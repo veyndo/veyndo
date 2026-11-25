@@ -1,4 +1,5 @@
 /** Unified knowledge workspace connects sources, product evidence, observations and no-model retrieval previews. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import {
   useKnowledgeText,
@@ -106,26 +107,19 @@ export function KnowledgeView({
           <h1>{k("heading")}</h1>
           <p>{k("intro")}</p>
         </div>
-        <button
-          className="studio-secondary"
-          disabled={busy}
-          onClick={() => void load()}
-        >
+        <Button type="submit" disabled={busy} onClick={() => void load()}>
           <Icon name="refresh" />
           {k("refresh")}
-        </button>
+        </Button>
       </div>
       {pending && (
         <div className="knowledge-alert" role="alert">
           <p>{u("discardHint")}</p>
-          <button
-            className="studio-secondary"
-            onClick={() => setPending(undefined)}
-          >
+          <Button type="submit" onClick={() => setPending(undefined)}>
             {u("keepEditing")}
-          </button>
-          <button
-            className="studio-secondary"
+          </Button>
+          <Button
+            type="submit"
             onClick={() => {
               setDirty(false);
               setTab(pending);
@@ -133,7 +127,7 @@ export function KnowledgeView({
             }}
           >
             {u("discard")}
-          </button>
+          </Button>
         </div>
       )}
       <div className="knowledge-workbench">
@@ -142,13 +136,9 @@ export function KnowledgeView({
           {error && (
             <div className="knowledge-alert" role="alert">
               {error}
-              <button
-                className="studio-secondary"
-                disabled={busy}
-                onClick={() => void load()}
-              >
+              <Button type="submit" disabled={busy} onClick={() => void load()}>
                 {k("retry")}
-              </button>
+              </Button>
             </div>
           )}
           {busy && !workspace && <p role="status">{k("loading")}</p>}

@@ -1,4 +1,5 @@
 /** Merchant AI boundaries use canonical settings revisions, native catalogue lookup and the shared assistant. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn, Product } from "../shell/studio-types";
 import { useSettingsDraft } from "../settings/useSettingsDraft";
@@ -296,13 +297,9 @@ function GuardrailEditor({
             />
           ))}
           {policy.corridors.length > limit && (
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setLimit((n) => n + 20)}
-            >
+            <Button type="button" onClick={() => setLimit((n) => n + 20)}>
               {k("policyMore")}
-            </button>
+            </Button>
           )}
           {catalogAccess ? (
             <GuardrailProductSearch
@@ -326,13 +323,14 @@ function GuardrailEditor({
             <span role="status">
               {k(state.dirty ? "policyDraft" : "policySaved")}
             </span>
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={!editable || !state.dirty || state.busy || invalid}
             >
               <Icon name="check" />
               {k("saveGuardrails")}
-            </button>
+            </Button>
           </footer>
           {state.saved && <p role="status">{k("guardrailsSaved")}</p>}
         </form>
@@ -343,8 +341,8 @@ function GuardrailEditor({
         {state.dirty && <p role="status">{k("policySaveFirst")}</p>}
         <div>
           {studio.access.includes("assistant.use") && (
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={disabledLink || !state.value}
               onClick={() => {
                 if (policy.corridors[0])
@@ -360,38 +358,38 @@ function GuardrailEditor({
             >
               <Icon name="spark" />
               {k("policyAgent")}
-            </button>
+            </Button>
           )}
           {studio.access.includes("automation.read") && (
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={disabledLink}
               onClick={() => navigate("automation")}
             >
               <Icon name="graph" />
               {k("policyRules")}
-            </button>
+            </Button>
           )}
           {studio.access.includes("settings.read") && (
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={disabledLink}
               onClick={() => navigate("commerce")}
             >
               <Icon name="settings" />
               {k("policySettings")}
-            </button>
+            </Button>
           )}
           {studio.environment &&
             studio.access.includes("environments.read") && (
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={disabledLink}
                 onClick={() => navigate("environments")}
               >
                 <Icon name="history" />
                 {k("policyPublish")}
-              </button>
+              </Button>
             )}
         </div>
       </aside>

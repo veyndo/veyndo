@@ -1,4 +1,5 @@
 /** Immutable app purchase cards reuse native order navigation and preserve source-currency and rule snapshots. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { contentText } from "../../shared/i18n/content-language";
@@ -60,13 +61,9 @@ export default function AppConfiguredOrders({
               {a("orderLabel")} {order.orderNumber ?? order.orderId}
             </strong>
             {onOrder && (
-              <button
-                type="button"
-                className="studio-secondary"
-                onClick={() => onOrder(order.orderId)}
-              >
+              <Button type="button" onClick={() => onOrder(order.orderId)}>
                 {a("openOrder")}
-              </button>
+              </Button>
             )}
           </header>
           {order.items.flatMap((item) =>
@@ -148,9 +145,8 @@ export default function AppConfiguredOrders({
       ))}
       {onPage && (result.hasMore || cursors.length > 1) && (
         <nav className="configuration-pagination">
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy || cursors.length < 2}
             onClick={async () => {
               const next = cursors.slice(0, -1);
@@ -158,10 +154,9 @@ export default function AppConfiguredOrders({
             }}
           >
             {a("previousOrders")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy || !result.hasMore || !result.nextCursor}
             onClick={async () => {
               const next = result.nextCursor!;
@@ -169,7 +164,7 @@ export default function AppConfiguredOrders({
             }}
           >
             {a("moreOrders")}
-          </button>
+          </Button>
         </nav>
       )}
     </section>

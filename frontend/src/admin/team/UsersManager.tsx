@@ -1,4 +1,5 @@
 /** Users Manager: Personal accounts, memberships, roles, invitations and scoped developer access.. */
+import { Button } from "../../kit/ui";
 import type { WorkspaceRole } from "./RolesManager";
 import { contentText } from "../../shared/i18n/content-language";
 import { usePermissionText } from "./permission-i18n";
@@ -144,8 +145,9 @@ export default function UsersManager({
           <p>{s("workspaceHint")}</p>
         </div>
         {session && !creating && (
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy}
             aria-expanded={creating}
             aria-controls="team-create-workspace"
@@ -156,7 +158,7 @@ export default function UsersManager({
           >
             <Icon name="plus" size={18} />
             {s("register")}
-          </button>
+          </Button>
         )}
       </div>
       {session && creating && (
@@ -185,13 +187,14 @@ export default function UsersManager({
             <strong>{ct("created")}</strong>
             <p>{createdShop.name}</p>
           </div>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             onClick={() => onWorkspace(createdShop.id, createdShop.name)}
           >
             {ct("open")}
             <Icon name="arrow" size={18} />
-          </button>
+          </Button>
         </div>
       )}
       {error && (
@@ -204,8 +207,8 @@ export default function UsersManager({
           <p>{s("personalAccess")}</p>
           <div className="account-tabs">
             {["login", "register", "join"].map((m) => (
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 key={m}
                 aria-pressed={mode === m}
                 onClick={() => {
@@ -214,7 +217,7 @@ export default function UsersManager({
                 }}
               >
                 {s(m)}
-              </button>
+              </Button>
             ))}
           </div>
           <PersonalAccountForm
@@ -301,12 +304,13 @@ export default function UsersManager({
                       ))}
                     </select>
                   </label>
-                  <button
-                    className="studio-primary"
+                  <Button
+                    tone="primary"
+                    type="submit"
                     disabled={busy || !inviteAllowed}
                   >
                     {s("invite")}
-                  </button>
+                  </Button>
                 </form>
                 {invitation && (
                   <div className="invite-code">
@@ -366,8 +370,8 @@ export default function UsersManager({
                           </option>
                         ))}
                     </select>
-                    <button
-                      className="studio-secondary"
+                    <Button
+                      type="submit"
                       disabled={
                         busy || (role !== "owner" && m.role === "owner")
                       }
@@ -385,7 +389,7 @@ export default function UsersManager({
                       }
                     >
                       {s(m.active ? "deactivate" : "activate")}
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </section>

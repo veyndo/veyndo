@@ -1,4 +1,5 @@
 /** Search the canonical merchant catalog; unit permissions persist through the native revision-bound catalog API. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
@@ -51,7 +52,7 @@ export default function UnitCatalog({
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="b2b-unit-tabs">
         {rows.map((p) => (
           <button

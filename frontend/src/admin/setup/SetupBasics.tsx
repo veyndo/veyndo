@@ -1,4 +1,5 @@
 /** A focused first company form reuses native fields, geography, revisioned settings and the shared save bar. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
 import { useSettingsDraft } from "../settings/useSettingsDraft";
@@ -69,7 +70,7 @@ export default function SetupBasics({
       }}
     >
       {(state.error || worldError) && (
-        <p role="alert">{state.error || t("factsError")}</p>
+        <Notice tone="danger">{state.error || t("factsError")}</Notice>
       )}
       <fieldset disabled={!canWrite || state.busy}>
         <div className="setup-basics-fields">

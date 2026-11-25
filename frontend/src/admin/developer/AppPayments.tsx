@@ -1,4 +1,5 @@
 /** Visual payment contracts use the same manifest as coding agents; onboarding uses the protected API. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import type { RequestFn } from "../shell/studio-types";
@@ -230,23 +231,23 @@ export default function AppPayments({
                 </label>
               ))}
             </div>
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               onClick={() =>
                 patch(m.paymentProvider!.methods.filter((_, n) => n !== index))
               }
             >
               {t("remove")}
-            </button>
+            </Button>
           </section>
         ))}
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           onClick={add}
           disabled={(m.paymentProvider?.methods.length ?? 0) >= 32}
         >
           {t(m.paymentProvider ? "add" : "enable")}
-        </button>
+        </Button>
       </section>
       {m.paymentProvider && (
         <ProviderAccount provider={m.id} request={request} />

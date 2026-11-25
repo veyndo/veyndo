@@ -1,4 +1,5 @@
 /** Searchable installed/discovery app cards with category/status filters and real lifecycle actions. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Package } from "./app-types";
 import { useAppText } from "../../shared/i18n/app-i18n";
@@ -206,8 +207,8 @@ export default function AppLibrary({
             <div className="app-library-empty">
               <Icon name="search" size={28} />
               <h2>{l("empty")}</h2>
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 onClick={() => {
                   setQuery("");
                   setCategory("all");
@@ -215,7 +216,7 @@ export default function AppLibrary({
                 }}
               >
                 {l("reset")}
-              </button>
+              </Button>
             </div>
           )}
         </>

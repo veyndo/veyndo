@@ -1,4 +1,5 @@
 /** Bounded product pages and keyboard-wedge scanner input; feedback uses the authoritative cart. */
+import { Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
@@ -113,7 +114,7 @@ export default function RegisterCatalog({
         <small>{t("shortcuts")}</small>
         <span role="status">{added && `${t("added")}: ${added}`}</span>
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <AppSurfaceSlot
         location="admin.pos.catalog"
         context={{ salesChannelId: channel.id }}

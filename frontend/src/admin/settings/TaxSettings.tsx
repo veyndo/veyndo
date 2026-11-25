@@ -1,4 +1,5 @@
 /** Editable tax classes and explicit fallback/country rates with destination rules using native Rule Builder references. */
+import { Button } from "../../kit/ui";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
 import { useState } from "react";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -73,9 +74,8 @@ export default function TaxSettings({
             </span>
           </button>
         ))}
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={channel}
           onClick={() => {
             const id = `class-${crypto.randomUUID().slice(0, 8)}`;
@@ -107,7 +107,7 @@ export default function TaxSettings({
           }}
         >
           + {i("newTax")}
-        </button>
+        </Button>
       </aside>
       {tax && (
         <div className="intl-record" key={tax.id}>
@@ -141,13 +141,9 @@ export default function TaxSettings({
           </label>
           <div className="intl-section-heading">
             <h3>{w("specialTax")}</h3>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={addRule}
-            >
+            <Button type="button" onClick={addRule}>
               + {i("newRule")}
-            </button>
+            </Button>
           </div>
           <p className="intl-hint">{w("specialHint")}</p>
           <div className="intl-rule-list">
@@ -221,14 +217,13 @@ export default function TaxSettings({
             ))}
           </div>
           {!["standard", "reduced"].includes(tax.id) && (
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={channel}
               onClick={() => setRemoving("tax")}
             >
               {i("remove")}
-            </button>
+            </Button>
           )}
         </div>
       )}

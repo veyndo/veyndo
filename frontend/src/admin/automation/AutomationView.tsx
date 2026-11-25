@@ -1,4 +1,5 @@
 /** Typed merchant rule/campaign/flow/channel forms with exact JSON available for advanced review. */
+import { Notice } from "../../kit/ui";
 import { useGoalTemplate } from "./goal-template";
 import { useAutomationAccess } from "./useAutomationAccess";
 import AutomationDefinitions from "./AutomationDefinitions";
@@ -332,7 +333,7 @@ export default function AutomationView({
             )}
           </section>
         </div>
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
         <section className="studio-card">
           <h2>{w("executions")}</h2>
           {jobs.map((j) => (

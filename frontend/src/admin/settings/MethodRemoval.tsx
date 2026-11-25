@@ -1,4 +1,5 @@
 /** Dependency preflight is advisory; aggregate save repeats it under the checkout configuration lock. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
@@ -55,7 +56,7 @@ export default function MethodRemoval({
     >
       <p>{w(usage && !usage.canDelete ? "blocked" : "deleteHint")}</p>
       {error ? (
-        <p role="alert">{error}</p>
+        <Notice tone="danger">{error}</Notice>
       ) : !usage ? (
         <p role="status">{w("checking")}</p>
       ) : (

@@ -1,4 +1,5 @@
 /** Shared status footer keeps validation, persistence and execution feedback beside the designer. */
+import { Notice } from "../../kit/ui";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import type { useAppStudio } from "./useAppStudio";
@@ -24,7 +25,9 @@ export default function AppStudioStatus({
           {a("loading")}
         </p>
       )}
-      {problems(studio.manifest) && <p role="alert">{a("invalid")}</p>}
+      {problems(studio.manifest) && (
+        <Notice tone="danger">{a("invalid")}</Notice>
+      )}
       {studio.draftStorage.error && (
         <p className="app-error" role="alert">
           {a("autosaveError")} · {studio.draftStorage.error}

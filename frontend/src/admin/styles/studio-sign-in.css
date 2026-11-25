@@ -79,7 +79,7 @@
 .studio-auth-card input[readonly] {
   background: #f6f8fc;
 }
-.studio-auth-card .studio-primary {
+.studio-auth-card :is(.studio-primary, [data-tone="primary"]) {
   border: 0;
   border-radius: 12px;
   padding: 14px 18px;
@@ -89,7 +89,7 @@
   font-weight: 650;
   cursor: pointer;
 }
-.studio-auth-card .studio-secondary {
+.studio-auth-card :is(.studio-secondary, [data-tone="secondary"]) {
   border: 1px solid #dbe3f1;
   border-radius: 10px;
   padding: 10px 12px;

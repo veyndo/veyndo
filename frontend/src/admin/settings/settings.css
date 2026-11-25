@@ -169,11 +169,7 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.studio .settings-error {
-  margin: 20px 28px;
-  color: var(--danger);
-  font-size: 13px;
-}
+
 .studio .settings-panel > [role="status"] {
   padding: 24px 28px;
 }

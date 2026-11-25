@@ -1,4 +1,5 @@
 /** Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -64,11 +65,11 @@ export default function ExternalKnowledge({ request }: { request: RequestFn }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={k("search")}
         />
-        <button className="studio-secondary" disabled={busy}>
+        <Button type="submit" disabled={busy}>
           {k("search")}
-        </button>
+        </Button>
       </form>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {busy && <p role="status">{k("loading")}</p>}
       {!busy && !data.length && <p>{k("emptyExternal")}</p>}
       {data.map((s) => (

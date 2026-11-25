@@ -1,4 +1,5 @@
 /** Country metadata and subdivision editing with multilingual names; custom definitions cannot invent ISO assignment. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import TranslationFields from "../../shared/geography/TranslationFields";
 import type { Country, TextMap } from "../../shared/geography/geography-types";
@@ -78,9 +79,8 @@ export default function CountryDefinition({
         <h3>
           {i("regions")} · {v.states.length}
         </h3>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={v.code.length !== 2}
           onClick={() => {
             set({ states: [...v.states, { code: `${v.code}-`, name: {} }] });
@@ -88,7 +88,7 @@ export default function CountryDefinition({
           }}
         >
           + {i("add")}
-        </button>
+        </Button>
       </div>
       <div className="intl-region-list">
         {v.states.map((s, n) => (
@@ -134,21 +134,20 @@ export default function CountryDefinition({
               })
             }
           />
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => {
               set({ states: v.states.filter((_, n) => n !== region) });
               setRegion(null);
             }}
           >
             {i("remove")}
-          </button>
+          </Button>
         </div>
       )}
-      <button
+      <Button
+        tone="primary"
         type="button"
-        className="studio-primary"
         disabled={
           !/^[A-Z]{2}$/.test(v.code) ||
           !Object.keys(v.name).length ||
@@ -157,7 +156,7 @@ export default function CountryDefinition({
         onClick={onSave}
       >
         {i("extend")}
-      </button>
+      </Button>
     </div>
   );
 }

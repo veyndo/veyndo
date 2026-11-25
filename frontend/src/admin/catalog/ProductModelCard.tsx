@@ -1,4 +1,5 @@
 /** A model edits the same localized product media item; material choices come from the loaded GLB. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import ModelViewer from "../../shared/media/ModelViewer";
 import { useModelText } from "../../shared/media/model-i18n";
@@ -64,10 +65,10 @@ export default function ProductModelCard({
           </select>
         </label>
         {!names && <p>{t("discover")}</p>}
-        <button type="button" className="studio-secondary" onClick={onRemove}>
+        <Button type="button" onClick={onRemove}>
           <Icon name="close" size={16} />
           {t("remove")}
-        </button>
+        </Button>
       </fieldset>
     </article>
   );

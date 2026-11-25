@@ -1,4 +1,5 @@
 /** Flow review observes the original native task, including approval made in another Studio view. */
+import { Notice } from "../../kit/ui";
 import ProposalCard from "../assistant/ProposalCard";
 import AgentRunCard from "../shell/AgentRunCard";
 import { useTaskExecution } from "../shell/useTaskExecution";
@@ -36,12 +37,12 @@ export default function FlowProposalReview({
         />
       )}
       {progress.error && (
-        <p role="alert">
+        <Notice tone="danger">
           {progress.error}
           {progress.accepted && (
             <button onClick={progress.reload}>{t("reload")}</button>
           )}
-        </p>
+        </Notice>
       )}
       <ProposalCard
         message={{

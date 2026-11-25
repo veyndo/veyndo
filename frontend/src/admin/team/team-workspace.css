@@ -107,7 +107,7 @@
   cursor: pointer;
   padding: 12px 0;
 }
-.team-access details > .studio-primary {
+.team-access details > :is(.studio-primary, [data-tone="primary"]) {
   margin-top: 16px;
 }
 @media (max-width: 850px) {
@@ -117,7 +117,7 @@
   }
 }
 @media (max-width: 500px) {
-  .users-manager .commerce-title > .studio-primary {
+  .users-manager .commerce-title > :is(.studio-primary, [data-tone="primary"]) {
     width: 100%;
   }
   .team-form-actions {

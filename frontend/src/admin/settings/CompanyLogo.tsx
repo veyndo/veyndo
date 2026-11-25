@@ -1,4 +1,5 @@
 /** Private logo preview and bounded upload; attaching/removing is a draft change until the profile is saved. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useCompanyText } from "../../shared/i18n/company-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -104,11 +105,7 @@ export default function CompanyLogo({
             {co("remove")}
           </button>
         )}
-        {error && (
-          <p role="alert" className="settings-error">
-            {error}
-          </p>
-        )}
+        {error && <Notice tone="danger">{error}</Notice>}
       </div>
     </div>
   );

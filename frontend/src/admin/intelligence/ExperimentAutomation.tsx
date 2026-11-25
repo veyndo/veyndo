@@ -1,4 +1,5 @@
 /** Suggestion card, automation switches and decision note for experiments; the lifecycle and readout stay with the native owner. */
+import { Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -80,7 +81,7 @@ export function ExperimentSuggestion({
       >
         {t("suggestButton")}
       </button>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {value && (
         <div role="status">
           <p>

@@ -1,4 +1,5 @@
 /** Structured company profile with single-language content, inherited channel scopes, logo drafts and revision-bound saves. */
+import { Notice } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
 import {
@@ -161,9 +162,7 @@ export default function MasterDataSettings({
         </div>
       )}
       {(error || context.error) && (
-        <p role="alert" className="settings-error">
-          {error || co("loadError")}
-        </p>
+        <Notice tone="danger">{error || co("loadError")}</Notice>
       )}
       {!value && !error && <p>{o("loading")}</p>}
       {value && (

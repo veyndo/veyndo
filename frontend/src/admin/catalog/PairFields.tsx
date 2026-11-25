@@ -1,4 +1,5 @@
 /** Native map editing uses explicit row creation and collision-safe rename on blur, never whitespace keys or overwritten siblings. */
+import { Button } from "../../kit/ui";
 import { useState, useId } from "react";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -80,9 +81,8 @@ export default function PairFields({
               }}
             />
           </label>
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={disabled}
             aria-label={`${c("remove")} ${key}`}
             onClick={() => {
@@ -91,7 +91,7 @@ export default function PairFields({
             }}
           >
             <Icon name="close" />
-          </button>
+          </Button>
         </div>
       ))}
       {!disabled && (
@@ -105,9 +105,8 @@ export default function PairFields({
               {t("newValue")}
               <input value={text} onChange={(e) => setText(e.target.value)} />
             </label>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={!name.trim() || entries.length >= 40}
               onClick={() => {
                 const problem = issue(name, text);
@@ -120,7 +119,7 @@ export default function PairFields({
             >
               <Icon name="plus" />
               {t("add")}
-            </button>
+            </Button>
           </div>
           <p className="product-spec-hint">
             {entries.length >= 40 ? t("limit") : t("addHint")}

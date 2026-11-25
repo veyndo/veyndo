@@ -1,4 +1,5 @@
 /** Purpose inventory and provider disclosures edited in the selected content language. */
+import { Button } from "../../kit/ui";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { purposes, type LegalConfig } from "../../shared/legal/legal-types";
@@ -176,8 +177,7 @@ export default function LegalServices({
           />
         </article>
       ))}
-      <button
-        className="studio-secondary"
+      <Button
         type="button"
         onClick={() =>
           update({
@@ -196,7 +196,7 @@ export default function LegalServices({
         }
       >
         + {l("addService")}
-      </button>
+      </Button>
     </>
   );
 }

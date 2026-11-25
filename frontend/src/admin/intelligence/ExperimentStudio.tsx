@@ -1,4 +1,5 @@
 /** Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -135,7 +136,7 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
       <h2>{k("experiments")}</h2>
       <p>{k("experimentIntro")}</p>
       <p className="muted">{k("experimentBoundary")}</p>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <ExperimentSuggestion
         request={request}
         disabled={busy || !canWrite}
@@ -226,21 +227,18 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
             value={draft.automation}
             onChange={(automation) => setDraft({ ...draft, automation })}
           />
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!draft.channel || !draft.currency}
           >
             {k("registerExperiment")}
-          </button>
+          </Button>
         </fieldset>
       </form>
-      <button
-        className="studio-secondary"
-        disabled={busy}
-        onClick={() => void run(refresh)}
-      >
+      <Button type="submit" disabled={busy} onClick={() => void run(refresh)}>
         {k("experimentRecheck")}
-      </button>
+      </Button>
       {!rows.length && <p>{k("experimentEmpty")}</p>}
       {rows.map((row) => (
         <article className="knowledge-source-card" key={row.id}>

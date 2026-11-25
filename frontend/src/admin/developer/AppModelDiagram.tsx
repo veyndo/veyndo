@@ -1,4 +1,5 @@
 /** Relationships use the same typed field.references contract as the form editor; no separate diagram state or database model. */
+import { Button } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -76,9 +77,8 @@ export default function AppModelDiagram({
                 <small>{f.references ? `→ ${f.references}` : a(f.kind)}</small>
               </div>
             ))}
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={
                 (manifest.views?.length ?? 0) >= 8 ||
                 (manifest.surfaces?.length ?? 0) >= 12
@@ -86,7 +86,7 @@ export default function AppModelDiagram({
               onClick={() => onChange(modelWorkspace(manifest, e.name))}
             >
               {a("formWizard")}
-            </button>
+            </Button>
           </article>
         ))}
       </div>

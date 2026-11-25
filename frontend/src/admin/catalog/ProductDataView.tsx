@@ -1,4 +1,5 @@
 /** Central catalog workspace uses shared server-paged grids, existing product editing and hierarchical categories. */
+import { Button, Notice } from "../../kit/ui";
 import type { GridCriteria } from "../../shared/grid/types";
 import { lazy, useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -82,16 +83,16 @@ export default function ProductDataView({
           <p>{c("intro")}</p>
         </div>
         {view === "products" && canWrite && (
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             onClick={() => {
               setInitialTab("general");
               setId("");
             }}
           >
             + {c("newProduct")}
-          </button>
+          </Button>
         )}
       </div>
       <div className="catalog-tabs" role="tablist">
@@ -117,7 +118,7 @@ export default function ProductDataView({
           {c("categories")}
         </button>
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {view === "preparation" ? (
         <CatalogPreparation
           request={request}

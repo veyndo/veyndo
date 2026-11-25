@@ -1,4 +1,5 @@
 /** DataField and one-level container references are edited against the current typed model rather than free text. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import type {
   Block,
@@ -129,13 +130,9 @@ export default function AppControlProperties({
       {["button", "textbox", "combobox", "checkbox", "datepicker"].includes(
         block.kind,
       ) && (
-        <button
-          type="button"
-          className="studio-secondary"
-          onClick={() => setCode(true)}
-        >
+        <Button type="button" onClick={() => setCode(true)}>
           {a("eventsCode")}
-        </button>
+        </Button>
       )}
       {code && (
         <AppLogicEditor

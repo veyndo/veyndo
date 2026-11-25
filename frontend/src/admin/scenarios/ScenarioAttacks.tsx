@@ -1,4 +1,5 @@
 /** Scripted attack results for the selected private sandbox; outcomes come from native refusals, never from a model. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import Icon from "../../shared/ui/Icon";
@@ -95,13 +96,9 @@ export default function ScenarioAttacks({
           <h3>{t("attackTitle")}</h3>
           <p>{t("attackIntro")}</p>
         </div>
-        <button
-          className="studio-secondary"
-          disabled={busy}
-          onClick={() => void start()}
-        >
+        <Button type="submit" disabled={busy} onClick={() => void start()}>
           {t(busy ? "attackRunning" : "attackStart")}
-        </button>
+        </Button>
       </header>
       {error && (
         <p className="scenario-error" role="alert">

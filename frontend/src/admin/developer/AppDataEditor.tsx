@@ -1,4 +1,5 @@
 /** Managed app models expose typed fields and opt-in public reads; removal cleans dependent bindings. */
+import { Button } from "../../kit/ui";
 import CoreExtensionBinding from "./CoreExtensionBinding";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import AppModelDiagram from "./AppModelDiagram";
@@ -31,8 +32,9 @@ export default function AppDataEditor({
           <h2>{a("data")}</h2>
           <p>{a("privateHint")}</p>
         </div>
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={manifest.entities.length >= 12}
           onClick={() =>
             onChange({
@@ -62,7 +64,7 @@ export default function AppDataEditor({
         >
           <Icon name="plus" size={16} />
           {a("addEntity")}
-        </button>
+        </Button>
       </div>
       <details className="app-data-safety">
         <summary>{a("privateHint")}</summary>
@@ -282,8 +284,8 @@ export default function AppDataEditor({
             entity={entity}
             onChange={(next) => patch(entity.name, next)}
           />
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={entity.fields.length >= 16}
             onClick={() =>
               patch(entity.name, {
@@ -305,7 +307,7 @@ export default function AppDataEditor({
           >
             <Icon name="plus" size={15} />
             {a("addField")}
-          </button>
+          </Button>
         </section>
       ))}
     </div>

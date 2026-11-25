@@ -1,4 +1,5 @@
 /** Tenant role editor uses the canonical roles API, shared translation editor, audit and dependency confirmation. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -95,8 +96,9 @@ export default function RolesManager({
           <h2>{t("roles")}</h2>
           <p>{t("roleHint")}</p>
         </div>
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={busy}
           onClick={() =>
             open({
@@ -109,9 +111,9 @@ export default function RolesManager({
         >
           <Icon name="plus" />
           {t("newRole")}
-        </button>
+        </Button>
       </header>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {!selected ? (
         <div className="role-cards">
           {roles.map((r) => (
@@ -136,15 +138,15 @@ export default function RolesManager({
           onLanguageChange={setLanguage}
         >
           <nav className="workbench-row">
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               onClick={() => {
                 if (dirty) setConfirm(true);
                 else setSelected(undefined);
               }}
             >
               {t("back")}
-            </button>
+            </Button>
             <ContentLanguagePicker />
           </nav>
           <p>{t("locked")}</p>
@@ -187,13 +189,12 @@ export default function RolesManager({
                 value={selected.data.permissions}
                 onChange={(permissions) => patch({ permissions })}
               />
-              <button className="studio-primary" disabled={!dirty}>
+              <Button tone="primary" type="submit" disabled={!dirty}>
                 {t("save")}
-              </button>
+              </Button>
               {!selected.builtin && selected.revision > 0 && (
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   onClick={() =>
                     void run(async () => {
                       setUsage(
@@ -205,7 +206,7 @@ export default function RolesManager({
                   }
                 >
                   {t("delete")}
-                </button>
+                </Button>
               )}
             </fieldset>
           </form>

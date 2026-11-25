@@ -1,4 +1,5 @@
 /** Merchant ideas, requirements and explicit agent handoff edit the canonical versioned Manifest without executing changes. */
+import { Button } from "../../kit/ui";
 import "./app-capability.css";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -69,13 +70,9 @@ export default function AppCapabilityEditor({
             )}
           </p>
           {language !== mainLocale && (
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => select(mainLocale)}
-            >
+            <Button type="button" onClick={() => select(mainLocale)}>
               {t("editMain")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -94,9 +91,9 @@ export default function AppCapabilityEditor({
           <p className="app-intent-help">{t("goalHelp")}</p>
           <div className="app-intent-actions">
             {onAssist && (
-              <button
+              <Button
+                tone="primary"
                 type="button"
-                className="studio-primary"
                 disabled={!goal}
                 onClick={() =>
                   onAssist(t("agentRequest").replace("{goal}", goal))
@@ -104,17 +101,13 @@ export default function AppCapabilityEditor({
               >
                 <Icon name="spark" size={17} />
                 {t("agentContinue")}
-              </button>
+              </Button>
             )}
             {onDesign && !!manifest.views?.length && (
-              <button
-                type="button"
-                className="studio-secondary"
-                onClick={onDesign}
-              >
+              <Button type="button" onClick={onDesign}>
                 <Icon name="palette" size={17} />
                 {t("designContinue")}
-              </button>
+              </Button>
             )}
           </div>
           <div className="app-intent-inspiration">
@@ -185,9 +178,8 @@ export default function AppCapabilityEditor({
                 </button>
               </div>
             ))}
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={contract.assumptions.length >= 12}
               onClick={() =>
                 update({ assumptions: [...contract.assumptions, {}] })
@@ -195,7 +187,7 @@ export default function AppCapabilityEditor({
             >
               <Icon name="plus" size={16} />
               {t("add")}
-            </button>
+            </Button>
           </section>
         </div>
         <aside className="app-intent-guide" aria-label={t("guideTitle")}>

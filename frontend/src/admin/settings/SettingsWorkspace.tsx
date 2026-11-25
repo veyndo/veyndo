@@ -1,4 +1,5 @@
 /** Independent settings workspace: grouped navigation, explicit dirty-draft guards and native API forms. */
+import { Button } from "../../kit/ui";
 import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
 import B2BSettings from "./B2BSettings";
 import { useB2BExperienceText } from "../b2b/experience-i18n";
@@ -165,14 +166,12 @@ export default function SettingsWorkspace({
         <div className="settings-discard" role="alert">
           <p>{u("discardHint")}</p>
           <div>
-            <button
-              className="studio-secondary"
-              onClick={() => setPending(null)}
-            >
+            <Button type="submit" onClick={() => setPending(null)}>
               {u("keepEditing")}
-            </button>
-            <button
-              className="studio-primary"
+            </Button>
+            <Button
+              tone="primary"
+              type="submit"
               onClick={() => {
                 setDirty(false);
                 pending();
@@ -180,7 +179,7 @@ export default function SettingsWorkspace({
               }}
             >
               {u("discard")}
-            </button>
+            </Button>
           </div>
         </div>
       )}

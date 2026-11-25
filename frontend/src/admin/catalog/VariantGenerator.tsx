@@ -1,4 +1,5 @@
 /** Reviewable, bounded batch creation uses saved parent data and keeps successful rows on partial failure. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { ProductDraft } from "./catalog-model";
@@ -80,9 +81,8 @@ export default function VariantGenerator({
                 }}
               />
             </label>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={axes.length === 1}
               onClick={() => {
                 setRows([]);
@@ -90,21 +90,19 @@ export default function VariantGenerator({
               }}
             >
               {v("remove")}
-            </button>
+            </Button>
           </div>
         ))}
         <div className="workbench-row">
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={axes.length >= 5}
             onClick={() => setAxes([...axes, { name: "", values: "" }])}
           >
             {v("add")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={async () => {
               setBusy(true);
               setError("");
@@ -154,7 +152,7 @@ export default function VariantGenerator({
             }}
           >
             {v("generate")}
-          </button>
+          </Button>
         </div>
         {!!rows.length && (
           <div className="variant-table">
@@ -236,9 +234,9 @@ export default function VariantGenerator({
           </div>
         )}
         {!!rows.length && (
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             disabled={!valid}
             onClick={async () => {
               setBusy(true);
@@ -274,10 +272,10 @@ export default function VariantGenerator({
             }}
           >
             {v("create")} ({selected.length})
-          </button>
+          </Button>
         )}
       </fieldset>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

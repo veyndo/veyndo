@@ -1,4 +1,5 @@
 /** Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Category } from "../catalog/catalog-model";
@@ -155,32 +156,26 @@ export default function SalesChannelsWorkspace({
         <h1>{t("title")}</h1>
         <p>{t("hint")}</p>
         {!sandbox && !selected && rights.includes("apps.read") && (
-          <button
-            className="studio-secondary"
-            onClick={() => setMigration(true)}
-          >
+          <Button type="submit" onClick={() => setMigration(true)}>
             <Icon name="layers" />
             {migrationText("title")}
-          </button>
+          </Button>
         )}
         {!selected && (
-          <button
-            type="button"
-            className="studio-secondary"
-            onClick={() => setAgentic(true)}
-          >
+          <Button type="button" onClick={() => setAgentic(true)}>
             <Icon name="spark" />
             {ai("title")}
-          </button>
+          </Button>
         )}
         {!selected && (
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!settings || !manage}
             onClick={() => setSelected(freshChannel(settings!.mainLocale))}
           >
             + {t("new")}
-          </button>
+          </Button>
         )}
       </div>
       {selected && settings ? (
@@ -248,24 +243,21 @@ export default function SalesChannelsWorkspace({
                     ? `${t("selected")}: ${c.data.productIds.length}`
                     : t("all")}
                 </p>
-                <button
-                  className="studio-secondary"
-                  onClick={() => setSelected(c)}
-                >
+                <Button type="submit" onClick={() => setSelected(c)}>
                   {t("edit")} ↗
-                </button>
+                </Button>
               </article>
             ))}
           </div>
           <aside className="studio-card">
             <p>{t("independent")}</p>
-            <button className="studio-secondary" onClick={onTeam}>
+            <Button type="submit" onClick={onTeam}>
               {t("team")} ↗
-            </button>
+            </Button>
           </aside>
         </>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

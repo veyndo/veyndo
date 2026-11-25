@@ -1,4 +1,5 @@
 /** Installed settings use the existing encrypted secret owner; secret inputs are write-only and cleared after save. */
+import { Button, Notice } from "../../kit/ui";
 import "./app-settings.css";
 import { useEffect, useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
@@ -149,14 +150,14 @@ export default function AppSettings({
               />
               {t("approve")}
             </label>
-            <button className="studio-primary" disabled={!approve}>
+            <Button tone="primary" type="submit" disabled={!approve}>
               {t("save")}
-            </button>
+            </Button>
           </fieldset>
         </form>
       )}
       {saved && <p role="status">{t("saved")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

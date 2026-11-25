@@ -1,4 +1,5 @@
 /** Localized category tree editor; parent moves and revisions are validated in the API. */
+import { Button, Notice } from "../../kit/ui";
 import "./catalog.css";
 import "./catalog-editor.css";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -91,8 +92,8 @@ export default function CategoriesWorkspace({
         <div className="catalog-heading">
           <h2>{c("categories")}</h2>
           {canWrite && (
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               onClick={() =>
                 edit({
                   id: "",
@@ -128,7 +129,7 @@ export default function CategoriesWorkspace({
               }
             >
               + {c("newCategory")}
-            </button>
+            </Button>
           )}
         </div>
         {orderedCategories(categories).map(({ category, depth }) => (
@@ -329,10 +330,11 @@ export default function CategoriesWorkspace({
                   />
                 </ContentLanguage>
               )}
-              {error && <p role="alert">{error}</p>}
+              {error && <Notice tone="danger">{error}</Notice>}
               {saved && <p role="status">{c("saved")}</p>}
-              <button
-                className="studio-primary"
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={
                   busy || !selected.data.translations[mainKey]?.name?.trim()
                 }
@@ -369,7 +371,7 @@ export default function CategoriesWorkspace({
                 }}
               >
                 {c(busy ? "saving" : "saveCategory")}
-              </button>
+              </Button>
             </fieldset>
             {selected.id && (
               <EntityHistory

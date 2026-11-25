@@ -1,4 +1,5 @@
 /** B2B controls edit the shared revisioned settings aggregate; no separate policy store or checkout engine. */
+import { Button, Notice } from "../../kit/ui";
 import "../../shared/b2b/b2b.css";
 import "./b2b-settings.css";
 import { b2bChanged } from "../shell/useB2BNavigation";
@@ -75,9 +76,9 @@ export default function B2BSettings({
           <p>{t("settingsHint")}</p>
         </div>
         {features.enabled && onCompanies && (
-          <button className="studio-secondary" onClick={onCompanies}>
+          <Button type="submit" onClick={onCompanies}>
             {t("companies")} ↗
-          </button>
+          </Button>
         )}
       </header>
       <form
@@ -111,7 +112,7 @@ export default function B2BSettings({
               </label>
             ))}
           </div>
-          {state.error && <p role="alert">{state.error}</p>}
+          {state.error && <Notice tone="danger">{state.error}</Notice>}
           <p>{t("budgetsHint")}</p>
           <SettingsSaveBar
             dirty={state.dirty}

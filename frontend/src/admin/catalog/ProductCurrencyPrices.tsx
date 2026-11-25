@@ -1,4 +1,5 @@
 /** Exact per-currency decimals live in the same revisioned product draft, including variants. */
+import { Button, Notice } from "../../kit/ui";
 import "../../shared/styles/currencies.css";
 import { convertDraftPrice } from "../../shared/money/fx-draft";
 import { useEffect, useState } from "react";
@@ -90,7 +91,7 @@ export default function ProductCurrencyPrices({
         </select>
       </label>
       <h2>{c("prices")}</h2>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <label>
         {c("select")}
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
@@ -124,9 +125,8 @@ export default function ProductCurrencyPrices({
           ),
         )}
       </div>
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={!value}
         onClick={() => {
           const next = { ...prices };
@@ -138,7 +138,7 @@ export default function ProductCurrencyPrices({
         }}
       >
         {c("remove")}
-      </button>
+      </Button>
     </section>
   );
 }

@@ -1,4 +1,5 @@
 /** Shared native order/provider controls; an accepted job is observed before another financial action. */
+import { Button } from "../../kit/ui";
 import { useId, useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
@@ -78,36 +79,42 @@ export default function PaymentActions({
         </dl>
       )}
       <div className="payment-action-tools">
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={disabled}
           onClick={() => void onPayment("reconcile")}
         >
           {o("reconcile")}
-        </button>
+        </Button>
         {canCapture && (
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={disabled}
             onClick={() => void onPayment("void")}
           >
             {provider("void")}
-          </button>
+          </Button>
         )}
         {pending && (
-          <button className="studio-primary" disabled={busy} onClick={onCheck}>
+          <Button
+            tone="primary"
+            type="submit"
+            disabled={busy}
+            onClick={onCheck}
+          >
             {o("checkOperation")}
-          </button>
+          </Button>
         )}
       </div>
       {canCapture && !settlement?.multipleCapture && (
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={disabled}
           onClick={() => void onPayment("capture")}
         >
           {provider("capture")}
-        </button>
+        </Button>
       )}
       {canCapture && settlement?.multipleCapture && (
         <form
@@ -132,8 +139,9 @@ export default function PaymentActions({
               aria-describedby={hintId}
             />
           </label>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={
               disabled ||
               !captureMinor ||
@@ -142,7 +150,7 @@ export default function PaymentActions({
             }
           >
             {text("capture")}
-          </button>
+          </Button>
           <label className="payment-final">
             <input
               type="checkbox"
@@ -204,8 +212,8 @@ export default function PaymentActions({
                 onChange={(e) => setRefund(e.target.value)}
               />
             </label>
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={
                 disabled ||
                 !refundMinor ||
@@ -213,7 +221,7 @@ export default function PaymentActions({
               }
             >
               {text("refund")}
-            </button>
+            </Button>
           </form>
         )}
     </div>

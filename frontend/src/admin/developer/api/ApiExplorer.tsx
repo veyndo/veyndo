@@ -1,4 +1,5 @@
 /** Source-derived static route explorer, runtime app discovery and isolated same-origin read tests. */
+import { Button } from "../../../kit/ui";
 import { useState } from "react";
 import { useQuery } from "../../../kit/query";
 import { fillPath, routes, type Route } from "../../../kit/api";
@@ -141,20 +142,21 @@ export default function ApiExplorer({
             />
           </label>
           <div className="workbench-row">
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={busy || !reads(selected)}
               onClick={() => void run()}
             >
               {t(busy ? "testing" : "test")}
-            </button>
-            <button
-              className="studio-secondary"
+            </Button>
+            <Button
+              type="submit"
               disabled={busy}
               onClick={() => void run(true)}
             >
               {t("protocol")}
-            </button>
+            </Button>
           </div>
           {!!result && (
             <>

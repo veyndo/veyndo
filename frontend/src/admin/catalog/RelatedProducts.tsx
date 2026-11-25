@@ -1,4 +1,5 @@
 /** Ordered recommendations retain selected native records across cursor-paginated searches, content-language changes and read-only inspection. */
+import { Button } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -200,13 +201,9 @@ export default function RelatedProducts({
         {current?.error && (
           <div role="alert">
             <p>{current.error}</p>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setRetry((n) => n + 1)}
-            >
+            <Button type="button" onClick={() => setRetry((n) => n + 1)}>
               {t("retry")}
-            </button>
+            </Button>
           </div>
         )}
         {current &&
@@ -216,14 +213,13 @@ export default function RelatedProducts({
             <p className="related-products-hint">{t("noMatches")}</p>
           )}
         {current?.next && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={current.loading}
             onClick={() => setCursor(current.next!)}
           >
             {t("more")}
-          </button>
+          </Button>
         )}
       </section>
     </div>

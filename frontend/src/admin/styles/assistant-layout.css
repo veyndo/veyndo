@@ -141,7 +141,7 @@
   flex: 1;
   line-height: 1.5;
 }
-.studio-conversation .studio-composer .studio-primary {
+.studio-conversation .studio-composer [data-tone="primary"] {
   flex-shrink: 0;
 }
 .studio-conversation ::selection {

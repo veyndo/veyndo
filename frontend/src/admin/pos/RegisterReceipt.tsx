@@ -1,4 +1,5 @@
 /** Receipt creation and PDF download reuse merchant documents and immutable order revision/idempotency. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -183,7 +184,7 @@ export default function RegisterReceipt({
         </button>
       </div>
       {receipt && <ReceiptPrinter register={r} receipt={receipt} />}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <AppSurfaceSlot
         location="admin.pos.receipt"
         context={{ orderId: o.id }}

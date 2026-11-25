@@ -1,4 +1,5 @@
 /** Guided app kinds create normal editable manifests; all changes follow private-stage versioning. */
+import { Button } from "../../kit/ui";
 import "./app-creation.css";
 import AppPlacementPicker from "./AppPlacementPicker";
 import AppCreationSummary from "./AppCreationSummary";
@@ -218,20 +219,17 @@ export default function AppAssistant({
             />
           </div>
           <footer>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setKind(null)}
-            >
+            <Button type="button" onClick={() => setKind(null)}>
               {t("back")}
-            </button>
-            <button
-              className="studio-primary"
+            </Button>
+            <Button
+              tone="primary"
+              type="submit"
               disabled={!selectedLocations.length}
             >
               <Icon name="plus" size={16} />
               {t("create")}
-            </button>
+            </Button>
           </footer>
         </form>
       )}

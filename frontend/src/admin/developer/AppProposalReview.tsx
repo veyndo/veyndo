@@ -1,4 +1,5 @@
 /** AI generation is an explicit reviewed proposal, with conflict protection and no automatic canvas replacement. */
+import { Button, Notice } from "../../kit/ui";
 import { useCanvasText } from "../../shared/canvas/canvas-i18n";
 import type { AppStudio } from "./useAppStudio";
 import { proposalChanges } from "./app-proposal";
@@ -102,34 +103,29 @@ export default function AppProposalReview({
           ),
         )}
       </div>
-      {stale && <p role="alert">{t("conflict")}</p>}
+      {stale && <Notice tone="danger">{t("conflict")}</Notice>}
       <div className="app-agent-options">
         {onPreview && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             aria-pressed={!!comparing}
             disabled={stale}
             onClick={() => onPreview(!comparing)}
           >
             {cv(comparing ? "before" : "after")}
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={stale || studio.busy}
           onClick={studio.acceptProposal}
         >
           {t("accept")}
-        </button>
-        <button
-          type="button"
-          className="studio-secondary"
-          onClick={studio.discardProposal}
-        >
+        </Button>
+        <Button type="button" onClick={studio.discardProposal}>
           {t("discard")}
-        </button>
+        </Button>
       </div>
     </section>
   );

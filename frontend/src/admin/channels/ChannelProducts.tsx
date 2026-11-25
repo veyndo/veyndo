@@ -1,4 +1,5 @@
 /** Search-based channel product assignment, preserving selected IDs across server-filtered result pages. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useChannelText } from "./channel-i18n";
@@ -53,15 +54,14 @@ export default function ChannelProducts({
       </label>
       <div className="channel-product-chips">
         {value.map((id) => (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             key={id}
             aria-label={`${t("remove")} ${names[id] ?? id}`}
             onClick={() => onChange(value.filter((v) => v !== id))}
           >
             {names[id] ?? id} ×
-          </button>
+          </Button>
         ))}
       </div>
       <div className="channel-product-results">
@@ -82,7 +82,7 @@ export default function ChannelProducts({
             </button>
           ))}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 /** Editable fictional customers share the channel's actual languages, countries and currency. */
+import { Button } from "../../kit/ui";
 import type { Dispatch, SetStateAction } from "react";
 import EntityPicker from "../../shared/geography/EntityPicker";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -25,8 +26,8 @@ export default function ScenarioProfiles({
       <div className="scenario-section-title">
         <h3>{t("profiles")}</h3>
         <span>{config.currency}</span>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={profiles.length >= 6}
           onClick={() =>
             onChange((ps) => [
@@ -40,7 +41,7 @@ export default function ScenarioProfiles({
           }
         >
           {t("addProfile")}
-        </button>
+        </Button>
       </div>
       <div className="scenario-profiles">
         {profiles.map((p, index) => (

@@ -41,8 +41,8 @@
 .setup-return button {
   min-height: 42px;
 }
-.setup-workspace .studio-primary,
-.setup-workspace .studio-secondary {
+.setup-workspace :is(.studio-primary, [data-tone="primary"]),
+.setup-workspace :is(.studio-secondary, [data-tone="secondary"]) {
   padding: 10px 16px;
 }
 .setup-welcome {
@@ -298,7 +298,7 @@
   font-size: 0.875rem;
   font-weight: 600;
 }
-.setup-return .studio-secondary {
+.setup-return :is(.studio-secondary, [data-tone="secondary"]) {
   padding: 8px 14px;
   white-space: nowrap;
 }
@@ -319,7 +319,9 @@
   font-size: 1.125rem;
   margin: 42px 0 0;
 }
-.setup-complete .setup-actions > button:not(.studio-primary) {
+.setup-complete
+  .setup-actions
+  > button:not(.studio-primary, [data-tone="primary"]) {
   padding: 10px 16px;
   border: 1px solid var(--border);
 }

@@ -1,4 +1,5 @@
 /** Start catalogue translations, poll durable progress, review paginated drafts and apply bounded revision-checked batches. */
+import { Button, Notice } from "../../kit/ui";
 import { useControlText } from "../../shared/i18n/control-i18n";
 import { responseError } from "../../shared/i18n/errors-i18n";
 import { useEffect, useRef, useState } from "react";
@@ -158,9 +159,9 @@ export default function TranslationJobs({
           />
           {i("overwrite")}
         </label>
-        <button
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={
             !target ||
             target === config.mainLocale ||
@@ -180,13 +181,9 @@ export default function TranslationJobs({
           }
         >
           {i("startTranslation")}
-        </button>
+        </Button>
       </fieldset>
-      {error && (
-        <p role="alert" className="settings-error">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="intl-rule-list">
         {jobs.map((j) => (
           <button
@@ -228,16 +225,17 @@ export default function TranslationJobs({
             </span>
           </div>
           {job.error && (
-            <p role="alert">{responseError(job.error, 400).message}</p>
+            <Notice tone="danger">
+              {responseError(job.error, 400).message}
+            </Notice>
           )}
           {job.run_task && (
             <p className="intl-hint">{i("managedTranslation")}</p>
           )}
           <div className="intl-inline">
             {!job.run_task && job.status === "failed" && (
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={disabled || busy}
                 onClick={() =>
                   void act(() =>
@@ -250,13 +248,12 @@ export default function TranslationJobs({
                 }
               >
                 {i("resume")}
-              </button>
+              </Button>
             )}
             {!job.run_task &&
               ["queued", "processing", "failed"].includes(job.status) && (
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   disabled={disabled || busy}
                   onClick={() =>
                     void act(() =>
@@ -269,12 +266,12 @@ export default function TranslationJobs({
                   }
                 >
                   {i("cancel")}
-                </button>
+                </Button>
               )}
             {job.status === "ready" && counts.ready > 0 && (
-              <button
+              <Button
+                tone="primary"
                 type="button"
-                className="studio-primary"
                 disabled={disabled || busy}
                 onClick={() =>
                   void act(async () => {
@@ -290,7 +287,7 @@ export default function TranslationJobs({
                 }
               >
                 {i("applyAll")}
-              </button>
+              </Button>
             )}
           </div>
           {drafts.map((d) => (
@@ -312,9 +309,8 @@ export default function TranslationJobs({
                 </div>
               </div>
               {d.status === "ready" && job.status === "ready" && (
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   disabled={disabled || busy}
                   onClick={() =>
                     void act(() =>
@@ -325,14 +321,13 @@ export default function TranslationJobs({
                   }
                 >
                   {i("applyDraft")}
-                </button>
+                </Button>
               )}
             </details>
           ))}
           {cursor && (
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               onClick={() =>
                 void act(async () => {
                   const v = await request(
@@ -345,7 +340,7 @@ export default function TranslationJobs({
               }
             >
               {i("more")}
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -1,4 +1,5 @@
 /** Supplier links in the native settings revision and reorder proposals with signed supplier offers; approval hands over to the supplier checkout. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -128,7 +129,9 @@ export default function SupplyReorder({
           <p className="soft-tag">{t("scope")}</p>
         </div>
       </header>
-      {(state.error || error) && <p role="alert">{state.error || error}</p>}
+      {(state.error || error) && (
+        <Notice tone="danger">{state.error || error}</Notice>
+      )}
       {!canWrite && <p role="status">{t("readOnly")}</p>}
       {settings && (
         <fieldset disabled={!canWrite || state.busy || busy}>
@@ -200,9 +203,8 @@ export default function SupplyReorder({
                     }
                   />
                 </label>
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   onClick={() =>
                     update({
                       ...supply,
@@ -211,14 +213,13 @@ export default function SupplyReorder({
                   }
                 >
                   {t("remove")}
-                </button>
+                </Button>
               </div>
             );
           })}
           <div className="studio-actions">
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={supply.links.length >= 200}
               onClick={() =>
                 update({
@@ -237,27 +238,26 @@ export default function SupplyReorder({
               }
             >
               {t("add")}
-            </button>
-            <button
+            </Button>
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={!state.dirty}
               onClick={() => void state.save()}
             >
               {t("save")}
-            </button>
+            </Button>
           </div>
         </fieldset>
       )}
       <div className="studio-actions">
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy || state.dirty || !supply.links.length}
           onClick={() => void propose()}
         >
           {t("propose")}
-        </button>
+        </Button>
         {state.dirty && <small>{t("saveFirst")}</small>}
       </div>
       {proposal && !proposal.lines.length && (
@@ -315,14 +315,14 @@ export default function SupplyReorder({
                   </a>
                 </p>
               ) : (
-                <button
+                <Button
+                  tone="primary"
                   type="button"
-                  className="studio-primary"
                   disabled={busy || !canWrite || !line.withinCeiling}
                   onClick={() => void approve(line)}
                 >
                   {t("approve")}
-                </button>
+                </Button>
               )}
             </>
           )}

@@ -1,4 +1,5 @@
 /** Explicit native sandbox preview rechecks the saved run; it never attests a historical render. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Report, Run } from "../scenarios/scenario-types";
@@ -89,22 +90,21 @@ export default function ReleaseShopPreview({
             </select>
           </label>
         )}
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy || !task}
           onClick={() => void open()}
         >
           {t(view ? "reload" : "open")}
-        </button>
+        </Button>
         {(view || busy) && (
-          <button type="button" className="studio-secondary" onClick={close}>
+          <Button type="button" onClick={close}>
             {t("close")}
-          </button>
+          </Button>
         )}
       </div>
       {busy && <p role="status">{t("loading")}</p>}
-      {error && <p role="alert">{t("error")}</p>}
+      {error && <Notice tone="danger">{t("error")}</Notice>}
       {view && scenario && url && (
         <>
           <ScenarioEvidence run={view.run} />

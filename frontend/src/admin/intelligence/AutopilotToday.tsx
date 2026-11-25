@@ -1,4 +1,5 @@
 /** Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -211,13 +212,12 @@ export default function AutopilotToday({
                     <em>{t("atBaseline")}</em>
                   ) : (
                     canRevert && (
-                      <button
+                      <Button
                         type="button"
-                        className="studio-secondary"
                         onClick={() => void revert(change.productId)}
                       >
                         {t("revert")}
-                      </button>
+                      </Button>
                     )
                   )}
                 </li>

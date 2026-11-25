@@ -1,4 +1,5 @@
 /** API-backed per-app call metadata, storage budgets and explicitly approved durable replay. */
+import { Button, Notice } from "../../kit/ui";
 import AppJobs from "./AppJobs";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -92,13 +93,9 @@ export default function AppActivity({
       <section className="app-contract-summary">
         <header className="app-detail-heading">
           <h3>{t("title")}</h3>
-          <button
-            className="studio-secondary"
-            disabled={busy}
-            onClick={() => void refresh()}
-          >
+          <Button type="submit" disabled={busy} onClick={() => void refresh()}>
             {t("refresh")}
-          </button>
+          </Button>
         </header>
         <p>{t("metadata")}</p>
         {data?.storage && (
@@ -165,8 +162,8 @@ export default function AppActivity({
               onChange={(e) => setCursor(e.target.value)}
             />
           </label>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={
               busy ||
               !Number.isSafeInteger(Number(cursor)) ||
@@ -174,14 +171,14 @@ export default function AppActivity({
             }
           >
             {t("replay")}
-          </button>
+          </Button>
         </form>
         {queued !== null && (
           <p role="status">
             {t("queued")}: {queued}
           </p>
         )}
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
         {confirm && (
           <ConfirmDialog
             title={t("replay")}

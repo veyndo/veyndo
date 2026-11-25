@@ -1,4 +1,5 @@
 /** Bounded field-to-event mapping over the original native operations, never a second executor. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import {
   scalarFields,
@@ -57,7 +58,8 @@ export default function WorkTemplateEditor({
     loaded && loaded.id === taskId && loaded.request === request
       ? loaded
       : undefined;
-  if (!request || current?.error) return <p role="alert">{t("unavailable")}</p>;
+  if (!request || current?.error)
+    return <Notice tone="danger">{t("unavailable")}</Notice>;
   if (!current?.steps) return <p role="status">{t("loading")}</p>;
   const steps = current.steps;
   return (

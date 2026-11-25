@@ -1,4 +1,5 @@
 /** Declared package diagnostics link to their real editors; counts never claim a successful runtime test or installed secret. */
+import { Button } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import type { AppStudioKey } from "../../shared/i18n/app-studio-i18n";
 import { useAppDiagnosticText } from "./app-diagnostic-i18n";
@@ -49,16 +50,15 @@ export default function AppDiagnostics({
       <p>{t("hint")}</p>
       <div className="app-diagnostic-grid">
         {rows.map((row) => (
-          <button
+          <Button
             key={row.key}
             type="button"
-            className="studio-secondary"
             disabled={!onNavigate}
             onClick={() => onNavigate?.(row.tab)}
           >
             <strong>{row.value}</strong>
             <span>{t(row.key)}</span>
-          </button>
+          </Button>
         ))}
       </div>
       <h3>{t("connections")}</h3>
@@ -66,9 +66,8 @@ export default function AppDiagnostics({
         <ul className="app-connection-issues">
           {issues.map((issue) => (
             <li key={`${issue.kind}:${issue.reference}`}>
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={!onNavigate}
                 onClick={() => onNavigate?.(issue.tab)}
               >
@@ -77,7 +76,7 @@ export default function AppDiagnostics({
                   <small>{issue.reference}</small>
                 </span>
                 <Icon name="arrow" size={16} />
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -90,13 +89,9 @@ export default function AppDiagnostics({
         ))}
       </ol>
       {onAssist && (
-        <button
-          type="button"
-          className="studio-secondary"
-          onClick={() => onAssist(t("prompt"))}
-        >
+        <Button type="button" onClick={() => onAssist(t("prompt"))}>
           <Icon name="spark" size={16} /> {t("assist")}
-        </button>
+        </Button>
       )}
     </section>
   );

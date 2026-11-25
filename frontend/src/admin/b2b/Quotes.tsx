@@ -1,4 +1,5 @@
 /** Native RFQ inbox and merchant offers use the same versioned contract as buyer API/MCP operations. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useB2BQuoteText } from "../../shared/i18n/b2b-quotes-i18n";
@@ -26,7 +27,7 @@ export default function Quotes({
   }, []);
   return (
     <section className="b2b-panel">
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <header className="b2b-toolbar">
         <h2>{t("title")}</h2>
         <button disabled={busy} onClick={() => void run(reload)}>

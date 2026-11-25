@@ -1,4 +1,5 @@
 /** Currency-aware editing of one native product corridor, with honest product/configuration links. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Product, RequestFn } from "../shell/studio-types";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
@@ -120,18 +121,13 @@ export default function GuardrailProductCard({
           </small>
         </div>
         {onOpen && (
-          <button
-            type="button"
-            className="studio-secondary"
-            disabled={navigationDisabled}
-            onClick={onOpen}
-          >
+          <Button type="button" disabled={navigationDisabled} onClick={onOpen}>
             {k("policyOpenProduct")}
             <Icon name="arrow" />
-          </button>
+          </Button>
         )}
       </header>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {mismatch && (
         <p className="knowledge-alert" role="alert">
           {k("policyMismatch")}
@@ -144,7 +140,7 @@ export default function GuardrailProductCard({
           {field("maximumMinor", k("policyMaximum"), true)}
         </div>
         {row.minimumMinor > row.maximumMinor && (
-          <p role="alert">{k("policyInvalid")}</p>
+          <Notice tone="danger">{k("policyInvalid")}</Notice>
         )}
         <label className="guardrail-check">
           <input

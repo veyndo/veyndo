@@ -1,4 +1,5 @@
 /** Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -63,19 +64,18 @@ export default function AiImageStudio({
         />
       </label>
       <div className="media-actions">
-        <button
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={
             !configured || busy || waiting || disabled || !prompt.trim()
           }
           onClick={() => void create("generate")}
         >
           {w("generate")}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={
             !configured ||
             !sourceId ||
@@ -87,21 +87,21 @@ export default function AiImageStudio({
           onClick={() => void create("optimize")}
         >
           {w("optimize")}
-        </button>
+        </Button>
       </div>
       {waiting && <p role="status">{w("generating")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {job?.state === "ready" && (
         <div className="media-ai-preview">
           <img src={job.preview} alt={w("aiImages")} />
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             disabled={busy || disabled}
             onClick={() => void apply(revision, onImage)}
           >
             {w("applyImage")}
-          </button>
+          </Button>
         </div>
       )}
     </details>

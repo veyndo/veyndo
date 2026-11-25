@@ -1,4 +1,5 @@
 /** Guided review links native setup owners and the existing agent without duplicating configuration or publication. */
+import { Button, Notice } from "../../kit/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SetupBasics from "./SetupBasics";
 import { useStudio } from "../shell/StudioContext";
@@ -83,7 +84,11 @@ export default function SetupWizard() {
       step: next,
     });
   if (!guide.available)
-    return <p role="alert">{t(studio.environment ? "liveOnly" : "rights")}</p>;
+    return (
+      <Notice tone="danger">
+        {t(studio.environment ? "liveOnly" : "rights")}
+      </Notice>
+    );
   if (guide.loading)
     return (
       <div className="setup-loading" role="status">
@@ -93,9 +98,9 @@ export default function SetupWizard() {
   const error = guide.error && (
     <div className="setup-error" role="alert">
       <p>{guide.error}</p>
-      <button className="studio-secondary" onClick={guide.reload}>
+      <Button type="submit" onClick={guide.reload}>
         {t("retry")}
-      </button>
+      </Button>
     </div>
   );
   if (!guide.record) return <div className="setup-workspace">{error}</div>;
@@ -115,9 +120,13 @@ export default function SetupWizard() {
         <p>{t("doneHint")}</p>
         <p>{t("progress", { done: steps.length, total: steps.length })}</p>
         <div className="setup-actions">
-          <button className="studio-primary" onClick={() => open("workspace")}>
+          <Button
+            tone="primary"
+            type="submit"
+            onClick={() => open("workspace")}
+          >
             {t("workspace")}
-          </button>
+          </Button>
           <a
             className="studio-secondary"
             href={storefrontURL(studio.workspace)}
@@ -149,8 +158,8 @@ export default function SetupWizard() {
           <h1>{t("title")}</h1>
           <p>{t("hint")}</p>
         </div>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={guide.busy || dirty}
           onClick={async () => {
             if (await guide.save({ ...progress, state: "dismissed" }))
@@ -158,7 +167,7 @@ export default function SetupWizard() {
           }}
         >
           {t("pause")}
-        </button>
+        </Button>
       </header>
       {error}
       <div className="setup-layout">
@@ -216,7 +225,7 @@ export default function SetupWizard() {
             {!facts ? (
               <p role="status">{t("loading")}</p>
             ) : facts.failed ? (
-              <p role="alert">{t("factsError")}</p>
+              <Notice tone="danger">{t("factsError")}</Notice>
             ) : (
               <ul>
                 {facts.company && (
@@ -274,8 +283,9 @@ export default function SetupWizard() {
                 <Icon name="arrow" size={18} />
               </a>
             ) : (
-              <button
-                className="studio-primary"
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={
                   guide.busy ||
                   dirty ||
@@ -286,15 +296,15 @@ export default function SetupWizard() {
               >
                 {copy.action}
                 <Icon name="arrow" size={18} />
-              </button>
+              </Button>
             )}
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={!secondaryAllowed || guide.busy || dirty}
               onClick={() => void secondary()}
             >
               {copy.secondary}
-            </button>
+            </Button>
           </div>
           {step === "checkout" || step === "test" ? (
             <p className="setup-note">
@@ -321,23 +331,20 @@ export default function SetupWizard() {
           <footer className="setup-task-footer">
             {step !== "products" &&
               canOpenStudio("assistant", studio.access) && (
-                <button
-                  className="studio-secondary"
-                  disabled={dirty}
-                  onClick={agent}
-                >
+                <Button type="submit" disabled={dirty} onClick={agent}>
                   <Icon name="spark" size={17} />
                   {t("ai")}
-                </button>
+                </Button>
               )}
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={guide.busy || dirty}
               onClick={() => void guide.save(reviewStep(progress))}
             >
               {t("reviewed")}
               <Icon name="check" size={17} />
-            </button>
+            </Button>
           </footer>
           <p className="setup-caption" role="status">
             {guide.busy ? t("loading") : t("saved")}

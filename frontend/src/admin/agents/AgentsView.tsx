@@ -1,4 +1,5 @@
 /** AgentsView renders verified shop state and typed user actions. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
@@ -67,8 +68,8 @@ export function AgentsView({
             <span className="soft-tag positive">{t("readyLocal")}</span>
           </div>
           <p>{t("mcpDesc")}</p>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(
@@ -83,8 +84,8 @@ export function AgentsView({
           >
             {copied ? t("copied") : t("copyConfig")}
             <Icon name={copied ? "check" : "copy"} size={16} />
-          </button>
-          {copyFailed && <p role="alert">{t("copyFailed")}</p>}
+          </Button>
+          {copyFailed && <Notice tone="danger">{t("copyFailed")}</Notice>}
         </section>
       </div>
       <div className="overview-columns">
@@ -120,10 +121,10 @@ export function AgentsView({
             <Icon name="arrow" size={14} />
             {t("orders")}
           </div>
-          <button className="studio-primary" onClick={onStorefront}>
+          <Button tone="primary" type="submit" onClick={onStorefront}>
             {t("checkoutDemo")}
             <Icon name="arrow" size={16} />
-          </button>
+          </Button>
         </section>
       </div>
       <section className="studio-card explanation-card">

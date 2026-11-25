@@ -1,4 +1,5 @@
 /** Native findings stay separate from simulated customer reasoning. */
+import { Button, Notice } from "../../kit/ui";
 import { useScenarioText, type ScenarioWord } from "./scenario-i18n";
 import type { Report, Run } from "./scenario-types";
 import ScenarioEvidence from "./ScenarioEvidence";
@@ -52,7 +53,7 @@ export default function ScenarioReport({
               {run.scenario?.source && (
                 <ScenarioSource taskId={run.scenario.source.taskId} />
               )}
-              {run.error && <p role="alert">{run.error.detail}</p>}
+              {run.error && <Notice tone="danger">{run.error.detail}</Notice>}
               {steps && (
                 <ol>
                   {steps.map((step) => (
@@ -74,20 +75,14 @@ export default function ScenarioReport({
                 </p>
               )}
               {onControl && ["queued", "running"].includes(run.state) && (
-                <button
-                  className="studio-secondary"
-                  onClick={() => onControl(run, "cancel")}
-                >
+                <Button type="submit" onClick={() => onControl(run, "cancel")}>
                   {t("cancel")}
-                </button>
+                </Button>
               )}
               {onControl && ["uncertain", "failed"].includes(run.state) && (
-                <button
-                  className="studio-secondary"
-                  onClick={() => onControl(run, "resume")}
-                >
+                <Button type="submit" onClick={() => onControl(run, "resume")}>
                   {t("resume")}
-                </button>
+                </Button>
               )}
             </article>
           );

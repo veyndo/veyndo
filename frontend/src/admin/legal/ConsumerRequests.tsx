@@ -1,4 +1,5 @@
 /** Permission-scoped consumer request queue and optimistic, recorded review actions. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLegalText, type LegalWord } from "../../shared/i18n/legal-i18n";
@@ -35,7 +36,7 @@ export default function ConsumerRequests({
   const row = rows.find((r) => r.id === selected);
   return (
     <div className="legal-request-list">
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {!rows.length && <p>{l("emptyRequests")}</p>}
       <div className="legal-request-master">
         {rows.map((r) => (
@@ -106,12 +107,13 @@ export default function ConsumerRequests({
               </option>
             ))}
           </select>
-          <button
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!canWrite || busy || !note.trim()}
-            className="studio-primary"
           >
             {l("reviewSave")}
-          </button>
+          </Button>
         </form>
       )}
     </div>

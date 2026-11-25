@@ -1,4 +1,5 @@
 /** In-register advice reuses the existing grounded merchant assistant; no task apply or money mutation is exposed. */
+import { Notice } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { usePosText } from "./pos-i18n";
@@ -73,7 +74,7 @@ export default function RegisterAssistant({
           {answer}
         </p>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

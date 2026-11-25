@@ -1,4 +1,5 @@
 /** Shared configurable reporting canvas; late data is fenced by request identity, filters and current rights. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
@@ -84,44 +85,42 @@ export default function ReportBoard({
     <section className="report-board" aria-label={t("title")}>
       <div className="report-actions">
         <div>
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             onClick={() => setAdding(!adding)}
             aria-expanded={adding}
           >
             <Icon name="plus" size={17} />
             {t("add")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => setEditing(!editing)}
             aria-pressed={editing}
           >
             <Icon name="settings" size={16} />
             {t(editing ? "done" : "customize")}
-          </button>
+          </Button>
         </div>
         <div>
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={!data}
             onClick={() => data && downloadReport(data)}
           >
             {t("export")}
-          </button>
+          </Button>
           {save && (
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={saving}
               onClick={save}
             >
               <Icon name="check" size={17} />
               {t("save")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -220,13 +219,9 @@ export default function ReportBoard({
       {error ? (
         <div role="alert" className="report-error">
           <p>{t("error")}</p>
-          <button
-            type="button"
-            className="studio-secondary"
-            onClick={() => setAttempt((v) => v + 1)}
-          >
+          <Button type="button" onClick={() => setAttempt((v) => v + 1)}>
             {t("reload")}
-          </button>
+          </Button>
         </div>
       ) : !data ? (
         <div className="report-skeleton" role="status">

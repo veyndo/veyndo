@@ -1,4 +1,5 @@
 /** Personal entry point on the existing shell; requests and linked views retain current scope and rights. */
+import { Button, Notice } from "../../kit/ui";
 import { openPinnedView } from "../../shared/grid/pinned-view";
 import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
@@ -137,19 +138,20 @@ export default function PersonalWorkspace() {
           <h1>{t("lead")}</h1>
           <p>{t("hint")}</p>
         </div>
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={busy || !record}
           onClick={() => void save()}
         >
           <Icon name="check" />
           {t("save")}
-        </button>
+        </Button>
       </header>
       {error && (
-        <p role="alert">
+        <Notice tone="danger">
           {error} <button onClick={() => void load()}>{t("reload")}</button>
-        </p>
+        </Notice>
       )}
       {saved && <p role="status">{t("saved")}</p>}
       <div className="personal-areas" role="tablist" aria-label={t("title")}>

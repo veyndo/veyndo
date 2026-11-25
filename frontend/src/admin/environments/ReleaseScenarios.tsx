@@ -1,4 +1,5 @@
 /** Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useMemo, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type {
@@ -171,29 +172,27 @@ function Review({
             ))}
           </select>
         </label>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={loading}
           onClick={() => setRefresh((v) => v + 1)}
         >
           {t("refresh")}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={navigation?.request === request && navigation.busy}
           onClick={() => void navigate()}
         >
           {t(report ? "open" : "new")}
-        </button>
+        </Button>
       </div>
       {navigation?.request === request && navigation.error && (
-        <p role="alert">{t("openError")}</p>
+        <Notice tone="danger">{t("openError")}</Notice>
       )}
       {loading && <p role="status">{t("loading")}</p>}
       {(currentList?.error || currentResult?.error) && (
-        <p role="alert">{t("error")}</p>
+        <Notice tone="danger">{t("error")}</Notice>
       )}
       {currentList && !currentList.error && !currentList.items.length && (
         <p>{t("empty")}</p>

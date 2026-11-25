@@ -1,4 +1,5 @@
 /** Explicitly inspect an immutable build in its owned stage, with response fencing on account/environment changes. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Build } from "./useAppStudio";
@@ -28,8 +29,8 @@ export default function AppUpgradeCheck({
       result?.request === request && result.key === key ? result : undefined;
   return (
     <div className="app-upgrade-check">
-      <button
-        className="studio-secondary"
+      <Button
+        type="submit"
         disabled={disabled || busy}
         onClick={async () => {
           setBusy(true);
@@ -48,18 +49,19 @@ export default function AppUpgradeCheck({
         }}
       >
         {t(busy ? "checking" : "check")}
-      </button>
+      </Button>
       {current?.report && <AppUpgradeReport report={current.report} />}
       {current?.report?.ready && install && (
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={disabled || busy}
           onClick={install.run}
         >
           {install.label}
-        </button>
+        </Button>
       )}
-      {current?.error && <p role="alert">{current.error}</p>}
+      {current?.error && <Notice tone="danger">{current.error}</Notice>}
     </div>
   );
 }

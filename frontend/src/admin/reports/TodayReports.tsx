@@ -1,4 +1,5 @@
 /** Shop-today presentation is saved in the existing actor-private revisioned workspace, never in shop configuration. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
 import type { WorkspaceRecord } from "../workspace/workspace-model";
@@ -69,12 +70,9 @@ export default function TodayReports() {
     return (
       <div className="report-error" role="alert">
         <p>{t("error")}</p>
-        <button
-          className="studio-secondary"
-          onClick={() => setAttempt((v) => v + 1)}
-        >
+        <Button type="submit" onClick={() => setAttempt((v) => v + 1)}>
           {t("reload")}
-        </button>
+        </Button>
       </div>
     );
   if (!current) return <p role="status">{t("loading")}</p>;
@@ -83,15 +81,12 @@ export default function TodayReports() {
       {error && (
         <div role="alert" className="report-error">
           <p>{t("saveError")}</p>
-          <button className="studio-secondary" onClick={() => void save()}>
+          <Button type="submit" onClick={() => void save()}>
             {t("save")}
-          </button>
-          <button
-            className="studio-secondary"
-            onClick={() => setAttempt((v) => v + 1)}
-          >
+          </Button>
+          <Button type="submit" onClick={() => setAttempt((v) => v + 1)}>
             {t("reload")}
-          </button>
+          </Button>
         </div>
       )}
       <ReportBoard

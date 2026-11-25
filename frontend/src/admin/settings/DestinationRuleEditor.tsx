@@ -1,4 +1,5 @@
 /** Geographical tax rule editor: country, subdivisions, postcode constraints, date window and persisted Rule Builder condition. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import EntityPicker from "../../shared/geography/EntityPicker";
@@ -145,10 +146,10 @@ export default function DestinationRuleEditor({
           </select>
         </label>
       </div>
-      {error && <p role="alert">{error}</p>}
-      <button type="button" className="studio-secondary" onClick={onRemove}>
+      {error && <Notice tone="danger">{error}</Notice>}
+      <Button type="button" onClick={onRemove}>
         {i("remove")}
-      </button>
+      </Button>
     </div>
   );
 }

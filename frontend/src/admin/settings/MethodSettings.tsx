@@ -1,4 +1,5 @@
 /** Master/detail shipping and payment configuration, translated content and searchable country availability. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import type { Payment, Shipping } from "../../shared/api/shop-api";
 import CaptureModeSettings from "./CaptureModeSettings";
@@ -100,9 +101,9 @@ export default function MethodSettings({
             <span className={m.active ? "intl-dot" : "intl-dot inactive"} />
           </button>
         ))}
-        <button type="button" className="studio-secondary" onClick={add}>
+        <Button type="button" onClick={add}>
           + {i(area === "shipping" ? "newShipping" : "newPayment")}
-        </button>
+        </Button>
       </aside>
       {method && (
         <div className="intl-record" key={`${area}:${method.id}`}>
@@ -252,14 +253,13 @@ export default function MethodSettings({
               }
             />
           )}
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={methods.length === 1}
             onClick={() => setRemoving(true)}
           >
             {i("remove")}
-          </button>
+          </Button>
           {removing && (
             <MethodRemoval
               area={area}

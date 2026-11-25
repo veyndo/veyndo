@@ -1,4 +1,5 @@
 /** Native GLB upload, parent reuse and material binding stay inside the existing revisioned product draft. */
+import { Button, Notice } from "../../kit/ui";
 import { useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -107,15 +108,15 @@ export default function ProductModels({
           <p>{t("hint")}</p>
         </div>
         {canWrite && draft.id && (
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             disabled={busy || media.length >= 20 || models.length >= 4}
             onClick={() => input.current?.click()}
           >
             <Icon name="plus" size={18} />
             {t("upload")}
-          </button>
+          </Button>
         )}
       </header>
       <p>{t("variantHint")}</p>
@@ -131,9 +132,8 @@ export default function ProductModels({
         />
       )}
       {canWrite && draft.catalog.parentId && (
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy || models.length >= 4}
           onClick={async () => {
             const product = draft.id;
@@ -164,10 +164,10 @@ export default function ProductModels({
           }}
         >
           {t("inherit")}
-        </button>
+        </Button>
       )}
       {busy && <p role="status">{t("saving")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {models.map((model) => (
         <ProductModelCard
           key={model.id}

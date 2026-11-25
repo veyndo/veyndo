@@ -1,4 +1,5 @@
 /** Shop currency registry and inherited channel availability. Actions use saved revisions and native job APIs. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { CurrencyConfig } from "../../shared/api/shop-api";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
@@ -104,7 +105,7 @@ export default function CurrencySettings({
     `${code} · ${new Intl.DisplayNames(locale, { type: "currency" }).of(code) ?? code}`;
   return (
     <div className="currency-settings">
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="currency-settings-top">
         {!channel && (
           <label>
@@ -191,9 +192,8 @@ export default function CurrencySettings({
                   ))}
               </select>
             </label>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={!add}
               onClick={() => {
                 const d = catalogue.find((v) => v.code === add);
@@ -211,7 +211,7 @@ export default function CurrencySettings({
               }}
             >
               {c("add")}
-            </button>
+            </Button>
           </div>
           <div className="currency-rate-cards">
             {cfg.definitions.map((d) => (
@@ -262,9 +262,8 @@ export default function CurrencySettings({
                   </select>
                 </label>
                 {d.code !== cfg.baseCurrency && (
-                  <button
+                  <Button
                     type="button"
-                    className="studio-secondary"
                     disabled={cfg.enabled.includes(d.code)}
                     onClick={() =>
                       update({
@@ -275,12 +274,12 @@ export default function CurrencySettings({
                     }
                   >
                     {c("remove")}
-                  </button>
+                  </Button>
                 )}
                 {d.strategy === "fixed" && (
-                  <button
+                  <Button
+                    tone="primary"
                     type="button"
-                    className="studio-primary"
                     disabled={busy || dirty || !canWriteCatalogue}
                     onClick={() =>
                       void action("/api/merchant/currencies/price-jobs", {
@@ -291,7 +290,7 @@ export default function CurrencySettings({
                     }
                   >
                     {c("generate")}
-                  </button>
+                  </Button>
                 )}
               </article>
             ))}
@@ -319,9 +318,9 @@ export default function CurrencySettings({
               />
               {c("autoRefresh")}
             </label>
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={busy || dirty || !canWriteCatalogue}
               onClick={() =>
                 void action(
@@ -332,7 +331,7 @@ export default function CurrencySettings({
               }
             >
               {c("refresh")}
-            </button>
+            </Button>
             <p>{c("refreshHint")}</p>
           </div>
           {!!jobs.length && (

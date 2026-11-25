@@ -1,4 +1,5 @@
 /** Successful native channel creation ends in a clear next action; no provider is connected implicitly. */
+import { Button } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import type { Channel } from "./channel-model";
 import { useChannelText } from "./channel-i18n";
@@ -27,13 +28,13 @@ export default function ChannelLaunch({
       <p>{t("createdHint")}</p>
       <div className="workbench-row">
         {channel.data.kind === "marketplace" && onMarketplace && (
-          <button className="studio-primary" onClick={onMarketplace}>
+          <Button tone="primary" type="submit" onClick={onMarketplace}>
             {t("marketplaceManage")} <Icon name="arrow" size={18} />
-          </button>
+          </Button>
         )}
-        <button className="studio-secondary" onClick={onEdit}>
+        <Button type="submit" onClick={onEdit}>
           {t("edit")}
-        </button>
+        </Button>
       </div>
     </section>
   );

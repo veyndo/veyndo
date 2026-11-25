@@ -1,4 +1,5 @@
 /** Uses the existing tenant-owned frontend registry, not a parallel domain or Experience store. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import {
@@ -148,13 +149,13 @@ export default function ChannelConnections({
                 ))}
               </select>
             </label>
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={disabled || busy}
               onClick={() => setRemove(f)}
             >
               {t("disconnect")}
-            </button>
+            </Button>
           </article>
         ))}
       {experiences.length > 0 && (
@@ -193,17 +194,18 @@ export default function ChannelConnections({
               ))}
             </select>
           </label>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={disabled || busy || !alias}
           >
             {t("save")}
-          </button>
+          </Button>
         </form>
       )}
       <p className="channel-status-hint">{t("hosting")}</p>
       {notice && <p role="status">{t("saved")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {remove && (
         <ConfirmDialog
           title={t("disconnect")}

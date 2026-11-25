@@ -1,4 +1,5 @@
 /** Visual App Studio orchestrates modular editors over the same executable schema used by coding agents. */
+import { Button } from "../../kit/ui";
 import { useMemo, useState, useEffect } from "react";
 import type { Environment } from "../environments/EnvironmentManager";
 import type { RequestFn } from "../shell/studio-types";
@@ -235,14 +236,15 @@ export default function DeveloperView({
                     ))}
                   </select>
                 </label>
-                <button
-                  className="studio-primary"
+                <Button
+                  tone="primary"
+                  type="submit"
                   disabled={!studio.env || problems(m) || !studio.dirty}
                   onClick={() => void studio.run(studio.importVersion)}
                 >
                   <Icon name="check" size={16} />
                   {a("saveVersion")}
-                </button>
+                </Button>
               </div>
             </div>
             {!environments.length && (
@@ -264,7 +266,7 @@ export default function DeveloperView({
                     onChange={(e) => setStageName(e.target.value)}
                   />
                 </label>
-                <button className="studio-secondary">{w("newStage")}</button>
+                <Button type="submit">{w("newStage")}</Button>
               </form>
             )}
             <ContentLanguage
@@ -299,8 +301,8 @@ export default function DeveloperView({
                     >
                       ↷
                     </button>
-                    <button
-                      className="studio-secondary"
+                    <Button
+                      type="submit"
                       disabled={immediate.busy || !!problems(m)}
                       aria-pressed={preview && canPreview}
                       onClick={() => {
@@ -314,7 +316,7 @@ export default function DeveloperView({
                       }}
                     >
                       {a(preview && canPreview ? "design" : "realPreview")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

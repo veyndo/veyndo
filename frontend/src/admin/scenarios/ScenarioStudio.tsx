@@ -1,4 +1,5 @@
 /** A compact private customer lab on the existing Studio scope and durable run controls. */
+import { Button } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { rememberScenario } from "./scenario-history";
 import { useStudio } from "../shell/StudioContext";
@@ -252,12 +253,13 @@ export default function ScenarioStudio({
       ) : !environment ? (
         <div className="scenario-empty">
           <p>{t("private")}</p>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             onClick={() => selectTab("environments")}
           >
             {t("sandbox")}
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -304,8 +306,9 @@ export default function ScenarioStudio({
           )}
           <footer className="scenario-start">
             <p>{t("boundary")}</p>
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={
                 busy ||
                 !instruction.trim() ||
@@ -318,7 +321,7 @@ export default function ScenarioStudio({
             >
               <Icon name="arrow" />
               {t(busy ? "starting" : "start")}
-            </button>
+            </Button>
           </footer>
           <ScenarioAttacks
             request={request}
@@ -338,29 +341,20 @@ export default function ScenarioStudio({
           )}
           {currentReport && (
             <div className="scenario-actions">
-              <button className="studio-secondary" onClick={repeat}>
+              <Button type="submit" onClick={repeat}>
                 {t("repeat")}
-              </button>
-              <button
-                className="studio-secondary"
-                onClick={() => selectTab("productData")}
-              >
+              </Button>
+              <Button type="submit" onClick={() => selectTab("productData")}>
                 {t("repairProducts")}
-              </button>
+              </Button>
               {access.includes("settings.read") && (
-                <button
-                  className="studio-secondary"
-                  onClick={() => selectTab("commerce")}
-                >
+                <Button type="submit" onClick={() => selectTab("commerce")}>
                   {t("repairSettings")}
-                </button>
+                </Button>
               )}
-              <button
-                className="studio-secondary"
-                onClick={() => selectTab("orders")}
-              >
+              <Button type="submit" onClick={() => selectTab("orders")}>
                 {t("openOrders")}
-              </button>
+              </Button>
             </div>
           )}
           {currentComparison && currentReport && (

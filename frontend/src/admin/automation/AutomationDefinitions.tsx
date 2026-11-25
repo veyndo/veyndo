@@ -1,4 +1,5 @@
 /** Searchable, explicitly editable definitions with visible active state and version. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "./automation-types";
 import { contentText } from "../../shared/i18n/content-language";
@@ -29,9 +30,14 @@ export default function AutomationDefinitions({
   );
   return (
     <section className="studio-card automation-definitions">
-      <button className="studio-primary" disabled={!manage} onClick={onCreate}>
+      <Button
+        tone="primary"
+        type="submit"
+        disabled={!manage}
+        onClick={onCreate}
+      >
         + {t("create")}
-      </button>
+      </Button>
       <label>
         {t("search")}
         <input

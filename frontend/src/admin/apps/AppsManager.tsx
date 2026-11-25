@@ -1,4 +1,5 @@
 /** Installed package workspace: lifecycle, generated entities and shared agent actions. */
+import { Button } from "../../kit/ui";
 import type { Package } from "./app-types";
 import AppConsent from "./AppConsent";
 import AppPackageImport from "./AppPackageImport";
@@ -117,13 +118,13 @@ export default function AppsManager({
       {error && (
         <div role="alert" className="app-library-error">
           <p>{error}</p>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy}
             onClick={() => void run(async () => {})}
           >
             {l("retry")}
-          </button>
+          </Button>
         </div>
       )}
       <div hidden={Boolean(selected)}>

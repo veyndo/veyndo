@@ -1,4 +1,5 @@
 /** Native variant family browser with cursor pagination, explicit editing and a bounded creation wizard. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
@@ -59,14 +60,13 @@ export default function ProductVariants({
   if (draft.catalog.parentId)
     return (
       <>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={dirty}
           onClick={() => onOpen(draft.catalog.parentId!)}
         >
           {v("parent")}
-        </button>
+        </Button>
         <h3>{c("options")}</h3>
         <fieldset className="catalog-permission-fields" disabled={!canWrite}>
           <PairFields
@@ -123,9 +123,8 @@ export default function ProductVariants({
         </button>
       ))}
       {cursor && (
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy}
           onClick={async () => {
             setBusy(true);
@@ -144,9 +143,9 @@ export default function ProductVariants({
           }}
         >
           {v("more")}
-        </button>
+        </Button>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {canWrite && (
         <details className="variant-create">
           <summary>

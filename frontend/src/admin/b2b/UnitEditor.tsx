@@ -1,4 +1,5 @@
 /** Purchasing unit policies, hierarchy, catalogs and customer grants share current revision checks. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -228,13 +229,14 @@ export default function UnitEditor({
             onChange={update}
             disabled={busy}
           />
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy}
             onClick={() => void run(save)}
           >
             {t("save")}
-          </button>
+          </Button>
           {selected.revision > 0 && (
             <>
               {selected.data.restrictedCatalog && (

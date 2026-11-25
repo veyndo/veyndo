@@ -1,4 +1,5 @@
 /** Versioned setting declarations share the native Manifest; no credential value enters a draft. */
+import { Button } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useAppSettingText } from "../../shared/i18n/app-settings-i18n";
@@ -89,9 +90,8 @@ export default function AppSettingsEditor({
               />
               {t("required")}
             </label>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               onClick={() =>
                 onChange({
                   ...manifest,
@@ -100,13 +100,12 @@ export default function AppSettingsEditor({
               }
             >
               {a("delete")}
-            </button>
+            </Button>
           </div>
         </article>
       ))}
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={fields.length >= 16}
         onClick={() =>
           onChange({
@@ -127,7 +126,7 @@ export default function AppSettingsEditor({
         }
       >
         {t("add")}
-      </button>
+      </Button>
     </section>
   );
 }

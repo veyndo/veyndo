@@ -1,4 +1,5 @@
 /** Accessible multi-file upload with drag/drop, visible progress and the same validated asset API as attachments. */
+import { Button, Notice } from "../../kit/ui";
 import { useRef, useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
@@ -100,16 +101,16 @@ export default function MediaDropzone({
         accept="image/png,image/jpeg,image/webp"
         onChange={(e) => void upload([...(e.target.files ?? [])])}
       />
-      <button
+      <Button
+        tone="primary"
         type="button"
-        className="studio-primary"
         disabled={!!progress}
         onClick={() => input.current?.click()}
       >
         {w("choose")}
-      </button>
+      </Button>
       {progress && <p role="status">{progress}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

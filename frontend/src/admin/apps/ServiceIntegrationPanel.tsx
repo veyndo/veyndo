@@ -1,4 +1,5 @@
 /** Revisioned encrypted connection forms and bounded operations on the existing app action gateway. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { serviceIntegrations } from "./service-integrations";
@@ -92,7 +93,7 @@ export default function ServiceIntegrationPanel({
   return (
     <section className="service-integration">
       <h2>{d.name}</h2>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="service-integration-columns">
         <form
           onSubmit={(e) => {
@@ -144,9 +145,9 @@ export default function ServiceIntegrationPanel({
             </label>
             <small>{t("protected")}</small>
             <p>{t(status?.credentialConfigured ? "saved" : "missing")}</p>
-            <button className="studio-primary" type="submit">
+            <Button tone="primary" type="submit">
               {t("save")}
-            </button>
+            </Button>
           </fieldset>
         </form>
         <form
@@ -243,25 +244,25 @@ export default function ServiceIntegrationPanel({
                   </label>
                 ),
               )}
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
               type="submit"
               disabled={app === "algolia" && !records.length}
             >
               {t("run")}
-            </button>
+            </Button>
           </fieldset>
         </form>
       </div>
       <header>
         <h3>{t("jobs")}</h3>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={busy || !status}
           onClick={() => void run("status", {})}
         >
           {t("refresh")}
-        </button>
+        </Button>
       </header>
       {!status?.jobs.length && <p>{t("empty")}</p>}
       <ul>

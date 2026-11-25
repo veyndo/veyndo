@@ -1,4 +1,5 @@
 /** Revision-aware product aggregate editor: one save, translation tabs and product-scoped linked capabilities. */
+import { Button } from "../../kit/ui";
 import "./catalog.css";
 import "./catalog-editor.css";
 import { useCoreExtensions } from "../../shared/apps/CoreExtensions";
@@ -241,21 +242,18 @@ export default function ProductEditor({
           {leaving && (
             <div className="catalog-unsaved" role="alert">
               <strong>{c("unsaved")}</strong>
-              <button
-                className="studio-secondary"
-                onClick={() => setLeaving(false)}
-              >
+              <Button type="submit" onClick={() => setLeaving(false)}>
                 {c("continue")}
-              </button>
-              <button
-                className="studio-secondary"
+              </Button>
+              <Button
+                type="submit"
                 onClick={() => {
                   onDirtyChange?.(false);
                   onBack();
                 }}
               >
                 {c("discard")}
-              </button>
+              </Button>
             </div>
           )}
           {error && (

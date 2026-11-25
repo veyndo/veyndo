@@ -1,4 +1,5 @@
 /** One paged native projection connects saved content and durable image jobs to their existing editors. */
+import { Button } from "../../kit/ui";
 import { useContext, useEffect, useMemo } from "react";
 import AgenticGrid from "../../shared/grid/AgenticGrid";
 import { useGridPage } from "../../shared/grid/useGridPage";
@@ -47,9 +48,8 @@ export default function CatalogPreparation({
       <p className="catalog-preparation-hint">{t("translationHint")}</p>
       <div className="catalog-preparation-actions">
         {studio?.access.includes("settings.read") && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => {
               const url = new URL(location.href);
               url.searchParams.set("settings", "languages");
@@ -58,16 +58,15 @@ export default function CatalogPreparation({
             }}
           >
             {t("translations")}
-          </button>
+          </Button>
         )}
         {studio?.environment && studio.access.includes("environments.read") && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => studio.selectTab("environments")}
           >
             {t("publication")}
-          </button>
+          </Button>
         )}
       </div>
       <AgenticGrid

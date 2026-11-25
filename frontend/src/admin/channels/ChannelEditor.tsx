@@ -1,4 +1,5 @@
 /** Guided channel creation/editing reuses the native revisioned API and shared content-language inheritance. */
+import { Button, Notice } from "../../kit/ui";
 import ChannelReview from "./ChannelReview";
 import ChannelLaunch from "./ChannelLaunch";
 import ChannelActions from "./ChannelActions";
@@ -146,13 +147,13 @@ export default function ChannelEditor({
     >
       <section className="studio-card channel-editor">
         <header className="channel-editor-heading">
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy}
             onClick={() => (dirty ? setConfirm("back") : onBack())}
           >
             ← {t("back")}
-          </button>
+          </Button>
           <div>
             <h2>
               {contentText(draft.data.name, locale, mainLocale) || t("new")}
@@ -314,36 +315,32 @@ export default function ChannelEditor({
               )}
               <footer className="workbench-row">
                 {!draft.revision && step > 0 && (
-                  <button
-                    type="button"
-                    className="studio-secondary"
-                    onClick={() => setStep(step - 1)}
-                  >
+                  <Button type="button" onClick={() => setStep(step - 1)}>
                     {t("back")}
-                  </button>
+                  </Button>
                 )}
                 {!draft.revision && step < 2 ? (
-                  <button
+                  <Button
+                    tone="primary"
                     type="button"
-                    className="studio-primary"
                     onClick={() => {
                       if (!validate(step)) return;
                       setStep(step + 1);
                     }}
                   >
                     {t("next")}
-                  </button>
+                  </Button>
                 ) : (
-                  <button
+                  <Button
+                    tone="primary"
                     type="button"
-                    className="studio-primary"
                     disabled={!valid || (!dirty && draft.revision > 0)}
                     onClick={() => {
                       if (validate(0) && validate(1)) void save();
                     }}
                   >
                     {t(draft.revision ? "save" : "new")}
-                  </button>
+                  </Button>
                 )}
               </footer>
             </fieldset>
@@ -370,7 +367,7 @@ export default function ChannelEditor({
         )}
         {draft.id === "default" && <p>{life("inheritLanguages")}</p>}
         {notice && <p role="status">{t("saved")}</p>}
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
         {confirm && (
           <ConfirmDialog
             title={t(confirmKey)}

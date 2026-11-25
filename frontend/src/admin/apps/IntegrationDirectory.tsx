@@ -1,4 +1,5 @@
 /** Ten explicit service routes reuse native app consent or the documented HTTP setup; no fake connected state. */
+import { Button } from "../../kit/ui";
 import type { Package } from "./app-types";
 import Icon from "../../shared/ui/Icon";
 import { useIntegrationDirectoryText } from "./integration-directory-text";
@@ -44,8 +45,8 @@ export default function IntegrationDirectory({
               <strong>{r.name}</strong>
               <p>{t(r.kind)}</p>
               {r.app ? (
-                <button
-                  className="studio-secondary"
+                <Button
+                  type="submit"
                   disabled={busy || (!installed && !manage)}
                   onClick={() => {
                     if (r.app === "migration") {
@@ -60,7 +61,7 @@ export default function IntegrationDirectory({
                   }}
                 >
                   {t(installed ? "open" : "setup")}
-                </button>
+                </Button>
               ) : (
                 <a
                   href="https://www.veyndo.ai/docs/service-integrations.html#shopware-nexus"

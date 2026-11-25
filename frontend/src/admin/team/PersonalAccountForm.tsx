@@ -1,4 +1,5 @@
 /** PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks. */
+import { Button } from "../../kit/ui";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Session } from "./UsersManager";
 
@@ -118,9 +119,9 @@ export default function PersonalAccountForm({
           />
         </label>
       )}
-      <button className="studio-primary" disabled={busy}>
+      <Button tone="primary" type="submit" disabled={busy}>
         {s(mode)}
-      </button>
+      </Button>
       {mode === "login" && <RecoveryLink />}
     </form>
   );

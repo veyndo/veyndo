@@ -1,4 +1,5 @@
 /** One confirmation and a server recheck; stale versions and used definitions never disappear silently. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Kind } from "./automation-types";
@@ -67,14 +68,13 @@ export default function AutomationDelete({
   };
   return (
     <div className="automation-delete">
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={disabled || busy}
         onClick={() => void inspect()}
       >
         {busy ? t("checking") : t("delete")}
-      </button>
+      </Button>
       {dependencies !== null && (
         <ConfirmDialog
           title={t("confirm")}
@@ -94,16 +94,15 @@ export default function AutomationDelete({
               <li key={`${d.kind}:${d.id}:${i}`}>
                 {onReference &&
                 ["rules", "flows", "promotions"].includes(d.kind) ? (
-                  <button
+                  <Button
                     type="button"
-                    className="studio-secondary"
                     onClick={() => {
                       setDependencies(null);
                       onReference(d.kind as Kind, d.id);
                     }}
                   >
                     {contentText(d.name ?? {}, locale, "en-GB") || d.id} ↗
-                  </button>
+                  </Button>
                 ) : (
                   <span>
                     {t(d.kind)} · {d.count}
@@ -112,10 +111,10 @@ export default function AutomationDelete({
               </li>
             ))}
           </ul>
-          {error && <p role="alert">{error}</p>}
+          {error && <Notice tone="danger">{error}</Notice>}
         </ConfirmDialog>
       )}
-      {error && dependencies === null && <p role="alert">{error}</p>}
+      {error && dependencies === null && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

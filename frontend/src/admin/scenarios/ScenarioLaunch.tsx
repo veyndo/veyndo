@@ -1,4 +1,5 @@
 /** Shared customer-test entry; installing/saving a draft remains the owning workspace's action. */
+import { Button } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import { canTestCustomers } from "./scenario-access";
 import { useScenarioText } from "./scenario-i18n";
@@ -13,9 +14,9 @@ export default function ScenarioLaunch({
 }) {
   const t = useScenarioText();
   return canTestCustomers(rights) ? (
-    <button className="studio-secondary" disabled={disabled} onClick={onClick}>
+    <Button type="submit" disabled={disabled} onClick={onClick}>
       <Icon name="people" />
       {t("title")}
-    </button>
+    </Button>
   ) : null;
 }

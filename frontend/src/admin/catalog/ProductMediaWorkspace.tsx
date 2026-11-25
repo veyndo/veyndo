@@ -1,4 +1,5 @@
 /** One product-media workspace: cover, ordered gallery, multilingual image metadata, drag/drop and optional reviewed AI drafts. */
+import { Button } from "../../kit/ui";
 import MediaCaptionEditor from "../../shared/media/MediaCaptionEditor";
 import { useGridAccess } from "../../shared/grid/useGridAccess";
 import { useRef, useState } from "react";
@@ -72,14 +73,13 @@ export default function ProductMediaWorkspace({
           <h3>{w("gallery")}</h3>
           <p>{t("count", media.length)}</p>
         </div>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           onClick={() => setShowUrl((v) => !v)}
           disabled={!canWrite || busy || draft.commerce.media.length >= 20}
         >
           {w("addUrl")}
-        </button>
+        </Button>
       </header>
       {canWrite &&
         (draft.id ? (
@@ -104,9 +104,8 @@ export default function ProductMediaWorkspace({
               onChange={(e) => setUrl(e.target.value)}
             />
           </label>
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={
               !url ||
               busy ||
@@ -123,7 +122,7 @@ export default function ProductMediaWorkspace({
             }}
           >
             {w("addUrl")}
-          </button>
+          </Button>
         </div>
       )}
       {!media.length ? (
@@ -196,9 +195,8 @@ export default function ProductMediaWorkspace({
                   />
                 </label>
                 <div className="media-actions">
-                  <button
+                  <Button
                     type="button"
-                    className="studio-secondary"
                     disabled={media[0].id === image.id || busy}
                     onClick={() => {
                       setSelected(image.id);
@@ -206,11 +204,10 @@ export default function ProductMediaWorkspace({
                     }}
                   >
                     {w("makeCover")}
-                  </button>
+                  </Button>
                   {([-1, 1] as const).map((delta) => (
-                    <button
+                    <Button
                       type="button"
-                      className="studio-secondary"
                       key={delta}
                       disabled={
                         busy ||
@@ -232,16 +229,15 @@ export default function ProductMediaWorkspace({
                         <Icon name="arrow" size={16} />
                       </span>
                       {w(delta < 0 ? "previous" : "next")}
-                    </button>
+                    </Button>
                   ))}
-                  <button
+                  <Button
                     type="button"
-                    className="studio-secondary"
                     disabled={busy}
                     onClick={() => setRemoving(true)}
                   >
                     {w("confirm")}
-                  </button>
+                  </Button>
                 </div>
               </fieldset>
             </aside>

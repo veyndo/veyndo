@@ -1,4 +1,5 @@
 /** Product mutation actions share the workspace write grant; read-only users can still inspect all product tabs. */
+import { Button } from "../../kit/ui";
 import type { ProductDraft } from "./catalog-model";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 export default function ProductEditorActions({
@@ -37,8 +38,9 @@ export default function ProductEditorActions({
         />
         {c("active")}
       </label>
-      <button
-        className="studio-primary"
+      <Button
+        tone="primary"
+        type="submit"
         disabled={
           !canWrite ||
           busy ||
@@ -50,7 +52,7 @@ export default function ProductEditorActions({
         onClick={save}
       >
         {c(busy ? "saving" : "save")}
-      </button>
+      </Button>
     </div>
   );
 }

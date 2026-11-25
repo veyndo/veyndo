@@ -1,4 +1,5 @@
 /** Long actions use the same app/outbox contract, with progress and explicit uncertain-outcome review. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import AppJobArtifact from "./AppJobArtifact";
@@ -70,13 +71,9 @@ export default function AppJobs({
     <section className="app-contract-summary">
       <header className="app-detail-heading">
         <h3>{t("jobs")}</h3>
-        <button
-          className="studio-secondary"
-          disabled={busy}
-          onClick={() => void refresh()}
-        >
+        <Button type="submit" disabled={busy} onClick={() => void refresh()}>
           {t("refresh")}
-        </button>
+        </Button>
       </header>
       <p>{t("jobHint")}</p>
       {jobs.map((j) => (
@@ -98,14 +95,14 @@ export default function AppJobs({
                   ? ["archive"]
                   : []
             ).map((op) => (
-              <button
+              <Button
+                type="submit"
                 key={op}
-                className="studio-secondary"
                 disabled={busy}
                 onClick={() => setSelected({ job: j, operation: op })}
               >
                 {t(op as "cancel" | "retry" | "archive" | "resolve_cancelled")}
-              </button>
+              </Button>
             ))}
           </div>
           {j.status === "succeeded" && (
@@ -120,7 +117,7 @@ export default function AppJobs({
         </article>
       ))}
       {!jobs.length && <p>{t("empty")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {selected && (
         <ConfirmDialog
           title={t("jobs")}

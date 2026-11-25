@@ -1,4 +1,5 @@
 /** Tenant-scoped company workspace; canonical API operations are also exposed through MCP. */
+import { Button } from "../../kit/ui";
 import CompanyCreate from "./CompanyCreate";
 import { useB2BExperienceText } from "./experience-i18n";
 import { useEffect, useState } from "react";
@@ -107,14 +108,15 @@ export default function B2BWorkspace({
           <h1>{quotes ? x("quotes") : t("title")}</h1>
           <p>{t("hint")}</p>
         </div>
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={busy || !canManage || !canPII}
           onClick={() => setCreating(true)}
         >
           <Icon name="plus" />
           {t("newCompany")}
-        </button>
+        </Button>
       </header>
       {error && (
         <div role="alert" className="b2b-notice">
@@ -338,13 +340,14 @@ export default function B2BWorkspace({
                     {t("active")}
                   </label>
                 </div>
-                <button
-                  className="studio-primary"
+                <Button
+                  tone="primary"
+                  type="submit"
                   disabled={busy || !canManage}
                   onClick={() => void run(save)}
                 >
                   {t("save")}
-                </button>
+                </Button>
               </section>
               {detail && (
                 <UnitEditor

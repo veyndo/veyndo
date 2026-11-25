@@ -1,4 +1,5 @@
 /** Goals reference the existing proposal owner; no parallel worker, executor or approval queue. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { canOpenStudio } from "../shell/permissions";
 import type { Tab } from "../shell/navigation";
@@ -78,13 +79,10 @@ export default function WorkspaceGoals({
             placeholder={t("placeholder")}
           />
         </label>
-        <button
-          className="studio-secondary"
-          disabled={!title.trim() || goals.length >= 30}
-        >
+        <Button type="submit" disabled={!title.trim() || goals.length >= 30}>
           <Icon name="plus" />
           {t("addGoal")}
-        </button>
+        </Button>
       </form>
       <p>{t("agentHint")}</p>
       {goals.map((g) => (
@@ -142,7 +140,7 @@ export default function WorkspaceGoals({
           </button>
         </article>
       ))}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {allowed && (
         <details>
           <summary>

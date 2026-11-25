@@ -1,4 +1,5 @@
 /** A plain merchant brief opens an empty ordinary draft in the existing contextual agent. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -75,25 +76,25 @@ export default function AppBrief({
         </label>
         <small>{t("hint")}</small>
         <div className="app-brief-actions">
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => {
               setName({ [language]: t("exampleName") });
               setBrief(t("exampleBrief"));
             }}
           >
             {t("example")}
-          </button>
-          <button
-            className="studio-primary"
+          </Button>
+          <Button
+            tone="primary"
+            type="submit"
             disabled={
               !brief.trim() || !contentText(name, language, mainLocale).trim()
             }
           >
             <Icon name="spark" />
             {t("prepare")}
-          </button>
+          </Button>
         </div>
         <p className="app-brief-next">{t("next")}</p>
       </form>

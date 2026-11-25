@@ -1,4 +1,5 @@
 /** Bounded native catalogue search, not the sampled dashboard; stale replies never replace current results. */
+import { Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { Product, RequestFn } from "../shell/studio-types";
@@ -63,7 +64,7 @@ export default function GuardrailProductSearch({
           }}
         />
       </label>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="guardrail-search-results">
         {results.map((p) => (
           <button

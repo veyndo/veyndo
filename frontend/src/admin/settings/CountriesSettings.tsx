@@ -1,4 +1,5 @@
 /** Delivery-country selection and editable catalogue definitions, including tenant-owned subdivisions. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import {
@@ -58,9 +59,8 @@ export default function CountriesSettings({
       <p className="intl-hint">{i("countryHint")}</p>
       <div className="intl-section-heading">
         <h3>{i("countryDefinition")}</h3>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={channel}
           onClick={() =>
             setEditing({
@@ -75,7 +75,7 @@ export default function CountriesSettings({
           }
         >
           + {i("customCountry")}
-        </button>
+        </Button>
       </div>
       <CountryPicker
         countries={countries}

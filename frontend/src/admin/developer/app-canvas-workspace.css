@@ -241,9 +241,6 @@
   font-size: 16px;
   line-height: 1.4;
 }
-.app-canvas-agent .app-agent-options label {
-  min-width: 0;
-}
 
 .app-studio-editing .app-studio-toolbar > select {
   width: 168px;

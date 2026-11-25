@@ -1,4 +1,5 @@
 /** Canvas handoff reuses native product/category editors without unmounting or copying the page designer. */
+import { Button, Notice } from "../../kit/ui";
 import "./canvas-commerce-editor.css";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -56,14 +57,13 @@ export default function CanvasCommerceEditor({
   return (
     <section className="canvas-commerce-editor">
       <header className="canvas-commerce-heading">
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           onClick={() => (dirty ? setLeaving(true) : onBack())}
         >
           <Icon name="chevron-left" size={16} />
           {t("backToPages")}
-        </button>
+        </Button>
         <div>
           <h2>{t(kind === "product" ? "productData" : "categoryData")}</h2>
           <p>{t("dataEditorHint")}</p>
@@ -75,7 +75,7 @@ export default function CanvasCommerceEditor({
           </span>
         )}
       </header>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <Suspense fallback={<p role="status">{c("loading")}</p>}>
         {categories &&
           (kind === "product" ? (

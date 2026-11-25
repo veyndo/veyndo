@@ -1,4 +1,5 @@
 /** Saved version inspection, digest-approved stage install and conflict-aware package-only live release. */
+import { Button, Notice } from "../../kit/ui";
 import ScenarioLaunch from "../scenarios/ScenarioLaunch";
 import { useScenarioText } from "../scenarios/scenario-i18n";
 import AppDiagnostics from "./AppDiagnostics";
@@ -60,28 +61,29 @@ export default function AppVersions({
                 <code>{b.digest.slice(0, 12)}</code>
               </div>
               <div>
-                <button
-                  className="studio-secondary"
+                <Button
+                  type="submit"
                   disabled={studio.busy}
                   onClick={() => onEdit(b)}
                 >
                   {a("edit")}
-                </button>
-                <button
-                  className="studio-secondary"
+                </Button>
+                <Button
+                  type="submit"
                   disabled={studio.busy}
                   onClick={() => studio.adopt(b)}
                 >
                   {a("inspectVersion")}
-                </button>
+                </Button>
                 {b.state === "draft" && !rights?.includes("apps.manage") && (
-                  <button
-                    className="studio-primary"
+                  <Button
+                    tone="primary"
+                    type="submit"
                     disabled={studio.busy}
                     onClick={() => void studio.run(() => studio.stage(b))}
                   >
                     {w("installStage")}
-                  </button>
+                  </Button>
                 )}
               </div>
               <details>
@@ -109,8 +111,8 @@ export default function AppVersions({
       <section className="app-model-card">
         <h2>{a("review")}</h2>
         <p>{a("releaseHint")}</p>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={
             !studio.saved ||
             studio.saved.state !== "staged" ||
@@ -121,7 +123,7 @@ export default function AppVersions({
           onClick={() => void studio.run(studio.review)}
         >
           {w("changes")}
-        </button>
+        </Button>
         {studio.reviewed && !studio.change && <p>{w("noChanges")}</p>}
         {studio.change && (
           <>
@@ -129,7 +131,9 @@ export default function AppVersions({
               <code>{studio.change.key}</code> ·{" "}
               {studio.change.digest.slice(0, 12)}
             </p>
-            {studio.change.conflict && <p role="alert">{w("conflict")}</p>}
+            {studio.change.conflict && (
+              <Notice tone="danger">{w("conflict")}</Notice>
+            )}
             <details>
               <summary>{w("details")}</summary>
               <div className="diff-columns">
@@ -143,8 +147,9 @@ export default function AppVersions({
                 </div>
               </div>
             </details>
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={
                 studio.change.conflict ||
                 studio.busy ||
@@ -155,7 +160,7 @@ export default function AppVersions({
               onClick={() => void studio.run(studio.publish)}
             >
               {a("publish")}
-            </button>
+            </Button>
           </>
         )}
       </section>

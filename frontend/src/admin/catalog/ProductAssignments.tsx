@@ -1,4 +1,5 @@
 /** Searchable product category paths and explicit channel choices share the native revisioned aggregate save. */
+import { Button } from "../../kit/ui";
 import { useMemo, useState } from "react";
 import Icon, { type IconName } from "../../shared/ui/Icon";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
@@ -159,13 +160,9 @@ export default function ProductAssignments({
               {t("results", { count: visible.length, total: matches.length })}
             </span>
             {visible.length < matches.length && (
-              <button
-                type="button"
-                className="studio-secondary"
-                onClick={() => setLimit((old) => old + 50)}
-              >
+              <Button type="button" onClick={() => setLimit((old) => old + 50)}>
                 {t("more")}
-              </button>
+              </Button>
             )}
           </footer>
         )}

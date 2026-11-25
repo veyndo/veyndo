@@ -1,4 +1,5 @@
 /** Private environment creation and digest-bound selective release. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReleaseScenarios from "./ReleaseScenarios";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
@@ -155,9 +156,9 @@ export default function EnvironmentManager({
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-          <button className="studio-primary" disabled={busy || !manage}>
+          <Button tone="primary" type="submit" disabled={busy || !manage}>
             {w("newStage")}
-          </button>
+          </Button>
         </form>
         <p className="muted">{w("exclusion")}</p>
       </section>
@@ -175,13 +176,9 @@ export default function EnvironmentManager({
                 ))}
               </select>
             </label>
-            <button
-              className="studio-secondary"
-              disabled={!id}
-              onClick={() => onSelect(id)}
-            >
+            <Button type="submit" disabled={!id} onClick={() => onSelect(id)}>
               {w("stage")}
-            </button>
+            </Button>
             <a
               className="studio-secondary"
               target="_blank"
@@ -190,13 +187,13 @@ export default function EnvironmentManager({
             >
               {w("preview")} ↗
             </a>
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={busy || !id}
               onClick={() => void run(load)}
             >
               {w("changes")}
-            </button>
+            </Button>
           </div>
           {id && sandboxRequest && onTest && (
             <ReleaseScenarios
@@ -227,7 +224,7 @@ export default function EnvironmentManager({
                 />
                 <strong>{changeTitle(c, locale, mainLocale)}</strong>
               </label>
-              {c.conflict && <p role="alert">{w("conflict")}</p>}
+              {c.conflict && <Notice tone="danger">{w("conflict")}</Notice>}
               <details>
                 <summary>{w("details")}</summary>
                 <code>{c.key}</code>
@@ -244,8 +241,9 @@ export default function EnvironmentManager({
               </details>
             </article>
           ))}
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!visibleSelected.length || busy || !manage}
             onClick={() =>
               void run(async () => {
@@ -261,11 +259,11 @@ export default function EnvironmentManager({
             }
           >
             {w("release")} · {visibleSelected.length}
-          </button>
+          </Button>
         </section>
       )}
       {notice && <p role="status">{w("released")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <section className="studio-card">
         <h2>{w("history")}</h2>
         {(historyRequest === request ? history : []).map((r) => (

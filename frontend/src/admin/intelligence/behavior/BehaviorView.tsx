@@ -1,4 +1,5 @@
 /** Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. */
+import { Button } from "../../../kit/ui";
 import { useEffect, useState, useRef } from "react";
 import {
   useBehaviorText,
@@ -107,13 +108,13 @@ export default function BehaviorView({
             <option value={30}>{k("month")}</option>
           </select>
         </label>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={busy}
           onClick={() => setRevision((r) => r + 1)}
         >
           {k("refresh")}
-        </button>
+        </Button>
       </div>
       {error && (
         <div role="alert" className="knowledge-alert">

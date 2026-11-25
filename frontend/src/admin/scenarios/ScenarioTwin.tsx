@@ -1,4 +1,5 @@
 /** Readiness of the selected private copy as a shop twin; every figure is a native read and each open step links to its owner. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Tab } from "../shell/navigation";
@@ -205,19 +206,16 @@ export default function ScenarioTwin({
               <p>{step.text}</p>
             </div>
             {step.fill && access.includes("catalog.write") && (
-              <button className="studio-primary" onClick={() => void fill()}>
+              <Button tone="primary" type="submit" onClick={() => void fill()}>
                 {t("twinFill")}
-              </button>
+              </Button>
             )}
             {!step.done &&
               step.action &&
               access.includes(step.action.right) && (
-                <button
-                  className="studio-secondary"
-                  onClick={() => onOpen(step.action!.tab)}
-                >
+                <Button type="submit" onClick={() => onOpen(step.action!.tab)}>
                   {step.action.label}
-                </button>
+                </Button>
               )}
           </li>
         ))}

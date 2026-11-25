@@ -158,7 +158,7 @@
   display: grid;
   gap: 12px;
 }
-.catalog-intake-review > .studio-primary {
+.catalog-intake-review > :is(.studio-primary, [data-tone="primary"]) {
   margin: 8px 0 16px;
 }
 .merchant-catalog-actions {
@@ -204,7 +204,7 @@
     grid-template-columns: 1fr;
     padding: 14px;
   }
-  .catalog-intake-dialog .studio-primary {
+  .catalog-intake-dialog :is(.studio-primary, [data-tone="primary"]) {
     width: 100%;
     white-space: normal;
   }

@@ -1,4 +1,5 @@
 /** Native payment balances and observed financial jobs, shared with the order detail controls. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
@@ -145,9 +146,9 @@ export default function PaymentManager({
           <PaymentDetails id={p.id} request={request} />
         </article>
       ))}
-      {error && <p role="alert">{error}</p>}
-      <button
-        className="studio-secondary"
+      {error && <Notice tone="danger">{error}</Notice>}
+      <Button
+        type="submit"
         disabled={busy}
         onClick={() =>
           void request("/api/payments")
@@ -156,7 +157,7 @@ export default function PaymentManager({
         }
       >
         {a("refresh")}
-      </button>
+      </Button>
     </section>
   );
 }

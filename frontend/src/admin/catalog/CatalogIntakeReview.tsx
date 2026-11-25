@@ -1,4 +1,5 @@
 /** Editable catalogue review is distinct from native creation and later publication; AI images reuse the product editor's job workflow. */
+import { Button, Notice } from "../../kit/ui";
 import type { IntakePreview, IntakeRow } from "./catalog-intake-model";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 export default function CatalogIntakeReview({
@@ -149,24 +150,23 @@ export default function CatalogIntakeReview({
                   {row.imageQueued && <> · {c("imageQueued")}</>}
                 </p>
               )}
-              {row.error && <p role="alert">{row.error}</p>}
+              {row.error && <Notice tone="danger">{row.error}</Notice>}
               {row.saved && (
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   disabled={busy}
                   onClick={() => onOpen(row.id)}
                 >
                   {c("open")}
-                </button>
+                </Button>
               )}
             </div>
           </article>
         ))}
       </div>
-      <button
+      <Button
+        tone="primary"
         type="button"
-        className="studio-primary"
         disabled={
           busy ||
           !pending.length ||
@@ -186,7 +186,7 @@ export default function CatalogIntakeReview({
       >
         {c(busy ? "saving" : "save")}
         {!busy && ` · ${pending.length}`}
-      </button>
+      </Button>
     </section>
   );
 }

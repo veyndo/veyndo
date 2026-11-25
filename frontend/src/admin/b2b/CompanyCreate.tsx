@@ -1,4 +1,5 @@
 /** Guided company creation is one atomic native API command; the main-language name is always visible. */
+import { Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -101,7 +102,7 @@ export default function CompanyCreate({
             />
           )}
         </fieldset>
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
       </ContentLanguage>
     </ConfirmDialog>
   );

@@ -1,4 +1,5 @@
 /** A short, optional welcome demonstrates the actual setup path before asking for any work. */
+import { Button } from "../../kit/ui";
 import { useStudio } from "../shell/StudioContext";
 import { useShopSetup } from "./SetupProvider";
 import { useSetupText } from "./setup-i18n";
@@ -16,8 +17,9 @@ export default function SetupWelcome() {
         <h1>{t("welcome")}</h1>
         <p>{t("welcomeHint")}</p>
         <div className="setup-actions">
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={guide.busy}
             onClick={async () => {
               if (await guide.save(newProgress())) selectTab("setup");
@@ -25,9 +27,9 @@ export default function SetupWelcome() {
           >
             {t("begin")}
             <Icon name="arrow" size={18} />
-          </button>
-          <button
-            className="studio-secondary"
+          </Button>
+          <Button
+            type="submit"
             disabled={guide.busy}
             onClick={async () => {
               if (await guide.save({ ...newProgress(), state: "dismissed" }))
@@ -35,7 +37,7 @@ export default function SetupWelcome() {
             }}
           >
             {t("later")}
-          </button>
+          </Button>
         </div>
         <p className="setup-caption">{t("hint")}</p>
       </div>

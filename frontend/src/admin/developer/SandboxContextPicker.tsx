@@ -1,4 +1,5 @@
 /** Bounded server search selects an owned object for testing editor-bound apps in a private sandbox. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type { Block } from "../../shared/apps/native/types";
@@ -81,7 +82,7 @@ export default function SandboxContextPicker({
           ))}
         </select>
       </label>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

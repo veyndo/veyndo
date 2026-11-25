@@ -1,4 +1,5 @@
 /** Visual recursive rule tree: AND/OR/NOT groups, typed facts and editable leaf conditions. */
+import { Button } from "../../kit/ui";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { contentText } from "../../shared/i18n/content-language";
 import SourceRuleFields from "./SourceRuleFields";
@@ -164,16 +165,15 @@ export default function RuleBuilder({
               </div>
             ))}
           </div>
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={depth >= 8 || value.children.length >= 20}
             onClick={() =>
               set("children", [...value.children, { type: "alwaysValid" }])
             }
           >
             + {x("add")}
-          </button>
+          </Button>
         </>
       ) : not ? (
         <div className="rule-children">
@@ -325,9 +325,8 @@ export default function RuleBuilder({
                   }
                 }}
               />
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={!input.trim()}
                 onClick={() => {
                   set("values", [...value.values, input.trim()]);
@@ -335,7 +334,7 @@ export default function RuleBuilder({
                 }}
               >
                 +
-              </button>
+              </Button>
             </>
           ) : null}
         </div>

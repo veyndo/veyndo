@@ -46,7 +46,7 @@
   align-items: center;
   max-width: 200px;
 }
-.proposal-review .studio-primary {
+.proposal-review :is(.studio-primary, [data-tone="primary"]) {
   font-size: 12px;
   white-space: nowrap;
 }
@@ -202,7 +202,7 @@
   font-size: 12px;
   color: var(--muted);
 }
-.price-playground > .studio-secondary {
+.price-playground > :is(.studio-secondary, [data-tone="secondary"]) {
   width: 100%;
   font-size: 11px;
   padding: 10px;

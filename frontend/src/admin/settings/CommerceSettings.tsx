@@ -1,4 +1,5 @@
 /** One revisioned international settings aggregate: drafts survive navigation between countries, taxes, methods and languages. */
+import { Button, Notice } from "../../kit/ui";
 import CurrencySettings from "./CurrencySettings";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -186,9 +187,8 @@ export default function CommerceSettings({
         {channel && (
           <div className="intl-scope-note">
             <p>{w("scopeHint")}</p>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={!canWrite || state.busy}
               onClick={() => {
                 const basis = state.value?.inherited;
@@ -198,14 +198,12 @@ export default function CommerceSettings({
               }}
             >
               {w("resetScope")}
-            </button>
+            </Button>
           </div>
         )}
-        {scopeError && <p role="alert">{scopeError}</p>}
+        {scopeError && <Notice tone="danger">{scopeError}</Notice>}
         {(state.error || loadError) && (
-          <p role="alert" className="settings-error">
-            {state.error || loadError}
-          </p>
+          <Notice tone="danger">{state.error || loadError}</Notice>
         )}
         {!!missing.length && (
           <div role="status" className="intl-coverage">

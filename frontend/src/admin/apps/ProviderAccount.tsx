@@ -1,4 +1,5 @@
 /** Shared installed-provider onboarding and channel connection controls for merchant Apps and App Studio. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
@@ -169,29 +170,30 @@ export default function ProviderAccount({
         onChange={setCountry}
       />
       <div className="workbench-row">
-        <button
+        <Button
+          type="submit"
           disabled={busy || !canWrite || !environment}
-          className="studio-secondary"
           onClick={() => void connect("status")}
         >
           {t("refresh")}
-        </button>
-        <button
+        </Button>
+        <Button
+          tone="primary"
+          type="submit"
           disabled={busy || !canWrite || !environment}
-          className="studio-primary"
           onClick={() => void connect("start")}
         >
           {t("start")}
-        </button>
+        </Button>
       </div>
       {account && (
-        <button
+        <Button
+          type="submit"
           disabled={busy || !canWrite || !environment}
-          className="studio-secondary"
           onClick={() => setConfirmDisconnect(true)}
         >
           {t("disconnect")}
-        </button>
+        </Button>
       )}
       {confirmDisconnect && (
         <ConfirmDialog
@@ -204,7 +206,7 @@ export default function ProviderAccount({
           <p>{t("disconnectHint")}</p>
         </ConfirmDialog>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {account && <p>{t(account.ready ? "ready" : "pending")}</p>}
       {account?.onboardingUrl && (
         <a

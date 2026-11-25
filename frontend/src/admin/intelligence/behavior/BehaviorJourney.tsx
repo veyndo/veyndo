@@ -1,4 +1,5 @@
 /** Authorized journey timeline links to native product, customer and order views, through permission-bound native CRM references. */
+import { Button } from "../../../kit/ui";
 import {
   useBehaviorText,
   type BehaviorWord,
@@ -25,9 +26,9 @@ export default function BehaviorJourney({
     >
       <header>
         <h2>{k("inspect")}</h2>
-        <button className="studio-secondary" onClick={onClose}>
+        <Button type="submit" onClick={onClose}>
           {k("close")}
-        </button>
+        </Button>
       </header>
       <ol>
         {journey.events.map((e) => (

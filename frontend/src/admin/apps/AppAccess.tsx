@@ -1,4 +1,5 @@
 /** Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -130,8 +131,9 @@ export default function AppAccess({
               onChange={(e) => setDays(e.target.value)}
             />
           </label>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={
               !data ||
               !selected.length ||
@@ -142,7 +144,7 @@ export default function AppAccess({
             }
           >
             {t("create")}
-          </button>
+          </Button>
         </fieldset>
       </form>
       {secret && (
@@ -161,17 +163,17 @@ export default function AppAccess({
             Date.parse(key.expiresAt) <= Date.now()) && (
             <small>{t("expired")}</small>
           )}
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy || !data?.canManage}
             onClick={() => setRevoke(key.id)}
           >
             {t("revoke")}
-          </button>
+          </Button>
         </div>
       ))}
       {data && !data.keys.length && <p>{t("none")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {revoke && (
         <ConfirmDialog
           title={t("revoke")}

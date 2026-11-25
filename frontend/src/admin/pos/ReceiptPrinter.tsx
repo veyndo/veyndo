@@ -1,4 +1,5 @@
 /** OS-installed receipt printers receive the issued immutable invoice projection; no USB access, credentials or duplicate ledger. */
+import { Notice } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { usePosText } from "./pos-i18n";
@@ -71,7 +72,7 @@ export default function ReceiptPrinter({
         <Icon name="form" />
         {t(busy ? "busy" : "printReceipt")}
       </button>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

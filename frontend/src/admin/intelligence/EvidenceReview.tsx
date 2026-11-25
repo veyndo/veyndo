@@ -1,4 +1,5 @@
 /** Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import type { Product, RequestFn } from "../shell/studio-types";
@@ -97,8 +98,9 @@ export default function EvidenceReview({
           </select>
         </label>
       </div>
-      <button
-        className="studio-primary"
+      <Button
+        tone="primary"
+        type="submit"
         disabled={busy || !source || !product || !workspace.canWrite}
         onClick={() =>
           void run(() =>
@@ -110,7 +112,7 @@ export default function EvidenceReview({
         }
       >
         {k("extractCandidates")}
-      </button>
+      </Button>
       {error && (
         <p className="knowledge-alert" role="alert">
           {error}
@@ -129,12 +131,14 @@ export default function EvidenceReview({
             {sources.find((s) => s.id === claim.data.sourceId)?.title ??
               claim.data.sourceId}
           </p>
-          {!claim.sourceCurrent && <p role="alert">{k("claimStale")}</p>}
+          {!claim.sourceCurrent && (
+            <Notice tone="danger">{k("claimStale")}</Notice>
+          )}
           <div className="knowledge-actions">
             {(["confirmed", "rejected"] as const).map((state) => (
-              <button
+              <Button
+                type="submit"
                 key={state}
-                className="studio-secondary"
                 disabled={
                   busy ||
                   !workspace.canWrite ||
@@ -152,7 +156,7 @@ export default function EvidenceReview({
                 }
               >
                 {k(state === "confirmed" ? "confirmClaim" : "rejectClaim")}
-              </button>
+              </Button>
             ))}
           </div>
         </article>

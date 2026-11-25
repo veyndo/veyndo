@@ -1,4 +1,5 @@
 /** Preview resolves the installed registry first; a newer staged package cannot masquerade as an older build. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import SandboxContextPicker from "./SandboxContextPicker";
 import useSurfaceGateway from "../../shared/apps/useSurfaceGateway";
@@ -66,7 +67,7 @@ export default function SandboxPreview({
         <span>{version}</span>
       </div>
       {error ? (
-        <p role="alert">{error}</p>
+        <Notice tone="danger">{error}</Notice>
       ) : surface?.native ? (
         <>
           {surface.native.view.blocks.find((b) => b.contextBinding)

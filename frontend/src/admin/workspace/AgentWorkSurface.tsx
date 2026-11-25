@@ -1,4 +1,5 @@
 /** Reviewed composition binds real native views to the current Studio scope and private workspace preferences. */
+import { Notice } from "../../kit/ui";
 import {
   lazy,
   Suspense,
@@ -180,7 +181,7 @@ export default function AgentWorkSurface({
             {busy && <p role="status">{t("loading")}</p>}
           </div>
           {saved && <p role="status">{t("saved")}</p>}
-          {error && <p role="alert">{t("saveError")}</p>}
+          {error && <Notice tone="danger">{t("saveError")}</Notice>}
           <p className="agent-work-surface-privacy">{t("privacy")}</p>
           <GeneratedWorkspace
             candidate={{ ...view, criteria, components }}
@@ -271,7 +272,7 @@ export default function AgentWorkSurface({
           )}
         </>
       ) : (
-        <p role="alert">{t("error")}</p>
+        <Notice tone="danger">{t("error")}</Notice>
       )}
       {pendingNavigation && (
         <ConfirmDialog

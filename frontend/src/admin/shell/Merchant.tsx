@@ -1,4 +1,5 @@
 /** Studio composition root: layout, scoped controller and modular workspace views. */
+import { Button } from "../../kit/ui";
 import { SetupProvider } from "../setup/SetupProvider";
 import SetupBanner from "../setup/SetupBanner";
 import WorkspacePinBridge from "../workspace/WorkspacePinBridge";
@@ -143,12 +144,13 @@ export default function Merchant(props: {
                                   )}
                                 </b>
                                 {sessionExpired && (
-                                  <button
-                                    className="studio-primary"
+                                  <Button
+                                    tone="primary"
+                                    type="submit"
                                     onClick={() => selectTab("users")}
                                   >
                                     {x("studioSignIn")}
-                                  </button>
+                                  </Button>
                                 )}
                                 <p>{error}</p>
                               </>

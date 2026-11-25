@@ -1,4 +1,5 @@
 /** Read-only transaction observation and native financial history, shared across Studio views. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -89,7 +90,7 @@ export default function PaymentDetails({
     >
       <summary>{t("title")}</summary>
       {busy && <p role="status">{t("loading")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {data && (
         <>
           <p className="payment-details-hint">{t("readOnly")}</p>
@@ -182,14 +183,9 @@ export default function PaymentDetails({
           <small>{t("bounded")}</small>
         </>
       )}
-      <button
-        type="button"
-        className="studio-secondary"
-        disabled={busy}
-        onClick={() => void load()}
-      >
+      <Button type="button" disabled={busy} onClick={() => void load()}>
         {t("refresh")}
-      </button>
+      </Button>
     </details>
   );
 }

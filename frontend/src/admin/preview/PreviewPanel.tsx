@@ -1,4 +1,5 @@
 /** PreviewPanel renders verified shop state and typed user actions. */
+import { Button, Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -180,7 +181,7 @@ export function PreviewPanel({
               aria-busy={loading}
             >
               {error ? (
-                <p role="alert">{t("failure")}</p>
+                <Notice tone="danger">{t("failure")}</Notice>
               ) : line ? (
                 <>
                   <div>
@@ -208,8 +209,8 @@ export function PreviewPanel({
                 <p>{t("thinking")}</p>
               )}
             </div>
-            <button
-              className="studio-secondary"
+            <Button
+              type="submit"
               disabled={!connected}
               onClick={() =>
                 onIntent(t("promptSim", { product: product.name }))
@@ -217,7 +218,7 @@ export function PreviewPanel({
             >
               {t("useKnowledge")}
               <Icon name="arrow" size={16} />
-            </button>
+            </Button>
           </section>
         </>
       ) : (

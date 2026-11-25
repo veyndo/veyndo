@@ -1,4 +1,5 @@
 /** Explicit source attribution; removing it does not change or undo the approved proposal. */
+import { Button } from "../../kit/ui";
 import { useLocale } from "../../shared/i18n/i18n";
 export default function ScenarioSource({
   taskId,
@@ -31,9 +32,9 @@ export default function ScenarioSource({
         <code>{taskId}</code>
       </details>
       {onClear && (
-        <button type="button" className="studio-secondary" onClick={onClear}>
+        <Button type="button" onClick={onClear}>
           {clear}
-        </button>
+        </Button>
       )}
     </div>
   );

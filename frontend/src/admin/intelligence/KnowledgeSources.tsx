@@ -1,4 +1,5 @@
 /** Searchable cursor source library, guarded lifecycle decisions and single-language source editing. */
+import { Button } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
@@ -120,8 +121,9 @@ export default function KnowledgeSources({
           <p>{k("sample")}</p>
         </div>
         {workspace.canWrite && (
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy}
             onClick={() => {
               setNew(true);
@@ -131,7 +133,7 @@ export default function KnowledgeSources({
           >
             <Icon name="plus" />
             {k("addSource")}
-          </button>
+          </Button>
         )}
       </div>
       {error && (
@@ -161,12 +163,9 @@ export default function KnowledgeSources({
               <span className="kicker">{k(selected.kind)}</span>
               <h2>{name(selected)}</h2>
             </div>
-            <button
-              className="studio-secondary"
-              onClick={() => setSelected(undefined)}
-            >
+            <Button type="submit" onClick={() => setSelected(undefined)}>
               {k("cancel")}
-            </button>
+            </Button>
           </div>
           <p className="knowledge-badge">
             {k(
@@ -190,15 +189,16 @@ export default function KnowledgeSources({
             <div className="knowledge-actions">
               {!selected.archived && (
                 <>
-                  <button
-                    className="studio-secondary"
+                  <Button
+                    type="submit"
                     disabled={busy}
                     onClick={() => setEditing(selected)}
                   >
                     {k("edit")} <Icon name="settings" />
-                  </button>
-                  <button
-                    className="studio-primary"
+                  </Button>
+                  <Button
+                    tone="primary"
+                    type="submit"
                     disabled={busy}
                     onClick={() =>
                       setDecision({
@@ -215,11 +215,11 @@ export default function KnowledgeSources({
                         ? "unpublish"
                         : "publish",
                     )}
-                  </button>
+                  </Button>
                 </>
               )}
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={busy}
                 onClick={() =>
                   setDecision({
@@ -229,7 +229,7 @@ export default function KnowledgeSources({
                 }
               >
                 {k(selected.archived ? "restore" : "archive")}
-              </button>
+              </Button>
             </div>
           )}
           <EntityHistory
@@ -265,10 +265,10 @@ export default function KnowledgeSources({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button className="studio-secondary" disabled={busy}>
+          <Button type="submit" disabled={busy}>
             <Icon name="search" />
             {k("search")}
-          </button>
+          </Button>
         </form>
         <select
           aria-label={k("kind")}
@@ -282,13 +282,13 @@ export default function KnowledgeSources({
             </option>
           ))}
         </select>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           aria-pressed={archived}
           onClick={() => setArchived(!archived)}
         >
           {k(archived ? "active" : "archived")}
-        </button>
+        </Button>
       </div>
       <div className="knowledge-source-grid">
         {rows.map((s) => (
@@ -325,13 +325,13 @@ export default function KnowledgeSources({
       {!rows.length && !busy && <p className="knowledge-empty">{k("empty")}</p>}
       {busy && <p role="status">{k("loading")}</p>}
       {next && (
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={busy}
           onClick={() => void run(() => load(next))}
         >
           {k("more")}
-        </button>
+        </Button>
       )}
       {decision && (
         <ConfirmDialog

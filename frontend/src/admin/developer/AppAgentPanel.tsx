@@ -1,4 +1,5 @@
 /** Coding agents receive the current Manifest IR and authoritative schema; imported edits round-trip to the canvas. */
+import { Button } from "../../kit/ui";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import { useBuildingText } from "../../shared/i18n/app-building-i18n";
 import ReferenceInputs from "../../shared/canvas/ReferenceInputs";
@@ -117,20 +118,15 @@ export default function AppAgentPanel({
           </details>
         ) : (
           <div className="app-agent-options">
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setPrompt(t("formPrompt"))}
-            >
+            <Button type="button" onClick={() => setPrompt(t("formPrompt"))}>
               {t("formIdea")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="studio-secondary"
               onClick={() => setPrompt(t("validationPrompt"))}
             >
               {t("validationIdea")}
-            </button>
+            </Button>
           </div>
         )}
         <AgentComposer
@@ -274,8 +270,8 @@ export default function AppAgentPanel({
       <details className="app-agent-advanced">
         <summary>{workspace("agentAdvanced")}</summary>
         <div className="app-agent-options">
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={studio.busy}
             onClick={() =>
               void studio.run(async () =>
@@ -287,15 +283,15 @@ export default function AppAgentPanel({
             }
           >
             {a("schema")}
-          </button>
-          <button
-            className="studio-secondary"
+          </Button>
+          <Button
+            type="submit"
             onClick={() =>
               downloadJson(`${studio.manifest.id}.json`, studio.manifest)
             }
           >
             {a("download")}
-          </button>
+          </Button>
         </div>
         <section className="app-model-card">
           <h2>{a("import")}</h2>
@@ -305,8 +301,9 @@ export default function AppAgentPanel({
             value={json}
             onChange={(e) => setJson(e.target.value)}
           />
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!json || !studio.env || studio.busy}
             onClick={() => {
               try {
@@ -328,7 +325,7 @@ export default function AppAgentPanel({
             }}
           >
             {a("import")}
-          </button>
+          </Button>
         </section>
       </details>
     </div>

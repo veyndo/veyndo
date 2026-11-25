@@ -1,4 +1,5 @@
 /** Import a bounded manifest through the same server review and approval as built-in apps. */
+import { Button, Notice } from "../../kit/ui";
 import { useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLibraryText } from "../../shared/i18n/app-library-i18n";
@@ -49,14 +50,10 @@ export default function AppPackageImport({
           }
         }}
       />
-      <button
-        type="button"
-        className="studio-secondary"
-        onClick={() => input.current?.click()}
-      >
+      <Button type="button" onClick={() => input.current?.click()}>
         {l("importPackage")}
-      </button>
-      {error && <p role="alert">{error}</p>}
+      </Button>
+      {error && <Notice tone="danger">{error}</Notice>}
       {manifest && (
         <AppConsent
           app={manifest.id as string}

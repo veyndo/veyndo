@@ -1,4 +1,5 @@
 /** Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type { Channel } from "../channels/channel-model";
@@ -129,10 +130,10 @@ export default function POSWorkspace(props: POSProps) {
             <Icon name="register" size={52} />
           </div>
           <h2>{t("empty")}</h2>
-          <button className="studio-primary" onClick={props.onChannels}>
+          <Button tone="primary" type="submit" onClick={props.onChannels}>
             {t("setup")}
             <Icon name="arrow" />
-          </button>
+          </Button>
         </section>
       )}
       {channel && (

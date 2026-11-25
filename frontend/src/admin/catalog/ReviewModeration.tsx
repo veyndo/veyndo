@@ -1,4 +1,5 @@
 /** Product-scoped review publication; authoritative authorization stays in the API. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
@@ -57,7 +58,7 @@ export default function ReviewModeration({
     <section className="studio-card">
       <h2>{s("moderation")}</h2>
       <p>{s("reviewHint")}</p>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {!loading && !error && reviews.length === 0 && (
         <div className="product-review-empty">
           <Icon name="chat" />
@@ -86,8 +87,8 @@ export default function ReviewModeration({
               </>
             )}
           </div>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy}
             onClick={async () => {
               setBusy(true);
@@ -111,7 +112,7 @@ export default function ReviewModeration({
             }}
           >
             {s(r.approved ? "hide" : "approve")}
-          </button>
+          </Button>
         </article>
       ))}
     </section>

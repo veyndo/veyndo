@@ -1,4 +1,5 @@
 /** One merchant entry for inbound shops and native agent checkout; technical support never masquerades as external approval. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
@@ -96,10 +97,10 @@ export default function AgenticChannels({
     <section className="agentic-channels">
       <header>
         <div>
-          <button type="button" className="studio-secondary" onClick={onBack}>
+          <Button type="button" onClick={onBack}>
             <Icon name="arrow" />
             {t("back")}
-          </button>
+          </Button>
           <h2>{t("title")}</h2>
           <p>{t("intro")}</p>
         </div>
@@ -119,7 +120,7 @@ export default function AgenticChannels({
         </label>
       </header>
       {!canRead && <p role="status">{t("permission")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <article className="studio-card agentic-protocol">
         <div>
           <Icon name="spark" />
@@ -217,23 +218,22 @@ export default function AgenticChannels({
             </span>
             <h3>{t(c.id)}</h3>
             <p>{t(c.hint)}</p>
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={!canRead || !canImport}
               onClick={() => onImport(c.mode)}
             >
               {t(c.label)}
-            </button>
+            </Button>
             {c.id === "others" && (
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={!canRead || !canImport}
                 onClick={() => onImport("url")}
               >
                 {t("url")}
-              </button>
+              </Button>
             )}
           </article>
         ))}

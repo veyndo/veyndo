@@ -1,4 +1,5 @@
 /** Merchant source chooser and explicit staged creation reuse native product, media and environment owners. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -248,9 +249,8 @@ export default function CatalogIntake({
           </select>
         </label>
         {access.includes("environments.manage") && !preview && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy}
             onClick={async () => {
               setBusy(true);
@@ -272,7 +272,7 @@ export default function CatalogIntake({
           >
             <Icon name="plus" size={16} />
             {c("newSandbox")}
-          </button>
+          </Button>
         )}
       </div>
       {!stage && <p>{c("needSandbox")}</p>}
@@ -320,9 +320,9 @@ export default function CatalogIntake({
             count={count}
             setCount={setCount}
           />
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             disabled={
               busy ||
               !stage ||
@@ -335,7 +335,7 @@ export default function CatalogIntake({
             onClick={() => void prepare()}
           >
             {c("prepare")}
-          </button>
+          </Button>
           {busy && <p role="status">{c("preparing")}</p>}
         </>
       ) : (
@@ -365,9 +365,8 @@ export default function CatalogIntake({
             <aside className="catalog-intake-next">
               <h3>{c("nextTitle")}</h3>
               <p>{c("nextHint")}</p>
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={busy}
                 onClick={() => {
                   studio.setEnvironment(stage);
@@ -376,12 +375,11 @@ export default function CatalogIntake({
                 }}
               >
                 {c("release")}
-              </button>
+              </Button>
             </aside>
           )}
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy}
             onClick={() => {
               setPreview(undefined);
@@ -389,10 +387,10 @@ export default function CatalogIntake({
             }}
           >
             {c("again")}
-          </button>
+          </Button>
         </>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </dialog>
   );
 }

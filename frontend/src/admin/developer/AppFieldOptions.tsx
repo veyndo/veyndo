@@ -1,4 +1,5 @@
 /** Core references and typed choice fields remain owned app data with a single content-language editor. */
+import { Button } from "../../kit/ui";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import {
   useAssistantText,
@@ -98,9 +99,8 @@ export default function AppFieldOptions({
               </button>
             </div>
           ))}
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={(f.choices?.length ?? 0) >= 100}
             onClick={() =>
               onChange({
@@ -118,7 +118,7 @@ export default function AppFieldOptions({
             }
           >
             {t("addChoice")}
-          </button>
+          </Button>
         </>
       )}
     </div>

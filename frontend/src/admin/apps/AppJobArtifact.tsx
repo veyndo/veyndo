@@ -1,4 +1,5 @@
 /** Completed app exports read the existing tenant asset owner; private files never acquire a public URL. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useAppOperationsText } from "../../shared/i18n/app-operations-i18n";
@@ -24,9 +25,8 @@ export default function AppJobArtifact({
   if (!id) return null;
   return (
     <div>
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={busy}
         onClick={async () => {
           setBusy(true);
@@ -52,8 +52,8 @@ export default function AppJobArtifact({
         }}
       >
         {t("download")}
-      </button>
-      {error && <p role="alert">{error}</p>}
+      </Button>
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

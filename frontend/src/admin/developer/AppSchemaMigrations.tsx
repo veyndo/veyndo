@@ -1,4 +1,5 @@
 /** Migration plans are explicit versioned agent-readable data, validated by the shared server compiler before any DDL. */
+import { Button, Notice } from "../../kit/ui";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
@@ -20,9 +21,8 @@ export default function AppSchemaMigrations({
     <details>
       <summary>{a("migrationPlan")}</summary>
       <p>{a("migrationHint")}</p>
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         onClick={() => {
           setSource(JSON.stringify(manifest.schemaMigrations ?? [], null, 2));
           setError(false);
@@ -30,7 +30,7 @@ export default function AppSchemaMigrations({
         }}
       >
         {a("edit")}
-      </button>
+      </Button>
       {open && (
         <ConfirmDialog
           title={a("migrationPlan")}
@@ -59,7 +59,7 @@ export default function AppSchemaMigrations({
               setError(false);
             }}
           />
-          {error && <p role="alert">{a("invalid")}</p>}
+          {error && <Notice tone="danger">{a("invalid")}</Notice>}
         </ConfirmDialog>
       )}
     </details>

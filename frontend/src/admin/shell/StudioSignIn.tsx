@@ -1,4 +1,5 @@
 /** Dedicated login page and blocking reauthentication dialog preserve mounted private editors. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BRAND } from "../../shared/ui/Brand";
@@ -68,23 +69,22 @@ export default function StudioSignIn({
       {overlay && (
         <div className="studio-auth-resume">
           <p>{x("resumeBrowserHint")}</p>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
             type="button"
             disabled={busy || auth.checking}
             onClick={() => void run(auth.resume)}
           >
             {x("resumeBrowser")}
-          </button>
+          </Button>
         </div>
       )}
       {!overlay && (
         <div className="account-tabs">
           {["login", "register", "join"].map((m) => (
-            <button
+            <Button
               key={m}
               type="button"
-              className="studio-secondary"
               aria-pressed={mode === m}
               disabled={busy || auth.checking}
               onClick={() => {
@@ -93,7 +93,7 @@ export default function StudioSignIn({
               }}
             >
               {s(m)}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -120,18 +120,14 @@ export default function StudioSignIn({
       )}
       {auth.checking && <p role="status">{x("checkingSession")}</p>}
       {!overlay && auth.error && (
-        <button className="studio-secondary" onClick={auth.retry}>
+        <Button type="submit" onClick={auth.retry}>
           {t("refresh")}
-        </button>
+        </Button>
       )}
       <div className="studio-auth-footer">
-        <button
-          className="studio-secondary"
-          type="button"
-          onClick={overlay ? auth.logout : onExit}
-        >
+        <Button type="button" onClick={overlay ? auth.logout : onExit}>
           {overlay ? x("leaveStudio") : t("storefront")}
-        </button>
+        </Button>
         {!overlay && (
           <select
             aria-label={t("language")}

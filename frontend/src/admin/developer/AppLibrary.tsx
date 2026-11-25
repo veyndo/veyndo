@@ -1,4 +1,5 @@
 /** Saved app cards with explicit editing and recoverable project removal, independent of installed package/data lifecycle. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { contentText } from "../../shared/i18n/content-language";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
@@ -50,22 +51,22 @@ export default function AppLibrary({
               <Icon name="arrow" size={16} />
             </button>
             <footer>
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={busy}
                 aria-label={`${a("editApp")}: ${name(build)}`}
                 onClick={() => onOpen(build)}
               >
                 {a("editApp")}
-              </button>
-              <button
-                className="studio-secondary"
+              </Button>
+              <Button
+                type="submit"
                 disabled={busy}
                 aria-label={`${a("deleteApp")}: ${name(build)}`}
                 onClick={() => setRemoving(build)}
               >
                 {a("deleteApp")}
-              </button>
+              </Button>
             </footer>
           </article>
         ))}
@@ -81,15 +82,12 @@ export default function AppLibrary({
             {a("confirmDelete")}: {name(removing)}
           </h3>
           <p id="app-trash-hint">{a("deleteHint")}</p>
-          <button
-            className="studio-secondary"
-            autoFocus
-            onClick={() => setRemoving(null)}
-          >
+          <Button type="submit" autoFocus onClick={() => setRemoving(null)}>
             {a("cancel")}
-          </button>
-          <button
-            className="studio-primary"
+          </Button>
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy}
             onClick={() => {
               onArchive(removing.app, true);
@@ -97,7 +95,7 @@ export default function AppLibrary({
             }}
           >
             {a("confirmDelete")}
-          </button>
+          </Button>
         </section>
       )}
       {!!archived.length && (
@@ -109,14 +107,14 @@ export default function AppLibrary({
             <div key={build.app}>
               <strong>{name(build)}</strong>
               <code>{build.app}</code>
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={busy}
                 aria-label={`${a("restoreApp")}: ${name(build)}`}
                 onClick={() => onArchive(build.app, false)}
               >
                 {a("restoreApp")}
-              </button>
+              </Button>
             </div>
           ))}
         </details>

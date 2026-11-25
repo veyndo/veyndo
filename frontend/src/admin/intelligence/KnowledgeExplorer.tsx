@@ -1,4 +1,5 @@
 /** Product-centred evidence inspector reads canonical facts and graph relationships beyond overview sampling. */
+import { Button, Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import {
@@ -114,7 +115,7 @@ export default function KnowledgeExplorer({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button className="studio-secondary">{k("productSearch")}</button>
+          <Button type="submit">{k("productSearch")}</Button>
         </form>
         <div className="knowledge-product-list">
           {found.map((p) => (
@@ -134,7 +135,7 @@ export default function KnowledgeExplorer({
         </div>
       </section>
       <div>
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
         {busy && <p role="status">{k("loading")}</p>}
         {evidence && p && (
           <>
@@ -150,13 +151,10 @@ export default function KnowledgeExplorer({
                 <span className="kicker">{k("snapshot")}</span>
                 <h2>{p.name}</h2>
                 <p>{p.description}</p>
-                <button
-                  className="studio-secondary"
-                  onClick={() => onProduct(p.id)}
-                >
+                <Button type="submit" onClick={() => onProduct(p.id)}>
                   {k("openProduct")}
                   <Icon name="arrow" />
-                </button>
+                </Button>
               </div>
             </section>
             <KnowledgeFacts product={p} stats={evidence.stats} />
@@ -235,13 +233,14 @@ export default function KnowledgeExplorer({
                 !evidence.sources.length &&
                 !evidence.observed.length &&
                 !evidence.external.length && <p>{k("noConnections")}</p>}
-              <button
-                className="studio-primary"
+              <Button
+                tone="primary"
+                type="submit"
                 onClick={() => onIntent(k("prompt") + p.name)}
               >
                 {k("sendAssistant")}
                 <Icon name="chat" />
-              </button>
+              </Button>
             </section>
           </>
         )}

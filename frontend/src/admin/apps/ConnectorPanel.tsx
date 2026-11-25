@@ -1,4 +1,5 @@
 /** Native app workspace: OAuth, provider settings, durable jobs and private sources. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -96,22 +97,17 @@ export default function ConnectorPanel({
           <span className="kicker">{x("connection")}</span>
           <h3>{x(status?.connected ? "connected" : "disconnected")}</h3>
         </div>
-        <button
-          type="button"
-          className="studio-secondary"
-          disabled={busy}
-          onClick={() => void run(refresh)}
-        >
+        <Button type="button" disabled={busy} onClick={() => void run(refresh)}>
           {x("refresh")}
-        </button>
+        </Button>
       </header>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {status && !status.oauthClientConfigured && <p>{x("setup")}</p>}
       <p>{x(contract.hint)}</p>
       <div className="workbench-row">
-        <button
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={!manage || busy || !status?.oauthClientConfigured}
           onClick={() => {
             const popup = window.open("about:blank", "_blank");
@@ -128,16 +124,15 @@ export default function ConnectorPanel({
           }}
         >
           {x("connect")}
-        </button>
+        </Button>
         {status?.connected && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={!manage || busy}
             onClick={() => void run(() => call("disconnect"))}
           >
             {x("disconnect")}
-          </button>
+          </Button>
         )}
       </div>
       <div className="connector-settings">
@@ -163,9 +158,8 @@ export default function ConnectorPanel({
         )}
         {contract.choices && status?.connected && (
           <>
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={!manage || busy}
               onClick={() =>
                 void run(async () => {
@@ -175,7 +169,7 @@ export default function ConnectorPanel({
               }
             >
               {x("choose")}
-            </button>
+            </Button>
             {choices.length > 0 && (
               <select
                 aria-label={x(contract.choices.label)}
@@ -198,9 +192,9 @@ export default function ConnectorPanel({
             )}
           </>
         )}
-        <button
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={!manage || busy || !status}
           onClick={() =>
             void run(async () => {
@@ -215,18 +209,17 @@ export default function ConnectorPanel({
           }
         >
           {x("save")}
-        </button>
+        </Button>
         {contract.sync && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={!manage || busy || !status?.connected}
             onClick={() =>
               void run(() => call("sync", { requestKey: crypto.randomUUID() }))
             }
           >
             {x("sync")}
-          </button>
+          </Button>
         )}
       </div>
       {contract.sources && (

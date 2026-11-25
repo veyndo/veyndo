@@ -1,4 +1,5 @@
 /** Metadata-only credentials screen; rotation sends plaintext once to the encrypted server store. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -84,7 +85,7 @@ export default function AppSecrets({
       <h3>{t("secretTitle")}</h3>
       <p>{t("secretHint")}</p>
       {data && !data.encryptionReady && (
-        <p role="alert">{t("encryptedUnavailable")}</p>
+        <Notice tone="danger">{t("encryptedUnavailable")}</Notice>
       )}
       <form
         onSubmit={(e) => {
@@ -125,9 +126,9 @@ export default function AppSecrets({
               onChange={(e) => setSecret(e.target.value)}
             />
           </label>
-          <button className="studio-primary" disabled={secret.length < 32}>
+          <Button tone="primary" type="submit" disabled={secret.length < 32}>
             {t("rotate")}
-          </button>
+          </Button>
         </fieldset>
       </form>
       {data?.secrets.map((s) => (
@@ -141,7 +142,7 @@ export default function AppSecrets({
         </div>
       ))}
       {notice && <p role="status">{t("rotated")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {confirm && (
         <ConfirmDialog
           title={t("rotate")}

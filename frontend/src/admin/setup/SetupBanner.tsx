@@ -1,4 +1,5 @@
 /** Keeps the setup return path visible while the merchant works in the actual native views. */
+import { Button } from "../../kit/ui";
 import { useStudio } from "../shell/StudioContext";
 import { useShopSetup } from "./SetupProvider";
 import { useSetupText } from "./setup-i18n";
@@ -20,15 +21,15 @@ export default function SetupBanner() {
         {t("continuing")}
         <strong>{stepText(guide.progress.step).title}</strong>
       </span>
-      <button
-        className="studio-secondary"
+      <Button
+        type="submit"
         onClick={() => {
           selectTab("setup");
         }}
       >
         {t("return")}
         <Icon name="arrow" size={16} />
-      </button>
+      </Button>
     </aside>
   );
 }

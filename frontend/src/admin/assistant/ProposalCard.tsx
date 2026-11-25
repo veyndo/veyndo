@@ -1,4 +1,5 @@
 /** ProposalCard keeps merchant interaction separate from workspace orchestration. */
+import { Button, Notice } from "../../kit/ui";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -98,31 +99,31 @@ export default function ProposalCard({
               view!.entity === "products" ? "productData" : view!.entity,
             )}
           </strong>
-          {!viewMatches && <p role="alert">{u("viewMismatch")}</p>}
+          {!viewMatches && <Notice tone="danger">{u("viewMismatch")}</Notice>}
           {viewMatches && onOpenWorkspace && (
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={busy}
               onClick={() => onOpenWorkspace(preview.proposal.view!)}
             >
               <Icon name="box" />
               {composed("open")}
-            </button>
+            </Button>
           )}
           <details>
             <summary>{t("details")}</summary>
             <pre>{JSON.stringify(preview.proposal.view.criteria, null, 2)}</pre>
           </details>
           {viewMatches && onOpenView && (
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={busy}
               onClick={() => onOpenView(preview.proposal.view!)}
             >
               {aw("openView")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -226,22 +227,23 @@ export default function ProposalCard({
             <Icon name="lock" size={14} />
             {t("trust")}
           </span>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy || !canApply}
             onClick={onApply}
           >
             {t("approve")}
             <Icon name="check" size={18} />
-          </button>
+          </Button>
         </footer>
       )}
       {message.applied && onTest && (
         <footer>
-          <button className="studio-secondary" onClick={onTest}>
+          <Button type="submit" onClick={onTest}>
             <Icon name="people" />
             {scenarioText("title")}
-          </button>
+          </Button>
         </footer>
       )}
     </section>

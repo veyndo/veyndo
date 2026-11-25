@@ -1,4 +1,5 @@
 /** Visible native shop creation keeps identifiers editable and submits only through its account owner. */
+import { Button } from "../../kit/ui";
 import { useId, useState } from "react";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -82,17 +83,13 @@ export default function CreateWorkspace({
             </div>
           </div>
           <footer className="team-form-actions">
-            <button type="submit" className="studio-primary">
+            <Button tone="primary" type="submit">
               <Icon name="plus" size={18} />
               {busy ? t("creating") : s("register")}
-            </button>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={onCancel}
-            >
+            </Button>
+            <Button type="button" onClick={onCancel}>
               {t("cancel")}
-            </button>
+            </Button>
           </footer>
         </fieldset>
       </form>

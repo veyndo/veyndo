@@ -1,4 +1,5 @@
 /** Proposed versions run in the existing actor-private native preview; diagnostic repair returns to the same composer. */
+import { Button } from "../../kit/ui";
 import { useMemo, useState } from "react";
 import type { Build } from "./useAppStudio";
 import type { RequestFn } from "../shell/studio-types";
@@ -30,14 +31,13 @@ export default function AppProposalTest({
   );
   return (
     <section className="app-model-card">
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={preview.busy}
         onClick={() => void preview.run()}
       >
         {t("testProposal")}
-      </button>
+      </Button>
       {preview.error && (
         <div role="alert">
           <p>{preview.error}</p>

@@ -1,4 +1,5 @@
 /** No-model evidence preview makes customer/private retrieval boundaries and missing facts inspectable. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -49,7 +50,7 @@ export default function KnowledgePreview({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="studio-secondary">{k("productSearch")}</button>
+          <Button type="submit">{k("productSearch")}</Button>
         </form>
         <form
           onSubmit={async (e) => {
@@ -121,18 +122,19 @@ export default function KnowledgePreview({
               }}
             />
           </label>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={
               busy || !query.trim() || (audience === "customer" && !product)
             }
           >
             <Icon name="search" />
             {k("runPreview")}
-          </button>
+          </Button>
         </form>
         {busy && <p role="status">{k("loading")}</p>}
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
       </section>
       <section className="studio-card">
         <h2>{k("usageTitle")}</h2>
@@ -147,13 +149,13 @@ export default function KnowledgePreview({
           ))}
         </ul>
         <p className="knowledge-boundary">{k("boundary")}</p>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           onClick={() => onIntent(k("prompt") + (query || k("heading")))}
         >
           {k("sendAssistant")}
           <Icon name="chat" />
-        </button>
+        </Button>
       </section>
       {result && (
         <section className="studio-card knowledge-preview-results">

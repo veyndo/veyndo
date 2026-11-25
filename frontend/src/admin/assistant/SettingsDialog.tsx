@@ -1,4 +1,5 @@
 /** SettingsDialog keeps merchant interaction separate from workspace orchestration. */
+import { Button } from "../../kit/ui";
 import { useControlText } from "../../shared/i18n/control-i18n";
 import { useEffect, useRef } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -86,14 +87,10 @@ export default function SettingsDialog({
           />
         </label>
         <p>{t("cloudDisclosure")}</p>
-        <button
-          className="studio-secondary"
-          disabled={!connected || busy}
-          onClick={onIndex}
-        >
+        <Button type="submit" disabled={!connected || busy} onClick={onIndex}>
           <Icon name="refresh" size={16} />
           {t("index")}
-        </button>
+        </Button>
       </section>
     </dialog>
   );

@@ -1,4 +1,5 @@
 /** Customer-number card scanner and bounded CRM search; attaching a customer stays tenant/actor/revision checked. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { usePosText } from "./pos-i18n";
@@ -109,7 +110,7 @@ export default function RegisterCustomer({
           </form>
           <p className="pos-tool-hint">{t("cardHint")}</p>
           {busy && <p role="status">{t("busy")}</p>}
-          {error && <p role="alert">{error}</p>}
+          {error && <Notice tone="danger">{error}</Notice>}
           {!busy && !customers.length && <p>{t("customerNone")}</p>}
           <div className="pos-customer-results">
             {customers.map((c) => (
@@ -135,7 +136,7 @@ export default function RegisterCustomer({
               </button>
             ))}
           </div>
-          {r.error && <p role="alert">{r.error}</p>}
+          {r.error && <Notice tone="danger">{r.error}</Notice>}
           {r.cart?.customerId && (
             <button disabled={r.busy} onClick={() => void choose(null)}>
               {t("removeCustomer")}

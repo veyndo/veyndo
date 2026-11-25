@@ -1,4 +1,5 @@
 /** Lifecycle actions use shared dependency deletion and one-use preview admission. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import AutomationDelete from "../automation/AutomationDelete";
 import type { RequestFn } from "../shell/studio-types";
@@ -56,14 +57,13 @@ export default function ChannelActions({
   return (
     <>
       {draft.data.kind === "storefront" && onDesign && (
-        <button type="button" className="studio-secondary" onClick={onDesign}>
+        <Button type="button" onClick={onDesign}>
           {personal("design")} ↗
-        </button>
+        </Button>
       )}
       {draft.data.kind === "marketplace" && (
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={disabled || busy}
           onClick={() =>
             onMarketplace
@@ -74,7 +74,7 @@ export default function ChannelActions({
           }
         >
           {t("marketplaceManage")}
-        </button>
+        </Button>
       )}
       {draft.data.kind === "pos" && draft.data.active && (
         <a className="studio-secondary" href={posUrl(workspace, draft.id)}>
@@ -94,21 +94,17 @@ export default function ChannelActions({
           </a>
         )}
       {!["pos", "marketplace"].includes(draft.data.kind) && (
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={disabled || busy}
           onClick={() => void preview()}
         >
           {t("previewPrivate")} ↗
-        </button>
+        </Button>
       )}
-      <button
-        className="studio-secondary"
-        disabled={disabled || busy}
-        onClick={onToggle}
-      >
+      <Button type="submit" disabled={disabled || busy} onClick={onToggle}>
         {t(draft.data.active ? "deactivate" : "activate")}
-      </button>
+      </Button>
       <AutomationDelete
         request={request}
         kind="channels"
@@ -117,7 +113,7 @@ export default function ChannelActions({
         disabled={disabled || busy}
         onDeleted={onDeleted}
       />
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </>
   );
 }

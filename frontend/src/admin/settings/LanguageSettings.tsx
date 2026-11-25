@@ -1,4 +1,5 @@
 /** Shop main language and enabled locales with resumable provider-backed bulk product translation drafts. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { useInternationalText } from "../../shared/i18n/international-i18n";
 import type { InternationalProps } from "./CommerceSettings";
@@ -68,9 +69,8 @@ export default function LanguageSettings({
             onChange={(e) => setNext(e.target.value)}
           />
         </label>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={!canonical || config.locales.includes(canonical)}
           onClick={() => {
             if (!canonical) return;
@@ -79,7 +79,7 @@ export default function LanguageSettings({
           }}
         >
           + {i("add")}
-        </button>
+        </Button>
       </div>
       {dirty && <p className="intl-coverage">{i("saveFirst")}</p>}
       <TranslationJobs

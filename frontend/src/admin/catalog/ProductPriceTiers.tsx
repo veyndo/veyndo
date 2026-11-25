@@ -1,4 +1,5 @@
 /** Native rule-bound price tiers edit the existing revisioned product aggregate. */
+import { Button } from "../../kit/ui";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import type { ProductDraft } from "./catalog-model";
 export default function ProductPriceTiers({
@@ -50,9 +51,8 @@ export default function ProductPriceTiers({
               />
             </label>
           ))}
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() =>
               onChange({
                 ...d,
@@ -66,12 +66,11 @@ export default function ProductPriceTiers({
             }
           >
             {c("remove")}
-          </button>
+          </Button>
         </div>
       ))}
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         onClick={() =>
           onChange({
             ...d,
@@ -91,7 +90,7 @@ export default function ProductPriceTiers({
         }
       >
         + {c("add")}
-      </button>
+      </Button>
     </>
   );
 }

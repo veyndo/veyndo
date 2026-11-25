@@ -1,4 +1,5 @@
 /** AppDetails: Installed app details, activation, version, data and isolated interface. */
+import { Button } from "../../kit/ui";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
 import type { ConfiguredOrders } from "./AppConfiguredOrders";
@@ -89,13 +90,13 @@ export default function AppDetails({
           </span>
           <small> · {p.version}</small>
         </div>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={!manage || busy || !!p.managedBy}
           onClick={() => (p.active ? setConfirm(true) : toggle())}
         >
           {p.managedBy ? text("managed") : a(p.active ? "disable" : "enable")}
-        </button>
+        </Button>
       </header>
       {confirm && (
         <ConfirmDialog
@@ -274,8 +275,8 @@ export default function AppDetails({
             {p.manifest.actions
               .filter((act) => act.handler === "configurations")
               .map((act) => (
-                <button
-                  className="studio-secondary"
+                <Button
+                  type="submit"
                   key={act.name}
                   onClick={() =>
                     void run(async () => {
@@ -290,7 +291,7 @@ export default function AppDetails({
                   }
                 >
                   {a("personalizedOrders")}
-                </button>
+                </Button>
               ))}
           </div>
         )}

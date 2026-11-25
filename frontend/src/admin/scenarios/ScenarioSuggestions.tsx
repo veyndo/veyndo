@@ -1,4 +1,5 @@
 /** Catalogue-derived drafts are previewed before adoption; native commerce still decides actual prices and purchases. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
@@ -62,15 +63,15 @@ export default function ScenarioSuggestions({
       : [];
   return (
     <section className="scenario-suggestions">
-      <button
-        className="studio-secondary"
+      <Button
+        type="submit"
         aria-expanded={open}
         disabled={disabled}
         onClick={() => setOpen(!open)}
       >
         <Icon name="people" />
         {t("suggest")}
-      </button>
+      </Button>
       {open && (
         <div className="scenario-suggestion-preview">
           <p>
@@ -97,8 +98,8 @@ export default function ScenarioSuggestions({
                   </article>
                 ))}
               </div>
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={disabled}
                 onClick={() => {
                   onApply(profiles);
@@ -106,7 +107,7 @@ export default function ScenarioSuggestions({
                 }}
               >
                 {t("suggestApply")}
-              </button>
+              </Button>
             </>
           )}
         </div>

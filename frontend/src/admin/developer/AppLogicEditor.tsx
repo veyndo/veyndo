@@ -1,4 +1,5 @@
 /** A code-behind dialog edits one AST through visual blocks, BASIC syntax or agent JSON, then returns it to the manifest compiler. */
+import { Button, Notice } from "../../kit/ui";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import { AppFlowNavigation } from "./AppFlowNavigation";
 import { useContext, useCallback, useState, useRef } from "react";
@@ -96,16 +97,15 @@ export default function AppLogicEditor({
       >
         <p>{w("behaviorHint")}</p>
         {onFlows && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             onClick={() => {
               onClose();
               onFlows();
             }}
           >
             {a("openFlows")}
-          </button>
+          </Button>
         )}
         <div className="app-code-modes">
           {(["blocks", "basic", "json"] as const).map((m) => (
@@ -204,7 +204,7 @@ export default function AppLogicEditor({
             </div>
           </>
         )}
-        {error && <p role="alert">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
       </ConfirmDialog>
     </AppCodeBuffer.Provider>
   );

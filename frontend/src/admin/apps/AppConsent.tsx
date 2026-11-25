@@ -1,4 +1,5 @@
 /** Review the actual package and permission changes before installation; consent is enforced by the API. */
+import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -99,7 +100,7 @@ export default function AppConsent({
           </ul>
         </>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </ConfirmDialog>
   );
 }

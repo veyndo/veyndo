@@ -1,4 +1,5 @@
 /** Frozen pure-decision expectations remain advanced, read-only metadata; no fake execution result is inferred. */
+import { Button } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import { useAppCapabilityText } from "../../shared/i18n/app-capability-i18n";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
@@ -69,14 +70,10 @@ export default function AppCapabilityChecks({
       )}
       <AppConfigurationExamples manifest={manifest} />
       {onAssist && (
-        <button
-          type="button"
-          className="studio-secondary"
-          onClick={() => onAssist(t("testsRequest"))}
-        >
+        <Button type="button" onClick={() => onAssist(t("testsRequest"))}>
           <Icon name="spark" size={16} />
           {t("prepareTests")}
-        </button>
+        </Button>
       )}
     </details>
   );

@@ -54,12 +54,12 @@
     padding: 6px;
     font-size: 11px;
   }
-  .topbar-actions > .studio-primary {
+  .topbar-actions > :is(.studio-primary, [data-tone="primary"]) {
     padding: 8px;
     width: 40px;
     min-height: 40px;
   }
-  .topbar-actions > .studio-primary span {
+  .topbar-actions > :is(.studio-primary, [data-tone="primary"]) span {
     display: none;
   }
   .studio-topbar .icon-button {
@@ -159,7 +159,7 @@
     max-width: 100%;
     font-size: 10px;
   }
-  .proposal-review > footer > .studio-primary {
+  .proposal-review > footer > :is(.studio-primary, [data-tone="primary"]) {
     width: 100%;
   }
   .review-product > div {

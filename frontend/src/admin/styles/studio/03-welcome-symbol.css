@@ -210,7 +210,7 @@
   font-size: 10px;
   color: var(--muted);
 }
-.studio-composer .studio-primary {
+.studio-composer [data-tone="primary"] {
   width: 40px;
   min-height: 40px;
   padding: 0;

@@ -1,4 +1,5 @@
 /** StudioComposer: focused Studio view; state and commands come from the session-scoped controller. */
+import { Button } from "../../kit/ui";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
@@ -203,14 +204,14 @@ export default function StudioComposer({
               <Icon name="lock" size={13} />
               {t("trust")}
             </span>
-            <button
+            <Button
+              tone="primary"
               type="submit"
-              className="studio-primary"
               disabled={!connected || busy || !draft.trim()}
               aria-label={t("send")}
             >
               <Icon name="send" size={18} />
-            </button>
+            </Button>
           </div>
         </form>
         <small>

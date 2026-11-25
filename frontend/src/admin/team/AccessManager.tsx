@@ -1,4 +1,5 @@
 /** Fine-grained team overrides, revocable invitations and personal session inventory. */
+import { Button, Notice } from "../../kit/ui";
 import IntegrationKeys from "../developer/api/IntegrationKeys";
 import RolesManager from "./RolesManager";
 import PermissionPicker from "./PermissionPicker";
@@ -90,9 +91,10 @@ export default function AccessManager({ request }: { request: RequestFn }) {
                   }
                 />
               )}
-              <button
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={busy}
-                className="studio-primary"
                 onClick={() =>
                   run(() =>
                     request(
@@ -108,7 +110,7 @@ export default function AccessManager({ request }: { request: RequestFn }) {
                 }
               >
                 {o("save")}
-              </button>
+              </Button>
             </details>
           ))}
         {invites.length > 0 && (
@@ -118,9 +120,9 @@ export default function AccessManager({ request }: { request: RequestFn }) {
               <div key={i.id} className="operation-row">
                 <span>{i.email}</span>
                 <span>{new Date(i.expires).toLocaleString(locale)}</span>
-                <button
+                <Button
+                  type="submit"
                   disabled={busy}
-                  className="studio-secondary"
                   onClick={() =>
                     run(() =>
                       request(
@@ -132,7 +134,7 @@ export default function AccessManager({ request }: { request: RequestFn }) {
                   }
                 >
                   {o("revoke")}
-                </button>
+                </Button>
               </div>
             ))}
           </>
@@ -146,9 +148,9 @@ export default function AccessManager({ request }: { request: RequestFn }) {
             {s.current ? (
               <span>{o("current")}</span>
             ) : (
-              <button
+              <Button
+                type="submit"
                 disabled={busy}
-                className="studio-secondary"
                 onClick={() =>
                   run(() =>
                     request(`/api/auth/sessions/${s.id}`, undefined, "DELETE"),
@@ -156,13 +158,13 @@ export default function AccessManager({ request }: { request: RequestFn }) {
                 }
               >
                 {o("revoke")}
-              </button>
+              </Button>
             )}
           </div>
         ))}
       </section>
       {canManage && <IntegrationKeys request={request} />}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );
 }

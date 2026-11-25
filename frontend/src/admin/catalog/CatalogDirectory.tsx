@@ -1,4 +1,5 @@
 /** Product columns and native catalog criteria over the shared grid; media/price/content stay domain-owned. */
+import { Button } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import type { GridQueryState } from "../../shared/grid/types";
 import AgenticGrid from "../../shared/grid/AgenticGrid";
@@ -47,9 +48,9 @@ export default function CatalogDirectory({
       }}
       emptyAction={
         canWrite && (
-          <button type="button" className="studio-primary" onClick={onNew}>
+          <Button tone="primary" type="button" onClick={onNew}>
             {c("newProduct")}
-          </button>
+          </Button>
         )
       }
       filters={[

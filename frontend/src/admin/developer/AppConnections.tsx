@@ -1,4 +1,5 @@
 /** Route, tool, grounding and Flow Builder switches modify the shared executable manifest directly. */
+import { Button } from "../../kit/ui";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 import AppNativeLifecycles from "./AppNativeLifecycles";
@@ -77,10 +78,10 @@ export default function AppConnections({
                 {a("enableFlow")} · <code>{action.name}</code>
               </label>
             ))}
-          <button className="studio-secondary" onClick={onFlows}>
+          <Button type="submit" onClick={onFlows}>
             {a("openFlows")}
             <Icon name="arrow" size={16} />
-          </button>
+          </Button>
         </section>
       </details>
       <details>

@@ -1,4 +1,5 @@
 /** Bounded upload and explicit digest-bound publication of attachments and paid files. */
+import { Button, Notice } from "../../kit/ui";
 import { useCallback, useEffect, useState } from "react";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import type { LocalizedText } from "../../shared/i18n/content-language";
@@ -71,9 +72,9 @@ export default function ProductAssets({
             <option value="download">{o("download")}</option>
           </select>
         </label>
-        <button className="studio-primary" disabled={busy}>
+        <Button tone="primary" type="submit" disabled={busy}>
           {o("upload")}
-        </button>
+        </Button>
       </form>
       {rows.map((r) => (
         <div className="operation-row" key={r.id}>
@@ -81,8 +82,8 @@ export default function ProductAssets({
           <span>
             {o(r.kind)} · {(r.bytes / 1024).toFixed(1)} KB
           </span>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy}
             onClick={() =>
               run(() =>
@@ -95,10 +96,10 @@ export default function ProductAssets({
             }
           >
             {o(r.public ? "unpublish" : "publish")}
-          </button>
+          </Button>
         </div>
       ))}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

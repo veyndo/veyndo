@@ -1,4 +1,5 @@
 /** Personal, expiring, least-privilege integration keys; plaintext stays in component memory and is never reloaded. */
+import { Button, Notice } from "../../../kit/ui";
 import "../api-console.css";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
@@ -198,8 +199,9 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
             value={scopes}
             onChange={setScopes}
           />
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={
               !name.trim() ||
               !scopes.length ||
@@ -208,7 +210,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
             }
           >
             {t("create")}
-          </button>
+          </Button>
         </fieldset>
       </form>
       {secret && secretOwner.current === request && (
@@ -221,8 +223,8 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
             value={secret}
             autoComplete="off"
           />
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(secret);
@@ -233,10 +235,10 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
             }}
           >
             {t(copied ? "copied" : "copy")}
-          </button>
-          <button className="studio-secondary" onClick={() => setSecret("")}>
+          </Button>
+          <Button type="submit" onClick={() => setSecret("")}>
             {t("clear")}
-          </button>
+          </Button>
         </div>
       )}
       {(keyOwner.current === request ? keys : []).map((key) => (
@@ -263,13 +265,13 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
                 : ""}
             </small>
           </div>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={!manage || busy}
             onClick={() => setRevoke(key)}
           >
             {t("revoke")}
-          </button>
+          </Button>
         </article>
       ))}
       {revoke && (
@@ -301,7 +303,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
           <p>{t("revokeHint")}</p>
         </ConfirmDialog>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

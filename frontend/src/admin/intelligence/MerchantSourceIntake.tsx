@@ -1,4 +1,5 @@
 /** Conversation intake reuses the real private versioned source editor and existing upload API. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Workspace } from "./knowledge-types";
@@ -40,12 +41,12 @@ export default function MerchantSourceIntake({
     >
       <header>
         <h2>{t(guidance ? "guidance" : "source")}</h2>
-        <button className="studio-secondary" onClick={onClose}>
+        <Button type="submit" onClick={onClose}>
           {t("close")}
-        </button>
+        </Button>
       </header>
       {guidance && <p>{t("guidanceHint")}</p>}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {workspace && (
         <SourceEditor
           workspace={workspace}

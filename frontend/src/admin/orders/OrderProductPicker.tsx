@@ -1,4 +1,5 @@
 /** Bounded, debounced native product/SKU lookup; prices are only committed through the reviewed checkout quote. */
+import { Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -58,7 +59,7 @@ export default function OrderProductPicker({
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <div className="orders-product-results">
         {products.map((p) => (
           <button

@@ -1,4 +1,5 @@
 /** StudioRoutes: renders the registered route of the selected Studio area after the shell's connection, rights and data guards. */
+import { Button } from "../../kit/ui";
 import "../../shared/styles/workbench.css";
 import Icon from "../../shared/ui/Icon";
 import "../styles/operations.css";
@@ -41,16 +42,13 @@ export default function StudioRoutes() {
         </p>
         {!connectionPending && (
           <>
-            <button className="studio-primary" onClick={retryConnection}>
+            <Button tone="primary" type="submit" onClick={retryConnection}>
               {t("refresh")}
-            </button>
+            </Button>
             {environment && (
-              <button
-                className="studio-secondary"
-                onClick={() => setEnvironment("")}
-              >
+              <Button type="submit" onClick={() => setEnvironment("")}>
                 {w("live")}
-              </button>
+              </Button>
             )}
           </>
         )}
@@ -69,9 +67,9 @@ export default function StudioRoutes() {
     return (
       <div className="studio-empty">
         <p>{t("connectFirst")}</p>
-        <button className="studio-primary" onClick={() => selectTab("users")}>
+        <Button tone="primary" type="submit" onClick={() => selectTab("users")}>
           {t("users")}
-        </button>
+        </Button>
       </div>
     );
   if (route.requires === "data" && !data)
@@ -80,10 +78,10 @@ export default function StudioRoutes() {
         <Icon name={nav.find((n) => n.id === tab)!.icon} size={48} />
         <h1>{tabLabel(tab)}</h1>
         <p>{t("connectFirst")}</p>
-        <button className="studio-primary" onClick={() => selectTab("users")}>
+        <Button tone="primary" type="submit" onClick={() => selectTab("users")}>
           {x("studioSignIn")}
           <Icon name="link" size={18} />
-        </button>
+        </Button>
       </div>
     );
   return <route.component />;

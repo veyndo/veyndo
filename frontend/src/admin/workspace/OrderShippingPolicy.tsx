@@ -1,4 +1,5 @@
 /** Current source passages for the order workspace. The query contains no order or customer data. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { PreviewResult } from "../intelligence/knowledge-types";
@@ -51,14 +52,10 @@ export default function OrderShippingPolicy({
         <p role="status">{t("shippingLoading")}</p>
       ) : !sources ? (
         <>
-          <p role="alert">{t("shippingError")}</p>
-          <button
-            type="button"
-            className="studio-secondary"
-            onClick={() => setRetry(retry + 1)}
-          >
+          <Notice tone="danger">{t("shippingError")}</Notice>
+          <Button type="button" onClick={() => setRetry(retry + 1)}>
             {t("shippingRetry")}
-          </button>
+          </Button>
         </>
       ) : sources.length === 0 ? (
         <p>{t("shippingEmpty")}</p>

@@ -1,4 +1,5 @@
 /** Customer groups share the translation/inheritance editor and revisioned settings aggregate. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { CustomerGroup } from "../../shared/customer/customer-types";
@@ -61,7 +62,7 @@ export default function CustomerGroupsSettings({
           </div>
           <ContentLanguagePicker />
         </header>
-        {state.error && <p role="alert">{state.error}</p>}
+        {state.error && <Notice tone="danger">{state.error}</Notice>}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -84,9 +85,8 @@ export default function CustomerGroupsSettings({
                     </span>
                   </button>
                 ))}
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   onClick={() => {
                     const id = `group_${crypto.randomUUID().slice(0, 8)}`;
                     const translations = Object.fromEntries(
@@ -115,7 +115,7 @@ export default function CustomerGroupsSettings({
                   }}
                 >
                   + {r("addGroup")}
-                </button>
+                </Button>
               </aside>
               {group && (
                 <div className="intl-record">
@@ -151,13 +151,9 @@ export default function CustomerGroupsSettings({
                   {["consumer", "business"].includes(group.id) ? (
                     <p>{r("baseGroup")}</p>
                   ) : (
-                    <button
-                      type="button"
-                      className="studio-secondary"
-                      onClick={() => setRemoving(true)}
-                    >
+                    <Button type="button" onClick={() => setRemoving(true)}>
                       {r("delete")}
-                    </button>
+                    </Button>
                   )}
                 </div>
               )}

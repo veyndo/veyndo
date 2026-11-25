@@ -1,4 +1,5 @@
 /** Bounded read-only comparison; stale responses cannot cross a rule or workspace. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Config } from "./automation-types";
@@ -117,17 +118,16 @@ export default function RuleHistory({
               </select>
             </label>
           </div>
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy || !flow}
             onClick={() => void compare()}
           >
             {t(busy ? "running" : "run")}
-          </button>
+          </Button>
         </>
       )}
-      {error && <p role="alert">{t("error")}</p>}
+      {error && <Notice tone="danger">{t("error")}</Notice>}
       {report && (
         <section aria-live="polite">
           {report.sampled === 0 ? (

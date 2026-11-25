@@ -1,4 +1,5 @@
 /** Actual permission-filtered work links open native owners; late responses cannot survive a scope change. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
@@ -58,29 +59,21 @@ export default function WorkSuggestions() {
         {t("work")}
       </h2>
       <p>{t("hint")}</p>
-      <button
-        className="studio-secondary"
-        onClick={() => setReload((n) => n + 1)}
-      >
+      <Button type="submit" onClick={() => setReload((n) => n + 1)}>
         {t("reload")}
-      </button>
+      </Button>
       {error ? (
-        <p role="alert">{t("error")}</p>
+        <Notice tone="danger">{t("error")}</Notice>
       ) : !items.length ? (
         <p>{t("empty")}</p>
       ) : (
         <div className="personal-cards">
           {items.map((item) => (
-            <button
-              type="button"
-              className="studio-secondary"
-              key={item.id}
-              onClick={() => void open(item)}
-            >
+            <Button type="button" key={item.id} onClick={() => void open(item)}>
               <Icon name={item.kind === "stock" ? "box" : "pulse"} />
               {t(item.kind)}
               {item.entity && <small>{item.entity}</small>}
-            </button>
+            </Button>
           ))}
         </div>
       )}

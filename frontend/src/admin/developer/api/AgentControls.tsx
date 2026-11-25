@@ -1,4 +1,5 @@
 /** Personal current-rights stop control; operational revisions cannot be published from a sandbox. */
+import { Button, Notice } from "../../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
@@ -48,13 +49,13 @@ export default function AgentControls({ request }: { request: RequestFn }) {
         <>
           <strong>{t(state.stopped ? "stopped" : "running")}</strong>
           <p>{t("stopHint")}</p>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy}
             onClick={() => setConfirm(true)}
           >
             {t(state.stopped ? "resume" : "stop")}
-          </button>
+          </Button>
         </>
       )}
       {state && confirm && (
@@ -90,7 +91,7 @@ export default function AgentControls({ request }: { request: RequestFn }) {
           <p>{t(state.stopped ? "resumeHint" : "stopHint")}</p>
         </ConfirmDialog>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

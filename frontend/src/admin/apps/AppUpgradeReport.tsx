@@ -1,4 +1,5 @@
 /** Display only native admission metadata; a report is never an installation permission. */
+import { Notice } from "../../kit/ui";
 import { useUpgradeText } from "./upgrade-i18n";
 import { responseError } from "../../shared/i18n/errors-i18n";
 export type UpgradeReport = {
@@ -38,13 +39,13 @@ export default function AppUpgradeReport({
       )}
       {report.issue && (
         <div>
-          <p role="alert">
+          <Notice tone="danger">
             {
               responseError(report.issue.detail ?? "", 400, report.issue)
                 .message
             }
             {report.issue.pointer && <code>{report.issue.pointer}</code>}
-          </p>
+          </Notice>
           <details>
             <summary>{t("diagnostic")}</summary>
             <code>{report.issue.detail}</code>

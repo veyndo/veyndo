@@ -1,4 +1,5 @@
 /** App Studio heading and new-app entry share the localized workbench language. */
+import { Button } from "../../kit/ui";
 import { usePermissionText } from "../team/permission-i18n";
 import Icon from "../../shared/ui/Icon";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
@@ -35,15 +36,15 @@ export default function AppStudioIntro({
         <p>{a("hint")}</p>
       </div>
       {overview && (
-        <button className="studio-secondary" onClick={onNew}>
+        <Button type="submit" onClick={onNew}>
           <Icon name="arrow" />
           {pt("back")}
-        </button>
+        </Button>
       )}
-      <button className="studio-primary" disabled={disabled} onClick={onNew}>
+      <Button tone="primary" type="submit" disabled={disabled} onClick={onNew}>
         <Icon name="plus" size={16} />
         {a("reset")}
-      </button>
+      </Button>
     </div>
   );
 }

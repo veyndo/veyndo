@@ -1,4 +1,5 @@
 /** A selected product resolves through the native merchant read; missing/forbidden records remain explicitly removable without losing the selection. */
+import { Button } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -108,15 +109,14 @@ export default function RelatedProductRow({
         >
           <Icon name="arrow" />
         </button>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={disabled}
           aria-label={t("remove", { name })}
           onClick={onRemove}
         >
           <Icon name="close" />
-        </button>
+        </Button>
       </div>
     </li>
   );

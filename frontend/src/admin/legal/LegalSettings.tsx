@@ -1,4 +1,5 @@
 /** Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -97,9 +98,9 @@ export default function LegalSettings({
               ))}
           </select>
           {channel && (
-            <button
+            <Button
+              type="submit"
               disabled={!canWrite || state.busy}
-              className="studio-secondary"
               onClick={() =>
                 state.value?.inherited &&
                 state.change({
@@ -109,7 +110,7 @@ export default function LegalSettings({
               }
             >
               {l("inheritBasis")} ↗
-            </button>
+            </Button>
           )}
         </div>
         <nav className="legal-tabs">
@@ -127,7 +128,7 @@ export default function LegalSettings({
               </button>
             ))}
         </nav>
-        {state.error && <p role="alert">{state.error}</p>}
+        {state.error && <Notice tone="danger">{state.error}</Notice>}
         {tab === "requests" ? (
           <ConsumerRequests
             request={request}

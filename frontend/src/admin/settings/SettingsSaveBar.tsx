@@ -1,4 +1,5 @@
 /** Consistent settings save feedback, dirty state and permission-aware controls. */
+import { Button } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import { useStudioText } from "../../shared/i18n/studio-ui-i18n";
 export default function SettingsSaveBar({
@@ -35,14 +36,10 @@ export default function SettingsSaveBar({
         )}
       </span>
       {canWrite && (
-        <button
-          className="studio-primary"
-          type="submit"
-          disabled={busy || !dirty}
-        >
+        <Button tone="primary" type="submit" disabled={busy || !dirty}>
           <Icon name="check" size={16} />
           {u(busy ? "saving" : "saveChanges")}
-        </button>
+        </Button>
       )}
     </footer>
   );

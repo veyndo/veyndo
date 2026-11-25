@@ -1,4 +1,5 @@
 /** Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. */
+import { Button, Notice } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -98,9 +99,9 @@ export default function SourceEditor({
     <section className="studio-card knowledge-editor">
       <div className="knowledge-section-heading">
         <h2>{source ? source.title : k("newSource")}</h2>
-        <button className="studio-secondary" disabled={busy} onClick={onCancel}>
+        <Button type="submit" disabled={busy} onClick={onCancel}>
           {k("cancel")}
-        </button>
+        </Button>
       </div>
       <ContentLanguage
         locales={workspace.locales}
@@ -198,9 +199,9 @@ export default function SourceEditor({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button className="studio-secondary" disabled={searching}>
+          <Button type="submit" disabled={searching}>
             {k("productSearch")}
-          </button>
+          </Button>
         </form>
       </div>
       {!source && (
@@ -225,18 +226,19 @@ export default function SourceEditor({
           <small>{k("uploadHint")}</small>
         </label>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       <footer className="knowledge-editor-footer">
         <p>{k("saveHint")}</p>
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={
             busy || !title[base]?.trim() || (!file && !content[base]?.trim())
           }
           onClick={() => void save()}
         >
           {k("save")}
-        </button>
+        </Button>
       </footer>
     </section>
   );

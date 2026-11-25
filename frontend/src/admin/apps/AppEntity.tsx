@@ -1,4 +1,5 @@
 /** Managed entity editor renders fields from the installed app contract. */
+import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -200,11 +201,11 @@ export default function AppEntity({
             </label>
           ),
         )}
-        <button className="studio-primary" disabled={!canWrite || busy}>
+        <Button tone="primary" type="submit" disabled={!canWrite || busy}>
           {a("save")}
-        </button>
+        </Button>
       </form>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
     </section>
   );
 }

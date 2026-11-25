@@ -1,4 +1,5 @@
 /** AutomationEditor: focused form view with explicit typed inputs and callbacks. */
+import { Button } from "../../kit/ui";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
 import { channelUrl } from "../channels/channel-model";
 import PromotionSchedule from "./PromotionSchedule";
@@ -130,9 +131,8 @@ export default function AutomationEditor({
             value={imported}
             onChange={(e) => setImported(e.target.value)}
           />
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy || !manage || !imported.trim()}
             onClick={() =>
               void run(async () => {
@@ -145,7 +145,7 @@ export default function AutomationEditor({
             }
           >
             {x("import")}
-          </button>
+          </Button>
         </details>
       )}
       {kind === "rules" && (
@@ -341,9 +341,8 @@ export default function AutomationEditor({
       </details>
       <div className="studio-actions">
         {kind === "flows" && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={busy || !manage || !id}
             onClick={() => {
               setChecked(undefined);
@@ -358,11 +357,11 @@ export default function AutomationEditor({
             }}
           >
             {a("checkFlowDraft")}
-          </button>
+          </Button>
         )}
-        <button className="studio-primary" disabled={busy || !manage}>
+        <Button tone="primary" type="submit" disabled={busy || !manage}>
           {w("save")}
-        </button>
+        </Button>
       </div>
       {kind === "flows" && (
         <div role="status">
