@@ -1,6 +1,6 @@
 //! Durable idempotent payment commands, customer context binding and serial refund admission.
 use crate::domain::settlements;
-use crate::store::attempts::attempt;
+use crate::store::attempts;
 use crate::store::jobs::enqueue_tx;
 use crate::store::{capture_admission, refund_allocation};
 use serde::Deserialize;
@@ -29,13 +29,9 @@ pub async fn enqueue(
     let input: EnqueueInput = view(v);
     let t = tenant(h)?;
     let mut tx = a.db.begin().await?;
-    let r = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&t)
-        .bind(id)
-        .fetch_optional(&mut *tx)
+    let p = attempts::lock(&mut *tx, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
-    let p = attempt(&r);
     if p.provider != "paypal"
         && ["capture", "authorize", "void", "refund"].contains(&op)
         && !p.context["capabilities"]
@@ -46,12 +42,13 @@ pub async fn enqueue(
     }
     // Existing operation retries return the original job, even after its terminal state.
     let job = hash(&format!("{t}:{key}"));
-    let exists: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM payment_jobs WHERE tenant=$1 AND id=$2)")
-            .bind(&t)
-            .bind(&job)
-            .fetch_one(&mut *tx)
-            .await?;
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM payment_jobs WHERE tenant=$1 AND id=$2) AS "exists!""#,
+        t,
+        job
+    )
+    .fetch_one(&mut *tx)
+    .await?;
     if !exists {
         if op == "capture" {
             capture_admission::validate(&mut tx, &p, v).await?;
@@ -60,7 +57,7 @@ pub async fn enqueue(
                 .amount_minor
                 .filter(|v| *v > 0)
                 .ok_or(bad("Positive amountMinor required"))?;
-            let reserved:i64=sqlx::query_scalar("SELECT coalesce(sum((request->>'amountMinor')::bigint),0)::bigint FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='refund' AND state IN ('queued','running','uncertain')").bind(&t).bind(id).fetch_one(&mut *tx).await?;
+            let reserved: i64 = sqlx::query_scalar!(r#"SELECT coalesce(sum((request->>'amountMinor')::bigint),0)::bigint AS "reserved!" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='refund' AND state IN ('queued','running','uncertain')"#, t, id).fetch_one(&mut *tx).await?;
             if ![
                 "captured",
                 "captured_late",
@@ -96,8 +93,33 @@ pub async fn enqueue(
     tx.commit().await?;
     Ok(json!({"jobId":job,"queued":true}))
 }
+/// The order payment an app command names through its order event.
+pub async fn order_attempt(a: &State, tenant: &str, order: &str) -> Result<Option<String>> {
+    Ok(sqlx::query_scalar!(
+        "SELECT data->'payment'->>'attemptId' FROM orders WHERE tenant=$1 AND id=$2",
+        tenant,
+        order
+    )
+    .fetch_optional(&a.db)
+    .await?
+    .flatten())
+}
+
+/// The attempt exists in the shop and the given provider owns it.
+pub async fn provider_owns(a: &State, tenant: &str, id: &str, provider: &str) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM payment_attempts WHERE tenant=$1 AND id=$2 AND provider=$3) AS "owned!""#,
+        tenant,
+        id,
+        provider
+    )
+    .fetch_one(&a.db)
+    .await?)
+}
+
+/// The attempt belongs to the order of the request's cart (by cart token).
 pub async fn customer(a: &State, h: &RequestContext, id: &str) -> Result<()> {
-    let ok:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM payment_attempts p JOIN orders o ON o.id=p.order_id AND o.tenant=p.tenant JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE p.tenant=$1 AND p.id=$2 AND c.token=$3)").bind(tenant(h)?).bind(id).bind(token(h)?).fetch_one(&a.db).await?;
+    let ok = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM payment_attempts p JOIN orders o ON o.id=p.order_id AND o.tenant=p.tenant JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE p.tenant=$1 AND p.id=$2 AND c.token=$3) AS "ok!""#, tenant(h)?, id, token(h)?).fetch_one(&a.db).await?;
     if !ok {
         return Err(Error(
             StatusCode::NOT_FOUND,

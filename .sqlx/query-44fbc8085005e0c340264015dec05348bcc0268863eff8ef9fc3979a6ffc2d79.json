@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE payment_jobs SET state='uncertain',error=$1,lease_until=NULL WHERE id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44fbc8085005e0c340264015dec05348bcc0268863eff8ef9fc3979a6ffc2d79"
+}

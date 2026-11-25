@@ -1,0 +1,115 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id,r.author,r.rating,r.title,r.content,r.verified,r.demo,(r.source_import IS NOT NULL) AS \"imported!\",r.created_at::text AS \"time!\" FROM product_reviews r WHERE r.tenant=$1 AND r.approved AND (r.product_id=$2 OR EXISTS(SELECT 1 FROM products p WHERE p.tenant=r.tenant AND p.id=r.product_id AND p.parent_id=$2)) ORDER BY r.created_at DESC LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "author",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "author"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "rating",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "content",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "content"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "verified",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "verified"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "demo",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "demo"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "imported!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "time!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "725ca85a69a64648c027bedd2857f428ae7fbffacc1e67d31bd7be8434999090"
+}

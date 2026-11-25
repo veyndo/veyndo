@@ -1,8 +1,8 @@
 //! Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state.
 use crate::domain::receipt_ref::{ProviderReceipt, is};
 use crate::ports::Host;
-use crate::store::attempts::attempt;
-use crate::store::jobs::enqueue_tx;
+use crate::store::attempts;
+use crate::store::jobs::{enqueue_tx, record_inbox};
 use hmac::{Hmac, Mac};
 use serde_json::{Value, json};
 use sha2::Sha256;
@@ -23,15 +23,9 @@ pub async fn accept(
         serde_json::from_slice(bytes).map_err(|_| bad("Invalid provider notification"))?;
     let r: ProviderReceipt = view(&v);
     let id = r.attempt_id.as_deref().ok_or(bad("Attempt required"))?;
-    let row =
-        sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 AND provider=$3")
-            .bind(t)
-            .bind(id)
-            .bind(provider)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
-    let p = attempt(&row);
+    let p = attempts::find_for_provider(&a.db, t, id, provider)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
     let c = host.service(&p.provider, &p.adapter_version, &p.environment)?;
     let stamp = header(h, "x-payment-timestamp")
         .and_then(|s| s.parse::<i64>().ok())
@@ -77,7 +71,12 @@ pub async fn accept(
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Event id required"))?;
     let mut tx = a.db.begin().await?;
-    let count=sqlx::query("INSERT INTO payment_inbox(tenant,provider,event_id,data) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING").bind(t).bind(&p.provider).bind(event).bind(json!({"attemptId":id,"reference":p.provider_order})).execute(&mut *tx).await?.rows_affected();
+    let count = record_inbox(
+        &mut tx,
+        (t, &p.provider, event),
+        &json!({"attemptId":id,"reference":p.provider_order}),
+    )
+    .await?;
     if count == 1 {
         enqueue_tx(
             &mut tx,

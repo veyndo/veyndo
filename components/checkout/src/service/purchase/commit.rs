@@ -5,9 +5,9 @@ use crate::domain::review_binding::validate as validate_review;
 use crate::domain::session_review::Review;
 use crate::ports::Purchase;
 use crate::store::customer_snapshot::snapshot as customer_snapshot;
+use crate::store::purchase::{self, NewOrder};
 use crate::store::session::admit_channel;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_b2b::service::quote_contract::consume as consume_quote;
 use veyndo_b2b::store::purchase::{check_locked, record};
 use veyndo_catalog::store::order_downloads::grant;
@@ -46,11 +46,7 @@ async fn prepare_external<P: Purchase>(
     }
     prepare_funding(tx, h, c, order).await?;
     order_fields(order);
-    sqlx::query("UPDATE orders SET data=$1 WHERE id=$2")
-        .bind(&*order)
-        .bind(order["id"].as_str())
-        .execute(&mut **tx)
-        .await?;
+    purchase::update_order(tx, order["id"].as_str(), order).await?;
     Ok(())
 }
 
@@ -71,11 +67,7 @@ async fn admit<P: Purchase>(
         review.check_quote(q, &priced.legal_snapshot["policyVersion"], minor)?;
     }
     if priced.config.is_business(&c.data.group) {
-        let digest: String =
-            sqlx::query_scalar("SELECT digest FROM extensions WHERE tenant=$1 FOR SHARE")
-                .bind(&c.tenant)
-                .fetch_one(&mut **tx)
-                .await?;
+        let digest = purchase::policy_digest(tx, &c.tenant).await?;
         port.approve(modules, &digest, minor)?;
     }
     Ok(())
@@ -173,7 +165,18 @@ pub(super) async fn run<P: Purchase>(
     }
     port.settle(&mut tx, h, &c, &mut order).await?;
     order_fields(&mut order);
-    sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data) VALUES($1,$2,$3,$4,$5,$6)").bind(&id).bind(&c.tenant).bind(&c.id).bind(key).bind(&fingerprint).bind(&order).execute(&mut *tx).await?;
+    purchase::insert_order(
+        &mut tx,
+        &NewOrder {
+            id: &id,
+            tenant: &c.tenant,
+            cart: &c.id,
+            key,
+            fingerprint: &fingerprint,
+            data: &order,
+        },
+    )
+    .await?;
     record(&mut tx, &c, &id, procurement.as_ref()).await?;
     consume_quote(&mut tx, &c, &id).await?;
     let inventory = InventoryLines::new(c.data.items.iter().map(|i| (i.id.as_str(), i.quantity)))?;
@@ -186,13 +189,9 @@ pub(super) async fn run<P: Purchase>(
     }
     consume(&mut tx, &c.tenant, &inventory).await?;
     c.data.order = Some(order.clone());
-    sqlx::query("UPDATE carts SET status='completed',data=$1,revision=revision+1 WHERE id=$2")
-        .bind(json!(c.data))
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
-    if !external && let Some(e)=sqlx::query("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=$2 AND rewarded=false RETURNING variant").bind(&c.tenant).bind(&c.data.session).fetch_optional(&mut *tx).await? {
-        sqlx::query("UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2").bind(&c.tenant).bind(e.get::<String,_>("variant")).execute(&mut *tx).await?;
+    purchase::complete_cart(&mut tx, &c.id, &json!(c.data)).await?;
+    if !external {
+        purchase::reward_exposure(&mut tx, &c.tenant, &c.data.session).await?;
     }
     veyndo_core::store::outbox::publish_on(
         &mut *tx,

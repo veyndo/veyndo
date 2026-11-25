@@ -3,8 +3,9 @@ use crate::domain::receipt_ref::identity;
 use crate::domain::service_config::approval_url;
 use crate::ports::{Gateway, Host};
 use crate::service::remote::execute;
-use crate::store::attempts::attempt;
+use crate::store::attempts;
 use crate::store::commands::customer;
+use crate::store::origins::hosted_alias;
 use serde_json::{Value, json};
 use std::env;
 use veyndo_core::host_names::{configured_alias, same_origin_family};
@@ -21,12 +22,7 @@ pub async fn session(
 ) -> Result<Value> {
     customer(a, h, id).await?;
     let t = tenant(h)?;
-    let row = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(id)
-        .fetch_one(&a.db)
-        .await?;
-    let p = attempt(&row);
+    let p = attempts::get(&a.db, &t, id).await?;
     if p.provider == "paypal"
         || p.context["checkout"] != "embedded"
         || !["ready", "approved"].contains(&p.state.as_str())
@@ -117,8 +113,7 @@ pub async fn origin_conn(
             if alias == t {
                 return Ok(normalized);
             }
-            let owned: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3)").bind(t).bind(channel).bind(alias).fetch_one(conn).await?;
-            if owned {
+            if hosted_alias(conn, t, channel, alias).await? {
                 return Ok(normalized);
             }
         }

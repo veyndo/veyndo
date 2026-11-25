@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE checkout_handoffs SET consumed_at=clock_timestamp() WHERE tenant=$1 AND digest=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f089d443353aae03c3d221a58b0c862664f50f84b808f11df02545bd06202182"
+}

@@ -1,5 +1,5 @@
 //! App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority.
-use crate::store::commands::enqueue;
+use crate::store::commands::{enqueue, order_attempt, provider_owns};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -46,28 +46,12 @@ pub async fn app_command(
             .order_id
             .as_deref()
             .ok_or(bad("Payment action requires attemptId or an order event"))?;
-        sqlx::query_scalar::<_, Option<String>>(
-            "SELECT data->'payment'->>'attemptId' FROM orders WHERE tenant=$1 AND id=$2",
-        )
-        .bind(&t)
-        .bind(order)
-        .fetch_optional(&a.db)
-        .await?
-        .flatten()
-        .ok_or(Error(
+        order_attempt(a, &t, order).await?.ok_or(Error(
             StatusCode::NOT_FOUND,
             "Order payment not found".into(),
         ))?
     };
-    let owned: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM payment_attempts WHERE tenant=$1 AND id=$2 AND provider=$3)",
-    )
-    .bind(&t)
-    .bind(&attempt_id)
-    .bind(provider)
-    .fetch_one(&a.db)
-    .await?;
-    if !owned {
+    if !provider_owns(a, &t, &attempt_id, provider).await? {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Provider payment not found".into(),

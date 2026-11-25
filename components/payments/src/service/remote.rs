@@ -2,6 +2,7 @@
 use crate::domain::attempt::Attempt;
 use crate::domain::return_urls;
 use crate::ports::Gateway;
+use crate::store::order_ledger::order_document;
 use serde_json::{Value, json};
 use veyndo_core::{Result, State};
 
@@ -17,11 +18,7 @@ pub async fn execute(
     let mut order: Value = if ["inspect", "instructions", "vault_revoke"].contains(&op) {
         Value::Null
     } else {
-        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
-            .bind(&p.tenant)
-            .bind(&p.order)
-            .fetch_one(&a.db)
-            .await?
+        order_document(&a.db, &p.tenant, &p.order).await?
     };
     if let Some(c) = order["cart"].as_object_mut() {
         c.remove("token");

@@ -3,7 +3,7 @@ use crate::domain::instructions::{Instructions, snapshot, validated};
 use crate::domain::receipt_ref::identity;
 use crate::ports::Gateway;
 use crate::service::remote::execute;
-use crate::store::attempts::attempt;
+use crate::store::attempts;
 use crate::store::commands::customer;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -13,13 +13,9 @@ use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflic
 use veyndo_identity::{merchant, permit};
 
 pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result<Value> {
-    let row = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&a.db)
+    let p = attempts::find(&a.db, t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
-    let p = attempt(&row);
     if !p.context["capabilities"]
         .as_array()
         .is_some_and(|cs| cs.iter().any(|c| c == "instructions"))
@@ -106,15 +102,9 @@ pub async fn for_document(
     let Some(id) = order.payment.attempt_id.as_deref() else {
         return Ok(None);
     };
-    let row =
-        sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 AND order_id=$3")
-            .bind(t)
-            .bind(id)
-            .bind(order.id.as_deref().unwrap_or(""))
-            .fetch_optional(tx)
-            .await?
-            .ok_or(bad("Document payment is not bound to this order"))?;
-    let p = attempt(&row);
+    let p = attempts::find_for_order(tx, t, id, order.id.as_deref().unwrap_or(""))
+        .await?
+        .ok_or(bad("Document payment is not bound to this order"))?;
     if !p.context["capabilities"]
         .as_array()
         .is_some_and(|caps| caps.iter().any(|cap| cap == "instructions"))
@@ -128,8 +118,7 @@ pub async fn for_document(
 /// Flow actions recheck current compound rights and fetch the original order's cached evidence at execution time.
 pub async fn for_flow(a: &State, h: &RequestContext, order: &str) -> Result<Value> {
     let t = compound(h)?;
-    let row=sqlx::query("SELECT p.* FROM payment_attempts p JOIN orders o ON o.tenant=p.tenant AND o.id=p.order_id AND o.data#>>'{payment,attemptId}'=p.id WHERE p.tenant=$1 AND o.id=$2").bind(t).bind(order).fetch_one(&a.db).await?;
-    let p = attempt(&row);
+    let p = attempts::current_of_order(&a.db, &t, order).await?;
     snapshot(
         &p,
         p.context

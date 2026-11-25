@@ -1,8 +1,8 @@
 //! Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient.
 use crate::domain::attempt::Attempt;
-use crate::store::attempts::attempt;
+use crate::store::attempts;
+use crate::store::funding;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::types::cart::StoredCart;
@@ -32,7 +32,7 @@ pub async fn prepare(
         StatusCode::UNAUTHORIZED,
         "Customer login required to save or use a payment method".into(),
     ))?;
-    let customer:Option<String>=sqlx::query_scalar("SELECT c.id FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active").bind(&c.tenant).bind(hash(token)).fetch_optional(&mut **tx).await?;
+    let customer = funding::session_customer(tx, &c.tenant, &hash(token)).await?;
     let customer = customer
         .filter(|id| Some(id) == c.data.customer_id.as_ref())
         .ok_or(Error(
@@ -42,12 +42,7 @@ pub async fn prepare(
     let id = o["payment"]["attemptId"]
         .as_str()
         .ok_or(bad("Saved payment requires a provider payment"))?;
-    let row = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2")
-        .bind(&c.tenant)
-        .bind(id)
-        .fetch_one(&mut **tx)
-        .await?;
-    let p = attempt(&row);
+    let p = attempts::get(&mut **tx, &c.tenant, id).await?;
     if !p.context["capabilities"]
         .as_array()
         .is_some_and(|v| v.iter().any(|s| s == "vault"))
@@ -58,20 +53,25 @@ pub async fn prepare(
     }
     let mut funding = json!({"customerId":customer,"save":choice.save,"consentId":uid(),"consentVersion":"save-payment@1"});
     if let Some(saved) = &choice.id {
-        let r=sqlx::query("SELECT reference,method,provider,account_ref,environment FROM payment_instruments WHERE tenant=$1 AND customer_id=$2 AND id=$3 AND state='active' FOR SHARE").bind(&c.tenant).bind(&customer).bind(saved).fetch_optional(&mut **tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Saved payment method unavailable".into()))?;
-        if r.get::<String, _>("provider") != p.provider
-            || r.get::<String, _>("method") != p.context["method"]
-            || r.get::<String, _>("account_ref") != p.context["accountRef"]
-            || r.get::<String, _>("environment") != p.environment
+        let r = funding::share_instrument(tx, &c.tenant, &customer, saved)
+            .await?
+            .ok_or(Error(
+                StatusCode::NOT_FOUND,
+                "Saved payment method unavailable".into(),
+            ))?;
+        if r.provider != p.provider
+            || r.method != p.context["method"]
+            || r.account_ref != p.context["accountRef"]
+            || r.environment != p.environment
         {
             return Err(bad(
                 "Saved payment method belongs to another payment account or method",
             ));
         }
-        funding["reference"] = json!(r.get::<String, _>("reference"));
+        funding["reference"] = json!(r.reference);
         funding["instrumentId"] = json!(saved);
     }
-    sqlx::query("UPDATE payment_attempts SET provider_context=jsonb_set(jsonb_set(provider_context,'{funding}',$3),'{vaultStatus}',to_jsonb(CASE WHEN $3::jsonb->>'save'='true' THEN 'pending'::text ELSE 'reused'::text END)) WHERE tenant=$1 AND id=$2").bind(&c.tenant).bind(id).bind(funding).execute(&mut **tx).await?;
+    funding::bind(tx, &c.tenant, id, &funding).await?;
     Ok(())
 }
 /// A revoked instrument cannot start another queued provider operation. Already submitted financial effects still reconcile.
@@ -80,7 +80,13 @@ pub async fn dispatch_check(a: &State, p: &Attempt, op: &str) -> Result<()> {
         return Ok(());
     }
     if let Some(id) = p.context["funding"]["instrumentId"].as_str() {
-        let active:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM payment_instruments WHERE tenant=$1 AND id=$2 AND customer_id=$3 AND state='active')").bind(&p.tenant).bind(id).bind(p.context["funding"]["customerId"].as_str().unwrap_or("")).fetch_one(&a.db).await?;
+        let active = funding::instrument_active(
+            &a.db,
+            &p.tenant,
+            id,
+            p.context["funding"]["customerId"].as_str().unwrap_or(""),
+        )
+        .await?;
         if !active {
             return Err(conflict("Saved payment method has been revoked"));
         }

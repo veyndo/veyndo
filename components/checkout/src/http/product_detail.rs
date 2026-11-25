@@ -2,11 +2,11 @@
 use crate::domain::cart_quote::{normalized_quantity, quote};
 use crate::domain::tax_lines::tax_products;
 use crate::store::cart_load;
+use crate::store::product_reviews;
 use crate::store::tax_conditions::{conditional, tax_settings_for_cart};
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
@@ -128,10 +128,10 @@ fn price_tiers(
 
 /// Approved reviews and their aggregate over the whole family, independently of variant pagination.
 async fn reviews(a: &State, t: &str, family: &str) -> Result<Value> {
-    let rows=sqlx::query("SELECT r.id,r.author,r.rating,r.title,r.content,r.verified,r.demo,(r.source_import IS NOT NULL) AS imported,r.created_at::text AS time FROM product_reviews r WHERE r.tenant=$1 AND r.approved AND (r.product_id=$2 OR EXISTS(SELECT 1 FROM products p WHERE p.tenant=r.tenant AND p.id=r.product_id AND p.parent_id=$2)) ORDER BY r.created_at DESC LIMIT 50").bind(t).bind(family).fetch_all(&a.db).await?;
-    let stats=sqlx::query("SELECT count(*) AS count,coalesce(avg(r.rating),0)::double precision AS rating FROM product_reviews r WHERE r.tenant=$1 AND r.approved AND (r.product_id=$2 OR EXISTS(SELECT 1 FROM products p WHERE p.tenant=r.tenant AND p.id=r.product_id AND p.parent_id=$2))").bind(t).bind(family).fetch_one(&a.db).await?;
+    let rows = product_reviews::published(&a.db, t, family).await?;
+    let stats = product_reviews::summary(&a.db, t, family).await?;
     Ok(
-        json!({"count":stats.get::<i64, _>("count"),"average":stats.get::<f64, _>("rating"),"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"author":r.get::<String,_>("author"),"rating":r.get::<i32,_>("rating"),"title":r.get::<String,_>("title"),"content":r.get::<String,_>("content"),"verifiedPurchase":r.get::<bool,_>("verified"),"demo":r.get::<bool,_>("demo"),"imported":r.get::<bool,_>("imported"),"time":r.get::<String,_>("time")})).collect::<Vec<_>>()}),
+        json!({"count":stats.count,"average":stats.rating,"elements":rows.iter().map(|r|json!({"id":r.id,"author":r.author,"rating":r.rating,"title":r.title,"content":r.content,"verifiedPurchase":r.verified,"demo":r.demo,"imported":r.imported,"time":r.time})).collect::<Vec<_>>()}),
     )
 }
 

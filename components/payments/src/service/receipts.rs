@@ -4,6 +4,7 @@ use crate::domain::receipt_ref::{ProviderReceipt, identity, is, reference};
 use crate::domain::service_config::approval_url;
 use crate::domain::{instructions, refunds, settlements, state};
 use crate::ports::Host;
+use crate::store::attempts::{Receipt, record_receipt};
 use crate::store::jobs::enqueue_tx;
 use crate::store::order_ledger::{release_stock, update_order};
 use crate::store::receipt_claims::claim;
@@ -148,36 +149,58 @@ pub async fn persist(
             state = next.into();
         }
     }
-    sqlx::query("UPDATE payment_attempts SET state=$1,provider_order=$2,approval_url=coalesce($3,approval_url),capture_id=$4,refunded_minor=$5,provider_context=$6,revision=revision+1 WHERE tenant=$7 AND id=$8").bind(&state).bind(remote).bind(url).bind(&capture).bind(refunded).bind(&context).bind(&p.tenant).bind(&p.id).execute(&mut **tx).await?;
+    record_receipt(
+        tx,
+        p,
+        Receipt {
+            state: &state,
+            provider_order: remote,
+            approval_url: url.as_deref(),
+            capture: capture.as_deref(),
+            refunded,
+            context: &context,
+        },
+    )
+    .await?;
     if state != p.state
         || capture != p.capture
         || refunded != p.refunded
         || context["capturedAmountMinor"] != p.context["capturedAmountMinor"]
         || context["captureClosed"] != p.context["captureClosed"]
     {
-        if state == "approved" || (state == "authorized" && p.context["intent"] == "capture") {
-            let op = if p.context["intent"] == "authorize" {
-                "authorize"
-            } else {
-                "capture"
-            };
-            enqueue_tx(
-                tx,
-                &p.tenant,
-                &p.id,
-                op,
-                &format!("approved:{}", p.id),
-                &json!({}),
-            )
-            .await?;
-        }
-        update_order(host, tx, p, &state).await?;
+        follow(host, tx, p, &state).await?;
     }
     instruments::observe(tx, p, v).await?;
     if instructions_changed {
         store_instructions::publish(tx, p, &context).await?;
     }
     Ok(())
+}
+
+/// A changed ledger state queues the capture or authorization an approval asks for and moves the order along.
+async fn follow(
+    host: &dyn Host,
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    p: &Attempt,
+    state: &str,
+) -> Result<()> {
+    if state == "approved" || (state == "authorized" && p.context["intent"] == "capture") {
+        let op = if p.context["intent"] == "authorize" {
+            "authorize"
+        } else {
+            "capture"
+        };
+        enqueue_tx(
+            tx,
+            &p.tenant,
+            &p.id,
+            op,
+            &format!("approved:{}", p.id),
+            &json!({}),
+        )
+        .await?;
+    }
+    update_order(host, tx, p, state).await
 }
 
 #[cfg(test)]

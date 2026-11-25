@@ -243,9 +243,9 @@ pub async fn inspect(
     {
         let buyer = veyndo_runtime::tenant_scope::scoped(
             veyndo_runtime::tenant_scope::Scope::Tenant(grant.tenant.clone()),
-            sqlx::query_scalar::<_, String>("SELECT c.id FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email JOIN tenants t ON t.id=s.tenant WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active AND t.status='active' AND NOT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=s.tenant)")
-                .bind(&grant.tenant).bind(&grant.digest).fetch_optional(&a.db)
-        ).await?;
+            crate::store::buyer_sessions::live_buyer(&a.db, &grant.tenant, &grant.digest),
+        )
+        .await?;
         if let Some(buyer) = buyer.filter(|id| hash(id) == grant.buyer_hash) {
             result = json!({"active":true,"sub":buyer,"tenant":grant.tenant,"aud":AUDIENCE,
                 "exp":grant.exp,"personal_session":true,"live":true,

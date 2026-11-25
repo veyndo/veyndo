@@ -1,5 +1,7 @@
 //! Single-use checkout transfer for independent storefronts; no app-specific catalog or checkout rules.
 use crate::store::cart_load;
+use crate::store::carts::{lock_by_token, rotate_token, rotate_token_returning};
+use crate::store::handoffs::{self, RecoveryKey, Ticket};
 use crate::store::hosted_parent::registered_parent;
 use axum::Json;
 use axum::extract::State as Shared;
@@ -12,7 +14,7 @@ use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel, tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::domain::cart_admission::request;
-use veyndo_shop::types::cart::{StoredCart, stored};
+use veyndo_shop::types::cart::StoredCart;
 
 /// The JSON fields `issue` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -34,13 +36,10 @@ pub async fn issue(
     let t = tenant(&h)?;
     let _ = cart_load::load(&a, &h).await?;
     let mut tx = a.db.begin().await?;
-    let r = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(&t)
-        .bind(token(&h)?)
-        .fetch_optional(&mut *tx)
+    let c = lock_by_token(&mut tx, &t, token(&h)?)
         .await?
-        .ok_or(bad("Cart unavailable"))?;
-    let c = stored(&r)?;
+        .ok_or(bad("Cart unavailable"))?
+        .into_cart()?;
     request(&h, &c)?;
     guard_conn(&mut tx, &h, &c).await?;
     if c.status != "open" || c.data.items.is_empty() || input.revision != Some(c.revision) {
@@ -54,12 +53,19 @@ pub async fn issue(
     } else {
         None
     };
-    sqlx::query("DELETE FROM checkout_handoffs WHERE tenant=$1 AND greatest(expires_at,recovery_expires_at)<now()")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO checkout_handoffs(digest,tenant,cart_id,expires_at,recovery_digest,recovery_origin,recovery_expires_at) VALUES($1,$2,$3,now()+interval '10 minutes',$4::text,$5,CASE WHEN $4::text IS NOT NULL THEN now()+interval '24 hours' END) ON CONFLICT(cart_id) DO UPDATE SET digest=EXCLUDED.digest,expires_at=EXCLUDED.expires_at,recovery_digest=EXCLUDED.recovery_digest,recovery_origin=EXCLUDED.recovery_origin,recovery_expires_at=EXCLUDED.recovery_expires_at,consumed_at=NULL")
-        .bind(hash(&ticket)).bind(&t).bind(&c.id).bind(recovery.as_deref().map(hash)).bind(parent).execute(&mut *tx).await?;
+    handoffs::purge_expired(&mut tx, &t).await?;
+    let recovery_digest = recovery.as_deref().map(hash);
+    handoffs::issue(
+        &mut tx,
+        &Ticket {
+            digest: &hash(&ticket),
+            tenant: &t,
+            cart: &c.id,
+            recovery_digest: recovery_digest.as_deref(),
+            recovery_origin: parent,
+        },
+    )
+    .await?;
     tx.commit().await?;
     let mut result =
         json!({"checkoutPath":checkout_path(&c, &ticket),"expiresInSeconds":600,"singleUse":true});
@@ -114,30 +120,23 @@ pub async fn recover(
     registered_parent(&mut tx, &t, channel, &input.parent_origin).await?;
     let digest = hash(&input.key);
     // Status polling can read the last committed state while an order is being placed.
-    let mut query = sqlx::QueryBuilder::new(
-        "SELECT c.* FROM carts c JOIN checkout_handoffs h ON h.cart_id=c.id AND h.tenant=c.tenant WHERE c.tenant=$1 AND c.id=$2 AND h.recovery_digest=$3 AND h.recovery_origin=$4 AND h.recovery_expires_at>clock_timestamp()",
-    );
-    if input.reopen {
-        query.push(" FOR UPDATE OF c");
-    }
-    let row = query
-        .build()
-        .bind(&t)
-        .bind(&input.cart_id)
-        .bind(&digest)
-        .bind(&input.parent_origin)
-        .fetch_optional(&mut *tx)
+    let key = RecoveryKey {
+        tenant: &t,
+        cart: &input.cart_id,
+        digest: &digest,
+        origin: &input.parent_origin,
+    };
+    let c = handoffs::recovered_cart(&mut tx, &key, input.reopen)
         .await?
-        .ok_or_else(unavailable)?;
-    let c = stored(&row)?;
+        .ok_or_else(unavailable)?
+        .into_cart()?;
     if c.data.sales_channel != channel {
         return Err(unavailable());
     }
     if input.reopen {
         // The recovery key may have changed while this request waited for the cart lock.
-        let admitted: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM checkout_handoffs WHERE tenant=$1 AND cart_id=$2 AND recovery_digest=$3 AND recovery_origin=$4 AND recovery_expires_at>clock_timestamp())")
-            .bind(&t).bind(&c.id).bind(&digest).bind(&input.parent_origin).fetch_one(&mut *tx).await?;
-        if !admitted {
+        let key = RecoveryKey { cart: &c.id, ..key };
+        if !handoffs::recovery_valid(&mut tx, &key).await? {
             return Err(unavailable());
         }
     }
@@ -154,14 +153,8 @@ pub async fn recover(
     } else if c.status == "open" && input.reopen {
         let ticket = uid();
         // Fence the old frame before allowing a replacement ticket for this same cart.
-        sqlx::query("UPDATE carts SET token=$1,revision=revision+1 WHERE tenant=$2 AND id=$3")
-            .bind(uid())
-            .bind(&t)
-            .bind(&c.id)
-            .execute(&mut *tx)
-            .await?;
-        sqlx::query("UPDATE checkout_handoffs SET digest=$1,expires_at=now()+interval '10 minutes',consumed_at=NULL WHERE tenant=$2 AND cart_id=$3")
-            .bind(hash(&ticket)).bind(&t).bind(&c.id).execute(&mut *tx).await?;
+        rotate_token(&mut tx, &t, &c.id, &uid()).await?;
+        handoffs::reissue(&mut tx, &t, &c.id, &hash(&ticket)).await?;
         json!({"state":"open","checkoutPath":checkout_path(&c, &ticket)})
     } else if c.status == "open" {
         json!({"state":"open"})
@@ -190,10 +183,13 @@ pub async fn consume(a: &State, h: &RequestContext, v: &Value) -> Result<StoredC
         .ok_or(bad("Invalid checkout ticket"))?;
     let mut tx = a.db.begin().await?;
     // Lock the cart first, matching issue/order lock order. The secret remains only in the browser fragment.
-    let r = sqlx::query("SELECT c.* FROM carts c JOIN checkout_handoffs h ON h.cart_id=c.id AND h.tenant=c.tenant WHERE h.tenant=$1 AND h.digest=$2 AND h.expires_at>now() AND h.consumed_at IS NULL FOR UPDATE OF c")
-        .bind(&t).bind(hash(ticket)).fetch_optional(&mut *tx).await?
-        .ok_or(Error(StatusCode::GONE,"Checkout ticket expired or already used".into()))?;
-    let c = stored(&r)?;
+    let c = handoffs::lock_ticket_cart(&mut tx, &t, &hash(ticket))
+        .await?
+        .ok_or(Error(
+            StatusCode::GONE,
+            "Checkout ticket expired or already used".into(),
+        ))?
+        .into_cart()?;
     request(h, &c)?;
     guard_conn(&mut tx, h, &c).await?;
     if c.data.sales_channel != channel(h) {
@@ -205,29 +201,16 @@ pub async fn consume(a: &State, h: &RequestContext, v: &Value) -> Result<StoredC
     if c.status != "open" {
         return Err(conflict("Cart is terminal"));
     }
-    let consumed = sqlx::query(
-        "UPDATE checkout_handoffs SET consumed_at=clock_timestamp() WHERE tenant=$1 AND digest=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL",
-    )
-    .bind(&t)
-    .bind(hash(ticket))
-    .execute(&mut *tx)
-    .await?
-    .rows_affected();
+    let consumed = handoffs::consume(&mut tx, &t, &hash(ticket)).await?;
     if consumed != 1 {
         return Err(Error(
             StatusCode::GONE,
             "Checkout ticket already used".into(),
         ));
     }
-    let r = sqlx::query(
-        "UPDATE carts SET token=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 RETURNING *",
-    )
-    .bind(uid())
-    .bind(&t)
-    .bind(&c.id)
-    .fetch_one(&mut *tx)
-    .await?;
-    let c = stored(&r)?;
+    let c = rotate_token_returning(&mut tx, &t, &c.id, &uid())
+        .await?
+        .into_cart()?;
     request(h, &c)?;
     guard_conn(&mut tx, h, &c).await?;
     tx.commit().await?;

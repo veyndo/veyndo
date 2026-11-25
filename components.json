@@ -278,8 +278,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 102,
-      "sql_outside_store": 6,
-      "runtime_sql": 48
+      "sql_outside_store": 0,
+      "runtime_sql": 24
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -387,8 +387,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 151,
-      "sql_outside_store": 11,
-      "runtime_sql": 95
+      "sql_outside_store": 0,
+      "runtime_sql": 36
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
