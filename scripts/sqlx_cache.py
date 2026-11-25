@@ -6,6 +6,7 @@ The cache lets every build compile the checked queries offline (`.cargo/config.t
 and fails when a query, its columns, their types or nullability differ from the committed cache."""
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -36,7 +37,7 @@ def sources_using_macros():
         for path in (ROOT / folder).rglob('*.rs'):
             if 'target' in path.parts:
                 continue
-            if 'sqlx::query_as!(' in path.read_text() or 'sqlx::query!(' in path.read_text() or 'sqlx::query_scalar!(' in path.read_text():
+            if re.search(r'\bsqlx::query(?:_file)?(?:_as|_scalar)?!\(', path.read_text()):
                 crate = path.parent
                 while not (crate / 'Cargo.toml').exists():
                     crate = crate.parent
@@ -69,12 +70,21 @@ def migration_binary():
 def generate(target, url):
     """Expand every query macro against `url`, writing one data file per query into `target`."""
     target.mkdir(parents=True, exist_ok=True)
+    # Touching re-runs the macros; the original times are restored afterwards so that a built
+    # binary does not look older than its sources to the suites that run after this check.
+    touched = {}
     for crate in sources_using_macros():
         for lib in ('src/lib.rs', 'src/main.rs'):
             if (crate / lib).exists():
+                stat = (crate / lib).stat()
+                touched[crate / lib] = (stat.st_atime_ns, stat.st_mtime_ns)
                 (crate / lib).touch()
     env = {**os.environ, 'SQLX_OFFLINE': 'false', 'SQLX_OFFLINE_DIR': str(target), 'DATABASE_URL': url}
-    subprocess.run(['cargo', 'check', '--offline', '--workspace', '--all-targets'], cwd=ROOT, env=env, check=True)
+    try:
+        subprocess.run(['cargo', 'check', '--offline', '--workspace', '--all-targets'], cwd=ROOT, env=env, check=True)
+    finally:
+        for path, times in touched.items():
+            os.utime(path, ns=times)
 
 
 def main():
