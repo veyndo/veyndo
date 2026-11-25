@@ -4,6 +4,7 @@ import "./app-settings.css";
 import { useEffect, useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import { useAppSettingText } from "../../shared/i18n/app-settings-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import { contentText } from "../../shared/i18n/content-language";
@@ -28,37 +29,24 @@ export default function AppSettings({
 }) {
   const t = useAppSettingText(),
     { locale } = useLocale(),
-    [state, setState] = useState<State | null>(null),
     [values, setValues] = useState<State["values"]>({}),
     [approve, setApprove] = useState(false),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false);
-  const load = async () => {
-    const next = await request(`/api/apps/${encodeURIComponent(app)}/settings`);
-    setState(next);
-    setValues(next.values);
-    setApprove(false);
-  };
+  const settingsPath = `/api/apps/${encodeURIComponent(app)}/settings`;
+  const settings = useRead<State>(request, settingsPath);
+  const setRead = useSetRead(request);
+  const state = settings.data ?? null;
+  const error =
+    actionError || (settings.error as Error | undefined)?.message || "";
+  // A newly loaded state replaces the form values; drafts never outlive it.
   useEffect(() => {
-    let active = true;
-    setState(null);
-    setValues({});
-    setError("");
-    request(`/api/apps/${encodeURIComponent(app)}/settings`)
-      .then((next) => {
-        if (active) {
-          setState(next);
-          setValues(next.values);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request]);
+    setValues(state?.values ?? {});
+    setApprove(false);
+  }, [state]);
+  useEffect(() => setError(""), [app]);
+  const load = async () => setRead(settingsPath, await request(settingsPath));
   return (
     <section className="app-installed-settings">
       <h2>{t("settings")}</h2>

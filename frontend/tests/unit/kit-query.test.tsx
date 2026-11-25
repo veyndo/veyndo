@@ -15,6 +15,7 @@ import {
   useMutation,
   useQuery,
   useQueryCache,
+  resetFallbackQueryCache,
 } from "../../src/kit/query";
 
 const deferred = <T,>() => {
@@ -194,12 +195,32 @@ describe("hooks", () => {
     await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
   });
 
-  it("gives each component a private cache outside a provider", async () => {
+  it("shares one fallback cache outside a provider until it is reset", async () => {
     const load = vi.fn(async () => 1);
     const first = renderHook(() => useQuery(["k"], load));
-    const second = renderHook(() => useQuery(["k"], load));
     await waitFor(() => expect(first.result.current.data).toBe(1));
-    await waitFor(() => expect(second.result.current.data).toBe(1));
+    const second = renderHook(() => useQuery(["k"], load, { staleMs: 60_000 }));
+    expect(second.result.current.data).toBe(1);
+    expect(load).toHaveBeenCalledTimes(1);
+    resetFallbackQueryCache();
+    const third = renderHook(() => useQuery(["k"], load));
+    await waitFor(() => expect(third.result.current.data).toBe(1));
     expect(load).toHaveBeenCalledTimes(2);
+  });
+  it("polls while mounted when refetchMs is set", async () => {
+    vi.useFakeTimers();
+    let count = 0;
+    const { result, unmount } = renderHook(() =>
+      useQuery(["poll"], async () => ++count, { refetchMs: 1000 }),
+    );
+    await vi.waitFor(() => expect(result.current.data).toBe(1));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    await vi.waitFor(() => expect(result.current.data).toBe(2));
+    unmount();
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(count).toBe(2);
+    vi.useRealTimers();
   });
 });

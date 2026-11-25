@@ -171,7 +171,9 @@ it("discovers and installs through the existing API, and makes the installed det
       }),
     ),
   );
-  expect(screen.getByRole("heading", { name: "Storyfront" })).toBeVisible();
+  expect(
+    await screen.findByRole("heading", { name: "Storyfront" }),
+  ).toBeVisible();
 });
 it("disables privileged lifecycle actions for viewers and shows honest empty interface/data states", async () => {
   setup("viewer");

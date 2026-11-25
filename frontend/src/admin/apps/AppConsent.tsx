@@ -1,7 +1,8 @@
 /** Review the actual package and permission changes before installation; consent is enforced by the API. */
 import { Badge, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead } from "../shell/useRead";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useAppAccessText } from "../../shared/i18n/app-access-i18n";
 import { contentText } from "../../shared/i18n/content-language";
@@ -34,33 +35,15 @@ export default function AppConsent({
 }) {
   const t = useAppAccessText(),
     { a, locale } = useAppText();
-  const [result, setResult] = useState<{
-      app: string;
-      request: RequestFn;
-      manifest?: Record<string, unknown>;
-      review: Review;
-    } | null>(null),
-    [error, setError] = useState(""),
+  const [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false);
-  const review =
-    result?.app === app &&
-    result.request === request &&
-    result.manifest === manifest
-      ? result.review
-      : null;
-  useEffect(() => {
-    let active = true;
-    request("/api/apps/review", manifest ? { manifest } : { builtIn: app })
-      .then((v) => {
-        if (active) setResult({ app, request, manifest, review: v });
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request, manifest]);
+  // The review is a read exposed as POST; its key carries the app or manifest.
+  const reviewRead = useRead<Review>(request, "/api/apps/review", {
+    body: manifest ? { manifest } : { builtIn: app },
+  });
+  const review = reviewRead.data ?? null;
+  const error =
+    actionError || (reviewRead.error as Error | undefined)?.message || "";
   return (
     <ConfirmDialog
       title={t("installConsent")}

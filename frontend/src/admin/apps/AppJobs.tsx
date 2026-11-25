@@ -1,7 +1,8 @@
 /** Long actions use the same app/outbox contract, with progress and explicit uncertain-outcome review. */
 import { Button, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead } from "../shell/useRead";
 import AppJobArtifact from "./AppJobArtifact";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { contentText } from "../../shared/i18n/content-language";
@@ -34,39 +35,22 @@ export default function AppJobs({
   const t = useAppOperationsText(),
     { mainLocale } = useContentLanguage(),
     { locale } = useLocale();
-  const [jobs, setJobs] = useState<Job[]>([]),
-    [error, setError] = useState(""),
+  const [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [selected, setSelected] = useState<{ job: Job; operation: string } | null>(
       null,
     );
+  // Polls every ten seconds while the page is visible.
+  const jobsRead = useRead(request, `/api/apps/${app}/jobs`, {
+    refetchMs: 10000,
+  });
+  const jobs: Job[] = jobsRead.data?.jobs ?? [];
+  const error =
+    actionError || (jobsRead.error as Error | undefined)?.message || "";
   const refresh = async () => {
-    try {
-      setJobs((await request(`/api/apps/${app}/jobs`)).jobs);
-      setError("");
-    } catch (e) {
-      setError((e as Error).message);
-    }
+    setError("");
+    await jobsRead.refetch();
   };
-  useEffect(() => {
-    let active = true;
-    const read = () =>
-      request(`/api/apps/${app}/jobs`)
-        .then((v) => {
-          if (active) setJobs(v.jobs);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    void read();
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible") void read();
-    }, 10000);
-    return () => {
-      active = false;
-      clearInterval(timer);
-    };
-  }, [app, request]);
   return (
     <section className="app-contract-summary">
       <header className="app-detail-heading">

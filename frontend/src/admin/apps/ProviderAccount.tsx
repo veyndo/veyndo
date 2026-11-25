@@ -2,6 +2,7 @@
 import { Button, Field, LinkButton, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead } from "../shell/useRead";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -17,23 +18,12 @@ export default function ProviderAccount({
   canWrite?: boolean;
 }) {
   const t = usePaymentProviderText(),
-    [geo, setGeo] = useState<CountryCatalogue>(),
     [channel, setChannel] = useState("default"),
     [environment, setEnvironment] = useState(""),
-    [environments, setEnvironments] = useState<string[]>([]),
-    [savedAccounts, setSavedAccounts] = useState<
-      {
-        provider: string;
-        channel: string;
-        environment: string;
-        ready: boolean;
-      }[]
-    >([]),
-    [channels, setChannels] = useState<{ id: string }[]>([]),
     [country, setCountry] = useState(["DE"]),
     [busy, setBusy] = useState(false),
     [confirmDisconnect, setConfirmDisconnect] = useState(false),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [account, setAccount] = useState<{
       ready: boolean;
       onboardingUrl?: string;
@@ -41,43 +31,35 @@ export default function ProviderAccount({
   const scope = `${provider}:${channel}:${environment}`;
   const currentScope = useRef(scope);
   currentScope.current = scope;
+  const geo = useRead<CountryCatalogue>(request, "/store-api/countries").data;
+  const providers = useRead(request, "/api/payment-providers");
+  const channels: { id: string }[] = providers.data?.channels ?? [];
+  const savedAccounts: {
+    provider: string;
+    channel: string;
+    environment: string;
+    ready: boolean;
+  }[] = providers.data?.accounts ?? [];
+  const configuration = providers.data?.providers?.find(
+    (p: { id: string }) => p.id === provider,
+  )?.configuration;
+  const environments: string[] = configuration?.environments ?? [];
+  const error =
+    actionError || (providers.error as Error | undefined)?.message || "";
+  // A provider (or its list) arriving selects its saved or default environment.
   useEffect(() => {
-    let active = true;
-    void request("/store-api/countries")
-      .then((v) => {
-        if (active) setGeo(v);
-      })
-      .catch(() => {});
     setAccount(undefined);
-    setEnvironments([]);
-    setEnvironment("");
     setError("");
-    void request("/api/payment-providers")
-      .then((v) => {
-        if (!active) return;
-        setChannels(v.channels ?? []);
-        setSavedAccounts(v.accounts ?? []);
-        const configuration = v.providers?.find(
-          (p: { id: string }) => p.id === provider,
-        )?.configuration;
-        setEnvironments(configuration?.environments ?? []);
-        const saved = v.accounts?.find(
-          (a: { provider: string; channel: string; environment: string }) =>
-            a.provider === provider &&
-            a.channel === "default" &&
-            configuration?.environments?.includes(a.environment),
-        );
-        setEnvironment(
-          saved?.environment ?? configuration?.defaultEnvironment ?? "",
-        );
-      })
-      .catch((e) => {
-        if (active) setError((e as Error).message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, provider]);
+    const saved = savedAccounts.find(
+      (a) =>
+        a.provider === provider &&
+        a.channel === "default" &&
+        configuration?.environments?.includes(a.environment),
+    );
+    setEnvironment(
+      saved?.environment ?? configuration?.defaultEnvironment ?? "",
+    );
+  }, [provider, providers.data]);
   useEffect(() => {
     setAccount(
       savedAccounts.find(

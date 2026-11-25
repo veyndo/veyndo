@@ -27,12 +27,19 @@ export function useRead<T = any>(
     body,
     enabled = true,
     staleMs,
-  }: { body?: unknown; enabled?: boolean; staleMs?: number } = {},
+    refetchMs,
+  }: {
+    body?: unknown;
+    enabled?: boolean;
+    staleMs?: number;
+    refetchMs?: number;
+  } = {},
 ) {
   return useQuery<T>(
     readKey(request, path ?? "", body),
-    () => request(path!, body, body === undefined ? undefined : "POST"),
-    { enabled: enabled && !!path, staleMs },
+    // A body makes the transport send POST, exactly as a direct call would.
+    () => (body === undefined ? request(path!) : request(path!, body)),
+    { enabled: enabled && !!path, staleMs, refetchMs },
   );
 }
 

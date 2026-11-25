@@ -8,7 +8,7 @@ import AppConfiguredOrders, {
 } from "./AppConfiguredOrders";
 import AppDetails from "./AppDetails";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
 import { useLibraryText } from "../../shared/i18n/app-library-i18n";
@@ -19,6 +19,7 @@ import "./app-catalog.css";
 import "./app-detail.css";
 import "./app-artwork.css";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 export default function AppsManager({
   request,
   role,
@@ -35,51 +36,37 @@ export default function AppsManager({
   const { c } = useCustomerText();
   const l = useLibraryText();
   const [installing, setInstalling] = useState("");
-  const [mainLocale, setMainLocale] = useState("en-GB");
-  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(
     () => new URLSearchParams(location.search).get("app") ?? "",
   );
   const [detailTab, setDetailTab] = useState("appDetails");
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [resultApp, setResultApp] = useState("");
   const [result, setResult] = useState<ConfiguredOrders>();
+  const appsRead = useRead(request, "/api/apps");
+  const setRead = useSetRead(request);
+  const packages: Package[] = appsRead.data?.packages ?? [];
+  const mainLocale: string = appsRead.data?.mainLocale ?? "en-GB";
+  const loading = appsRead.status === "idle" || appsRead.status === "loading";
+  const error =
+    actionError || (appsRead.error as Error | undefined)?.message || "";
   const load = async () => {
-    const data = await request("/api/apps");
-    setPackages(data.packages);
-    setMainLocale(data.mainLocale ?? "en-GB");
+    setRead("/api/apps", await request("/api/apps"));
     dispatchEvent(new Event("commerce.apps.changed"));
   };
+  // The first list decides whether a deep-linked app is installed or offered.
+  const checked = useRef(false);
   useEffect(() => {
-    let active = true;
-    setLoading(true);
-    request("/api/apps")
-      .then((v) => {
-        if (active) {
-          setPackages(v.packages);
-          if (selected && !v.packages.some((p: Package) => p.id === selected)) {
-            setSelected("");
-            if (
-              v.builtIns?.includes(selected) &&
-              rights?.includes("apps.manage")
-            )
-              setInstalling(selected);
-          }
-          setMainLocale(v.mainLocale ?? "en-GB");
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+    const v = appsRead.data;
+    if (!v || checked.current) return;
+    checked.current = true;
+    if (selected && !v.packages.some((p: Package) => p.id === selected)) {
+      setSelected("");
+      if (v.builtIns?.includes(selected) && rights?.includes("apps.manage"))
+        setInstalling(selected);
+    }
+  }, [appsRead.data, selected, rights]);
   const run = async (fn: () => Promise<void>, after?: () => void) => {
     setBusy(true);
     setError("");

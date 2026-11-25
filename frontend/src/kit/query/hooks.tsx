@@ -32,16 +32,19 @@ export function QueryProvider({
   );
 }
 
-/**
- * The provider's cache, or outside a provider a cache private to the calling
- * component, so isolated views work without ever sharing data.
- */
+// Outside a provider (isolated views, tests) every hook shares this one cache.
+// Studio always renders inside a QueryProvider scoped per shop, stage and person.
+let fallback = new QueryCache();
+
+/** Drops the fallback cache; test setups call it between tests. */
+export function resetFallbackQueryCache() {
+  fallback.dispose();
+  fallback = new QueryCache();
+}
+
+/** The provider's cache, or the shared fallback outside a provider. */
 export function useQueryCache() {
-  const shared = useContext(CacheContext);
-  const own = useRef<QueryCache | null>(null);
-  if (shared) return shared;
-  own.current ??= new QueryCache();
-  return own.current;
+  return useContext(CacheContext) ?? fallback;
 }
 
 export type QueryResult<T> = QueryState<T> & {
@@ -57,7 +60,16 @@ export type QueryResult<T> = QueryState<T> & {
 export function useQuery<T>(
   key: QueryKey,
   load: () => Promise<T>,
-  { enabled = true, staleMs = 0 }: { enabled?: boolean; staleMs?: number } = {},
+  {
+    enabled = true,
+    staleMs = 0,
+    refetchMs,
+  }: {
+    enabled?: boolean;
+    staleMs?: number;
+    /** Reload this often while mounted and the page is visible (polling). */
+    refetchMs?: number;
+  } = {},
 ): QueryResult<T> {
   const cache = useQueryCache();
   const text = keyText(key);
@@ -82,6 +94,13 @@ export function useQuery<T>(
     if (enabled)
       cache.fetch(stableKey, () => loader.current(), staleMs).catch(() => {});
   }, [cache, stableKey, enabled, staleMs, needsLoad]);
+  useEffect(() => {
+    if (!enabled || !refetchMs) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "hidden") cache.invalidate(stableKey);
+    }, refetchMs);
+    return () => clearInterval(timer);
+  }, [cache, stableKey, enabled, refetchMs]);
   const refetch = useCallback(async () => {
     cache.invalidate(stableKey);
     try {

@@ -2,6 +2,7 @@
 import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useAppAccessText } from "../../shared/i18n/app-access-i18n";
 type Kind = "service" | "webhook" | "outbound";
@@ -25,34 +26,29 @@ export default function AppSecrets({
   request: RequestFn;
 }) {
   const t = useAppAccessText();
-  const [data, setData] = useState<Secrets | null>(null),
-    [kind, setKind] = useState<Kind>("service"),
+  const [kind, setKind] = useState<Kind>("service"),
     [secret, setSecret] = useState(""),
     [busy, setBusy] = useState(false),
     [confirm, setConfirm] = useState(false),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [notice, setNotice] = useState(false);
+  const secretsPath = `/api/apps/${app}/secrets`;
+  const secretsRead = useRead<Secrets>(request, secretsPath);
+  const setRead = useSetRead(request);
+  const data = secretsRead.data ?? null;
+  const error =
+    actionError || (secretsRead.error as Error | undefined)?.message || "";
   useEffect(() => {
-    let active = true;
-    setData(null);
     setSecret("");
     setError("");
     setNotice(false);
     setConfirm(false);
-    request(`/api/apps/${app}/secrets`)
-      .then((v) => {
-        if (active) {
-          setData(v);
-          setKind(v.kinds[0] ?? "service");
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request]);
+  }, [app]);
+  // The first offered kind is preselected once the app's secrets arrive.
+  const firstKind = data?.kinds[0];
+  useEffect(() => {
+    setKind(firstKind ?? "service");
+  }, [app, firstKind]);
   const rotate = async () => {
     if (!data) return;
     setBusy(true);
@@ -71,7 +67,7 @@ export default function AppSecrets({
       );
       setSecret("");
       setConfirm(false);
-      setData(await request(`/api/apps/${app}/secrets`));
+      setRead(secretsPath, await request(secretsPath));
       setNotice(true);
     } catch (e) {
       setError((e as Error).message);

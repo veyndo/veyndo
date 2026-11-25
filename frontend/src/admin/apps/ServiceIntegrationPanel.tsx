@@ -2,6 +2,7 @@
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import { serviceIntegrations } from "./service-integrations";
 import {
   useIntegrationText,
@@ -29,46 +30,49 @@ export default function ServiceIntegrationPanel({
 }) {
   const t = useIntegrationText(),
     d = serviceIntegrations[app];
-  const [status, setStatus] = useState<Status>(),
-    [settings, setSettings] = useState<Record<string, string | boolean>>({
+  const [settings, setSettings] = useState<Record<string, string | boolean>>({
       enabled: false,
     }),
     [credential, setCredential] = useState(""),
     [input, setInput] = useState<Record<string, string>>({}),
     [records, setRecords] = useState<unknown[]>([]),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const generation = useRef(0);
   const fileRead = useRef(0);
   const path = `/api/apps/${app}/actions/`;
+  // The status action is a read; only managers load it.
+  const statusRead = useRead<Status>(request, path + "status", {
+    body: {},
+    enabled: manage,
+  });
+  const setRead = useSetRead(request);
+  const status = statusRead.data;
+  const error =
+    actionError || (statusRead.error as Error | undefined)?.message || "";
   const dirty =
     !!credential ||
     JSON.stringify({ enabled: false, ...settings }) !==
       JSON.stringify({ enabled: false, ...status?.settings });
   useEffect(() => {
-    const g = ++generation.current;
-    setStatus(undefined);
+    ++generation.current;
     fileRead.current++;
     setBusy(false);
     setCredential("");
     setInput({});
     setRecords([]);
     setError("");
-    if (manage)
-      void request(path + "status", {})
-        .then((v) => {
-          if (g === generation.current) {
-            setStatus(v);
-            setSettings({ enabled: false, ...v.settings });
-          }
-        })
-        .catch((e) => {
-          if (g === generation.current) setError(e.message);
-        });
     return () => {
       generation.current++;
     };
   }, [app, request, manage, path]);
+  // The first status of an app fills the settings form; later ones keep drafts.
+  const seeded = useRef("");
+  useEffect(() => {
+    if (!status || seeded.current === path) return;
+    seeded.current = path;
+    setSettings({ enabled: false, ...status.settings });
+  }, [status, path]);
   async function run(action: string, value: unknown, replace = false) {
     const g = generation.current;
     setBusy(true);
@@ -77,7 +81,7 @@ export default function ServiceIntegrationPanel({
       await request(path + action, value);
       const v = await request(path + "status", {});
       if (g === generation.current) {
-        setStatus(v);
+        setRead(path + "status", v, {});
         if (replace) {
           setSettings({ enabled: false, ...v.settings });
           setCredential("");

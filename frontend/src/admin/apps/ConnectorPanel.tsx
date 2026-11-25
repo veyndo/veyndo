@@ -3,6 +3,7 @@ import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import { connectorDescriptors } from "./connector-descriptors";
 export default function ConnectorPanel({
   app,
@@ -15,55 +16,43 @@ export default function ConnectorPanel({
 }) {
   const { x } = useConnectedText();
   const contract = connectorDescriptors[app];
-  const [status, setStatus] = useState<any>();
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [dirty, setDirty] = useState(false);
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [choices, setChoices] = useState<any[]>([]);
-  const [sources, setSources] = useState<any[]>([]);
   const call = (name: string, value: unknown = {}) =>
     request(`/api/apps/${app}/actions/${name}`, value);
-  const refresh = async () => {
-    const v = await call("status");
-    setStatus(v);
-    if (!dirty) setSettings(v.settings);
-    if (contract.sources) {
-      const s = await request("/api/knowledge/external");
-      setSources(s.elements.filter((r: any) => r.app === app));
-    }
-  };
+  // The status action is a read; it polls while a connector job runs.
+  const statusPath = `/api/apps/${app}/actions/status`;
+  const [running, setRunning] = useState(false);
+  const statusRead = useRead(request, statusPath, {
+    body: {},
+    refetchMs: running ? 1500 : undefined,
+  });
+  const evidenceRead = useRead(request, "/api/knowledge/external", {
+    enabled: !!contract.sources,
+  });
+  const setRead = useSetRead(request);
+  const status = statusRead.data;
+  const sources: any[] = (evidenceRead.data?.elements ?? []).filter(
+    (r: any) => r.app === app,
+  );
+  const error =
+    actionError ||
+    (statusRead.error as Error | undefined)?.message ||
+    (evidenceRead.error as Error | undefined)?.message ||
+    "";
   useEffect(() => {
-    let active = true;
-    Promise.all([
-      call("status"),
-      contract.sources
-        ? request("/api/knowledge/external")
-        : Promise.resolve({ elements: [] }),
-    ])
-      .then(([v, evidence]) => {
-        if (active) {
-          setStatus(v);
-          setSettings(v.settings);
-          setSources(evidence.elements.filter((r: any) => r.app === app));
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request]);
-  useEffect(() => {
-    if (!status?.jobs.some((j: any) => ["queued", "running"].includes(j.state)))
-      return;
-    const timer = setInterval(
-      () => void refresh().catch((e) => setError(e.message)),
-      1500,
+    setRunning(
+      !!status?.jobs.some((j: any) => ["queued", "running"].includes(j.state)),
     );
-    return () => clearInterval(timer);
-  }, [status, app, dirty]);
+    if (status && !dirty) setSettings(status.settings);
+  }, [status]);
+  const refresh = async () => {
+    await statusRead.refetch();
+    if (contract.sources) await evidenceRead.refetch();
+  };
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
     setError("");
@@ -201,7 +190,7 @@ export default function ConnectorPanel({
                 revision: status.revision,
                 settings,
               });
-              setStatus(v);
+              setRead(statusPath, v, {});
               setSettings(v.settings);
               setDirty(false);
             })

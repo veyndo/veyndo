@@ -7,7 +7,8 @@ prefixes reload after a successful write.
 
 The cache lives in memory only and belongs to a `QueryProvider` scope: Studio keys it
 by shop, stage and person, so changing any of them drops all cached data. Outside a
-provider each component gets a private cache, so isolated views work without sharing. Loads that started before
+provider (isolated views, tests) all hooks share one fallback cache;
+`resetFallbackQueryCache()` drops it, and the unit-test setup does so after each test. Loads that started before
 an invalidation or a scope change never overwrite newer state. Nothing is written to
 browser storage; credentials stay with the transport the loader uses.
 

@@ -1,8 +1,9 @@
 /** Managed entity editor renders fields from the installed app contract. */
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { contentText } from "../../shared/i18n/content-language";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -36,39 +37,30 @@ export default function AppEntity({
     f.translatable && value && typeof value === "object"
       ? contentText(value as Record<string, string>, language, mainLocale)
       : value;
-  const [records, setRecords] = useState<Record<string, unknown>[]>([]);
   const [id, setId] = useState("default");
   const [revision, setRevision] = useState(0);
   const [fields, setFields] = useState<Record<string, unknown>>({});
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const load = async () => {
-    const v = await request(`/api/apps/${app}/entities/${entity.name}`);
-    setRecords(v.elements);
-  };
+  const recordsPath = `/api/apps/${app}/entities/${entity.name}`;
+  const recordsRead = useRead(request, recordsPath);
+  const setRead = useSetRead(request);
+  const records: Record<string, unknown>[] = recordsRead.data?.elements ?? [];
+  const error =
+    actionError || (recordsRead.error as Error | undefined)?.message || "";
+  const load = async () => setRead(recordsPath, await request(recordsPath));
+  // Open the first record once per entity, when its list first arrives.
+  const opened = useRef("");
   useEffect(() => {
-    let active = true;
-    request(`/api/apps/${app}/entities/${entity.name}`)
-      .then((v) => {
-        if (active) {
-          setRecords(v.elements);
-          const r = v.elements[0];
-          if (r) {
-            setId(r.id);
-            setRevision(r.revision);
-            setFields(
-              Object.fromEntries(entity.fields.map((f) => [f.name, r[f.name]])),
-            );
-          }
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, entity.name, request]);
+    const r = recordsRead.data?.elements?.[0];
+    if (!r || opened.current === recordsPath) return;
+    opened.current = recordsPath;
+    setId(r.id);
+    setRevision(r.revision);
+    setFields(
+      Object.fromEntries(entity.fields.map((f) => [f.name, r[f.name]])),
+    );
+  }, [recordsPath, recordsRead.data, entity.fields]);
   return (
     <section className="app-entity">
       <h3>
