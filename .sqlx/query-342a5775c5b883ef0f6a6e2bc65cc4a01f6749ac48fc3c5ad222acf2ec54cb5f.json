@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (request->>'amountMinor')::bigint AS \"amount!\" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "amount!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "342a5775c5b883ef0f6a6e2bc65cc4a01f6749ac48fc3c5ad222acf2ec54cb5f"
+}

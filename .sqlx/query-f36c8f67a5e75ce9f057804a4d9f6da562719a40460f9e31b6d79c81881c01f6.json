@@ -1,0 +1,89 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status FROM carts c JOIN checkout_handoffs h ON h.cart_id=c.id AND h.tenant=c.tenant WHERE h.tenant=$1 AND h.digest=$2 AND h.expires_at>now() AND h.consumed_at IS NULL FOR UPDATE OF c",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "token",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "token"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "carts",
+            "name": "status"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f36c8f67a5e75ce9f057804a4d9f6da562719a40460f9e31b6d79c81881c01f6"
+}

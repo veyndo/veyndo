@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "98b4aebd96f121e33d1f4a00e21c5c5b57972825096ccb756662535a129a4dae"
+}

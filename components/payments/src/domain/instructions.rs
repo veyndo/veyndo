@@ -69,10 +69,7 @@ pub fn admit(p: &Attempt, context: &mut Value, receipt: &Value) -> Result<bool> 
     let Some(value) = receipt.get("instructions") else {
         return Ok(false);
     };
-    if !p.context["capabilities"]
-        .as_array()
-        .is_some_and(|caps| caps.iter().any(|cap| cap == "instructions"))
-    {
+    if !p.ctx().can("instructions") {
         return Err(bad(
             "Payment method has no recipient-instructions capability",
         ));

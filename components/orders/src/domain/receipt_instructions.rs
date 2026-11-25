@@ -11,10 +11,17 @@ struct LinesInput {
     simulated: Option<bool>,
 }
 
+/// The kind of recipient instructions.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InstructionKind {
+    kind: Value,
+}
+
 pub fn lines(v: &Value, index: usize) -> Vec<String> {
     let input: LinesInput = view(v);
     let i = &input.instructions;
-    if i["kind"] != "bank_transfer" {
+    if view::<InstructionKind>(i).kind != "bank_transfer" {
         return vec![];
     }
     let word = |v: [&str; 4]| v[index.min(3)].to_owned();

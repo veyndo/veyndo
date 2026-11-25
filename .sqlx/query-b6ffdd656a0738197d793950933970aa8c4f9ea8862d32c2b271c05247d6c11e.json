@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE payment_jobs SET state='queued',available_at=now()+interval '10 seconds',lease_until=NULL WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b6ffdd656a0738197d793950933970aa8c4f9ea8862d32c2b271c05247d6c11e"
+}

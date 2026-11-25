@@ -19,11 +19,13 @@ pub async fn publish(
     context: &Value,
 ) -> Result<()> {
     let input: PublishInput = view(context);
-    let mut order: Value = sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
-        .bind(&p.tenant)
-        .bind(&p.order)
-        .fetch_one(&mut **tx)
-        .await?;
+    let mut order: Value = sqlx::query_scalar!(
+        "SELECT data FROM orders WHERE tenant=$1 AND id=$2",
+        p.tenant,
+        p.order
+    )
+    .fetch_one(&mut **tx)
+    .await?;
     if let Some(cart) = order["cart"].as_object_mut() {
         cart.remove("token");
     }

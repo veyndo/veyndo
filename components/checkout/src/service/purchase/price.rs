@@ -1,11 +1,13 @@
 //! The authoritative locked quote: product locks and channel admission, contract prices, locked settings, taxes, promotions, app hooks, the cashier discount and stock.
 use super::{Locked, Priced};
 use crate::domain::cart_quote::quote;
+use crate::domain::quote_view::{digital, quote_view};
 use crate::domain::tax_lines::tax_products;
 use crate::ports::{LockedQuote, Purchase};
 use crate::service::delivery::{dates_conn, enrich};
 use crate::store::admin_order::admit_products;
 use crate::store::legal_snapshot::snapshot as legal_snapshot;
+use crate::store::product_locks;
 use crate::store::product_snapshot::snapshot as product_snapshot;
 use crate::store::selected_customer::check as check_customer;
 use crate::store::tax_conditions::tax_settings_for_cart;
@@ -29,25 +31,19 @@ async fn locked_products(
     c: &StoredCart,
 ) -> Result<Vec<sqlx::postgres::PgRow>> {
     let ids: Vec<String> = c.data.items.iter().map(|i| i.id.clone()).collect();
-    let parents:Vec<String>=sqlx::query_scalar("SELECT DISTINCT parent_id FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NOT NULL").bind(&c.tenant).bind(&ids).fetch_all(&mut **tx).await?;
+    let parents = product_locks::parents(tx, &c.tenant, &ids).await?;
     let mut locks = ids;
     locks.extend(parents);
     locks.sort();
     locks.dedup();
-    let rows =
-        sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE")
-            .bind(&c.tenant)
-            .bind(locks)
-            .fetch_all(&mut **tx)
-            .await?;
+    let rows = product_locks::lock(tx, &c.tenant, &locks).await?;
     // Recheck the new catalog admission under product locks: edits cannot deactivate/hide a SKU
     // between the initial request check and the authoritative inventory/price snapshot.
     if rows.iter().any(|r| !r.get::<bool, _>("active")) {
         return Err(Error(StatusCode::NOT_FOUND, "Product unavailable".into()));
     }
-    let hidden: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM product_channel_visibility WHERE tenant=$1 AND product_id=ANY($2) AND channel_id=$3 AND NOT visible)")
-        .bind(&c.tenant).bind(rows.iter().map(|r|r.get::<String,_>("id")).collect::<Vec<_>>())
-        .bind(channel(h)).fetch_one(&mut **tx).await?;
+    let locked: Vec<String> = rows.iter().map(|r| r.get::<String, _>("id")).collect();
+    let hidden = product_locks::hidden(tx, &c.tenant, &locked, channel(h)).await?;
     if hidden {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -124,7 +120,7 @@ pub(super) async fn run<P: Purchase>(
         .await?;
     if selected.shipping_method_id != "pickup"
         && selected.address.is_none()
-        && !ps.iter().all(|p| p.extra["digital"] == true)
+        && !ps.iter().all(|p| digital(&p.extra))
     {
         return Err(bad("Delivery address required"));
     }
@@ -156,7 +152,9 @@ pub(super) async fn run<P: Purchase>(
     check_stock(c, &ps)?;
     let currency = config.currencies.selected(&c.data.currency)?;
     let money = amount(
-        q["price"]["totalPrice"]
+        quote_view(&q)
+            .price
+            .total_price
             .as_f64()
             .ok_or(bad("Invalid total"))?,
         &currency.code,

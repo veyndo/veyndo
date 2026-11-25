@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SAVEPOINT receipt",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "22a56c4c51f83f75d97c86220a9461b04cc0e59264ba363263b8c092f6357ffe"
+}

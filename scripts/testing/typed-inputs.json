@@ -59,11 +59,6 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/checkout/src/service/cart_projection.rs",
-      "function": "checkout_service",
-      "category": "in-place-edit"
-    },
-    {
       "file": "components/checkout/src/service/delivery.rs",
       "function": "dates_conn",
       "category": "in-place-edit"
@@ -99,33 +94,8 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/payments/src/domain/instructions.rs",
-      "function": "admit",
-      "category": "attempt-context"
-    },
-    {
-      "file": "components/payments/src/domain/refunds.rs",
-      "function": "capture",
-      "category": "attempt-context"
-    },
-    {
-      "file": "components/payments/src/service/funding.rs",
-      "function": "prepare",
-      "category": "attempt-context"
-    },
-    {
       "file": "components/payments/src/store/refund_receipts.rs",
       "function": "apply",
-      "category": "attempt-context"
-    },
-    {
-      "file": "components/payments/src/store/refund_receipts.rs",
-      "function": "reconcile",
-      "category": "attempt-context"
-    },
-    {
-      "file": "components/payments/src/store/settlements.rs",
-      "function": "admit",
       "category": "attempt-context"
     },
     {

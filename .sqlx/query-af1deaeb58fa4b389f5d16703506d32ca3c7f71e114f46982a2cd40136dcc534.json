@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT app,channel,account_ref,environment,ready,updated_at::text AS \"updated_at!\" FROM payment_provider_accounts WHERE tenant=$1 ORDER BY app,channel",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_provider_accounts",
+            "name": "app"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "channel",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_provider_accounts",
+            "name": "channel"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "account_ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_provider_accounts",
+            "name": "account_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "environment",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_provider_accounts",
+            "name": "environment"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "ready",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "payment_provider_accounts",
+            "name": "ready"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "af1deaeb58fa4b389f5d16703506d32ca3c7f71e114f46982a2cd40136dcc534"
+}

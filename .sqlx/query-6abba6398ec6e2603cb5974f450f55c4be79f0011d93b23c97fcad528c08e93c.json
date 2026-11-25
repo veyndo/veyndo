@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO checkout_handoffs(digest,tenant,cart_id,expires_at,recovery_digest,recovery_origin,recovery_expires_at) VALUES($1,$2,$3,now()+interval '10 minutes',$4::text,$5,CASE WHEN $4::text IS NOT NULL THEN now()+interval '24 hours' END) ON CONFLICT(cart_id) DO UPDATE SET digest=EXCLUDED.digest,expires_at=EXCLUDED.expires_at,recovery_digest=EXCLUDED.recovery_digest,recovery_origin=EXCLUDED.recovery_origin,recovery_expires_at=EXCLUDED.recovery_expires_at,consumed_at=NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6abba6398ec6e2603cb5974f450f55c4be79f0011d93b23c97fcad528c08e93c"
+}

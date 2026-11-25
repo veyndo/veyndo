@@ -4,7 +4,6 @@ use crate::domain::service_config::validate_service;
 use crate::store::jobs::enqueue_tx;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::{HashMap, HashSet};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{Raw, lenient, view};
@@ -16,6 +15,21 @@ use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{Payment, Settings};
 
 type AvailableMethods = HashMap<(String, String), String>;
+
+/// The methods a provider account enabled for the merchant.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AccountMethods {
+    methods: Value,
+}
+
+/// The provider account enabled the method.
+fn enables(account: &Value, method: &str) -> bool {
+    view::<AccountMethods>(account)
+        .methods
+        .as_array()
+        .is_some_and(|ms| ms.iter().any(|v| v == method))
+}
 
 /// The pinned adapter service of a provider version and environment, from the operator's payment service map.
 pub fn config(provider: &str, version: &str, environment: &str) -> Result<Value> {
@@ -37,12 +51,13 @@ pub async fn install_methods(
     t: &str,
     m: &Manifest,
 ) -> Result<()> {
-    let previous: Option<Value> =
-        sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(&m.id)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let previous: Option<Value> = sqlx::query_scalar!(
+        "SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2",
+        t,
+        m.id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
     let old = previous
         .map(serde_json::from_value::<Manifest>)
         .transpose()
@@ -50,17 +65,17 @@ pub async fn install_methods(
     if m.payment_provider.is_none() && old.as_ref().is_none_or(|p| p.payment_provider.is_none()) {
         return Ok(());
     }
-    let row = sqlx::query("SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-        .bind(t)
-        .fetch_one(&mut **tx)
-        .await?;
-    let mut s: Settings =
-        serde_json::from_value(row.get("data")).map_err(|_| bad("Invalid settings"))?;
+    let data = sqlx::query_scalar!(
+        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
+        t
+    )
+    .fetch_one(&mut **tx)
+    .await?;
+    let mut s: Settings = serde_json::from_value(data).map_err(|_| bad("Invalid settings"))?;
     // Basis locking serializes channel overrides. Check the actual resolved settings,
     // including an enabled channel method whose shared-basis counterpart is disabled.
     let patches: Vec<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_overrides WHERE tenant=$1")
-            .bind(t)
+        sqlx::query_scalar!("SELECT data FROM commerce_overrides WHERE tenant=$1", t)
             .fetch_all(&mut **tx)
             .await?;
     let mut scopes = vec![s.clone()];
@@ -153,11 +168,13 @@ pub async fn install_methods(
         });
     }
     validate(&s, &conditions)?;
-    sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2")
-        .bind(json!(s))
-        .bind(t)
-        .execute(&mut **tx)
-        .await?;
+    sqlx::query!(
+        "UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2",
+        json!(s),
+        t
+    )
+    .execute(&mut **tx)
+    .await?;
     Ok(())
 }
 /// Records the pending provider payment attempt of an order with its reservations and enqueues its creation.
@@ -221,16 +238,16 @@ pub async fn prepare_remote(
         .provider
         .as_deref()
         .ok_or(bad("Provider required"))?;
-    let row = sqlx::query(
+    let row = sqlx::query!(
         "SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
+        c.tenant,
+        provider
     )
-    .bind(&c.tenant)
-    .bind(provider)
     .fetch_optional(&mut **tx)
     .await?
     .ok_or(conflict("Payment app is inactive"))?;
     let m: Manifest =
-        serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid payment manifest"))?;
+        serde_json::from_value(row.manifest).map_err(|_| bad("Invalid payment manifest"))?;
     let contract = m
         .payment_provider
         .as_ref()
@@ -258,26 +275,23 @@ pub async fn prepare_remote(
     }
     let intent = intent(configured_intent, method)?;
     let channel = c.data.sales_channel.as_str();
-    let r=sqlx::query("SELECT * FROM payment_provider_accounts WHERE tenant=$1 AND app=$2 AND channel IN ($3,'default') ORDER BY (channel=$3) DESC LIMIT 1 FOR SHARE").bind(&c.tenant).bind(provider).bind(channel).fetch_optional(&mut **tx).await?.ok_or(conflict("Complete payment provider onboarding first"))?;
-    if !r.get::<bool, _>("ready") {
+    let r=sqlx::query!("SELECT account_ref,environment,ready,data FROM payment_provider_accounts WHERE tenant=$1 AND app=$2 AND channel IN ($3,'default') ORDER BY (channel=$3) DESC LIMIT 1 FOR SHARE", c.tenant, provider, channel).fetch_optional(&mut **tx).await?.ok_or(conflict("Complete payment provider onboarding first"))?;
+    if !r.ready {
         return Err(conflict("Payment account is not ready"));
     }
-    if !r.get::<Value, _>("data")["methods"]
-        .as_array()
-        .is_some_and(|ms| ms.iter().any(|v| v == &method.id))
-    {
+    if !enables(&r.data, &method.id) {
         return Err(conflict(
             "Provider has not enabled this method for the merchant",
         ));
     }
-    let environment: String = r.get("environment");
+    let environment: String = r.environment;
     config(provider, &m.version, &environment)?;
-    let context = json!({"apiVersion":"1","accountRef":r.get::<String,_>("account_ref"),"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":order.cart.price.currency_scale});
+    let context = json!({"apiVersion":"1","accountRef":r.account_ref,"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":order.cart.price.currency_scale});
     let id = uid();
     o["payment"] = json!({"method":selected.raw,"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
-    sqlx::query("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)").bind(&id).bind(&c.tenant).bind(order.id.as_deref().ok_or(bad("Order ID required"))?).bind(provider).bind(&m.version).bind(minor).bind(environment).bind(context).bind(currency).bind(order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
+    sqlx::query!("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)", id, c.tenant, order.id.as_deref().ok_or(bad("Order ID required"))?, provider, m.version, minor, environment, context, currency, order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
     for item in &c.data.items {
-        sqlx::query("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)").bind(&c.tenant).bind(&id).bind(&item.id).bind(item.quantity as i32).execute(&mut **tx).await?;
+        sqlx::query!("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)", c.tenant, id, item.id, item.quantity as i32).execute(&mut **tx).await?;
     }
     enqueue_tx(
         tx,
@@ -310,28 +324,33 @@ async fn available_environments(
     channel: &str,
     currency: &str,
 ) -> Result<AvailableMethods> {
-    let rows = sqlx::query("SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC").bind(t).bind(channel).fetch_all(&a.db).await?;
+    let rows = sqlx::query_as!(ProviderRow, "SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC", t, channel).fetch_all(&a.db).await?;
     enabled_rows(rows, currency)
 }
-fn enabled_rows(rows: Vec<sqlx::postgres::PgRow>, currency: &str) -> Result<AvailableMethods> {
+/// An active payment package with the account of the requested (or default) channel.
+struct ProviderRow {
+    id: String,
+    version: String,
+    manifest: Value,
+    ready: bool,
+    data: Value,
+    environment: String,
+}
+
+fn enabled_rows(rows: Vec<ProviderRow>, currency: &str) -> Result<AvailableMethods> {
     let mut enabled = HashMap::new();
     for row in rows {
-        let id: String = row.get("id");
-        let environment: String = row.get("environment");
-        if !row.get::<bool, _>("ready")
-            || config(&id, &row.get::<String, _>("version"), &environment).is_err()
-        {
+        let id: String = row.id;
+        let environment: String = row.environment;
+        if !row.ready || config(&id, &row.version, &environment).is_err() {
             continue;
         }
-        let manifest: Manifest = serde_json::from_value(row.get("manifest"))
-            .map_err(|_| bad("Invalid installed provider"))?;
-        let account: Value = row.get("data");
+        let manifest: Manifest =
+            serde_json::from_value(row.manifest).map_err(|_| bad("Invalid installed provider"))?;
+        let account: Value = row.data;
         if let Some(provider) = manifest.payment_provider {
             for method in provider.methods {
-                if method.currencies.iter().any(|c| c == currency)
-                    && account["methods"]
-                        .as_array()
-                        .is_some_and(|ms| ms.iter().any(|v| v == &method.id))
+                if method.currencies.iter().any(|c| c == currency) && enables(&account, &method.id)
                 {
                     enabled.insert((id.clone(), method.id), environment.clone());
                 }
@@ -379,6 +398,6 @@ pub async fn currency_methods_conn(
     code: &str,
     s: Settings,
 ) -> Result<Settings> {
-    let rows=sqlx::query("SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC").bind(t).bind(channel).fetch_all(conn).await?;
+    let rows=sqlx::query_as!(ProviderRow, "SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC", t, channel).fetch_all(conn).await?;
     Ok(filter_methods(&enabled_rows(rows, code)?, code, s))
 }

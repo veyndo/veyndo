@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT digest FROM extensions WHERE tenant=$1 FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "extensions",
+            "name": "digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f1d6b38a70e5d688101bbeb49724470aacedef6bc1e647fbf8d14f1a505e079d"
+}

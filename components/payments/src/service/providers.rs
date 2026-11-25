@@ -3,10 +3,9 @@ use crate::domain::attempt::Attempt;
 use crate::domain::service_config::approval_url;
 use crate::domain::settlements::summary;
 use crate::ports::{Gateway, Host};
-use crate::store::attempts::attempt;
+use crate::store::{attempts, jobs, provider_accounts};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, process_config,
@@ -53,24 +52,19 @@ pub async fn onboarding(
         return Err(bad("Supported onboarding operation and approval required"));
     }
     let channel = args.channel.as_deref().unwrap_or("default");
-    let owned: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)")
-            .bind(&t)
-            .bind(channel)
-            .fetch_one(&a.db)
-            .await?;
-    if !owned {
+    if !provider_accounts::channel_exists(&a.db, &t, channel).await? {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Sales channel not found".into(),
         ));
     }
     let configured = &process_config::get().payment_services[id][&m.version];
+    let configured_service: ConfiguredService = view(configured);
     let environment = args
         .environment
         .as_deref()
-        .or_else(|| configured["defaultEnvironment"].as_str())
-        .or_else(|| configured["environment"].as_str())
+        .or_else(|| configured_service.default_environment.as_str())
+        .or_else(|| configured_service.environment.as_str())
         .ok_or(Error(
             StatusCode::SERVICE_UNAVAILABLE,
             "Payment service not configured".into(),
@@ -192,36 +186,32 @@ async fn bind_account(
     (ready, public): (bool, Value),
 ) -> Result<()> {
     let mut tx = a.db.begin().await?;
-    let current: bool = sqlx::query_scalar(
-        "SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 AND version=$3 FOR SHARE",
-    )
-    .bind(t)
-    .bind(id)
-    .bind(version)
-    .fetch_optional(&mut *tx)
-    .await?
-    .unwrap_or(false);
-    if !current {
+    if !provider_accounts::share_package_active(&mut tx, t, id, version).await? {
         return Err(conflict("Payment package changed during onboarding"));
     }
-    let statement = if start {
-        "INSERT INTO payment_provider_accounts(tenant,app,channel,account_ref,environment,ready,data) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(tenant,app,channel) DO UPDATE SET account_ref=EXCLUDED.account_ref,environment=EXCLUDED.environment,ready=EXCLUDED.ready,data=EXCLUDED.data,updated_at=now()"
+    let key = provider_accounts::AccountKey {
+        tenant: t,
+        app: id,
+        channel,
+        account_ref: account,
+        environment,
+    };
+    if start {
+        provider_accounts::bind(&mut tx, &key, ready, &public).await?;
     } else {
         // Inspecting or disconnecting another environment cannot replace the active payment account.
-        "UPDATE payment_provider_accounts SET ready=$6,data=$7,updated_at=now() WHERE tenant=$1 AND app=$2 AND channel=$3 AND account_ref=$4 AND environment=$5"
-    };
-    sqlx::query(statement)
-        .bind(t)
-        .bind(id)
-        .bind(channel)
-        .bind(account)
-        .bind(environment)
-        .bind(ready)
-        .bind(public)
-        .execute(&mut *tx)
-        .await?;
+        provider_accounts::refresh(&mut tx, &key, ready, &public).await?;
+    }
     tx.commit().await?;
     Ok(())
+}
+
+/// The environments of a configured adapter service version.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConfiguredService {
+    default_environment: Value,
+    environment: Value,
 }
 
 /// The JSON fields `configured_environments` reads, typed as it reads them.
@@ -248,22 +238,18 @@ pub fn configured_environments(c: &Value) -> Value {
 pub async fn providers(a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "payments.read")?;
-    let rows=sqlx::query("SELECT id,version,active,manifest->'paymentProvider' AS contract FROM app_packages WHERE tenant=$1 AND manifest ? 'paymentProvider' ORDER BY id").bind(&t).fetch_all(&a.db).await?;
-    let accounts=sqlx::query("SELECT app,channel,account_ref,environment,ready,updated_at::text FROM payment_provider_accounts WHERE tenant=$1 ORDER BY app,channel").bind(&t).fetch_all(&a.db).await?;
-    let channels = sqlx::query("SELECT id FROM sales_channels WHERE tenant=$1 ORDER BY id")
-        .bind(&t)
-        .fetch_all(&a.db)
-        .await?;
+    let rows = provider_accounts::packages(&a.db, &t).await?;
+    let accounts = provider_accounts::accounts(&a.db, &t).await?;
+    let channels = provider_accounts::channels(&a.db, &t).await?;
     let services = &process_config::get().payment_services;
     let providers: Vec<_> = rows
         .iter()
         .map(|r| {
-            let (id, version) = (r.get::<String, _>("id"), r.get::<String, _>("version"));
-            json!({"id":id,"version":version,"active":r.get::<bool,_>("active"),"contract":r.get::<Value,_>("contract"),"configuration":configured_environments(&services[&id][&version])})
+            json!({"id":r.id,"version":r.version,"active":r.active,"contract":r.contract,"configuration":configured_environments(&services[&r.id][&r.version])})
         })
         .collect();
     Ok(
-        json!({"apiVersion":"1","channels":channels.iter().map(|r|json!({"id":r.get::<String,_>("id")})).collect::<Vec<_>>(),"providers":providers,"accounts":accounts.iter().map(|r|json!({"provider":r.get::<String,_>("app"),"channel":r.get::<String,_>("channel"),"accountRef":r.get::<String,_>("account_ref"),"environment":r.get::<String,_>("environment"),"ready":r.get::<bool,_>("ready"),"updatedAt":r.get::<String,_>("updated_at")})).collect::<Vec<_>>() }),
+        json!({"apiVersion":"1","channels":channels.iter().map(|id|json!({"id":id})).collect::<Vec<_>>(),"providers":providers,"accounts":accounts.iter().map(|r|json!({"provider":r.app,"channel":r.channel,"accountRef":r.account_ref,"environment":r.environment,"ready":r.ready,"updatedAt":r.updated_at})).collect::<Vec<_>>() }),
     )
 }
 
@@ -273,6 +259,16 @@ pub async fn providers(a: &State, h: &RequestContext) -> Result<Value> {
 struct MarkConfiguredInput {
     accounts: Value,
     providers: Value,
+}
+
+/// The fields of a listed provider or channel account that decide whether a provider is configured.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Listed {
+    id: Value,
+    active: Value,
+    provider: Value,
+    ready: Value,
 }
 
 /// An adapter provider is configured once it is active and one of its channel accounts is ready.
@@ -286,11 +282,13 @@ pub fn mark_configured(generic: &Value) -> Vec<Value> {
         .flatten()
         .map(|p| {
             let mut p = p.clone();
+            let listed: Listed = view(&p);
             p["configured"] = json!(
-                p["active"] == true
+                listed.active == true
                     && accounts
                         .iter()
-                        .any(|c| c["provider"] == p["id"] && c["ready"] == true)
+                        .map(view::<Listed>)
+                        .any(|c| c.provider == listed.id && c.ready == true)
             );
             p
         })
@@ -301,20 +299,18 @@ pub fn mark_configured(generic: &Value) -> Vec<Value> {
 pub async fn status(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "payments.read")?;
-    let rows = sqlx::query(
-        "SELECT * FROM payment_attempts WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
-    )
-    .bind(&t)
-    .fetch_all(&a.db)
-    .await?;
-    let jobs=sqlx::query("SELECT id,attempt_id,operation,state,error FROM payment_jobs WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(&t).fetch_all(&a.db).await?;
+    let rows = attempts::latest(&a.db, &t).await?;
+    let jobs = jobs::latest(&a.db, &t).await?;
     let mut list = vec![gateway.builtin(&t)];
     list.extend(mark_configured(&providers(a, h).await?));
-    if !list.iter().any(|p| p["id"] == "shopware_payments") {
+    if !list
+        .iter()
+        .any(|p| view::<Listed>(p).id == "shopware_payments")
+    {
         list.push(json!({"id":"shopware_payments","configured":false,"status":"private-adapter-required"}));
     }
     Ok(
-        json!({"providers":list,"attempts":rows.iter().map(|r|json!({"provider":r.get::<String,_>("provider"),"id":r.get::<String,_>("id"),"orderId":r.get::<String,_>("order_id"),"state":r.get::<String,_>("state"),"amountMinor":r.get::<i64,_>("amount_minor"),"currency":r.get::<String,_>("currency"),"currencyScale":r.get::<i16,_>("currency_scale"),"refundedMinor":r.get::<i64,_>("refunded_minor"),"adapterVersion":r.get::<String,_>("adapter_version"),"environment":r.get::<String,_>("environment"),"settlement":summary(&attempt(r))})).collect::<Vec<_>>(),"jobs":jobs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"attemptId":r.get::<String,_>("attempt_id"),"operation":r.get::<String,_>("operation"),"state":r.get::<String,_>("state"),"error":r.get::<Option<String>,_>("error")})).collect::<Vec<_>>()}),
+        json!({"providers":list,"attempts":rows.iter().map(|r|json!({"provider":r.provider,"id":r.id,"orderId":r.order,"state":r.state,"amountMinor":r.amount,"currency":r.currency,"currencyScale":r.currency_scale,"refundedMinor":r.refunded,"adapterVersion":r.adapter_version,"environment":r.environment,"settlement":summary(r)})).collect::<Vec<_>>(),"jobs":jobs.iter().map(|r|json!({"id":r.id,"attemptId":r.attempt_id,"operation":r.operation,"state":r.state,"error":r.error})).collect::<Vec<_>>()}),
     )
 }
 

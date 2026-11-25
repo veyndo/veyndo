@@ -3,13 +3,27 @@ use crate::domain::receipt_ref::identity;
 use crate::domain::service_config::approval_url;
 use crate::ports::{Gateway, Host};
 use crate::service::remote::execute;
-use crate::store::attempts::attempt;
+use crate::store::attempts;
 use crate::store::commands::customer;
+use crate::store::origins::hosted_alias;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use std::env;
+use veyndo_core::document::view;
 use veyndo_core::host_names::{configured_alias, same_origin_family};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
+
+/// The provider's embedded checkout session.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SessionAnswer {
+    ui_url: Value,
+    session_token: Value,
+    expires_in: Value,
+    nonce: Value,
+    ready_signal: Value,
+}
 
 pub async fn session(
     host: &dyn Host,
@@ -21,14 +35,10 @@ pub async fn session(
 ) -> Result<Value> {
     customer(a, h, id).await?;
     let t = tenant(h)?;
-    let row = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(id)
-        .fetch_one(&a.db)
-        .await?;
-    let p = attempt(&row);
+    let p = attempts::get(&a.db, &t, id).await?;
+    let ctx = p.ctx();
     if p.provider == "paypal"
-        || p.context["checkout"] != "embedded"
+        || ctx.checkout != "embedded"
         || !["ready", "approved"].contains(&p.state.as_str())
     {
         return Err(conflict("Embedded payment is not available in this state"));
@@ -36,7 +46,7 @@ pub async fn session(
     let parent = origin(
         a,
         &t,
-        p.context["channel"].as_str().unwrap_or("default"),
+        ctx.channel.as_str().unwrap_or("default"),
         parent_origin,
     )
     .await?;
@@ -51,7 +61,8 @@ pub async fn session(
     )
     .await?;
     identity(&p, &v)?;
-    let url = approval_url(host, &p, &v["uiUrl"])?.ok_or(bad("Checkout UI URL required"))?;
+    let answer: SessionAnswer = view(&v);
+    let url = approval_url(host, &p, &answer.ui_url)?.ok_or(bad("Checkout UI URL required"))?;
     if reqwest::Url::parse(&url)
         .map_err(|_| bad("Invalid checkout origin"))?
         .origin()
@@ -61,19 +72,21 @@ pub async fn session(
     {
         return Err(bad("Provider UI must use a separate origin"));
     }
-    let token = v["sessionToken"]
+    let token = answer
+        .session_token
         .as_str()
         .filter(|s| s.len() >= 24 && s.len() <= 2048)
         .ok_or(bad("Bounded checkout session token required"))?;
-    let ttl = v["expiresIn"]
+    let ttl = answer
+        .expires_in
         .as_u64()
         .filter(|n| *n > 0 && *n <= 600)
         .ok_or(bad("Short-lived checkout session required"))?;
-    if v["nonce"] != nonce {
+    if answer.nonce != nonce {
         return Err(bad("Checkout session nonce mismatch"));
     }
     Ok(
-        json!({"uiUrl":url,"sessionToken":token,"nonce":nonce,"expiresIn":ttl,"readySignal":v["readySignal"].as_bool().unwrap_or(false)}),
+        json!({"uiUrl":url,"sessionToken":token,"nonce":nonce,"expiresIn":ttl,"readySignal":answer.ready_signal.as_bool().unwrap_or(false)}),
     )
 }
 
@@ -117,8 +130,7 @@ pub async fn origin_conn(
             if alias == t {
                 return Ok(normalized);
             }
-            let owned: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3)").bind(t).bind(channel).bind(alias).fetch_one(conn).await?;
-            if owned {
+            if hosted_alias(conn, t, channel, alias).await? {
                 return Ok(normalized);
             }
         }

@@ -1,9 +1,10 @@
 //! Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions.
-use crate::domain::attempt::Attempt;
+use crate::domain::attempt::{Attempt, context_of};
 use crate::domain::receipt_ref::{ProviderReceipt, identity, is, reference};
 use crate::domain::service_config::approval_url;
 use crate::domain::{instructions, refunds, settlements, state};
 use crate::ports::Host;
+use crate::store::attempts::{Receipt, record_receipt};
 use crate::store::jobs::enqueue_tx;
 use crate::store::order_ledger::{release_stock, update_order};
 use crate::store::receipt_claims::claim;
@@ -90,10 +91,7 @@ pub async fn persist(
         if !r.confirmed() || r.authorized_amount_minor != Some(p.amount) {
             return Err(bad("Authorization receipt mismatch"));
         }
-        if !p.context["capabilities"]
-            .as_array()
-            .is_some_and(|cs| cs.iter().any(|c| c == "authorize"))
-        {
+        if !p.ctx().can("authorize") {
             return Err(bad("Method does not support authorization"));
         }
         let id = reference(&r.authorization_id)?;
@@ -138,46 +136,70 @@ pub async fn persist(
     if ["captured", "partially_captured"].contains(&status) && r.confirmed() {
         refunded = refund_receipts::reconcile(tx, p, &mut context, v).await?;
         if refunded > 0 {
+            let settled = context_of(&context);
             let next = settlements::state(
                 p,
-                context["capturedAmountMinor"].as_i64().unwrap_or(p.amount),
+                settled.captured_amount_minor.as_i64().unwrap_or(p.amount),
                 refunded,
-                context["captureClosed"] == true,
+                settled.capture_closed == true,
             );
             state::transition(&state, next)?;
             state = next.into();
         }
     }
-    sqlx::query("UPDATE payment_attempts SET state=$1,provider_order=$2,approval_url=coalesce($3,approval_url),capture_id=$4,refunded_minor=$5,provider_context=$6,revision=revision+1 WHERE tenant=$7 AND id=$8").bind(&state).bind(remote).bind(url).bind(&capture).bind(refunded).bind(&context).bind(&p.tenant).bind(&p.id).execute(&mut **tx).await?;
+    record_receipt(
+        tx,
+        p,
+        Receipt {
+            state: &state,
+            provider_order: remote,
+            approval_url: url.as_deref(),
+            capture: capture.as_deref(),
+            refunded,
+            context: &context,
+        },
+    )
+    .await?;
     if state != p.state
         || capture != p.capture
         || refunded != p.refunded
-        || context["capturedAmountMinor"] != p.context["capturedAmountMinor"]
-        || context["captureClosed"] != p.context["captureClosed"]
+        || context_of(&context).captured_amount_minor != p.ctx().captured_amount_minor
+        || context_of(&context).capture_closed != p.ctx().capture_closed
     {
-        if state == "approved" || (state == "authorized" && p.context["intent"] == "capture") {
-            let op = if p.context["intent"] == "authorize" {
-                "authorize"
-            } else {
-                "capture"
-            };
-            enqueue_tx(
-                tx,
-                &p.tenant,
-                &p.id,
-                op,
-                &format!("approved:{}", p.id),
-                &json!({}),
-            )
-            .await?;
-        }
-        update_order(host, tx, p, &state).await?;
+        follow(host, tx, p, &state).await?;
     }
     instruments::observe(tx, p, v).await?;
     if instructions_changed {
         store_instructions::publish(tx, p, &context).await?;
     }
     Ok(())
+}
+
+/// A changed ledger state queues the capture or authorization an approval asks for and moves the order along.
+async fn follow(
+    host: &dyn Host,
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    p: &Attempt,
+    state: &str,
+) -> Result<()> {
+    let intent = p.ctx().intent;
+    if state == "approved" || (state == "authorized" && intent == "capture") {
+        let op = if intent == "authorize" {
+            "authorize"
+        } else {
+            "capture"
+        };
+        enqueue_tx(
+            tx,
+            &p.tenant,
+            &p.id,
+            op,
+            &format!("approved:{}", p.id),
+            &json!({}),
+        )
+        .await?;
+    }
+    update_order(host, tx, p, state).await
 }
 
 #[cfg(test)]

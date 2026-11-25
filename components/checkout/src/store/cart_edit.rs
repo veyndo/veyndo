@@ -5,7 +5,6 @@ use crate::store::cart_load;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use sqlx::Row;
 use veyndo_b2b::store::access::guard_conn;
 use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
@@ -122,27 +121,30 @@ pub async fn commit(
         ));
     }
     let mut tx = a.db.begin().await?;
-    let locked =
-        sqlx::query("SELECT revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-            .bind(&c.tenant)
-            .bind(&c.token)
-            .fetch_one(&mut *tx)
-            .await?;
-    if locked.get::<String, _>("status") != "open" {
+    let locked = sqlx::query!(
+        "SELECT revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE",
+        c.tenant,
+        c.token
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    if locked.status != "open" {
         return Err(conflict("Cart is terminal"));
     }
-    if locked.get::<i64, _>("revision") != c.revision {
+    if locked.revision != c.revision {
         return Err(conflict("Cart revision changed; reload before editing"));
     }
     guard_conn(&mut tx, h, &c).await?;
     edits.locked(&mut tx, &c).await?;
     c.revision += 1;
-    sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE id=$3")
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
+    sqlx::query!(
+        "UPDATE carts SET data=$1,revision=$2 WHERE id=$3",
+        json!(c.data),
+        c.revision,
+        c.id
+    )
+    .execute(&mut *tx)
+    .await?;
     edits.committed(&mut tx, &c).await?;
     tx.commit().await?;
     Ok(c)

@@ -1,0 +1,60 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,active,group_name,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "group_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "group_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "c4dfa29f941d05b3b6fd94e39bdd4f17768e28975aa32e7bc3dcd739809c1c45"
+}

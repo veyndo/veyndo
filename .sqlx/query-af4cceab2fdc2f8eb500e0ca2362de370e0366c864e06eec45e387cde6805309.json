@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM payment_attempts p JOIN orders o ON o.id=p.order_id AND o.tenant=p.tenant JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE p.tenant=$1 AND p.id=$2 AND c.token=$3) AS \"ok!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ok!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "af4cceab2fdc2f8eb500e0ca2362de370e0366c864e06eec45e387cde6805309"
+}

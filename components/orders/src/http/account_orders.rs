@@ -81,6 +81,14 @@ pub fn project(raw: &Value, created: &str) -> Value {
     project_labels(raw, &mut v);
     v
 }
+/// The fields of a projected order the list and detail read back.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Listed {
+    id: Value,
+    state_labels: Value,
+}
+
 /// The cursor of the order list.
 #[derive(Default, Deserialize)]
 pub struct Page {
@@ -102,7 +110,7 @@ pub async fn list(
     let has_more = elements.len() > 100;
     elements.truncate(100);
     let next = if has_more {
-        elements.last().map(|v| v["id"].clone())
+        elements.last().map(|v| view::<Listed>(v).id)
     } else {
         None
     };
@@ -115,7 +123,7 @@ pub async fn list(
             .collect::<HashMap<_, _>>()
     );
     for v in &mut elements {
-        if !v["stateLabels"].is_object() {
+        if !view::<Listed>(v).state_labels.is_object() {
             v["stateLabels"] = labels.clone();
         }
     }
@@ -134,7 +142,7 @@ pub async fn detail(
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     v["receipts"] = json!(account_orders::receipts(&a, &t, &id).await?);
     let (machine, _) = machine(&a.db, &t).await?;
-    if !v["stateLabels"].is_object() {
+    if !view::<Listed>(&v).state_labels.is_object() {
         v["stateLabels"] = json!(
             machine
                 .states

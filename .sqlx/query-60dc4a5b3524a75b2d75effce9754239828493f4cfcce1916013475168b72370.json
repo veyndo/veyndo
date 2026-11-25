@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT email,group_name,company FROM customers WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "email"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "group_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "group_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "company",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "company"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "60dc4a5b3524a75b2d75effce9754239828493f4cfcce1916013475168b72370"
+}

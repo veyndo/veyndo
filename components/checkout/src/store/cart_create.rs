@@ -1,7 +1,8 @@
 //! A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer.
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{channel as channel_id, header, session_digest, tenant};
 use veyndo_core::{RequestContext, Result, State, bad, uid};
 use veyndo_customers::service::{address_book, sessions};
@@ -11,6 +12,13 @@ use veyndo_shop::service::language::language_context;
 use veyndo_shop::service::read_cache::settings as scoped;
 use veyndo_shop::types::cart::{Cart, StoredCart, selection};
 use veyndo_shop::types::settings::CheckoutSelection;
+
+/// The customer profile default a new cart starts from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProfileDefaults {
+    default_payment_method_id: Value,
+}
 
 /// Inserts an empty open cart with the shop's default delivery country, shipping and consumer payment.
 pub async fn new_cart(
@@ -76,13 +84,15 @@ pub async fn new_cart(
         revision: 1,
         status: "open".into(),
     };
-    sqlx::query("INSERT INTO carts(id,tenant,token,data) VALUES($1,$2,$3,$4)")
-        .bind(&c.id)
-        .bind(t)
-        .bind(&c.token)
-        .bind(json!(c.data))
-        .execute(&a.db)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO carts(id,tenant,token,data) VALUES($1,$2,$3,$4)",
+        c.id,
+        t,
+        c.token,
+        json!(c.data)
+    )
+    .execute(&a.db)
+    .await?;
     Ok(c)
 }
 /// A new cart of the request: its language, sales channel and currency, prefilled for a signed-in customer.
@@ -118,19 +128,17 @@ pub async fn new_cart_context(
         &settings,
     ));
     if let Some(email) = identity {
-        let r = sqlx::query("SELECT * FROM customers WHERE tenant=$1 AND email=$2")
-            .bind(&t)
-            .bind(&email)
+        let r = sqlx::query!("SELECT id,group_name,company,default_billing_address_id,default_shipping_address_id,profile FROM customers WHERE tenant=$1 AND email=$2", t, email)
             .fetch_one(&a.db)
             .await?;
         c.data.email = Some(email.clone());
-        c.data.customer_id = Some(r.get("id"));
-        c.data.group = r.get("group_name");
-        c.data.company = r.get("company");
+        c.data.customer_id = Some(r.id);
+        c.data.group = r.group_name;
+        c.data.company = r.company;
         if let Some(checkout) = &mut c.data.checkout {
             checkout.customer_email = Some(email.clone());
-            checkout.billing_address_id = r.get("default_billing_address_id");
-            checkout.shipping_address_id = r.get("default_shipping_address_id");
+            checkout.billing_address_id = r.default_billing_address_id;
+            checkout.shipping_address_id = r.default_shipping_address_id;
             let mut conn = a.db.begin().await?;
             if let Some(id) = &checkout.billing_address_id {
                 checkout.billing_address =
@@ -141,8 +149,11 @@ pub async fn new_cart_context(
                 checkout.country = checkout.address.as_ref().unwrap().country.clone();
             }
             drop(conn);
-            let p: Value = r.get("profile");
-            if let Some(id) = p["defaultPaymentMethodId"].as_str() {
+            let p: Value = r.profile;
+            if let Some(id) = view::<ProfileDefaults>(&p)
+                .default_payment_method_id
+                .as_str()
+            {
                 checkout.payment_method_id = id.into();
             }
             let (settings, _) = scoped(a, &t, channel).await?;
@@ -150,9 +161,7 @@ pub async fn new_cart_context(
             *checkout = resolve_selection(checkout.clone(), &c.data.group, &settings);
         }
     }
-    sqlx::query("UPDATE carts SET data=$1 WHERE id=$2")
-        .bind(json!(c.data))
-        .bind(&c.id)
+    sqlx::query!("UPDATE carts SET data=$1 WHERE id=$2", json!(c.data), c.id)
         .execute(&a.db)
         .await?;
     Ok(c)

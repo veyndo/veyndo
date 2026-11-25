@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO payment_inbox(tenant,provider,event_id,data) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "07727da2c65b4ab346bb96804b55085648b9113623e971718bcaf0e8a3183350"
+}

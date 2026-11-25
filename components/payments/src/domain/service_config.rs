@@ -42,6 +42,13 @@ pub fn validate_service(c: &Value, environment: &str) -> Result<()> {
     }
     Ok(())
 }
+/// The buyer approval origins an adapter service may hand out.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApprovalOrigins {
+    approval_origins: Value,
+}
+
 pub fn approval_url(host: &dyn Host, p: &Attempt, value: &Value) -> Result<Option<String>> {
     let Some(s) = value.as_str() else {
         if value.is_null() {
@@ -54,11 +61,14 @@ pub fn approval_url(host: &dyn Host, p: &Attempt, value: &Value) -> Result<Optio
     if !approval_transport(&u, &p.environment)
         || !u.username().is_empty()
         || u.password().is_some()
-        || !c["approvalOrigins"].as_array().is_some_and(|origins| {
-            origins
-                .iter()
-                .any(|v| v.as_str() == Some(u.origin().ascii_serialization().as_str()))
-        })
+        || !view::<ApprovalOrigins>(&c)
+            .approval_origins
+            .as_array()
+            .is_some_and(|origins| {
+                origins
+                    .iter()
+                    .any(|v| v.as_str() == Some(u.origin().ascii_serialization().as_str()))
+            })
     {
         return Err(bad("Provider approval origin is not authorized"));
     }

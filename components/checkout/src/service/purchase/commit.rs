@@ -1,16 +1,19 @@
 //! Final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call.
 use super::{Locked, Placed, Priced};
 use crate::domain::admin_order::{admit_payment, order as admin_order};
+use crate::domain::quote_view::{OrderRef, quote_view};
 use crate::domain::review_binding::validate as validate_review;
 use crate::domain::session_review::Review;
 use crate::ports::Purchase;
 use crate::store::customer_snapshot::snapshot as customer_snapshot;
+use crate::store::purchase::{self, NewOrder};
 use crate::store::session::admit_channel;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_b2b::service::quote_contract::consume as consume_quote;
 use veyndo_b2b::store::purchase::{check_locked, record};
 use veyndo_catalog::store::order_downloads::grant;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::live_parent;
 use veyndo_core::{RequestContext, Result, bad, process_config, uid};
@@ -23,6 +26,13 @@ use veyndo_payments::service::sessions::origin_conn;
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
 
+/// The legal policy version a purchase froze.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LegalSnapshot {
+    policy_version: Value,
+}
+
 /// Prepares the provider payment of an external order and stores the order with it.
 async fn prepare_external<P: Purchase>(
     port: &P,
@@ -34,7 +44,7 @@ async fn prepare_external<P: Purchase>(
     review: Option<&Review>,
 ) -> Result<()> {
     let return_origin = match header(h, "origin") {
-        Some(origin) if q["paymentMethod"]["provider"].is_string() => {
+        Some(origin) if quote_view(q).method().provider.is_string() => {
             Some(origin_conn(tx, &c.tenant, &c.data.sales_channel, Some(origin)).await?)
         }
         _ => None,
@@ -42,15 +52,15 @@ async fn prepare_external<P: Purchase>(
     port.prepare_payment(tx, c, order, minor, return_origin.as_deref())
         .await?;
     if let Some(review) = review {
-        review.check_prepared_payment(&order["payment"], process_config::get().strict)?;
+        review.check_prepared_payment(
+            &view::<OrderRef>(order).payment,
+            process_config::get().strict,
+        )?;
     }
     prepare_funding(tx, h, c, order).await?;
     order_fields(order);
-    sqlx::query("UPDATE orders SET data=$1 WHERE id=$2")
-        .bind(&*order)
-        .bind(order["id"].as_str())
-        .execute(&mut **tx)
-        .await?;
+    let id = view::<OrderRef>(order).id;
+    purchase::update_order(tx, id.as_str(), order).await?;
     Ok(())
 }
 
@@ -68,14 +78,14 @@ async fn admit<P: Purchase>(
     validate_review(h, c, q, minor)?;
     if let Some(review) = review {
         admit_channel(tx, c).await?;
-        review.check_quote(q, &priced.legal_snapshot["policyVersion"], minor)?;
+        review.check_quote(
+            q,
+            &view::<LegalSnapshot>(&priced.legal_snapshot).policy_version,
+            minor,
+        )?;
     }
     if priced.config.is_business(&c.data.group) {
-        let digest: String =
-            sqlx::query_scalar("SELECT digest FROM extensions WHERE tenant=$1 FOR SHARE")
-                .bind(&c.tenant)
-                .fetch_one(&mut **tx)
-                .await?;
+        let digest = purchase::policy_digest(tx, &c.tenant).await?;
         port.approve(modules, &digest, minor)?;
     }
     Ok(())
@@ -91,19 +101,19 @@ async fn admit_payment_contact<P: Purchase>(
 ) -> Result<bool> {
     let (q, minor) = (&priced.q, priced.minor);
     admit_payment(c, q)?;
-    let external = q["paymentMethod"]["mode"] == "app";
+    let method = quote_view(q).method();
+    let external = method.mode == "app";
     if external && live_parent(tx, &c.tenant).await?.is_some() {
         return Err(bad("External payments are disabled in private sandboxes"));
     }
-    if external && q["paymentMethod"]["provider"].is_null() {
+    if external && method.provider.is_null() {
         port.provider_ready(&c.tenant, &priced.selected.payment_method_id)?;
     }
     // Financial providers/manual invoices require usable contact and billing data.
     // The explicit simulated demo method keeps legacy headless fixture carts compatible.
     port.settlement(h, c, q, &priced.config, minor)?;
     if !verified_kernel::checkout_contact_admissible(
-        q["paymentMethod"]["mode"] == "simulated"
-            || (q["paymentMethod"]["mode"] == "cash" && h.pos.is_some()),
+        method.mode == "simulated" || (method.mode == "cash" && h.pos.is_some()),
         c.data.email.is_some(),
         priced.selected.billing_address.is_some(),
     ) {
@@ -121,7 +131,9 @@ fn order_document(
     review: Option<&Review>,
 ) -> Value {
     let q = &priced.q;
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":q,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":q["deliveries"],"payment":{"method":q["paymentMethod"],"provider":if q["paymentMethod"]["mode"]=="simulated"{"simulated"}else{"manual"},"state":if q["paymentMethod"]["mode"]=="simulated"{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
+    let quoted = quote_view(q);
+    let simulated = quoted.method().mode == "simulated";
+    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":q,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":quoted.deliveries,"payment":{"method":quoted.payment_method,"provider":if simulated{"simulated"}else{"manual"},"state":if simulated{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
     if let Some(review) = review {
         order["checkoutSessionId"] = json!(review.session());
     }
@@ -163,7 +175,7 @@ pub(super) async fn run<P: Purchase>(
     port.bind_order(&mut tx, &c.tenant, &mut order).await?;
     admin_order(&c, &mut order);
     order["money"] = json!(priced.money);
-    order["currencyContext"] = priced.q["currencyContext"].clone();
+    order["currencyContext"] = quote_view(&priced.q).currency_context;
     order["legal"] = priced.legal_snapshot.clone();
     if let Some(p) = &procurement {
         order["b2b"] = json!({"companyId":p.company_id,"unitId":p.context.unit_id,"purchaseOrder":p.context.purchase_order,"approvalId":p.approval,"quoteId":p.context.quote_id});
@@ -173,7 +185,18 @@ pub(super) async fn run<P: Purchase>(
     }
     port.settle(&mut tx, h, &c, &mut order).await?;
     order_fields(&mut order);
-    sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data) VALUES($1,$2,$3,$4,$5,$6)").bind(&id).bind(&c.tenant).bind(&c.id).bind(key).bind(&fingerprint).bind(&order).execute(&mut *tx).await?;
+    purchase::insert_order(
+        &mut tx,
+        &NewOrder {
+            id: &id,
+            tenant: &c.tenant,
+            cart: &c.id,
+            key,
+            fingerprint: &fingerprint,
+            data: &order,
+        },
+    )
+    .await?;
     record(&mut tx, &c, &id, procurement.as_ref()).await?;
     consume_quote(&mut tx, &c, &id).await?;
     let inventory = InventoryLines::new(c.data.items.iter().map(|i| (i.id.as_str(), i.quantity)))?;
@@ -186,13 +209,9 @@ pub(super) async fn run<P: Purchase>(
     }
     consume(&mut tx, &c.tenant, &inventory).await?;
     c.data.order = Some(order.clone());
-    sqlx::query("UPDATE carts SET status='completed',data=$1,revision=revision+1 WHERE id=$2")
-        .bind(json!(c.data))
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
-    if !external && let Some(e)=sqlx::query("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=$2 AND rewarded=false RETURNING variant").bind(&c.tenant).bind(&c.data.session).fetch_optional(&mut *tx).await? {
-        sqlx::query("UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2").bind(&c.tenant).bind(e.get::<String,_>("variant")).execute(&mut *tx).await?;
+    purchase::complete_cart(&mut tx, &c.id, &json!(c.data)).await?;
+    if !external {
+        purchase::reward_exposure(&mut tx, &c.tenant, &c.data.session).await?;
     }
     veyndo_core::store::outbox::publish_on(
         &mut *tx,

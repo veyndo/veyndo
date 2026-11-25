@@ -3,9 +3,10 @@ use super::{Admission, Locked, Prepared};
 use crate::domain::admin_order::purchase as admin_purchase;
 use crate::domain::session_review::Review;
 use crate::store::admin_order::lock_checkout;
+use crate::store::carts::lock_by_token;
+use crate::store::purchase::{lock_key as lock_idempotency_key, placed};
 use crate::store::session::admit_channel;
 use serde_json::json;
-use sqlx::Row;
 use veyndo_b2b::store::access::{guard_conn, identity};
 use veyndo_b2b::store::purchase::lock_unit;
 use veyndo_core::shop_scope::{channel, tenant, token};
@@ -14,7 +15,7 @@ use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, process_co
 use veyndo_marketing::service::conditions::validate_condition;
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::domain::cart_admission::request;
-use veyndo_shop::types::cart::{StoredCart, stored};
+use veyndo_shop::types::cart::StoredCart;
 
 /// The locked cart still belongs to the reviewed session and its current buyer.
 async fn admit_reviewed(
@@ -57,18 +58,12 @@ pub(super) async fn run<P>(
     let mut tx = a.db.begin().await?;
     context(&mut tx, h, "checkout").await?;
     let lock_key = format!("{}:{key}", tenant(h)?);
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(lock_key)
-        .execute(&mut *tx)
-        .await?;
+    lock_idempotency_key(&mut tx, &lock_key).await?;
     lock_checkout(&mut tx, &prepared.admitted, &validate_condition).await?;
-    let r = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(tenant(h)?)
-        .bind(token(h)?)
-        .fetch_optional(&mut *tx)
+    let c = lock_by_token(&mut tx, &tenant(h)?, token(h)?)
         .await?
-        .ok_or(bad("Cart not found"))?;
-    let c = stored(&r)?;
+        .ok_or(bad("Cart not found"))?
+        .into_cart()?;
     request(h, &c)?;
     lock_unit(&mut tx, &c).await?;
     guard_conn(&mut tx, h, &c).await?;
@@ -84,22 +79,15 @@ pub(super) async fn run<P>(
         customer_context(&mut tx, email).await?;
     }
     let fingerprint = purchase_fingerprint(h, &c);
-    if let Some(r) = sqlx::query(
-        "SELECT data,fingerprint,cart_id FROM orders WHERE tenant=$1 AND idempotency_key=$2",
-    )
-    .bind(&c.tenant)
-    .bind(key)
-    .fetch_optional(&mut *tx)
-    .await?
-    {
+    if let Some(r) = placed(&mut tx, &c.tenant, key).await? {
         if !verified_kernel::replay_admissible(
-            r.get::<String, _>("cart_id") == c.id,
+            r.cart_id == c.id,
             c.status == "open",
-            r.get::<String, _>("fingerprint") == fingerprint,
+            r.fingerprint == fingerprint,
         ) {
             return Err(conflict("Idempotency key was used for another purchase"));
         }
-        let order = r.get("data");
+        let order = r.data;
         if let Some(review) = review {
             admit_channel(&mut tx, &c).await?;
             review.check_replay(&order, process_config::get().strict)?;

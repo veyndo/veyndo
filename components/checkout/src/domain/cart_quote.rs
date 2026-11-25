@@ -1,5 +1,8 @@
 //! The authoritative cart quote: quantity pricing, app configuration fees and localized totals. Totals are added as whole minor units.
+use crate::domain::quote_view::LineView;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::domain::context;
@@ -11,6 +14,13 @@ use veyndo_pricing::types::currency::{Config, Definition, scale};
 use veyndo_pricing::{money, verified_kernel};
 use veyndo_shop::Settings;
 use veyndo_shop::types::cart::{AppConfiguration, StoredCart};
+
+/// The app an app configuration belongs to.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ConfigApp {
+    app: Value,
+}
 
 /// The priced cart: line prices with tiers, app configuration fees and taxes, totals summed in whole minor units.
 pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Value> {
@@ -98,10 +108,13 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             .data
             .app_configurations
             .values()
-            .filter(|v| Some(v.product_id.as_str()) == line["id"].as_str())
+            .filter(|v| Some(v.product_id.as_str()) == view::<LineView>(line).id.as_str())
             .map(|v| json!(v))
             .collect::<Vec<_>>();
-        configs.sort_by(|a, b| a["app"].as_str().cmp(&b["app"].as_str()));
+        configs.sort_by(|a, b| {
+            let (a, b) = (view::<ConfigApp>(a).app, view::<ConfigApp>(b).app);
+            a.as_str().cmp(&b.as_str())
+        });
         if !configs.is_empty() {
             line["configuration"] = configs[0].clone();
             line["appConfigurations"] = json!(configs);

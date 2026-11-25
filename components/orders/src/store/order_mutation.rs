@@ -2,7 +2,6 @@
 use crate::domain::order_fields::order_fields;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
@@ -16,17 +15,18 @@ pub async fn replay(
     if !(8..=128).contains(&key.len()) {
         return Err(bad("Invalid order request key"));
     }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,28))")
-        .bind(format!("{t}:{key}"))
-        .execute(&mut **tx)
-        .await?;
-    let r = sqlx::query("SELECT fingerprint,response FROM order_transition_requests WHERE tenant=$1 AND request_key=$2")
-        .bind(t).bind(key).fetch_optional(&mut **tx).await?;
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1,28))",
+        format!("{t}:{key}")
+    )
+    .execute(&mut **tx)
+    .await?;
+    let r = sqlx::query!("SELECT fingerprint,response FROM order_transition_requests WHERE tenant=$1 AND request_key=$2", t, key).fetch_optional(&mut **tx).await?;
     if let Some(r) = r {
-        if r.get::<String, _>("fingerprint") != fingerprint {
+        if r.fingerprint != fingerprint {
             return Err(conflict("Order request key reused with different input"));
         }
-        return Ok(Some(r.get("response")));
+        return Ok(Some(r.response));
     }
     Ok(None)
 }
@@ -36,6 +36,14 @@ pub struct Audit<'a> {
     pub data: Value,
     pub event_kind: &'a str,
     pub event: Value,
+}
+
+/// The change kind and target state an audit entry records.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AuditFields {
+    kind: Value,
+    state: Value,
 }
 
 /// The identity, revision and import origin of an order being persisted.
@@ -65,25 +73,26 @@ pub async fn persist(
         .id
         .as_deref()
         .ok_or(bad("Order identity unavailable"))?;
-    sqlx::query(
+    sqlx::query!(
         "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,$4,$5)",
+        t,
+        id,
+        h.principal.user.as_deref().unwrap_or("unknown"),
+        audit.kind,
+        audit.data
     )
-    .bind(t)
-    .bind(id)
-    .bind(h.principal.user.as_deref().unwrap_or("unknown"))
-    .bind(audit.kind)
-    .bind(&audit.data)
     .execute(&mut **tx)
     .await?;
-    sqlx::query("UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3")
-        .bind(&*o)
-        .bind(t)
-        .bind(id)
-        .execute(&mut **tx)
-        .await?;
-    sqlx::query("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3")
-        .bind(&*o).bind(t).bind(id).execute(&mut **tx).await?;
-    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":stored.revision})).await?;
+    sqlx::query!(
+        "UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3",
+        &*o,
+        t,
+        id
+    )
+    .execute(&mut **tx)
+    .await?;
+    sqlx::query!("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3", &*o, t, id).execute(&mut **tx).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":view::<AuditFields>(&audit.data).kind,"state":view::<AuditFields>(&audit.data).state,"revision":stored.revision})).await?;
     veyndo_core::store::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
     Ok(())
 }
@@ -96,8 +105,7 @@ pub async fn remember(
     fingerprint: &str,
     response: &Value,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO order_transition_requests(tenant,request_key,order_id,fingerprint,response) VALUES($1,$2,$3,$4,$5)")
-        .bind(t).bind(key).bind(id).bind(fingerprint).bind(response).execute(&mut **tx).await?;
+    sqlx::query!("INSERT INTO order_transition_requests(tenant,request_key,order_id,fingerprint,response) VALUES($1,$2,$3,$4,$5)", t, key, id, fingerprint, response).execute(&mut **tx).await?;
     Ok(())
 }
 

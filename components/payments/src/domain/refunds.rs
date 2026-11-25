@@ -8,6 +8,14 @@ use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_pricing::verified_kernel;
 
+/// One refund: the capture it draws from and its amount.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RefundEntry {
+    capture_id: Value,
+    amount_minor: Value,
+}
+
 /// The JSON fields `capture` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -18,7 +26,9 @@ struct CaptureInput {
 pub fn capture(p: &Attempt, context: &Value, refund: &Value) -> Result<(String, i64)> {
     let input: CaptureInput = view(context);
     let captures = input.capture_receipts.as_object();
-    let id = refund["captureId"]
+    let requested: RefundEntry = view(refund);
+    let id = requested
+        .capture_id
         .as_str()
         .or_else(|| match captures {
             Some(cs) if cs.len() == 1 => cs.keys().next().map(String::as_str),
@@ -29,7 +39,7 @@ pub fn capture(p: &Attempt, context: &Value, refund: &Value) -> Result<(String, 
     reference(&Value::String(id.into()))?;
     let amount = captures
         .and_then(|cs| cs.get(id))
-        .and_then(|c| c["amountMinor"].as_i64())
+        .and_then(|c| view::<RefundEntry>(c).amount_minor.as_i64())
         .or_else(|| (p.capture.as_deref() == Some(id)).then(|| settlements::captured(p)))
         .filter(|n| *n > 0)
         .ok_or(bad("Refund capture does not belong to this payment"))?;
@@ -49,12 +59,13 @@ pub fn used(p: &Attempt, context: &Value, capture: &str) -> i64 {
     };
     let known: i64 = rows
         .values()
-        .filter(|r| r["captureId"].as_str().or(p.capture.as_deref()) == Some(capture))
-        .filter_map(|r| r["amountMinor"].as_i64())
+        .map(view::<RefundEntry>)
+        .filter(|r| r.capture_id.as_str().or(p.capture.as_deref()) == Some(capture))
+        .filter_map(|r| r.amount_minor.as_i64())
         .fold(0_i64, i64::saturating_add);
     let total: i64 = rows
         .values()
-        .filter_map(|r| r["amountMinor"].as_i64())
+        .filter_map(|r| view::<RefundEntry>(r).amount_minor.as_i64())
         .fold(0_i64, i64::saturating_add);
     known
         + if p.capture.as_deref() == Some(capture) {

@@ -4,6 +4,7 @@ use crate::domain::order_workflow::{guard, workflow};
 use crate::http::transitions::accepted_machine;
 use crate::store::machine::machine;
 use crate::store::order_mutation;
+use crate::types::order_document::OrderControl;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -61,7 +62,8 @@ pub async fn split_delivery(
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     let (m, mr) = accepted_machine(&o, m, mr)?;
-    let revision = o["revision"].as_u64().unwrap_or(1);
+    let control: OrderControl = view(&o);
+    let revision = control.revision.as_u64().unwrap_or(1);
     if !verified_kernel::revision_admissible(revision, input.revision.unwrap_or(0)) {
         return Err(conflict("Order revision changed"));
     }
@@ -72,7 +74,7 @@ pub async fn split_delivery(
         .ok_or(bad("Shipment index required"))?;
     let split_id = uid();
     let (original, parcel) = veyndo_shipping::domain::split::allocate(
-        &o["deliveries"][index],
+        control.deliveries.get(index).unwrap_or(&Value::Null),
         &input.positions,
         terminal,
         &split_id,

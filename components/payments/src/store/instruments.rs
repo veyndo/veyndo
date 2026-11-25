@@ -15,21 +15,21 @@ pub async fn observe(
     if v.get("vault").is_none() {
         return Ok(());
     }
-    sqlx::query("SAVEPOINT vault_metadata")
+    sqlx::query!("SAVEPOINT vault_metadata")
         .execute(&mut **tx)
         .await?;
     let status = if accept(tx, p, v).await.is_err() {
-        sqlx::query("ROLLBACK TO SAVEPOINT vault_metadata")
+        sqlx::query!("ROLLBACK TO SAVEPOINT vault_metadata")
             .execute(&mut **tx)
             .await?;
         "failed"
     } else {
         "saved"
     };
-    sqlx::query("RELEASE SAVEPOINT vault_metadata")
+    sqlx::query!("RELEASE SAVEPOINT vault_metadata")
         .execute(&mut **tx)
         .await?;
-    sqlx::query("UPDATE payment_attempts SET provider_context=jsonb_set(provider_context,'{vaultStatus}',$3) WHERE tenant=$1 AND id=$2").bind(&p.tenant).bind(&p.id).bind(json!(status)).execute(&mut **tx).await?;
+    sqlx::query!("UPDATE payment_attempts SET provider_context=jsonb_set(provider_context,'{vaultStatus}',$3) WHERE tenant=$1 AND id=$2", p.tenant, p.id, json!(status)).execute(&mut **tx).await?;
     Ok(())
 }
 /// The JSON fields `accept` reads, typed as it reads them.
@@ -38,6 +38,15 @@ pub async fn observe(
 struct AcceptInput {
     #[serde(deserialize_with = "lenient")]
     status: Option<String>,
+}
+
+/// The vault handle a provider receipt returns.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Vault {
+    customer_id: Value,
+    consent_id: Value,
+    reference: Value,
 }
 
 /// A financial provider receipt may add a handle only for the original account's explicit save consent.
@@ -50,10 +59,12 @@ pub async fn accept(
     let Some(vault) = v.get("vault") else {
         return Ok(());
     };
-    let f = &p.context["funding"];
-    if f["save"] != true
-        || f["customerId"] != vault["customerId"]
-        || f["consentId"] != vault["consentId"]
+    let ctx = p.ctx();
+    let f = &ctx.funding;
+    let held: Vault = view(vault);
+    if f.save != true
+        || f.customer_id != held.customer_id
+        || f.consent_id != held.consent_id
         || !["captured", "authorized", "partially_captured"]
             .contains(&input.status.as_deref().unwrap_or(""))
     {
@@ -61,26 +72,30 @@ pub async fn accept(
             "Saved instrument lacks original customer consent and successful payment",
         ));
     }
-    let reference = reference(&vault["reference"])?;
+    let reference = reference(&held.reference)?;
     let metadata = projection(vault)?;
-    let id = f["consentId"]
+    let id = f
+        .consent_id
         .as_str()
         .ok_or(bad("Consent identity required"))?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,515))")
-        .bind(format!("{}:{}", p.tenant, f["customerId"]))
-        .execute(&mut **tx)
-        .await?;
-    let count:i64=sqlx::query_scalar("SELECT count(*) FROM payment_instruments WHERE tenant=$1 AND customer_id=$2 AND state='active' AND id<>$3").bind(&p.tenant).bind(f["customerId"].as_str().unwrap_or("")).bind(id).fetch_one(&mut **tx).await?;
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1,515))",
+        format!("{}:{}", p.tenant, f.customer_id)
+    )
+    .execute(&mut **tx)
+    .await?;
+    let count:i64=sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM payment_instruments WHERE tenant=$1 AND customer_id=$2 AND state='active' AND id<>$3"#, p.tenant, f.customer_id.as_str().unwrap_or(""), id).fetch_one(&mut **tx).await?;
     if count >= 32 {
         return Err(bad("Maximum 32 saved payment methods per customer"));
     }
-    sqlx::query("INSERT INTO payment_instruments(tenant,id,customer_id,provider,adapter_version,account_ref,environment,method,reference,attempt_id,metadata,consent_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(tenant,id) DO NOTHING").bind(&p.tenant).bind(id).bind(f["customerId"].as_str().unwrap_or("")).bind(&p.provider).bind(&p.adapter_version).bind(p.context["accountRef"].as_str().unwrap_or("")).bind(&p.environment).bind(p.context["method"].as_str().unwrap_or("")).bind(reference).bind(&p.id).bind(metadata).bind(f["consentVersion"].as_str().unwrap_or("")).execute(&mut **tx).await?;
-    let original: String =
-        sqlx::query_scalar("SELECT reference FROM payment_instruments WHERE tenant=$1 AND id=$2")
-            .bind(&p.tenant)
-            .bind(id)
-            .fetch_one(&mut **tx)
-            .await?;
+    sqlx::query!("INSERT INTO payment_instruments(tenant,id,customer_id,provider,adapter_version,account_ref,environment,method,reference,attempt_id,metadata,consent_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(tenant,id) DO NOTHING", p.tenant, id, f.customer_id.as_str().unwrap_or(""), p.provider, p.adapter_version, ctx.account_ref.as_str().unwrap_or(""), p.environment, ctx.method.as_str().unwrap_or(""), reference, p.id, metadata, f.consent_version.as_str().unwrap_or("")).execute(&mut **tx).await?;
+    let original: String = sqlx::query_scalar!(
+        "SELECT reference FROM payment_instruments WHERE tenant=$1 AND id=$2",
+        p.tenant,
+        id
+    )
+    .fetch_one(&mut **tx)
+    .await?;
     if original != reference {
         return Err(conflict("Saved payment handle changed"));
     }

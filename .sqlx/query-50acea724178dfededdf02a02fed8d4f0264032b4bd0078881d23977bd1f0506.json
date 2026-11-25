@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,attempt_id,operation,request,attempts FROM payment_jobs WHERE attempt_id=$1 AND available_at<=now() AND (state='queued' OR state='running' AND lease_until<now()) ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "attempt_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "attempt_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "operation",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "operation"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "request",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "request"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "attempts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "50acea724178dfededdf02a02fed8d4f0264032b4bd0078881d23977bd1f0506"
+}

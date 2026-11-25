@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'receipt',$4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "98b5ff0599d4457d330595c367c2a6af448a33f5fa13e861a75fbb0b0d08fecd"
+}

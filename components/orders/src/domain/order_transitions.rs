@@ -1,6 +1,7 @@
 //! Revision-free order transition rules: manual payment marks, delivery dispatch and the cancellation preconditions.
 use crate::domain::order_machine::OrderMachine;
 use crate::domain::order_workflow::external;
+use crate::types::order_document::DeliveryControl;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_catalog::domain::rich_document::safe_url;
@@ -71,8 +72,9 @@ pub fn delivery(o: &mut Value, v: &Value, target: &str) -> Result<()> {
         .as_array_mut()
         .and_then(|v| v.get_mut(index))
         .ok_or(bad("Order has no delivery"))?;
-    let current = d["state"].as_str().unwrap_or("open");
-    if !d["booking"].is_null() {
+    let control: DeliveryControl = view(d);
+    let current = control.state.as_str().unwrap_or("open");
+    if !control.booking.is_null() {
         return Err(conflict("Reconcile the carrier booking before dispatch"));
     }
     if !matches!(

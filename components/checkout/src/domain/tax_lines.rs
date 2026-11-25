@@ -1,4 +1,5 @@
 //! Destination tax-class resolution and net-preserving price conversion.
+use crate::domain::quote_view::flags;
 use serde_json::json;
 use std::collections::HashMap;
 use veyndo_core::{Result, bad};
@@ -16,11 +17,12 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
     ps.iter()
         .map(|p| {
             let mut p = p.clone();
+            let class = flags(&p.extra).tax_class_id;
             let tax = s
                 .taxes
                 .iter()
                 .find(|t| {
-                    t.id == if let Some(id) = p.extra["taxClassId"].as_str() {
+                    t.id == if let Some(id) = class.as_str() {
                         id
                     } else if p.tax_rate == 7. {
                         "reduced"
