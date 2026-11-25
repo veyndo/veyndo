@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE merchant_mfa SET recovery_digests=$2 WHERE user_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "650b2441ea42e82bbc385fece445764f7ebec0bbeef9a1199bf8c511badd3e0f"
+}

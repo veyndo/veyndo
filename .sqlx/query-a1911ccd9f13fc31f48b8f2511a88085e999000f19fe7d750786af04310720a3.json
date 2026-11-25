@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT pending_ciphertext AS \"pending_ciphertext!\",revision FROM merchant_mfa WHERE user_id=$1 AND NOT enabled AND pending_expires_at>now() FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pending_ciphertext!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_mfa",
+            "name": "pending_ciphertext"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "merchant_mfa",
+            "name": "revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "a1911ccd9f13fc31f48b8f2511a88085e999000f19fe7d750786af04310720a3"
+}

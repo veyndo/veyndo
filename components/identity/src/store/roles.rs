@@ -1,13 +1,12 @@
-//! Tenant-owned roles as access decisions read them: the grants of a role, the current actor and what still uses a role.
+//! Tenant-owned roles: the grants of a role, the current actor, what still uses a role, and the revisioned role definitions themselves.
 use crate::{SCOPES, allowed, permit};
 use serde_json::{Value, json};
-use sqlx::{PgConnection, Row};
+use sqlx::PgConnection;
 use veyndo_core::shop_scope::header;
-use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 
 pub async fn grants(conn: &mut PgConnection, tenant: &str, role: &str) -> Result<Value> {
-    sqlx::query_scalar("SELECT data->'permissions' FROM workspace_roles WHERE tenant=$1 AND id=$2 AND data->>'active'='true'")
-        .bind(tenant).bind(role).fetch_optional(conn).await?.ok_or(bad("Role unavailable"))
+    sqlx::query_scalar!(r#"SELECT data->'permissions' AS "permissions!" FROM workspace_roles WHERE tenant=$1 AND id=$2 AND data->>'active'='true'"#, tenant, role).fetch_optional(conn).await?.ok_or(bad("Role unavailable"))
 }
 /// Rehydrate asynchronous/delegating actors under the tenant lifecycle lock. Owner authority is reserved.
 pub async fn current(
@@ -17,11 +16,10 @@ pub async fn current(
 ) -> Result<RequestContext> {
     let mut actor = h.clone();
     if header(h, "x-rac-user") != Some("bootstrap") {
-        let r=sqlx::query("SELECT role,permissions FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND active")
-            .bind(tenant).bind(header(h,"x-rac-user").unwrap_or("")).fetch_optional(conn).await?
+        let r=sqlx::query!(r#"SELECT role AS "role!",permissions AS "permissions!" FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND active"#, tenant, header(h,"x-rac-user").unwrap_or("")).fetch_optional(conn).await?
             .ok_or(Error(StatusCode::FORBIDDEN,"Membership or role is paused".into()))?;
-        let permissions: Value = r.get("permissions");
-        actor.principal.role = Some(r.get("role"));
+        let permissions: Value = r.permissions;
+        actor.principal.role = Some(r.role);
         // Integration-key constraints may never be removed by a fresh membership read.
         let effective: Vec<_> = SCOPES
             .iter()
@@ -49,9 +47,80 @@ pub async fn current(
 }
 /// How many members and invitations still name a role; a used role cannot be removed.
 pub async fn usage(conn: &mut PgConnection, t: &str, id: &str) -> Result<Value> {
-    let r=sqlx::query("SELECT (SELECT count(*) FROM memberships WHERE tenant=$1 AND role=$2) AS members,(SELECT count(*) FROM user_invites WHERE tenant=$1 AND role=$2) AS invitations")
-        .bind(t).bind(id).fetch_one(conn).await?;
-    let members: i64 = r.get("members");
-    let invitations: i64 = r.get("invitations");
+    let r=sqlx::query!(r#"SELECT (SELECT count(*) FROM memberships WHERE tenant=$1 AND role=$2) AS "members!",(SELECT count(*) FROM user_invites WHERE tenant=$1 AND role=$2) AS "invitations!""#, t, id).fetch_one(conn).await?;
+    let members: i64 = r.members;
+    let invitations: i64 = r.invitations;
     Ok(json!({"members":members,"invitations":invitations,"blocked":members+invitations>0}))
+}
+
+/// A role definition with its revision.
+pub struct RoleRow {
+    pub id: String,
+    pub data: Value,
+    pub builtin: bool,
+    pub revision: i64,
+}
+
+/// The shop's roles, standard ones first (at most 100).
+pub async fn list(a: &State, tenant: &str) -> Result<Vec<RoleRow>> {
+    Ok(sqlx::query_as!(
+        RoleRow,
+        "SELECT id,data,builtin,revision FROM workspace_roles WHERE tenant=$1 ORDER BY builtin DESC,id LIMIT 100",
+        tenant
+    )
+    .fetch_all(&a.db)
+    .await?)
+}
+
+/// The revision of a role and whether it is a standard role.
+pub struct RoleLock {
+    pub revision: i64,
+    pub builtin: bool,
+}
+
+/// Locks a role for a revisioned change.
+pub async fn lock(conn: &mut PgConnection, tenant: &str, id: &str) -> Result<Option<RoleLock>> {
+    Ok(sqlx::query_as!(
+        RoleLock,
+        "SELECT revision,builtin FROM workspace_roles WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        tenant,
+        id
+    )
+    .fetch_optional(conn)
+    .await?)
+}
+
+/// Removes a role.
+pub async fn delete(conn: &mut PgConnection, tenant: &str, id: &str) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM workspace_roles WHERE tenant=$1 AND id=$2",
+        tenant,
+        id
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// How many roles the shop defines.
+pub async fn count(conn: &mut PgConnection, tenant: &str) -> Result<i64> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT count(*) AS "count!" FROM workspace_roles WHERE tenant=$1"#,
+        tenant
+    )
+    .fetch_one(conn)
+    .await?)
+}
+
+/// Creates a role or replaces its definition and advances its revision.
+pub async fn save(conn: &mut PgConnection, tenant: &str, id: &str, data: &Value) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO workspace_roles(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=workspace_roles.revision+1",
+        tenant,
+        id,
+        data
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
 }

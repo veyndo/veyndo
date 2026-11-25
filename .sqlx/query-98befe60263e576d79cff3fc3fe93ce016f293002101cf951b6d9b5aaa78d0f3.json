@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (has_table_privilege(current_user,$1,'SELECT') OR has_table_privilege(current_user,$1,'INSERT') OR has_table_privilege(current_user,$1,'UPDATE') OR has_table_privilege(current_user,$1,'DELETE')) AS \"exposed!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exposed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "98befe60263e576d79cff3fc3fe93ce016f293002101cf951b6d9b5aaa78d0f3"
+}

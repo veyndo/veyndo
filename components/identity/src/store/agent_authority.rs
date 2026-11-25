@@ -1,10 +1,21 @@
 //! Saved agent runs retain an upper authority bound; every continuation rechecks credential, membership and private stage admission.
 use crate::{allowed, assistant_access};
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_kernel::verified_kernel;
 
+/// The saved request of an agent run, as the rebuilt context reads it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunRequest {
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+}
 /// Rebuilds the request context of a saved run in its own privileged transaction.
 pub async fn headers(a: &State, row: &sqlx::postgres::PgRow) -> Result<RequestContext> {
     let mut tx = a.db.begin_privileged().await?;
@@ -38,18 +49,16 @@ pub async fn headers_on(
             h.principal.role = Some("owner".into());
         } else {
             let digest: Option<String> = row.get("run_credential");
-            let valid:bool=sqlx::query_scalar("SELECT CASE WHEN $3 THEN EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>statement_timestamp()) ELSE EXISTS(SELECT 1 FROM integration_keys WHERE digest=$1 AND user_id=$2 AND tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$4),$4) AND app_id IS NULL AND expires_at>statement_timestamp()) END")
-                .bind(digest).bind(&actor).bind(h.principal.personal_session).bind(&t).fetch_one(&mut *connection).await?;
+            let valid:bool=sqlx::query_scalar!(r#"SELECT CASE WHEN $3 THEN EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>statement_timestamp()) ELSE EXISTS(SELECT 1 FROM integration_keys WHERE digest=$1 AND user_id=$2 AND tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$4),$4) AND app_id IS NULL AND expires_at>statement_timestamp()) END AS "valid!""#, digest, &actor, h.principal.personal_session, &t).fetch_one(&mut *connection).await?;
             if !valid {
                 return Err(Error(
                     StatusCode::FORBIDDEN,
                     "Agent credential expired or revoked".into(),
                 ));
             }
-            let member=sqlx::query("SELECT role,permissions FROM membership_grants WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active")
-                .bind(&t).bind(&actor).fetch_optional(&mut *connection).await?.ok_or(Error(StatusCode::FORBIDDEN,"Agent owner lost membership".into()))?;
-            h.principal.role = Some(member.get("role"));
-            let permissions: Value = member.get("permissions");
+            let member=sqlx::query!(r#"SELECT role AS "role!",permissions AS "permissions!" FROM membership_grants WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active"#, &t, &actor).fetch_optional(&mut *connection).await?.ok_or(Error(StatusCode::FORBIDDEN,"Agent owner lost membership".into()))?;
+            h.principal.role = Some(member.role);
+            let permissions: Value = member.permissions;
             h.principal.permissions = (!permissions.is_null()).then(|| permissions.to_string());
             let scopes: Value = row.get("run_scopes");
             if scopes
@@ -62,16 +71,14 @@ pub async fn headers_on(
                 ));
             }
             if !h.principal.personal_session {
-                h.principal.agent_key=sqlx::query_scalar("SELECT id FROM integration_keys WHERE digest=$1 AND user_id=$2 AND agent_budget IS NOT NULL AND expires_at>statement_timestamp()")
-                    .bind(row.get::<Option<String>,_>("run_credential")).bind(&actor).fetch_optional(&mut *connection).await?;
+                h.principal.agent_key=sqlx::query_scalar!("SELECT id FROM integration_keys WHERE digest=$1 AND user_id=$2 AND agent_budget IS NOT NULL AND expires_at>statement_timestamp()", row.get::<Option<String>,_>("run_credential"), &actor).fetch_optional(&mut *connection).await?;
                 if h.principal.agent_key.is_none() {
                     return Err(Error(
                         StatusCode::FORBIDDEN,
                         "Dedicated agent budget required".into(),
                     ));
                 }
-                let current:Value=sqlx::query_scalar("SELECT permissions FROM integration_keys WHERE digest=$1 AND user_id=$2 AND expires_at>statement_timestamp()")
-                    .bind(row.get::<Option<String>,_>("run_credential")).bind(&actor).fetch_one(&mut *connection).await?;
+                let current:Value=sqlx::query_scalar!("SELECT permissions FROM integration_keys WHERE digest=$1 AND user_id=$2 AND expires_at>statement_timestamp()", row.get::<Option<String>,_>("run_credential"), &actor).fetch_one(&mut *connection).await?;
                 let mut key = h.clone();
                 key.principal.role = Some("admin".into());
                 key.principal.permissions = Some(current.to_string());
@@ -98,29 +105,30 @@ pub async fn headers_on(
         }
         h.principal.role = Some("admin".into());
         h.principal.permissions = Some(row.get::<Value, _>("run_scopes").to_string());
-        let request: Value = row.get("run_request");
+        let request: RunRequest = view(&row.get::<Value, _>("run_request"));
         h.insert(
             "x-commerce-locale",
-            request["locale"]
-                .as_str()
+            request
+                .locale
+                .as_deref()
                 .unwrap_or("en-GB")
                 .parse()
                 .map_err(|_| bad("Invalid saved locale"))?,
         );
-        if let Some(channel) = request["channel"].as_str() {
+        if let Some(channel) = request.channel.as_deref() {
             h.insert(
                 "sw-sales-channel-id",
                 channel.parse().map_err(|_| bad("Invalid saved channel"))?,
             );
         }
-        let admitted=sqlx::query("SELECT t.status,e.preview_owner,e.preview_until>statement_timestamp() AS valid FROM tenants t LEFT JOIN shop_environments e ON e.tenant=$1 WHERE t.id=coalesce(e.live_tenant,$1)").bind(&t).fetch_optional(&mut *connection).await?.ok_or(bad("Shop no longer exists"))?;
-        let owner: Option<String> = admitted.get("preview_owner");
+        let admitted=sqlx::query!("SELECT t.status,e.preview_owner,e.preview_until>statement_timestamp() AS valid FROM tenants t LEFT JOIN shop_environments e ON e.tenant=$1 WHERE t.id=coalesce(e.live_tenant,$1)", &t).fetch_optional(&mut *connection).await?.ok_or(bad("Shop no longer exists"))?;
+        let owner: Option<String> = admitted.preview_owner;
         if !verified_kernel::agent_preview_admissible(
-            admitted.get::<String, _>("status") == "active",
+            admitted.status == "active",
             owner.is_some(),
             h.principal.personal_session,
             owner.as_deref() == Some(actor.as_str()),
-            admitted.get::<Option<bool>, _>("valid") == Some(true),
+            admitted.valid == Some(true),
         ) {
             return Err(Error(
                 StatusCode::FORBIDDEN,

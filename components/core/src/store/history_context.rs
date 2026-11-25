@@ -7,18 +7,22 @@ pub async fn context(
     h: &RequestContext,
     source: &str,
 ) -> Result<()> {
-    sqlx::query("SELECT set_config('veyndo.actor',$1,true),set_config('veyndo.source',$2,true),set_config('veyndo.reason',$3,true)")
- .bind(header(h,"x-rac-user").unwrap_or(""))
- .bind(source).bind(header(h,"x-rac-history-reason").unwrap_or(""))
- .execute(conn).await?;
+    sqlx::query!(
+        "SELECT set_config('veyndo.actor',$1,true) AS actor,set_config('veyndo.source',$2,true) AS source,set_config('veyndo.reason',$3,true) AS reason",
+        header(h, "x-rac-user").unwrap_or(""),
+        source,
+        header(h, "x-rac-history-reason").unwrap_or("")
+    )
+    .fetch_one(conn)
+    .await?;
     Ok(())
 }
 pub async fn customer_context(conn: &mut sqlx::PgConnection, email: &str) -> Result<()> {
-    sqlx::query(
-        "SELECT set_config('veyndo.actor',$1,true),set_config('veyndo.source','customer',true)",
+    sqlx::query!(
+        "SELECT set_config('veyndo.actor',$1,true) AS actor,set_config('veyndo.source','customer',true) AS source",
+        format!("customer:{email}")
     )
-    .bind(format!("customer:{email}"))
-    .execute(conn)
+    .fetch_one(conn)
     .await?;
     Ok(())
 }

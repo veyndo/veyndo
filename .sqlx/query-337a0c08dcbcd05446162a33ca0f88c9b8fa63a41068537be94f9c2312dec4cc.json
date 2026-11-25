@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO merchant_users(id,email,name,password_hash,password_initialized,email_verified_at) VALUES($1,$2,$3,$4,false,now()) ON CONFLICT(email) DO UPDATE SET email=EXCLUDED.email,email_verified_at=COALESCE(merchant_users.email_verified_at,now()) RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "337a0c08dcbcd05446162a33ca0f88c9b8fa63a41068537be94f9c2312dec4cc"
+}

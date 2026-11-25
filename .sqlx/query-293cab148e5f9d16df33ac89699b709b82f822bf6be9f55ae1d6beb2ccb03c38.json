@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Remove only unreferenced delivered metadata after its separate audit window.\nWITH expired AS (\n SELECT e.id FROM outbox e\n WHERE e.delivered_at < now()-$1*interval '1 day' AND e.payload_retired_at IS NOT NULL\n AND NOT EXISTS(SELECT 1 FROM projections p WHERE p.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM app_deliveries d WHERE d.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM flow_jobs f WHERE f.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM knowledge_receipts r WHERE r.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM observed_pairs p WHERE p.last_event=e.id)\n AND NOT EXISTS(SELECT 1 FROM pair_evidence p WHERE p.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM app_schedule_runs s WHERE s.event_id=e.id)\n AND NOT EXISTS(SELECT 1 FROM app_webhook_receipts w WHERE w.event_id=e.id)\n ORDER BY e.delivered_at,e.id LIMIT 1000 FOR UPDATE OF e SKIP LOCKED\n)\nDELETE FROM outbox WHERE id IN(SELECT id FROM expired);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "293cab148e5f9d16df33ac89699b709b82f822bf6be9f55ae1d6beb2ccb03c38"
+}

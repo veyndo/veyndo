@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 AND preview_owner IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "baseline",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "shop_environments",
+            "name": "baseline"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "79d356122a5c632f7618b03c7389179ac783cf24eae0a7f63ef7a99f558eca3b"
+}

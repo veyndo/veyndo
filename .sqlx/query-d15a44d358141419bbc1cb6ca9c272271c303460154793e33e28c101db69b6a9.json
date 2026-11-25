@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO integration_keys(id,tenant,user_id,digest,name,permissions,expires_at,agent_budget) VALUES($1,$2,$3,$4,$5,$6,CASE WHEN $8 THEN 'infinity'::timestamptz ELSE now()+$7*interval '1 day' END,$9)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Float8",
+        "Bool",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d15a44d358141419bbc1cb6ca9c272271c303460154793e33e28c101db69b6a9"
+}

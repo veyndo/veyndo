@@ -1,12 +1,11 @@
 //! Workspace member visibility and immediately effective role/revocation changes.
 use crate::domain::credentials::role_allowed;
-use crate::store::roles;
+use crate::store::{invitations, members, roles};
 use crate::{merchant, permit, validate_permissions};
 use axum::Json;
 use axum::extract::{Path, State};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
@@ -17,10 +16,10 @@ pub async fn members(
 ) -> Result<Json<Value>> {
     let tenant = merchant(&h)?;
     permit(&h, "users")?;
-    let rows=sqlx::query("SELECT u.id,u.name,u.email,m.role,m.active,m.permissions FROM memberships m JOIN merchant_users u ON u.id=m.user_id WHERE m.tenant=$1 ORDER BY u.name").bind(&tenant).fetch_all(&a.db).await?;
-    let invites=sqlx::query("SELECT id,email,role,expires_at::text AS expires FROM user_invites WHERE tenant=$1 AND redeemed_at IS NULL AND expires_at>now() ORDER BY expires_at").bind(&tenant).fetch_all(&a.db).await?;
+    let rows = members::list(&a, &tenant).await?;
+    let invites = invitations::pending(&a, &tenant).await?;
     Ok(Json(
-        json!({"members":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"name":r.get::<String,_>("name"),"email":r.get::<String,_>("email"),"role":r.get::<String,_>("role"),"active":r.get::<bool,_>("active"),"permissions":r.get::<Value,_>("permissions")})).collect::<Vec<_>>(),"invitations":invites.iter().map(|r|json!({"id":r.get::<String,_>("id"),"email":r.get::<String,_>("email"),"role":r.get::<String,_>("role"),"expires":r.get::<String,_>("expires")})).collect::<Vec<_>>()}),
+        json!({"members":rows.iter().map(|r|json!({"id":r.id,"name":r.name,"email":r.email,"role":r.role,"active":r.active,"permissions":r.permissions})).collect::<Vec<_>>(),"invitations":invites.iter().map(|r|json!({"id":r.id,"email":r.email,"role":r.role,"expires":r.expires})).collect::<Vec<_>>()}),
     ))
 }
 /// The JSON fields `update_member` reads, typed as it reads them.
@@ -60,28 +59,18 @@ pub async fn update_member(
         ));
     }
     let role_grants = roles::grants(&mut tx, &t, role).await?;
-    let old = sqlx::query(
-        "SELECT role,active,permissions FROM memberships WHERE tenant=$1 AND user_id=$2",
-    )
-    .bind(&t)
-    .bind(&user)
-    .fetch_optional(&mut *tx)
-    .await?
-    .ok_or(Error(StatusCode::NOT_FOUND, "Member not found".into()))?;
-    if old.get::<String, _>("role") == "owner" {
+    let old = members::membership(&mut tx, &t, &user)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Member not found".into()))?;
+    if old.role == "owner" {
         if actor != "owner" {
             return Err(Error(
                 StatusCode::FORBIDDEN,
                 "Only an owner can change an owner".into(),
             ));
         }
-        if old.get::<bool, _>("active") && (!active || role != "owner") {
-            let owners: i64 = sqlx::query_scalar(
-                "SELECT count(*) FROM memberships WHERE tenant=$1 AND role='owner' AND active",
-            )
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
+        if old.active && (!active || role != "owner") {
+            let owners = members::active_owners(&mut tx, &t).await?;
             if owners <= 1 {
                 return Err(conflict(
                     "The last active owner cannot be removed or demoted",
@@ -92,7 +81,7 @@ pub async fn update_member(
     let permissions = if v.get("permissions").is_some() {
         validate_permissions(&h, &input.permissions)?
     } else {
-        old.get("permissions")
+        old.permissions.clone()
     };
     validate_permissions(
         &h,
@@ -105,17 +94,8 @@ pub async fn update_member(
     if role == "owner" && !permissions.is_null() {
         return Err(bad("Owner permissions cannot be restricted"));
     }
-    sqlx::query(
-        "UPDATE memberships SET role=$1,active=$2,permissions=$5 WHERE tenant=$3 AND user_id=$4",
-    )
-    .bind(role)
-    .bind(active)
-    .bind(&t)
-    .bind(&user)
-    .bind(&permissions)
-    .execute(&mut *tx)
-    .await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.get::<String,_>("role"),"previousActive":old.get::<bool,_>("active")})).await?;
+    members::update(&mut tx, (&t, &user), (role, active), &permissions).await?;
+    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.role,"previousActive":old.active})).await?;
     tx.commit().await?;
     Ok(Json(json!({"updated":true})))
 }

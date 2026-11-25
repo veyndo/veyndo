@@ -1,13 +1,12 @@
 //! Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history.
 use crate::domain::permissions::{SCOPES, validate_permissions};
 use crate::ports::RoleLanguages;
-use crate::store::roles::{current, usage};
+use crate::store::roles::{self, current, usage};
 use crate::{merchant, permit};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
@@ -46,6 +45,14 @@ struct RoleChange {
     #[serde(deserialize_with = "lenient")]
     approve: Option<bool>,
 }
+/// A role definition as `invoke` checks it: the shape of each field is validated before use.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RoleDefinition {
+    name: Value,
+    permissions: Value,
+    active: Value,
+}
 /// The JSON fields `invoke` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -74,9 +81,9 @@ pub async fn invoke(
     permit(h, "team.manage")?;
     if name == "team.roles" {
         let (main_locale, locales) = languages.languages(&t).await?;
-        let rows=sqlx::query("SELECT id,data,builtin,revision FROM workspace_roles WHERE tenant=$1 ORDER BY builtin DESC,id LIMIT 100").bind(t).fetch_all(&a.db).await?;
+        let rows = roles::list(a, &t).await?;
         return Ok(
-            json!({"mainLocale":main_locale,"locales":locales,"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"builtin":r.get::<bool,_>("builtin"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>()}),
+            json!({"mainLocale":main_locale,"locales":locales,"elements":rows.iter().map(|r|json!({"id":r.id,"data":r.data,"builtin":r.builtin,"revision":r.revision})).collect::<Vec<_>>()}),
         );
     }
     let input: RoleChange = view(v);
@@ -88,71 +95,55 @@ pub async fn invoke(
     let mut tx = a.db.begin().await?;
     veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
     let actor = current(&mut tx, h, &t).await?;
-    let row = sqlx::query(
-        "SELECT revision,builtin FROM workspace_roles WHERE tenant=$1 AND id=$2 FOR UPDATE",
-    )
-    .bind(&t)
-    .bind(id)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let row = roles::lock(&mut tx, &t, id).await?;
     if name == "team.role.dependencies" {
         let mut d = usage(&mut tx, &t, id).await?;
-        d["revision"] = json!(row.ok_or(bad("Role not found"))?.get::<i64, _>("revision"));
+        merge(
+            &mut d,
+            json!({"revision":row.ok_or(bad("Role not found"))?.revision}),
+        )?;
         return Ok(d);
     }
     if id == "owner" {
         return Err(bad("Owner authority cannot be changed"));
     }
     let expected = input.revision.ok_or(bad("Role revision required"))?;
-    if row
-        .as_ref()
-        .map(|r| r.get::<i64, _>("revision"))
-        .unwrap_or(0)
-        != expected
-    {
+    if row.as_ref().map(|r| r.revision).unwrap_or(0) != expected {
         return Err(conflict("Role revision changed"));
     }
     context(&mut tx, &actor, "team.roles").await?;
     if name == "team.role.delete" {
         let row = row.ok_or(bad("Role not found"))?;
         if input.approve != Some(true)
-            || row.get::<bool, _>("builtin")
+            || row.builtin
             || usage(&mut tx, &t, id).await?["blocked"] == true
         {
             return Err(conflict("Role is standard or referenced; pause it instead"));
         }
-        sqlx::query("DELETE FROM workspace_roles WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .execute(&mut *tx)
-            .await?;
+        roles::delete(&mut tx, &t, id).await?;
     } else {
         let d = &args.data;
+        let definition: RoleDefinition = view(d);
         if d.as_object().is_none_or(|o| {
             o.len() != 3
                 || o.keys()
                     .any(|k| !["name", "permissions", "active"].contains(&k.as_str()))
-        }) || !d["active"].is_boolean()
-            || !d["permissions"].is_array()
+        }) || !definition.active.is_boolean()
+            || !definition.permissions.is_array()
         {
             return Err(bad("Invalid role definition"));
         }
-        validate_permissions(&actor, &d["permissions"])?;
+        validate_permissions(&actor, &definition.permissions)?;
         // Keep locale validation on the acquired connection and fence concurrent
         // settings edits until this role commits; a cached/pool read can deadlock.
-        languages.check_names(&mut tx, &t, &d["name"]).await?;
+        languages.check_names(&mut tx, &t, &definition.name).await?;
         if row.is_none() {
-            let count: i64 =
-                sqlx::query_scalar("SELECT count(*) FROM workspace_roles WHERE tenant=$1")
-                    .bind(&t)
-                    .fetch_one(&mut *tx)
-                    .await?;
+            let count = roles::count(&mut tx, &t).await?;
             if count >= 100 {
                 return Err(bad("Role limit reached"));
             }
         }
-        sqlx::query("INSERT INTO workspace_roles(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=workspace_roles.revision+1")
-            .bind(&t).bind(id).bind(d).execute(&mut *tx).await?;
+        roles::save(&mut tx, &t, id, d).await?;
     }
     veyndo_core::store::outbox::publish_on(&mut *tx, &t, "team.role_changed", &json!({"actor":header(&actor,"x-rac-user"),"id":id,"revision":expected+1,"deleted":name=="team.role.delete"})).await?;
     tx.commit().await?;

@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM merchant_mfa_challenges WHERE digest=$1 AND expires_at>now()) AND EXISTS(SELECT 1 FROM membership_grants WHERE user_id=$2 AND tenant=$3 AND active) AS \"valid!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valid!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a1fbd6cc89498597c182a61894437c085a52bbb154f3e409f26b0f2ef3259f03"
+}

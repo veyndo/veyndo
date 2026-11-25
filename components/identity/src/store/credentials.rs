@@ -1,6 +1,5 @@
 //! Resolves a bearer credential once: the person or app behind it, its workspace memberships and the selected shop.
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_core::access::ChannelSnapshot;
 use veyndo_core::{Error, Result, State, StatusCode, bad, hash};
 
@@ -26,6 +25,24 @@ pub struct Identity {
     pub members: Vec<Member>,
     pub channel: Option<ChannelSnapshot>,
 }
+/// The credential snapshot `identity.sql` returns, checked against the schema at compile time.
+struct IdentityRow {
+    user_id: String,
+    default_tenant: String,
+    scopes: Option<Value>,
+    app_id: Option<String>,
+    app_permissions: Option<Value>,
+    agent_key: Option<String>,
+    key_expiry: Option<i64>,
+    tenant: Option<String>,
+    parent: Option<String>,
+    preview_owner: Option<String>,
+    preview_valid: Option<bool>,
+    status: Option<String>,
+    channel_data: Option<Value>,
+    channel_revision: Option<i64>,
+    memberships: Value,
+}
 pub async fn resolve_identity(a: &State, token: &str, selected: Option<&str>) -> Result<Identity> {
     resolve_identity_channel(a, token, selected, None).await
 }
@@ -37,41 +54,42 @@ pub async fn resolve_identity_channel(
 ) -> Result<Identity> {
     let r = veyndo_runtime::tenant_scope::scoped(
         veyndo_runtime::tenant_scope::Scope::System,
-        sqlx::query(include_str!("identity.sql"))
-            .bind(hash(token))
-            .bind(selected)
-            .bind(channel)
-            .fetch_optional(&a.db),
+        sqlx::query_file_as!(
+            IdentityRow,
+            "src/store/identity.sql",
+            hash(token),
+            selected,
+            channel
+        )
+        .fetch_optional(&a.db),
     )
     .await?
     .ok_or(Error(
         StatusCode::UNAUTHORIZED,
         "Session or integration key expired or invalid".into(),
     ))?;
-    let scopes: Option<Value> = r.get("scopes");
+    let scopes = r.scopes;
     Ok(Identity {
-        user: r.get("user_id"),
-        app: r.get("app_id"),
-        app_permissions: r.get("app_permissions"),
-        agent_key: r.get("agent_key"),
-        key_expiry: r.get("key_expiry"),
-        default: r.get("default_tenant"),
-        tenant: r.get("tenant"),
-        parent: r.get("parent"),
-        preview_owner: r.get("preview_owner"),
-        preview_valid: r.get("preview_valid"),
-        status: r.get("status"),
-        channel: r
-            .get::<Option<Value>, _>("channel_data")
-            .map(|data| ChannelSnapshot {
-                data,
-                revision: r.get("channel_revision"),
-            }),
+        user: r.user_id,
+        app: r.app_id,
+        app_permissions: r.app_permissions,
+        agent_key: r.agent_key,
+        key_expiry: r.key_expiry,
+        default: r.default_tenant,
+        tenant: r.tenant,
+        parent: r.parent,
+        preview_owner: r.preview_owner,
+        preview_valid: r.preview_valid,
+        status: r.status,
+        channel: r.channel_data.map(|data| ChannelSnapshot {
+            data,
+            revision: r.channel_revision.unwrap_or_default(),
+        }),
         scopes: scopes
             .map(serde_json::from_value)
             .transpose()
             .map_err(|_| bad("Invalid integration scopes"))?,
-        members: serde_json::from_value(r.get("memberships"))
+        members: serde_json::from_value(r.memberships)
             .map_err(|_| bad("Invalid membership grants"))?,
     })
 }

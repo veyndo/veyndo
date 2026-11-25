@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT CASE WHEN $3 THEN EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>statement_timestamp()) ELSE EXISTS(SELECT 1 FROM integration_keys WHERE digest=$1 AND user_id=$2 AND tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$4),$4) AND app_id IS NULL AND expires_at>statement_timestamp()) END AS \"valid!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valid!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "cecbab50ee0779b237c5fc6f4d8f1842d511bc5ebe13825eda4ae7d8d65c6ac6"
+}

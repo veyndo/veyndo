@@ -13,7 +13,7 @@ WITH credential AS (
 ), scope AS (
  SELECT chosen.tenant,e.live_tenant AS parent,e.preview_owner,e.preview_until>now() AS preview_valid FROM chosen LEFT JOIN shop_environments e ON e.tenant=chosen.tenant
 )
-SELECT c.user_id,c.default_tenant,c.scopes,c.app_id,c.app_permissions,c.agent_key,c.key_expiry,s.tenant,s.parent,s.preview_owner,s.preview_valid,t.status,ch.data AS channel_data,ch.revision AS channel_revision,
- coalesce((SELECT jsonb_agg(jsonb_build_object('tenant',tenant,'role',role,'permissions',permissions)) FROM members),'[]'::jsonb) AS memberships
+SELECT c.user_id AS "user_id!",c.default_tenant AS "default_tenant!",c.scopes,c.app_id,c.app_permissions,c.agent_key,c.key_expiry,s.tenant,s.parent,s.preview_owner,s.preview_valid,t.status,ch.data AS channel_data,ch.revision AS channel_revision,
+ coalesce((SELECT jsonb_agg(jsonb_build_object('tenant',tenant,'role',role,'permissions',permissions)) FROM members),'[]'::jsonb) AS "memberships!"
 FROM credential c CROSS JOIN scope s LEFT JOIN tenants t ON t.id=coalesce(s.parent,s.tenant)
 LEFT JOIN sales_channels ch ON ch.tenant=s.tenant AND ch.id=$3;

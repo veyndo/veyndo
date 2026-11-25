@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO merchant_handoffs(digest,user_id,tenant,expires_at,session_digest) SELECT $1,$2,$3,now()+interval '60 seconds',digest FROM user_sessions WHERE digest=$4 AND user_id=$2 AND expires_at>now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5c8768a51312c586fe4ea99914501ebf1b605c2cba6272ed20a21e8098cfa644"
+}

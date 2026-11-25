@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE resource_leases SET expires_at=now()+interval '310 seconds' WHERE id=$1 AND expires_at>now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b5552a533753ee0be1a2d36a1fe2bac401611c5a2df93bfc02715e58199745cc"
+}

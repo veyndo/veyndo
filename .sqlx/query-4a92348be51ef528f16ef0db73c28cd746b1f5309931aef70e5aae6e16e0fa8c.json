@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SAVEPOINT project_event",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "4a92348be51ef528f16ef0db73c28cd746b1f5309931aef70e5aae6e16e0fa8c"
+}

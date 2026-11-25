@@ -1,12 +1,15 @@
 //! Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing.
+use crate::store::attempts;
 use axum::{
     body::Body,
     extract::{ConnectInfo, Request},
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use serde::Deserialize;
 use std::net::{IpAddr, SocketAddr};
 use veyndo_core::admission::run as admit_request;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::HeaderReader;
 use veyndo_core::{Error, Result, State, StatusCode, bad, hash, process_config};
 use veyndo_runtime::tenant_scope::{Scope, scoped};
@@ -47,8 +50,7 @@ fn peer(request: &Request) -> String {
 }
 /// Counts one attempt in the bucket; a full or blocked bucket refuses it.
 async fn reserve(a: &State, key: &str, limit: i32) -> Result<()> {
-    let allowed:Option<i32>=sqlx::query_scalar("INSERT INTO auth_attempt_buckets(key,attempts) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN 1 ELSE auth_attempt_buckets.attempts+1 END,window_at=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN now() ELSE auth_attempt_buckets.window_at END,updated_at=now() WHERE auth_attempt_buckets.blocked_until<=now() AND (auth_attempt_buckets.window_at<now()-interval '1 minute' OR auth_attempt_buckets.attempts<$2) RETURNING attempts")
-        .bind(key).bind(limit).fetch_optional(&a.db).await?;
+    let allowed = attempts::reserve(a, key, limit).await?;
     if allowed.is_none() {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -56,6 +58,17 @@ async fn reserve(a: &State, key: &str, limit: i32) -> Result<()> {
         ));
     }
     Ok(())
+}
+/// The fields of an authentication payload that name the account a throttle bucket counts against.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AccountInput {
+    #[serde(deserialize_with = "lenient")]
+    email: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    invitation_token: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
 }
 /// Throttles sign-in, registration and redemption by peer prefix and account before the request is admitted.
 pub async fn run(a: &State, request: Request, next: Next) -> Response {
@@ -87,13 +100,16 @@ pub async fn run(a: &State, request: Request, next: Next) -> Response {
         Err(_) => return bad("Authentication payload exceeds 64 KiB").into_response(),
     };
     let value: serde_json::Value = serde_json::from_slice(&body).unwrap_or_default();
-    let account = value["email"]
-        .as_str()
+    let input: AccountInput = view(&value);
+    let account = input
+        .email
+        .as_deref()
         .map(|s| s.trim().to_lowercase())
         .or_else(|| {
-            value["invitationToken"]
-                .as_str()
-                .or(value["token"].as_str())
+            input
+                .invitation_token
+                .as_deref()
+                .or(input.token.as_deref())
                 .map(|s| format!("token:{}", hash(s)))
         });
     let tenant = if path.starts_with("/store-api/") {
@@ -111,7 +127,7 @@ pub async fn run(a: &State, request: Request, next: Next) -> Response {
     if response.status() == StatusCode::UNAUTHORIZED
         && let Some(key) = key
     {
-        let _=scoped(Scope::System,sqlx::query("UPDATE auth_attempt_buckets SET blocked_until=now()+least(60,power(2,least(attempts,6))::int)*interval '1 second' WHERE key=$1 AND attempts>=5").bind(key).execute(&a.db)).await;
+        let _ = scoped(Scope::System, attempts::block(a, &key)).await;
     }
     response
 }

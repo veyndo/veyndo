@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox e SET attempts=greatest(e.attempts,f.attempts),available_at=f.available_at,dead_letter_at=coalesce(e.dead_letter_at,f.dead_letter_at),error_code='projection_failed' FROM outbox_subscriber_failures f WHERE e.id=$1 AND e.tenant=$2 AND f.tenant=e.tenant AND f.event_id=e.id AND f.subscriber=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "887322e8de370e2e9c48552925b18aa149ca431e9297cb5243966fd0cfb1a701"
+}

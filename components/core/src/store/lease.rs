@@ -19,14 +19,16 @@ impl Lease {
     ) -> Result<Self> {
         veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System, async {
             let id = uid();
-            let inserted: bool = sqlx::query_scalar("SELECT claim_resource_lease($1,$2,$3,$4,$5)")
-                .bind(&id)
-                .bind(tenant)
-                .bind(class)
-                .bind(limit as i64)
-                .bind(slots)
-                .fetch_one(db)
-                .await?;
+            let inserted: bool = sqlx::query_scalar!(
+                r#"SELECT claim_resource_lease($1,$2,$3,$4,$5) AS "claimed!""#,
+                &id,
+                tenant,
+                class,
+                limit as i64,
+                slots
+            )
+            .fetch_one(db)
+            .await?;
             if !inserted {
                 return Err(Error(
                     StatusCode::TOO_MANY_REQUESTS,
@@ -58,8 +60,7 @@ impl Lease {
             let mut timer = tokio::time::interval(std::time::Duration::from_secs(60));
             loop {
                 timer.tick().await;
-                let result = sqlx::query("UPDATE resource_leases SET expires_at=now()+interval '310 seconds' WHERE id=$1 AND expires_at>now()")
-                    .bind(&id).execute(&pool).await;
+                let result = sqlx::query!("UPDATE resource_leases SET expires_at=now()+interval '310 seconds' WHERE id=$1 AND expires_at>now()", &id).execute(&pool).await;
                 if result.is_err() || result.is_ok_and(|r| r.rows_affected() != 1) {
                     eprintln!(
                         "Database connection budget lease lost; stopping instead of exceeding cluster capacity"
@@ -94,10 +95,12 @@ impl Lease {
 
     async fn delete(&self) -> std::result::Result<(), sqlx::Error> {
         veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System, async {
-            sqlx::query("DELETE FROM resource_leases WHERE id=$1")
-                .bind(&self.id)
-                .execute(&self.db)
-                .await?;
+            sqlx::query!(
+                "DELETE FROM resource_leases WHERE id=$1",
+                self.id.as_deref()
+            )
+            .execute(&self.db)
+            .await?;
             Ok(())
         })
         .await
@@ -117,8 +120,7 @@ impl Drop for Lease {
         tokio::spawn(veyndo_runtime::tenant_scope::scoped(
             veyndo_runtime::tenant_scope::Scope::System,
             async move {
-                let _ = sqlx::query("DELETE FROM resource_leases WHERE id=$1")
-                    .bind(id)
+                let _ = sqlx::query!("DELETE FROM resource_leases WHERE id=$1", id)
                     .execute(&db)
                     .await;
             },

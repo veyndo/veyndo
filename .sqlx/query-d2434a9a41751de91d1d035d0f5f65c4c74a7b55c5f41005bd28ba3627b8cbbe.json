@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT data->'permissions' AS \"permissions!\" FROM workspace_roles WHERE tenant=$1 AND id=$2 AND data->>'active'='true'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "permissions!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d2434a9a41751de91d1d035d0f5f65c4c74a7b55c5f41005bd28ba3627b8cbbe"
+}
