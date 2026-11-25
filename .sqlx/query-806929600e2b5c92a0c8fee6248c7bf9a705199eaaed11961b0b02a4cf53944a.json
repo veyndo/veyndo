@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO commerce_flows(tenant,id,data) SELECT $2,id,data FROM commerce_flows WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "806929600e2b5c92a0c8fee6248c7bf9a705199eaaed11961b0b02a4cf53944a"
+}

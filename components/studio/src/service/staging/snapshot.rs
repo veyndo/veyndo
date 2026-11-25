@@ -5,13 +5,11 @@ use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::store::records::rows as record_rows;
 use veyndo_b2b::store::staging as b2b;
 use veyndo_catalog::service::product_identity::assign_categories;
-use veyndo_catalog::store::products::product;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_orders::domain::order_machine::default_machine;
@@ -153,13 +151,13 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
         )
         .await?;
     }
-    let r = db::product_row(tx, t, id).await?;
-    sync_product(tx, t, &json!(product(&r))).await?;
+    let published = crate::store::products::get(tx, t, id).await?;
+    sync_product(tx, t, &json!(published)).await?;
     veyndo_core::store::outbox::publish_on(
         &mut **tx,
         t,
         "product.published",
-        &json!({"productId":id,"revision":r.get::<i64,_>("revision")}),
+        &json!({"productId":id,"revision":published.revision}),
     )
     .await?;
     Ok(())

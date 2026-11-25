@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE translation_jobs SET status='failed',error_code='call_interrupted',error='Translation call interrupted; explicitly resume the parent task',lease=NULL,lease_until=NULL WHERE (tenant,id) IN (SELECT tenant,id FROM translation_jobs WHERE run_task IS NOT NULL AND status='processing' AND lease_until<now() ORDER BY created_at LIMIT 20 FOR UPDATE SKIP LOCKED)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "6a2912ba0af97f60d92ddb62e70252a1897ed13641ce41078d22eb81c1240e1d"
+}

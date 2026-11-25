@@ -6,7 +6,6 @@ use crate::ports::WorkHost;
 use crate::store::{products, tasks};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
@@ -38,25 +37,20 @@ struct AdmitActorInput {
 /// A merchant approval needs the original actor of the run and every scope it was planned with.
 fn admit_actor(
     h: &RequestContext,
-    r: &sqlx::postgres::PgRow,
+    r: &tasks::ProposalTask,
     v: &Value,
     autonomous: bool,
 ) -> Result<()> {
     let input: AdmitActorInput = view(v);
     if !autonomous
-        && (r
-            .get::<Option<String>, _>("run_actor")
-            .as_deref()
-            .or(input.actor.as_deref())
-            != header(h, "x-rac-user")
-            || r.get::<Option<Value>, _>("run_scopes")
-                .is_some_and(|scopes| {
-                    scopes.as_array().is_none_or(|scopes| {
-                        scopes
-                            .iter()
-                            .any(|s| s.as_str().is_none_or(|s| !allowed(h, s)))
-                    })
-                }))
+        && (r.run_actor.as_deref().or(input.actor.as_deref()) != header(h, "x-rac-user")
+            || r.run_scopes.as_ref().is_some_and(|scopes| {
+                scopes.as_array().is_none_or(|scopes| {
+                    scopes
+                        .iter()
+                        .any(|s| s.as_str().is_none_or(|s| !allowed(h, s)))
+                })
+            }))
     {
         return Err(Error(
             StatusCode::FORBIDDEN,
@@ -143,17 +137,15 @@ pub async fn apply_mode<H: WorkHost>(
     let r = tasks::lock(&mut tx, t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Task not found".into()))?;
-    if r.get::<Option<String>, _>("run_state")
-        .is_some_and(|s| s != "ready")
-    {
+    if r.run_state.as_deref().is_some_and(|s| s != "ready") {
         return Err(conflict("Agent run has no completed proposal to approve"));
     }
-    let v: Value = r.get("proposal");
-    admit_actor(h, &r, &v, autonomous)?;
+    admit_actor(h, &r, &r.proposal, autonomous)?;
+    let v = &r.proposal;
     let p: Proposal =
         serde_json::from_value(v["proposal"].clone()).map_err(|e| bad(e.to_string()))?;
     admit_proposal(h, &p, autonomous)?;
-    if r.get::<bool, _>("applied") {
+    if r.applied {
         return Ok(
             json!({"taskId":id,"applied":true,"replayed":true,"translationJobId":p.translation.as_ref().map(|_|id)}),
         );

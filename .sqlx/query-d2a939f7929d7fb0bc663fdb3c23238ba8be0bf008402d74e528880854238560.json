@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM studio_workspace_versions WHERE tenant=$1 AND user_id=$2 AND revision <= $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d2a939f7929d7fb0bc663fdb3c23238ba8be0bf008402d74e528880854238560"
+}

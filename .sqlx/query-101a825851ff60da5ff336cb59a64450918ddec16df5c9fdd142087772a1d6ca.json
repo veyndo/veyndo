@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT (data ? 'nativeLifecycle') AND NOT (data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review')) AS \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "101a825851ff60da5ff336cb59a64450918ddec16df5c9fdd142087772a1d6ca"
+}

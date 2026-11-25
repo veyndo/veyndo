@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM translation_jobs WHERE tenant=$1 AND EXISTS(SELECT 1 FROM translation_items i WHERE i.tenant=translation_jobs.tenant AND i.job_id=translation_jobs.id AND i.status='ready') ORDER BY created_at DESC LIMIT 3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8ebf28cbfc6cc288fa173a81823cf951605d74be82fac0f94ed8ff4ceff107e8"
+}

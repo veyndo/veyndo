@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO commerce_settings(tenant,data) SELECT $2,data FROM commerce_settings WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5de8ead79f27856694b1eb87d101bab6b12bb9909e6875b4e6606fcd21f57250"
+}

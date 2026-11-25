@@ -2,8 +2,6 @@
 use crate::service::work_execution::{task_context, task_headers};
 use crate::store::translation_runs as db;
 use serde_json::{Value, json};
-use sqlx::Row;
-use sqlx::postgres::PgRow;
 use uuid::Uuid;
 use veyndo_catalog::domain::translation_fields::{Source, source, texts, translated};
 use veyndo_cognition::inference::{Choice, budget};
@@ -25,23 +23,23 @@ pub async fn once(m: Models<'_>) -> Result<bool> {
     let Some(job) = row else {
         return Ok(false);
     };
-    let t: String = job.get("tenant");
-    let id: String = job.get("id");
+    let t = job.tenant.clone();
+    let id = job.id.clone();
     let result = authorized_step(m, &job, &lease).await;
     if let Err(e) = result {
         db::fail(a, &t, &id, &lease, &e.1).await?;
     }
     // Notify only after the child transaction is closed: parent admission locks task before job.
-    if let Some(task) = job.get::<Option<String>, _>("run_task") {
-        db::wake_task(a, &job.get::<String, _>("tenant"), &task).await?;
+    if let Some(task) = &job.run_task {
+        db::wake_task(a, &job.tenant, task).await?;
     }
     Ok(true)
 }
-async fn authorized_step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
+async fn authorized_step(m: Models<'_>, job: &db::Job, lease: &str) -> Result<()> {
     let a = m.core;
-    if let Some(task) = job.get::<Option<String>, _>("run_task") {
-        let t: String = job.get("tenant");
-        let (h, trace) = task_context(a, &t, &task).await?;
+    if let Some(task) = &job.run_task {
+        let t = job.tenant.clone();
+        let (h, trace) = task_context(a, &t, task).await?;
         let scope = if h.principal.personal_session {
             Scope::Personal {
                 tenant: t,
@@ -62,28 +60,26 @@ async fn authorized_step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> 
     }
     step(m, job, lease).await
 }
-async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
+async fn step(m: Models<'_>, job: &db::Job, lease: &str) -> Result<()> {
     let a = m.core;
-    let t: String = job.get("tenant");
-    let id: String = job.get("id");
-    let source: String = job.get("source_locale");
-    let target: String = job.get("target_locale");
+    let t = job.tenant.clone();
+    let id = job.id.clone();
+    let source = job.source_locale.clone();
+    let target = job.target_locale.clone();
     let row = db::next_product(
         a,
         &t,
         db::Window {
-            cursor: job.get("cursor"),
-            highwater: job.get("highwater"),
+            cursor: &job.cursor,
+            highwater: &job.highwater,
             source: &source,
             target: &target,
-            products: job.get("product_ids"),
+            products: job.product_ids.clone(),
         },
     )
     .await?;
     let Some(row) = row else {
-        if job.get::<Option<Vec<String>>, _>("product_ids").is_some()
-            && job.get::<i64, _>("processed") != job.get::<i64, _>("total")
-        {
+        if job.product_ids.is_some() && job.processed != job.total {
             return Err(conflict(
                 "Selected products changed during translation; review the collection",
             ));
@@ -98,14 +94,14 @@ async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
     let source_key = key(&source, &settings.locales);
     let target_key = key(&target, &settings.locales);
     let src = source_fields(&row, &source_key, &source_key);
-    let extra: Value = row.get("extra");
+    let extra = &row.extra;
     // Never skip a partial target: missing description/SEO/specs/rich text must still be translated.
-    let complete = row.get::<Option<String>, _>("target_name").is_some()
-        && db::has_target_description(a, &t, &row.get::<String, _>("id"), &target).await?
+    let complete = row.target_name.is_some()
+        && db::has_target_description(a, &t, &row.id, &target).await?
         && ["seo", "specifications", "richDescription"]
             .iter()
             .all(|k| src[*k].is_null() || extra[*k].get(&target_key).is_some());
-    let skip = complete && !job.get::<bool, _>("overwrite");
+    let skip = complete && !job.overwrite;
     let (result, evidence) = if skip {
         (Value::Null, None)
     } else {
@@ -116,7 +112,7 @@ async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
         if texts.len() > 500 || src.to_string().len() > 64000 {
             return Err(bad("Product exceeds translation chunk limits"));
         }
-        let choice: Choice = serde_json::from_value(job.get("choice"))
+        let choice: Choice = serde_json::from_value(job.choice.clone())
             .map_err(|_| bad("Invalid translation provider"))?;
         let schema = json!({"type":"object","properties":{"translations":{"type":"array","items":{"type":"object","properties":{"path":{"type":"string"},"text":{"type":"string"}},"required":["path","text"],"additionalProperties":false}}},"required":["translations"],"additionalProperties":false});
         let _slot = m
@@ -138,8 +134,8 @@ async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
         let evidence = json!({"provider":output.provider,"model":output.model,"prompt":output.usage["prompt"],"inputTokens":output.usage["input_tokens"].as_u64(),"outputTokens":output.usage["output_tokens"].as_u64()});
         (translated(&src, &output.value)?, Some(evidence))
     };
-    if let Some(task) = job.get::<Option<String>, _>("run_task") {
-        task_headers(a, &t, &task).await?;
+    if let Some(task) = &job.run_task {
+        task_headers(a, &t, task).await?;
     }
     let mut tx = a.db.begin().await?;
     let current = db::current_lease(&mut tx, &t, &id).await?;
@@ -152,8 +148,8 @@ async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
         &id,
         lease,
         db::Item {
-            product: row.get("id"),
-            revision: row.get("revision"),
+            product: row.id.clone(),
+            revision: row.revision,
             source: src,
             result,
             status: if skip { "skipped" } else { "ready" },
@@ -166,14 +162,14 @@ async fn step(m: Models<'_>, job: &PgRow, lease: &str) -> Result<()> {
 }
 
 /// The translatable fields of a product row in its main language.
-fn source_fields(row: &PgRow, locale: &str, main: &str) -> Value {
+fn source_fields(row: &db::NextProduct, locale: &str, main: &str) -> Value {
     source(
         Source {
-            name: row.get("name"),
-            description: row.get("description"),
-            translated_name: row.get("translated_name"),
-            translated_description: row.get("translated_description"),
-            extra: row.get("extra"),
+            name: row.name.clone(),
+            description: row.description.clone(),
+            translated_name: row.translated_name.clone(),
+            translated_description: row.translated_description.clone(),
+            extra: row.extra.clone(),
         },
         locale,
         main,

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox SET attempts=0,available_at=now(),dispatch_not_before=now(),dispatch_requires_retry=false,dead_letter_at=NULL,error_code=NULL WHERE tenant=$1 AND id=$2 AND delivered_at IS NULL AND payload_retired_at IS NULL AND (dispatch_requires_retry OR $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c512d9da6839c15b5571cab8eeef14b12b087c99da9a3888a16fe68b2d7fa057"
+}

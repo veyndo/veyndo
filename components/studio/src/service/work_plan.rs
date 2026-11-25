@@ -4,7 +4,6 @@ use crate::domain::proposal::{NATIVE, Step};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::product_admission::{admit_product_write, product_write_guidance};
@@ -155,16 +154,16 @@ pub async fn approve<H: WorkHost>(
     // Rebinding uses native owners which acquire their own connection. Do not hold
     // a transaction while calling them: transaction poolers may have one backend.
     let row = tasks::get(a, t, id).await?;
-    if row.get::<bool, _>("applied") {
+    if row.applied {
         return Ok(json!({"taskId":id,"applied":true,"replayed":true}));
     }
-    if row.get::<String, _>("run_actor") != header(h, "x-rac-user").unwrap_or("") {
+    if row.run_actor != header(h, "x-rac-user").unwrap_or("") {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Only the original actor may approve work".into(),
         ));
     }
-    let ceiling: Value = row.get("run_scopes");
+    let ceiling = row.run_scopes;
     if ceiling.as_array().is_none_or(|scopes| {
         scopes
             .iter()
@@ -175,9 +174,9 @@ pub async fn approve<H: WorkHost>(
             "Current permissions no longer cover the reviewed work".into(),
         ));
     }
-    let mut request: Value = row.get("run_request");
+    let mut request = row.run_request;
     if request.get("execution").is_some() {
-        let state: String = row.get("run_state");
+        let state = row.run_state.unwrap_or_default();
         if !["queued", "running"].contains(&state.as_str()) {
             return Err(conflict(
                 "Work is stopped; use its explicit continuation or cancellation controls",
@@ -185,10 +184,10 @@ pub async fn approve<H: WorkHost>(
         }
         return Ok(json!({"taskId":id,"applied":false,"queued":true,"replayed":true}));
     }
-    if row.get::<Option<String>, _>("run_state").as_deref() != Some("ready") {
+    if row.run_state.as_deref() != Some("ready") {
         return Err(conflict("Work proposal is not ready"));
     }
-    let evidence: Value = row.get("proposal");
+    let evidence = row.proposal;
     let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
         .map_err(|_| bad("Invalid saved work plan"))?;
     if steps.is_empty() {
@@ -213,12 +212,12 @@ pub async fn approve<H: WorkHost>(
         ));
     }
     let revision = tasks::lock_revision(&mut tx, t, id).await?;
-    if revision != row.get::<i64, _>("run_revision") {
+    if revision != row.run_revision {
         return Err(conflict(
             "Work changed while checking approval; reload its current state",
         ));
     }
-    if let Some(conversation) = row.get::<Option<String>, _>("conversation_id") {
+    if let Some(conversation) = row.conversation_id {
         claim_conversation(&mut tx, t, &conversation, id).await?;
     }
     request["execution"] = json!(steps);

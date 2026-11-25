@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO categories(tenant,id,parent_id,position,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET parent_id=EXCLUDED.parent_id,position=EXCLUDED.position,data=EXCLUDED.data,revision=categories.revision+1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "67e1b04f5e44a3838ebc2cfa4030456a9c3e1b854dba19266645f9a6a17b46ff"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- One tenant-scoped CRM entry per email, including historical guest checkouts.\nWITH contacts AS (\n  (SELECT email, jsonb_build_object(\n    'id',id,'customerNumber',customer_number,'email',email,'profile',profile,\n    'company',company,'customerGroup',group_name,'active',active,'revision',revision,\n    'defaultBillingAddressId',default_billing_address_id,\n    'defaultShippingAddressId',default_shipping_address_id,\n    'createdAt',created_at::text,'guest',false) AS contact\n  FROM customers WHERE tenant=$1 AND email>$2\n    AND ($3='' OR strpos(lower(email||' '||coalesce(profile->>'name','')||' '||coalesce(company,'')),lower($3))>0)\n  ORDER BY email LIMIT $4)\n  UNION ALL\n  (SELECT email,contact FROM (SELECT DISTINCT ON (data->'orderCustomer'->>'email')\n    data->'orderCustomer'->>'email' AS email,\n    jsonb_build_object('id',null,'customerNumber',null,\n      'email',data->'orderCustomer'->>'email',\n      'profile',(CASE WHEN jsonb_typeof(data->'billingAddress')='object' THEN data->'billingAddress' ELSE '{}'::jsonb END)||data->'orderCustomer',\n      'company',data->'billingAddress'->>'company',\n      'customerGroup',coalesce(data->>'customerGroup','consumer'),\n      'active',false,'revision',null,'guest',true,'createdAt',created_at::text,\n      'billingAddress',data->'billingAddress','shippingAddress',data->'shippingAddress') AS contact\n  FROM orders o WHERE tenant=$1 AND data->'orderCustomer'->>'guest'='true'\n    AND data->'orderCustomer'->>'email'>$2\n    AND NOT EXISTS(SELECT 1 FROM customers c WHERE c.tenant=o.tenant AND c.email=o.data->'orderCustomer'->>'email')\n  ORDER BY email,created_at DESC,id DESC) latest\n  WHERE $3='' OR strpos(lower(email||' '||coalesce(contact->'profile'->>'name','')||' '||coalesce(contact->>'company','')),lower($3))>0\n  ORDER BY email LIMIT $4)\n)\nSELECT contact AS \"contact!\" FROM contacts\nORDER BY email LIMIT $4;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "contact!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "463bbd5f5b7f98f654887bf319de49fdb2fbde6f4b57a6d08ed7560695fba2dd"
+}

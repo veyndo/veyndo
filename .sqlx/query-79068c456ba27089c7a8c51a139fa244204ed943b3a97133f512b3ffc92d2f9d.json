@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tasks SET applied=true,applied_at=now() WHERE tenant=$2 AND id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "79068c456ba27089c7a8c51a139fa244204ed943b3a97133f512b3ffc92d2f9d"
+}

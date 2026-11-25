@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT coalesce(data#>>'{money,currency,code}',data#>>'{cart,price,currency}','EUR') AS \"currency!\" FROM orders WHERE tenant=$1 ORDER BY 1 LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "currency!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c215539dd65484e707160f1242b501196b9308c46ad8a5e42746a5ffadd02ad1"
+}

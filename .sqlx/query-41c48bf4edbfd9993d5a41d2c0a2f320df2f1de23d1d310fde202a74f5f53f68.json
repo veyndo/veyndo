@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT applied,run_actor AS \"run_actor!\",run_scopes AS \"run_scopes!\",run_request AS \"run_request!\",run_state,proposal,run_revision,conversation_id FROM tasks WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "applied",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "applied"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "run_actor!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_actor"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "run_scopes!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_scopes"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "run_request!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_request"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "run_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_state"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "proposal",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "proposal"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "run_revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_revision"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "conversation_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "41c48bf4edbfd9993d5a41d2c0a2f320df2f1de23d1d310fde202a74f5f53f68"
+}

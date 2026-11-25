@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('productId',product_id,'digest',encode(sha256(content),'hex'),'byteLength',octet_length(content),'mime',mime,'filename',filename,'title',title,'public',public) AS \"value!\" FROM product_assets WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "value!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c596f42980fa1cb6b5e7b01bcdcd1fcab502fdb81d0c25f2540f49340139b923"
+}

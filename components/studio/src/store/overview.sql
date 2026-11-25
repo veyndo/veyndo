@@ -48,4 +48,4 @@ SELECT jsonb_build_object(
  'indexedProducts',indexed.count,'lastIndexed',indexed.updated,
  'activity',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM activity r),'[]'::jsonb),
  'channels',coalesce((SELECT jsonb_agg(jsonb_build_object('channel',channel,'calls',calls,'httpFailures',failures,'lastSeen',last_seen)) FROM channels),'[]'::jsonb)
-) AS facts FROM stats CROSS JOIN plans CROSS JOIN indexed;
+) AS "facts!" FROM stats CROSS JOIN plans CROSS JOIN indexed;

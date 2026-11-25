@@ -11,8 +11,7 @@ fn totals(amounts: Value) -> Value {
 
 /// The overview facts of a shop: summary, timeline and experiment variants.
 pub async fn load(a: &State, tenant: &str) -> Result<Value> {
-    let mut facts: Value = sqlx::query_scalar(include_str!("overview.sql"))
-        .bind(tenant)
+    let mut facts: Value = sqlx::query_file_scalar!("src/store/overview.sql", tenant)
         .fetch_one(&a.db)
         .await?;
     let amounts = facts["revenue"].take();

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT j.app FROM app_jobs j JOIN app_packages p ON p.tenant=j.tenant AND p.id=j.app WHERE j.tenant=$1 AND j.status='failed' AND p.active ORDER BY j.app LIMIT 3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_jobs",
+            "name": "app"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e9d90a56947a85aefb73abf3e30c36e0d9fc4f3ba865ce121abf9886624c3138"
+}

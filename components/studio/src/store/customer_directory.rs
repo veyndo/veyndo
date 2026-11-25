@@ -1,6 +1,5 @@
 //! SQL of the merchant CRM directory: one keyset page of customer contacts with optional filters and app extension predicates.
 use serde_json::{Value, json};
-use sqlx::Row;
 use sqlx::postgres::PgRow;
 use veyndo_app_model::Object;
 use veyndo_app_platform::domain::extension_filter::Filter;
@@ -25,13 +24,15 @@ pub async fn page(
             && c.active.is_none()
             && c.group.is_empty()
         {
-            sqlx::query_scalar::<_, Value>(include_str!("customer_directory_default.sql"))
-                .bind(t)
-                .bind(c.after)
-                .bind(c.query)
-                .bind(n + 1)
-                .fetch_all(&a.db)
-                .await?
+            sqlx::query_file_scalar!(
+                "src/store/customer_directory_default.sql",
+                t,
+                c.after,
+                c.query,
+                n + 1
+            )
+            .fetch_all(&a.db)
+            .await?
         } else {
             use sqlx::Arguments;
             let mut arguments = sqlx::postgres::PgArguments::default();
@@ -87,12 +88,12 @@ pub async fn customer(a: &State, t: &str, email: &str) -> Result<Option<PgRow>> 
 
 /// The customer's 100 most recent orders (without cart tokens), each with `createdAt`.
 pub async fn orders(a: &State, t: &str, email: &str) -> Result<Vec<Value>> {
-    let rows=sqlx::query("SELECT o.data #- '{cart,token}' AS data,o.created_at::text AS created FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ((o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) OR (o.data->'orderCustomer'->>'guest'='true' AND o.data->'orderCustomer'->>'email'=$2) OR (NOT o.data ? 'orderCustomer' AND c.data->>'email'=$2)) ORDER BY o.created_at DESC LIMIT 100").bind(t).bind(email).fetch_all(&a.db).await?;
+    let rows=sqlx::query!(r#"SELECT o.data #- '{cart,token}' AS "data!",o.created_at::text AS "created!" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ((o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) OR (o.data->'orderCustomer'->>'guest'='true' AND o.data->'orderCustomer'->>'email'=$2) OR (NOT o.data ? 'orderCustomer' AND c.data->>'email'=$2)) ORDER BY o.created_at DESC LIMIT 100"#, t, email).fetch_all(&a.db).await?;
     Ok(rows
-        .iter()
+        .into_iter()
         .map(|r| {
-            let mut o: Value = r.get("data");
-            o["createdAt"] = json!(r.get::<String, _>("created"));
+            let mut o = r.data;
+            o["createdAt"] = json!(r.created);
             o
         })
         .collect())

@@ -89,6 +89,7 @@ pub async fn load(
     let (evidence, scopes) = tasks::completed_work(tx, t, &template.task_id, actor)
         .await?
         .ok_or(Error(StatusCode::FORBIDDEN, "Choose your completed work in this private workspace; source tasks cannot be published or copied across workspaces".into()))?;
+    let scopes = scopes.unwrap_or_default();
     if scopes.as_array().is_none_or(|values| {
         values
             .iter()

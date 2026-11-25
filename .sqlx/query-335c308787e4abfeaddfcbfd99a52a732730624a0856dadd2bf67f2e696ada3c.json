@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO knowledge_documents SELECT (jsonb_populate_record(NULL::knowledge_documents,to_jsonb(d)||jsonb_build_object('tenant',$2::text))).* FROM knowledge_documents d WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "335c308787e4abfeaddfcbfd99a52a732730624a0856dadd2bf67f2e696ada3c"
+}
