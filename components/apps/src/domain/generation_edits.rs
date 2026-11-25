@@ -1,4 +1,5 @@
 //! Bounded RFC 6902 edits modify the canonical Manifest; this is model wire adaptation, not an app runtime.
+//! The edited manifest stays open JSON: RFC 6902 paths address arbitrary app-declared keys.
 use crate::domain::{app_generation, generation_contract};
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};

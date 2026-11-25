@@ -34,11 +34,11 @@ pub fn page(
         .into_iter()
         .skip(offset)
         .take(limit)
-        .map(|x| x.2)
         .collect::<Vec<_>>();
-    Ok(
-        json!({"nextAfter":if has_more {page.last().map(|p|p["app"].clone())}else{None},"hasMore":has_more,"apps":page}),
-    )
+    // The listed app ID is the ID the entry was ranked under.
+    let next = page.last().filter(|_| has_more).map(|x| x.1.clone());
+    let page = page.into_iter().map(|x| x.2).collect::<Vec<_>>();
+    Ok(json!({"nextAfter":next,"hasMore":has_more,"apps":page}))
 }
 
 /// An app discovery request: a managed read with its arguments, or a search page.

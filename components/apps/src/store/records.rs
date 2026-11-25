@@ -5,6 +5,38 @@ use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::{Error, Result, bad, conflict};
 
+/// The metadata the host keeps on every stored record document, typed as it is read; app-declared fields stay in the document.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+pub struct RecordMeta {
+    /// Passed on as stored.
+    pub id: Value,
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    pub revision: Option<i64>,
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    pub replayed: Option<bool>,
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    pub entity: Option<String>,
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    pub evidence: Option<String>,
+    /// The app-declared field values of a record input, as sent.
+    pub fields: Value,
+}
+
+/// A page of records as the record query answers it, typed as the host reads it.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+pub struct RecordPage {
+    pub elements: Value,
+}
+
+impl RecordMeta {
+    /// The metadata of a record document.
+    pub fn of(record: &Value) -> Self {
+        veyndo_core::document::view(record)
+    }
+}
+
 /// The identity of one record: shop, app, entity and id.
 pub fn key<'a>(
     t: &'a str,

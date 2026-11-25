@@ -2,6 +2,16 @@
 use super::{Inference, Provider, Value, env, json};
 use std::net::IpAddr;
 
+/// The fields of a reported model route that decide whether data leaves the deployment.
+#[derive(serde::Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Route {
+    #[serde(rename = "use")]
+    purpose: Value,
+    configured: Value,
+    self_hosted: Value,
+}
+
 const REFUSED: &str = "Sovereign AI mode admits only self-hosted models";
 
 /// The deployment variable locks the mode on; the operator setting cannot switch it off.
@@ -98,7 +108,8 @@ impl Inference {
         let routes = self.routes();
         let leaking = routes
             .iter()
-            .any(|r| r["use"] != "images" && r["configured"] == true && r["selfHosted"] != true);
+            .map(veyndo_core::document::view::<Route>)
+            .any(|r| r.purpose != "images" && r.configured == true && r.self_hosted != true);
         json!({"enabled":self.sovereign,"lockedByDeployment":locked(),
             "refusedProviders":if self.sovereign { json!(["openai","anthropic"]) } else { json!([]) },
             "routes":routes,"holds":self.sovereign && !leaking,

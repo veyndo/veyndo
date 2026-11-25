@@ -10,6 +10,7 @@ use crate::store::{locks, record_write, records};
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::view;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 
@@ -52,7 +53,8 @@ pub async fn list_scoped(
     .map_err(persistence::error)?;
     tx.commit().await?;
     let mut result = veyndo_app_storage::record_query::response(e, plan.limit, page);
-    if let Some(graph) = ontology::project(t, m, e, &result["elements"]) {
+    let page: records::RecordPage = view(&result);
+    if let Some(graph) = ontology::project(t, m, e, &page.elements) {
         result["ontology"] = graph;
     }
     Ok(result)
@@ -72,7 +74,7 @@ pub async fn record_revision(
     locks::tenant_scope(&mut tx, t).await?;
     let revision = records::get(&mut tx, t, &m.id, &e.name, id, false)
         .await?
-        .and_then(|row| row["revision"].as_i64());
+        .and_then(|row| records::RecordMeta::of(&row).revision);
     tx.commit().await?;
     Ok(revision.unwrap_or(0))
 }
@@ -129,24 +131,26 @@ async fn write_tx(
     lock_package_write(tx, t, m).await?;
     let normalized = rules.normalize(m, v)?;
     let v = &normalized;
-    field_values::validate(e, &v["fields"])?;
+    let meta = records::RecordMeta::of(v);
+    field_values::validate(e, &meta.fields)?;
     rules.validate(tx, t, m, e, v).await?;
-    validate_references(tx, t, e, &v["fields"]).await?;
-    references(tx, t, e, &v["fields"]).await?;
+    validate_references(tx, t, e, &meta.fields).await?;
+    references(tx, t, e, &meta.fields).await?;
     if e.fields
         .iter()
         .any(|f| f.translatable || f.kind == "richtext")
     {
-        validate_languages(tx, t, e, &v["fields"]).await?;
+        validate_languages(tx, t, e, &meta.fields).await?;
     }
     if let Some(c) = &m.configuration
         && c.entity == e.name
-        && let Some(fee) = v["fields"][&c.price_field].as_i64()
+        && let Some(fee) = meta.fields[&c.price_field].as_i64()
     {
         validate_fee(c, fee).await?;
     }
 
-    let id = v["id"]
+    let id = meta
+        .id
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Record id required"))?;

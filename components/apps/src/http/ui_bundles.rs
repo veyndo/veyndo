@@ -8,8 +8,17 @@ use crate::store::surface_grants;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, process_config};
+
+/// The UI bundle digests an operator pinned for one app service, by UI path.
+#[derive(serde::Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub(crate) struct UiPins {
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    pub ui_digests: serde_json::Map<String, Value>,
+}
 
 /// Returns the operator-pinned UI bundle of a surface the caller holds a grant for.
 pub async fn load(
@@ -27,8 +36,11 @@ pub async fn load(
             "External UI package is not approved".into(),
         ));
     }
-    let digest = config["uiDigests"][&s.ui_path]
-        .as_str()
+    let pins: UiPins = view(config);
+    let digest = pins
+        .ui_digests
+        .get(&s.ui_path)
+        .and_then(Value::as_str)
         .filter(|s| s.len() == 64 && s.bytes().all(|b| b.is_ascii_hexdigit()))
         .ok_or(Error(
             StatusCode::SERVICE_UNAVAILABLE,

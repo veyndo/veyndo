@@ -49,6 +49,24 @@ struct IngestInput {
     sources: Value,
 }
 
+/// One exported source of an app, typed as the import reads it; the original is mirrored as sent.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Source {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    deleted: Value,
+    #[serde(deserialize_with = "lenient")]
+    title: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    metadata: Value,
+}
+
 /// Stores one export page of an app's private sources at its cursor, mirrors them into the knowledge graph and announces new ones.
 pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> Result<()> {
     let input: IngestInput = view(v);
@@ -78,11 +96,13 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
         return Ok(());
     }
     for s in sources {
-        let id = s["id"]
-            .as_str()
+        let source: Source = view(s);
+        let id = source
+            .id
+            .as_deref()
             .filter(|s| !s.is_empty() && s.len() <= 150)
             .ok_or(bad("Invalid source ID"))?;
-        if s["deleted"] == true {
+        if source.deleted == true {
             // The connector's existing reset tombstone must survive a lost action reply.
             // It is still scoped to this admitted package and tenant.
             sqlx::query!(
@@ -104,20 +124,24 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
             .await?;
             continue;
         }
-        let title = s["title"]
-            .as_str()
+        let title = source
+            .title
+            .as_deref()
             .filter(|s| s.len() <= 300)
             .ok_or(bad("Invalid source title"))?;
-        let text = s["text"]
-            .as_str()
+        let text = source
+            .text
+            .as_deref()
             .filter(|s| s.len() <= 12000)
             .ok_or(bad("Invalid source text"))?;
-        let url = s["sourceUrl"]
-            .as_str()
+        let url = source
+            .source_url
+            .as_deref()
             .filter(|s| s.starts_with("https://") && s.len() <= 1500)
             .ok_or(bad("Invalid source URL"))?;
-        let kind = s["kind"]
-            .as_str()
+        let kind = source
+            .kind
+            .as_deref()
             .filter(|s| s.len() <= 50)
             .ok_or(bad("Invalid source kind"))?;
         let digest = hash(&s.to_string());
@@ -130,7 +154,7 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
             title,
             text,
             url,
-            &s["metadata"],
+            &source.metadata,
             digest
         )
         .execute(&mut *tx)
@@ -138,7 +162,7 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
         .rows_affected();
         if n > 0 {
             sync_integration(&mut tx, t, app, id, s, false).await?;
-            veyndo_core::store::outbox::publish_on(&mut *tx, t, &format!("app.{app}.source_imported"), &json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":s["metadata"]})).await?;
+            veyndo_core::store::outbox::publish_on(&mut *tx, t, &format!("app.{app}.source_imported"), &json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":source.metadata})).await?;
         }
     }
     sqlx::query!(

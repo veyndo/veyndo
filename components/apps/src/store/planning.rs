@@ -37,6 +37,7 @@ pub async fn planning_context(
     let mut context = vec![];
     for m in manifests.into_iter().take(8) {
         let mut records = vec![];
+        let mut entities: Vec<String> = vec![];
         if m.permissions.contains(&"data.read".into()) {
             for e in m
                 .entities
@@ -79,19 +80,17 @@ pub async fn planning_context(
                     reader.public.then(|| channel(h)),
                 )
                 .await?;
-                data["elements"] = json!(
-                    data["elements"]
-                        .as_array()
-                        .unwrap()
-                        .iter()
-                        .take(12)
-                        .collect::<Vec<_>>()
-                );
-                if let Some(rows) = data["elements"].as_array_mut() {
-                    for row in rows {
-                        *row = bounded_context(row, 0);
-                    }
-                }
+                let page: crate::store::records::RecordPage = veyndo_core::document::view(&data);
+                let elements = page
+                    .elements
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .take(12)
+                    .map(|row| bounded_context(row, 0))
+                    .collect::<Vec<_>>();
+                data["elements"] = json!(elements);
+                entities.push(e.name.clone());
                 records.push(json!({"entity":e.name,"records":data}));
             }
         }
@@ -110,8 +109,7 @@ pub async fn planning_context(
         if let Some(ai) = &mut intelligence {
             ai.tools
                 .retain(|name| actions.iter().any(|act| act.name == *name));
-            ai.entities
-                .retain(|name| records.iter().any(|record| record["entity"] == *name));
+            ai.entities.retain(|name| entities.contains(name));
             ai.ontology
                 .retain(|node| ai.entities.contains(&node.entity));
         }
@@ -163,9 +161,11 @@ pub async fn bind_change(
         .ok_or(bad("Unknown app entity"))?;
     let mut args: Value =
         serde_json::from_str(&c.arguments_json).map_err(|_| bad("Invalid app arguments JSON"))?;
-    field_values::validate(e, &args["fields"])?;
-    a.rules.check(&m, e, &args["fields"])?;
-    let id = args["id"]
+    let meta = crate::store::records::RecordMeta::of(&args);
+    field_values::validate(e, &meta.fields)?;
+    a.rules.check(&m, e, &meta.fields)?;
+    let id = meta
+        .id
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("App record ID required"))?;

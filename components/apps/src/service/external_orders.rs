@@ -4,7 +4,7 @@ use crate::store::{locks, packages};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     RequestContext, Result, State, bad, conflict, hash, store::history_context, uid,
 };
@@ -57,6 +57,20 @@ async fn replayed(
     }
     Ok(None)
 }
+/// The sales channel fields an import admits the channel by, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ImportChannel {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    visibility: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locales: Option<Vec<Value>>,
+}
+
 /// The JSON fields `order_lines` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -180,9 +194,10 @@ pub async fn import_external(
     let channel: Value = stored::lock_channel(&mut tx, &t, &input.sales_channel_id)
         .await?
         .ok_or(bad("Unknown external sales channel"))?;
-    if channel["kind"] != "marketplace"
-        || channel["active"] != true
-        || channel["visibility"] == "private"
+    let admitted: ImportChannel = view(&channel);
+    if admitted.kind.as_deref() != Some("marketplace")
+        || admitted.active != Some(true)
+        || admitted.visibility.as_deref() == Some("private")
     {
         return Err(conflict("External sales channel must be active and public"));
     }
@@ -194,8 +209,9 @@ pub async fn import_external(
     )
     .await?;
     let currency = settings.currencies.selected(&input.currency)?.clone();
-    if !channel["locales"]
-        .as_array()
+    if !admitted
+        .locales
+        .as_ref()
         .is_some_and(|ls| ls.iter().any(|l| l == &input.locale))
     {
         return Err(bad("External order language is not enabled in channel"));

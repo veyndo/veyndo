@@ -1,10 +1,12 @@
 //! Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc.
 use crate::domain::surfaces::surface_url;
+use crate::http::ui_bundles::UiPins;
 use crate::service::ui_bundles;
 use axum::extract::Path;
 use axum::response::{Html, IntoResponse, Response};
 use tokio::sync::Semaphore;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, StatusCode, bad, process_config};
 
 // Only this handler can mark a response. Request paths/headers cannot opt out of Studio CSP.
@@ -24,12 +26,11 @@ pub async fn document(Path((id, digest)): Path<(String, String)>) -> Result<Resp
     ))?;
     // This endpoint serves static code only. No tenant, surface grant, cookie, context or
     // callback credential reaches the upstream. Every data/action call still uses the host grant.
-    let path = config["uiDigests"]
-        .as_object()
-        .and_then(|pins| {
-            pins.iter()
-                .find(|(_, hash)| hash.as_str() == Some(digest.as_str()))
-        })
+    let pins: UiPins = view(config);
+    let path = pins
+        .ui_digests
+        .iter()
+        .find(|(_, hash)| hash.as_str() == Some(digest.as_str()))
         .map(|(path, _)| path)
         .ok_or(Error(
             StatusCode::NOT_FOUND,

@@ -6,9 +6,21 @@ use crate::ports::{HostCall, Platform};
 use crate::service::service_call::service_call;
 use crate::store::packages::package;
 use crate::store::{action_log, jobs, managed_data};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
+
+/// The host instructions a service action reply may carry, typed as they are read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ServiceReply {
+    #[serde(deserialize_with = "lenient")]
+    purge_sources: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    export_cursor: Option<i64>,
+}
 
 /// Runs one app action for a caller and records its outcome without its payload.
 pub async fn invoke(
@@ -79,8 +91,11 @@ async fn execute(
                 ));
             }
             let result = service_call(a, &t, id, &format!("actions/{name}"), v).await?;
-            if result["purgeSources"] == true && m.permissions.contains(&"knowledge.write".into()) {
-                host.purge_sources(&t, id, result["exportCursor"].as_i64().unwrap_or(0))
+            let reply: ServiceReply = view(&result);
+            if reply.purge_sources == Some(true)
+                && m.permissions.contains(&"knowledge.write".into())
+            {
+                host.purge_sources(&t, id, reply.export_cursor.unwrap_or(0))
                     .await?;
             }
             Ok(result)

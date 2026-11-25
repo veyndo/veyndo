@@ -9,6 +9,7 @@ use crate::store::records::reset_preview;
 use crate::store::{environments, packages};
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::view;
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{RequestContext, Result, bad, process_config};
 use veyndo_identity::permit;
@@ -22,6 +23,16 @@ pub fn immediate(m: &Manifest) -> bool {
 }
 
 /// Installs the draft into the personal preview environment of the caller, creating that environment on first use.
+/// The installed package an install reports, passed on as reported.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct Installed {
+    id: Value,
+    version: Value,
+    digest: Value,
+}
+
+/// Previews a package in the merchant's personal environment; the request's `manifest` is the app's open manifest document.
 pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value> {
     let t = live(a, h).await?;
     let actor = h
@@ -72,8 +83,9 @@ pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value
     let result = install_preview(a.rules, a.commerce, &mut tx, &environment, m).await?;
     environments::extend_preview(&mut tx, &environment).await?;
     tx.commit().await?;
+    let installed: Installed = view(&result);
     Ok(
-        json!({"environment":environment,"app":result["id"],"version":result["version"],"digest":result["digest"],"private":true,"expiresInSeconds":3600,"releaseAllowed":false}),
+        json!({"environment":environment,"app":installed.id,"version":installed.version,"digest":installed.digest,"private":true,"expiresInSeconds":3600,"releaseAllowed":false}),
     )
 }
 

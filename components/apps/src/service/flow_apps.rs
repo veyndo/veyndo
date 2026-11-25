@@ -1,4 +1,5 @@
 //! App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding.
+//! Action input schemas and step arguments are app-declared open JSON; native schema validation types them.
 use crate::domain::{action_admission, core_extensions, field_values};
 use crate::store::{flows, locks, packages};
 use serde::Deserialize;

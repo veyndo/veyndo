@@ -95,16 +95,39 @@ impl Budget {
     }
 }
 
+/// The output allowance fields of a provider request, typed as the budget reads them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OutputLimits {
+    #[serde(deserialize_with = "lenient")]
+    max_output_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    max_completion_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    max_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    options: LocalOptions,
+}
+
+/// The output allowance of a local (Ollama) request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct LocalOptions {
+    #[serde(deserialize_with = "lenient")]
+    num_predict: Option<u64>,
+}
+
 /// The charge is an allocation at the operator-selected ceiling tariff, not a provider invoice.
 pub fn allocation(request: &Value, images: bool, tariff: u64) -> Result<(u64, u64), String> {
     if images {
         return Err("Budgeted agents currently require text-only model input".into());
     }
-    let output = request["max_output_tokens"]
-        .as_u64()
-        .or_else(|| request["max_completion_tokens"].as_u64())
-        .or_else(|| request["max_tokens"].as_u64())
-        .or_else(|| request["options"]["num_predict"].as_u64())
+    let limits: OutputLimits = view(request);
+    let output = limits
+        .max_output_tokens
+        .or(limits.max_completion_tokens)
+        .or(limits.max_tokens)
+        .or(limits.options.num_predict)
         .filter(|n| *n > 0 && *n <= 8192)
         .ok_or("Model request has no bounded output allowance")?;
     // UTF-8 request bytes deliberately overcount ordinary text tokens. Reserve an

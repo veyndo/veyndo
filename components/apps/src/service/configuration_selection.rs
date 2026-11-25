@@ -57,8 +57,8 @@ pub async fn resolve_selection(
         currency: contract.currency.clone(),
         rule_fields,
         presentation,
-        rule_revision: rule["revision"]
-            .as_i64()
+        rule_revision: records::RecordMeta::of(&rule)
+            .revision
             .ok_or(bad("App revision missing"))?,
         app_version: m.version,
         entity: contract.entity.clone(),

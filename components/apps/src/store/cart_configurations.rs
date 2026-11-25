@@ -65,7 +65,10 @@ pub async fn validate_configurations(
             &config.fields,
         )
         .await?;
-        if r["revision"].as_i64().ok_or(bad("App revision missing"))? != config.rule_revision
+        if records::RecordMeta::of(&r)
+            .revision
+            .ok_or(bad("App revision missing"))?
+            != config.rule_revision
             || fee != config.fee_minor
         {
             return Err(conflict("App price changed; configure again"));

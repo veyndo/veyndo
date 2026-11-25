@@ -1,5 +1,6 @@
 //! Shared operator settings; AES-GCM secrets are never part of merchant/operator read responses.
 use super::{Inference, Value, env, json};
+use veyndo_core::document::{lenient, view};
 
 pub fn encryption_ready() -> bool {
     encryption_key().is_ok()
@@ -52,6 +53,31 @@ fn safe_endpoint(value: &str) -> String {
     url.set_fragment(None);
     url.to_string().trim_end_matches('/').to_string()
 }
+/// The operator's platform AI document, typed as the runtime reads it.
+#[derive(serde::Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PlatformAi {
+    #[serde(deserialize_with = "lenient")]
+    default_provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+    sovereign: Value,
+}
+
+/// One provider entry of the platform AI document.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct ProviderRow {
+    #[serde(deserialize_with = "lenient")]
+    endpoint: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    model: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    key: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    enabled: Option<bool>,
+}
+
 impl Inference {
     pub fn with_database(mut self, db: crate::scoped_pool::ScopedPool) -> Self {
         self.budget_db = Some(db.clone());
@@ -84,15 +110,15 @@ impl Inference {
             }
             *cache = Some((std::time::Instant::now(), data));
         }
-        let data = &cache.as_ref().unwrap().1;
+        let data: PlatformAi = view(&cache.as_ref().unwrap().1);
         let mut runtime = self.clone();
         runtime.db = None;
-        if let Some(provider) = data["defaultProvider"].as_str() {
+        if let Some(provider) = data.default_provider.as_deref() {
             runtime.default_provider = serde_json::from_value(json!(provider))
                 .map_err(|_| "Invalid default AI provider")?;
         }
         for id in ["ollama", "openai", "anthropic"] {
-            let row = &data["providers"][id];
+            let row: ProviderRow = data.providers.get(id).map(view).unwrap_or_default();
             let (endpoint, model, key) = match id {
                 "ollama" => (
                     &mut runtime.ollama,
@@ -110,20 +136,20 @@ impl Inference {
                     &mut runtime.anthropic_key,
                 ),
             };
-            if let Some(value) = row["endpoint"].as_str() {
-                *endpoint = value.into();
+            if let Some(value) = row.endpoint {
+                *endpoint = value;
             }
-            if let Some(value) = row["model"].as_str() {
-                *model = value.into();
+            if let Some(value) = row.model {
+                *model = value;
             }
-            if let Some(value) = row["key"].as_str() {
-                *key = Some(value.into());
+            if let Some(value) = row.key {
+                *key = Some(value);
             }
-            if row["enabled"].as_bool() == Some(false) {
+            if row.enabled == Some(false) {
                 runtime.disabled.push(id.to_string());
             }
         }
-        runtime.apply_sovereign(data["sovereign"] == true);
+        runtime.apply_sovereign(data.sovereign == true);
         Ok(runtime)
     }
     pub async fn public_providers(&self) -> Result<Value, String> {

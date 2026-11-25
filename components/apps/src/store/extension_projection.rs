@@ -7,7 +7,16 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::{Entity, Object};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
+
+/// The immutable ID of a native list row, the object an extension binds to.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct NativeRow {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
 use veyndo_identity::merchant;
 
 /// Attaches the readable app extensions of up to 100 native objects in one indexed lookup.
@@ -28,7 +37,7 @@ pub async fn attach(
     let t = merchant(h)?;
     let ids: Vec<String> = rows
         .iter()
-        .filter_map(|r| r["id"].as_str().map(str::to_owned))
+        .filter_map(|r| view::<NativeRow>(r).id)
         .collect();
     // CRM guest contacts have no immutable native customer ID and receive no extension binding.
     if ids.is_empty() {
@@ -79,7 +88,7 @@ pub async fn attach(
         .collect();
     tx.commit().await?;
     for row in rows {
-        let Some(id) = row["id"].as_str() else {
+        let Some(id) = view::<NativeRow>(row).id else {
             continue;
         };
         let mut projections = Vec::new();

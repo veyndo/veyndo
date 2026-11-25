@@ -74,10 +74,11 @@ pub async fn save(
         &json!({"type":"object","properties":{"action":{"type":"string","maxLength":32},"input":{"type":"object"}},"required":["action","input"],"additionalProperties":false}),
         evidence,
     )?;
+    let save: EvidenceSave = view(evidence);
     let action = m
         .actions
         .iter()
-        .find(|a| a.name == evidence["action"] && a.handler == "save" && !a.public)
+        .find(|a| Some(&a.name) == save.action.as_ref() && a.handler == "save" && !a.public)
         .ok_or(bad("Private evidence save action required"))?;
     permit(
         identity,
@@ -91,13 +92,15 @@ pub async fn save(
         .ok_or(bad("Private evidence entity required"))?;
     core_extensions::access(entity, identity, true)?;
     let frozen: Value = job.get("input");
-    let mut input = rules.normalize(m, &evidence["input"])?;
-    let id = input["id"]
+    let reviewed: ReviewedJob = view(&frozen);
+    let mut input = rules.normalize(m, &save.input)?;
+    let id = records::RecordMeta::of(&input)
+        .id
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Evidence record identity required"))?
         .to_owned();
-    if frozen["evidenceRecord"] != json!({"entity":entity.name,"id":id}) {
+    if reviewed.evidence_record != json!({"entity":entity.name,"id":id}) {
         return Err(conflict(
             "Evidence destination differs from the reviewed job",
         ));
@@ -121,6 +124,33 @@ pub async fn save(
     managed_data::save_tx(rules, tx, t, m, entity, &input).await?;
     Ok(())
 }
+/// The evidence save a job service submits: the private save action and its record input.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EvidenceSave {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    input: Value,
+}
+
+/// The reviewed job input fields evidence is checked against.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedJob {
+    evidence_record: Value,
+}
+
+/// The sealed completion proof, typed as it is checked.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Proof {
+    v: Value,
+    fields_hash: Value,
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    job: Value,
+}
+
 /// The completion report fields that evidence is bound to.
 #[derive(Deserialize, Default)]
 #[serde(default)]
@@ -166,7 +196,8 @@ pub async fn verify(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> R
         let Some(row) = records::get(&mut tx, &t, &m.id, &e.name, id, false).await? else {
             continue;
         };
-        let Some(token) = row["evidence"].as_str().filter(|s| s.len() <= 2000) else {
+        let meta = records::RecordMeta::of(&row);
+        let Some(token) = meta.evidence.as_deref().filter(|s| s.len() <= 2000) else {
             continue;
         };
         let Ok(raw) = open(&binding(&t, m, &e.name, id), token) else {
@@ -175,19 +206,20 @@ pub async fn verify(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> R
         let Ok(proof) = serde_json::from_str::<Value>(&raw) else {
             continue;
         };
-        if proof["v"] != 1 || proof["fieldsHash"] != hash(&document(e, &row).to_string()) {
+        let proof: Proof = view(&proof);
+        if proof.v != 1 || proof.fields_hash != hash(&document(e, &row).to_string()) {
             continue;
         }
         let Some(action) = m
             .actions
             .iter()
-            .find(|a| a.name == proof["action"] && a.handler == "job")
+            .find(|a| Some(&a.name) == proof.action.as_ref() && a.handler == "job")
         else {
             continue;
         };
         permit(h, action.permission.as_deref().unwrap_or("apps.manage"))?;
         action_admission::additional(h, action)?;
-        verified.push(json!({"id":id,"revision":row["revision"],"job":proof["job"]}));
+        verified.push(json!({"id":id,"revision":meta.revision,"job":proof.job}));
     }
     tx.commit().await?;
     Ok(json!({"verified":verified}))

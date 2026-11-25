@@ -1,5 +1,13 @@
 //! Short-lived UI grants bind a package, surface, actor and concrete editor object; these are the rules without storage.
 use serde_json::Value;
+
+/// The record fields and list filter of an action input; both hold app-declared field names.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct BoundInput {
+    fields: Value,
+    filter: Value,
+}
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::surfaces::Surface;
 use veyndo_core::shop_scope::header;
@@ -27,6 +35,7 @@ pub fn bind_input(m: &Manifest, s: &Surface, ctx: &Value, name: &str, v: &Value)
             ));
         }
     }
+    let input: BoundInput = veyndo_core::document::view(v);
     for block in m
         .views
         .iter()
@@ -37,14 +46,15 @@ pub fn bind_input(m: &Manifest, s: &Surface, ctx: &Value, name: &str, v: &Value)
             let value = ctx
                 .get(&binding.key)
                 .ok_or(bad("Editor surface needs a context object"))?;
-            if block.write_action.as_deref() == Some(name) && v["fields"][&binding.field] != *value
+            if block.write_action.as_deref() == Some(name) && input.fields[&binding.field] != *value
             {
                 return Err(Error(
                     StatusCode::FORBIDDEN,
                     "Record must remain bound to the surface object".into(),
                 ));
             }
-            if block.read_action.as_deref() == Some(name) && v["filter"][&binding.field] != *value {
+            if block.read_action.as_deref() == Some(name) && input.filter[&binding.field] != *value
+            {
                 return Err(Error(
                     StatusCode::FORBIDDEN,
                     "Read must filter by the surface object".into(),

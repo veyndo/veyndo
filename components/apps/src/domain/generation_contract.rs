@@ -1,4 +1,5 @@
 //! Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review.
+//! Manifest drafts stay open JSON here: the revision is compared and patched key by key so unknown model output survives until native `Manifest` validation.
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};
 /// Models may add fields and change presentation but never drop persisted schemas or broaden old exposure.

@@ -2,7 +2,7 @@
 use super::{Provider, Value, env, json};
 use crate::inference::strict_schema;
 use serde::Deserialize;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 pub(super) fn chat_request(
     model: &str,
     system: &str,
@@ -61,36 +61,75 @@ pub(super) fn prompt_cache(provider: &Provider, request: &mut Value, system: &st
         _ => {}
     }
 }
+/// The provider response fields `parse` reads (Ollama, Anthropic and OpenAI Responses), typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProviderReply {
+    done_reason: Value,
+    #[serde(deserialize_with = "lenient")]
+    message: OllamaMessage,
+    stop_reason: Value,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<Vec<Value>>,
+    status: Value,
+    #[serde(deserialize_with = "lenient")]
+    output: Option<Vec<Value>>,
+}
+
+/// The message of an Ollama chat response.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OllamaMessage {
+    #[serde(deserialize_with = "lenient")]
+    content: Option<String>,
+}
+
+/// A content block or output item: its type, text and nested content.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Part {
+    #[serde(rename = "type")]
+    kind: Value,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<Vec<Value>>,
+}
+
+/// The text of the given blocks of one type, concatenated.
+fn text_of(blocks: &[Value], kind: &str) -> String {
+    blocks
+        .iter()
+        .map(view::<Part>)
+        .filter(|v| v.kind == kind)
+        .filter_map(|v| v.text)
+        .collect::<String>()
+}
+
 pub(super) fn parse(provider: &Provider, raw: &Value) -> Result<Value, String> {
+    let reply: ProviderReply = view(raw);
     let text = match provider {
         Provider::Platform => return Err("Unresolved platform provider".into()),
         Provider::Ollama => {
-            if raw["done_reason"] == "length" {
+            if reply.done_reason == "length" {
                 return Err("Local model output was truncated".into());
             }
-            raw["message"]["content"].as_str().map(str::to_string)
+            reply.message.content
         }
         Provider::Anthropic => {
-            if raw["stop_reason"] == "max_tokens" {
+            if reply.stop_reason == "max_tokens" {
                 return Err("Model output was truncated".into());
             }
-            raw["content"].as_array().map(|a| {
-                a.iter()
-                    .filter(|v| v["type"] == "text")
-                    .filter_map(|v| v["text"].as_str())
-                    .collect::<String>()
-            })
+            reply.content.map(|a| text_of(&a, "text"))
         }
         Provider::Openai => {
-            if raw["status"] != "completed" {
+            if reply.status != "completed" {
                 return Err("OpenAI response did not complete".into());
             }
-            raw["output"].as_array().map(|a| {
+            reply.output.map(|a| {
                 a.iter()
-                    .filter_map(|v| v["content"].as_array())
-                    .flatten()
-                    .filter(|v| v["type"] == "output_text")
-                    .filter_map(|v| v["text"].as_str())
+                    .filter_map(|v| view::<Part>(v).content)
+                    .map(|c| text_of(&c, "output_text"))
                     .collect::<String>()
             })
         }

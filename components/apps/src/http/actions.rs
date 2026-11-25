@@ -37,10 +37,15 @@ pub async fn entity_list(
         .find(|e| e.name == name)
         .ok_or(bad("Unknown entity"))?;
     entity_access(&m, e, &h, "list")?;
-    let input = json!({"limit":q.get("limit").map(|s| s.parse::<i64>()).transpose().map_err(|_| bad("Invalid app limit"))?,"after":q.get("after"),"filter":q.get("filter").map(|s| serde_json::from_str::<Value>(s)).transpose().map_err(|_| bad("Invalid app filter"))?});
-    let mut input = input;
-    if input["filter"].is_null() {
-        input.as_object_mut().unwrap().remove("filter");
+    let filter = q
+        .get("filter")
+        .map(|s| serde_json::from_str::<Value>(s))
+        .transpose()
+        .map_err(|_| bad("Invalid app filter"))?
+        .filter(|f| !f.is_null());
+    let mut input = json!({"limit":q.get("limit").map(|s| s.parse::<i64>()).transpose().map_err(|_| bad("Invalid app limit"))?,"after":q.get("after")});
+    if let Some(filter) = filter {
+        input["filter"] = filter;
     }
     Ok(Json(managed_data::list_page(&a, &t, &m, e, &input).await?))
 }
