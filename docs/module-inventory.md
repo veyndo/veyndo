@@ -2987,6 +2987,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
+| [scripts/store_isolation.py](../scripts/store_isolation.py) | Store tests per component against an isolated PostgreSQL database under forced row security. |
 | [scripts/storefront_urls.py](../scripts/storefront_urls.py) | Real HTTP product deep links and host isolation in disposable shops. |
 | [scripts/structure.py](../scripts/structure.py) | Guard the documented Rust domain split and public extension examples. |
 | [scripts/studio.py](../scripts/studio.py) | Actual Studio API, localization and original-kernel consumer checks. |

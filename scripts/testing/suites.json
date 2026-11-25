@@ -85,6 +85,7 @@
     "read_performance",
     "fashion_demo",
     "identity_broker",
+    "store_isolation",
     "production_foundations",
     "signed_runtime",
     "signed_pooler",

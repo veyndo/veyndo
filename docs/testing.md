@@ -568,6 +568,58 @@ alone with `python3 scripts/verify_integration.py --container <postgres> --only
 browser_journeys` after `cargo build --workspace --bins` and a frontend build. A
 failing journey leaves a screenshot in `artifacts/browser-journeys/`.
 
+## Component test suite (phase 7)
+
+Phase 7 of [the component plan](plans/2026-11-19-component-architecture.md#phase-7-test-suite)
+adds test sets beside the per-function domain tests. Each is listed with what it proves.
+
+### Property tests
+
+`proptest` (dev-dependency only; `scripts/testing/workspace_boundaries.py` refuses it as
+a normal or build dependency) generates inputs for 37 properties in
+`components/<name>/tests/properties.rs` and `components/marketing/src/store/promotion_property_tests.rs`.
+Where a Lean property exists the test names it and states the same claim on the compiled
+Rust; the others are open proof obligations of phase 8 tested here first.
+
+| Crate | Properties |
+| --- | --- |
+| pricing (16) | currency scale bound; decimal text ↔ minor units bijection for every `i64` and scale; parsing refuses a wrong scale; half-away-from-zero rounding against an integer model; scaling error at most half a minor unit; checked addition exact or refused, never across currencies; float wire amounts round-trip in the exact range; negative/non-finite amounts have no minor units; `discount_cap` within base, requested, idempotent, monotone; discount allocation conserves cents, never takes a line below zero or above itself, monotone in the request; `amount_sum` exact or saturating and commutative; net plus tax equals gross; `math_round` idempotent, symmetric, within half a unit; quote totals add up for net and gross quotes; a line price is the rounded unit times the quantity, deterministic, tax within the gross |
+| inventory (5) | `stock_admissible` exact; any sequence of reservations and releases keeps stock non-negative, conserves units, keeps every order within what it ordered, and releasing all restores the opening stock; inventory batches aligned and positive; reorder ceiling; an admitted supplier offer is never above the ceiling |
+| orders (6) | every state reached from `placed` in a valid (app-extended) machine is listed and terminal states have no edge; validation admits only closed reachable machines; terminal orders refuse every action, including fulfilment and payment; the cancellation guard agrees with the blocker; completion needs payment and delivery; manual payments move only pending/authorized to paid |
+| payments (6) | exactly the listed ledger transitions are admitted; no walk returns money to a pre-capture state; captures stay within the authorization and refunds within the capture over any request sequence; provider refund totals; wire amounts round-trip and are never negative |
+| checkout (2) | the cart quote's total is the sum of its line totals (gross) or lines plus tax (net), net plus tax is the gross, the same cart gives the same quote; normalized quantities are on the step grid |
+| marketing (2) | applied promotions stay within their base: no negative total, line or discount and no line rises; an exclusive promotion ends the chain and free shipping changes no amount |
+
+Run them with `cargo test -p <crate> --test properties` (marketing: `cargo test -p
+veyndo-marketing --lib promotion`). The order total's shipping part is added by the
+checkout service (`service/delivery.rs`), not by a domain function, so the quote property
+covers lines and tax; shipping is covered by the HTTP contract and checkout suites.
+
+### Store isolation under forced row security
+
+`store_isolation` (provider group) runs on the isolated suite database with a dedicated
+login that is `NOSUPERUSER NOBYPASSRLS`, owns no table and has only row privileges, as the
+production runtime role.
+
+1. `tests/store_isolation.rs` calls component store functions through the scoped pool:
+   it writes under shop A (outbox event, webhook receipt, product, stock reservation,
+   price job, customer session; operator limits with system authority) and proves that
+   under shop B the same functions read nothing (`exists`, `queued`, `find`, `valid`,
+   cart locks of checkout, B2B, POS and marketing, orders, roles, settings, locale) and
+   change nothing (updates affect no row, releases leave the reservation held, every
+   insert for A is refused by row security). Fifteen components' stores take part.
+2. A sweep over every tenant table each component declares in `components.json` (135
+   tables in 16 components): under shop B no row of another shop is visible and an update
+   or delete aimed at a holding shop touches no row; under that shop a row cannot be moved
+   to another shop (row security `WITH CHECK`, SQLSTATE 42501). Every tenant table must
+   force row security and belong to a component.
+3. Negative control: a `BYPASSRLS` login sees shop A's products under the same probe.
+
+On an isolated run only seeded tables hold rows, so update, delete and move probes are
+meaningful for the tables that report "hold shop rows" (35 of 135 on the 25 November run);
+the visibility probe applies to all. In the complete registry the suite runs after the
+HTTP suites have filled the database.
+
 ## Repeatable checks
 
 From the repository root:
