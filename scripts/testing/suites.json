@@ -64,7 +64,8 @@
     "admin_creation",
     "agentic_commerce",
     "migration_assistant",
-    "product_models"
+    "product_models",
+    "schema_contracts"
   ],
   "providers": [
     "outbox_subscribers",
@@ -118,6 +119,7 @@
     "branding",
     "money_boundary_differential",
     "testing/test_integration_partitions",
-    "testing/test_partition_coverage"
+    "testing/test_partition_coverage",
+    "testing/schema_contracts"
   ]
 }

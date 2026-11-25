@@ -2978,6 +2978,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/rule_differential.py](../scripts/rule_differential.py) | Execute original Shopware numeric comparisons, including epsilon, null and unsupported operator semantics. |
 | [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth/import and adversarial fixtures; no external accounts. |
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
+| [scripts/schema_contracts.py](../scripts/schema_contracts.py) | HTTP and MCP contract cases generated from the route catalogue and the operation contracts, against the running server. |
 | [scripts/security/authenticated_scope.py](../scripts/security/authenticated_scope.py) | Adversarial SQL uses the actual tenant login, not SET ROLE on a privileged fixture session. |
 | [scripts/security/core_hardening.py](../scripts/security/core_hardening.py) | Real replica regressions for auth admission, poison-event isolation, retention and bounded resource leases. |
 | [scripts/security/tenant_schema.py](../scripts/security/tenant_schema.py) | Database adversarial checks: reject cross-shop links even when API predicates are accidentally omitted. |
@@ -3071,6 +3072,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/rule_history.py](../scripts/testing/rule_history.py) | Frozen comparison against real checkout/Flow snapshots; no current-data fallback or effects. |
 | [scripts/testing/runtime.py](../scripts/testing/runtime.py) | Owned synthetic server lifetime, child checks and loopback readiness for verification. |
 | [scripts/testing/scenario_source.py](../scripts/testing/scenario_source.py) | Native task ownership and applied-proposal admission for customer-test references. |
+| [scripts/testing/schema_contracts.py](../scripts/testing/schema_contracts.py) | Generate one valid and one invalid request per HTTP route and per MCP tool from the route catalogue and the operation contracts. |
 | [scripts/testing/shop_setup_checks.py](../scripts/testing/shop_setup_checks.py) | Personal setup progression exercises the native HTTP/MCP workspace CAS and tenant boundaries. |
 | [scripts/testing/site_release.py](../scripts/testing/site_release.py) | Actual selective publication resolves page dependencies atomically; no provider calls. |
 | [scripts/testing/sitecustomize.py](../scripts/testing/sitecustomize.py) | Opt-in subprocess instrumentation for synthetic verification; never loaded by production. |
