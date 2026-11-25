@@ -1,6 +1,7 @@
 /** Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. */
-import { Card, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useRead, useSetRead } from "../shell/useRead";
+import { Button, Card, Notice } from "../../kit/ui";
+import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -37,27 +38,19 @@ export default function MemoryView({
 }) {
   const k = useKnowledgeText(),
     { number, locale } = useLocale();
-  const [data, setData] = useState<Memory>(),
-    [error, setError] = useState(""),
+  const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState("");
+  const dataPath = "/api/intelligence";
+  const dataRead = useRead<Memory>(request, dataPath);
+  const setReadData = useSetRead(request);
+  const data = dataRead.data ?? undefined;
+  const dataLoadError = (dataRead.error as Error | undefined)?.message;
+
   const [decision, setDecision] = useState<{
     hypothesis: Memory["hypotheses"][number];
     state: DecisionState;
   }>();
-  useEffect(() => {
-    let active = true;
-    request("/api/intelligence")
-      .then((v) => {
-        if (active) setData(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
   const name = (id: string) => products.find((p) => p.id === id)?.name ?? id;
   const label = (state: string) =>
     k(
@@ -120,12 +113,9 @@ export default function MemoryView({
                   <div className="knowledge-actions">
                     {(["published", "experiment", "dismissed"] as const).map(
                       (state) => (
-                        <button
-                          className={
-                            state === "published"
-                              ? "studio-primary"
-                              : "studio-secondary"
-                          }
+                        <Button
+                          tone={state === "published" ? "primary" : "secondary"}
+                          type="submit"
                           key={state}
                           disabled={busy || state === h.state}
                           onClick={() => setDecision({ hypothesis: h, state })}
@@ -137,7 +127,7 @@ export default function MemoryView({
                                 ? "mark"
                                 : "dismiss",
                           )}
-                        </button>
+                        </Button>
                       ),
                     )}
                   </div>
@@ -148,7 +138,9 @@ export default function MemoryView({
       ))}
       <p className="knowledge-boundary">{k("boundary")}</p>
       {notice && <p role="status">{notice}</p>}
-      {error && <Notice tone="danger">{error}</Notice>}
+      {(error || dataLoadError) && (
+        <Notice tone="danger">{error || dataLoadError}</Notice>
+      )}
       {decision && (
         <ConfirmDialog
           title={k("confirm")}
@@ -170,7 +162,7 @@ export default function MemoryView({
                 },
                 "PUT",
               );
-              setData(await request("/api/intelligence"));
+              setReadData(dataPath, await request(dataPath));
               setNotice(k("changed"));
               setDecision(undefined);
               onChange?.();

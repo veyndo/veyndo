@@ -1,10 +1,10 @@
 /* Actual graph nodes and original rule forms use the Studio theme and independent responsive columns. */
 .automation-canvas {
   padding: 20px;
-  border: 1px solid var(--studio-border, #dbe5ef);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 20px;
-  background: radial-gradient(#cfdeea 1px, transparent 1px) 0 0/16px 16px
-    #f5f9fc;
+  background: radial-gradient(var(--vy-color-border) 1px, transparent 1px) 0
+    0/16px 16px var(--vy-color-bg);
 }
 .automation-canvas > header,
 .automation-node > header,
@@ -19,7 +19,7 @@
 }
 .automation-canvas > header span,
 .source-rule-fields small {
-  color: #657d94;
+  color: var(--vy-color-muted);
   font-size: 11px;
 }
 .automation-canvas-grid {
@@ -29,22 +29,23 @@
   padding: 24px 0;
 }
 .automation-node {
-  border: 1px solid #d8e4ee;
-  border-top: 3px solid #2196ee;
+  border: 1px solid var(--vy-color-border);
+  border-top: 3px solid var(--vy-color-accent-strong);
   border-radius: 14px;
   padding: 16px;
-  background: #fff;
-  box-shadow: 0 5px 18px #1538580a;
+  background: var(--vy-color-surface);
+  box-shadow: 0 5px 18px
+    color-mix(in srgb, var(--vy-color-text) 4%, transparent);
   min-width: 0;
 }
 .automation-node.node-condition {
-  border-top-color: #9365d3;
+  border-top-color: var(--vy-color-violet);
 }
 .automation-node.node-delay {
-  border-top-color: #e4aa37;
+  border-top-color: var(--vy-color-amber);
 }
 .automation-node.node-stop {
-  border-top-color: #d36c78;
+  border-top-color: var(--vy-color-rose);
 }
 .automation-node > header {
   font-size: 12px;
@@ -53,7 +54,7 @@
 .automation-node > header button {
   border: 0;
   background: transparent;
-  color: #8093a5;
+  color: var(--vy-color-muted);
   font-size: 20px;
 }
 .flow-entry {
@@ -73,7 +74,7 @@
 }
 .flow-connection {
   min-width: 0;
-  border-top: 1px dashed #d6e2ec;
+  border-top: 1px dashed var(--vy-color-border);
   padding-top: 14px;
   margin-top: 18px;
 }
@@ -83,21 +84,21 @@
   max-width: 100%;
 }
 .flow-branches .flow-connection:first-child {
-  color: #25826a;
+  color: var(--vy-color-positive);
 }
 .flow-branches .flow-connection:last-child {
-  color: #bd5968;
+  color: var(--vy-color-rose);
 }
 .automation-canvas > footer {
   justify-content: flex-start;
   flex-wrap: wrap;
 }
 .automation-canvas > footer button {
-  border: 1px solid #cbddeb;
+  border: 1px solid var(--vy-color-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--vy-color-surface);
   padding: 8px 12px;
-  color: #275d86;
+  color: var(--vy-color-accent);
 }
 .source-rule-fields {
   display: grid;
@@ -123,8 +124,8 @@
 }
 
 .flow-topology {
-  background: var(--surface-soft, #f5f8ff);
-  border: 1px solid var(--border, #dce5f3);
+  background: var(--surface-soft, var(--vy-color-bg));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 16px;
   overflow: auto;
   max-height: 420px;
@@ -135,16 +136,16 @@
   display: block;
 }
 .flow-topology rect {
-  fill: var(--surface, #fff);
-  stroke: #c7d7ef;
+  fill: var(--surface, var(--vy-color-accent-text));
+  stroke: var(--vy-color-border);
   stroke-width: 1.5;
 }
 .flow-topology .flow-start {
-  stroke: #2672ed;
+  stroke: var(--vy-color-accent-strong);
   stroke-width: 2.5;
 }
 .flow-topology text {
-  fill: var(--text, #253c59);
+  fill: var(--text, var(--vy-color-text));
   font-size: 12px;
   font-family: inherit;
 }
@@ -152,14 +153,14 @@
   cursor: pointer;
 }
 .flow-topology g[role="button"]:focus rect {
-  stroke: #2672ed;
+  stroke: var(--vy-color-accent-strong);
   stroke-width: 3;
 }
 .flow-topology .edge-yes {
-  color: #458dd4;
+  color: var(--vy-color-accent-strong);
 }
 .flow-topology .edge-no {
-  color: #bf8296;
+  color: var(--vy-color-rose);
 }
 
 .workbench-grid.flow-workspace {

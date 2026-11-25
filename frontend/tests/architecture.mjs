@@ -49,6 +49,15 @@ try{
  file('admin/shell/registry.ts','/** Registry fixture. */\nimport {load} from "../orders/other";\nexport const routes=[load];\n');
  assert.match(check().stderr,/Runtime import cycle/);
  for (const name of ['admin/orders/OrdersRoute.ts','admin/shell/registry.ts','admin/orders/studio-extension.ts','admin/orders/other.ts']) fs.unlinkSync(path.join(directory,name));
+ file('admin/orders/orders.css','/* Area styles. */\n.a { color: var(--vy-color-text); }\n');
+ assert.equal(check().status,0,check().stderr);
+ file('admin/orders/orders.css','/* Area styles. */\n.a { color: #142432; }\n');assert.match(check().stderr,/Studio styles use var/);
+ file('admin/orders/orders.css','/* Area styles. */\n.a { color: var(--vy-color-text); }\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nexport const cls="studio-primary";\n');assert.match(check().stderr,/retired Studio class/);
+ file('shared/api/base.ts','/** Shared fixture. */\nexport const value="x studio-card";\n');assert.match(check().stderr,/retired Studio class/);
+ file('shared/api/base.ts','/** Documented fixture. */\nexport const value=1;\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
+ assert.equal(check().status,0,check().stderr);
  fs.unlinkSync(path.join(directory,'shared/api/README.md'));assert.match(check().stderr,/folder contract/);
- console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token and lazy-registration negative controls');
+ console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token, lazy-registration and Studio kit-only negative controls');
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

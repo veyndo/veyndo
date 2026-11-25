@@ -2,9 +2,9 @@
 /* Scoped, touch-first register layout; Veyndo tokens support light/dark and reduced motion. */
 .pos-workspace {
   max-width: 1720px !important;
-  --pos-line: var(--border, #dce4ef);
-  --pos-ink: var(--text, #192d42);
-  --pos-paper: var(--surface, #fff);
+  --pos-line: var(--vy-color-border);
+  --pos-ink: var(--vy-color-text);
+  --pos-paper: var(--vy-color-surface);
   color: var(--pos-ink);
 }
 .pos-workspace button,
@@ -26,15 +26,16 @@
   gap: 8px;
 }
 .pos-workspace button:hover:not(:disabled) {
-  border-color: #3a75ee;
-  box-shadow: 0 4px 16px #2462db14;
+  border-color: var(--vy-color-accent-strong);
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--vy-color-accent-strong) 8%, transparent);
 }
 .pos-workspace button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 .pos-workspace :focus-visible {
-  outline: 3px solid #3479ff;
+  outline: 3px solid var(--vy-color-accent-strong);
   outline-offset: 3px;
 }
 .pos-heading {
@@ -113,9 +114,9 @@
   outline-offset: 0 !important;
 }
 .pos-search button {
-  color: #2462db;
+  color: var(--vy-color-accent-strong);
   font-weight: 650;
-  background: #edf3ff;
+  background: var(--vy-color-panel);
   border-color: transparent;
 }
 .pos-products {
@@ -140,7 +141,7 @@
 .pos-product-image {
   position: relative;
   aspect-ratio: 1;
-  background: #f2f5f9;
+  background: var(--vy-color-bg);
   display: grid;
   place-items: center;
 }
@@ -154,8 +155,8 @@
   right: 10px;
   top: 10px;
   border-radius: 20px;
-  background: #fffffff2;
-  color: #193046;
+  background: color-mix(in srgb, var(--vy-color-surface) 95%, transparent);
+  color: var(--vy-color-text);
   padding: 4px 9px;
   font-size: 11px;
 }
@@ -185,7 +186,8 @@
   top: 18px;
   max-height: calc(100dvh - 130px);
   overflow: auto;
-  box-shadow: 0 8px 36px #183c7010;
+  box-shadow: 0 8px 36px
+    color-mix(in srgb, var(--vy-color-accent) 6%, transparent);
 }
 .pos-cart > header {
   display: flex;
@@ -243,7 +245,7 @@
 .pos-hold {
   width: auto;
   margin: 0;
-  background: #f4f7fb !important;
+  background: var(--vy-color-bg) !important;
 }
 .pos-payment {
   display: grid;
@@ -291,16 +293,16 @@
   justify-content: space-between;
   font-size: 14px;
   padding: 14px;
-  background: #eaf7f2;
+  background: var(--vy-color-positive-soft);
   border-radius: 12px;
-  color: #165849;
+  color: var(--vy-color-positive);
 }
 .pos-pay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #2565ed !important;
+  background: var(--vy-color-accent-strong) !important;
   color: white !important;
   border-color: transparent !important;
   min-height: 56px !important;
@@ -343,9 +345,9 @@
   place-items: center;
   width: 100px;
   height: 100px;
-  background: #ecf3ff;
+  background: var(--vy-color-panel);
   border-radius: 28px;
-  color: #2565ed;
+  color: var(--vy-color-accent-strong);
 }
 .pos-error {
   display: flex;
@@ -354,9 +356,9 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 16px 20px;
-  border: 1px solid #efd0cd;
-  background: #fff0ee;
-  color: #8b3530;
+  border: 1px solid var(--vy-color-border);
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
   border-radius: 14px;
   margin: 12px 0;
 }

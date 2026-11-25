@@ -164,10 +164,9 @@ export default function ChannelEditor({
         </header>
         {draft.revision > 0 && (
           <nav className="workbench-row">
-            <button
-              className={
-                !scope && !connections ? "studio-primary" : "studio-secondary"
-              }
+            <Button
+              tone={!scope && !connections ? "primary" : "secondary"}
+              type="submit"
               disabled={scopeDirty}
               onClick={() => {
                 setScope(false);
@@ -175,9 +174,10 @@ export default function ChannelEditor({
               }}
             >
               {t("basics")}
-            </button>
-            <button
-              className={scope ? "studio-primary" : "studio-secondary"}
+            </Button>
+            <Button
+              tone={scope ? "primary" : "secondary"}
+              type="submit"
               disabled={busy || JSON.stringify(draft) !== baseline}
               onClick={() => {
                 setScope(true);
@@ -185,9 +185,10 @@ export default function ChannelEditor({
               }}
             >
               {t("scope")}
-            </button>
-            <button
-              className={connections ? "studio-primary" : "studio-secondary"}
+            </Button>
+            <Button
+              tone={connections ? "primary" : "secondary"}
+              type="submit"
               disabled={
                 dirty ||
                 busy ||
@@ -199,7 +200,7 @@ export default function ChannelEditor({
               }}
             >
               {t("connections")}
-            </button>
+            </Button>
             <ChannelActions
               draft={draft}
               request={request}

@@ -18,7 +18,7 @@
 }
 .commerce-title p:not(.kicker),
 .commerce-card > p {
-  color: var(--muted, #62758b);
+  color: var(--muted, var(--vy-color-muted));
   font-size: 13px;
   line-height: 1.7;
   max-width: 720px;
@@ -30,28 +30,28 @@
   flex-shrink: 0;
 }
 .commerce-card {
-  border: 1px solid var(--border, #dfe7ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 10px;
   padding: 24px;
   margin-bottom: 20px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
 }
 
 .commerce-manager label {
   display: grid;
   gap: 7px;
   font-size: 11px;
-  color: var(--muted, #62758b);
+  color: var(--muted, var(--vy-color-muted));
 }
 .commerce-manager input:not([type="checkbox"]),
 .commerce-manager select {
   min-height: 44px;
   width: 100%;
-  border: 1px solid var(--border, #d1dce7);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 6px;
   padding: 10px;
   font: inherit;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   color: inherit;
 }
 
@@ -64,7 +64,7 @@
 .commerce-manager th {
   font-weight: 500;
   padding: 12px;
-  color: var(--muted, #62758b);
+  color: var(--muted, var(--vy-color-muted));
 }
 .commerce-manager td {
   padding: 8px 12px;
@@ -90,7 +90,7 @@
   justify-content: space-between;
   gap: 20px;
   padding: 20px 0;
-  border-top: 1px solid var(--border, #dfe7ef);
+  border-top: 1px solid var(--border, var(--vy-color-border));
 }
 .commerce-review strong {
   font-size: 13px;
@@ -98,7 +98,7 @@
 .commerce-review small {
   display: block;
   font-size: 10px;
-  color: var(--muted, #62758b);
+  color: var(--muted, var(--vy-color-muted));
   margin-top: 9px;
 }
 .commerce-review p {
@@ -115,8 +115,8 @@
 }
 .commerce-error {
   padding: 16px;
-  background: #fff0ed;
-  color: #a53526;
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
   border-radius: 7px;
   font-size: 13px;
 }
@@ -140,8 +140,8 @@
   margin: 20px 0;
 }
 .account-tabs [aria-pressed="true"] {
-  background: var(--hover, #edf4ff);
-  border-color: var(--accent, #1768eb);
+  background: var(--hover, var(--vy-color-panel));
+  border-color: var(--accent, var(--vy-color-accent-strong));
 }
 .account-form {
   display: grid;
@@ -158,7 +158,7 @@
 .invite-code {
   margin-top: 20px;
   padding: 16px;
-  background: var(--panel, #f1f5fb);
+  background: var(--panel, var(--vy-color-panel));
   border-radius: 7px;
   font-size: 12px;
 }
@@ -167,7 +167,7 @@
   gap: 14px;
   align-items: center;
   padding: 18px 0;
-  border-top: 1px solid var(--border, #dfe7ef);
+  border-top: 1px solid var(--border, var(--vy-color-border));
 }
 .member-row > div {
   margin-right: auto;
@@ -179,7 +179,7 @@
   display: block;
   margin-top: 5px;
   font-size: 11px;
-  color: var(--muted, #62758b);
+  color: var(--muted, var(--vy-color-muted));
 }
 .member-row select {
   max-width: 150px;

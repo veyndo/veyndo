@@ -1,5 +1,5 @@
 /** Guided review links native setup owners and the existing agent without duplicating configuration or publication. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, LinkButton, Notice } from "../../kit/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SetupBasics from "./SetupBasics";
 import { useStudio } from "../shell/StudioContext";
@@ -127,15 +127,14 @@ export default function SetupWizard() {
           >
             {t("workspace")}
           </Button>
-          <a
-            className="studio-secondary"
+          <LinkButton
             href={storefrontURL(studio.workspace)}
             target="_blank"
             rel="noreferrer"
           >
             {t("preview")}
             <Icon name="arrow" size={16} />
-          </a>
+          </LinkButton>
         </div>
         <h2>{t("next")}</h2>
         <div className="setup-actions">
@@ -273,15 +272,15 @@ export default function SetupWizard() {
           )}
           <div className="setup-actions">
             {step === "test" ? (
-              <a
-                className="studio-primary"
+              <LinkButton
+                tone="primary"
                 href={storefrontURL(studio.workspace)}
                 target="_blank"
                 rel="noreferrer"
               >
                 {copy.action}
                 <Icon name="arrow" size={18} />
-              </a>
+              </LinkButton>
             ) : (
               <Button
                 tone="primary"

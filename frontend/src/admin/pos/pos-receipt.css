@@ -12,8 +12,8 @@
 .pos-receipt-mark {
   display: grid;
   place-items: center;
-  background: #e7f7ef;
-  color: #147354;
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
   border-radius: 50%;
   height: 80px;
   width: 80px;
@@ -63,7 +63,7 @@
   margin: 6px 0;
 }
 .pos-variants::backdrop {
-  background: #13273866;
+  background: color-mix(in srgb, var(--vy-color-text) 40%, transparent);
 }
 .pos-variants {
   background: var(--pos-paper);

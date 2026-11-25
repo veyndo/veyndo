@@ -1,5 +1,10 @@
 /** Buttons: one tone and size vocabulary, busy state announced, icon-only buttons require an accessible label. */
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import {
+  forwardRef,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { Spinner } from "./Feedback";
 
 export type ButtonTone = "primary" | "secondary" | "ghost" | "danger";
@@ -61,6 +66,29 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         title={label}
         className={["vy-icon-button", className].filter(Boolean).join(" ")}
         icon={icon}
+        {...rest}
+      />
+    );
+  },
+);
+
+export type LinkButtonProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  tone?: ButtonTone;
+  size?: ButtonSize;
+};
+
+/** A link that looks like a button: navigation keeps link semantics. */
+export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(
+  function LinkButton(
+    { tone = "secondary", size = "md", className, ...rest },
+    ref,
+  ) {
+    return (
+      <a
+        ref={ref}
+        className={["vy-button", className].filter(Boolean).join(" ")}
+        data-tone={tone}
+        data-size={size}
         {...rest}
       />
     );

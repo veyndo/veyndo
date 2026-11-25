@@ -1,4 +1,5 @@
 /** Guided seller connection editor reuses native channel and record revisions. Secrets remain server-only. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
@@ -145,17 +146,16 @@ export default function ConnectionEditor({
           </label>
         </fieldset>
         <footer>
-          <button
-            type="button"
-            className="studio-secondary"
-            disabled={busy}
-            onClick={cancel}
-          >
+          <Button type="button" disabled={busy} onClick={cancel}>
             {t("cancel")}
-          </button>
-          <button className="studio-primary" disabled={busy || !row.channel_id}>
+          </Button>
+          <Button
+            tone="primary"
+            type="submit"
+            disabled={busy || !row.channel_id}
+          >
             {t("save")}
-          </button>
+          </Button>
         </footer>
       </form>
     </ContentLanguage>

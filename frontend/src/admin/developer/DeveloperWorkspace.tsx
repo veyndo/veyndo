@@ -1,4 +1,5 @@
 /** Dedicated app and API workspaces retain App Studio state while switching the developer console. */
+import { Button } from "../../kit/ui";
 import { lazy, Suspense, useState } from "react";
 import type { ComponentProps } from "react";
 import DeveloperView from "./DeveloperView";
@@ -29,9 +30,10 @@ export default function DeveloperWorkspace(
     <>
       <nav className="developer-workspace-tabs workbench-row">
         {tabs.map((k) => (
-          <button
+          <Button
+            tone={tab === k ? "primary" : "secondary"}
+            type="submit"
             key={k}
-            className={tab === k ? "studio-primary" : "studio-secondary"}
             aria-pressed={tab === k}
             onClick={() => {
               setTab(k);
@@ -39,7 +41,7 @@ export default function DeveloperWorkspace(
             }}
           >
             {k === "components" ? c("tab") : t(k)}
-          </button>
+          </Button>
         ))}
       </nav>
       <div hidden={tab !== "studio"}>

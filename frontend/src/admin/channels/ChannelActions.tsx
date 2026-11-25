@@ -1,5 +1,5 @@
 /** Lifecycle actions use shared dependency deletion and one-use preview admission. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, LinkButton, Notice } from "../../kit/ui";
 import { useState } from "react";
 import AutomationDelete from "../automation/AutomationDelete";
 import type { RequestFn } from "../shell/studio-types";
@@ -77,21 +77,18 @@ export default function ChannelActions({
         </Button>
       )}
       {draft.data.kind === "pos" && draft.data.active && (
-        <a className="studio-secondary" href={posUrl(workspace, draft.id)}>
-          {t("pos")} ↗
-        </a>
+        <LinkButton href={posUrl(workspace, draft.id)}>{t("pos")} ↗</LinkButton>
       )}
       {!["pos", "marketplace"].includes(draft.data.kind) &&
         draft.data.active &&
         draft.data.visibility !== "private" && (
-          <a
-            className="studio-secondary"
+          <LinkButton
             href={channelUrl(workspace, draft.id)}
             target="_blank"
             rel="noopener noreferrer"
           >
             {t("preview")} ↗
-          </a>
+          </LinkButton>
         )}
       {!["pos", "marketplace"].includes(draft.data.kind) && (
         <Button

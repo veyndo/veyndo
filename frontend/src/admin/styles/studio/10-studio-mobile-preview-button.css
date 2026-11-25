@@ -21,7 +21,7 @@
   max-height: 90dvh;
 }
 .studio-preview-dialog::backdrop {
-  background: #0009;
+  background: color-mix(in srgb, var(--vy-color-text) 60%, transparent);
   backdrop-filter: blur(6px);
 }
 .studio-preview-dialog .studio-preview {
@@ -44,40 +44,51 @@
 }
 
 .studio[data-theme="light"] .studio-topbar {
-  background: #fff;
+  background: var(--vy-color-surface);
 }
 .studio[data-theme="light"] .studio-sidebar {
-  background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+  background: linear-gradient(
+    180deg,
+    var(--vy-color-surface) 0%,
+    var(--vy-color-bg) 100%
+  );
 }
 .studio[data-theme="light"] .studio-brand .veyndo-mark {
   border-radius: 11px;
-  box-shadow: 0 4px 16px #1768eb26;
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--vy-color-accent-strong) 15%, transparent);
 }
 .studio[data-theme="light"] .studio-sidebar nav button.active {
-  background: #e8f1ff;
-  color: #145bcc;
-  box-shadow: inset 3px 0 0 #1768eb;
+  background: var(--vy-color-hover);
+  color: var(--vy-color-accent-strong);
+  box-shadow: inset 3px 0 0 var(--vy-color-accent-strong);
 }
 .studio[data-theme="light"] .studio-preview {
-  background: #fff;
+  background: var(--vy-color-surface);
 }
 .studio[data-theme="light"] .preview-art {
-  background: linear-gradient(135deg, #e8f1ff, #eef7f9 65%, #edf0ff);
-  border: 1px solid #e0eafb;
+  background: linear-gradient(
+    135deg,
+    var(--vy-color-hover),
+    var(--vy-color-panel) 65%,
+    var(--vy-color-panel)
+  );
+  border: 1px solid var(--vy-color-border);
 }
 
 .studio[data-theme="light"] .studio-composer {
-  background: #fff;
-  box-shadow: 0 4px 28px #1544830d;
-  border: 1px solid #cad9ec;
+  background: var(--vy-color-surface);
+  box-shadow: 0 4px 28px
+    color-mix(in srgb, var(--vy-color-accent) 5%, transparent);
+  border: 1px solid var(--vy-color-border);
 }
 .studio[data-theme="light"] .from-user .message-body > p {
-  background: #eaf2ff;
-  border: 1px solid #dce9fd;
+  background: var(--vy-color-panel);
+  border: 1px solid var(--vy-color-border);
 }
-.studio[data-theme="light"] .studio-card,
 .studio[data-theme="light"] .metric {
-  box-shadow: 0 3px 16px #12365f05;
+  box-shadow: 0 3px 16px
+    color-mix(in srgb, var(--vy-color-text) 2%, transparent);
 }
 
 .studio .verified-facts {

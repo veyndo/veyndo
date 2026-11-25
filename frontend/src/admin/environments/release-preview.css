@@ -1,7 +1,7 @@
 /* Native shop preview stays contained in the release review at both viewport sizes. */
 .release-shop-preview {
   margin-block: 24px;
-  border-block-start: 1px solid var(--studio-border, #d1e0f0);
+  border-block-start: 1px solid var(--studio-border, var(--vy-color-border));
   padding-block-start: 20px;
 }
 .release-shop-preview h3 {
@@ -28,9 +28,9 @@
   overflow-wrap: anywhere;
 }
 .release-preview-canvas {
-  background: var(--studio-bg, #f4f7fb);
+  background: var(--studio-bg, var(--vy-color-bg));
   padding: 12px;
-  border: 1px solid var(--studio-border, #d1e0f0);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 12px;
 }
 .release-preview-canvas iframe {

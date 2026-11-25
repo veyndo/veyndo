@@ -9,7 +9,7 @@
   cursor: not-allowed;
 }
 .customer-account .shop-primary,
-.customer-account .studio-primary {
+.customer-account :is(.studio-primary, [data-tone="primary"]) {
   padding: 13px 22px;
   width: auto;
   border: 1px solid var(--account-accent);
@@ -23,7 +23,7 @@
   background: #173245;
 }
 .customer-account .shop-secondary,
-.customer-account .studio-secondary {
+.customer-account :is(.studio-secondary, [data-tone="secondary"]) {
   padding: 11px 16px;
   width: auto;
   border: 1px solid var(--account-line);
@@ -33,7 +33,8 @@
   font-size: 12px;
 }
 .customer-account .shop-secondary:hover:not(:disabled),
-.customer-account .studio-secondary:hover:not(:disabled) {
+.customer-account
+  :is(.studio-secondary, [data-tone="secondary"]):hover:not(:disabled) {
   border-color: #a3b3bf;
   background: #f5f8fa;
 }

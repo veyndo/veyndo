@@ -60,7 +60,8 @@
 .studio .knowledge-source-card:hover,
 .studio .knowledge-census button:hover {
   border-color: var(--accent);
-  box-shadow: 0 6px 20px #1766e90d;
+  box-shadow: 0 6px 20px
+    color-mix(in srgb, var(--vy-color-accent-strong) 5%, transparent);
 }
 .studio .knowledge-source-card strong {
   font-size: 17px;
@@ -126,12 +127,6 @@
   margin: 24px 0;
   align-items: end;
 }
-.studio .knowledge-upload {
-  padding: 22px;
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  background: var(--bg);
-}
 .studio .knowledge-upload small {
   line-height: 1.6;
 }
@@ -159,6 +154,10 @@
 }
 
 .studio .knowledge-upload {
+  padding: 22px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--bg);
   position: relative;
   cursor: pointer;
 }

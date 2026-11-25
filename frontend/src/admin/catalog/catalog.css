@@ -2,10 +2,10 @@
 .catalog-workspace {
   max-width: 1500px;
   margin: auto;
-  --catalog-blue: #1365f0;
-  --catalog-muted: #64748b;
-  --catalog-line: #e3e9f2;
-  --catalog-surface: #f6f9fd;
+  --catalog-blue: var(--vy-color-accent-strong);
+  --catalog-muted: var(--vy-color-muted);
+  --catalog-line: var(--vy-color-border);
+  --catalog-surface: var(--vy-color-panel);
 }
 .catalog-workspace label:not(.checkbox-label) {
   display: flex;
@@ -51,7 +51,7 @@
   letter-spacing: 1.8px;
   color: var(--catalog-blue) !important;
 }
-.catalog-heading :is(.studio-primary, [data-tone="primary"]) {
+.catalog-heading [data-tone="primary"] {
   white-space: nowrap;
   min-height: 44px;
 }
@@ -75,15 +75,15 @@
 }
 
 .catalog-low {
-  color: #b86a12;
+  color: var(--vy-color-warning);
 }
 
 .catalog-error,
 .catalog-unsaved {
   padding: 16px;
   border-radius: 12px;
-  background: #fff0eb;
-  color: #9b3827;
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
 }
 .catalog-unsaved {
   display: flex;
@@ -119,10 +119,10 @@
   border-radius: 9px;
   background: none;
   padding: 13px 14px;
-  color: #64748b;
+  color: var(--vy-color-muted);
 }
 .catalog-detail-nav [aria-selected="true"] {
-  background: #eaf2ff;
+  background: var(--vy-color-panel);
   color: var(--catalog-blue);
   font-weight: 650;
 }

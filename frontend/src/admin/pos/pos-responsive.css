@@ -26,9 +26,9 @@
     flex: 1;
   }
   .pos-mobile-switch button[aria-pressed="true"] {
-    border-color: #3479ff;
-    background: #edf3ff;
-    color: #2462db;
+    border-color: var(--vy-color-accent-strong);
+    background: var(--vy-color-panel);
+    color: var(--vy-color-accent-strong);
   }
   .pos-register[data-panel="catalog"] .pos-cart,
   .pos-register[data-panel="cart"] .pos-catalog {

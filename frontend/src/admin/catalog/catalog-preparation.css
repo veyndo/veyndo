@@ -15,9 +15,9 @@
   align-items: flex-start;
   gap: 0.25rem;
   padding: 0.5rem 0.7rem;
-  border: 1px solid var(--line, #dbe5ef);
+  border: 1px solid var(--line, var(--vy-color-border));
   border-radius: 0.6rem;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   color: inherit;
   text-align: start;
   cursor: pointer;
@@ -27,7 +27,7 @@
   border-color: var(--accent);
 }
 .catalog-preparation-step.is-failed {
-  color: var(--danger, #b42318);
+  color: var(--danger, var(--vy-color-danger));
 }
 .catalog-preparation-step.is-ready {
   color: var(--accent);

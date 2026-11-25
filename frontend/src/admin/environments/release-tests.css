@@ -2,7 +2,7 @@
 .release-tests {
   margin-block: 24px;
   padding-block: 24px;
-  border-block: 1px solid var(--studio-border, #d1e0f0);
+  border-block: 1px solid var(--studio-border, var(--vy-color-border));
 }
 .release-tests h2 {
   margin: 0 0 8px;

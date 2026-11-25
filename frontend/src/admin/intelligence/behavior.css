@@ -95,7 +95,11 @@
   display: block;
   min-width: 2px;
   height: 100%;
-  background: linear-gradient(90deg, #2f72f6, #17b5bf);
+  background: linear-gradient(
+    90deg,
+    var(--vy-color-accent-strong),
+    var(--vy-color-teal)
+  );
   border-radius: 8px;
 }
 .behavior-bar strong {
@@ -120,7 +124,10 @@
   margin: auto;
   width: 28px;
   border-radius: 8px 8px 3px 3px;
-  background: linear-gradient(#3d84ff, #b9d6ff);
+  background: linear-gradient(
+    var(--vy-color-accent-strong),
+    var(--vy-color-border)
+  );
 }
 .behavior-graph-scroll {
   overflow: auto;
@@ -132,12 +139,12 @@
 }
 .behavior-edge {
   fill: none;
-  stroke: #53b7bf;
+  stroke: var(--vy-color-teal);
   stroke-width: 2;
   opacity: 0.55;
 }
 .behavior-edge.semantic {
-  stroke: #a58aef;
+  stroke: var(--vy-color-accent-border);
   stroke-dasharray: 5 4;
 }
 .behavior-node rect {
@@ -149,11 +156,11 @@
 }
 .behavior-node.product rect {
   fill: color-mix(in srgb, var(--accent) 8%, var(--surface));
-  stroke: #8fb4fc;
+  stroke: var(--vy-color-accent-border);
 }
 .behavior-node.product:focus rect,
 .behavior-node.product:hover rect {
-  stroke: #2f72f6;
+  stroke: var(--vy-color-accent-strong);
   stroke-width: 2;
 }
 .behavior-node text {
@@ -221,7 +228,7 @@
   padding: 0;
 }
 .behavior-journey li {
-  border-left: 2px solid #b9d6ff;
+  border-left: 2px solid var(--vy-color-border);
   padding: 8px 20px 20px;
   display: grid;
   gap: 10px;

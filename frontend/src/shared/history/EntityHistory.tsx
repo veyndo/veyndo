@@ -1,4 +1,5 @@
 /** On-demand entity history, field comparisons and explicitly confirmed revision-checked restoration. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../api/types";
 import { useCrmText } from "../i18n/crm-i18n";
@@ -145,14 +146,13 @@ export default function EntityHistory({
             ))}
           </div>
           {cursor && (
-            <button
+            <Button
               type="button"
-              className="studio-secondary"
               disabled={busy}
               onClick={() => void run(() => load(cursor))}
             >
               {r("more")}
-            </button>
+            </Button>
           )}
           {detail && (
             <div className="history-comparison">
@@ -184,9 +184,8 @@ export default function EntityHistory({
                   {(["before", "after"] as const)
                     .filter((side) => detail[side] != null)
                     .map((side) => (
-                      <button
+                      <Button
                         type="button"
-                        className="studio-secondary"
                         disabled={dirty || busy || revision == null}
                         key={side}
                         onClick={() => setPending(side)}
@@ -194,7 +193,7 @@ export default function EntityHistory({
                         {r(
                           side === "before" ? "restoreBefore" : "restoreAfter",
                         )}
-                      </button>
+                      </Button>
                     ))}
                 </div>
               )}

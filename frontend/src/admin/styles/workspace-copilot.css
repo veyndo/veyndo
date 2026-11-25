@@ -194,7 +194,8 @@
     bottom: 0;
     height: auto;
     width: min(460px, 100vw);
-    box-shadow: -12px 12px 40px #14243220;
+    box-shadow: -12px 12px 40px
+      color-mix(in srgb, var(--vy-color-text) 13%, transparent);
   }
 }
 @media (max-width: 600px) {

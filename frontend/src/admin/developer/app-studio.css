@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: var(--accent, #1769f3);
+  color: var(--accent, var(--vy-color-accent-strong));
 }
 .app-studio-intro h1 {
   font-size: clamp(24px, 2.5vw, 34px) !important;
@@ -24,18 +24,19 @@
 }
 .app-studio-intro p {
   font-size: 14px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   margin: 0;
 }
 .app-studio-fieldset {
   container-type: inline-size;
-  border: 1px solid var(--border, #dce5ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 20px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   padding: 0;
   margin: 0;
   min-width: 0;
-  box-shadow: 0 12px 48px #163b7210;
+  box-shadow: 0 12px 48px
+    color-mix(in srgb, var(--vy-color-accent) 6%, transparent);
   overflow: hidden;
 }
 .app-studio-toolbar {
@@ -58,7 +59,7 @@
 .app-current small {
   display: block;
   font-size: 11px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   margin-top: 5px;
   overflow-wrap: anywhere;
 }
@@ -68,8 +69,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #ecf3ff;
-  color: #1769f3;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-accent-strong);
   flex-shrink: 0;
 }
 .app-toolbar-actions {
@@ -81,7 +82,7 @@
   font-size: 12px;
   display: grid;
   gap: 6px;
-  color: var(--text, #19304f);
+  color: var(--text, var(--vy-color-text));
 }
 .app-toolbar-actions select {
   max-width: 210px;
@@ -92,9 +93,9 @@
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
-  border: 1px solid var(--border, #dce5ef);
-  background: var(--surface, #fff);
-  color: var(--text, #19304f);
+  border: 1px solid var(--border, var(--vy-color-border));
+  background: var(--surface, var(--vy-color-surface));
+  color: var(--text, var(--vy-color-text));
   border-radius: 9px;
   padding: 9px 11px;
   font-size: 13px;
@@ -111,7 +112,7 @@
   cursor: not-allowed;
 }
 .app-studio :focus-visible {
-  outline: 3px solid #3183ff;
+  outline: 3px solid var(--vy-color-accent-strong);
   outline-offset: 3px;
 }
 .app-studio-tabs {
@@ -119,7 +120,7 @@
   gap: 8px;
   align-items: center;
   padding: 0 24px;
-  border-bottom: 1px solid var(--border, #dce5ef);
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
   overflow-x: auto;
 }
 .app-studio-tabs button {
@@ -132,15 +133,15 @@
   border: 0;
   border-bottom: 2px solid transparent;
   font-size: 13px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
 }
 .app-studio-tabs button.active {
-  border-color: #1769f3;
-  color: #1769f3;
+  border-color: var(--vy-color-accent-strong);
+  color: var(--vy-color-accent-strong);
   font-weight: 600;
 }
 .app-studio-tabs button span {
-  background: var(--surface-alt, #eff4fc);
+  background: var(--surface-alt, var(--vy-color-panel));
   border-radius: 6px;
   padding: 2px 6px;
   font-size: 10px;
@@ -148,7 +149,7 @@
 .app-tabs-caption {
   margin-left: auto;
   font-size: 10px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   white-space: nowrap;
 }
 .app-language-toolbar {
@@ -157,8 +158,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 12px 24px;
-  background: var(--surface-alt, #f8faff);
-  border-bottom: 1px solid var(--border, #dce5ef);
+  background: var(--surface-alt, var(--vy-color-bg));
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
 }
 .app-language-toolbar .intl-language-switcher {
   background: none;
@@ -191,20 +192,20 @@
 }
 .app-icon-button {
   background: none;
-  border: 1px solid var(--border, #dce5ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 8px;
   padding: 6px;
   min-width: 32px;
   min-height: 32px;
   display: inline-grid;
   place-items: center;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
 }
 .app-view-tabs {
   display: flex;
   gap: 6px;
   padding: 12px 24px;
-  border-bottom: 1px solid var(--border, #dce5ef);
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
   overflow-x: auto;
 }
 .app-view-tabs button {
@@ -213,16 +214,16 @@
   border-radius: 8px;
   padding: 7px 11px;
   font-size: 12px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   display: flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
 }
 .app-view-tabs button.active {
-  background: #ecf3ff;
-  border-color: #d8e6ff;
-  color: #1769f3;
+  background: var(--vy-color-panel);
+  border-color: var(--vy-color-border);
+  color: var(--vy-color-accent-strong);
 }
 
 .app-designer {
@@ -235,26 +236,26 @@
   text-transform: uppercase;
   letter-spacing: 0.09em;
   font-weight: 600;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   display: block;
   margin-bottom: 16px;
 }
 .app-palette {
   padding: 22px 14px;
-  border-right: 1px solid var(--border, #dce5ef);
+  border-right: 1px solid var(--border, var(--vy-color-border));
 }
 .app-palette > button {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 42px;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #dce5ef);
+  background: var(--surface, var(--vy-color-surface));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 9px;
   width: 100%;
   padding: 10px;
   font-size: 12px;
-  color: var(--text, #19304f);
+  color: var(--text, var(--vy-color-text));
   margin-bottom: 8px;
 }
 .app-palette > button > span {
@@ -262,20 +263,23 @@
   text-align: left;
 }
 .app-palette > button:hover {
-  border-color: #91b9ff;
-  background: #f4f8ff;
+  border-color: var(--vy-color-accent-border);
+  background: var(--vy-color-bg);
 }
 .app-palette-note {
-  border-top: 1px solid var(--border, #dce5ef);
+  border-top: 1px solid var(--border, var(--vy-color-border));
   padding-top: 22px;
   margin-top: 32px;
   font-size: 11px;
   line-height: 1.65;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
 }
 .app-canvas {
-  background-color: var(--surface-alt, #f4f7fc);
-  background-image: radial-gradient(#a6bad34a 1px, transparent 1px);
+  background-color: var(--surface-alt, var(--vy-color-bg));
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--vy-color-accent-border) 29%, transparent) 1px,
+    transparent 1px
+  );
   background-size: 18px 18px;
   padding: 22px;
   min-width: 0;
@@ -285,7 +289,7 @@
   justify-content: space-between;
   gap: 10px;
   font-size: 10px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   margin-bottom: 20px;
 }
 .app-design-blocks {
@@ -299,15 +303,17 @@
 }
 .app-design-block {
   position: relative;
-  border: 1px solid var(--border, #dce5ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 14px;
-  box-shadow: 0 3px 14px #26496c06;
-  background: var(--surface, #fff);
+  box-shadow: 0 3px 14px
+    color-mix(in srgb, var(--vy-color-accent) 2%, transparent);
+  background: var(--surface, var(--vy-color-surface));
   min-width: 0;
 }
 .app-design-block.selected {
-  border-color: #1769f3;
-  box-shadow: 0 0 0 2px #1769f319;
+  border-color: var(--vy-color-accent-strong);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--vy-color-accent-strong) 10%, transparent);
 }
 .app-block-select {
   display: block;
@@ -317,7 +323,7 @@
   width: 100%;
   text-align: left;
   border-radius: 14px;
-  color: var(--text, #19304f);
+  color: var(--text, var(--vy-color-text));
 }
 
 .app-block-select h3 {
@@ -328,7 +334,7 @@
 .app-block-select p {
   font-size: 13px;
   line-height: 1.7;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
   margin: 0;
   white-space: pre-wrap;
 }
@@ -339,8 +345,8 @@
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: var(--surface, #fff);
-  border: 1px solid #1769f3;
+  background: var(--surface, var(--vy-color-surface));
+  border: 1px solid var(--vy-color-accent-strong);
   border-radius: 8px;
 }
 .app-node-controls button {
@@ -351,7 +357,7 @@
   border: 0;
   border-radius: 4px;
   background: none;
-  color: #1769f3;
+  color: var(--vy-color-accent-strong);
 }
 
 /* While editing, keep the selected workspace above the fold; the library remains on its overview. */

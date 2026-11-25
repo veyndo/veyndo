@@ -1,5 +1,5 @@
 /** ProposalCard keeps merchant interaction separate from workspace orchestration. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, LinkButton, Notice } from "../../kit/ui";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -184,9 +184,9 @@ export default function ProposalCard({
             </ul>
           )}
           {message.applied && (
-            <a className="studio-secondary" href={translations.href}>
+            <LinkButton href={translations.href}>
               {b("reviewTranslations")}
-            </a>
+            </LinkButton>
           )}
         </div>
       )}

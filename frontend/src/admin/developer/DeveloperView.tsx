@@ -207,9 +207,9 @@ export default function DeveloperView({
                 payments={m.category === "payment" || !!m.paymentProvider}
               />
               <div className="app-toolbar-actions">
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary app-agent-toggle"
+                  className="app-agent-toggle"
                   aria-expanded={agent.drawer.open}
                   onClick={() => {
                     setSection("design");
@@ -218,7 +218,7 @@ export default function DeveloperView({
                 >
                   <Icon name="spark" size={17} />
                   {workspaceText("agentTitle")}
-                </button>
+                </Button>
                 <Field label={a("sandbox")}>
                   <Select
                     value={studio.env}

@@ -1,5 +1,5 @@
 /** Personal entry point on the existing shell; requests and linked views retain current scope and rights. */
-import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { openPinnedView } from "../../shared/grid/pinned-view";
 import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
@@ -325,7 +325,7 @@ export default function PersonalWorkspace() {
           </div>
         </section>
       )}
-      <details className="studio-card">
+      <Card as="details">
         <summary>{t("create")}</summary>
         <div className="personal-create">
           <Field label={t("areaName")}>
@@ -368,8 +368,8 @@ export default function PersonalWorkspace() {
             {t("suggest")}
           </button>
         </div>
-      </details>
-      <details className="studio-card">
+      </Card>
+      <Card as="details">
         <summary>{t("history")}</summary>
         {record?.versions?.map((v) => (
           <p key={v.revision}>
@@ -377,7 +377,7 @@ export default function PersonalWorkspace() {
             <button onClick={() => update(v.data)}>{t("restore")}</button>
           </p>
         ))}
-      </details>
+      </Card>
       {workingView && workingView.request === request && (
         <AgentWorkSurface
           candidate={workingView.view}

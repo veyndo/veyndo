@@ -7,6 +7,7 @@ export type CatalogueEntry = {
 export const catalogue: CatalogueEntry[] = [
   { name: "Button", kind: "atom", pattern: "button" },
   { name: "IconButton", kind: "atom", pattern: "button" },
+  { name: "LinkButton", kind: "atom", pattern: "link" },
   { name: "Badge", kind: "atom" },
   { name: "Spinner", kind: "atom", pattern: "status" },
   { name: "VisuallyHidden", kind: "atom" },

@@ -187,8 +187,9 @@ export default function AppLibrary({
                       </div>
                       <h2>{name(b)}</h2>
                       <p>{l(descriptionKey(b.id))}</p>
-                      <button
-                        className="studio-secondary app-install-button"
+                      <Button
+                        type="submit"
+                        className="app-install-button"
                         disabled={!manage || busy}
                         onClick={() => onInstall(b.id)}
                       >
@@ -198,7 +199,7 @@ export default function AppLibrary({
                             ? "upgrade"
                             : "install",
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </article>
                 ))}

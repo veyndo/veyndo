@@ -171,14 +171,6 @@
 .app-canvas-agent .app-agent-panel {
   padding: 16px;
 }
-.app-canvas-agent .app-model-card {
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-}
-.app-canvas-agent .app-agent-options {
-  flex-wrap: wrap;
-}
 
 .app-canvas-agent .app-agent-options label {
   min-width: 0;
@@ -196,9 +188,9 @@
   min-height: 44px;
   padding: 8px;
   font: inherit;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   color: inherit;
-  border: 1px solid var(--border, #d4e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
 }
 
 .app-scene-form {
@@ -232,9 +224,12 @@
   padding: 8px 16px;
 }
 .app-canvas-agent .app-agent-options {
+  flex-wrap: wrap;
   gap: 8px;
 }
 .app-canvas-agent .app-model-card {
+  border: 0;
+  box-shadow: none;
   padding: 16px;
 }
 .app-canvas-agent .app-model-card h2 {

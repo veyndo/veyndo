@@ -1,5 +1,5 @@
 /** AgentsView renders verified shop state and typed user actions. */
-import { Badge, Button, Card, Notice } from "../../kit/ui";
+import { Badge, Button, Card, LinkButton, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
@@ -48,15 +48,10 @@ export function AgentsView({
               <span className="soft-tag pending">{t("notLinked")}</span>
             </div>
             <p>{t("remoteHint")}</p>
-            <a
-              href={guide}
-              target="_blank"
-              rel="noreferrer"
-              className="studio-secondary"
-            >
+            <LinkButton href={guide} target="_blank" rel="noreferrer">
               {t("setupGuide")}
               <Icon name="arrow" size={16} />
-            </a>
+            </LinkButton>
           </Card>
         ))}
         <Card className="connection-card">

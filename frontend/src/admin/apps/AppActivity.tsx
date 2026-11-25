@@ -1,4 +1,5 @@
 /** API-backed per-app call metadata, storage budgets and explicitly approved durable replay. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import AppJobs from "./AppJobs";
 import { useEffect, useState } from "react";
@@ -36,32 +37,25 @@ export default function AppActivity({
   request: RequestFn;
 }) {
   const t = useAppOperationsText();
-  const [data, setData] = useState<Activity | null>(null),
-    [error, setError] = useState(""),
+  const [error, setError] = useState(""),
     [cursor, setCursor] = useState("0"),
     [confirm, setConfirm] = useState(false),
     [busy, setBusy] = useState(false),
     [queued, setQueued] = useState<number | null>(null);
+  const dataPath = `/api/apps/${app}/activity`;
+  const dataRead = useRead<Activity | null>(request, dataPath);
+  const setReadData = useSetRead(request);
+  const data = dataRead.data ?? null;
+  const dataLoadError = (dataRead.error as Error | undefined)?.message;
+
   useEffect(() => {
-    let active = true;
-    setData(null);
     setError("");
-    request(`/api/apps/${app}/activity`)
-      .then((v) => {
-        if (active) setData(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request]);
+  }, [app]);
   const refresh = async () => {
     setBusy(true);
     setError("");
     try {
-      setData(await request(`/api/apps/${app}/activity`));
+      setReadData(dataPath, await request(dataPath));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -80,7 +74,7 @@ export default function AppActivity({
       setQueued(result.queued);
       setCursor(String(result.nextCursor));
       setConfirm(false);
-      setData(await request(`/api/apps/${app}/activity`));
+      setReadData(dataPath, await request(dataPath));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -177,7 +171,9 @@ export default function AppActivity({
             {t("queued")}: {queued}
           </p>
         )}
-        {error && <Notice tone="danger">{error}</Notice>}
+        {(error || dataLoadError) && (
+          <Notice tone="danger">{error || dataLoadError}</Notice>
+        )}
         {confirm && (
           <ConfirmDialog
             title={t("replay")}

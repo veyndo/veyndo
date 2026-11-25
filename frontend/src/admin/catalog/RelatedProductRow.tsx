@@ -91,24 +91,24 @@ export default function RelatedProductRow({
         )}
       </div>
       <div className="related-product-actions">
-        <button
+        <Button
           type="button"
-          className="studio-secondary related-product-earlier"
+          className="related-product-earlier"
           disabled={disabled || index === 0}
           aria-label={t("earlier", { name })}
           onClick={() => onMove(-1)}
         >
           <Icon name="arrow" />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className="studio-secondary related-product-later"
+          className="related-product-later"
           disabled={disabled || index === total - 1}
           aria-label={t("later", { name })}
           onClick={() => onMove(1)}
         >
           <Icon name="arrow" />
-        </button>
+        </Button>
         <Button
           type="button"
           disabled={disabled}

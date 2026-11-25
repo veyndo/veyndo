@@ -41,8 +41,8 @@
 .setup-return button {
   min-height: 42px;
 }
-.setup-workspace :is(.studio-primary, [data-tone="primary"]),
-.setup-workspace :is(.studio-secondary, [data-tone="secondary"]) {
+.setup-workspace [data-tone="primary"],
+.setup-workspace [data-tone="secondary"] {
   padding: 10px 16px;
 }
 .setup-welcome {
@@ -194,12 +194,6 @@
   color: var(--accent);
   margin-bottom: 14px;
 }
-.setup-task h2 {
-  font-size: 1.625rem;
-  line-height: 1.25;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
 .setup-task-hint {
   color: var(--muted);
   line-height: 1.65;
@@ -298,7 +292,7 @@
   font-size: 0.875rem;
   font-weight: 600;
 }
-.setup-return :is(.studio-secondary, [data-tone="secondary"]) {
+.setup-return [data-tone="secondary"] {
   padding: 8px 14px;
   white-space: nowrap;
 }
@@ -319,9 +313,7 @@
   font-size: 1.125rem;
   margin: 42px 0 0;
 }
-.setup-complete
-  .setup-actions
-  > button:not(.studio-primary, [data-tone="primary"]) {
+.setup-complete .setup-actions > button:not([data-tone="primary"]) {
   padding: 10px 16px;
   border: 1px solid var(--border);
 }
@@ -358,5 +350,9 @@
   min-height: auto;
 }
 .setup-task h2 {
+  font-size: 1.625rem;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.02em;
   scroll-margin-top: 20px;
 }

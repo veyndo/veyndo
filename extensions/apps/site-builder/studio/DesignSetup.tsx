@@ -1,4 +1,5 @@
 /** One visible setup path reuses native sandbox admission and explicit per-package consent. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
@@ -138,8 +139,9 @@ export default function DesignSetup({
       {denied ? (
         <p role="status">{denied}</p>
       ) : (
-        <button
-          className="studio-primary"
+        <Button
+          tone="primary"
+          type="submit"
           disabled={busy || !loaded}
           onClick={async () => {
             const epoch = generation.current;
@@ -173,7 +175,7 @@ export default function DesignSetup({
           }}
         >
           {t(busy ? "busy" : sandbox ? "review" : selected ? "open" : "create")}
-        </button>
+        </Button>
       )}
       {error && <p role="alert">{error}</p>}
       {consent && sandbox && missing && channel && apps && (

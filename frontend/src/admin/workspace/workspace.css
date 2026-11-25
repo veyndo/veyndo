@@ -5,7 +5,7 @@
   padding: clamp(20px, 4vw, 56px);
   display: grid;
   gap: 24px;
-  color: var(--studio-text, #193044);
+  color: var(--studio-text, var(--vy-color-text));
 }
 .personal-heading {
   display: flex;
@@ -21,7 +21,7 @@
 .personal-heading p {
   max-width: 800px;
   line-height: 1.65;
-  color: var(--studio-muted, #60768d);
+  color: var(--studio-muted, var(--vy-color-muted));
 }
 .personal-workspace button {
   min-height: 44px;
@@ -32,7 +32,7 @@
 }
 .personal-workspace button:focus-visible,
 .personal-workspace select:focus-visible {
-  outline: 3px solid #189eff;
+  outline: 3px solid var(--vy-color-accent-strong);
   outline-offset: 3px;
 }
 .personal-areas {
@@ -43,15 +43,15 @@
 .personal-areas button {
   padding: 12px 20px;
   border-radius: 14px;
-  border: 1px solid #d3e1f0;
-  background: var(--studio-card, #fff);
+  border: 1px solid var(--vy-color-border);
+  background: var(--studio-card, var(--vy-color-surface));
   color: inherit;
   font-weight: 650;
 }
 .personal-areas button[aria-selected="true"] {
-  background: #0877e8;
+  background: var(--vy-color-accent-strong);
   color: white;
-  border-color: #0877e8;
+  border-color: var(--vy-color-accent-strong);
 }
 .personal-cards {
   display: grid;
@@ -60,18 +60,20 @@
 }
 .personal-cards article {
   min-width: 0;
-  border: 1px solid #d5e2f1;
-  background: var(--studio-card, #fff);
+  border: 1px solid var(--vy-color-border);
+  background: var(--studio-card, var(--vy-color-surface));
   border-radius: 22px;
   padding: 20px;
-  box-shadow: 0 6px 24px #103b6e06;
+  box-shadow: 0 6px 24px
+    color-mix(in srgb, var(--vy-color-accent) 2%, transparent);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
 }
 .personal-cards article:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 32px #085bc412;
+  box-shadow: 0 14px 32px
+    color-mix(in srgb, var(--vy-color-accent) 7%, transparent);
 }
 .personal-card-open {
   display: flex;
@@ -85,14 +87,14 @@
   padding: 0;
 }
 .personal-card-open > svg:first-child {
-  color: #0877e8;
+  color: var(--vy-color-accent-strong);
 }
 .personal-card-open h2 {
   font-size: 20px;
   flex: 1;
 }
 .personal-card-controls {
-  border-top: 1px solid #dce5ef;
+  border-top: 1px solid var(--vy-color-border);
   display: flex;
   gap: 8px;
   margin-top: 16px;
@@ -103,7 +105,7 @@
   place-items: center;
   min-width: 44px;
   border: 0;
-  background: var(--studio-bg, #f2f7fd);
+  background: var(--studio-bg, var(--vy-color-bg));
   color: inherit;
   border-radius: 10px;
 }
@@ -127,8 +129,8 @@
 }
 .personal-workspace input,
 .personal-workspace select {
-  border: 1px solid #ccdaeb;
-  background: var(--studio-card, #fff);
+  border: 1px solid var(--vy-color-border);
+  background: var(--studio-card, var(--vy-color-surface));
   color: inherit;
   border-radius: 12px;
   min-height: 48px;
@@ -140,7 +142,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border-top: 1px solid #dce5ef;
+  border-top: 1px solid var(--vy-color-border);
   padding: 16px 0;
 }
 .personal-goal strong {
@@ -149,13 +151,9 @@
 .personal-goal label {
   font-size: 12px;
 }
-.personal-goals > p {
-  line-height: 1.6;
-  color: var(--studio-muted, #60768d);
-}
 .personal-task {
   padding: 14px 0;
-  border-bottom: 1px solid #dce5ef;
+  border-bottom: 1px solid var(--vy-color-border);
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
@@ -236,12 +234,14 @@
 }
 .personal-goal > button {
   padding: 10px 14px;
-  border: 1px solid #d6e2ef;
+  border: 1px solid var(--vy-color-border);
   border-radius: 12px;
-  background: var(--studio-card, #fff);
+  background: var(--studio-card, var(--vy-color-surface));
   color: inherit;
 }
 .personal-goals > p {
+  line-height: 1.6;
+  color: var(--studio-muted, var(--vy-color-muted));
   margin: 16px 0 24px;
 }
 @media (max-width: 1200px) {

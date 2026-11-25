@@ -186,13 +186,13 @@ export default function AutopilotToday({
           {canRevert &&
             value.changes.filter((c) => c.currentMinor !== c.baselineMinor)
               .length > 1 && (
-              <button
+              <Button
                 type="button"
-                className="studio-secondary autopilot-all"
+                className="autopilot-all"
                 onClick={() => void revert()}
               >
                 {t("revertAll")}
-              </button>
+              </Button>
             )}
           {value.changes.length ? (
             <ul className="autopilot-changes">

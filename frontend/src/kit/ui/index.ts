@@ -1,8 +1,13 @@
 /** Public interface of kit/ui: accessible, label-free atoms, molecules and headless primitives over the design tokens. */
 import "../tokens";
 import "./ui.css";
-export { Button, IconButton } from "./Button";
-export type { ButtonProps, ButtonTone, ButtonSize } from "./Button";
+export { Button, IconButton, LinkButton } from "./Button";
+export type {
+  ButtonProps,
+  ButtonTone,
+  ButtonSize,
+  LinkButtonProps,
+} from "./Button";
 export { Badge, Spinner, Notice, EmptyState, VisuallyHidden } from "./Feedback";
 export type { Tone } from "./Feedback";
 export {

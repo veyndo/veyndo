@@ -1,6 +1,7 @@
 /** Native payment balances and observed financial jobs, shared with the order detail controls. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -38,28 +39,21 @@ export default function PaymentManager({
   const { a } = useAppText(),
     explain = usePaymentDiagnosticText(),
     { o } = useOperationsText();
-  const [data, setData] = useState<Data>();
+
+  const dataPath = "/api/payments";
+  const dataRead = useRead<Data>(request, dataPath);
+  const setReadData = useSetRead(request);
+  const data = dataRead.data ?? undefined;
+  const dataLoadError = (dataRead.error as Error | undefined)?.message;
+
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<Record<string, string>>({});
   const retries = useRef<Record<string, PaymentRetry>>({});
-  useEffect(() => {
-    let active = true;
-    request("/api/payments")
-      .then((v) => {
-        if (active) setData(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
   const observe = async (id: string, job: string) => {
     for (let attempt = 0; attempt < 15; attempt++) {
       const result = await request(`/api/payments/jobs/${job}`);
-      setData(await request("/api/payments"));
+      setReadData(dataPath, await request(dataPath));
       if (["succeeded", "failed", "uncertain"].includes(result.state)) {
         setPending((old) => {
           const next = { ...old };
@@ -146,15 +140,13 @@ export default function PaymentManager({
           <PaymentDetails id={p.id} request={request} />
         </article>
       ))}
-      {error && <Notice tone="danger">{error}</Notice>}
+      {(error || dataLoadError) && (
+        <Notice tone="danger">{error || dataLoadError}</Notice>
+      )}
       <Button
         type="submit"
         disabled={busy}
-        onClick={() =>
-          void request("/api/payments")
-            .then(setData)
-            .catch((e) => setError(e.message))
-        }
+        onClick={() => void dataRead.refetch()}
       >
         {a("refresh")}
       </Button>

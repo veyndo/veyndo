@@ -1,4 +1,5 @@
 /** StudioHeader: focused Studio view; state and commands come from the session-scoped controller. */
+import { Button } from "../../kit/ui";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { surfaceLabel } from "../../shared/apps/AppSurfaces";
 import { locales } from "../../shared/i18n/i18n";
@@ -64,14 +65,15 @@ export default function StudioHeader() {
         </span>
       </div>
       <div className="topbar-actions">
-        <button
-          className="studio-secondary studio-signout"
+        <Button
+          type="submit"
+          className="studio-signout"
           aria-label={s("logout")}
           onClick={auth.logout}
         >
           <Icon name="logout" size={18} />
           <span>{s("logout")}</span>
-        </button>
+        </Button>
         {canOpenStudio("assistant", access) && (
           <button
             className="copilot-launch"
@@ -149,27 +151,26 @@ export default function StudioHeader() {
         >
           <Icon name={theme === "dark" ? "sun" : "moon"} />
         </button>
-        <button
-          className={auth.active ? "icon-button" : "studio-primary"}
-          aria-label={auth.active ? t("refresh") : x("studioSignIn")}
-          disabled={busy || connectionPending}
-          onClick={() =>
-            connected
-              ? run(refresh)
-              : auth.active
-                ? retryConnection()
-                : selectTab("users")
-          }
-        >
-          {auth.active ? (
+        {auth.active ? (
+          <button
+            className="icon-button"
+            aria-label={t("refresh")}
+            disabled={busy || connectionPending}
+            onClick={() => (connected ? run(refresh) : retryConnection())}
+          >
             <Icon name="refresh" size={18} />
-          ) : (
-            <>
-              <Icon name="link" size={16} />
-              <span>{x("studioSignIn")}</span>
-            </>
-          )}
-        </button>
+          </button>
+        ) : (
+          <Button
+            tone="primary"
+            aria-label={x("studioSignIn")}
+            disabled={busy || connectionPending}
+            onClick={() => (connected ? run(refresh) : selectTab("users"))}
+          >
+            <Icon name="link" size={16} />
+            <span>{x("studioSignIn")}</span>
+          </Button>
+        )}
       </div>
     </header>
   );

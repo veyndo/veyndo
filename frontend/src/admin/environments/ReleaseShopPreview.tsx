@@ -1,5 +1,5 @@
 /** Explicit native sandbox preview rechecks the saved run; it never attests a historical render. */
-import { Button, Field, Notice, Select } from "../../kit/ui";
+import { Button, Field, LinkButton, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Report, Run } from "../scenarios/scenario-types";
@@ -120,14 +120,9 @@ export default function ReleaseShopPreview({
                 <option value="mobile">{t("mobile")}</option>
               </Select>
             </Field>
-            <a
-              className="studio-secondary"
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <LinkButton href={url} target="_blank" rel="noopener noreferrer">
               {t("separate")}
-            </a>
+            </LinkButton>
           </div>
           <div className="release-preview-canvas" data-device={device}>
             <iframe

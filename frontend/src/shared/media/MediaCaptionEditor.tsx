@@ -1,4 +1,5 @@
 /** Shared localized caption edits and explicit AI proposal review; native owners retain persistence and publication. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../api/types";
 import { useContentLanguage } from "../i18n/ContentLanguage";
@@ -104,15 +105,14 @@ export default function MediaCaptionEditor({
       />
       <small>{t("hint")}</small>
       {request && canGenerate && (
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={disabled || busy || !context.trim()}
           onClick={() => void generate()}
         >
           <Icon name="spark" size={15} />
           {t(busy ? "working" : "generate")}
-        </button>
+        </Button>
       )}
       {error && <p role="alert">{t("error")}</p>}
       {proposal && !disabled && (
@@ -133,9 +133,9 @@ export default function MediaCaptionEditor({
             {t(proposal.basis === "image" ? "imageBasis" : "contextBasis")}
           </small>
           <div className="media-caption-actions">
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={
                 !proposal.caption.trim() ||
                 new TextEncoder().encode(proposal.caption).length > 600
@@ -149,14 +149,10 @@ export default function MediaCaptionEditor({
               }}
             >
               {t("apply")}
-            </button>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setProposal(undefined)}
-            >
+            </Button>
+            <Button type="button" onClick={() => setProposal(undefined)}>
               {t("discard")}
-            </button>
+            </Button>
           </div>
         </div>
       )}

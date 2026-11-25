@@ -1,4 +1,5 @@
 /** Discover the actual tenant-bound hosted frontends; keep the optional legacy app connector separate. */
+import { Button, Card } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import {
   AppSurfaceView,
@@ -83,14 +84,14 @@ export default function StoryfrontView({
         <span className="kicker">{w("storyfronts")}</span>
         <h1>{w("storyfronts")}</h1>
         <p>{w("storyHint")}</p>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={loading}
           onClick={() => setRefresh((v) => v + 1)}
         >
           <Icon name="refresh" />
           {text("refresh")}
-        </button>
+        </Button>
       </div>
       {!loading && error !== "load" && workspace && (
         <StoryfrontCreate
@@ -110,7 +111,7 @@ export default function StoryfrontView({
             </>
           )}
           {!frontends.length && (!workspace || (app?.active && surface)) && (
-            <section className="studio-card">
+            <Card>
               {app?.active && surface ? (
                 <AppSurfaceView selected={surface} />
               ) : (
@@ -120,8 +121,9 @@ export default function StoryfrontView({
                       {app?.active ? text("setupMissing") : text("installHint")}
                     </p>
                     {!app?.active && (
-                      <button
-                        className="studio-primary"
+                      <Button
+                        tone="primary"
+                        type="submit"
                         disabled={busy || !rights.includes("apps.manage")}
                         onClick={async () => {
                           if (!app) {
@@ -145,12 +147,12 @@ export default function StoryfrontView({
                         }}
                       >
                         {w("connectStory")}
-                      </button>
+                      </Button>
                     )}
                   </>
                 )
               )}
-            </section>
+            </Card>
           )}
         </>
       )}

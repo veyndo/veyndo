@@ -1,4 +1,5 @@
 /** Channel, private save and agent entry remain visible above the shared preview. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { canTestCustomers } from "../../../../frontend/src/admin/scenarios/scenario-access";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
@@ -92,14 +93,15 @@ export default function DesignerHeader({
               </button>
             )}
             {d.draft && (
-              <button
-                className="studio-primary"
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={!writable || !d.dirty || d.busy}
                 onClick={() => void d.save()}
               >
                 <Icon name="check" />
                 {t("save")}
-              </button>
+              </Button>
             )}
             <button
               disabled={!rights.includes("environments.read")}

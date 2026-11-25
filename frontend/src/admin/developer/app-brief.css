@@ -4,7 +4,7 @@
   margin: 0 0 28px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: var(--accent-soft, #eef6ff);
+  background: var(--accent-soft, var(--vy-color-panel));
 }
 .app-brief-heading {
   display: flex;

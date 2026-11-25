@@ -141,7 +141,8 @@
   padding: 0;
   color: var(--text);
   font: inherit;
-  box-shadow: 0 3px 10px #122c5005;
+  box-shadow: 0 3px 10px
+    color-mix(in srgb, var(--vy-color-text) 2%, transparent);
 }
 .studio button.app-catalog-card {
   cursor: pointer;
@@ -151,7 +152,8 @@
 }
 .studio button.app-catalog-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 8px 24px #122c5010;
+  box-shadow: 0 8px 24px
+    color-mix(in srgb, var(--vy-color-text) 6%, transparent);
 }
 .studio .app-card-content {
   padding: 22px;
@@ -218,8 +220,8 @@
   background: currentColor;
 }
 .studio .app-status[data-active="true"] {
-  color: #167151;
-  background: #e7f5ed;
+  color: var(--vy-color-positive);
+  background: var(--vy-color-positive-soft);
 }
 .studio .app-install-button {
   display: inline-flex;
@@ -260,10 +262,6 @@
 .studio .app-workspace select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-}
-.studio[data-theme="dark"] .app-status[data-active="true"] {
-  color: #a4dec8;
-  background: #1d3b32;
 }
 .studio[data-theme="dark"] .app-artwork {
   background: color-mix(in srgb, currentColor 15%, var(--surface));

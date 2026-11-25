@@ -1,9 +1,9 @@
 /* Compact, responsive provider setup and explicit operation feedback. */
 .service-integration {
   padding: 1.5rem;
-  border: 1px solid var(--border, #d3dfeb);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 18px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
 }
 .service-integration-columns {
   display: grid;
@@ -36,7 +36,7 @@
   align-items: center;
 }
 .service-integration small {
-  color: var(--muted, #60748a);
+  color: var(--muted, var(--vy-color-muted));
 }
 .service-integration header {
   display: flex;
@@ -55,7 +55,7 @@
   flex-wrap: wrap;
   gap: 0.6rem;
   padding: 0.75rem;
-  background: var(--soft, #f3f7fb);
+  background: var(--soft, var(--vy-color-bg));
   border-radius: 8px;
 }
 .service-integration code {
@@ -72,7 +72,7 @@
 .integration-directory {
   margin: 1.25rem 0;
   padding: 1rem;
-  border: 1px solid var(--border, #d3dfeb);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 14px;
 }
 .integration-directory summary {
@@ -89,7 +89,7 @@
 }
 .integration-directory-grid article {
   padding: 1rem;
-  border: 1px solid var(--border, #d3dfeb);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 12px;
   display: flex;
   flex-direction: column;

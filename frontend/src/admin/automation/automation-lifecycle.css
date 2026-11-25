@@ -46,7 +46,7 @@
   margin-top: 1rem;
 }
 .studio .automation-delete > button {
-  color: #c13e55;
+  color: var(--vy-color-danger);
 }
 .studio .automation-delete li {
   margin: 0.65rem 0;

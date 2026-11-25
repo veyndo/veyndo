@@ -253,7 +253,7 @@
   min-height: 38px;
   font-size: 12px;
 }
-.designer-welcome > :is(.studio-primary, [data-tone="primary"]) {
+.designer-welcome > [data-tone="primary"] {
   background: #0877df;
   color: white;
   border: 0;

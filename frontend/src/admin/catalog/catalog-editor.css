@@ -24,7 +24,7 @@
   cursor: pointer;
 }
 .catalog-rich-toolbar button[aria-pressed="true"] {
-  background: #dceaff;
+  background: var(--vy-color-hover);
   color: var(--catalog-blue);
 }
 .catalog-rich-toolbar select {
@@ -41,7 +41,8 @@
   line-height: 1.7;
 }
 .catalog-rich .tiptap:focus {
-  box-shadow: inset 0 0 0 2px #1365f030;
+  box-shadow: inset 0 0 0 2px
+    color-mix(in srgb, var(--vy-color-accent-strong) 19%, transparent);
 }
 .catalog-rich img,
 .catalog-rich video {
@@ -84,7 +85,7 @@
   font-size: 10px;
 }
 .catalog-tree-node[aria-pressed="true"] {
-  background: #eaf2ff;
+  background: var(--vy-color-panel);
   color: var(--catalog-blue);
 }
 .catalog-category-editor {
@@ -92,7 +93,8 @@
 }
 .catalog-workspace button:focus-visible,
 .catalog-workspace select:focus-visible {
-  outline: 3px solid #1365f070;
+  outline: 3px solid
+    color-mix(in srgb, var(--vy-color-accent-strong) 44%, transparent);
   outline-offset: 3px;
 }
 @media (max-width: 1050px) {
@@ -142,14 +144,9 @@
     flex-direction: column;
   }
 }
-[data-theme="dark"] .catalog-workspace {
-  --catalog-muted: #a7b4c7;
-  --catalog-line: #344054;
-  --catalog-surface: #1c2636;
-}
 
 [data-theme="dark"] .catalog-variant {
-  background: #1c2636;
+  background: var(--vy-color-surface);
 }
 
 .catalog-permission-fields {

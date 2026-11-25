@@ -1,5 +1,5 @@
 /** Typed merchant rule/campaign/flow/channel forms with exact JSON available for advanced review. */
-import { Card, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useGoalTemplate } from "./goal-template";
 import { useAutomationAccess } from "./useAutomationAccess";
 import AutomationDefinitions from "./AutomationDefinitions";
@@ -224,9 +224,10 @@ export default function AutomationView({
         </div>
         <nav className="workbench-row">
           {(["rules", "promotions", "flows", "channels"] as Kind[]).map((k) => (
-            <button
+            <Button
+              tone={kind === k ? "primary" : "secondary"}
+              type="submit"
               key={k}
-              className={kind === k ? "studio-primary" : "studio-secondary"}
               onClick={() =>
                 k === "channels" && onChannels
                   ? onChannels()
@@ -236,7 +237,7 @@ export default function AutomationView({
               }
             >
               {w(k)}
-            </button>
+            </Button>
           ))}
         </nav>
         <aside className="automation-process-guide">

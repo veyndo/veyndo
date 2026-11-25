@@ -1,4 +1,5 @@
 /** StudioSidebar: focused Studio view; state and commands come from the session-scoped controller. */
+import { Button } from "../../kit/ui";
 import { AdminAppNavigation } from "../../shared/apps/AppSurfaces";
 import "../../shared/styles/workbench.css";
 import Icon from "../../shared/ui/Icon";
@@ -80,14 +81,16 @@ export default function StudioSidebar() {
         </span>
         <Icon name="settings" size={16} />
       </button>
-      <button
-        className="studio-primary new-conversation"
+      <Button
+        tone="primary"
+        type="submit"
+        className="new-conversation"
         disabled={busy || !canOpenStudio("assistant", access)}
         onClick={newChat}
       >
         <Icon name="plus" size={18} />
         {t("newChat")}
-      </button>
+      </Button>
       <nav aria-label={t("studio")}>
         {groups.map((group) => (
           <div className="sidebar-nav-group" key={group.label}>

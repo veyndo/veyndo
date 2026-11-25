@@ -1,4 +1,5 @@
 /** Personal MFA settings use native revision checks and never become staged shop content. */
+import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { shopApi } from "../api/shop-api";
 import { useSecurityText } from "../i18n/security-i18n";
@@ -84,9 +85,9 @@ export default function AccountSecurity({
               </li>
             ))}
           </ul>
-          <button className="studio-primary" onClick={onLogout}>
+          <Button tone="primary" type="submit" onClick={onLogout}>
             {t("finish")}
-          </button>
+          </Button>
         </div>
       ) : (
         status && (
@@ -138,9 +139,9 @@ export default function AccountSecurity({
                   />
                 </label>
               )}
-              <button className="studio-primary" disabled={busy}>
+              <Button tone="primary" type="submit" disabled={busy}>
                 {t(status.enabled ? "disable" : setup ? "confirm" : "enroll")}
-              </button>
+              </Button>
             </form>
           </>
         )

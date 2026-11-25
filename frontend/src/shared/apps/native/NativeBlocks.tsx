@@ -1,4 +1,5 @@
 /** All native controls render from the same validated manifest, including one-level containers and code-behind buttons. */
+import { Button } from "../../../kit/ui";
 import { useState } from "react";
 import type { Block, NativePayload } from "./types";
 import type { RequestFn } from "../../api/types";
@@ -56,15 +57,15 @@ export default function NativeBlocks({
             {contentText(b.text ?? {}, locale, mainLocale)}
           </p>
         ) : b.kind === "button" ? (
-          <button
+          <Button
+            tone="primary"
             type="button"
-            className="studio-primary"
             tabIndex={0}
             disabled={b.enabled === false || runtime?.busy}
             onClick={() => void runtime?.run(b.handlers?.click ?? [])}
           >
             {title}
-          </button>
+          </Button>
         ) : b.kind === "frame" || b.kind === "tabs" ? (
           <fieldset disabled={b.enabled === false} className="native-fieldset">
             {b.kind === "tabs" && (

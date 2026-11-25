@@ -1,5 +1,5 @@
 /** Catalog/language controls share the channel schema and content-language fallback. */
-import { Field, Select } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import type { Channel } from "./channel-model";
 import type { Category } from "../catalog/catalog-model";
 import type { RequestFn } from "../shell/studio-types";
@@ -40,16 +40,14 @@ export default function ChannelCatalog({
         aria-invalid={!!languageError}
       >
         {languages.map((language) => (
-          <button
+          <Button
+            tone={
+              draft.data.locales.includes(language) ? "primary" : "secondary"
+            }
             type="button"
             key={language}
             disabled={draft.id === "default"}
             aria-pressed={draft.data.locales.includes(language)}
-            className={
-              draft.data.locales.includes(language)
-                ? "studio-primary"
-                : "studio-secondary"
-            }
             onClick={() =>
               patch({
                 locales: draft.data.locales.includes(language)
@@ -61,7 +59,7 @@ export default function ChannelCatalog({
             {new Intl.DisplayNames([locale], {
               type: "language",
             }).of(language) ?? language}
-          </button>
+          </Button>
         ))}
       </div>
       {languageError && <small role="alert">{languageError}</small>}
@@ -91,19 +89,17 @@ export default function ChannelCatalog({
       </Field>
       <div className="workbench-row">
         {[false, true].map((value) => (
-          <button
+          <Button
+            tone={selected === value ? "primary" : "secondary"}
             type="button"
             key={String(value)}
-            className={
-              selected === value ? "studio-primary" : "studio-secondary"
-            }
             onClick={() => {
               setSelected(value);
               if (!value) patch({ productIds: [] });
             }}
           >
             {t(value ? "selected" : "all")}
-          </button>
+          </Button>
         ))}
       </div>
       {productError && (

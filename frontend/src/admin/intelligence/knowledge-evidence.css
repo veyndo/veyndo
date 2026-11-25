@@ -198,7 +198,7 @@
   padding: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid #c64545;
+  border-left: 3px solid var(--vy-color-danger);
   border-radius: 12px;
   margin: 20px 0;
 }
@@ -303,27 +303,28 @@
 .claim-review-card {
   margin-top: 1rem;
   padding: 1.25rem;
-  border: 1px solid var(--studio-border, #dce5f2);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 16px;
-  background: var(--studio-surface, #fff);
+  background: var(--studio-surface, var(--vy-color-surface));
 }
 .claim-review-status {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   font-size: 0.8rem;
-  color: var(--studio-muted, #657895);
+  color: var(--studio-muted, var(--vy-color-muted));
 }
 .claim-review-status span {
   padding: 0.3rem 0.6rem;
   border-radius: 99px;
-  background: var(--studio-hover, #eef4ff);
+  background: var(--studio-hover, var(--vy-color-panel));
 }
 .claim-review-card blockquote {
   margin: 1rem 0;
   padding: 1rem;
-  border-inline-start: 3px solid var(--studio-accent, #2563eb);
-  background: var(--studio-hover, #f5f8ff);
+  border-inline-start: 3px solid
+    var(--studio-accent, var(--vy-color-accent-strong));
+  background: var(--studio-hover, var(--vy-color-bg));
   overflow-wrap: anywhere;
 }
 .evidence-review .knowledge-actions {

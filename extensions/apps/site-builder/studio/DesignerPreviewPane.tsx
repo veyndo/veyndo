@@ -1,4 +1,5 @@
 /** Scrollable page preview and optional native record editor share the Studio layout. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import CanvasCommerceEditor from "../../../../frontend/src/admin/catalog/CanvasCommerceEditor";
 import type { Page, Theme } from "../model";
@@ -157,8 +158,7 @@ export default function DesignerPreviewPane({
                 </label>
               )}
               {previewId && rights.includes("catalog.read") && (
-                <button
-                  className="studio-secondary"
+                <Button
                   type="button"
                   onClick={() => commerce.pick(layout, previewId)}
                 >
@@ -167,7 +167,7 @@ export default function DesignerPreviewPane({
                       ? "editProductRecord"
                       : "editCategoryRecord",
                   )}
-                </button>
+                </Button>
               )}
             </div>
           )}

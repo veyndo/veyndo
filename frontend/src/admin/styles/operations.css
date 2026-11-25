@@ -8,22 +8,22 @@
   width: 100%;
   padding: 18px 6px;
   border: 0;
-  border-bottom: 1px solid var(--studio-border, #dde4ed);
+  border-bottom: 1px solid var(--studio-border, var(--vy-color-border));
   background: transparent;
   text-align: left;
   color: inherit;
   flex-wrap: wrap;
 }
 button.operation-row:hover {
-  background: #eef6ff;
+  background: var(--vy-color-panel);
   cursor: pointer;
 }
 .operation-status {
   display: inline-flex;
   border-radius: 20px;
   padding: 5px 12px;
-  background: #eaf2ff;
-  color: #2463bc;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-accent);
   font-size: 13px;
 }
 
@@ -63,7 +63,7 @@ button.operation-row:hover {
   padding: 13px 18px;
 }
 .workflow-choice small {
-  color: #637793;
+  color: var(--vy-color-muted);
   line-height: 1.5;
 }
 
@@ -74,7 +74,7 @@ button.operation-row:hover {
 
 .operations .operation-row small {
   display: block;
-  color: #718096;
+  color: var(--vy-color-muted);
   font-size: 12px;
   margin-top: 5px;
 }

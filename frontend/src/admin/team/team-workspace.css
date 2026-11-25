@@ -89,7 +89,7 @@
   justify-self: start;
 }
 .users-manager input:user-invalid {
-  border-color: var(--error, #b42318);
+  border-color: var(--error, var(--vy-color-danger));
 }
 .team-access {
   display: grid;
@@ -107,7 +107,7 @@
   cursor: pointer;
   padding: 12px 0;
 }
-.team-access details > :is(.studio-primary, [data-tone="primary"]) {
+.team-access details > [data-tone="primary"] {
   margin-top: 16px;
 }
 @media (max-width: 850px) {
@@ -117,7 +117,7 @@
   }
 }
 @media (max-width: 500px) {
-  .users-manager .commerce-title > :is(.studio-primary, [data-tone="primary"]) {
+  .users-manager .commerce-title > [data-tone="primary"] {
     width: 100%;
   }
   .team-form-actions {

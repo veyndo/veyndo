@@ -3,7 +3,7 @@
   display: grid;
   gap: 24px;
   min-width: 0;
-  color: var(--text, #182b3c);
+  color: var(--text, var(--vy-color-text));
 }
 .scenario-intro {
   display: flex;
@@ -17,7 +17,7 @@
 .scenario-intro p,
 .scenario-start p {
   margin: 0;
-  color: var(--muted, #63768c);
+  color: var(--muted, var(--vy-color-muted));
   line-height: 1.6;
 }
 .scenario-emblem {
@@ -26,8 +26,8 @@
   width: 62px;
   height: 62px;
   flex-shrink: 0;
-  background: #e5f3ff;
-  color: #0877e8;
+  background: var(--vy-color-hover);
+  color: var(--vy-color-accent-strong);
   border-radius: 20px;
 }
 .scenario-studio label {
@@ -43,9 +43,9 @@
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--border, #d6e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 10px;
-  background: var(--panel, #fff);
+  background: var(--panel, var(--vy-color-surface));
   color: inherit;
   padding: 11px 12px;
   font: inherit;
@@ -59,16 +59,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
   gap: 16px;
-}
-.scenario-profiles article {
-  display: grid;
-  align-content: start;
-  gap: 16px;
-  padding: 20px;
-  border: 1px solid var(--border, #d6e2ef);
-  background: var(--panel, #fff);
-  border-radius: 18px;
-  box-shadow: 0 6px 24px #122e5105;
 }
 .scenario-profile-context,
 .scenario-history {
@@ -94,7 +84,7 @@
 .scenario-start {
   padding: 20px;
   border-radius: 16px;
-  background: #eaf5ff;
+  background: var(--vy-color-panel);
 }
 .scenario-start p {
   font-size: 13px;
@@ -105,7 +95,7 @@
 }
 .scenario-empty {
   padding: 24px;
-  border: 1px dashed #a5c4e3;
+  border: 1px dashed var(--vy-color-accent-border);
   border-radius: 16px;
 }
 .scenario-results {
@@ -118,8 +108,8 @@
   flex-wrap: wrap;
 }
 .scenario-result {
-  background: var(--panel, #fff);
-  border: 1px solid var(--border, #d6e2ef);
+  background: var(--panel, var(--vy-color-surface));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 16px;
   padding: 20px;
   min-width: 0;
@@ -147,21 +137,21 @@
   margin: 6px 0;
 }
 .scenario-state {
-  background: #eaf3fc;
-  color: #205d92;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-accent);
   padding: 6px 10px;
   border-radius: 20px;
   font-size: 12px;
 }
 .scenario-state.is-purchased {
-  background: #e5f7ef;
-  color: #1b694a;
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
 }
 .scenario-error,
 .scenario-state.is-blocked,
 .scenario-state.is-failed {
-  color: #aa3333;
-  background: #fff0f0;
+  color: var(--vy-color-danger);
+  background: var(--vy-color-danger-soft);
   border-radius: 8px;
   padding: 10px;
 }
@@ -181,6 +171,15 @@
   }
 }
 .scenario-profiles article {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  background: var(--panel, var(--vy-color-surface));
+  border-radius: 18px;
+  box-shadow: 0 6px 24px
+    color-mix(in srgb, var(--vy-color-text) 2%, transparent);
   position: relative;
 }
 .scenario-remove {
@@ -192,11 +191,11 @@
   border: 0;
 }
 .scenario-comparison-note {
-  border: 1px solid var(--studio-border, #d1e0f0);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 12px;
   padding: 16px;
   margin: 16px 0;
-  background: var(--studio-panel, #fff);
+  background: var(--studio-panel, var(--vy-color-surface));
 }
 .scenario-suggestions {
   margin: 1rem 0;
@@ -204,9 +203,9 @@
 .scenario-suggestion-preview {
   margin-top: 0.75rem;
   padding: 1rem;
-  border: 1px solid var(--border, #d6e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 1rem;
-  background: var(--panel, #fff);
+  background: var(--panel, var(--vy-color-surface));
 }
 .scenario-suggestion-preview .scenario-profiles {
   margin-bottom: 1rem;
@@ -229,9 +228,9 @@
   gap: 12px;
   flex-wrap: wrap;
   padding: 12px 16px;
-  border: 1px solid var(--border, #d6e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 10px;
-  background: var(--studio-panel, #fff);
+  background: var(--studio-panel, var(--vy-color-surface));
   line-height: 1.5;
 }
 .scenario-source details {
@@ -246,5 +245,5 @@
   margin-block-start: 8px;
   overflow-wrap: anywhere;
   font-size: 12px;
-  color: var(--muted, #63768c);
+  color: var(--muted, var(--vy-color-muted));
 }

@@ -64,7 +64,8 @@
   background: var(--surface);
   border-color: var(--border);
   color: var(--accent);
-  box-shadow: 0 3px 12px #0d2d5410;
+  box-shadow: 0 3px 12px
+    color-mix(in srgb, var(--vy-color-text) 6%, transparent);
 }
 .studio .settings-navigation button[aria-current="page"] strong {
   color: var(--accent);
@@ -75,7 +76,8 @@
 .studio .settings-panel {
   padding: 0;
   overflow: clip;
-  box-shadow: 0 4px 24px #0d2d5405;
+  box-shadow: 0 4px 24px
+    color-mix(in srgb, var(--vy-color-text) 2%, transparent);
 }
 .studio .settings-panel-header {
   display: flex;
@@ -139,7 +141,8 @@
   bottom: 0;
   z-index: 3;
   border-top: 1px solid var(--border);
-  box-shadow: 0 -4px 12px #14274405;
+  box-shadow: 0 -4px 12px
+    color-mix(in srgb, var(--vy-color-text) 2%, transparent);
   display: flex;
   align-items: center;
   justify-content: space-between;

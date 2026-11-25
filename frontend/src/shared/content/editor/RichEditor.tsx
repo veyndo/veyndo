@@ -1,4 +1,5 @@
 /** Actual Tiptap WYSIWYG editor with structured safe content, media, formatting and per-language drafts. */
+import { Button } from "../../../kit/ui";
 import { useCaptionText } from "../../media/caption-i18n";
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
@@ -194,9 +195,8 @@ export default function RichEditor({
               />
             </label>
           )}
-          <button
+          <Button
             type="button"
-            className="studio-secondary"
             disabled={!safeRichUrl(url)}
             onClick={() => {
               if (media === "image")
@@ -218,7 +218,7 @@ export default function RichEditor({
             }}
           >
             {c("add")}
-          </button>
+          </Button>
         </div>
       )}
       {preview ? (

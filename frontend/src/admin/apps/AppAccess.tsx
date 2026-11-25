@@ -2,6 +2,7 @@
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead, useSetRead } from "../shell/useRead";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import {
   useAppAccessText,
@@ -26,30 +27,22 @@ export default function AppAccess({
   request: RequestFn;
 }) {
   const t = useAppAccessText();
-  const [data, setData] = useState<Access | null>(null),
-    [selected, setSelected] = useState<CallbackPermission[]>([]),
+  const path = `/api/apps/${app}/credentials`;
+  const access = useRead<Access>(request, path);
+  const setRead = useSetRead(request);
+  const data = access.data ?? null;
+  const [selected, setSelected] = useState<CallbackPermission[]>([]),
     [days, setDays] = useState("30"),
     [secret, setSecret] = useState(""),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [revoke, setRevoke] = useState<string | null>(null);
   useEffect(() => {
-    let active = true;
-    setData(null);
     setSelected([]);
     setSecret("");
     setError("");
-    request(`/api/apps/${app}/credentials`)
-      .then((v) => {
-        if (active) setData(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [app, request]);
+  }, [app]);
+  const error = actionError || (access.error as Error | undefined)?.message;
   const create = async () => {
     if (!data) return;
     setBusy(true);
@@ -63,7 +56,7 @@ export default function AppAccess({
         expiresInDays: Number(days),
       });
       setSecret(result.key);
-      setData(await request(`/api/apps/${app}/credentials`));
+      setRead(path, await request(path));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -81,7 +74,7 @@ export default function AppAccess({
       );
       setRevoke(null);
       setSecret("");
-      setData(await request(`/api/apps/${app}/credentials`));
+      setRead(path, await request(path));
     } catch (e) {
       setError((e as Error).message);
     } finally {

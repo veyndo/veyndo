@@ -2,7 +2,7 @@
 .rule-history {
   margin-block: 1.25rem;
   padding: 1rem;
-  border: 1px solid var(--studio-border, #d4e2f4);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 1rem;
 }
 .rule-history > summary {
@@ -33,7 +33,7 @@
 .rule-history-counts > div {
   flex: 1;
   padding: 0.8rem;
-  background: var(--studio-soft, #eef5fd);
+  background: var(--studio-soft, var(--vy-color-panel));
   border-radius: 0.65rem;
 }
 .rule-history-counts dd {
@@ -53,7 +53,7 @@
 .rule-history-table th,
 .rule-history-table td {
   padding: 0.7rem;
-  border-bottom: 1px solid var(--studio-border, #d4e2f4);
+  border-bottom: 1px solid var(--studio-border, var(--vy-color-border));
 }
 .rule-history-digest {
   display: block;

@@ -18,16 +18,16 @@ export default function AppStudioIntro({
   const { a } = useAppStudioText();
   if (compact)
     return (
-      <button
+      <Button
         type="button"
-        className="studio-secondary app-canvas-back"
+        className="app-canvas-back"
         title={pt("back")}
         aria-label={pt("back")}
         onClick={onNew}
       >
         <Icon name="chevron-left" size={16} />
         {pt("back")}
-      </button>
+      </Button>
     );
   return (
     <div className="app-studio-intro">

@@ -10,14 +10,14 @@
   gap: 1rem 2rem;
   margin: 0.5rem 0;
   padding-block: 0.75rem;
-  border-block: 1px solid var(--border, #cbdced);
+  border-block: 1px solid var(--border, var(--vy-color-border));
 }
 .payment-balances div {
   min-width: 8rem;
 }
 .payment-balances dt {
   font-size: 0.8125rem;
-  color: var(--muted, #50647a);
+  color: var(--muted, var(--vy-color-muted));
 }
 .payment-balances dd {
   margin: 0.25rem 0 0;
@@ -46,7 +46,7 @@
   min-width: 0;
   width: 100%;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--border, #cbdced);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 0.5rem;
   color: inherit;
   background: var(--surface, white);
@@ -65,7 +65,7 @@
 }
 .payment-amount-form input:focus-visible,
 .payment-amount-form select:focus-visible {
-  outline: 2px solid var(--accent, #0072ed);
+  outline: 2px solid var(--accent, var(--vy-color-accent-strong));
   outline-offset: 2px;
 }
 @media (max-width: 600px) {

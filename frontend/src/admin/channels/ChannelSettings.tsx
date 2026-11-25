@@ -1,4 +1,5 @@
 /** Channel settings embed existing revision-aware identity and checkout editors with the channel selected. */
+import { Button } from "../../kit/ui";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -43,9 +44,10 @@ export default function ChannelSettings({
             "legal",
           ] as const
         ).map((k) => (
-          <button
+          <Button
+            tone={k === area ? "primary" : "secondary"}
+            type="submit"
             key={k}
-            className={k === area ? "studio-primary" : "studio-secondary"}
             disabled={dirty && k !== area}
             onClick={() => setArea(k)}
           >
@@ -54,7 +56,7 @@ export default function ChannelSettings({
               : k === "currencies"
                 ? ct("title")
                 : t(k)}
-          </button>
+          </Button>
         ))}
       </nav>
       {area === "company" ? (

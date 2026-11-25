@@ -5,13 +5,7 @@
   max-width: 680px;
   line-height: 1.8;
 }
-.studio-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  padding: 22px;
-  min-width: 0;
-}
+
 .card-heading {
   display: flex;
   align-items: center;

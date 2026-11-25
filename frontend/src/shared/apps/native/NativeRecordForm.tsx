@@ -1,4 +1,5 @@
 /** Native managed-record form retains revisions and inherited translations; it never executes schema code. */
+import { Button } from "../../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useAppStudioText } from "../../i18n/app-studio-i18n";
 import { useNativeRuntime } from "./NativeRuntime";
@@ -208,12 +209,13 @@ export default function NativeRecordForm({
         {error && <p role="alert">{error}</p>}
         {notice && <p role="status">{a("savedRecord")}</p>}
         {!externalSubmit && !readOnly && (
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy || runtime?.busy || pendingSource}
           >
             {a(busy ? "loading" : "save")}
-          </button>
+          </Button>
         )}
       </form>
     </EditorBuffer.Provider>

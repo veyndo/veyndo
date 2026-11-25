@@ -1,6 +1,7 @@
 /** Permission-scoped consumer request queue and optimistic, recorded review actions. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, TextArea } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLegalText, type LegalWord } from "../../shared/i18n/legal-i18n";
 import type { ConsumerRequest } from "../../shared/legal/legal-types";
@@ -12,31 +13,24 @@ export default function ConsumerRequests({
   canWrite: boolean;
 }) {
   const { l } = useLegalText();
-  const [rows, setRows] = useState<ConsumerRequest[]>([]),
-    [selected, setSelected] = useState(""),
+  const [selected, setSelected] = useState(""),
     [note, setNote] = useState(""),
     [state, setState] = useState("in_review"),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
-  const load = () =>
-    request("/api/merchant/legal/requests").then((v) => setRows(v.elements));
-  useEffect(() => {
-    let active = true;
-    request("/api/merchant/legal/requests")
-      .then((v) => {
-        if (active) setRows(v.elements);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const rowsPath = "/api/merchant/legal/requests";
+  const rowsRead = useRead(request, rowsPath);
+  const setReadRows = useSetRead(request);
+  const rows: ConsumerRequest[] = rowsRead.data?.elements ?? [];
+  const rowsLoadError = (rowsRead.error as Error | undefined)?.message;
+
+  const load = () => request(rowsPath).then((v) => setReadRows(rowsPath, v));
   const row = rows.find((r) => r.id === selected);
   return (
     <div className="legal-request-list">
-      {error && <Notice tone="danger">{error}</Notice>}
+      {(error || rowsLoadError) && (
+        <Notice tone="danger">{error || rowsLoadError}</Notice>
+      )}
       {!rows.length && <p>{l("emptyRequests")}</p>}
       <div className="legal-request-master">
         {rows.map((r) => (

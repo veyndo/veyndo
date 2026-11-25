@@ -1,4 +1,5 @@
 /** Coarse work plans use existing versioned native app records; source rows and job authority stay with their original owners. */
+import { Button, Card } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
@@ -71,7 +72,7 @@ export default function RunPlans({
       setPlans((old) => old.map((p) => (p.id === selected.id ? selected : p)));
   }, [selected]);
   return (
-    <section className="studio-card migration-run-plans">
+    <Card className="migration-run-plans">
       <h2>{t("plans")}</h2>
       <p>{t("notice")}</p>
       <div className="migration-run-picker">
@@ -156,8 +157,9 @@ export default function RunPlans({
                 ))}
               </div>
             </fieldset>
-            <button
-              className="studio-primary"
+            <Button
+              tone="primary"
+              type="submit"
               disabled={
                 busy ||
                 saving ||
@@ -193,10 +195,10 @@ export default function RunPlans({
               }}
             >
               {t("create")}
-            </button>
+            </Button>
           </>
         )}
       </details>
-    </section>
+    </Card>
   );
 }

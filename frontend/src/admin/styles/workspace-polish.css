@@ -29,7 +29,7 @@ body:has(.studio) {
 }
 .studio .new-conversation {
   background: var(--surface) !important;
-  box-shadow: 0 2px 6px #14274408;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--vy-color-text) 3%, transparent);
 }
 .studio .studio-sidebar nav {
   flex: 1;
@@ -117,15 +117,14 @@ body:has(.studio) {
   line-height: 1.65;
   max-width: 700px;
 }
-.studio .studio-card {
-  border-radius: 14px;
-}
+
 .studio input:not([type="checkbox"]),
 .studio select {
   border-radius: 9px;
 }
 .studio :is(input, textarea, select):focus-visible {
-  box-shadow: 0 0 0 4px #189eff12;
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--vy-color-accent-strong) 7%, transparent);
   outline-offset: 0;
 }
 .studio .operation-row {

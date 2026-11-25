@@ -4,11 +4,11 @@
   display: grid;
   place-items: center;
   min-height: 240px;
-  color: var(--muted, #64758c);
+  color: var(--muted, var(--vy-color-muted));
 }
 .app-inspector {
   padding: 22px 18px;
-  border-left: 1px solid var(--border, #dce5ef);
+  border-left: 1px solid var(--border, var(--vy-color-border));
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -19,7 +19,7 @@
 }
 .app-inspector-divider {
   height: 1px;
-  background: var(--border, #dce5ef);
+  background: var(--border, var(--vy-color-border));
   margin: 2px 0;
 }
 .app-inspector .intl-field-heading {
@@ -67,10 +67,11 @@
   min-width: 0;
   overflow: hidden;
   cursor: grab;
-  box-shadow: 0 4px 12px #172d4d08;
+  box-shadow: 0 4px 12px
+    color-mix(in srgb, var(--vy-color-text) 3%, transparent);
 }
 .app-grid-block.selected {
-  outline: 2px solid var(--accent, #2368ff);
+  outline: 2px solid var(--accent, var(--vy-color-accent-strong));
   outline-offset: 2px;
 }
 .app-grid-block h3 {
@@ -106,8 +107,8 @@
 .app-instruction {
   padding: 14px;
   margin: 10px 0;
-  background: var(--studio-surface, #fff);
-  border: 1px solid var(--studio-line, #e0e7f3);
+  background: var(--studio-surface, var(--vy-color-surface));
+  border: 1px solid var(--studio-line, var(--vy-color-border));
   border-radius: 12px;
 }
 .app-instruction > header {
@@ -121,7 +122,7 @@
 }
 .app-instructions .app-instructions {
   margin-left: 12px;
-  border-left: 2px solid #d7e6ff;
+  border-left: 2px solid var(--vy-color-border);
   padding-left: 12px;
 }
 
@@ -155,17 +156,17 @@
 
 /* Optional designer appearance affects no manifest, runtime or publishing behavior. */
 .classic-designer {
-  background-color: #d9d9d9;
-  border: 2px solid #888;
+  background-color: var(--vy-color-border);
+  border: 2px solid var(--vy-color-muted);
   border-radius: 0;
 }
 .classic-designer .app-grid-block {
-  background: #ececec;
+  background: var(--vy-color-positive-soft);
   border-radius: 0;
-  border: 2px outset #fff;
-  box-shadow: 2px 2px 0 #777;
-  color: #202020;
+  border: 2px outset var(--vy-color-surface);
+  box-shadow: 2px 2px 0 var(--vy-color-muted);
+  color: var(--vy-color-text);
 }
 .classic-designer .app-grid-block.selected {
-  border-color: #276bfa;
+  border-color: var(--vy-color-accent-strong);
 }

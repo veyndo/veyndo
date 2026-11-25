@@ -111,43 +111,6 @@
 .studio-dialog .icon-button:hover {
   background: var(--hover);
 }
-.studio .studio-primary,
-.studio-dialog .studio-primary {
-  background: var(--accent);
-  color: var(--accent-text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid transparent;
-  border-radius: 8px;
-}
-.studio .studio-primary:hover:not(:disabled),
-.studio-dialog .studio-primary:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-.studio .studio-secondary,
-.studio-dialog .studio-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px 14px;
-  min-height: 44px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 13px;
-  color: var(--text);
-}
-.studio .studio-secondary:hover,
-.studio-dialog .studio-secondary:hover {
-  background: var(--hover);
-}
 .studio input,
 .studio select,
 .studio textarea,

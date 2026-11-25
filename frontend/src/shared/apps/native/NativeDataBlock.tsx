@@ -1,4 +1,5 @@
 /** One bounded keyset page per mounted data block; action requests remain tenant- and permission-scoped. */
+import { Button } from "../../../kit/ui";
 import AgenticGrid from "../../grid/AgenticGrid";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../api/types";
@@ -133,14 +134,13 @@ export default function NativeDataBlock({
             ? a("loading")
             : `${block.kind === "form" ? "" : `${records.length} · `}${contentText(entity.label, locale, mainLocale)}`}
         </span>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy}
           onClick={() => setEpoch((x) => x + 1)}
         >
           {a("refresh")}
-        </button>
+        </Button>
       </div>
       {error && block.kind !== "table" && <p role="alert">{error}</p>}
       {block.kind === "form" ? (
@@ -178,14 +178,13 @@ export default function NativeDataBlock({
                     id: "__edit",
                     label: a("edit"),
                     render: (r: AppRecord) => (
-                      <button
+                      <Button
                         type="button"
-                        className="studio-secondary"
                         disabled={busy || runtime?.busy}
                         onClick={() => setEditing(editing === r.id ? "" : r.id)}
                       >
                         {a(editing === r.id ? "cancel" : "edit")}
-                      </button>
+                      </Button>
                     ),
                   },
                 ]
@@ -243,8 +242,8 @@ export default function NativeDataBlock({
         <p className="muted">{a("empty")}</p>
       )}
       {cursor && (
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={busy}
           onClick={async () => {
             setBusy(true);
@@ -264,7 +263,7 @@ export default function NativeDataBlock({
           }}
         >
           {a("more")}
-        </button>
+        </Button>
       )}
     </div>
   );

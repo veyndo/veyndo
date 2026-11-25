@@ -28,6 +28,9 @@
     background var(--vy-motion-fast) var(--vy-motion-easing),
     border-color var(--vy-motion-fast) var(--vy-motion-easing);
 }
+a.vy-button {
+  text-decoration: none;
+}
 .vy-button[data-size="sm"] {
   min-height: 32px;
   padding: 0 var(--vy-space-3);

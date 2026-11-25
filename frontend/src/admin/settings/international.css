@@ -162,7 +162,8 @@
   background: var(--panel);
   border-color: var(--border);
   color: var(--accent);
-  box-shadow: 0 3px 10px #10284408;
+  box-shadow: 0 3px 10px
+    color-mix(in srgb, var(--vy-color-text) 3%, transparent);
 }
 .studio .intl-record {
   display: grid;
@@ -174,7 +175,7 @@
 .studio .intl-dot {
   width: 6px;
   height: 6px;
-  background: #30a584;
+  background: var(--vy-color-teal);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -199,8 +200,9 @@
   display: grid;
   gap: 8px;
   padding: 18px 24px;
-  background: #f5ab2810;
-  border-bottom: 1px solid #b8783025;
+  background: color-mix(in srgb, var(--vy-color-amber) 6%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--vy-color-amber) 15%, transparent);
   color: var(--text);
   font-size: 12px;
 }

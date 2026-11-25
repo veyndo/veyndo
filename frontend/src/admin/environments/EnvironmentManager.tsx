@@ -1,5 +1,13 @@
 /** Private environment creation and digest-bound selective release. */
-import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
+import {
+  Button,
+  Card,
+  Field,
+  LinkButton,
+  Notice,
+  Select,
+  TextInput,
+} from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReleaseScenarios from "./ReleaseScenarios";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
@@ -177,14 +185,13 @@ export default function EnvironmentManager({
             <Button type="submit" disabled={!id} onClick={() => onSelect(id)}>
               {w("stage")}
             </Button>
-            <a
-              className="studio-secondary"
+            <LinkButton
               target="_blank"
               rel="noreferrer"
               href={`/?shop=${id}&sandbox=1#`}
             >
               {w("preview")} ↗
-            </a>
+            </LinkButton>
             <Button
               type="submit"
               disabled={busy || !id}

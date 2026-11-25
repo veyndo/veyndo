@@ -1,4 +1,5 @@
 /** App-owned inward migration workflow: native consent, exact reviewed pages, private product targets and durable jobs. */
+import { Button, Card } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import InstallConsent from "./InstallConsent";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
@@ -159,25 +160,26 @@ export default function MigrationWorkspace({
   return (
     <div className="studio-page migration-workspace">
       <header className="page-intro">
-        <button className="studio-secondary" onClick={onBack}>
+        <Button type="submit" onClick={onBack}>
           ← {t("back")}
-        </button>
+        </Button>
         <h1>{t("title")}</h1>
         <p>{t("intro")}</p>
         {rights.includes("assistant.use") && (
-          <button className="studio-secondary" onClick={() => setAgent(true)}>
+          <Button type="submit" onClick={() => setAgent(true)}>
             <Icon name="spark" />
             {t("agent")}
-          </button>
+          </Button>
         )}
       </header>
       {!canRead ? (
         <p role="alert">{t("denied")}</p>
       ) : !app?.active ? (
-        <section className="studio-card">
+        <Card>
           <p>{t("private")}</p>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!canManage || busy}
             onClick={async () => {
               if (!app) {
@@ -200,8 +202,8 @@ export default function MigrationWorkspace({
             }}
           >
             {t("install")}
-          </button>
-        </section>
+          </Button>
+        </Card>
       ) : (
         <div className="migration-layout">
           <MigrationSteps
@@ -257,22 +259,22 @@ export default function MigrationWorkspace({
               />
             )}
             {settings && (
-              <section className="studio-card">
+              <Card>
                 <h2>{t("connection")}</h2>
                 <Connection request={request} />
-              </section>
+              </Card>
             )}
-            <section className="studio-card">
+            <Card>
               <h2>{t("review")}</h2>
               <p>{t("reviewNotice")}</p>
               {kind === "pages" && !designerPackage?.active && (
-                <button
-                  className="studio-secondary"
+                <Button
+                  type="submit"
                   disabled={!canManage}
                   onClick={() => setInstall("site_builder")}
                 >
                   {t("connectDesigner")}
-                </button>
+                </Button>
               )}
               {isPrivate(kind) && (
                 <Target
@@ -297,13 +299,14 @@ export default function MigrationWorkspace({
                 }}
               />
 
-              <button
-                className="studio-primary"
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={busy}
                 onClick={() => void inspect()}
               >
                 {t(busy ? "busy" : "inspect")}
-              </button>
+              </Button>
               {review && (
                 <ReviewPanel
                   comparison={
@@ -345,7 +348,7 @@ export default function MigrationWorkspace({
                   mainLocale={mainLocale}
                 />
               )}
-            </section>
+            </Card>
             <JobHistory
               grouped={!!plan}
               more={more}

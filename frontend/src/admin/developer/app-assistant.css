@@ -1,11 +1,12 @@
 /* Guided extension workspace: restrained colour, clear choices and responsive setup. */
 .app-assistant {
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #dce4f0);
+  background: var(--surface, var(--vy-color-surface));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 22px;
   padding: 28px;
   margin-bottom: 24px;
-  box-shadow: 0 12px 38px #263f7310;
+  box-shadow: 0 12px 38px
+    color-mix(in srgb, var(--vy-color-accent) 6%, transparent);
 }
 .app-assistant > header {
   display: flex;
@@ -19,7 +20,7 @@
   margin: 10px 0;
 }
 .app-assistant p {
-  color: var(--muted, #64748b);
+  color: var(--muted, var(--vy-color-muted));
   line-height: 1.6;
 }
 .app-assistant-grid {
@@ -34,8 +35,8 @@
   gap: 12px;
   text-align: left;
   min-height: 175px;
-  background: var(--surface, #f8faff);
-  border: 1px solid var(--border, #dce4f0);
+  background: var(--surface, var(--vy-color-bg));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 16px;
   padding: 20px;
   transition:
@@ -45,18 +46,19 @@
 }
 .app-kind-card:hover {
   transform: translateY(-3px);
-  border-color: #7ea3ff;
-  box-shadow: 0 8px 25px #4267ac1b;
+  border-color: var(--vy-color-accent-border);
+  box-shadow: 0 8px 25px
+    color-mix(in srgb, var(--vy-color-muted) 11%, transparent);
 }
 .app-kind-card:focus-visible {
-  outline: 3px solid #357cff;
+  outline: 3px solid var(--vy-color-accent-strong);
   outline-offset: 3px;
 }
 .app-kind-card > strong {
   font-size: 16px;
 }
 .app-kind-card > span:not(.app-kind-icon) {
-  color: var(--muted, #64748b);
+  color: var(--muted, var(--vy-color-muted));
   font-size: 13px;
   line-height: 1.6;
   padding-right: 10px;
@@ -65,31 +67,31 @@
   position: absolute;
   right: 20px;
   top: 28px;
-  color: var(--muted, #64748b);
+  color: var(--muted, var(--vy-color-muted));
 }
 .app-kind-icon {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #e9f0ff;
-  color: #316cec;
+  background: var(--vy-color-hover);
+  color: var(--vy-color-accent-strong);
   display: grid;
   place-items: center;
 }
 .app-kind-payment,
 .app-kind-shipping {
-  background: #e7f6f0;
-  color: #13836b;
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
 }
 .app-kind-integration,
 .app-kind-webhook {
-  background: #f0eaff;
-  color: #7954c4;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-violet);
 }
 .app-kind-scheduled,
 .app-kind-event {
-  background: #fff0df;
-  color: #b26d18;
+  background: var(--vy-color-warning-soft);
+  color: var(--vy-color-warning);
 }
 .app-assistant-fields {
   display: grid;
@@ -113,7 +115,7 @@
   width: auto;
 }
 .app-assistant-access {
-  border: 1px solid var(--border, #dce4f0);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 14px;
   padding: 18px;
   margin: 22px 0;
@@ -123,8 +125,8 @@
   padding: 0 8px;
 }
 .app-assistant-note {
-  border-left: 3px solid #85a7f5;
-  background: #467cf509;
+  border-left: 3px solid var(--vy-color-accent-border);
+  background: color-mix(in srgb, var(--vy-color-accent-strong) 4%, transparent);
   padding: 14px 18px;
   border-radius: 6px;
 }
@@ -143,14 +145,14 @@
   gap: 16px;
   align-items: center;
   padding: 18px 0;
-  border-bottom: 1px solid var(--border, #dce4f0);
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
 }
 .app-access-row:last-child {
   border: 0;
 }
 .app-field-options {
   grid-column: 1/-1;
-  border-top: 1px solid var(--border, #dce4f0);
+  border-top: 1px solid var(--border, var(--vy-color-border));
   padding-top: 12px;
   display: grid;
   gap: 12px;

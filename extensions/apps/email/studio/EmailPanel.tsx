@@ -1,4 +1,5 @@
 /** Native email app settings, localized templates, safe previews and durable delivery receipts. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import EmailTemplateEditor from "./EmailTemplateEditor";
 import EmailProviderFields from "./EmailProviderFields";
 
@@ -163,13 +164,9 @@ export default function EmailPanel({
           <h3>{e("title")}</h3>
           <p>{e("hint")}</p>
         </div>
-        <button
-          className="studio-secondary"
-          disabled={busy}
-          onClick={() => void run(refresh)}
-        >
+        <Button type="submit" disabled={busy} onClick={() => void run(refresh)}>
           {e("refresh")}
-        </button>
+        </Button>
       </header>
       {error && <p role="alert">{e("error")}</p>}
       {settings && (
@@ -200,8 +197,9 @@ export default function EmailPanel({
             }}
             change={change}
           />
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={!manage || busy || !dirty}
             onClick={() =>
               void run(async () => {
@@ -221,9 +219,9 @@ export default function EmailPanel({
             }
           >
             {e("save")}
-          </button>
-          <button
-            className="studio-secondary"
+          </Button>
+          <Button
+            type="submit"
             disabled={!manage || busy || dirty}
             onClick={() =>
               void run(async () => {
@@ -238,7 +236,7 @@ export default function EmailPanel({
             }
           >
             {e("removeCredentials")}
-          </button>
+          </Button>
           <section>
             <h3>{e("test")}</h3>
             <label>
@@ -254,8 +252,8 @@ export default function EmailPanel({
             </label>
             {dirty && <p>{e("savedFirst")}</p>}
             <div className="workbench-row">
-              <button
-                className="studio-secondary"
+              <Button
+                type="submit"
                 disabled={!manage || busy || dirty || !recipient}
                 onClick={() =>
                   void run(async () =>
@@ -264,18 +262,19 @@ export default function EmailPanel({
                 }
               >
                 {e("preview")}
-              </button>
-              <button
-                className="studio-secondary"
+              </Button>
+              <Button
+                type="submit"
                 disabled={
                   !manage || busy || dirty || !settings.enabled || !recipient
                 }
                 onClick={() => void run(() => test(true))}
               >
                 {e("simulate")}
-              </button>
-              <button
-                className="studio-primary"
+              </Button>
+              <Button
+                tone="primary"
+                type="submit"
                 disabled={
                   !manage ||
                   busy ||
@@ -288,7 +287,7 @@ export default function EmailPanel({
                 onClick={() => void run(() => test(false))}
               >
                 {e("send")}
-              </button>
+              </Button>
             </div>
             {preview && (
               <article className="email-preview">

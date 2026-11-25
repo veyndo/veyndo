@@ -1,5 +1,12 @@
 /** Uses the existing tenant-owned frontend registry, not a parallel domain or Experience store. */
-import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
+import {
+  Button,
+  Field,
+  LinkButton,
+  Notice,
+  Select,
+  TextInput,
+} from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import {
@@ -108,24 +115,23 @@ export default function ChannelConnections({
             </div>
             <div className="workbench-row">
               {connectionUrl(f.editorUrl, locale) && (
-                <a
-                  className="studio-primary"
+                <LinkButton
+                  tone="primary"
                   href={connectionUrl(f.editorUrl, locale)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {t("edit")} ↗
-                </a>
+                </LinkButton>
               )}
               {connectionUrl(f.url) && (
-                <a
-                  className="studio-secondary"
+                <LinkButton
                   href={connectionUrl(f.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {t("open")} ↗
-                </a>
+                </LinkButton>
               )}
             </div>
             <Field label={t("channel")}>

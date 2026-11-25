@@ -1,4 +1,5 @@
 /** Native job history remains paged and visibly distinct from a whole-shop completion report. */
+import { Card } from "../../../../frontend/src/kit/ui";
 import type { ComponentProps } from "react";
 import Jobs from "./Jobs";
 import { useRunText } from "./run-i18n";
@@ -16,7 +17,7 @@ export default function JobHistory({
   const rt = useRunText(),
     t = useMigrationText();
   return (
-    <section className="studio-card">
+    <Card>
       <h2>{t("jobs")}</h2>
       {grouped && (
         <p>
@@ -29,6 +30,6 @@ export default function JobHistory({
           {rt("more")}
         </button>
       )}
-    </section>
+    </Card>
   );
 }

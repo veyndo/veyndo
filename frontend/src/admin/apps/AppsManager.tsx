@@ -144,8 +144,9 @@ export default function AppsManager({
       </div>
       {selected && (
         <>
-          <button
-            className="studio-secondary app-back"
+          <Button
+            type="submit"
+            className="app-back"
             onClick={() => {
               setSelected("");
               const url = new URL(location.href);
@@ -157,20 +158,19 @@ export default function AppsManager({
             }}
           >
             ← {c("backApps")}
-          </button>
+          </Button>
           <div className="app-detail-tabs">
             {["appDetails", "appInterface", "appData", "appVersion"].map(
               (k) => (
-                <button
+                <Button
+                  tone={detailTab === k ? "primary" : "secondary"}
+                  type="submit"
                   key={k}
                   aria-pressed={detailTab === k}
-                  className={
-                    detailTab === k ? "studio-primary" : "studio-secondary"
-                  }
                   onClick={() => setDetailTab(k)}
                 >
                   {c(k)}
-                </button>
+                </Button>
               ),
             )}
           </div>

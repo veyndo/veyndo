@@ -3,8 +3,7 @@
   max-width: 1440px;
   margin: auto;
 }
-.b2b-workspace
-  button:not(.studio-primary, [data-tone="primary"]):not(.b2b-company-card) {
+.b2b-workspace button:not([data-tone="primary"]):not(.b2b-company-card) {
   padding: 11px 16px;
   min-height: 44px;
   border: 1px solid var(--border, #dbe4f2);
@@ -16,9 +15,9 @@
   cursor: pointer;
 }
 .b2b-workspace
-  button:not(.studio-primary, [data-tone="primary"]):not(
-    .b2b-company-card
-  ):hover:not(:disabled) {
+  button:not([data-tone="primary"]):not(.b2b-company-card):hover:not(
+    :disabled
+  ) {
   background: var(--surface-soft, #f5f7ff);
   border-color: #b6c6ed;
 }

@@ -1,4 +1,5 @@
 /** Canvas handoff reuses native product/category editors without unmounting or copying the page designer. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
 import "./canvas-commerce-editor.css";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
@@ -29,31 +30,22 @@ export default function CanvasCommerceEditor({
 }) {
   const t = useCanvasText(),
     { c } = useCatalogText();
-  const [categories, setCategories] = useState<Category[]>(),
-    [error, setError] = useState(""),
-    [dirty, setDirty] = useState(false),
+  const [dirty, setDirty] = useState(false),
     [leaving, setLeaving] = useState(false);
+  const categoriesPath = "/api/merchant/categories";
+  const categoriesRead = useRead(request, categoriesPath);
+  const setReadCategories = useSetRead(request);
+  const categories: Category[] | undefined = categoriesRead.data?.elements;
+  const categoriesLoadError = (categoriesRead.error as Error | undefined)
+    ?.message;
+
   useEffect(() => {
     onDirtyChange?.(dirty);
   }, [dirty, onDirtyChange]);
   const reload = useCallback(async () => {
-    const value = await request("/api/merchant/categories");
-    setCategories(value.elements);
+    setReadCategories(categoriesPath, await request(categoriesPath));
     onSaved();
   }, [request, onSaved]);
-  useEffect(() => {
-    let active = true;
-    void request("/api/merchant/categories")
-      .then((v) => {
-        if (active) setCategories(v.elements);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
   return (
     <section className="canvas-commerce-editor">
       <header className="canvas-commerce-heading">
@@ -75,7 +67,9 @@ export default function CanvasCommerceEditor({
           </span>
         )}
       </header>
-      {error && <Notice tone="danger">{error}</Notice>}
+      {categoriesLoadError && (
+        <Notice tone="danger">{categoriesLoadError}</Notice>
+      )}
       <Suspense fallback={<p role="status">{c("loading")}</p>}>
         {categories &&
           (kind === "product" ? (

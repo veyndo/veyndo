@@ -1,4 +1,5 @@
 /** Shared domain-independent grid shell: server criteria, sortable/draggable columns, bounded pages and reviewed AI filters. */
+import { Button } from "../../kit/ui";
 import { extensionColumns, extensionFilterSummary } from "./extension-columns";
 import ExtensionFilter from "./ExtensionFilter";
 import { useLocale } from "../i18n/i18n";
@@ -362,13 +363,9 @@ export default function AgenticGrid<Row>({
             <h3>{g("empty")}</h3>
             <p>{g("emptyHint")}</p>
             {active.length > 0 && (
-              <button
-                type="button"
-                className="studio-secondary"
-                onClick={() => onCriteria({})}
-              >
+              <Button type="button" onClick={() => onCriteria({})}>
                 {g("clear")}
-              </button>
+              </Button>
             )}
             {emptyAction}
           </div>

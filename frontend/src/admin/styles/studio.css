@@ -15,10 +15,11 @@
 .agent-run-card {
   margin: 16px 0;
   padding: 20px;
-  border: 1px solid var(--border, #ccdfef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 16px;
-  background: var(--surface, #fff);
-  box-shadow: 0 4px 20px #0870c308;
+  background: var(--surface, var(--vy-color-surface));
+  box-shadow: 0 4px 20px
+    color-mix(in srgb, var(--vy-color-accent-strong) 3%, transparent);
 }
 .agent-run-card > div {
   display: flex;

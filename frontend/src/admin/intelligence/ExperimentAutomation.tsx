@@ -1,5 +1,5 @@
 /** Suggestion card, automation switches and decision note for experiments; the lifecycle and readout stay with the native owner. */
-import { Notice } from "../../kit/ui";
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -73,14 +73,14 @@ export function ExperimentSuggestion({
         <h3>{t("suggestTitle")}</h3>
         <p>{t("suggestIntro")}</p>
       </div>
-      <button
+      <Button
         type="button"
-        className="studio-secondary autopilot-all"
+        className="autopilot-all"
         disabled={disabled || busy}
         onClick={() => void load()}
       >
         {t("suggestButton")}
-      </button>
+      </Button>
       {error && <Notice tone="danger">{error}</Notice>}
       {value && (
         <div role="status">

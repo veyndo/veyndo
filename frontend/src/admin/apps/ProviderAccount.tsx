@@ -1,5 +1,5 @@
 /** Shared installed-provider onboarding and channel connection controls for merchant Apps and App Studio. */
-import { Button, Field, Notice, Select } from "../../kit/ui";
+import { Button, Field, LinkButton, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
@@ -207,14 +207,14 @@ export default function ProviderAccount({
       {error && <Notice tone="danger">{error}</Notice>}
       {account && <p>{t(account.ready ? "ready" : "pending")}</p>}
       {account?.onboardingUrl && (
-        <a
-          className="studio-primary"
+        <LinkButton
+          tone="primary"
           href={account.onboardingUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
           {t("continue")}
-        </a>
+        </LinkButton>
       )}
     </section>
   );

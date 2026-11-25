@@ -1,4 +1,5 @@
 /** A pending second factor never enters merchant or operator session storage. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { shopApi } from "../api/shop-api";
 import { useSecurityText } from "../i18n/security-i18n";
@@ -66,17 +67,12 @@ export default function AuthenticationChallenge({
         />
       </label>
       {error && <p role="alert">{error}</p>}
-      <button className="studio-primary" disabled={busy}>
+      <Button tone="primary" type="submit" disabled={busy}>
         {t("verify")}
-      </button>
-      <button
-        type="button"
-        className="studio-secondary"
-        disabled={busy}
-        onClick={onCancel}
-      >
+      </Button>
+      <Button type="button" disabled={busy} onClick={onCancel}>
         {t("cancel")}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -68,12 +68,6 @@
   padding: 0;
   margin: 24px 0;
 }
-.channel-steps li {
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: var(--panel);
-  color: var(--muted);
-}
 .channel-steps li[aria-current] {
   background: var(--hover);
   color: var(--accent);
@@ -161,11 +155,11 @@
 .channel-editor .field-invalid textarea,
 .channel-editor .field-invalid [role="combobox"],
 .channel-editor .field-invalid {
-  border-color: #dc3545;
+  border-color: var(--vy-color-danger);
 }
 .channel-editor .field-invalid small,
 .channel-editor [role="alert"] {
-  color: #be2437;
+  color: var(--vy-color-danger);
 }
 .channel-editor .commerce-fields {
   display: grid;
@@ -230,6 +224,10 @@
   counter-reset: steps;
 }
 .channel-steps li {
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 10px;

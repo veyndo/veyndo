@@ -136,7 +136,8 @@
 }
 .app-creation-placement:hover {
   border-color: var(--accent);
-  box-shadow: 0 3px 12px #0075ff0c;
+  box-shadow: 0 3px 12px
+    color-mix(in srgb, var(--vy-color-accent-strong) 5%, transparent);
 }
 .app-creation-placement[data-selected="true"] {
   border-color: var(--accent);

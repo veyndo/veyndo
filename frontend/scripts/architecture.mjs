@@ -59,6 +59,25 @@ for (const file of files) {
     errors.push(`${relative(file)} needs a leading responsibility comment`);
   if (path.dirname(file) === source && path.basename(file) !== "main.tsx")
     errors.push(`${relative(file)} belongs in a feature folder`);
+  // Studio areas style with design tokens and kit parts only (F4).
+  if (
+    file.endsWith(".css") &&
+    owner(file) === "admin" &&
+    colourLiteral.test(text.replace(/\/\*[\s\S]*?\*\//g, ""))
+  )
+    errors.push(
+      `${relative(file)} uses a colour literal; Studio styles use var(--vy-color-*)`,
+    );
+  if (
+    /\.tsx?$/.test(file) &&
+    (["admin", "shared"].includes(owner(file)) ||
+      (file.startsWith(appRoot + path.sep) &&
+        file.includes(`${path.sep}studio${path.sep}`))) &&
+    /["'`\s]studio-(?:primary|secondary|card)["'`\s]/.test(text)
+  )
+    errors.push(
+      `${relative(file)} uses a retired Studio class; use kit Button, LinkButton or Card`,
+    );
   if (
     file.endsWith(".css") &&
     kitPackage(file) &&
@@ -244,6 +263,37 @@ if (!process.argv[2]) {
   else if (adminLines < budget.adminLines)
     errors.push(
       `admin CSS shrank to ${adminLines} lines; lower adminLines in scripts/admin-styles-budget.json to match`,
+    );
+  // Studio areas read server data through kit/query (useRead); effects that call
+  // the request function directly only fall until none is left.
+  let effectReads = 0;
+  for (const file of walk(path.join(source, "admin")).filter((f) =>
+    /\.tsx?$/.test(f),
+  )) {
+    const text = fs.readFileSync(file, "utf8");
+    for (const match of text.matchAll(/useEffect\(\s*\(\)\s*=>\s*\{/g)) {
+      let depth = 1,
+        index = match.index + match[0].length;
+      while (depth && index < text.length) {
+        if (text[index] === "{") depth++;
+        else if (text[index] === "}") depth--;
+        index++;
+      }
+      if (
+        /\b(?:request|liveRequest|requestJson)\(/.test(
+          text.slice(match.index, index),
+        )
+      )
+        effectReads++;
+    }
+  }
+  if (effectReads > budget.effectReads)
+    errors.push(
+      `${effectReads} Studio effects call the request function (budget ${budget.effectReads}); read through useRead`,
+    );
+  else if (effectReads < budget.effectReads)
+    errors.push(
+      `Studio effects with direct reads fell to ${effectReads}; lower effectReads in scripts/admin-styles-budget.json`,
     );
   if (sheets.length > budget.files || lines > budget.lines)
     errors.push(

@@ -1,4 +1,5 @@
 /** Tenant-owned address cards, defaults and revision-aware CRUD shared by account and CRM. */
+import { Button } from "../../kit/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../api/types";
 import { useCustomerText } from "../i18n/customer-i18n";
@@ -91,13 +92,13 @@ export default function AddressBook({
           <small>{list?.elements.length ?? 0} / 100</small>
         </div>
         {canEdit && !draft && (
-          <button
+          <Button
             type="button"
-            className="studio-secondary shop-secondary"
+            className="shop-secondary"
             onClick={() => edit()}
           >
             {c("addAddress")}
-          </button>
+          </Button>
         )}
       </div>
       {error && <p role="alert">{error}</p>}
@@ -149,17 +150,22 @@ export default function AddressBook({
             </label>
           </div>
           <div className="customer-actions">
-            <button disabled={busy} className="studio-primary shop-primary">
+            <Button
+              tone="primary"
+              type="submit"
+              disabled={busy}
+              className="shop-primary"
+            >
               {c("save")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               disabled={busy}
-              className="studio-secondary shop-secondary"
+              className="shop-secondary"
               onClick={() => setDraft(undefined)}
             >
               {c("cancel")}
-            </button>
+            </Button>
           </div>
         </form>
       ) : (
@@ -178,33 +184,33 @@ export default function AddressBook({
               <AddressCard address={entry.address} />
               {canEdit && (
                 <div className="customer-actions">
-                  <button
+                  <Button
                     type="button"
                     disabled={busy}
-                    className="studio-secondary shop-secondary"
+                    className="shop-secondary"
                     onClick={() => edit(entry)}
                   >
                     {c("editAddress")}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     disabled={busy}
-                    className="studio-secondary shop-secondary"
+                    className="shop-secondary"
                     onClick={() => setDeleting(entry)}
                   >
                     {c("delete")}
-                  </button>
+                  </Button>
                   {(["billing", "shipping"] as const).map(
                     (kind) =>
                       entry.id !==
                         (kind === "billing"
                           ? list.defaultBillingAddressId
                           : list.defaultShippingAddressId) && (
-                        <button
+                        <Button
                           type="button"
                           key={kind}
                           disabled={busy}
-                          className="studio-secondary shop-secondary"
+                          className="shop-secondary"
                           onClick={() =>
                             void run(async () => {
                               await request(
@@ -222,7 +228,7 @@ export default function AddressBook({
                           }
                         >
                           {r(kind === "billing" ? "useBilling" : "useShipping")}
-                        </button>
+                        </Button>
                       ),
                   )}
                 </div>
