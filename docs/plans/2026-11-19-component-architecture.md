@@ -1088,29 +1088,49 @@ Each component carries its own tests; the suite runner composes them.
 Lean proves the pure rules in `domain/`. It does not prove SQL, HTTP or providers;
 those stay covered by the tests above, and the coverage page keeps saying so.
 
-- [ ] Every function in `domain/` of core, pricing, inventory, checkout, payments
+- [x] Every function in `domain/` of core, pricing, inventory, checkout, payments
       and orders is either an extracted proved rule or listed as unproved with a
-      reason. No third state.
+      reason. No third state. `proof/domain-inventory.json` lists all 144 (15 bind
+      proved rules, 129 unproved with one of ten reasons); `scripts/formal.py
+      --check` fails on an unlisted or stale function, an unknown status or reason,
+      or a binding that differs from the source, and the mutation run rejects seven
+      such third states. Generated page: `docs/formal-coverage.md`. `core` has no
+      `domain/` module yet; one added later is checked the same way.
 - [ ] Money: addition and scaling never overflow silently; rounding is stated and
       proved; net plus tax equals gross; a discount never exceeds its base; a total
       is never negative. Proved and bound in cart pricing: addition (`amount_sum`,
       four properties), net plus tax equals gross and net never above gross
       (`net_amount`), discount within its base (`discount_cap`). Open: scaling
-      and rounding.
+      and rounding — they wait for the money refactor (whole minor units) and are
+      done by another session after it.
 - [ ] Price calculation: the order total equals the sum of its lines, shipping and
-      tax for every input; the same input gives the same quote.
-- [ ] Stock: a reservation never takes stock below zero; reserve followed by
+      tax for every input; the same input gives the same quote. Open: the
+      calculation is still the floating-point port, so this waits for the money
+      refactor and is done by another session after it.
+- [x] Stock: a reservation never takes stock below zero; reserve followed by
       release restores the quantity; an order holds at most what it ordered.
       Proved: the first two, also for two reservations in sequence
-      (`stock_admissible`, five properties). Open: the per-order bound.
+      (`stock_admissible`, five properties), and the per-order bound
+      (`reservation_admissible`, nine properties): over any sequence of
+      reservations and releases an order holds at most what it ordered, stock plus
+      held is conserved, release is idempotent and restores the stock. Bound in
+      `InventoryLines::new` (allocation ledger of checkout and external orders; a
+      new order holds nothing and reserves exactly its ordered quantity).
 - [x] Checkout: an order is placed only for the reviewed cart revision and total
       (`checkout_review_exact`); a repeated request places no second order
       (`replay_exact`, `replay_same_cart`, `replay_open_fingerprint`).
 - [x] Payments: captured never exceeds authorised (`capture_bounded`), refunded
       never exceeds captured (`refund_bounded`, also in sequence), and every ledger
       transition is one of the listed ones (`payment_transition_exact`).
-- [ ] Orders: every reachable state of the order machine is a listed state, and
-      completed or cancelled orders accept no further fulfilment.
+- [x] Orders: every reachable state of the order machine is a listed state, and
+      completed or cancelled orders accept no further fulfilment. Proved over any
+      request sequence for any configured machine (`order_transition_admissible`,
+      seven properties, plus `order_run_fulfilment_denied` on
+      `order_edit_admissible`); bound in `order_workflow::admitted_edge`, which the
+      transition endpoint uses. The payment ledger also writes `cancelled`,
+      `expired` and `payment_review` into the order; those writes are reviewed, not
+      modelled (they need a pre-capture ledger state, and `payment_run_captured_kept`
+      shows captured money never returns to one).
 - [x] Access: a credential of one shop never satisfies a check for another
       (`merchant_scope_admissible`, three properties, bound in the identity
       crate); a missing permission never admits (`scope_exact`).
@@ -1120,12 +1140,21 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       endpoint (`sovereign_request_admissible`, four properties).
 - [ ] Extend the extractor to saturating addition and multiplication together with
       the first rule that uses them. Addition is done (`amount_sum`); multiplication
-      follows with line totals. The price calculation is still a floating-point
+      follows with line totals (open: money refactor, another session). The price calculation is still a floating-point
       port of the original calculators, so "total equals the sum of its parts"
       becomes provable only after phase 2 moves it to whole minor units.
-- [ ] State-machine proofs as invariants over transitions, not only single steps.
-- [ ] The comparison driver checks the compiled Rust rules against the Lean
-      versions on generated inputs for every rule above.
+- [x] State-machine proofs as invariants over transitions, not only single steps.
+      Order runs (above); payment ledger runs (`payment_run_listed`,
+      `payment_run_captured_kept`, `payment_run_refunded_final`); refund and capture
+      totals over any request list (`refund_run_bounded`, `capture_run_bounded`);
+      revisions are monotone and a stale revision or checkout review is refused
+      after any later writes (`revision_run_monotone`, `revision_reuse_denied`,
+      `checkout_review_stale_denied`). Replay stays single-step: at most one order
+      per key comes from the key lookup in SQL, not from the rule.
+- [x] The comparison driver checks the compiled Rust rules against the Lean
+      versions on generated inputs for every rule above: suite
+      `formal_differential` (72 rules, 228,195 cases), with a negative control that
+      alters five rules in the Lean model and must catch each.
 - [ ] No `f64` on the money path.
 
 ## Order
@@ -1175,7 +1204,7 @@ The release waits for all of it. Baseline on 25 November, measured by
 | H4 typed access | untyped field accesses | 2,208 | 0 outside documented protocol adapters |
 | H5 ports | foreign table accesses | 239 | 0 |
 | H6 tests | property, store per component, mutation | none | money, stock, discounts, state machines; every component; `domain/` |
-| H7 proofs | Lean | price, stock bound, order states open | proved and bound |
+| H7 proofs | Lean | price, stock bound, order states open | proved and bound (stock bound and order states done 25 Nov; price waits for the money refactor) |
 | H8 migrations, mirrors, upgrade | per-component migrations, generated mirrors, rolling upgrade | none | 5.3, 5.4, 5.5 |
 
 Each step lowers its ratchet in `components.json` (the check refuses growth and asks

@@ -93,11 +93,13 @@ verified separately by native integration tests rather than proved by Lean.
 |---|---|---|
 | `discount_cap` | Discount is bounded by both requested amount and goods total; remainder plus discount conserves the total | `components/pricing/src/domain/discount.rs` |
 | `stock_admissible` | Admitted quantities are positive, within stock and conserve stock under subtraction | `src/order_checkout.rs`, `src/commerce/external_orders.rs` |
+| `reservation_admissible` | An order holds at most what it ordered; over any reserve/release sequence stock plus held is conserved and release restores stock | `components/inventory/src/domain/lines.rs` |
 | `refund_admissible` | Prior/reserved plus requested refund cannot exceed captured amount; zero refunds fail | `src/payments/operations.rs` |
 | `revision_admissible` | Admission requires an exact positive revision | `src/commerce/fulfillment.rs` |
 | `replay_admissible` | A replay belongs to the same cart; an open cart requires the same fingerprint | `src/order_checkout.rs` |
 | `scope_admissible` | Admission requires authentication and a known scope; explicit denial cannot inherit role defaults | `src/auth/permissions.rs` |
 | `order_edit_admissible` | Terminal orders cannot admit operational edits | `components/orders/src/domain/order_workflow.rs` |
+| `order_transition_admissible` | Over any request sequence and any configured machine, every reachable state is listed and a terminal order never changes again | `components/orders/src/domain/order_workflow.rs` |
 | `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `components/orders/src/domain/order_workflow.rs` |
 | `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `components/orders/src/domain/order_workflow.rs` |
 | `manual_payment_admissible` | Manual payment cannot confirm an external provider; it requires a pending payment and nonterminal order | `src/commerce/fulfillment.rs` |
@@ -140,6 +142,62 @@ algorithm, and stock admission does **not** prove transaction isolation.
 Authentication is supplied by the middleware; the theorem does not prove that
 middleware or the older aggregate `read` permission path. Provider receipt
 identity/signature checks and their parsers remain outside the pure theorem.
+
+## Phase 8: per-order stock, order runs and the domain inventory (25 November 2026)
+
+**Per-order stock bound.** `reservation_admissible(ordered, held, requested)` admits
+a positive reservation only when the order then holds at most what it ordered.
+Lean models one order's reserve/release events (a refused reservation changes
+nothing, release returns exactly what is held) and proves for every sequence:
+held never exceeds ordered, stock plus held is conserved, releasing twice equals
+releasing once, and a final release restores the stock. Production reserves once,
+when the order is created (`InventoryLines::new` with nothing held, used by checkout
+and external orders); release is the idempotent `release.sql`. The sequence
+theorems therefore also cover any later re-reservation path, provided it passes
+the persisted held quantity to the same rule. The SQL lock order and the
+`released_at` fence are reviewed adapters.
+
+**Order state machine.** `order_transition_admissible(edge_listed, target_listed,
+source_terminal)` is the move rule; `order_workflow::admitted_edge` feeds it for the
+transition endpoint, and the terminal predicate is shared with the business guard
+(machine terminal states plus `expired` and `payment_review`). Lean models any
+machine (listed states, terminal states, listed edges) and any sequence of moves
+and fulfilment requests (payment or delivery changes, gated by
+`order_edit_admissible`). Proved: every state reachable from a listed start is
+listed; a terminal order is unchanged by every sequence, so a completed or
+cancelled order accepts no fulfilment; once a prefix reaches a terminal state the
+rest has no effect. The binding also rechecks a stored machine snapshot, so a
+snapshot that bypassed validation can no longer move an order into an unlisted
+state. Ledger-driven order writes (`cancelled`, `expired`, `payment_review` from
+`order_ledger::update_order`) are outside this model; they need a pre-capture
+ledger state, and the ledger runs below show captured money never returns to one.
+
+**Single steps lifted to sequences.** Payment ledger runs stay within the listed
+codes, captured money never returns to pending, authorized, cancelled or expired,
+and refunded is final. Refund and capture totals stay within captured and
+authorized over any request list. Revisions never decrease, and a stale revision
+or checkout review is refused after any later writes. The replay rule stays
+single-step: at most one order per idempotency key comes from the key lookup in
+SQL, not from the rule.
+
+**Comparison driver.** The registered tooling suite `formal_differential` runs all
+72 rules, compiled Rust from the fresh build against the executable built from the
+extracted Lean model, on 228,195 generated inputs (all Boolean assignments crossed
+with numeric edges up to `u64::MAX`, plus seeded random cases). Its negative
+control alters five rules in a temporary Lean model and must catch each.
+
+**Domain inventory.** Every function in `domain/` of core, pricing, inventory,
+checkout, payments and orders is either bound to proved rules or listed as
+unproved with one of ten reasons in `proof/domain-inventory.json`: 144 functions,
+15 bound, 129 unproved; `core` has no `domain/` module yet. `scripts/formal.py
+--check` fails on any third state; the generated page is
+[formal-coverage.md](formal-coverage.md). "Bound" means the decision is a proved
+rule; the input mapping around it stays reviewed Rust.
+
+**Still open, waiting for the money refactor (another session):** order total =
+lines + shipping + tax, money scaling and rounding, and multiplication in the
+extractor. Pricing still uses the floating-point port, so these cannot be stated
+over whole minor units yet.
 
 ## Consent and legal checkout additions
 
