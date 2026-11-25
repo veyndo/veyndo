@@ -56,15 +56,18 @@ Prices, stock and totals always come from the server; parts only show them.
   `veyndo:quantity` and `veyndo:open` events; the host decides what they do. Cross-origin hosts need the shop to serve
   the script with CORS.
 
-- **Agents (MCP Apps).** The hosted `/mcp` server links `catalog.detail` and
-  `catalog.search` to the view `ui://veyndo/kit/storefront`
+- **Agents (MCP Apps).** The hosted `/mcp` server links `catalog.detail`,
+  `catalog.search`, `cart.create`, `cart.quote` and `cart.replace` to the view
+  `ui://veyndo/kit/storefront`
   (`_meta.ui.resourceUri`, plus the `openai/outputTemplate` alias ChatGPT still
   honours) and serves it as a self-contained `text/html;profile=mcp-app` document
   built from these contracts (`src/mcp/storefront_views.rs`). Each result carries
   its part props in `_meta["ai.veyndo/part"]`, derived from the same Store API
-  answer the model sees; hosts do not pass `_meta` to the model. The view never
-  takes payment: add to cart and checkout open the shop's own product page or
-  checkout, and only HTTPS links leave the sandbox. Images and links need
+  answer the model sees (buy box, product cards, cart summary); hosts do not pass
+  `_meta` to the model. The view never takes payment: add to cart opens the shop's
+  own product page, the agent's cart is shown read-only with its lines linking to
+  their product pages (changing it and purchase stay with the agent's native tools),
+  and only HTTPS links leave the sandbox. Images and links need
   `COMMERCE_PUBLIC_ORIGIN`; without it the view shows the parts without them.
 
 ## Verification

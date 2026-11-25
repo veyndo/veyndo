@@ -109,6 +109,37 @@ describe("storefront MCP App view", () => {
     expect(h.sent).toContainEqual({ id: 7, result: {} });
   });
 
+  it("shows an agent cart read-only and opens its lines in the shop", async () => {
+    const h = host();
+    render(<View send={h.send} subscribe={h.subscribe} />);
+    await h.deliver({
+      method: "ui/notifications/tool-result",
+      params: {
+        _meta: {
+          [partKey]: {
+            part: "cart-summary",
+            locale: "de-DE",
+            props: {
+              locale: "de-DE",
+              currency: "EUR",
+              lines: [{ id: "coat", label: "Mantel", quantity: 2, total: 498 }],
+              total: 498,
+            },
+            links: { coat: "https://shop.example/products/coat?shop=s" },
+          },
+        },
+      },
+    });
+    expect(screen.getByText("Mantel")).toBeInTheDocument();
+    // Quantity and purchase stay with the agent's native tools.
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    fireEvent.click(screen.getByText("Mantel"));
+    const open = h.sent.find((m) => m.method === "ui/open-link");
+    expect(open?.params).toEqual({
+      url: "https://shop.example/products/coat?shop=s",
+    });
+  });
+
   it("never opens non-HTTPS links and explains results it cannot show", async () => {
     const h = host();
     render(<View send={h.send} subscribe={h.subscribe} />);

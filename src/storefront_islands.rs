@@ -284,6 +284,197 @@ pub(crate) fn cards(
         .collect()
 }
 
+/// The fields of a Store API cart (`cart.quote`, `cart.create`, `cart.replace`) the cart summary reads.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub(crate) struct Quote {
+    locale: Option<String>,
+    line_items: Vec<QuoteLine>,
+    discounts: Vec<QuoteDiscount>,
+    shipping_costs: QuoteAmount,
+    deliveries: Vec<QuoteDelivery>,
+    price: QuotePrice,
+    currency_context: CurrencyContext,
+}
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteLine {
+    id: String,
+    label: String,
+    media: Vec<Media>,
+    quantity: u64,
+    min_purchase: Option<u64>,
+    purchase_steps: Option<u64>,
+    max_purchase: Option<u64>,
+    price: QuoteLinePrice,
+}
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteLinePrice {
+    unit_price: Option<f64>,
+    total_price: Option<f64>,
+}
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuoteDiscount {
+    id: String,
+    name: std::collections::BTreeMap<String, String>,
+    amount: Option<f64>,
+}
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteAmount {
+    total_price: Option<f64>,
+}
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteDelivery {
+    delivery_date: Option<DeliveryWindow>,
+}
+#[derive(Deserialize, Serialize, Default, Debug, PartialEq, Clone)]
+#[serde(default)]
+pub(crate) struct DeliveryWindow {
+    pub earliest: String,
+    pub latest: String,
+}
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuotePrice {
+    currency: Option<String>,
+    position_price: Option<f64>,
+    total_price: Option<f64>,
+    tax: Option<f64>,
+    tax_status: String,
+}
+
+/// Props of the kit `cart-summary` part.
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct CartView {
+    pub locale: String,
+    pub currency: String,
+    pub price_kind: &'static str,
+    pub lines: Vec<CartLine>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subtotal: Option<f64>,
+    pub discounts: Vec<CartDiscount>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shipping: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tax: Option<f64>,
+    pub total: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery: Option<DeliveryWindow>,
+}
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct CartLine {
+    pub id: String,
+    pub label: String,
+    pub quantity: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unit_price: Option<f64>,
+    pub total: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image: Option<String>,
+    pub min_purchase: u64,
+    pub purchase_steps: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_purchase: Option<u64>,
+}
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct CartDiscount {
+    pub id: String,
+    pub label: String,
+    pub amount: f64,
+}
+
+/// A finite amount without a negative zero (an empty cart must not show "-0.00").
+fn amount(value: f64) -> Option<f64> {
+    value.is_finite().then_some(value + 0.0)
+}
+
+/// Kit `cart-summary` props from a Store API cart; `None` without a total or currency.
+///
+/// A discount label uses the exact locale, then its language; without either the
+/// part shows its own localized "discount" word instead of another language.
+pub(crate) fn cart_view(quote: &Quote, locale: &str, origin: Option<&str>) -> Option<CartView> {
+    let currency = quote
+        .price
+        .currency
+        .clone()
+        .or(quote.currency_context.code.clone())
+        .filter(|c| c.len() == 3 && c.bytes().all(|b| b.is_ascii_uppercase()))?;
+    let total = quote.price.total_price.and_then(amount)?;
+    let locale = quote.locale.clone().unwrap_or_else(|| locale.to_string());
+    let language = locale.split(['-', '_']).next().unwrap_or("").to_string();
+    let count = |n: Option<u64>| n.filter(|n| (1..=100_000).contains(n));
+    let lines = quote
+        .line_items
+        .iter()
+        .filter(|l| !l.id.is_empty() && !l.label.is_empty() && (1..=100_000).contains(&l.quantity))
+        .take(200)
+        .filter_map(|l| {
+            Some(CartLine {
+                id: bounded(&l.id, 200),
+                label: bounded(&l.label, 300),
+                quantity: l.quantity,
+                unit_price: l.price.unit_price.and_then(amount),
+                total: l.price.total_price.and_then(amount)?,
+                image: l.media.first().and_then(|m| media_url(&m.url, origin)),
+                min_purchase: count(l.min_purchase).unwrap_or(1),
+                purchase_steps: count(l.purchase_steps).unwrap_or(1),
+                max_purchase: count(l.max_purchase),
+            })
+        })
+        .collect();
+    let discounts = quote
+        .discounts
+        .iter()
+        .filter(|d| !d.id.is_empty())
+        .take(50)
+        .filter_map(|d| {
+            Some(CartDiscount {
+                id: bounded(&d.id, 200),
+                label: bounded(
+                    d.name
+                        .get(&locale)
+                        .or_else(|| d.name.get(&language))
+                        .map(String::as_str)
+                        .unwrap_or(""),
+                    300,
+                ),
+                amount: d.amount.and_then(amount)?,
+            })
+        })
+        .collect();
+    Some(CartView {
+        locale: bounded(&locale, 35),
+        currency,
+        price_kind: if quote.price.tax_status == "net" {
+            "net"
+        } else {
+            "gross"
+        },
+        lines,
+        subtotal: quote.price.position_price.and_then(amount),
+        discounts,
+        shipping: quote.shipping_costs.total_price.and_then(amount),
+        tax: quote.price.tax.and_then(amount),
+        total,
+        delivery: quote
+            .deliveries
+            .first()
+            .and_then(|d| d.delivery_date.clone())
+            .filter(|w| !w.earliest.is_empty() && !w.latest.is_empty())
+            .map(|w| DeliveryWindow {
+                earliest: bounded(&w.earliest, 40),
+                latest: bounded(&w.latest, 40),
+            }),
+    })
+}
+
 /// Media as an absolute HTTPS URL: same-origin paths join the shop origin, HTTPS stays.
 pub(crate) fn media_url(url: &str, origin: Option<&str>) -> Option<String> {
     if url.starts_with("https://") {
@@ -382,6 +573,39 @@ mod tests {
         }
         assert!(props(&detail(|v| v["product"]["name"] = json!("")), "de-DE").is_none());
         assert_eq!(bounded(&"😀".repeat(200), 300).chars().count(), 150);
+    }
+
+    #[test]
+    fn cart_views_follow_the_store_api_cart() {
+        let quote: Quote = serde_json::from_value(json!({
+            "locale":"de-DE",
+            "lineItems":[
+                {"id":"coat","label":"Coat","quantity":2,"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,
+                 "media":[{"url":"/media/coat.webp"}],"price":{"unitPrice":100.0,"totalPrice":200.0}},
+                {"id":"ghost","label":"Ghost","quantity":0,"price":{"totalPrice":0.0}}],
+            "discounts":[{"id":"d1","name":{"de":"Rabatt"},"amount":20.0},{"id":"d2","name":{"fr":"Remise"},"amount":5.0}],
+            "shippingCosts":{"totalPrice":4.9},
+            "deliveries":[{"deliveryDate":{"earliest":"2026-11-27","latest":"2026-11-29"}}],
+            "price":{"currency":"EUR","positionPrice":200.0,"totalPrice":179.9,"tax":28.72,"taxStatus":"gross"}
+        }))
+        .unwrap();
+        let view = cart_view(&quote, "en-GB", Some("https://shop.example")).unwrap();
+        assert_eq!(view.locale, "de-DE");
+        assert_eq!(view.lines.len(), 1);
+        assert_eq!(
+            view.lines[0].image.as_deref(),
+            Some("https://shop.example/media/coat.webp")
+        );
+        assert_eq!(view.discounts[0].label, "Rabatt");
+        // No other language stands in for a missing translation.
+        assert_eq!(view.discounts[1].label, "");
+        assert_eq!(view.total, 179.9);
+        assert_eq!(view.delivery.as_ref().unwrap().latest, "2026-11-29");
+        let json = serde_json::to_value(&view).unwrap();
+        assert!(json["lines"][0].get("maxPurchase").is_none());
+        assert!(json["lines"][0].get("url").is_none());
+        assert!(cart_view(&Quote::default(), "en-GB", None).is_none());
+        assert!(amount(-0.0).unwrap().is_sign_positive());
     }
 
     #[test]

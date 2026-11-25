@@ -106,7 +106,13 @@ export function View({
           onAddToCart={({ productId }: { productId: string }) =>
             open(payload?.links?.[productId])
           }
-          onCheckout={() => open(payload?.checkout)}
+          onCheckout={
+            linkable(payload?.checkout)
+              ? () => open(payload?.checkout)
+              : undefined
+          }
+          // Cart lines and order references open the shop's own pages.
+          onOpen={({ id }: { id: string }) => open(payload?.links?.[id])}
         />
       ))}
     </div>

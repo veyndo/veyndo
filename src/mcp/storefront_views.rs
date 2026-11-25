@@ -4,7 +4,8 @@
 //! part contracts (`frontend/src/kit/storefront/mcp-app.tsx`). Part props travel in
 //! the result's `_meta` (hosts do not give `_meta` to the model) and are derived from
 //! the same Store API answers the model sees. The view never pays: buying opens the
-//! shop's own product page or checkout through the host (`ui/open-link`).
+//! shop's own product page or checkout through the host (`ui/open-link`); cart
+//! changes and purchase stay with the agent's native tools.
 use crate::apps::mcp_views::MIME;
 use crate::storefront_islands;
 use serde::Deserialize;
@@ -18,7 +19,13 @@ pub(super) const URI: &str = "ui://veyndo/kit/storefront";
 /// Where a tool result carries its part payload.
 pub(super) const PART: &str = "ai.veyndo/part";
 /// Commerce tools whose results the view renders.
-const TOOLS: [&str; 2] = ["catalog.detail", "catalog.search"];
+const TOOLS: [&str; 5] = [
+    "catalog.detail",
+    "catalog.search",
+    "cart.create",
+    "cart.quote",
+    "cart.replace",
+];
 
 /// The `_meta` object of a JSON object, created when absent.
 fn meta(value: &mut Value) -> Option<&mut serde_json::Map<String, Value>> {
@@ -55,7 +62,7 @@ struct Answer {
 /// The resource listing entry of the view.
 pub(super) fn listing() -> Value {
     json!({"uri":URI,"name":"Storefront parts","mimeType":MIME,
-        "description":"Product cards and the buy box from the shop's storefront kit."})
+        "description":"Product cards, the buy box and the cart summary from the shop's storefront kit."})
 }
 
 /// The view document: the built bundle in a self-contained page, or `None` before a frontend build.
@@ -143,6 +150,17 @@ pub(super) fn payload(
                 json!({"part":"product-card","locale":locale,"items":cards,"links":links})
             })
         }
+        "cart.create" | "cart.quote" | "cart.replace" => {
+            let quote: storefront_islands::Quote = serde_json::from_value(answer.clone()).ok()?;
+            let view = storefront_islands::cart_view(&quote, locale, origin)?;
+            // Lines open their product page; changing the cart stays with the agent's tools.
+            let links = view
+                .lines
+                .iter()
+                .filter_map(|line| link(&line.id).map(|url| (line.id.clone(), json!(url))))
+                .collect::<serde_json::Map<_, _>>();
+            Some(json!({"part":"cart-summary","locale":view.locale,"props":view,"links":links}))
+        }
         _ => None,
     }
 }
@@ -157,13 +175,13 @@ mod tests {
     }
 
     #[test]
-    fn only_commerce_reads_link_the_view() {
+    fn commerce_reads_and_carts_link_the_view() {
         let mut tool = json!({"name":"catalog.detail"});
         link("catalog.detail", &mut tool);
         assert_eq!(tool["_meta"]["ui"]["resourceUri"], URI);
         assert_eq!(tool["_meta"]["openai/outputTemplate"], URI);
-        let mut other = json!({"name":"cart.add"});
-        link("cart.add", &mut other);
+        let mut other = json!({"name":"checkout.complete"});
+        link("checkout.complete", &mut other);
         assert!(other.get("_meta").is_none());
     }
 
@@ -205,6 +223,19 @@ mod tests {
             .is_none()
         );
         assert!(payload("cart.quote", &detail(), "en-GB", "s", origin).is_none());
+        let cart = json!({"locale":"de-DE","lineItems":[{"id":"coat","label":"Coat","quantity":1,
+            "price":{"unitPrice":249.0,"totalPrice":249.0}}],
+            "price":{"currency":"EUR","totalPrice":249.0,"taxStatus":"gross"}});
+        for tool in ["cart.create", "cart.quote", "cart.replace"] {
+            let summary = payload(tool, &cart, "en-GB", "s", origin).unwrap();
+            assert_eq!(summary["part"], "cart-summary");
+            assert_eq!(summary["locale"], "de-DE");
+            assert_eq!(summary["props"]["lines"][0]["total"], 249.0);
+            assert_eq!(
+                summary["links"]["coat"],
+                "https://shop.example/products/coat?shop=s"
+            );
+        }
     }
 
     #[test]
