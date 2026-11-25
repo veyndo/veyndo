@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM merchant_handoffs h USING user_sessions s WHERE h.digest=$1 AND h.expires_at>now() AND h.session_digest=s.digest AND s.expires_at>now() RETURNING h.user_id,h.tenant",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_handoffs",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_handoffs",
+            "name": "tenant"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "969f4c02eda24580618ac6b1bccf50528f5f58c644748da2d927fcbd5bd43c0d"
+}

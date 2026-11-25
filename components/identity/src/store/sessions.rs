@@ -1,4 +1,4 @@
-//! Personal merchant sessions: only hashed opaque tokens persist, and a second factor is honoured before one is issued.
+//! Personal merchant sessions: only hashed opaque tokens persist, a second factor is honoured before one is issued, and sessions are listed and revoked here.
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::host_names::links;
@@ -133,4 +133,78 @@ pub async fn challenge_tx(
     Ok(Some(
         json!({"mfaRequired":true,"challengeToken":token,"expiresIn":300}),
     ))
+}
+
+/// One live personal session of a person, as their session list shows it.
+pub struct ActiveSession {
+    pub digest: String,
+    pub created: String,
+    pub expires: String,
+}
+
+/// The person's live sessions, newest first (at most 100).
+pub async fn active_sessions(a: &State, user: &str) -> Result<Vec<ActiveSession>> {
+    Ok(sqlx::query_as!(
+        ActiveSession,
+        r#"SELECT digest,created_at::text AS "created!",expires_at::text AS "expires!" FROM user_sessions WHERE user_id=$1 AND expires_at>now() ORDER BY created_at DESC LIMIT 100"#,
+        user
+    )
+    .fetch_all(&a.db)
+    .await?)
+}
+
+/// Ends one session of the person; a digest of someone else's session changes nothing.
+pub async fn revoke(a: &State, user: &str, digest: &str) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM user_sessions WHERE user_id=$1 AND digest=$2",
+        user,
+        digest
+    )
+    .execute(&a.db)
+    .await?;
+    Ok(())
+}
+
+/// Ends the session behind a token digest (sign-out).
+pub async fn end(a: &State, digest: &str) -> Result<()> {
+    sqlx::query!("DELETE FROM user_sessions WHERE digest=$1", digest)
+        .execute(&a.db)
+        .await?;
+    Ok(())
+}
+
+/// Whether the digest names a live session of the user (no tenant scope; callers run it as system work).
+pub async fn live(a: &State, digest: &str, user: &str) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>now()) AS "live!""#,
+        digest,
+        user
+    )
+    .fetch_one(&a.db)
+    .await?)
+}
+
+/// Deletes every session, handoff ticket and pending sign-in challenge of the user (after a credential change).
+pub async fn revoke_all(tx: &mut sqlx::PgConnection, user: &str) -> Result<()> {
+    sqlx::query!("DELETE FROM user_sessions WHERE user_id=$1", user)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query!("DELETE FROM merchant_handoffs WHERE user_id=$1", user)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query!("DELETE FROM merchant_mfa_challenges WHERE user_id=$1", user)
+        .execute(&mut *tx)
+        .await?;
+    Ok(())
+}
+
+/// Deletes the user's sessions and handoff tickets (password recovery keeps pending sign-in challenges).
+pub async fn revoke_sessions_and_handoffs(tx: &mut sqlx::PgConnection, user: &str) -> Result<()> {
+    sqlx::query!("DELETE FROM user_sessions WHERE user_id=$1", user)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query!("DELETE FROM merchant_handoffs WHERE user_id=$1", user)
+        .execute(&mut *tx)
+        .await?;
+    Ok(())
 }

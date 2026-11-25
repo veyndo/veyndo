@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM merchant_mfa_challenges WHERE user_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "46d2ed3c4d314739b1ac14ce4f2026a064c91f22f940b9f2f1e851fca19394d1"
+}

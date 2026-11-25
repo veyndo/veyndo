@@ -1,4 +1,4 @@
-//! Trusted identity broker assertions: the signature binds route, audience, expiry and a one-use nonce.
+//! Trusted identity broker: assertions (signature binds route, audience, expiry and a one-use nonce) and the account recovery, linking and workspace reads they unlock.
 use crate::domain::clock::now;
 use crate::domain::credentials::email;
 use crate::store::sessions::trusted_session_tx;
@@ -119,4 +119,136 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
         ));
     }
     Ok(claims)
+}
+
+/// The account a broker-verified identity may recover in a shop, locked for the credential change.
+pub struct Recoverable {
+    pub id: String,
+    pub password_hash: String,
+    pub password_initialized: bool,
+    pub credential_revision: i64,
+}
+
+/// The account linked to the broker subject with this email and an active membership in the shop, locked.
+pub async fn recoverable(
+    tx: &mut sqlx::PgConnection,
+    (issuer, subject): (&str, &str),
+    email: &str,
+    shop: &str,
+) -> Result<Option<Recoverable>> {
+    Ok(sqlx::query_as!(
+        Recoverable,
+        "SELECT u.id,u.password_hash,u.password_initialized,u.credential_revision FROM merchant_users u JOIN merchant_identities i ON i.user_id=u.id JOIN memberships m ON m.user_id=u.id WHERE i.issuer=$1 AND i.subject=$2 AND u.email=$3 AND m.tenant=$4 AND m.active FOR UPDATE OF u",
+        issuer,
+        subject,
+        email,
+        shop
+    )
+    .fetch_optional(tx)
+    .await?)
+}
+
+/// Stores a new password hash, marks the password set and advances the credential revision.
+pub async fn set_password(
+    tx: &mut sqlx::PgConnection,
+    user: &str,
+    password_hash: String,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE merchant_users SET password_hash=$1,password_initialized=true,credential_revision=credential_revision+1 WHERE id=$2",
+        password_hash,
+        user
+    )
+    .execute(tx)
+    .await?;
+    Ok(())
+}
+
+/// The account of an email and its credential revision, locked.
+pub struct Account {
+    pub id: String,
+    pub credential_revision: i64,
+}
+
+/// Locks the account behind an email.
+pub async fn lock_by_email(tx: &mut sqlx::PgConnection, email: &str) -> Result<Option<Account>> {
+    Ok(sqlx::query_as!(
+        Account,
+        "SELECT id,credential_revision FROM merchant_users WHERE email=$1 FOR UPDATE",
+        email
+    )
+    .fetch_optional(tx)
+    .await?)
+}
+
+/// Whether the broker subject is linked to exactly this user.
+pub async fn linked(
+    tx: &mut sqlx::PgConnection,
+    (issuer, subject): (&str, &str),
+    user: &str,
+) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM merchant_identities WHERE issuer=$1 AND subject=$2 AND user_id=$3) AS "linked!""#,
+        issuer,
+        subject,
+        user
+    )
+    .fetch_one(tx)
+    .await?)
+}
+
+/// Records that the broker verified the account's email now.
+pub async fn mark_verified(tx: &mut sqlx::PgConnection, user: &str) -> Result<()> {
+    sqlx::query!(
+        "UPDATE merchant_users SET email_verified_at=now() WHERE id=$1",
+        user
+    )
+    .execute(tx)
+    .await?;
+    Ok(())
+}
+
+/// Records the first broker verification of the account's email; a later one keeps the first time.
+pub async fn mark_verified_once(a: &State, user: &str) -> Result<()> {
+    sqlx::query!(
+        "UPDATE merchant_users SET email_verified_at=COALESCE(email_verified_at,now()) WHERE id=$1",
+        user
+    )
+    .execute(&a.db)
+    .await?;
+    Ok(())
+}
+
+/// An active shop the user is an active member of.
+pub struct Workspace {
+    pub id: String,
+    pub name: String,
+}
+
+/// The user's active shops by name (at most 100).
+pub async fn workspaces(tx: &mut sqlx::PgConnection, user: &str) -> Result<Vec<Workspace>> {
+    Ok(sqlx::query_as!(
+        Workspace,
+        "SELECT t.id,t.name FROM membership_grants m JOIN tenants t ON t.id=m.tenant WHERE m.user_id=$1 AND m.active AND t.status='active' ORDER BY t.name LIMIT 100",
+        user
+    )
+    .fetch_all(tx)
+    .await?)
+}
+
+/// The account behind an email and its first active shop.
+pub struct FirstWorkspace {
+    pub id: String,
+    pub tenant: String,
+}
+
+/// The account of the email with its first active membership in an active shop.
+pub async fn first_workspace(a: &State, email: &str) -> Result<Option<FirstWorkspace>> {
+    Ok(sqlx::query_as!(
+        FirstWorkspace,
+        r#"SELECT u.id,m.tenant AS "tenant!" FROM merchant_users u JOIN membership_grants m ON m.user_id=u.id AND m.active JOIN tenants t ON t.id=m.tenant AND t.status='active' WHERE u.email=$1 ORDER BY m.tenant LIMIT 1"#,
+        email
+    )
+    .fetch_optional(&a.db)
+    .await?)
 }

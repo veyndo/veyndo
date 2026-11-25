@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT revision,builtin FROM workspace_roles WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "builtin",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "builtin"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "07c37f38e7b7e9c154fefdbea27733a14ccf0e2730f69b71d24e27422fe2f6a3"
+}

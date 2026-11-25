@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,data,builtin,revision FROM workspace_roles WHERE tenant=$1 ORDER BY builtin DESC,id LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "builtin",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "builtin"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspace_roles",
+            "name": "revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a84079a391f45c1914f2a6865d6df854679600a0afec0e7b54258eb746899dc0"
+}

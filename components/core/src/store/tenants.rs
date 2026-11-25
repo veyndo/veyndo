@@ -71,3 +71,13 @@ pub async fn agents_stopped<'e>(
 ) -> Result<bool> {
     Ok(sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(tenant).fetch_one(db).await?)
 }
+
+/// Every shop's ID and name, by name (the instance administrator's workspace list).
+pub async fn all<'e>(db: impl Executor<'e, Database = Postgres>) -> Result<Vec<(String, String)>> {
+    Ok(sqlx::query!("SELECT id,name FROM tenants ORDER BY name")
+        .fetch_all(db)
+        .await?
+        .into_iter()
+        .map(|row| (row.id, row.name))
+        .collect())
+}

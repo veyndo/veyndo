@@ -43,7 +43,7 @@ pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Resu
         ));
     }
     accounts::link(&mut tx, (issuer, subject), &user).await?;
-    let first = accounts::first_shop(&mut tx, &user).await?;
+    let first = accounts::first_shop(&mut *tx, &user).await?;
     if !super::mfa::trusted_session_tx(&mut tx, &user, c["sessionToken"].as_str()).await?
         && let Some(first) = first
         && let Some(challenge) = super::mfa::challenge_tx(&mut tx, &user, &first).await?

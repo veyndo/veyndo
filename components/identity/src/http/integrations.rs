@@ -1,11 +1,11 @@
 //! Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership.
 use crate::domain::permissions::planning_scope;
+use crate::store::integrations::{self, NewKey};
 use crate::types::envelopes::Integration;
 use crate::{merchant, permit, validate_permissions};
 use axum::Json;
 use axum::extract::{Path, State};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
 use veyndo_kernel::verified_kernel;
@@ -16,9 +16,9 @@ pub async fn integration_list(
 ) -> Result<Json<Value>> {
     let t = merchant(&h)?;
     permit(&h, "users")?;
-    let rows=sqlx::query("SELECT id,name,user_id,app_id,permissions,agent_budget,agent_tokens_allocated,agent_cost_allocated,created_at::text AS created,CASE WHEN isfinite(expires_at) THEN expires_at::text ELSE NULL END AS expires FROM integration_keys WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(t).fetch_all(&a.db).await?;
+    let rows = integrations::list(&a, &t).await?;
     Ok(Json(
-        json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"name":r.get::<String,_>("name"),"userId":r.get::<String,_>("user_id"),"appId":r.get::<Option<String>,_>("app_id"),"agentBudget":r.get::<Option<Value>,_>("agent_budget"),"agentUsage":{"tokensAllocated":r.get::<i64,_>("agent_tokens_allocated"),"costMicrosAllocated":r.get::<i64,_>("agent_cost_allocated")},"permissions":r.get::<Value,_>("permissions"),"createdAt":r.get::<String,_>("created"),"expiresAt":r.get::<Option<String>,_>("expires")})).collect::<Vec<_>>()}),
+        json!({"elements":rows.iter().map(|r|json!({"id":r.id,"name":r.name,"userId":r.user_id,"appId":r.app_id,"agentBudget":r.agent_budget,"agentUsage":{"tokensAllocated":r.agent_tokens_allocated,"costMicrosAllocated":r.agent_cost_allocated},"permissions":r.permissions,"createdAt":r.created,"expiresAt":r.expires})).collect::<Vec<_>>()}),
     ))
 }
 pub async fn integration_create(
@@ -77,18 +77,27 @@ pub async fn integration_create(
         .ok_or(bad("Integration expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;
     veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
-    let count: i64 = sqlx::query_scalar(
-        "SELECT count(*) FROM integration_keys WHERE tenant=$1 AND expires_at>now()",
-    )
-    .bind(&t)
-    .fetch_one(&mut *tx)
-    .await?;
+    let count = integrations::active_count(&mut tx, &t).await?;
     if count >= 32 {
         return Err(bad("Maximum 32 active integration keys"));
     }
     let id = uid();
     let key = format!("rac_{}{}", uid(), uid());
-    sqlx::query("INSERT INTO integration_keys(id,tenant,user_id,digest,name,permissions,expires_at,agent_budget) VALUES($1,$2,$3,$4,$5,$6,CASE WHEN $8 THEN 'infinity'::timestamptz ELSE now()+$7*interval '1 day' END,$9)").bind(&id).bind(&t).bind(header(&h,"x-rac-user").unwrap()).bind(hash(&key)).bind(name).bind(permissions).bind(days as i32).bind(input.non_expiring).bind(input.agent_budget.as_ref().map(|b|json!(b))).execute(&mut *tx).await?;
+    integrations::create(
+        &mut tx,
+        NewKey {
+            id: &id,
+            tenant: &t,
+            user: header(&h, "x-rac-user").unwrap(),
+            digest: &hash(&key),
+            name,
+            permissions: &permissions,
+            days: days as i32,
+            non_expiring: input.non_expiring,
+            agent_budget: input.agent_budget.as_ref().map(|b| json!(b)),
+        },
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(json!({"id":id,"key":key,"workspace":t})))
 }
@@ -100,12 +109,7 @@ pub async fn integration_revoke(
     let t = merchant(&h)?;
     permit(&h, "users")?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("UPDATE integration_keys SET expires_at=least(expires_at,now()) WHERE tenant=$1 AND id=$2 AND agent_budget IS NOT NULL").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("DELETE FROM integration_keys WHERE tenant=$1 AND id=$2 AND agent_budget IS NULL")
-        .bind(&t)
-        .bind(&id)
-        .execute(&mut *tx)
-        .await?;
+    integrations::revoke(&mut tx, &t, &id).await?;
     tx.commit().await?;
     Ok(Json(json!({"revoked":true})))
 }

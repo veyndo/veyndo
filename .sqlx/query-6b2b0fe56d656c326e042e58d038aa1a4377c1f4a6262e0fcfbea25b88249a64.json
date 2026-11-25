@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,credential_revision FROM merchant_users WHERE email=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "credential_revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "credential_revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "6b2b0fe56d656c326e042e58d038aa1a4377c1f4a6262e0fcfbea25b88249a64"
+}

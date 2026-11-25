@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT digest,created_at::text AS \"created!\",expires_at::text AS \"expires!\" FROM user_sessions WHERE user_id=$1 AND expires_at>now() ORDER BY created_at DESC LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_sessions",
+            "name": "digest"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "created!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "expires!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "2e714d6b8e414ff6748c6131851f3e545624dcc7388b6277f9cac5a00c0104de"
+}

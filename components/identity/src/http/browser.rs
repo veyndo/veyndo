@@ -257,9 +257,15 @@ async fn bind_session(
     if session["user"]["id"].as_str().is_none() {
         return bad("Invalid browser authentication response").into_response();
     }
-    let valid=veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System,
-        sqlx::query_scalar::<_,bool>("SELECT EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>now())")
-            .bind(hash(&candidate)).bind(session["user"]["id"].as_str()).fetch_one(&a.db)).await;
+    let user = session["user"]["id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    let valid = veyndo_runtime::tenant_scope::scoped(
+        veyndo_runtime::tenant_scope::Scope::System,
+        crate::store::sessions::live(a, &hash(&candidate), &user),
+    )
+    .await;
     if !matches!(valid, Ok(true)) {
         return Error(
             StatusCode::UNAUTHORIZED,

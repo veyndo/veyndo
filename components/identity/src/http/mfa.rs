@@ -2,12 +2,12 @@
 use crate::domain::clock::now;
 use crate::domain::credentials::{password, verify_password};
 use crate::domain::totp;
-use crate::store::sessions::{SessionProof, issue_verified_tx};
+use crate::store::sessions::{self, SessionProof, issue_verified_tx};
+use crate::store::{merchant_accounts, mfa};
 use axum::Json;
 use axum::extract::State;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::settings;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
@@ -15,12 +15,7 @@ use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash
 
 /// The live workspace behind a sandbox; account security is managed only where it is absent.
 async fn parent(a: &veyndo_core::State, t: &str) -> Result<Option<String>> {
-    Ok(
-        sqlx::query_scalar("SELECT live_tenant FROM shop_environments WHERE tenant=$1")
-            .bind(t)
-            .fetch_optional(&a.db)
-            .await?,
-    )
+    mfa::live_shop(a, t).await
 }
 pub async fn personal<'a>(a: &veyndo_core::State, h: &'a RequestContext) -> Result<&'a str> {
     let user = header(h, "x-rac-user")
@@ -29,8 +24,11 @@ pub async fn personal<'a>(a: &veyndo_core::State, h: &'a RequestContext) -> Resu
     let token = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))
         .ok_or(bad("Personal session required"))?;
-    let personal:bool=veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System,
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>now())").bind(hash(token)).bind(user).fetch_one(&a.db)).await?;
+    let personal = veyndo_runtime::tenant_scope::scoped(
+        veyndo_runtime::tenant_scope::Scope::System,
+        sessions::live(a, &hash(token), user),
+    )
+    .await?;
     if !personal {
         return Err(bad("Personal session required"));
     }
@@ -49,19 +47,15 @@ fn invalid() -> Error {
     )
 }
 pub async fn status(State(a): State<veyndo_core::State>, h: RequestContext) -> Result<Json<Value>> {
-    let row=sqlx::query("SELECT enabled,revision,jsonb_array_length(recovery_digests) AS remaining FROM merchant_mfa WHERE user_id=$1").bind(personal(&a,&h).await?).fetch_optional(&a.db).await?;
-    Ok(Json(row.map(|r|json!({"enabled":r.get::<bool,_>("enabled"),"revision":r.get::<i64,_>("revision"),"recoveryCodesRemaining":r.get::<i32,_>("remaining")})).unwrap_or(json!({"enabled":false,"revision":0,"recoveryCodesRemaining":0}))))
+    let row = mfa::status(&a, personal(&a, &h).await?).await?;
+    Ok(Json(row.map(|r|json!({"enabled":r.enabled,"revision":r.revision,"recoveryCodesRemaining":r.remaining})).unwrap_or(json!({"enabled":false,"revision":0,"recoveryCodesRemaining":0}))))
 }
 async fn password_tx(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     user: &str,
     v: &Value,
 ) -> Result<()> {
-    let saved: String =
-        sqlx::query_scalar("SELECT password_hash FROM merchant_users WHERE id=$1 FOR UPDATE")
-            .bind(user)
-            .fetch_one(&mut **tx)
-            .await?;
+    let saved = merchant_accounts::password_hash_for_update(tx, user).await?;
     if !verify_password(password(v)?, saved).await? {
         return Err(invalid());
     }
@@ -89,11 +83,10 @@ pub async fn enroll(
     let cipher = settings::seal(&format!("mfa:{user}"), &secret).map_err(|_| unavailable())?;
     let mut tx = a.db.begin().await?;
     password_tx(&mut tx, user, &v).await?;
-    let row=sqlx::query("INSERT INTO merchant_mfa(user_id,pending_ciphertext,pending_expires_at) VALUES($1,$2,now()+interval '10 minutes') ON CONFLICT(user_id) DO UPDATE SET pending_ciphertext=EXCLUDED.pending_ciphertext,pending_expires_at=EXCLUDED.pending_expires_at WHERE NOT merchant_mfa.enabled RETURNING revision").bind(user).bind(cipher).fetch_optional(&mut *tx).await?.ok_or(conflict("MFA is already enabled"))?;
-    let email: String = sqlx::query_scalar("SELECT email FROM merchant_users WHERE id=$1")
-        .bind(user)
-        .fetch_one(&mut *tx)
-        .await?;
+    let revision = mfa::begin_enrolment(&mut tx, user, &cipher)
+        .await?
+        .ok_or(conflict("MFA is already enabled"))?;
+    let email = merchant_accounts::email(&mut tx, user).await?;
     tx.commit().await?;
     let mut url = reqwest::Url::parse("otpauth://totp/Veyndo").unwrap();
     url.set_path(&format!("Veyndo:{email}"));
@@ -104,7 +97,7 @@ pub async fn enroll(
         .append_pair("digits", "6")
         .append_pair("period", "30");
     Ok(Json(
-        json!({"secret":secret,"uri":url.to_string(),"revision":row.get::<i64,_>("revision"),"expiresIn":600}),
+        json!({"secret":secret,"uri":url.to_string(),"revision":revision,"expiresIn":600}),
     ))
 }
 /// One account security step: the expected revision, a one-time or recovery code, or a sign-in challenge.
@@ -138,23 +131,23 @@ pub async fn confirm(
     }
     let mut tx = a.db.begin().await?;
     password_tx(&mut tx, user, &v).await?;
-    let row=sqlx::query("SELECT pending_ciphertext,revision FROM merchant_mfa WHERE user_id=$1 AND NOT enabled AND pending_expires_at>now() FOR UPDATE").bind(user).fetch_optional(&mut *tx).await?.ok_or(invalid())?;
+    let row = mfa::lock_pending(&mut tx, user).await?.ok_or(invalid())?;
     let input: MfaStep = view(&v);
-    if input.revision != Some(row.get("revision")) {
+    if input.revision != Some(row.revision) {
         return Err(conflict("Security settings changed; reload"));
     }
-    let cipher: String = row.get("pending_ciphertext");
+    let cipher = row.pending_ciphertext;
     let secret = settings::open(&format!("mfa:{user}"), &cipher).map_err(|_| unavailable())?;
     let step = totp::matched(&secret, input.code(), now(), -1).ok_or(invalid())?;
     let codes: Vec<String> = (0..8).map(|_| uid()).collect();
     let digests: Vec<String> = codes.iter().map(|c| hash(c)).collect();
-    sqlx::query("UPDATE merchant_mfa SET ciphertext=$2,enabled=true,pending_ciphertext=NULL,pending_expires_at=NULL,recovery_digests=$3,last_step=$4,revision=revision+1,updated_at=now() WHERE user_id=$1").bind(user).bind(cipher).bind(json!(digests)).bind(step).execute(&mut *tx).await?;
-    revoke_tx(&mut tx, user).await?;
+    mfa::enable(&mut tx, user, &cipher, &json!(digests), step).await?;
+    sessions::revoke_all(&mut tx, user).await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &tenant(&h)?,
         "account.security.updated",
-        &json!({"userId":user,"action":"mfa.enabled","revision":row.get::<i64,_>("revision")+1}),
+        &json!({"userId":user,"action":"mfa.enabled","revision":row.revision+1}),
     )
     .await?;
     let session =
@@ -164,43 +157,25 @@ pub async fn confirm(
         json!({"enabled":true,"recoveryCodes":codes,"session":session}),
     ))
 }
-async fn revoke_tx(tx: &mut sqlx::Transaction<'_, sqlx::Postgres>, user: &str) -> Result<()> {
-    for sql in [
-        "DELETE FROM user_sessions WHERE user_id=$1",
-        "DELETE FROM merchant_handoffs WHERE user_id=$1",
-        "DELETE FROM merchant_mfa_challenges WHERE user_id=$1",
-    ] {
-        sqlx::query(sql).bind(user).execute(&mut **tx).await?;
-    }
-    Ok(())
-}
 async fn consume_code(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     user: &str,
     code: &str,
 ) -> Result<()> {
-    let row=sqlx::query("SELECT ciphertext,last_step,recovery_digests FROM merchant_mfa WHERE user_id=$1 AND enabled FOR UPDATE").bind(user).fetch_optional(&mut **tx).await?.ok_or(invalid())?;
+    let row = mfa::lock_enabled(tx, user).await?.ok_or(invalid())?;
     let mut codes: Vec<String> =
-        serde_json::from_value(row.get("recovery_digests")).map_err(|_| invalid())?;
+        serde_json::from_value(row.recovery_digests).map_err(|_| invalid())?;
     if code.len() == 32
         && let Some(i) = codes.iter().position(|digest| digest == &hash(code))
     {
         codes.remove(i);
-        sqlx::query("UPDATE merchant_mfa SET recovery_digests=$2 WHERE user_id=$1")
-            .bind(user)
-            .bind(json!(codes))
-            .execute(&mut **tx)
-            .await?;
+        mfa::set_recovery(tx, user, &json!(codes)).await?;
         return Ok(());
     }
-    let secret = settings::open(&format!("mfa:{user}"), &row.get::<String, _>("ciphertext"))
-        .map_err(|_| unavailable())?;
-    let step = totp::matched(&secret, code, now(), row.get("last_step")).ok_or(invalid())?;
-    sqlx::query("UPDATE merchant_mfa SET last_step=$2 WHERE user_id=$1")
-        .bind(user)
-        .bind(step)
-        .execute(&mut **tx)
-        .await?;
+    let secret =
+        settings::open(&format!("mfa:{user}"), &row.ciphertext).map_err(|_| unavailable())?;
+    let step = totp::matched(&secret, code, now(), row.last_step).ok_or(invalid())?;
+    mfa::set_last_step(tx, user, step).await?;
     Ok(())
 }
 pub async fn disable(
@@ -218,11 +193,16 @@ pub async fn disable(
     password_tx(&mut tx, user, &v).await?;
     let input: MfaStep = view(&v);
     consume_code(&mut tx, user, input.code()).await?;
-    let changed=sqlx::query("UPDATE merchant_mfa SET enabled=false,ciphertext=NULL,recovery_digests='[]',pending_ciphertext=NULL,pending_expires_at=NULL,revision=revision+1,updated_at=now() WHERE user_id=$1 AND revision=$2").bind(user).bind(input.revision.ok_or(bad("Revision required"))?).execute(&mut *tx).await?.rows_affected();
+    let changed = mfa::disable(
+        &mut tx,
+        user,
+        input.revision.ok_or(bad("Revision required"))?,
+    )
+    .await?;
     if changed != 1 {
         return Err(conflict("Security settings changed; reload"));
     }
-    revoke_tx(&mut tx, user).await?;
+    sessions::revoke_all(&mut tx, user).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &tenant(&h)?, "account.security.updated", &json!({"userId":user,"action":"mfa.disabled","revision":input.revision.unwrap_or_default()+1})).await?;
     tx.commit().await?;
     Ok(Json(json!({"enabled":false,"signInRequired":true})))
@@ -237,23 +217,19 @@ pub async fn verify(
         .as_deref()
         .filter(|s| s.len() == 64)
         .ok_or(invalid())?;
-    let row=sqlx::query("UPDATE merchant_mfa_challenges SET attempts=attempts+1 WHERE digest=$1 AND expires_at>now() AND attempts<5 RETURNING user_id,tenant").bind(hash(token)).fetch_optional(&a.db).await?.ok_or(invalid())?;
-    let user: String = row.get("user_id");
-    let t: String = row.get("tenant");
+    let row = mfa::attempt_challenge(&a, &hash(token))
+        .await?
+        .ok_or(invalid())?;
+    let user = row.user_id;
+    let t = row.tenant;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT id FROM merchant_users WHERE id=$1 FOR UPDATE")
-        .bind(&user)
-        .fetch_one(&mut *tx)
-        .await?;
-    let valid:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM merchant_mfa_challenges WHERE digest=$1 AND expires_at>now()) AND EXISTS(SELECT 1 FROM membership_grants WHERE user_id=$2 AND tenant=$3 AND active)").bind(hash(token)).bind(&user).bind(&t).fetch_one(&mut *tx).await?;
+    merchant_accounts::lock(&mut tx, &user).await?;
+    let valid = mfa::challenge_valid(&mut tx, &hash(token), &user, &t).await?;
     if !valid {
         return Err(invalid());
     }
     consume_code(&mut tx, &user, input.code()).await?;
-    sqlx::query("DELETE FROM merchant_mfa_challenges WHERE digest=$1")
-        .bind(hash(token))
-        .execute(&mut *tx)
-        .await?;
+    mfa::delete_challenge(&mut tx, &hash(token)).await?;
     let session = issue_verified_tx(&mut tx, &user, &t, SessionProof::SecondFactor).await?;
     tx.commit().await?;
     Ok(Json(session))

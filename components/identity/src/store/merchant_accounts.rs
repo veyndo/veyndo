@@ -1,4 +1,5 @@
-//! Merchant account creation for self-registration and the trusted identity broker, and the daily allowance of broker inference.
+//! Merchant accounts: creation for self-registration, invitations and the trusted identity broker, password lookups, the account lock and the daily allowance of broker inference.
+use sqlx::{Executor, Postgres};
 use veyndo_core::{Result, State, uid};
 
 /// Creates a personal merchant account; false when the email is already registered.
@@ -54,12 +55,15 @@ pub async fn link(
 }
 
 /// The first shop the user holds an active grant in.
-pub async fn first_shop(tx: &mut sqlx::PgConnection, user: &str) -> Result<Option<String>> {
+pub async fn first_shop<'e>(
+    db: impl Executor<'e, Database = Postgres>,
+    user: &str,
+) -> Result<Option<String>> {
     Ok(sqlx::query_scalar(
         "SELECT tenant FROM membership_grants WHERE user_id=$1 AND active ORDER BY tenant LIMIT 1",
     )
     .bind(user)
-    .fetch_optional(tx)
+    .fetch_optional(db)
     .await?)
 }
 
@@ -77,4 +81,70 @@ pub async fn ownership(
 /// Counts one broker inference call of the email today and returns the day's count.
 pub async fn count_inference(a: &State, email: &str) -> Result<i32> {
     Ok(sqlx::query_scalar("INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls").bind(email).fetch_one(&a.db).await?)
+}
+
+/// The id and password hash of the account behind an email.
+pub struct Credential {
+    pub id: String,
+    pub password_hash: String,
+}
+
+/// The account behind an email, for a password check.
+pub async fn by_email<'e>(
+    db: impl Executor<'e, Database = Postgres>,
+    email: &str,
+) -> Result<Option<Credential>> {
+    Ok(sqlx::query_as!(
+        Credential,
+        "SELECT id,password_hash FROM merchant_users WHERE email=$1",
+        email
+    )
+    .fetch_optional(db)
+    .await?)
+}
+
+/// Creates an account with a password; a duplicate email fails the statement.
+pub async fn create(
+    tx: &mut sqlx::PgConnection,
+    user: &str,
+    (email, name): (&str, &str),
+    password_hash: String,
+) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO merchant_users(id,email,name,password_hash) VALUES($1,$2,$3,$4)",
+        user,
+        email,
+        name,
+        password_hash
+    )
+    .execute(tx)
+    .await?;
+    Ok(())
+}
+
+/// Locks the account row until the transaction ends; serialises session issue and credential changes of one person.
+pub async fn lock(tx: &mut sqlx::PgConnection, user: &str) -> Result<()> {
+    sqlx::query_scalar!("SELECT id FROM merchant_users WHERE id=$1 FOR UPDATE", user)
+        .fetch_one(tx)
+        .await?;
+    Ok(())
+}
+
+/// The password hash of the account, locked for a credential change.
+pub async fn password_hash_for_update(tx: &mut sqlx::PgConnection, user: &str) -> Result<String> {
+    Ok(sqlx::query_scalar!(
+        "SELECT password_hash FROM merchant_users WHERE id=$1 FOR UPDATE",
+        user
+    )
+    .fetch_one(tx)
+    .await?)
+}
+
+/// The email of the account.
+pub async fn email(tx: &mut sqlx::PgConnection, user: &str) -> Result<String> {
+    Ok(
+        sqlx::query_scalar!("SELECT email FROM merchant_users WHERE id=$1", user)
+            .fetch_one(tx)
+            .await?,
+    )
 }

@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,tenant,email,role,created_by FROM user_invites WHERE digest=$1 AND redeemed_at IS NULL AND expires_at>now() FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_invites",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_invites",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_invites",
+            "name": "email"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_invites",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_invites",
+            "name": "created_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d9394434cb7a03b1a6a8ad642c7e72574099b8570acbb7a086f4a869527d9fd0"
+}

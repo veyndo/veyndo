@@ -1,4 +1,5 @@
 //! Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing.
+use crate::store::attempts;
 use axum::{
     body::Body,
     extract::{ConnectInfo, Request},
@@ -47,8 +48,7 @@ fn peer(request: &Request) -> String {
 }
 /// Counts one attempt in the bucket; a full or blocked bucket refuses it.
 async fn reserve(a: &State, key: &str, limit: i32) -> Result<()> {
-    let allowed:Option<i32>=sqlx::query_scalar("INSERT INTO auth_attempt_buckets(key,attempts) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN 1 ELSE auth_attempt_buckets.attempts+1 END,window_at=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN now() ELSE auth_attempt_buckets.window_at END,updated_at=now() WHERE auth_attempt_buckets.blocked_until<=now() AND (auth_attempt_buckets.window_at<now()-interval '1 minute' OR auth_attempt_buckets.attempts<$2) RETURNING attempts")
-        .bind(key).bind(limit).fetch_optional(&a.db).await?;
+    let allowed = attempts::reserve(a, key, limit).await?;
     if allowed.is_none() {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -111,7 +111,7 @@ pub async fn run(a: &State, request: Request, next: Next) -> Response {
     if response.status() == StatusCode::UNAUTHORIZED
         && let Some(key) = key
     {
-        let _=scoped(Scope::System,sqlx::query("UPDATE auth_attempt_buckets SET blocked_until=now()+least(60,power(2,least(attempts,6))::int)*interval '1 second' WHERE key=$1 AND attempts>=5").bind(key).execute(&a.db)).await;
+        let _ = scoped(Scope::System, attempts::block(a, &key)).await;
     }
     response
 }
