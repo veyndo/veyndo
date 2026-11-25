@@ -5,3 +5,7 @@ B2BWorkspace composes company editing, UnitEditor and membership management; Uni
 ## Organization references
 
 `reference.ts` creates native-valid company and purchasing-unit IDs. The API requires a lowercase first letter and no more than 32 characters; never use a bare UUID, whose first character may be a digit. The creation regression exercises both real editor request paths with a digit-led UUID.
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`B2BRoute.tsx`](B2BRoute.tsx) adapt the Studio context to the area's views.

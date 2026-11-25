@@ -3,6 +3,7 @@ import CoreExtensions, {
   type CoreExtensionData,
 } from "../../shared/apps/CoreExtensions";
 import { AppSurfaceSlot } from "../../shared/apps/AppSurfaces";
+import StudioSlot from "../shell/registry/StudioSlot";
 import type { RequestFn } from "../shell/studio-types";
 export default function ProductEditorExtras({
   extensions,
@@ -23,7 +24,7 @@ export default function ProductEditorExtras({
         <CoreExtensions objectId={id} {...extensions} request={request} />
       )}
       {id && tab === "general" && (
-        <AppSurfaceSlot
+        <StudioSlot
           location="admin.product.general"
           context={{ productId: id }}
         />

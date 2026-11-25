@@ -10,6 +10,10 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`PersonalAccountForm.tsx`](PersonalAccountForm.tsx): PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks.
 - [`UsersManager.tsx`](UsersManager.tsx): Users Manager: Personal accounts, memberships, roles, invitations and scoped developer access..
 
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`TeamRoute.tsx`](TeamRoute.tsx) adapt the Studio context to the area's views.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

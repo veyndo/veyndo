@@ -38,7 +38,8 @@ const kitLayers = {
   tokens: [],
   ui: ["tokens"],
   api: [],
-  storefront: ["tokens", "ui", "api"],
+  query: [],
+  storefront: ["tokens", "ui", "api", "query"],
 };
 const kitPackage = (f) =>
   owner(f) === "kit" ? relative(f).split("/")[1] : undefined;
@@ -76,6 +77,10 @@ for (const file of files) {
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
   const links = [];
+  // A Studio extension descriptor registers its views with lazy import(); those
+  // loaders run only when the route opens, so they are not initialisation edges.
+  const registers = path.basename(file) === "studio-extension.ts";
+  let registration = false;
   const add = (spec, runtime) => {
     if (!spec.startsWith(".")) return;
     const target = resolve(file, spec);
@@ -146,7 +151,8 @@ for (const file of files) {
       errors.push(
         `${relative(file)} crosses application boundary via ${relative(target)}`,
       );
-    if (runtime && !target.endsWith(".css")) links.push(target);
+    if (runtime && !target.endsWith(".css") && !registration)
+      links.push(target);
   };
   const visit = (node) => {
     if (
@@ -178,9 +184,11 @@ for (const file of files) {
       node.expression.kind === ts.SyntaxKind.ImportKeyword &&
       node.arguments[0] &&
       ts.isStringLiteral(node.arguments[0])
-    )
+    ) {
+      registration = registers;
       add(node.arguments[0].text, true);
-    else if (
+      registration = false;
+    } else if (
       ts.isImportTypeNode(node) &&
       ts.isLiteralTypeNode(node.argument) &&
       ts.isStringLiteral(node.argument.literal)

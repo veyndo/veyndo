@@ -1,6 +1,6 @@
 /** Order operations and native detail navigation; the shared grid owns only list presentation. */
 import type { GridCriteria } from "../../shared/grid/types";
-import { AppSurfaceSlot } from "../../shared/apps/AppSurfaces";
+import StudioSlot from "../shell/registry/StudioSlot";
 import { useEffect, useState } from "react";
 import { downloadFile } from "../../shared/api/download";
 import OrderCreate from "./OrderCreate";
@@ -83,11 +83,8 @@ export default function OrdersManager({
         />
       ) : selected ? (
         <>
-          <AppSurfaceSlot
-            location="admin.order"
-            context={{ orderId: selected }}
-          />
-          <AppSurfaceSlot
+          <StudioSlot location="admin.order" context={{ orderId: selected }} />
+          <StudioSlot
             location="admin.order.general"
             context={{ orderId: selected }}
           />

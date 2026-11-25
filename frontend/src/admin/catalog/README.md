@@ -58,6 +58,10 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`variant-i18n.ts`](variant-i18n.ts): Guided variant creation and editing vocabulary; content still follows shop language inheritance.
 - [`variant-model.ts`](variant-model.ts): Bounded option combinations and metadata-free child payloads shared by the guided variant creator.
 
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`ProductDataRoute.tsx`](ProductDataRoute.tsx) adapt the Studio context to the area's views.
+
 ## Verification
 
 During development, run affected frontend test suites, `npm run build` and `npm run architecture` from `frontend/`. Complete tests and coverage run daily through the existing workflow. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

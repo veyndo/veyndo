@@ -119,11 +119,9 @@ describe("client", () => {
       operation: "currency.select",
     });
     const protocol = createApiClient(
-      vi
-        .fn()
-        .mockResolvedValue({
-          error: { code: -32601, message: "Unknown tool" },
-        }),
+      vi.fn().mockResolvedValue({
+        error: { code: -32601, message: "Unknown tool" },
+      }),
     );
     const failure = await protocol
       .call("currency.list", null)

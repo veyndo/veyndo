@@ -1234,7 +1234,9 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [frontend/src/admin/agents/AgentsRoute.tsx](../frontend/src/admin/agents/AgentsRoute.tsx) | Agents route: the agents view over the loaded workspace data. |
 | [frontend/src/admin/agents/AgentsView.tsx](../frontend/src/admin/agents/AgentsView.tsx) | AgentsView renders verified shop state and typed user actions. |
+| [frontend/src/admin/agents/studio-extension.ts](../frontend/src/admin/agents/studio-extension.ts) | Studio extension of the agents view. |
 | [frontend/src/admin/apps/AppAccess.tsx](../frontend/src/admin/apps/AppAccess.tsx) | Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. |
 | [frontend/src/admin/apps/AppActivity.tsx](../frontend/src/admin/apps/AppActivity.tsx) | API-backed per-app call metadata, storage budgets and explicitly approved durable replay. |
 | [frontend/src/admin/apps/AppArtwork.tsx](../frontend/src/admin/apps/AppArtwork.tsx) | Passive app artwork with independent failed-image fallbacks and deterministic local category covers. |
@@ -1251,11 +1253,13 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/apps/AppSettings.tsx](../frontend/src/admin/apps/AppSettings.tsx) | Installed settings use the existing encrypted secret owner; secret inputs are write-only and cleared after save. |
 | [frontend/src/admin/apps/AppUpgradeReport.tsx](../frontend/src/admin/apps/AppUpgradeReport.tsx) | Display only native admission metadata; a report is never an installation permission. |
 | [frontend/src/admin/apps/AppsManager.tsx](../frontend/src/admin/apps/AppsManager.tsx) | Installed package workspace: lifecycle, generated entities and shared agent actions. |
+| [frontend/src/admin/apps/AppsRoute.tsx](../frontend/src/admin/apps/AppsRoute.tsx) | Apps route: the app manager for the current stage, with order links. |
 | [frontend/src/admin/apps/ConnectorPanel.tsx](../frontend/src/admin/apps/ConnectorPanel.tsx) | Native app workspace: OAuth, provider settings, durable jobs and private sources. |
 | [frontend/src/admin/apps/IntegrationDirectory.tsx](../frontend/src/admin/apps/IntegrationDirectory.tsx) | Ten explicit service routes reuse native app consent or the documented HTTP setup; no fake connected state. |
 | [frontend/src/admin/apps/PaymentManager.tsx](../frontend/src/admin/apps/PaymentManager.tsx) | Native payment balances and observed financial jobs, shared with the order detail controls. |
 | [frontend/src/admin/apps/ProviderAccount.tsx](../frontend/src/admin/apps/ProviderAccount.tsx) | Shared installed-provider onboarding and channel connection controls for merchant Apps and App Studio. |
 | [frontend/src/admin/apps/ServiceIntegrationPanel.tsx](../frontend/src/admin/apps/ServiceIntegrationPanel.tsx) | Revisioned encrypted connection forms and bounded operations on the existing app action gateway. |
+| [frontend/src/admin/apps/StoryfrontsRoute.tsx](../frontend/src/admin/apps/StoryfrontsRoute.tsx) | Storyfronts route: the Storyfront app's Studio view for the current stage. |
 | [frontend/src/admin/apps/app-settings.css](../frontend/src/admin/apps/app-settings.css) | Installed-app configuration remains usable outside the developer workbench. |
 | [frontend/src/admin/apps/app-types.ts](../frontend/src/admin/apps/app-types.ts) | Installed package metadata used by app administration views. |
 | [frontend/src/admin/apps/connector-descriptors.ts](../frontend/src/admin/apps/connector-descriptors.ts) | Shared connector presentation registry; settings and capabilities are owned by each app package. |
@@ -1263,16 +1267,19 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/apps/library-model.ts](../frontend/src/admin/apps/library-model.ts) | Shared app discovery metadata, safe artwork sources and localized search independent of rendering. |
 | [frontend/src/admin/apps/service-integration-text.ts](../frontend/src/admin/apps/service-integration-text.ts) | Shared connector controls; provider-specific descriptions and field choices stay in app packages. |
 | [frontend/src/admin/apps/service-integrations.ts](../frontend/src/admin/apps/service-integrations.ts) | Installed provider UI capabilities come from their app packages, not an alternate commerce registry. |
+| [frontend/src/admin/apps/studio-extension.ts](../frontend/src/admin/apps/studio-extension.ts) | Studio extension of installed apps and of the Storyfront app's entry. |
 | [frontend/src/admin/apps/upgrade-i18n.ts](../frontend/src/admin/apps/upgrade-i18n.ts) | Upgrade admission vocabulary shared by installed package consent and App Studio. |
 | [frontend/src/admin/assistant/CopilotNavigation.tsx](../frontend/src/admin/assistant/CopilotNavigation.tsx) | Suggested navigation stays explicit, using the shared native route. |
 | [frontend/src/admin/assistant/ProposalCard.tsx](../frontend/src/admin/assistant/ProposalCard.tsx) | ProposalCard keeps merchant interaction separate from workspace orchestration. |
 | [frontend/src/admin/assistant/SettingsDialog.tsx](../frontend/src/admin/assistant/SettingsDialog.tsx) | SettingsDialog keeps merchant interaction separate from workspace orchestration. |
 | [frontend/src/admin/assistant/WorkspaceCopilot.tsx](../frontend/src/admin/assistant/WorkspaceCopilot.tsx) | Contextual drawer reuses the existing scoped conversation, permissions and proposal execution without unmounting editors. |
 | [frontend/src/admin/assistant/copilot-navigation.ts](../frontend/src/admin/assistant/copilot-navigation.ts) | Only registered native destinations survive model/replay admission. Entity editors recheck current server access. |
+| [frontend/src/admin/assistant/studio-extension.ts](../frontend/src/admin/assistant/studio-extension.ts) | Studio extension of the assistant conversation. |
 | [frontend/src/admin/assistant/useCopilotDock.ts](../frontend/src/admin/assistant/useCopilotDock.ts) | One actor/shop-scoped assistant dock. Hiding never discards a conversation or starts a model call. |
 | [frontend/src/admin/automation/AutomationDefinitions.tsx](../frontend/src/admin/automation/AutomationDefinitions.tsx) | Searchable, explicitly editable definitions with visible active state and version. |
 | [frontend/src/admin/automation/AutomationDelete.tsx](../frontend/src/admin/automation/AutomationDelete.tsx) | One confirmation and a server recheck; stale versions and used definitions never disappear silently. |
 | [frontend/src/admin/automation/AutomationEditor.tsx](../frontend/src/admin/automation/AutomationEditor.tsx) | AutomationEditor: focused form view with explicit typed inputs and callbacks. |
+| [frontend/src/admin/automation/AutomationRoute.tsx](../frontend/src/admin/automation/AutomationRoute.tsx) | Automation route: flows for the current stage, with links to channels and to a translation job in settings. |
 | [frontend/src/admin/automation/AutomationView.tsx](../frontend/src/admin/automation/AutomationView.tsx) | Typed merchant rule/campaign/flow/channel forms with exact JSON available for advanced review. |
 | [frontend/src/admin/automation/CustomFieldCondition.tsx](../frontend/src/admin/automation/CustomFieldCondition.tsx) | Typed custom field conditions support text, numeric, Boolean and date values using original field payload names. |
 | [frontend/src/admin/automation/FlowActionFields.tsx](../frontend/src/admin/automation/FlowActionFields.tsx) | Focused source action forms expose only supported native parameters; app service dispatch stays in the app gateway. |
@@ -1295,10 +1302,12 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/automation/rule-history-i18n.ts](../frontend/src/admin/automation/rule-history-i18n.ts) | Frozen rule comparison copy; the sample and decision boundary remain explicit. |
 | [frontend/src/admin/automation/rule-history.css](../frontend/src/admin/automation/rule-history.css) | Contained comparison controls/results inside the existing rule editor. |
 | [frontend/src/admin/automation/source-rules.ts](../frontend/src/admin/automation/source-rules.ts) | Convert source condition nodes for the graphical editor without losing original payload fields. |
+| [frontend/src/admin/automation/studio-extension.ts](../frontend/src/admin/automation/studio-extension.ts) | Studio extension of automation flows. |
 | [frontend/src/admin/automation/useAutomationAccess.ts](../frontend/src/admin/automation/useAutomationAccess.ts) | Current native automation grants, cleared immediately when the workspace changes. |
 | [frontend/src/admin/automation/useAutomationLanguages.ts](../frontend/src/admin/automation/useAutomationLanguages.ts) | Load the current shop's content-language context and ignore replies after the workspace changes. |
 | [frontend/src/admin/automation/work-template-i18n.ts](../frontend/src/admin/automation/work-template-i18n.ts) | Reviewed-work Flow vocabulary in every Studio interface language. |
 | [frontend/src/admin/automation/work-template.ts](../frontend/src/admin/automation/work-template.ts) | Keep only a protected task reference in Flow configuration; operation inputs stay in actor-private evidence. |
+| [frontend/src/admin/b2b/B2BRoute.tsx](../frontend/src/admin/b2b/B2BRoute.tsx) | B2B route: companies or quotes in the current stage, or the disabled notice when the shop has not enabled them. |
 | [frontend/src/admin/b2b/B2BWorkspace.tsx](../frontend/src/admin/b2b/B2BWorkspace.tsx) | Tenant-scoped company workspace; canonical API operations are also exposed through MCP. |
 | [frontend/src/admin/b2b/CompanyCreate.tsx](../frontend/src/admin/b2b/CompanyCreate.tsx) | Guided company creation is one atomic native API command; the main-language name is always visible. |
 | [frontend/src/admin/b2b/CustomerPicker.tsx](../frontend/src/admin/b2b/CustomerPicker.tsx) | B2B reuses the shared native customer picker; purchasing policy stays in its domain owner. |
@@ -1309,6 +1318,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/b2b/UnitMethods.tsx](../frontend/src/admin/b2b/UnitMethods.tsx) | Unit allowlists reference the existing translated shipping/payment owner; empty means inherited availability. |
 | [frontend/src/admin/b2b/experience-i18n.ts](../frontend/src/admin/b2b/experience-i18n.ts) | Guided company purchasing and shared settings copy in all bundled interface languages. |
 | [frontend/src/admin/b2b/reference.ts](../frontend/src/admin/b2b/reference.ts) | Native organization IDs require a lowercase letter first and at most 32 characters. |
+| [frontend/src/admin/b2b/studio-extension.ts](../frontend/src/admin/b2b/studio-extension.ts) | Studio extension of B2B companies and quotes; the sidebar shows them in their own section when B2B is enabled. |
 | [frontend/src/admin/catalog/AiImageStudio.tsx](../frontend/src/admin/catalog/AiImageStudio.tsx) | Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked. |
 | [frontend/src/admin/catalog/CanvasCommerceEditor.tsx](../frontend/src/admin/catalog/CanvasCommerceEditor.tsx) | Canvas handoff reuses native product/category editors without unmounting or copying the page designer. |
 | [frontend/src/admin/catalog/CatalogDirectory.tsx](../frontend/src/admin/catalog/CatalogDirectory.tsx) | Product columns and native catalog criteria over the shared grid; media/price/content stay domain-owned. |
@@ -1323,6 +1333,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/catalog/ProductAssets.tsx](../frontend/src/admin/catalog/ProductAssets.tsx) | Bounded upload and explicit digest-bound publication of attachments and paid files. |
 | [frontend/src/admin/catalog/ProductAssignments.tsx](../frontend/src/admin/catalog/ProductAssignments.tsx) | Searchable product category paths and explicit channel choices share the native revisioned aggregate save. |
 | [frontend/src/admin/catalog/ProductCurrencyPrices.tsx](../frontend/src/admin/catalog/ProductCurrencyPrices.tsx) | Exact per-currency decimals live in the same revisioned product draft, including variants. |
+| [frontend/src/admin/catalog/ProductDataRoute.tsx](../frontend/src/admin/catalog/ProductDataRoute.tsx) | Product data route: the catalogue with deep-linked product entities and write access from current rights. |
 | [frontend/src/admin/catalog/ProductDataView.tsx](../frontend/src/admin/catalog/ProductDataView.tsx) | Central catalog workspace uses shared server-paged grids, existing product editing and hierarchical categories. |
 | [frontend/src/admin/catalog/ProductEditor.tsx](../frontend/src/admin/catalog/ProductEditor.tsx) | Revision-aware product aggregate editor: one save, translation tabs and product-scoped linked capabilities. |
 | [frontend/src/admin/catalog/ProductEditorActions.tsx](../frontend/src/admin/catalog/ProductEditorActions.tsx) | Product mutation actions share the workspace write grant; read-only users can still inspect all product tabs. |
@@ -1362,6 +1373,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/catalog/product-seo-i18n.ts](../frontend/src/admin/catalog/product-seo-i18n.ts) | Product search-preview labels and automatic SEO guidance in all Studio interface languages. |
 | [frontend/src/admin/catalog/product-specification-i18n.ts](../frontend/src/admin/catalog/product-specification-i18n.ts) | Four-language specification guidance, safe key editing and explicit draft-row actions. |
 | [frontend/src/admin/catalog/related-products-i18n.ts](../frontend/src/admin/catalog/related-products-i18n.ts) | Related-product selection and current-state guidance in all Studio interface languages. |
+| [frontend/src/admin/catalog/studio-extension.ts](../frontend/src/admin/catalog/studio-extension.ts) | Studio extension of the product catalogue. |
 | [frontend/src/admin/catalog/useImageJob.ts](../frontend/src/admin/catalog/useImageJob.ts) | Restore and reconcile native image jobs across request/locale changes; only explicit merchant actions create provider work. |
 | [frontend/src/admin/catalog/variant-family.ts](../frontend/src/admin/catalog/variant-family.ts) | Cursor-based family lookup for duplicate review, bounded independently of the 50-row creation limit. |
 | [frontend/src/admin/catalog/variant-i18n.ts](../frontend/src/admin/catalog/variant-i18n.ts) | Guided variant creation and editing vocabulary; content still follows shop language inheritance. |
@@ -1377,18 +1389,24 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/channels/ChannelSettings.tsx](../frontend/src/admin/channels/ChannelSettings.tsx) | Channel settings embed existing revision-aware identity and checkout editors with the channel selected. |
 | [frontend/src/admin/channels/ChannelType.tsx](../frontend/src/admin/channels/ChannelType.tsx) | Channel kind and POS presentation editor use the existing channel/content-language contract. |
 | [frontend/src/admin/channels/ChannelVisibility.tsx](../frontend/src/admin/channels/ChannelVisibility.tsx) | Public/private audience settings only apply to storefront and headless channel entry points. |
+| [frontend/src/admin/channels/ChannelsRoute.tsx](../frontend/src/admin/channels/ChannelsRoute.tsx) | Channels route: sales channels with stage-scoped requests, test scenarios and the hand-off to channel design. |
 | [frontend/src/admin/channels/SalesChannelsWorkspace.tsx](../frontend/src/admin/channels/SalesChannelsWorkspace.tsx) | Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. |
 | [frontend/src/admin/channels/SupplyReorder.tsx](../frontend/src/admin/channels/SupplyReorder.tsx) | Supplier links in the native settings revision and reorder proposals with signed supplier offers; approval hands over to the supplier checkout. |
 | [frontend/src/admin/channels/agentic-channel-i18n.ts](../frontend/src/admin/channels/agentic-channel-i18n.ts) | Inward catalogue intake and protocol readiness use clear four-language merchant copy. |
 | [frontend/src/admin/channels/channel-i18n.ts](../frontend/src/admin/channels/channel-i18n.ts) | Sales-channel onboarding and inherited settings vocabulary in all interface languages. |
 | [frontend/src/admin/channels/channel-model.ts](../frontend/src/admin/channels/channel-model.ts) | Existing sales-channel contract and safe storefront URLs; independent tenants remain a separate concept. |
 | [frontend/src/admin/channels/connection-i18n.ts](../frontend/src/admin/channels/connection-i18n.ts) | Domain lifecycle copy in every supported Studio language. |
+| [frontend/src/admin/channels/studio-extension.ts](../frontend/src/admin/channels/studio-extension.ts) | Studio extension of sales channels. |
 | [frontend/src/admin/channels/supply-i18n.ts](../frontend/src/admin/channels/supply-i18n.ts) | Vocabulary for supplier links and reorder proposals in EN/DE/FR/ES; figures and names are parameters. |
 | [frontend/src/admin/customers/CustomerCreate.tsx](../frontend/src/admin/customers/CustomerCreate.tsx) | Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. |
 | [frontend/src/admin/customers/CustomerDirectory.tsx](../frontend/src/admin/customers/CustomerDirectory.tsx) | Registered and guest contacts share native directory filters and permission-aware grid controls. |
 | [frontend/src/admin/customers/CustomersManager.tsx](../frontend/src/admin/customers/CustomersManager.tsx) | CRM list and editable customer profile with linked order history. |
+| [frontend/src/admin/customers/CustomersRoute.tsx](../frontend/src/admin/customers/CustomersRoute.tsx) | Customers route: customer management with deep-linked customer entities. |
 | [frontend/src/admin/customers/GuestContact.tsx](../frontend/src/admin/customers/GuestContact.tsx) | Read-only checkout snapshots distinguish guest contacts from authenticated customer accounts. |
+| [frontend/src/admin/customers/studio-extension.ts](../frontend/src/admin/customers/studio-extension.ts) | Studio extension of customer management. |
+| [frontend/src/admin/dashboard/OverviewRoute.tsx](../frontend/src/admin/dashboard/OverviewRoute.tsx) | Overview route: the dashboard over the loaded workspace data; product picks open the preview on narrow screens. |
 | [frontend/src/admin/dashboard/OverviewView.tsx](../frontend/src/admin/dashboard/OverviewView.tsx) | OverviewView renders verified shop state and typed user actions. |
+| [frontend/src/admin/dashboard/studio-extension.ts](../frontend/src/admin/dashboard/studio-extension.ts) | Studio extension of the overview dashboard; its cards come from the dashboard slot. |
 | [frontend/src/admin/developer/AppActionAccess.tsx](../frontend/src/admin/developer/AppActionAccess.tsx) | Team permissions and MCP visibility are independent from public storefront reads and AI grounding. |
 | [frontend/src/admin/developer/AppAgentDrawer.tsx](../frontend/src/admin/developer/AppAgentDrawer.tsx) | Contextual agent drawer retains the shared proposal workflow and draft while the native dialog manages focus. |
 | [frontend/src/admin/developer/AppAgentPanel.tsx](../frontend/src/admin/developer/AppAgentPanel.tsx) | Coding agents receive the current Manifest IR and authoritative schema; imported edits round-trip to the canvas. |
@@ -1448,6 +1466,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/developer/AppViewTabs.tsx](../frontend/src/admin/developer/AppViewTabs.tsx) | Native view navigation and creation are separate from workspace orchestration. |
 | [frontend/src/admin/developer/AppWorkflowEditor.tsx](../frontend/src/admin/developer/AppWorkflowEditor.tsx) | Visual status edges use the exact app manifest contract enforced by native record storage. |
 | [frontend/src/admin/developer/CoreExtensionBinding.tsx](../frontend/src/admin/developer/CoreExtensionBinding.tsx) | One understandable native-object selection; relationships, uniqueness and scopes compile together. |
+| [frontend/src/admin/developer/DeveloperRoute.tsx](../frontend/src/admin/developer/DeveloperRoute.tsx) | Developer route: the developer workspace on the live shop, with sandbox-scoped requests and test scenarios. |
 | [frontend/src/admin/developer/DeveloperView.tsx](../frontend/src/admin/developer/DeveloperView.tsx) | Visual App Studio orchestrates modular editors over the same executable schema used by coding agents. |
 | [frontend/src/admin/developer/DeveloperWorkspace.tsx](../frontend/src/admin/developer/DeveloperWorkspace.tsx) | Dedicated app and API workspaces retain App Studio state while switching the developer console. |
 | [frontend/src/admin/developer/SandboxContextPicker.tsx](../frontend/src/admin/developer/SandboxContextPicker.tsx) | Bounded server search selects an owned object for testing editor-bound apps in a private sandbox. |
@@ -1480,11 +1499,13 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/developer/core-extension-model.ts](../frontend/src/admin/developer/core-extension-model.ts) | Visual extension bindings compile into the canonical model and current native action scopes. |
 | [frontend/src/admin/developer/model-workspace.ts](../frontend/src/admin/developer/model-workspace.ts) | Form wizard emits the standard manifest IR; the ordinary compiler supplies all actions, APIs and permission allowlists. |
 | [frontend/src/admin/developer/start-described-app.ts](../frontend/src/admin/developer/start-described-app.ts) | A merchant brief begins in an owned private stage and uses the existing reviewed app agent. |
+| [frontend/src/admin/developer/studio-extension.ts](../frontend/src/admin/developer/studio-extension.ts) | Studio extension of the developer workspace (App Studio, API console, component catalogue). |
 | [frontend/src/admin/developer/useAppPreview.ts](../frontend/src/admin/developer/useAppPreview.ts) | F5/hot reload uses the existing native runtime in an actor-private staging environment, never an immutable build. |
 | [frontend/src/admin/developer/useAppStudio.ts](../frontend/src/admin/developer/useAppStudio.ts) | Tenant-scoped build lifecycle; immutable saved snapshots gate sandbox previews and selected app-only releases. |
 | [frontend/src/admin/developer/useDesignerKeys.ts](../frontend/src/admin/developer/useDesignerKeys.ts) | Designer keyboard shortcuts leave native input and rich-editor undo behavior intact. |
 | [frontend/src/admin/developer/useDraftStorage.ts](../frontend/src/admin/developer/useDraftStorage.ts) | Actor-private server autosaves serialize writes and preserve optimistic revisions across app switches. |
 | [frontend/src/admin/environments/EnvironmentManager.tsx](../frontend/src/admin/environments/EnvironmentManager.tsx) | Private environment creation and digest-bound selective release. |
+| [frontend/src/admin/environments/EnvironmentsRoute.tsx](../frontend/src/admin/environments/EnvironmentsRoute.tsx) | Environments route: sandbox stages of the live shop, with scoped requests, test scenarios and stage selection. |
 | [frontend/src/admin/environments/ReleaseAttack.tsx](../frontend/src/admin/environments/ReleaseAttack.tsx) | The latest saved attack test of the sandbox beside the release review; evidence only, never an approval gate. |
 | [frontend/src/admin/environments/ReleaseScenarios.tsx](../frontend/src/admin/environments/ReleaseScenarios.tsx) | Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. |
 | [frontend/src/admin/environments/ReleaseShopPreview.tsx](../frontend/src/admin/environments/ReleaseShopPreview.tsx) | Explicit native sandbox preview rechecks the saved run; it never attests a historical render. |
@@ -1492,6 +1513,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/environments/release-preview.css](../frontend/src/admin/environments/release-preview.css) | Native shop preview stays contained in the release review at both viewport sizes. |
 | [frontend/src/admin/environments/release-tests-i18n.ts](../frontend/src/admin/environments/release-tests-i18n.ts) | Release review vocabulary keeps simulated commerce evidence distinct from publication approval. |
 | [frontend/src/admin/environments/release-tests.css](../frontend/src/admin/environments/release-tests.css) | Existing release workbench typography with bounded, responsive test controls. |
+| [frontend/src/admin/environments/studio-extension.ts](../frontend/src/admin/environments/studio-extension.ts) | Studio extension of sandbox stages. |
 | [frontend/src/admin/intelligence/AutopilotToday.tsx](../frontend/src/admin/intelligence/AutopilotToday.tsx) | Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. |
 | [frontend/src/admin/intelligence/EvidenceReview.tsx](../frontend/src/admin/intelligence/EvidenceReview.tsx) | Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. |
 | [frontend/src/admin/intelligence/ExperimentAutomation.tsx](../frontend/src/admin/intelligence/ExperimentAutomation.tsx) | Suggestion card, automation switches and decision note for experiments; the lifecycle and readout stay with the native owner. |
@@ -1505,6 +1527,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/KnowledgeNavigation.tsx](../frontend/src/admin/intelligence/KnowledgeNavigation.tsx) | Stable grouped navigation replaces clipped horizontal tabs; a labelled selector serves narrow workspaces. |
 | [frontend/src/admin/intelligence/KnowledgeOverview.tsx](../frontend/src/admin/intelligence/KnowledgeOverview.tsx) | Whole-shop knowledge census, operational next steps and provenance activity; examples never masquerade as learned facts. |
 | [frontend/src/admin/intelligence/KnowledgePreview.tsx](../frontend/src/admin/intelligence/KnowledgePreview.tsx) | No-model evidence preview makes customer/private retrieval boundaries and missing facts inspectable. |
+| [frontend/src/admin/intelligence/KnowledgeRoute.tsx](../frontend/src/admin/intelligence/KnowledgeRoute.tsx) | Knowledge route: the knowledge view over the loaded workspace data with entity links and the product preview. |
 | [frontend/src/admin/intelligence/KnowledgeSources.tsx](../frontend/src/admin/intelligence/KnowledgeSources.tsx) | Searchable cursor source library, guarded lifecycle decisions and single-language source editing. |
 | [frontend/src/admin/intelligence/KnowledgeView.tsx](../frontend/src/admin/intelligence/KnowledgeView.tsx) | Unified knowledge workspace connects sources, product evidence, observations and no-model retrieval previews. |
 | [frontend/src/admin/intelligence/MemoryView.tsx](../frontend/src/admin/intelligence/MemoryView.tsx) | Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. |
@@ -1520,6 +1543,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/guardrail-model.ts](../frontend/src/admin/intelligence/guardrail-model.ts) | Native policy shape and currency conversion only; admission remains in the Rust commerce owner. |
 | [frontend/src/admin/intelligence/knowledge-types.ts](../frontend/src/admin/intelligence/knowledge-types.ts) | Typed knowledge read models preserve source ownership, revisions, sampling and privacy boundaries. |
 | [frontend/src/admin/intelligence/sovereign-i18n.ts](../frontend/src/admin/intelligence/sovereign-i18n.ts) | Sovereign AI vocabulary: the switch state, one line per model route and the limits of the statement in EN/DE/FR/ES. |
+| [frontend/src/admin/intelligence/studio-extension.ts](../frontend/src/admin/intelligence/studio-extension.ts) | Studio extension of the knowledge workspace. |
 | [frontend/src/admin/legal/ConsumerRequests.tsx](../frontend/src/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |
 | [frontend/src/admin/legal/LegalServices.tsx](../frontend/src/admin/legal/LegalServices.tsx) | Purpose inventory and provider disclosures edited in the selected content language. |
 | [frontend/src/admin/legal/LegalSettings.tsx](../frontend/src/admin/legal/LegalSettings.tsx) | Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. |
@@ -1532,9 +1556,11 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/orders/OrderReview.tsx](../frontend/src/admin/orders/OrderReview.tsx) | Reviewed native quote and explicit customer-authorisation acknowledgements precede the idempotent order command. |
 | [frontend/src/admin/orders/OrderWorkflow.tsx](../frontend/src/admin/orders/OrderWorkflow.tsx) | Server-owned transitions: one source for permitted actions, labels and business guards. |
 | [frontend/src/admin/orders/OrdersManager.tsx](../frontend/src/admin/orders/OrdersManager.tsx) | Order operations and native detail navigation; the shared grid owns only list presentation. |
+| [frontend/src/admin/orders/OrdersRoute.tsx](../frontend/src/admin/orders/OrdersRoute.tsx) | Orders route: order operations with deep-linked order entities in the current shop or stage. |
 | [frontend/src/admin/orders/ReceiptPanel.tsx](../frontend/src/admin/orders/ReceiptPanel.tsx) | Seller configuration and version-bound receipt creation/download. |
 | [frontend/src/admin/orders/ShipmentSplit.tsx](../frontend/src/admin/orders/ShipmentSplit.tsx) | Explicit subset editor uses server admission, parent command fencing and immutable order quantities. |
 | [frontend/src/admin/orders/shipments.css](../frontend/src/admin/orders/shipments.css) | Package allocation stays compact on desktop and touch-friendly on narrow order workspaces. |
+| [frontend/src/admin/orders/studio-extension.ts](../frontend/src/admin/orders/studio-extension.ts) | Studio extension of order operations. |
 | [frontend/src/admin/orders/useOrderCreation.ts](../frontend/src/admin/orders/useOrderCreation.ts) | Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. |
 | [frontend/src/admin/payments/PaymentActions.tsx](../frontend/src/admin/payments/PaymentActions.tsx) | Shared native order/provider controls; an accepted job is observed before another financial action. |
 | [frontend/src/admin/payments/PaymentDetails.tsx](../frontend/src/admin/payments/PaymentDetails.tsx) | Read-only transaction observation and native financial history, shared across Studio views. |
@@ -1542,6 +1568,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/payments/payment-amount.ts](../frontend/src/admin/payments/payment-amount.ts) | Exact decimal merchant input; reject overprecision instead of rounding financial commands. |
 | [frontend/src/admin/payments/payment-command.ts](../frontend/src/admin/payments/payment-command.ts) | Shared frozen merchant payment request identity; retries preserve the original exact payload. |
 | [frontend/src/admin/payments/payment-details.css](../frontend/src/admin/payments/payment-details.css) | Responsive, read-only payment receipt and history disclosure. |
+| [frontend/src/admin/pos/POSRoute.tsx](../frontend/src/admin/pos/POSRoute.tsx) | POS route: the register for the current shop or stage, with order links and authenticated receipt downloads. |
 | [frontend/src/admin/pos/POSWorkspace.tsx](../frontend/src/admin/pos/POSWorkspace.tsx) | Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. |
 | [frontend/src/admin/pos/ReceiptPrinter.tsx](../frontend/src/admin/pos/ReceiptPrinter.tsx) | OS-installed receipt printers receive the issued immutable invoice projection; no USB access, credentials or duplicate ledger. |
 | [frontend/src/admin/pos/Register.tsx](../frontend/src/admin/pos/Register.tsx) | Register composition: persisted sale, catalog, customer and assistant tools share native transport. |
@@ -1561,6 +1588,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/pos/pos-receipt.css](../frontend/src/admin/pos/pos-receipt.css) | Completion, held sale and variant surfaces for the register. |
 | [frontend/src/admin/pos/pos-responsive.css](../frontend/src/admin/pos/pos-responsive.css) | Responsive register breakpoints and reduced-motion behavior. |
 | [frontend/src/admin/pos/pos.css](../frontend/src/admin/pos/pos.css) | POS layout, product cards and touch checkout, using shared Veyndo tokens. |
+| [frontend/src/admin/pos/studio-extension.ts](../frontend/src/admin/pos/studio-extension.ts) | Studio extension of the point of sale. |
 | [frontend/src/admin/pos/useCashierFocus.ts](../frontend/src/admin/pos/useCashierFocus.ts) | URL-preserved register focus uses the existing authenticated Studio; re-login overlays remain outside its shell. |
 | [frontend/src/admin/pos/useRegister.ts](../frontend/src/admin/pos/useRegister.ts) | Register commands share authenticated Studio transport and persist only the cart capability locally. |
 | [frontend/src/admin/pos/useRegisterViewport.ts](../frontend/src/admin/pos/useRegisterViewport.ts) | Size the register pane from its actual header position, including translated toolbars and tablet wraps. |
@@ -1575,6 +1603,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/reports/model.ts](../frontend/src/admin/reports/model.ts) | Saved report definitions contain presentation/filter choices only; the server remains the source of every value. |
 | [frontend/src/admin/reports/report-i18n.ts](../frontend/src/admin/reports/report-i18n.ts) | Studio report vocabulary; amounts, names and dates come from the native report snapshot. |
 | [frontend/src/admin/reports/reports.css](../frontend/src/admin/reports/reports.css) | Report workspace extends Studio tokens with readable charts, restrained controls and explicit reordering. |
+| [frontend/src/admin/reports/studio-extension.ts](../frontend/src/admin/reports/studio-extension.ts) | Studio extension of reports: the shop-today report board as a dashboard card. |
 | [frontend/src/admin/scenarios/ScenarioAttacks.tsx](../frontend/src/admin/scenarios/ScenarioAttacks.tsx) | Scripted attack results for the selected private sandbox; outcomes come from native refusals, never from a model. |
 | [frontend/src/admin/scenarios/ScenarioComparison.tsx](../frontend/src/admin/scenarios/ScenarioComparison.tsx) | Matching test inputs and changed observed snapshots are separate evidence. |
 | [frontend/src/admin/scenarios/ScenarioEvidence.tsx](../frontend/src/admin/scenarios/ScenarioEvidence.tsx) | Configuration freshness is independent of whether a fictional purchase succeeded. |
@@ -1610,11 +1639,13 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/settings/MasterDataSettings.tsx](../frontend/src/admin/settings/MasterDataSettings.tsx) | Structured company profile with single-language content, inherited channel scopes, logo drafts and revision-bound saves. |
 | [frontend/src/admin/settings/MethodRemoval.tsx](../frontend/src/admin/settings/MethodRemoval.tsx) | Dependency preflight is advisory; aggregate save repeats it under the checkout configuration lock. |
 | [frontend/src/admin/settings/MethodSettings.tsx](../frontend/src/admin/settings/MethodSettings.tsx) | Master/detail shipping and payment configuration, translated content and searchable country availability. |
+| [frontend/src/admin/settings/SettingsRoute.tsx](../frontend/src/admin/settings/SettingsRoute.tsx) | Settings route: shop settings with links to connections, team, automation, B2B, channels and apps. |
 | [frontend/src/admin/settings/SettingsSaveBar.tsx](../frontend/src/admin/settings/SettingsSaveBar.tsx) | Consistent settings save feedback, dirty state and permission-aware controls. |
 | [frontend/src/admin/settings/SettingsWorkspace.tsx](../frontend/src/admin/settings/SettingsWorkspace.tsx) | Independent settings workspace: grouped navigation, explicit dirty-draft guards and native API forms. |
 | [frontend/src/admin/settings/TaxSettings.tsx](../frontend/src/admin/settings/TaxSettings.tsx) | Editable tax classes and explicit fallback/country rates with destination rules using native Rule Builder references. |
 | [frontend/src/admin/settings/TranslationJobs.tsx](../frontend/src/admin/settings/TranslationJobs.tsx) | Start catalogue translations, poll durable progress, review paginated drafts and apply bounded revision-checked batches. |
 | [frontend/src/admin/settings/company-types.ts](../frontend/src/admin/settings/company-types.ts) | Typed company metadata and sparse per-channel inheritance contract; statutory facts are never auto-translated. |
+| [frontend/src/admin/settings/studio-extension.ts](../frontend/src/admin/settings/studio-extension.ts) | Studio extension of shop settings. |
 | [frontend/src/admin/settings/useCompanyContext.ts](../frontend/src/admin/settings/useCompanyContext.ts) | Load enabled content languages, countries and channel choices without overwriting an edited draft on locale refresh. |
 | [frontend/src/admin/settings/useSettingsDraft.ts](../frontend/src/admin/settings/useSettingsDraft.ts) | Revisioned settings drafts survive locale refreshes, reject late loads and keep failed saves editable. |
 | [frontend/src/admin/setup/SetupBanner.tsx](../frontend/src/admin/setup/SetupBanner.tsx) | Keeps the setup return path visible while the merchant works in the actual native views. |
@@ -1628,20 +1659,26 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/setup/setup-responsive.css](../frontend/src/admin/setup/setup-responsive.css) | Structural adaptation of the setup path for narrow administration viewports. |
 | [frontend/src/admin/setup/setup.css](../frontend/src/admin/setup/setup.css) | A compact, responsive setup workspace extends the existing Studio colour and type system. |
 | [frontend/src/admin/setup/step-i18n.ts](../frontend/src/admin/setup/step-i18n.ts) | Concrete outcomes for each setup step in every supported interface language. |
+| [frontend/src/admin/setup/studio-extension.ts](../frontend/src/admin/setup/studio-extension.ts) | Studio extension of setup: the personal workspace start and the guided shop setup share one entry view. |
 | [frontend/src/admin/setup/useSetupFacts.ts](../frontend/src/admin/setup/useSetupFacts.ts) | Read only current native setup data; unavailable sources never become successful checks. |
 | [frontend/src/admin/shell/AgentRunCard.tsx](../frontend/src/admin/shell/AgentRunCard.tsx) | Saved native run progress and explicit continuation share the conversation's permission-scoped request owner. |
 | [frontend/src/admin/shell/Merchant.tsx](../frontend/src/admin/shell/Merchant.tsx) | Studio composition root: layout, scoped controller and modular workspace views. |
-| [frontend/src/admin/shell/StudioCommerceRoute.tsx](../frontend/src/admin/shell/StudioCommerceRoute.tsx) | Installed app and business entry points stay within the active Studio workspace. |
+| [frontend/src/admin/shell/StudioCommerceRoute.tsx](../frontend/src/admin/shell/StudioCommerceRoute.tsx) | Installed app surfaces (including the marketplace workspace) stay within the active Studio workspace. |
 | [frontend/src/admin/shell/StudioComposer.tsx](../frontend/src/admin/shell/StudioComposer.tsx) | StudioComposer: focused Studio view; state and commands come from the session-scoped controller. |
 | [frontend/src/admin/shell/StudioContext.ts](../frontend/src/admin/shell/StudioContext.ts) | Typed, local Studio context; never shared across a different mounted Studio. |
 | [frontend/src/admin/shell/StudioConversation.tsx](../frontend/src/admin/shell/StudioConversation.tsx) | StudioConversation: focused Studio view; state and commands come from the session-scoped controller. |
 | [frontend/src/admin/shell/StudioHeader.tsx](../frontend/src/admin/shell/StudioHeader.tsx) | StudioHeader: focused Studio view; state and commands come from the session-scoped controller. |
-| [frontend/src/admin/shell/StudioRoutes.tsx](../frontend/src/admin/shell/StudioRoutes.tsx) | StudioRoutes: focused Studio view; state and commands come from the session-scoped controller. |
+| [frontend/src/admin/shell/StudioRoutes.tsx](../frontend/src/admin/shell/StudioRoutes.tsx) | StudioRoutes: renders the registered route of the selected Studio area after the shell's connection, rights and data guards. |
 | [frontend/src/admin/shell/StudioSidebar.tsx](../frontend/src/admin/shell/StudioSidebar.tsx) | StudioSidebar: focused Studio view; state and commands come from the session-scoped controller. |
 | [frontend/src/admin/shell/StudioSignIn.tsx](../frontend/src/admin/shell/StudioSignIn.tsx) | Dedicated login page and blocking reauthentication dialog preserve mounted private editors. |
 | [frontend/src/admin/shell/commerce-nav-i18n.ts](../frontend/src/admin/shell/commerce-nav-i18n.ts) | Shop areas use the interface locale, independently of catalogue translations. |
-| [frontend/src/admin/shell/navigation.ts](../frontend/src/admin/shell/navigation.ts) | Typed built-in Studio navigation and locale-specific labels. |
-| [frontend/src/admin/shell/permissions.ts](../frontend/src/admin/shell/permissions.ts) | Presentation admission mirrors named server rights. API/domain checks remain authoritative. |
+| [frontend/src/admin/shell/navigation.ts](../frontend/src/admin/shell/navigation.ts) | Typed Studio route ids, their locale-specific labels and the navigation entries the extensions register. |
+| [frontend/src/admin/shell/permissions.ts](../frontend/src/admin/shell/permissions.ts) | Presentation admission from the rights each Studio extension declares. API/domain checks remain authoritative. |
+| [frontend/src/admin/shell/registry/StudioSlot.tsx](../frontend/src/admin/shell/registry/StudioSlot.tsx) | Renders one slot location: first-party contributions the current rights admit, then installed apps at the same location. |
+| [frontend/src/admin/shell/registry/define.ts](../frontend/src/admin/shell/registry/define.ts) | Declaring and admitting extensions: identity helpers that keep descriptor types, and the shared rights rule. |
+| [frontend/src/admin/shell/registry/first-party.ts](../frontend/src/admin/shell/registry/first-party.ts) | The first-party Studio extensions in route order; every Studio area registers here exactly like an app manifest. |
+| [frontend/src/admin/shell/registry/registry.ts](../frontend/src/admin/shell/registry/registry.ts) | The Studio registry: validates extensions once and answers route, navigation and slot questions in registration order. |
+| [frontend/src/admin/shell/registry/types.ts](../frontend/src/admin/shell/registry/types.ts) | Types of the Studio extension registry: routes, navigation, page slots, dashboard cards and form fields. |
 | [frontend/src/admin/shell/requests.ts](../frontend/src/admin/shell/requests.ts) | Authenticated Studio transport; staging changes only the tenant, never the principal. |
 | [frontend/src/admin/shell/resume-browser-session.ts](../frontend/src/admin/shell/resume-browser-session.ts) | Explicit same-account resume reads the existing ledger, without adopting ambient identity or replaying writes. |
 | [frontend/src/admin/shell/studio-types.ts](../frontend/src/admin/shell/studio-types.ts) | studio types: Studio layout, session/workspace controller, authenticated transport and lazy workspace navigation. |
@@ -1738,14 +1775,17 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/team/PermissionPicker.tsx](../frontend/src/admin/team/PermissionPicker.tsx) | One readable, searchable permission selector; technical IDs always remain visible beside the label. |
 | [frontend/src/admin/team/PersonalAccountForm.tsx](../frontend/src/admin/team/PersonalAccountForm.tsx) | PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks. |
 | [frontend/src/admin/team/RolesManager.tsx](../frontend/src/admin/team/RolesManager.tsx) | Tenant role editor uses the canonical roles API, shared translation editor, audit and dependency confirmation. |
+| [frontend/src/admin/team/TeamRoute.tsx](../frontend/src/admin/team/TeamRoute.tsx) | Team route: members and shop switching for the signed-in person, and access management once connected. |
 | [frontend/src/admin/team/UsersManager.tsx](../frontend/src/admin/team/UsersManager.tsx) | Users Manager: Personal accounts, memberships, roles, invitations and scoped developer access.. |
 | [frontend/src/admin/team/permission-groups.ts](../frontend/src/admin/team/permission-groups.ts) | Permission grouping is presentation only; grants still come from the canonical server scope registry. |
 | [frontend/src/admin/team/permission-i18n.ts](../frontend/src/admin/team/permission-i18n.ts) | Role interface vocabulary uses the shared permission label catalogue. |
 | [frontend/src/admin/team/permission-labels.ts](../frontend/src/admin/team/permission-labels.ts) | Shared readable labels and exact permission identifiers for Studio, app actions and API keys. |
 | [frontend/src/admin/team/permission-picker.css](../frontend/src/admin/team/permission-picker.css) | Shared readable permission groups replace flat scope walls in roles and API credentials. |
+| [frontend/src/admin/team/studio-extension.ts](../frontend/src/admin/team/studio-extension.ts) | Studio extension of team and access management. |
 | [frontend/src/admin/team/workspace-create-i18n.ts](../frontend/src/admin/team/workspace-create-i18n.ts) | Shop creation guidance uses the current Studio interface language. |
 | [frontend/src/admin/workspace/AgentViewDirectory.tsx](../frontend/src/admin/workspace/AgentViewDirectory.tsx) | Composition mounts existing domain directories, filters and native entity editors without a second renderer. |
 | [frontend/src/admin/workspace/AgentWorkSurface.tsx](../frontend/src/admin/workspace/AgentWorkSurface.tsx) | Reviewed composition binds real native views to the current Studio scope and private workspace preferences. |
+| [frontend/src/admin/workspace/DesignRoute.tsx](../frontend/src/admin/workspace/DesignRoute.tsx) | Design route: opens the site builder designer with the design reference that belongs to the current shop and stage. |
 | [frontend/src/admin/workspace/GeneratedWorkspace.tsx](../frontend/src/admin/workspace/GeneratedWorkspace.tsx) | Render registered workspace controls with A2UI or the existing OpenUI fallback. |
 | [frontend/src/admin/workspace/OrderShippingPolicy.tsx](../frontend/src/admin/workspace/OrderShippingPolicy.tsx) | Current source passages for the order workspace. The query contains no order or customer data. |
 | [frontend/src/admin/workspace/PersonalWorkspace.tsx](../frontend/src/admin/workspace/PersonalWorkspace.tsx) | Personal entry point on the existing shell; requests and linked views retain current scope and rights. |
@@ -1756,6 +1796,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/workspace/composition-i18n.ts](../frontend/src/admin/workspace/composition-i18n.ts) | Host-owned composition controls never repeat model claims about completed commerce actions. |
 | [frontend/src/admin/workspace/composition.css](../frontend/src/admin/workspace/composition.css) | Composed native work surfaces retain a large canvas, ordinary controls and contained responsive overflow. |
 | [frontend/src/admin/workspace/pin-workspace-view.ts](../frontend/src/admin/workspace/pin-workspace-view.ts) | Native grids and composed views share actor-private layout CAS; records and personal criteria never persist. |
+| [frontend/src/admin/workspace/studio-extension.ts](../frontend/src/admin/workspace/studio-extension.ts) | Studio extension of the standard storefront design: the site builder's designer inside the current stage. |
 | [frontend/src/admin/workspace/workspace-i18n.ts](../frontend/src/admin/workspace/workspace-i18n.ts) | Personal workspace vocabulary; UI language never changes saved content language. |
 | [frontend/src/admin/workspace/workspace-model.ts](../frontend/src/admin/workspace/workspace-model.ts) | Layouts are private presentation preferences, never roles or delegated permissions. |
 | [frontend/src/admin/workspace/workspace-presentation.ts](../frontend/src/admin/workspace/workspace-presentation.ts) | Project the native workspace's reviewed controls through the shared A2UI adapter. |
@@ -1785,6 +1826,9 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/api/generated/routes.ts](../frontend/src/kit/api/generated/routes.ts) | Generated by scripts/api_catalogue.py from the Rust router declarations; do not edit. |
 | [frontend/src/kit/api/index.ts](../frontend/src/kit/api/index.ts) | Public interface of kit/api: the generated route catalogue, operation contracts and the typed client over them. |
 | [frontend/src/kit/api/routes.ts](../frontend/src/kit/api/routes.ts) | The generated route catalogue as records, and safe path filling for a route template. |
+| [frontend/src/kit/query/cache.ts](../frontend/src/kit/query/cache.ts) | In-memory query cache: one entry per key, shared in-flight loads, prefix invalidation and subscribers; nothing is persisted. |
+| [frontend/src/kit/query/hooks.tsx](../frontend/src/kit/query/hooks.tsx) | React bindings of the query cache: a provider per scope, useQuery for reads and useMutation for writes that invalidate. |
+| [frontend/src/kit/query/index.ts](../frontend/src/kit/query/index.ts) | Public interface of kit/query: the scoped in-memory query cache and its React hooks. |
 | [frontend/src/kit/tokens/index.ts](../frontend/src/kit/tokens/index.ts) | Typed design tokens: the JSON source, CSS custom property names and the stylesheet that defines them. |
 | [frontend/src/kit/tokens/tokens.css](../frontend/src/kit/tokens/tokens.css) | Generated by scripts/tokens.mjs from tokens.json; do not edit. Design tokens for every Veyndo surface. |
 | [frontend/src/kit/ui/Button.tsx](../frontend/src/kit/ui/Button.tsx) | Buttons: one tone and size vocabulary, busy state announced, icon-only buttons require an accessible label. |

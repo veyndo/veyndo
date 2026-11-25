@@ -38,6 +38,17 @@ try{
  file('kit/tokens/index.ts','/** Token fixture importing the app. */\nimport {value} from "../../shared/api/base";\nexport const space=value;\n');assert.match(check().stderr,/imports outside kit/);
  file('kit/tokens/index.ts','/** Token fixture. */\nexport const space=4;\n');
  assert.equal(check().status,0,check().stderr);
+ file('admin/orders/OrdersRoute.ts','/** Route view reading the registry. */\nimport {routes} from "../shell/registry";\nexport const view=()=>routes;\n');
+ file('admin/shell/registry.ts','/** Registry fixture. */\nimport extension from "../orders/studio-extension";\nexport const routes=[extension];\n');
+ file('admin/orders/studio-extension.ts','/** Descriptor registering its view lazily. */\nexport default {load:()=>import("./OrdersRoute")};\n');
+ assert.equal(check().status,0,check().stderr);
+ file('admin/orders/studio-extension.ts','/** Descriptor importing its view statically. */\nimport {view} from "./OrdersRoute";\nexport default {view};\n');
+ assert.match(check().stderr,/Runtime import cycle/);
+ file('admin/orders/other.ts','/** Ordinary module with a lazy cycle. */\nexport const load=()=>import("../shell/registry");\n');
+ file('admin/orders/studio-extension.ts','/** Descriptor registering its view lazily. */\nexport default {load:()=>import("./OrdersRoute")};\n');
+ file('admin/shell/registry.ts','/** Registry fixture. */\nimport {load} from "../orders/other";\nexport const routes=[load];\n');
+ assert.match(check().stderr,/Runtime import cycle/);
+ for (const name of ['admin/orders/OrdersRoute.ts','admin/shell/registry.ts','admin/orders/studio-extension.ts','admin/orders/other.ts']) fs.unlinkSync(path.join(directory,name));
  fs.unlinkSync(path.join(directory,'shared/api/README.md'));assert.match(check().stderr,/folder contract/);
- console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation and kit layering/token negative controls');
+ console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token and lazy-registration negative controls');
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

@@ -1,4 +1,4 @@
-/** Typed built-in Studio navigation and locale-specific labels. */
+/** Typed Studio route ids, their locale-specific labels and the navigation entries the extensions register. */
 import { useSetupText } from "../setup/setup-i18n";
 import { useB2BExperienceText } from "../b2b/experience-i18n";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
@@ -8,6 +8,7 @@ import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import { type IconName } from "../../shared/ui/Icon";
 import { useWorkspaceText } from "../workspace/workspace-i18n";
+import { studioRegistry } from "./registry/first-party";
 export type Tab =
   | "setup"
   | "workspace"
@@ -61,29 +62,9 @@ export function useStudioNavigation() {
     return t(id);
   };
 
-  const nav: { id: Tab; icon: IconName }[] = [
-    { id: "setup", icon: "check" },
-    { id: "workspace", icon: "gauge" },
-    { id: "design", icon: "palette" },
-    { id: "assistant", icon: "chat" },
-    { id: "overview", icon: "pulse" },
-    { id: "b2b", icon: "people" },
-    { id: "b2bQuotes", icon: "chat" },
-    { id: "pos", icon: "register" },
-    { id: "orders", icon: "box" },
-    { id: "customers", icon: "people" },
-    { id: "knowledge", icon: "graph" },
-    { id: "agents", icon: "agents" },
-    { id: "commerce", icon: "settings" },
-    { id: "productData", icon: "box" },
-    { id: "channels", icon: "layers" },
-    { id: "automation", icon: "pulse" },
-    { id: "users", icon: "lock" },
-    { id: "storyfronts", icon: "layers" },
-    { id: "developers", icon: "code" },
-    { id: "environments", icon: "layers" },
-    { id: "apps", icon: "plus" },
-  ];
+  const nav: { id: Tab; icon: IconName }[] = studioRegistry.routes.map(
+    ({ id, icon }) => ({ id, icon }),
+  );
 
   return { tabLabel, nav };
 }

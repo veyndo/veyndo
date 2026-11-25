@@ -10,3 +10,7 @@ controls. `export.ts` exports authorized aggregate data and escapes spreadsheet
 formulas. `ReportChart` provides keyboard point values and a table alternative.
 Request identity, filters and current rights fence late/stale data. The server
 owns periods, numeric money aggregation, attribution and consent eligibility.
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md).

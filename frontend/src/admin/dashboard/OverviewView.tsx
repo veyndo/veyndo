@@ -1,6 +1,6 @@
 /** OverviewView renders verified shop state and typed user actions. */
 import { useReportText } from "../reports/report-i18n";
-import TodayReports from "../reports/TodayReports";
+import StudioSlot from "../shell/registry/StudioSlot";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import { storefrontURL } from "../../shared/api/shop-scope";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -29,7 +29,7 @@ export function OverviewView({
         <h1>{reportText("title")}</h1>
         <p>{reportText("hint")}</p>
       </div>
-      <TodayReports />
+      <StudioSlot location="admin.dashboard" context={{}} />
       <div className="overview-columns">
         <section className="studio-card inventory-card">
           <div className="card-heading">

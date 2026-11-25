@@ -1,5 +1,6 @@
 /** Source-derived static route explorer, runtime app discovery and isolated same-origin read tests. */
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "../../../kit/query";
 import { fillPath, routes, type Route } from "../../../kit/api";
 import type { RequestFn } from "../../shell/studio-types";
 import { createStudioRequest } from "../../shell/requests";
@@ -40,18 +41,8 @@ export default function ApiExplorer({
     [key, setKey] = useState(""),
     [result, setResult] = useState(""),
     [busy, setBusy] = useState(false),
-    [apps, setApps] = useState<any[]>([]);
-  useEffect(() => {
-    let active = true;
-    request("/api/apps")
-      .then((v) => {
-        if (active) setApps(v.packages ?? []);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [request]);
+    apps = useQuery(["apps", "packages"], () => request("/api/apps")).data
+      ?.packages as any[] | undefined;
   const run = async (mcp = false) => {
     setBusy(true);
     setResult("");
@@ -177,7 +168,7 @@ export default function ApiExplorer({
       </div>
       <details>
         <summary>{t("apps")}</summary>
-        {apps.map((p) => (
+        {(apps ?? []).map((p) => (
           <article key={p.id}>
             <strong>{p.id}</strong>
             <pre>{JSON.stringify(p.manifest.apiRoutes ?? [], null, 2)}</pre>

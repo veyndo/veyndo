@@ -1,4 +1,5 @@
 /** Developer API console exercises scopes, key lifetime, revoke confirmation and read-only route safety. */
+import { QueryProvider } from "../../src/kit/query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
@@ -90,7 +91,9 @@ it("live tests the existing scoped request and prevents path escape and write te
     );
   render(
     <LocaleProvider>
-      <ApiExplorer request={request} workspace="shop-test" />
+      <QueryProvider scope="shop-test">
+        <ApiExplorer request={request} workspace="shop-test" />
+      </QueryProvider>
     </LocaleProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Run read request" }));

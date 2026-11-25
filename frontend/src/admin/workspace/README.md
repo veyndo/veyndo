@@ -12,3 +12,7 @@ before projecting the workspace with the pinned SDK. A2UI v1.0 arranges
 the native directory, permitted intake and shipping policy controls.
 OpenUI provides the fallback. Both paths mount the same local bindings.
 External hosts can use the same SDK contract with their own scoped clients.
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`DesignRoute.tsx`](DesignRoute.tsx) adapt the Studio context to the area's views.

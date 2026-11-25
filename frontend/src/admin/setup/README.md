@@ -35,3 +35,7 @@ workspace RLS, revisions and history apply. No tables or new API operations.
 UI vocabulary is in `setup-i18n.ts` and `step-i18n.ts` (EN/DE/FR/ES).
 
 [User guide and local acceptance](../../../../docs/shop-setup.md).
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md).

@@ -23,3 +23,7 @@ Ownership, executable contracts and explicit migration boundaries are described 
 - [source-rules.ts](source-rules.ts): Convert source condition nodes for the graphical editor without losing original payload fields.
 
 [Full source inventory](../../../../docs/module-inventory.md) lists every module. Listings are not a claim of complete test coverage.
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`AutomationRoute.tsx`](AutomationRoute.tsx) adapt the Studio context to the area's views.

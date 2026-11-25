@@ -20,6 +20,10 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`email-languages.ts`](../../../../extensions/apps/email/studio/email-languages.ts): Supported transactional email template languages.
 - [`library-model.ts`](library-model.ts): Shared app discovery metadata, safe artwork sources and localized search independent of rendering.
 
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`AppsRoute.tsx`](AppsRoute.tsx), [`StoryfrontsRoute.tsx`](StoryfrontsRoute.tsx) adapt the Studio context to the area's views.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

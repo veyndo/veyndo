@@ -35,3 +35,7 @@ The shared request-error vocabulary explains this refusal in EN/DE/FR/ES and
 directs the cashier to retry the receipt, preserving the already recorded sale.
 
 `RegisterCheckoutOptions` keeps payment/contact settings in the tools pane; `RegisterCheckout` keeps final tender and completion separate. `useRegisterViewport` measures actual available register height after translation, wrapping and viewport changes.
+
+## Studio registration
+
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`POSRoute.tsx`](POSRoute.tsx) adapt the Studio context to the area's views.
