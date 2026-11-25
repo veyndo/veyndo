@@ -117,6 +117,7 @@
     "branding",
     "money_boundary_differential",
     "testing/test_integration_partitions",
-    "testing/test_partition_coverage"
+    "testing/test_partition_coverage",
+    "testing/component_mirrors_check"
   ]
 }
