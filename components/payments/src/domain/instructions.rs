@@ -1,6 +1,8 @@
 //! Typed recipient instructions of a payment method and their immutable admission into the attempt context.
 use crate::domain::attempt::Attempt;
+use serde::Serialize;
 use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::{Result, bad, conflict};
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -65,6 +67,13 @@ pub fn validated(value: &Value) -> Result<Value> {
     value.validate()?;
     serde_json::to_value(value).map_err(|_| bad("Invalid recipient instructions"))
 }
+/// The recipient instructions a provider accepted for the attempt.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Instructed {
+    recipient_instructions: Value,
+}
+
 pub fn admit(p: &Attempt, context: &mut Value, receipt: &Value) -> Result<bool> {
     let Some(value) = receipt.get("instructions") else {
         return Ok(false);
@@ -81,7 +90,12 @@ pub fn admit(p: &Attempt, context: &mut Value, receipt: &Value) -> Result<bool> 
         }
         return Ok(false);
     }
-    context["recipientInstructions"] = value;
+    merge(
+        context,
+        Instructed {
+            recipient_instructions: value,
+        },
+    )?;
     Ok(true)
 }
 pub fn snapshot(p: &Attempt, value: &Value) -> Result<Value> {
@@ -91,6 +105,25 @@ pub fn snapshot(p: &Attempt, value: &Value) -> Result<Value> {
 }
 #[cfg(test)]
 mod tests {
+    /// The typed instructions patch writes exactly the provider context the indexed assignment wrote.
+    #[test]
+    fn the_typed_instructions_match_the_indexed_write() {
+        use super::Instructed;
+        use veyndo_core::document::merge;
+        let value = serde_json::json!({"iban":"DE00"});
+        let mut indexed = serde_json::json!({"method":"transfer"});
+        indexed["recipientInstructions"] = value.clone();
+        let mut typed = serde_json::json!({"method":"transfer"});
+        merge(
+            &mut typed,
+            Instructed {
+                recipient_instructions: value,
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
+
     use super::{Instructions, admit, snapshot, validated};
     use crate::domain::attempt::{Attempt, sample};
     use serde_json::json;

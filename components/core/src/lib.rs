@@ -5,6 +5,7 @@ pub mod cache;
 pub mod channel_metrics;
 mod conversions;
 pub mod document;
+pub mod document_slot;
 mod failure;
 pub mod host_names;
 pub mod http_limits;

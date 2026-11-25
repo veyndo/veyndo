@@ -1,5 +1,6 @@
 //! Public method discovery: the active shipping methods with converted prices and the payment methods this visitor may choose.
 use crate::ports::Quotes;
+use crate::service::delivery::priced_shipping;
 use crate::store::cart_load;
 use serde_json::{Value, json};
 use veyndo_core::shop_scope::{channel, header, tenant};
@@ -29,16 +30,7 @@ pub async fn options(a: &State, quotes: &dyn Quotes, h: &RequestContext) -> Resu
         .shipping
         .iter()
         .filter(|v| v.active)
-        .map(|v| {
-            let mut result = method_text::localized_shipping(v, locale, &s);
-            result["price"] = json!(currencies::convert(v.price, &s.currencies, currency)?);
-            result["freeAbove"] = json!(
-                v.free_above
-                    .map(|v| currencies::convert(v, &s.currencies, currency))
-                    .transpose()?
-            );
-            Ok(result)
-        })
+        .map(|v| priced_shipping(v, locale, &s, currency))
         .collect::<Result<Vec<Value>>>()?;
     let available = quotes.available(&t, channel(h), &code).await?;
     let payments = s

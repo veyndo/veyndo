@@ -1,7 +1,7 @@
 //! Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record.
-use serde::Deserialize;
-use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad};
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
@@ -35,22 +35,38 @@ pub fn admit_payment(c: &StoredCart, quote: &Value) -> Result<()> {
     }
     Ok(())
 }
-/// Marks the purchase record with the merchant who placed it.
-pub fn purchase(c: &StoredCart, purchase: &mut Value) {
-    if let Some(actor) = &c.data.admin_actor {
-        purchase["adminActor"] = json!(actor);
-        purchase["adminCustomer"] = json!(c.data.customer_id);
-    }
-}
 /// Marks the order as created by a merchant.
-pub fn order(c: &StoredCart, order: &mut Value) {
+pub fn order(c: &StoredCart, order: &mut Value) -> Result<()> {
     if let Some(actor) = &c.data.admin_actor {
-        order["createdBy"] = json!({"source":"merchant","actor":actor});
+        merge(
+            order,
+            MerchantOrder {
+                created_by: CreatedBy {
+                    source: "merchant",
+                    actor,
+                },
+            },
+        )?;
     }
+    Ok(())
+}
+
+/// Who created an order a merchant placed.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MerchantOrder<'a> {
+    created_by: CreatedBy<'a>,
+}
+
+/// The merchant source and actor of an order.
+#[derive(Serialize)]
+struct CreatedBy<'a> {
+    source: &'static str,
+    actor: &'a str,
 }
 #[cfg(test)]
 mod tests {
-    use super::{admit_payment, order, purchase};
+    use super::{admit_payment, order};
     use serde_json::json;
     use veyndo_shop::types::cart::StoredCart;
 
@@ -81,20 +97,14 @@ mod tests {
 
     #[test]
     fn only_merchant_orders_carry_their_actor() {
-        let (mut bought, mut placed) = (json!({}), json!({}));
-        purchase(&cart(Some("merchant-1")), &mut bought);
-        order(&cart(Some("merchant-1")), &mut placed);
-        assert_eq!(
-            bought,
-            json!({"adminActor":"merchant-1","adminCustomer":"customer-1"})
-        );
-        assert_eq!(
-            placed["createdBy"],
-            json!({"source":"merchant","actor":"merchant-1"})
-        );
-        let (mut bought, mut placed) = (json!({}), json!({}));
-        purchase(&cart(None), &mut bought);
-        order(&cart(None), &mut placed);
-        assert_eq!((bought, placed), (json!({}), json!({})));
+        let base = json!({"id":"o1","state":"placed"});
+        let mut placed = base.clone();
+        order(&cart(Some("merchant-1")), &mut placed).unwrap();
+        let mut indexed = base.clone();
+        indexed["createdBy"] = json!({"source":"merchant","actor":"merchant-1"});
+        assert_eq!(placed, indexed);
+        let mut placed = base.clone();
+        order(&cart(None), &mut placed).unwrap();
+        assert_eq!(placed, base);
     }
 }

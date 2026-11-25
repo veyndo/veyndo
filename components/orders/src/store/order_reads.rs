@@ -1,21 +1,65 @@
 //! Token-redacted merchant order detail with its activity, and append-only operational notes.
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
+
+/// When the order was created and the email of its customer.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DetailFacts<'a> {
+    created_at: &'a Option<String>,
+    customer_email: &'a Option<String>,
+}
+
+/// The latest activity of an order, newest first.
+#[derive(Serialize)]
+struct Activity<'a> {
+    activity: Vec<ActivityEntry<'a>>,
+}
+
+/// One audited activity of an order.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ActivityEntry<'a> {
+    id: i64,
+    actor: &'a str,
+    kind: &'a str,
+    data: &'a Value,
+    created_at: &'a Option<String>,
+}
 
 /// The order without its cart token, with creation time and the customer's email.
 pub async fn detail(a: &State, t: &str, id: &str) -> Result<Value> {
     let r=sqlx::query!(r#"SELECT o.data #- '{cart,token}' AS "data!",o.created_at::text AS created,coalesce(o.data->'orderCustomer'->>'email',c.data->>'email') AS email FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2"#, t, id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Order not found".into()))?;
     let mut v: Value = r.data;
     crate::domain::order_fields::order_fields(&mut v);
-    v["createdAt"] = json!(r.created);
-    v["customerEmail"] = json!(r.email);
+    merge(
+        &mut v,
+        DetailFacts {
+            created_at: &r.created,
+            customer_email: &r.email,
+        },
+    )?;
     let rows=sqlx::query!("SELECT id,actor,kind,data,created_at::text AS created FROM order_activity WHERE tenant=$1 AND order_id=$2 ORDER BY id DESC LIMIT 100", t, id).fetch_all(&a.db).await?;
-    v["activity"]=json!(rows.iter().map(|r|json!({"id":r.id,"actor":r.actor,"kind":r.kind,"data":r.data,"createdAt":r.created})).collect::<Vec<_>>());
+    merge(
+        &mut v,
+        Activity {
+            activity: rows
+                .iter()
+                .map(|r| ActivityEntry {
+                    id: r.id,
+                    actor: &r.actor,
+                    kind: &r.kind,
+                    data: &r.data,
+                    created_at: &r.created,
+                })
+                .collect(),
+        },
+    )?;
     Ok(v)
 }
 
@@ -110,4 +154,46 @@ pub async fn bought(
     Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM orders o WHERE o.tenant=$1 AND (o.cart_id=$2 OR ($3::text IS NOT NULL AND o.data->'orderCustomer'->>'customerId'=$3)) AND EXISTS(SELECT 1 FROM jsonb_array_elements(o.data->'cart'->'lineItems') i WHERE i->>'id'=$4)) AS "exists!""#, t, cart, customer, product)
         .fetch_one(&a.db)
         .await?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Activity, ActivityEntry, DetailFacts};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed detail patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_detail_patches_match_the_indexed_writes() {
+        let (created, email) = (Some("2026-01-01".to_string()), None::<String>);
+        let data = json!({"text":"note"});
+        let mut indexed = json!({"id":"o1"});
+        indexed["createdAt"] = json!(created);
+        indexed["customerEmail"] = json!(email);
+        indexed["activity"] =
+            json!([{"id":7,"actor":"m","kind":"note","data":data,"createdAt":created}]);
+        let mut typed = json!({"id":"o1"});
+        merge(
+            &mut typed,
+            DetailFacts {
+                created_at: &created,
+                customer_email: &email,
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            Activity {
+                activity: vec![ActivityEntry {
+                    id: 7,
+                    actor: "m",
+                    kind: "note",
+                    data: &data,
+                    created_at: &created,
+                }],
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

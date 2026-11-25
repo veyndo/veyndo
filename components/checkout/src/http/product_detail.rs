@@ -6,11 +6,13 @@ use crate::store::cart_load;
 use crate::store::tax_conditions::{conditional, tax_settings_for_cart};
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
+use serde::Serialize;
 use serde_json::{Value, json};
 use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads;
 use veyndo_catalog::store::purchase_products as product_reviews;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::document::merge;
 use veyndo_core::shop_scope::{channel, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
 use veyndo_marketing::service::channels;
@@ -139,6 +141,20 @@ async fn reviews(a: &State, t: &str, family: &str) -> Result<Value> {
     )
 }
 
+/// The context price of a product in the requested currency.
+#[derive(Serialize)]
+struct ContextPrice<'a> {
+    price: f64,
+    currency: &'a str,
+}
+
+/// The option values that name a variant.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct VariantLabel {
+    variant_label: String,
+}
+
 /// A product as JSON with its context price in the requested currency.
 fn priced_json(
     p: &Product,
@@ -147,12 +163,17 @@ fn priced_json(
     currency: &veyndo_pricing::types::currency::Definition,
 ) -> Result<Value> {
     let mut v = json!(p);
-    v["price"] = json!(currencies::product_price(
-        priced.iter().find(|v| v.id == p.id).unwrap_or(p),
-        &config.currencies,
-        currency
-    )?);
-    v["currency"] = json!(currency.code);
+    merge(
+        &mut v,
+        ContextPrice {
+            price: currencies::product_price(
+                priced.iter().find(|v| v.id == p.id).unwrap_or(p),
+                &config.currencies,
+                currency,
+            )?,
+            currency: &currency.code,
+        },
+    )?;
     Ok(v)
 }
 
@@ -214,16 +235,21 @@ pub async fn product_detail(
     let delivery=method.map(|method|json!({"method":method,"minDays":if method.id=="pickup"{0}else{p.delivery_days.max(method.min_days)},"maxDays":if method.id=="pickup"{0}else{p.delivery_days.max(method.max_days)}}));
     let own = priced.iter().find(|v| v.id == id).unwrap_or(p);
     let mut product = priced_json(own, &priced, &config, currency)?;
-    product["variantLabel"] = json!(
-        p.options
-            .as_object()
-            .map(|o| o
-                .values()
-                .filter_map(|v| v.as_str())
-                .collect::<Vec<_>>()
-                .join(" / "))
-            .unwrap_or_default()
-    );
+    merge(
+        &mut product,
+        VariantLabel {
+            variant_label: p
+                .options
+                .as_object()
+                .map(|o| {
+                    o.values()
+                        .filter_map(|v| v.as_str())
+                        .collect::<Vec<_>>()
+                        .join(" / ")
+                })
+                .unwrap_or_default(),
+        },
+    )?;
     let variants = visible
         .iter()
         .filter(|v| v.id == family || v.parent_id.as_deref() == Some(&family))

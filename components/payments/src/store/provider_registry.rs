@@ -2,11 +2,11 @@
 use crate::domain::capture_intent::intent;
 use crate::domain::service_config::validate_service;
 use crate::store::jobs::enqueue_tx;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::{HashMap, HashSet};
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_core::{Result, State, bad, conflict, process_config, uid};
 use veyndo_inventory::store::attempt_reservations::reserve;
 use veyndo_shop::domain::patch::resolve;
@@ -212,6 +212,24 @@ struct PlacedCheckout {
     country: Option<String>,
 }
 
+/// The pending provider payment an order names.
+#[derive(Serialize)]
+struct PendingPayment<'a> {
+    payment: ProviderPayment<'a>,
+}
+
+/// The selected method, provider, attempt and environment of a pending provider payment; no money is charged yet.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProviderPayment<'a> {
+    method: &'a Value,
+    provider: &'a str,
+    state: &'a str,
+    attempt_id: &'a str,
+    environment: &'a str,
+    real_money_charged: bool,
+}
+
 pub async fn prepare_remote(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     c: &StoredCart,
@@ -275,7 +293,19 @@ pub async fn prepare_remote(
     config(provider, &m.version, &environment)?;
     let context = json!({"apiVersion":"1","accountRef":r.account_ref,"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":order.cart.price.currency_scale});
     let id = uid();
-    o["payment"] = json!({"method":selected.raw,"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
+    merge(
+        o,
+        PendingPayment {
+            payment: ProviderPayment {
+                method: &selected.raw,
+                provider,
+                state: "pending",
+                attempt_id: &id,
+                environment: &environment,
+                real_money_charged: false,
+            },
+        },
+    )?;
     sqlx::query!("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)", id, c.tenant, order.id.as_deref().ok_or(bad("Order ID required"))?, provider, m.version, minor, environment, context, currency, order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
     for item in &c.data.items {
         reserve(tx, &c.tenant, &id, &item.id, item.quantity as i32).await?;
@@ -387,4 +417,37 @@ pub async fn currency_methods_conn(
 ) -> Result<Settings> {
     let rows=sqlx::query_as!(ProviderRow, "SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC", t, channel).fetch_all(conn).await?;
     Ok(filter_methods(&enabled_rows(rows, code)?, code, s))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{PendingPayment, ProviderPayment};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed pending payment writes exactly the order document the indexed assignment wrote.
+    #[test]
+    fn the_typed_pending_payment_matches_the_indexed_write() {
+        let method = json!({"id":"paypal","mode":"app"});
+        let base =
+            json!({"id":"o1","payment":{"method":"old","provider":"manual","state":"pending"}});
+        let mut indexed = base.clone();
+        indexed["payment"] = json!({"method":method,"provider":"paypal","state":"pending","attemptId":"a1","environment":"sandbox","realMoneyCharged":false});
+        let mut typed = base.clone();
+        merge(
+            &mut typed,
+            PendingPayment {
+                payment: ProviderPayment {
+                    method: &method,
+                    provider: "paypal",
+                    state: "pending",
+                    attempt_id: "a1",
+                    environment: "sandbox",
+                    real_money_charged: false,
+                },
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

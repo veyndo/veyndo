@@ -1,9 +1,9 @@
 //! Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate.
 use crate::domain::company_model::CompanyFields;
 use crate::store::order_mutation::Tx;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad, conflict};
 
 pub async fn snapshot(
@@ -25,6 +25,20 @@ pub async fn snapshot(
  }
     Ok(())
 }
+/// The digest of the logo a staged company profile links, so the release can find or copy it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LogoDigest {
+    logo_digest: String,
+}
+
+/// The live logo a released company profile links.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LogoId {
+    logo_id: String,
+}
+
 async fn profile(tx: &mut Tx<'_>, t: &str, data: Value) -> Result<Value> {
     let logo = view::<CompanyFields>(&data).logo_id;
     let mut result = json!({"data":data});
@@ -36,7 +50,12 @@ async fn profile(tx: &mut Tx<'_>, t: &str, data: Value) -> Result<Value> {
         )
         .fetch_one(&mut **tx)
         .await?;
-        result["logoDigest"] = json!(digest);
+        merge(
+            &mut result,
+            LogoDigest {
+                logo_digest: digest,
+            },
+        )?;
     }
     Ok(result)
 }
@@ -72,7 +91,7 @@ pub async fn publish(
         .fetch_optional(&mut **tx)
         .await?;
         if let Some(existing) = existing {
-            data["logoId"] = json!(existing);
+            merge(&mut data, LogoId { logo_id: existing })?;
         } else {
             let n=sqlx::query!("INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) SELECT $1,id,content,digest,mime,width,height FROM company_logos WHERE tenant=$2 AND id=$3 AND digest=$4 ON CONFLICT(tenant,id) DO UPDATE SET digest=company_logos.digest WHERE company_logos.digest=EXCLUDED.digest", live, stage, id, input.logo_digest.as_deref()).execute(&mut **tx).await?.rows_affected();
             if n != 1 {
@@ -114,4 +133,38 @@ pub async fn live_value(tx: &mut Tx<'_>, t: &str, key: &str) -> Result<Value> {
         .await?
     };
     profile(tx, t, data).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{LogoDigest, LogoId};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed release patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_release_patches_match_the_indexed_writes() {
+        let mut indexed = json!({"data":{"logoId":"l1"}});
+        indexed["logoDigest"] = json!("abc");
+        let mut typed = json!({"data":{"logoId":"l1"}});
+        merge(
+            &mut typed,
+            LogoDigest {
+                logo_digest: "abc".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+        let mut indexed = json!({"logoId":"stage"});
+        indexed["logoId"] = json!("live");
+        let mut typed = json!({"logoId":"stage"});
+        merge(
+            &mut typed,
+            LogoId {
+                logo_id: "live".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

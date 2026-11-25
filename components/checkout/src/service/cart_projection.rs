@@ -7,8 +7,10 @@ use crate::http::buyer_identity::browser_checkout_transport;
 use crate::ports::Quotes;
 use crate::service::delivery::{dates_conn, enrich};
 use crate::store::tax_conditions::tax_settings_for_cart;
+use serde::Serialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{RequestContext, Result, State, bad, process_config};
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::Settings;
@@ -49,8 +51,13 @@ pub async fn project(
         && let Some(order) = &c.data.order
     {
         let mut result = view::<OrderRef>(order).cart;
-        result["status"] = json!(c.status);
-        result["order"] = order.clone();
+        merge(
+            &mut result,
+            CompletedCart {
+                status: &c.status,
+                order,
+            },
+        )?;
         return Ok(result);
     }
     let mut ps = ports.products(&c.tenant, &chain, &c.data.items).await?;
@@ -88,12 +95,19 @@ pub async fn project(
     result = ports
         .adjust(c, &preview, &ps, result, &config, revision)
         .await?;
-    result["selectionNeedsConfirmation"] = json!(changed);
-    result["legal"] = json!({"requiresDigital":!config.is_business(&c.data.group) && ps.iter().any(|p|digital(&p.extra)),"strictCheckout":config.legal.strict_checkout});
-    if include_policy_version {
-        result["legal"]["policyVersion"] = json!(policy_version(&config.legal));
-    }
-    checkout_service(c, &config, paypal_environment.as_deref(), &mut result);
+    merge(
+        &mut result,
+        CartLegalState {
+            selection_needs_confirmation: changed,
+            legal: CartLegal {
+                requires_digital: !config.is_business(&c.data.group)
+                    && ps.iter().any(|p| digital(&p.extra)),
+                strict_checkout: config.legal.strict_checkout,
+                policy_version: include_policy_version.then(|| policy_version(&config.legal)),
+            },
+        },
+    )?;
+    checkout_service(c, &config, paypal_environment.as_deref(), &mut result)?;
     finish(a, c, &config, locale, chain, result).await
 }
 
@@ -103,17 +117,17 @@ fn checkout_service(
     config: &Settings,
     paypal_environment: Option<&str>,
     result: &mut Value,
-) {
+) -> Result<()> {
     if c.status != "open"
         || c.data.customer_id.is_none()
         || c.data.admin_actor.is_some()
         || c.data.pos_actor.is_some()
         || config.is_business(&c.data.group)
     {
-        return;
+        return Ok(());
     }
     let Some(transport) = browser_checkout_transport(&c.tenant) else {
-        return;
+        return Ok(());
     };
     let process = process_config::get();
     let quoted = quote_view(result);
@@ -123,12 +137,85 @@ fn checkout_service(
         && paypal_environment.is_some_and(|e| test_environment(e, process.strict))
         && !has_saved_funding(c);
     if simulated || paypal_sandbox {
-        result["checkoutService"] =
-            json!({"legalPolicyVersion":policy_version(&config.legal),"transport":transport});
-        if paypal_sandbox {
-            result["checkoutService"]["paypalSandbox"] = json!(true);
-        }
+        merge(
+            result,
+            OfferedService {
+                checkout_service: TestCheckoutService {
+                    legal_policy_version: policy_version(&config.legal),
+                    transport,
+                    paypal_sandbox: paypal_sandbox.then_some(true),
+                },
+            },
+        )?;
     }
+    Ok(())
+}
+
+/// A completed cart answers with the quote frozen in its order.
+#[derive(Serialize)]
+struct CompletedCart<'a> {
+    status: &'a str,
+    order: &'a Value,
+}
+
+/// Whether the resolved selection changed, and what the legal checkout requires.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CartLegalState {
+    selection_needs_confirmation: bool,
+    legal: CartLegal,
+}
+
+/// The legal requirements of the cart; the policy version only when asked for.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CartLegal {
+    requires_digital: bool,
+    strict_checkout: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    policy_version: Option<String>,
+}
+
+/// The test checkout service a signed-in consumer may use.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OfferedService {
+    checkout_service: TestCheckoutService,
+}
+
+/// The policy version and transport of the test checkout service; `paypalSandbox` only for the PayPal sandbox.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TestCheckoutService {
+    legal_policy_version: String,
+    transport: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    paypal_sandbox: Option<bool>,
+}
+
+/// The exact minor total of the cart price.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MinorTotal {
+    total_minor: String,
+}
+
+/// The language a cart is shown in and the accepted app configuration inputs it restores.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CartLanguage<'a> {
+    locale: String,
+    language_id_chain: Vec<String>,
+    saved_configurations: Vec<SavedConfiguration<'a>>,
+}
+
+/// One accepted app configuration input of a cart line.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SavedConfiguration<'a> {
+    app: &'a str,
+    product_id: &'a str,
+    fields: &'a Value,
 }
 
 /// Delivery dates, the exact minor total, the company preview, the language and the saved app configurations.
@@ -142,31 +229,130 @@ async fn finish(
 ) -> Result<Value> {
     dates_conn(&mut *a.db.begin().await?, &mut result).await?;
     let currency = config.currencies.selected(&c.data.currency)?;
-    result["price"]["totalMinor"] = json!(
-        currencies::amount(
-            quote_view(&result)
-                .price
-                .total_price
-                .as_f64()
-                .ok_or(bad("Invalid total"))?,
-            &currency.code,
-            currency.scale
-        )?
-        .minor()
-        .to_string()
-    );
+    let total_minor = currencies::amount(
+        quote_view(&result)
+            .price
+            .total_price
+            .as_f64()
+            .ok_or(bad("Invalid total"))?,
+        &currency.code,
+        currency.scale,
+    )?
+    .minor()
+    .to_string();
+    merge(field(&mut result, "price")?, MinorTotal { total_minor })?;
     veyndo_b2b::store::purchase::preview(a, c, &mut result).await?;
-    result["locale"] = json!(locale);
-    result["languageIdChain"] = json!(chain);
     // Restore accepted inputs even before the product is added. Fees and rule
     // snapshots remain native pricing data, not editable form state.
     let mut saved = c.data.app_configurations.values().collect::<Vec<_>>();
     saved.sort_by(|a, b| (&a.app, &a.product_id).cmp(&(&b.app, &b.product_id)));
-    result["savedConfigurations"] = json!(
-        saved
-            .iter()
-            .map(|v| json!({"app":v.app,"productId":v.product_id,"fields":v.fields}))
-            .collect::<Vec<_>>()
-    );
+    merge(
+        &mut result,
+        CartLanguage {
+            locale,
+            language_id_chain: chain,
+            saved_configurations: saved
+                .iter()
+                .map(|v| SavedConfiguration {
+                    app: &v.app,
+                    product_id: &v.product_id,
+                    fields: &v.fields,
+                })
+                .collect(),
+        },
+    )?;
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        CartLanguage, CartLegal, CartLegalState, CompletedCart, MinorTotal, OfferedService,
+        SavedConfiguration, TestCheckoutService,
+    };
+    use serde_json::json;
+    use veyndo_core::document::merge;
+    use veyndo_core::document_slot::field;
+
+    /// The typed cart projection patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_cart_patches_match_the_indexed_writes() {
+        let order = json!({"id":"o1","cart":{"id":"c1"}});
+        let mut indexed = json!({"id":"c1"});
+        indexed["status"] = json!("completed");
+        indexed["order"] = order.clone();
+        let mut typed = json!({"id":"c1"});
+        merge(
+            &mut typed,
+            CompletedCart {
+                status: "completed",
+                order: &order,
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+        for (policy, sandbox) in [(true, true), (false, false)] {
+            let base = json!({"id":"c1","price":{"totalPrice":12.5}});
+            let mut indexed = base.clone();
+            indexed["selectionNeedsConfirmation"] = json!(true);
+            indexed["legal"] = json!({"requiresDigital":false,"strictCheckout":true});
+            if policy {
+                indexed["legal"]["policyVersion"] = json!("v1");
+            }
+            indexed["checkoutService"] = json!({"legalPolicyVersion":"v1","transport":"redirect"});
+            if sandbox {
+                indexed["checkoutService"]["paypalSandbox"] = json!(true);
+            }
+            indexed["price"]["totalMinor"] = json!("1250");
+            indexed["locale"] = json!("de-DE");
+            indexed["languageIdChain"] = json!(["de-DE", "en-GB"]);
+            indexed["savedConfigurations"] = json!([{"app":"a","productId":"p","fields":{"x":1}}]);
+            let mut typed = base.clone();
+            merge(
+                &mut typed,
+                CartLegalState {
+                    selection_needs_confirmation: true,
+                    legal: CartLegal {
+                        requires_digital: false,
+                        strict_checkout: true,
+                        policy_version: policy.then(|| "v1".to_string()),
+                    },
+                },
+            )
+            .unwrap();
+            merge(
+                &mut typed,
+                OfferedService {
+                    checkout_service: TestCheckoutService {
+                        legal_policy_version: "v1".into(),
+                        transport: "redirect",
+                        paypal_sandbox: sandbox.then_some(true),
+                    },
+                },
+            )
+            .unwrap();
+            merge(
+                field(&mut typed, "price").unwrap(),
+                MinorTotal {
+                    total_minor: "1250".into(),
+                },
+            )
+            .unwrap();
+            let fields = json!({"x":1});
+            merge(
+                &mut typed,
+                CartLanguage {
+                    locale: "de-DE".into(),
+                    language_id_chain: vec!["de-DE".into(), "en-GB".into()],
+                    saved_configurations: vec![SavedConfiguration {
+                        app: "a",
+                        product_id: "p",
+                        fields: &fields,
+                    }],
+                },
+            )
+            .unwrap();
+            assert_eq!(typed, indexed);
+        }
+    }
 }

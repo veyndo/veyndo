@@ -8,10 +8,10 @@ use axum::Json;
 use axum::extract::State as Shared;
 use axum::http::header::CACHE_CONTROL;
 use axum::response::IntoResponse;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_b2b::store::access::guard_conn;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{channel, tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::domain::cart_admission::request;
@@ -71,9 +71,31 @@ pub async fn issue(
     let mut result =
         json!({"checkoutPath":checkout_path(&c, &ticket),"expiresInSeconds":600,"singleUse":true});
     if let Some(key) = recovery {
-        result["recovery"] = json!({"cartId":c.id,"key":key});
+        merge(
+            &mut result,
+            RecoveryTicket {
+                recovery: RecoveryKeyOf {
+                    cart_id: &c.id,
+                    key: &key,
+                },
+            },
+        )?;
     }
     Ok(Json(result))
+}
+
+/// The recovery key of a handoff that may be resumed after the ticket expires.
+#[derive(Serialize)]
+struct RecoveryTicket<'a> {
+    recovery: RecoveryKeyOf<'a>,
+}
+
+/// The cart a recovery key resumes.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RecoveryKeyOf<'a> {
+    cart_id: &'a str,
+    key: &'a str,
 }
 
 /// The hosted checkout path; the ticket stays in the fragment and never reaches a server log.

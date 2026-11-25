@@ -1,7 +1,7 @@
 //! Company profile admission, sparse channel inheritance and structured-address print projection.
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad};
 use veyndo_shipping::domain::geography;
 use veyndo_shop::types::settings::Settings;
@@ -47,6 +47,27 @@ pub const FIELDS: &[&str] = &[
     "responsibilityScope",
 ];
 pub const LOCALIZED: &[&str] = &["brandName", "legalNotice", "responsibilityScope"];
+/// The single-line company address derived from its parts.
+#[derive(Serialize)]
+struct Address {
+    address: String,
+}
+
+/// The shop's default brand name on its public company data.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Brand {
+    brand_name: String,
+}
+
+/// The public company logo and the storefront path that serves it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PublicLogo<'a> {
+    logo_id: &'a str,
+    logo_url: String,
+}
+
 pub fn resolve(base: &Value, overrides: &Value) -> Value {
     let mut value = base.clone();
     if !value.is_object() {
@@ -75,7 +96,9 @@ pub fn resolve(base: &Value, overrides: &Value) -> Value {
         .as_str()
         .is_some_and(|s| !s.trim().is_empty())
     {
-        value["address"] = json!(address(&value));
+        let address = address(&value);
+        // The resolved value is an object, so the merge cannot fail.
+        let _ = merge(&mut value, Address { address });
     }
     value
 }
@@ -253,14 +276,18 @@ pub fn public(
     for key in LOCALIZED {
         public[*key] = json!(text(&data[*key]));
     }
-    if let Some(name) = default_brand {
-        public["brandName"] = json!(name);
+    // The public projection is an object, so the merges cannot fail.
+    if let Some(brand_name) = default_brand {
+        let _ = merge(&mut public, Brand { brand_name });
     }
     if let Some(logo) = input.logo_id.as_deref().filter(|s| !s.is_empty()) {
-        public["logoId"] = json!(logo);
-        public["logoUrl"] = json!(format!(
-            "/store-api/company-logo/{logo}?shop={t}&channel={channel}"
-        ));
+        let _ = merge(
+            &mut public,
+            PublicLogo {
+                logo_id: logo,
+                logo_url: format!("/store-api/company-logo/{logo}?shop={t}&channel={channel}"),
+            },
+        );
     }
     public
 }
@@ -286,6 +313,42 @@ pub struct CompanyRecord {
 
 #[cfg(test)]
 mod tests {
+    /// The typed company patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_company_patches_match_the_indexed_writes() {
+        use super::{Address, Brand, PublicLogo};
+        use veyndo_core::document::merge;
+        let mut indexed = serde_json::json!({"name":"Shop"});
+        indexed["address"] = serde_json::json!("Street 1");
+        indexed["brandName"] = serde_json::json!("Brand");
+        indexed["logoId"] = serde_json::json!("l1");
+        indexed["logoUrl"] = serde_json::json!("/store-api/company-logo/l1?shop=t&channel=c");
+        let mut typed = serde_json::json!({"name":"Shop"});
+        merge(
+            &mut typed,
+            Address {
+                address: "Street 1".into(),
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            Brand {
+                brand_name: "Brand".into(),
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            PublicLogo {
+                logo_id: "l1",
+                logo_url: "/store-api/company-logo/l1?shop=t&channel=c".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
+
     use super::{address, public, resolve, validate};
     use serde_json::{Value, json};
     use veyndo_shop::types::settings::Settings;

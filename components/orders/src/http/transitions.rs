@@ -1,6 +1,7 @@
 //! Order transition transport: revision-checked order, payment and delivery state changes with idempotent replay.
 use crate::domain::order_fields::order_fields;
 use crate::domain::order_machine::{MachineEdge, OrderMachine};
+use crate::domain::order_patches::{Revised, Stated, Workflowed, strip_cart_token};
 use crate::domain::order_transitions::{cancellation_blocker, delivery, payment};
 use crate::domain::order_workflow::{guard, workflow};
 use crate::store::machine::machine;
@@ -10,7 +11,8 @@ use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, shop_scope::header,
     store::history_context,
@@ -128,9 +130,9 @@ pub async fn transition_order(
                 }
                 veyndo_b2b::store::purchase::release_budget(&mut tx, &t, &id).await?;
                 veyndo_inventory::store::reservations::release(&mut tx, &t, &id).await?;
-                o["payment"]["state"] = json!("cancelled");
+                merge(field(&mut o, "payment")?, Stated { state: "cancelled" })?;
             }
-            o["state"] = json!(target);
+            merge(&mut o, Stated { state: target })?;
         }
         "payment" => {
             if let Some(reason) = guard(&o, &machine, kind, target) {
@@ -146,7 +148,12 @@ pub async fn transition_order(
         }
         _ => return Err(bad("Kind must be payment or delivery")),
     }
-    o["revision"] = json!(revision + 1);
+    merge(
+        &mut o,
+        Revised {
+            revision: revision + 1,
+        },
+    )?;
     order_fields(&mut o);
     let event_kind = match kind {
         "order" => "order.state_changed",
@@ -154,9 +161,7 @@ pub async fn transition_order(
         _ => "delivery.state_changed",
     };
     let mut event_order = o.clone();
-    if let Some(cart) = event_order["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(&mut event_order)?;
     order_mutation::persist(&mut tx, &t, &h, &mut o, order_mutation::Audit {
         kind:"transition",
         data:json!({"kind":kind,"state":target,"revision":revision+1,"trackingCode":input.tracking_code,"trackingUrl":input.tracking_url,"deliveryIndex":input.delivery_index,"requestKey":request_key,"lifecycle":if kind=="order" {machine.transitions.iter().find(|e|e.to==target && e.from==before.state).and_then(|e|e.policy.as_ref())} else {None}}),
@@ -164,16 +169,13 @@ pub async fn transition_order(
         event:json!({"orderId":id,"kind":kind,"from":if kind=="order" {before.state.clone()} else if kind=="payment" {before.payment.state.clone()} else {before.delivery(input.delivery_index.as_u64().unwrap_or(0) as usize).state},"state":target,"revision":revision+1,"requestKey":request_key,"order":event_order}),
     }).await?;
     let mut response = o.clone();
-    if let Some(cart) = response["cart"].as_object_mut() {
-        cart.remove("token");
-    }
-    response["workflow"] = workflow(&response, &machine, machine_revision, &h);
+    strip_cart_token(&mut response)?;
+    let workflow = workflow(&response, &machine, machine_revision, &h);
+    merge(&mut response, Workflowed { workflow })?;
     if let Some(key) = request_key {
         order_mutation::remember(&mut tx, &t, &id, key, &fingerprint, &response).await?;
     }
     tx.commit().await?;
-    if let Some(cart) = o["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(&mut o)?;
     Ok(Json(response))
 }

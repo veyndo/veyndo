@@ -1,10 +1,12 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
+use crate::domain::order_patches::strip_cart_token;
 use crate::ports::Payments;
 use crate::store::company;
 use crate::types::order_document::OrderControl;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 
@@ -182,13 +184,11 @@ pub async fn create(
     let number = format!("{prefix}-{number:08}");
     let receipt = uid();
     let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original.seller.clone()}else{seller},"order":if let Some(ref original)=reference{original.order.clone()}else{order.clone()},"issuedAt":sqlx::query_scalar!("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s.number.clone())});
-    if let Some(instructions) = payment_instructions {
-        snapshot["paymentInstructions"] = instructions;
-    }
-    if let Some(package) = package {
-        snapshot["deliveryIndex"] = input.delivery_index.clone();
-        snapshot["delivery"] = package;
-    }
+    complete_snapshot(
+        &mut snapshot,
+        payment_instructions,
+        package.map(|delivery| (&input.delivery_index, delivery)),
+    )?;
     sqlx::query!("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)", receipt, t, id, kind, number, locale, snapshot, key, fingerprint).execute(&mut *tx).await?;
     sqlx::query!(
         "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'receipt',$4)",
@@ -210,6 +210,47 @@ pub async fn create(
     Ok(
         json!({"id":receipt,"number":number,"pdfPath":format!("/api/merchant/receipts/{receipt}/pdf")}),
     )
+}
+
+/// The transfer instructions an invoice prints.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct InstructedReceipt {
+    payment_instructions: Value,
+}
+
+/// The delivery a delivery note covers.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PackageReceipt<'a> {
+    delivery_index: &'a Value,
+    delivery: Value,
+}
+
+/// Adds the transfer instructions an invoice prints and the delivery a delivery note covers to the receipt snapshot.
+fn complete_snapshot(
+    snapshot: &mut Value,
+    instructions: Option<Value>,
+    package: Option<(&Value, Value)>,
+) -> Result<()> {
+    if let Some(payment_instructions) = instructions {
+        merge(
+            &mut *snapshot,
+            InstructedReceipt {
+                payment_instructions,
+            },
+        )?;
+    }
+    if let Some((delivery_index, delivery)) = package {
+        merge(
+            snapshot,
+            PackageReceipt {
+                delivery_index,
+                delivery,
+            },
+        )?;
+    }
+    Ok(())
 }
 
 /// The frozen snapshot of a receipt and, for an imported original, its stored document.
@@ -239,9 +280,7 @@ pub async fn snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value
         StatusCode::NOT_FOUND,
         "Issued receipt not found for this order".into(),
     ))?;
-    if let Some(cart) = v["order"]["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(field(&mut v, "order")?)?;
     Ok(v)
 }
 
@@ -265,4 +304,38 @@ pub async fn settings_revision(a: &State, t: &str) -> Result<i64> {
             .fetch_one(&a.db)
             .await?,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{InstructedReceipt, PackageReceipt};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed receipt snapshot patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_receipt_patches_match_the_indexed_writes() {
+        let base = json!({"number":"INV-00000001","kind":"invoice","order":{"id":"o1"}});
+        let mut indexed = base.clone();
+        indexed["paymentInstructions"] = json!({"iban":"DE00"});
+        indexed["deliveryIndex"] = json!(1);
+        indexed["delivery"] = json!({"positions":[]});
+        let mut typed = base.clone();
+        merge(
+            &mut typed,
+            InstructedReceipt {
+                payment_instructions: json!({"iban":"DE00"}),
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            PackageReceipt {
+                delivery_index: &json!(1),
+                delivery: json!({"positions":[]}),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

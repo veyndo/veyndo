@@ -264,7 +264,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 54,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },
@@ -329,7 +329,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 41,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },
@@ -361,7 +361,7 @@
         "orders": "write: the payment ledger updates the order payment state (commands.rs, instructions.rs, order_ledger.rs, remote.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 32,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },

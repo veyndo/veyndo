@@ -1,9 +1,11 @@
 //! Immutable private carrier documents belong to the existing order receipt store, never product assets.
+use crate::domain::order_patches::{Revised, TrackingCode, TrackingUrl};
 use crate::store::order_mutation::{self, Audit, Tx};
 use crate::types::order_document::{DeliveryControl, OrderControl};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash, uid};
 
 /// The digest a carrier app must echo: it changes whenever the package, its method or the destination changes.
@@ -136,6 +138,20 @@ impl<'a> Document<'a> {
     }
 }
 
+/// The shipping label document a delivery carries.
+#[derive(Serialize)]
+struct Label<'a> {
+    label: LabelRef<'a>,
+}
+
+/// The label document and the carrier app that issued it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LabelRef<'a> {
+    id: &'a str,
+    source_app: &'a str,
+}
+
 /// Stores the document once per request key inside the app's package write transaction and marks the package as labelled.
 pub async fn record(
     tx: &mut Tx<'_>,
@@ -180,7 +196,7 @@ pub async fn record(
             "Package allocation changed; reconcile the provider result before booking again",
         ));
     }
-    let d = order["deliveries"]
+    let d = field(&mut order, "deliveries")?
         .as_array_mut()
         .and_then(|v| v.get_mut(index))
         .ok_or(bad("Shipment unavailable"))?;
@@ -203,18 +219,54 @@ pub async fn record(
     sqlx::query!("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint,content,source_app,customer_visible) VALUES($1,$2,$3,$4,$5,'en',$6,$7,$8,$9,$10,$11)", document, t, id, kind, number, snapshot, key, fingerprint, content, app, kind=="return_label").execute(&mut **tx).await?;
     if kind == "shipping_label" {
         d.as_object_mut().unwrap().remove("booking");
-        d["label"] = json!({"id":document,"sourceApp":app});
-        d["trackingCode"] = json!(tracking);
-        d["trackingUrl"] = if url.is_empty() {
-            Value::Null
-        } else {
-            json!(url)
-        };
+        merge(
+            &mut *d,
+            Label {
+                label: LabelRef {
+                    id: &document,
+                    source_app: app,
+                },
+            },
+        )?;
+        merge(
+            &mut *d,
+            TrackingCode {
+                tracking_code: &tracking,
+            },
+        )?;
+        merge(d, TrackingUrl::of(&url))?;
     }
-    order["revision"] = json!(view::<OrderControl>(&order).revision.as_u64().unwrap_or(1) + 1);
+    let revision = view::<OrderControl>(&order).revision.as_u64().unwrap_or(1) + 1;
+    merge(&mut order, Revised { revision })?;
     order_mutation::persist(tx,t,h,&mut order,Audit {
         kind:"receipt", data:json!({"id":document,"number":number,"kind":kind,"state":"issued","sourceApp":app}),
         event_kind:"document.created",event:json!({"orderId":id,"documentId":document,"kind":kind,"sourceApp":app}),
     }).await?;
     Ok(json!({"id":document,"number":number}))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Label, LabelRef};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed label patch writes exactly what the indexed assignment wrote.
+    #[test]
+    fn the_typed_label_matches_the_indexed_write() {
+        let mut indexed = json!({"state":"open","booking":null});
+        indexed["label"] = json!({"id":"doc-1","sourceApp":"carrier"});
+        let mut typed = json!({"state":"open","booking":null});
+        merge(
+            &mut typed,
+            Label {
+                label: LabelRef {
+                    id: "doc-1",
+                    source_app: "carrier",
+                },
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

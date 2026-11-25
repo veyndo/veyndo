@@ -1,8 +1,8 @@
 //! The authoritative cart quote: quantity pricing, app configuration fees and localized totals. Totals are added as whole minor units.
 use crate::domain::quote_view::LineView;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::domain::context;
@@ -20,6 +20,14 @@ use veyndo_shop::types::cart::{AppConfiguration, StoredCart};
 #[serde(default)]
 struct ConfigApp {
     app: Value,
+}
+
+/// The app configurations of a quote line: the first by app id, and all of them.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LineConfigurations<'a> {
+    configuration: &'a Value,
+    app_configurations: &'a [Value],
 }
 
 /// The priced cart: line prices with tiers, app configuration fees and taxes, totals summed in whole minor units.
@@ -115,9 +123,14 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             let (a, b) = (view::<ConfigApp>(a).app, view::<ConfigApp>(b).app);
             a.as_str().cmp(&b.as_str())
         });
-        if !configs.is_empty() {
-            line["configuration"] = configs[0].clone();
-            line["appConfigurations"] = json!(configs);
+        if let Some(first) = configs.first() {
+            merge(
+                line,
+                LineConfigurations {
+                    configuration: first,
+                    app_configurations: &configs,
+                },
+            )?;
         }
     }
     let decimal = |minor: u64| money::from_minor(minor, currency.scale);

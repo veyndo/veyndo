@@ -1,5 +1,6 @@
 //! Customer-owned order reads share one tenant/identity predicate and a public projection.
 use crate::domain::order_fields::order_fields;
+use crate::domain::order_patches::CreatedAt;
 use crate::store::account_orders;
 use crate::store::machine::machine;
 use axum::Json;
@@ -8,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use veyndo_app_model::native_lifecycle_snapshot::project_labels;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
 use veyndo_customers::service::sessions::identify;
@@ -73,10 +74,29 @@ struct CustomerPayment {
     method: Value,
 }
 
+/// The labels of the order machine states, as the account projection shows them.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StateLabels<'a> {
+    state_labels: &'a Value,
+}
+
+/// The customer-visible receipts of an order.
+#[derive(Serialize)]
+struct OrderReceipts {
+    receipts: Vec<Value>,
+}
+
 pub fn project(raw: &Value, created: &str) -> Value {
     let order: CustomerOrder = view(raw);
     let mut v = json!(order);
-    v["createdAt"] = json!(created);
+    // A serialized record is an object, so the merge cannot fail.
+    let _ = merge(
+        &mut v,
+        CreatedAt {
+            created_at: &created,
+        },
+    );
     order_fields(&mut v);
     project_labels(raw, &mut v);
     v
@@ -124,7 +144,12 @@ pub async fn list(
     );
     for v in &mut elements {
         if !view::<Listed>(v).state_labels.is_object() {
-            v["stateLabels"] = labels.clone();
+            merge(
+                v,
+                StateLabels {
+                    state_labels: &labels,
+                },
+            )?;
         }
     }
     Ok(Json(json!({"elements":elements,"nextCursor":next})))
@@ -140,21 +165,57 @@ pub async fn detail(
         .await?
         .pop()
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-    v["receipts"] = json!(account_orders::receipts(&a, &t, &id).await?);
+    merge(
+        &mut v,
+        OrderReceipts {
+            receipts: account_orders::receipts(&a, &t, &id).await?,
+        },
+    )?;
     let (machine, _) = machine(&a.db, &t).await?;
     if !view::<Listed>(&v).state_labels.is_object() {
-        v["stateLabels"] = json!(
+        let labels = json!(
             machine
                 .states
                 .iter()
                 .map(|s| (&s.id, &s.label))
                 .collect::<HashMap<_, _>>()
         );
+        merge(
+            &mut v,
+            StateLabels {
+                state_labels: &labels,
+            },
+        )?;
     }
     Ok(Json(v))
 }
 #[cfg(test)]
 mod tests {
+    /// The typed account projection patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_account_patches_match_the_indexed_writes() {
+        let labels = json!({"placed":{"en":"Placed"}});
+        let mut indexed = json!({"id":"o1"});
+        indexed["stateLabels"] = labels.clone();
+        indexed["receipts"] = json!([{"id":"r1"}]);
+        let mut typed = json!({"id":"o1"});
+        merge(
+            &mut typed,
+            StateLabels {
+                state_labels: &labels,
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            OrderReceipts {
+                receipts: vec![json!({"id":"r1"})],
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
+
     use super::*;
     #[test]
     fn projection_does_not_leak_operational_or_session_data() {

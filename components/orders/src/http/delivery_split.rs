@@ -1,5 +1,6 @@
 //! Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved.
 use crate::domain::order_fields::order_fields;
+use crate::domain::order_patches::{Revised, Workflowed, strip_cart_token};
 use crate::domain::order_workflow::{guard, workflow};
 use crate::http::transitions::accepted_machine;
 use crate::store::machine::machine;
@@ -9,7 +10,8 @@ use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, shop_scope::header,
     store::history_context, uid,
@@ -79,7 +81,7 @@ pub async fn split_delivery(
         terminal,
         &split_id,
     )?;
-    let ds = o["deliveries"]
+    let ds = field(&mut o, "deliveries")?
         .as_array_mut()
         .ok_or(bad("Order has no shipments"))?;
     if ds.len() >= 30 {
@@ -87,12 +89,15 @@ pub async fn split_delivery(
     }
     ds[index] = original;
     ds.push(parcel);
-    o["revision"] = json!(revision + 1);
+    merge(
+        &mut o,
+        Revised {
+            revision: revision + 1,
+        },
+    )?;
     order_fields(&mut o);
     let mut event_order = o.clone();
-    if let Some(cart) = event_order["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(&mut event_order)?;
     let activity = json!({"kind":"delivery","state":"split","sourceIndex":index,"deliveryId":split_id,"positions":input.positions,"requestKey":key,"revision":revision+1});
     let event = json!({"orderId":id,"deliveryId":split_id,"sourceIndex":index,"positions":input.positions,"kind":"delivery","state":"split","revision":revision+1,"requestKey":key,"order":event_order});
     order_mutation::persist(
@@ -109,10 +114,9 @@ pub async fn split_delivery(
     )
     .await?;
     let mut response = o;
-    if let Some(c) = response["cart"].as_object_mut() {
-        c.remove("token");
-    }
-    response["workflow"] = workflow(&response, &m, mr, &h);
+    strip_cart_token(&mut response)?;
+    let workflow = workflow(&response, &m, mr, &h);
+    merge(&mut response, Workflowed { workflow })?;
     order_mutation::remember(&mut tx, &t, &id, key, &fingerprint, &response).await?;
     tx.commit().await?;
     Ok(Json(response))
