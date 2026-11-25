@@ -44,13 +44,13 @@ and [test coverage](testing.md). Diagram images open at full size.
 | Tenant-scoped database leases | `components/core/src/request_context.rs`, `crates/runtime/src/tenant_scope.rs`, `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security}.rs` | Server-derived scope; PostgreSQL row policies |
 | Product, category and checkout operations | `src/commerce/`, `src/order_checkout.rs`, `src/cart_*.rs` | Locked catalog/settings/cart snapshot |
 | Exact money boundary | `components/pricing/src/domain/money.rs` | Checked minor integers and explicit currency scale |
-| Stock allocation | `components/inventory/src/store/reservations.rs`, migration 047 | Persisted quantities linked to tenant + order + product |
+| Stock allocation | `components/inventory/src/store/reservations.rs`, `components/inventory/migrations/0001-baseline.sql` | Persisted quantities linked to tenant + order + product |
 | Payments | `src/payments/{state,storage,generic_receipts,worker}.rs` | Verified receipts, immutable provider identity, fenced durable jobs |
 | Rules, flows and app events | `src/marketing/`, `src/apps/`, `src/outbox.rs` | Versioned contracts and current action permissions |
 | Read caching, admission and delivery | `src/performance/` | Immutable Arc handles; current SQL versions/access snapshots; outbox eviction; secret-free compression |
 | Shop memory and retrieval | `src/cognition/`, `components/intelligence/src/knowledge/` | Provenance/publication filters and persisted event receipts |
 | Operator controls | `src/platform/` | Separate personal operator grant, audit and revisions |
-| Migrations / startup | `src/migrations.rs`, `src/migrations/schema.rs`, `src/bootstrap.rs` | Append-only checksums and separate migration credential |
+| Schema setup / startup | `src/migrations.rs`, `src/migrations/schema.rs`, `components/*/migrations/`, `src/bootstrap.rs` | Ordered component baselines recorded with checksums, fresh installation only, separate migration credential |
 
 The [complete module inventory](module-inventory.md) includes every source file.
 The [source map](source-map.md) maps additional behavior to its real tests.
@@ -69,8 +69,7 @@ simulated and provider-backed methods. Cancellation uses its persisted quantity,
 not an editable line-item snapshot. Setting `released_at` and restoring stock happen
 atomically in one statement; repeat cancellation cannot release stock twice.
 Deduction and allocation are batched per cart. Product locks remain in sorted ID
-order for checkout and release, including baskets supplied in opposite orders. Existing order allocations
-are backfilled by migration 047 where their referenced product still exists.
+order for checkout and release, including baskets supplied in opposite orders.
 
 Provider-backed checkout also creates a payment attempt and durable command. Its
 provider version, merchant account, environment, currency and amount are frozen.
@@ -121,7 +120,7 @@ introduce explicit rounding rules for every intermediate operation.
 
 [![Verified tenant identity, scoped database lease, FORCE RLS and explicit privileged exceptions](assets/architecture/security.svg)](assets/architecture/security.svg)
 
-Migration 044 installs `ENABLE` and `FORCE ROW LEVEL SECURITY` on current public
+The component baselines install `ENABLE` and `FORCE ROW LEVEL SECURITY` on public
 core tables with a tenant column. Managed app tables keep their existing forced
 app policy. New tenant tables must add equivalent policies, scoped foreign keys and
 adversarial tests. Strict startup checks coverage, the effective runtime role,
@@ -151,13 +150,13 @@ injection, a compromised process, all side channels or arbitrary external servic
 
 ### Deploy safely
 
-1. Apply migrations with `DATABASE_URL` using `BOOTSTRAP_MODE=migrate`. They keep
-   their old checksums and add 044–047; migration 047 scans historical order lines,
-   so plan DDL/backfill locks for large live installations.
+1. Set up a new database with `DATABASE_URL` using `BOOTSTRAP_MODE=migrate`; it applies
+   the component baselines. A release replaces earlier installations, so there is no
+   upgrade of an existing database.
 2. Provision a dedicated runtime login through the database/secret manager.
    [runtime-role.sql](../deploy/sql/runtime-role.sql) grants only core DML/reference
    privileges and grants existing fixed Core/app tables (excluding connector credentials).
-   Shared app tables stay with the migration owner. Run it as the actual migration owner after additive migrations; rerun role provisioning for new tables. Never grant the migration owner to runtime.
+   Shared app tables stay with the migration owner. Run it as the actual migration owner after setup. Never grant the migration owner to runtime.
 3. Set `DATABASE_RUNTIME_URL`, `DB_RLS_REQUIRED=true`, `BOOTSTRAP_MODE=serve` and
    `ALLOW_BOOTSTRAP_AUTH=false` for public HTTP and worker deployments. Membership
    in `veyndo_runtime` must be inherited by the runtime login. All fixed Core/app tables stay with the migration owner. Separate signed tenant/system

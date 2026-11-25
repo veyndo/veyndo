@@ -36,11 +36,26 @@ translates inputs/outputs; it does not become a second owner of business rules.
 Product editing preserves aggregate `revision` for legacy/absolute-stock CAS and
 uses `contentRevision` only when `commerce.stock` is omitted. Never infer that an
 echoed old quantity is a new inventory instruction. The editor omits untouched
-stock and adopts the returned current quantity/clocks. Migration 098 observes
-existing revisioned writers during rolling releases. Keep both clocks and stock
+stock and adopts the returned current quantity/clocks. Keep both clocks and stock
 out of sandbox configuration digests; history restoration never restores stock.
 See `docs/product-management.md#editing-while-orders-arrive` and retain the actual
 two-replica purchase/cancellation/MCP regression in `production_foundations`.
+
+## Schema baselines and releases
+
+Each component owns its schema in `components/<name>/migrations/` (the connector
+service in `extensions/services/connectors/migrations/`). The cross-cutting
+extensions, the `veyndo_authority` schema and the shared functions live in
+`components/core/migrations/0000-foundation.sql`. `src/migrations/schema.rs` lists the
+files in one global order, core first and then by `components.json` `uses`;
+`scripts/components.py` checks that order and that a file creates only its own
+component's tables. A release replaces earlier installations: there is no upgrade
+path, rolling upgrade or legacy data import, and setup refuses a database that an
+earlier release created. Change a schema in the owning baseline, regenerate the
+reviewed reference with `scripts/schema_baseline.py --write` and keep the registered
+`schema_baseline` suite passing. Baselines keep forced tenant row security, the
+authenticated scope policy, the non-owner production role and encrypted credentials.
+Demo data belongs to `fixtures/demo/`, not to a baseline.
 
 ## Internationalization contract (mandatory for every new module)
 
@@ -83,17 +98,16 @@ two-replica purchase/cancellation/MCP regression in `production_foundations`.
 ## First-party service language boundary
 
 **Bundled production commerce and standard provider services run in Rust.**
-Python remains for development tools, tests, documentation, the explicit one-time
-legacy-data migration and independent example apps. Its presence in the repository
+Python remains for development tools, tests, documentation and independent example
+apps. Its presence in the repository
 does not make it a supported first-party production runtime.
 
 | Python location / purpose | Allowed boundary |
 | --- | --- |
 | Verification, differential tests, source/coverage checks and site generation | Development/CI tools only; never required to serve a commerce request or deliver a notification. |
 | `scripts/connectors.py` | Local lifecycle tooling that launches the compiled Rust connector; it is not the email/provider implementation. |
-| `scripts/migrate_connector_state.py` | Explicit offline reader for the old SQLite/Fernet data. Stop the old worker and preserve its backup/key first; pipe records to Rust `connectors --import-legacy`, which validates and atomically re-encrypts/imports into PostgreSQL. Never import automatically during normal startup. |
 | `scripts/mcp_stdio.py` | Optional client-side JSON-RPC bridge. The hosted `/mcp` server and its commerce operations run in Rust; no hosted Python MCP backend. |
-| `reference/connectors-python/` | Archived comparison implementation for differential fixtures and migration understanding. Do not resurrect, import into serving code or package it as a production service. |
+| `reference/connectors-python/` | Archived comparison implementation for the differential fixtures (`connector_store_tests`, `email_tests`). Do not resurrect, import into serving code or package it as a production service. |
 | Independent Product Lab / service-example / third-party apps | Deliberately language-independent extension examples, reached through extension contracts. They must not become a required dependency of the core or bundled standard services. |
 
 The final runtime stages of `deploy/Dockerfile` (commerce) and
@@ -117,11 +131,11 @@ For a runtime extension or port:
 1. Identify the existing module, API/app contract, event producer and actual consumer.
 2. Extend the Rust owner while keeping API, MCP, flow and frontend contracts aligned.
    External apps can keep their own language; do not pull them into the public core.
-3. For persisted legacy data, document the explicit backup, stop, import and cutover
-   path. Never run old and new dispatchers simultaneously against the same workload.
+3. There is no data from earlier releases to carry over; do not add import, backfill or
+   cutover paths for it. Never run two dispatchers against the same workload.
 4. Verify the real path with isolated PostgreSQL tenants and local provider fixtures.
    Use the registered `rust_connectors` / `email_tests` suites when changing these services;
-   preserve the original comparison fixtures, concurrency and migration checks.
+   preserve the original comparison fixtures, concurrency checks and `schema_baseline`.
 5. Update module ownership and service documentation. Check the final runtime image
    and startup path, not merely whether Rust code exists or unit tests pass.
 

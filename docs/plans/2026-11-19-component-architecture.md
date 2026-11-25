@@ -967,14 +967,29 @@ moved with the code, proof bindings updated.
       screens, with negative controls. Still open: request and response bodies of plain
       routes are not generated, and the route catalogue comes from the router
       declarations, not from component types.
-- [ ] 5.3 Migrations live with their component under one global order. A fresh
-      installation and an upgrade from the last release produce the same schema
-      (compared by a schema dump in the suite).
+- [x] 5.3 Migrations live with their component under one global order. Reworded by
+      the decision of 25 November (the release replaces earlier installations; no
+      upgrade path, rolling upgrade or legacy import): the 110 incremental files are
+      replaced by one baseline per component (`components/<name>/migrations/0001-baseline.sql`,
+      the connector tables in `extensions/services/connectors/migrations/`) plus the
+      cross-cutting `components/core/migrations/0000-foundation.sql`, split from a
+      `pg_dump` of a fresh installation of commit `ce4285d7`. `src/migrations/schema.rs`
+      lists them core first, then by `uses`; `scripts/components.py` checks the order
+      and that each file creates only its own tables. The registered `schema_baseline`
+      suite proves that a fresh installation equals the `ce4285d7` fresh installation
+      (normalized schema dump and starting rows, `fixtures/schema/reference.sql`), and
+      the `.sqlx` cache regenerated against a baseline database is unchanged except for
+      the two removed backfill queries. Checksum compatibility, the legacy 002/011
+      checks, the 102 hosted-app backfill, the connector `--import-legacy` path and
+      `scripts/migrate_connector_state.py`, and the upgrade replays
+      (`app_storage_migration`, the pre-055 hosted migration, the 093/078/079/097/103
+      rehearsals) are removed. Demo SQL lives in `fixtures/demo/`.
 - [ ] 5.4 Mirrors: every component repository is generated from the monorepo,
       builds and tests alone, and `components.lock.json` records the released commit.
 - [ ] 5.5 Acceptance of the whole system: all registered suites, the two-replica
-      purchase and cancellation regression, a rolling upgrade (old and new binary
-      on one database), and the hot-path benchmark compared with the starting point.
+      purchase and cancellation regression and the hot-path benchmark compared with
+      the starting point. A rolling upgrade (old and new binary on one database) is not
+      needed by the decision of 25 November: the release replaces earlier installations.
 - [ ] 5.6 Production images still contain no Python interpreter; startup path and
       image contents checked, not only the build.
 
@@ -1052,7 +1067,8 @@ moved with the code, proof bindings updated.
       imports payment code: the payments component contributes its ledger panel (provider
       commands with exact-once keys, job observation) through the new first-party slot
       `admin.order.payment`; the refund journey checks it in the browser.
-- [ ] Delete scripts and suites that tested the old layout only.
+- [ ] Delete scripts and suites that tested the old layout only. Done for the
+      schema (25 Nov): the upgrade and legacy-import suites and scripts are gone (see 5.3).
 - [ ] Update the source map, module inventory, README, handbook and the website's
       architecture page; remove every path that no longer exists.
 - [ ] Final dependency report: zero cycles, published with the release notes.
@@ -1078,7 +1094,9 @@ Each component carries its own tests; the suite runner composes them.
       fixture for the refund (see `docs/testing.md#browser-journeys`). CI installs
       the pinned driver; the first CI run has not happened yet.
 - [ ] Concurrency: two replicas, repeated delivery, lease loss, uncertain sends.
-- [ ] Migration tests: fresh, upgrade, and the explicit legacy import.
+- [x] Migration tests: fresh installation (`schema_baseline`, equal to the last
+      incremental release). Upgrade and legacy-import tests are not needed by the
+      decision of 25 November; the setup refuses a database of an earlier release.
 - [ ] Mutation testing on `domain/`; a surviving mutant is a missing test.
 - [ ] Coverage floors per component instead of one global floor.
 - [x] The suite runner reports every failing suite of a run, not only the first.
@@ -1176,7 +1194,7 @@ The release waits for all of it. Baseline on 25 November, measured by
 | H5 ports | foreign table accesses | 239 | 0 |
 | H6 tests | property, store per component, mutation | none | money, stock, discounts, state machines; every component; `domain/` |
 | H7 proofs | Lean | price, stock bound, order states open | proved and bound |
-| H8 migrations, mirrors, upgrade | per-component migrations, generated mirrors, rolling upgrade | none | 5.3, 5.4, 5.5 |
+| H8 migrations, mirrors | per-component baselines (done), generated mirrors; no rolling upgrade (decision of 25 November) | none | 5.3, 5.4, 5.5 |
 
 Each step lowers its ratchet in `components.json` (the check refuses growth and asks
 for the lower number), one component or a few files per commit, with the touched

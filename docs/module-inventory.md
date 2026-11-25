@@ -275,10 +275,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/mcp/storefront_views.rs](../src/mcp/storefront_views.rs) | Storefront kit parts as an MCP App view: the `ui://` document, the tool links and each tool result's part payload. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |
-| [src/migrations/identity_checksums.rs](../src/migrations/identity_checksums.rs) | Explicit source-hash pairs for the reviewed identity-only migration source update. |
-| [src/migrations/recent_schema.rs](../src/migrations/recent_schema.rs) | Later additive migrations retain the same ordered ledger and checksum contract. |
-| [src/migrations/schema.rs](../src/migrations/schema.rs) | Append-only ordered migration source catalogue; deployed checksums are never rewritten. |
-| [src/migrations.rs](../src/migrations.rs) | Versioned setup is separate from serving; no catalog-wide startup repair. |
+| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one |
+| [src/migrations.rs](../src/migrations.rs) | Fresh-installation setup, separate from serving: applies the component schema baselines in their |
 | [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant address operations live in the customers component. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
@@ -453,6 +451,7 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/apps/migrations/0001-baseline.sql](../components/apps/migrations/0001-baseline.sql) | Baseline schema of the apps component (App packages, managed data, UI surfaces, Wasm extensions and the app builder): its tables, sequences, functions, |
 | [components/apps/src/domain/action_admission.rs](../components/apps/src/domain/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
 | [components/apps/src/domain/action_policy.rs](../components/apps/src/domain/action_policy.rs) | Which declared actions only read: the distinction every surface, grant and GET route relies on. |
 | [components/apps/src/domain/app_generation.rs](../components/apps/src/domain/app_generation.rs) | The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps. |
@@ -747,6 +746,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/ui/admin/developer/useAppStudio.ts](../components/apps/ui/admin/developer/useAppStudio.ts) | Tenant-scoped build lifecycle; immutable saved snapshots gate sandbox previews and selected app-only releases. |
 | [components/apps/ui/admin/developer/useDesignerKeys.ts](../components/apps/ui/admin/developer/useDesignerKeys.ts) | Designer keyboard shortcuts leave native input and rich-editor undo behavior intact. |
 | [components/apps/ui/admin/developer/useDraftStorage.ts](../components/apps/ui/admin/developer/useDraftStorage.ts) | Actor-private server autosaves serialize writes and preserve optimistic revisions across app switches. |
+| [components/b2b/migrations/0001-baseline.sql](../components/b2b/migrations/0001-baseline.sql) | Baseline schema of the b2b component (Company procurement: organisations, budgets, approvals and quotes): its tables, sequences, functions, |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain/quote_lifecycle.rs](../components/b2b/src/domain/quote_lifecycle.rs) | App-owned RFQ preparation states reuse native quote CAS, ownership, history and outbox; only native offer/accept moves money. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
@@ -786,6 +786,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/ui/admin/b2b/experience-i18n.ts](../components/b2b/ui/admin/b2b/experience-i18n.ts) | Guided company purchasing and shared settings copy in all bundled interface languages. |
 | [components/b2b/ui/admin/b2b/reference.ts](../components/b2b/ui/admin/b2b/reference.ts) | Native organization IDs require a lowercase letter first and at most 32 characters. |
 | [components/b2b/ui/admin/b2b/studio-extension.ts](../components/b2b/ui/admin/b2b/studio-extension.ts) | Studio extension of B2B companies and quotes; the sidebar shows them in their own section when B2B is enabled. |
+| [components/catalog/migrations/0001-baseline.sql](../components/catalog/migrations/0001-baseline.sql) | Baseline schema of the catalog component (Products, categories, media, reviews, translations and catalogue reads): its tables, sequences, functions, |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/csv_rows.rs](../components/catalog/src/domain/csv_rows.rs) | Bounded UTF-8 CSV reader: quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
@@ -941,6 +942,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/ui/storefront/catalog/ProductReviews.tsx](../components/catalog/ui/storefront/catalog/ProductReviews.tsx) | ProductReviews: focused pdp-reviews view with explicit typed inputs and callbacks. |
 | [components/catalog/ui/storefront/catalog/ProductSafety.tsx](../components/catalog/ui/storefront/catalog/ProductSafety.tsx) | Explicit PDP safety/sector facts; no generated warning, certification or origin is invented. |
 | [components/catalog/ui/storefront/catalog/product-url.ts](../components/catalog/ui/storefront/catalog/product-url.ts) | Stable, collision-free product addresses: SKU identity plus the inherited localized SEO slug. |
+| [components/checkout/migrations/0001-baseline.sql](../components/checkout/migrations/0001-baseline.sql) | Baseline schema of the checkout component (Cart, quote, checkout transaction and order placement): its tables, sequences, functions, |
 | [components/checkout/src/domain/admin_order.rs](../components/checkout/src/domain/admin_order.rs) | Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record. |
 | [components/checkout/src/domain/cart_quote.rs](../components/checkout/src/domain/cart_quote.rs) | The authoritative cart quote: quantity pricing, app configuration fees and localized totals. Totals are added as whole minor units. |
 | [components/checkout/src/domain/quote_view.rs](../components/checkout/src/domain/quote_view.rs) | Typed read views of the cart quote, the placed order and product extras that checkout reads back; every field keeps the JSON value indexing returned. |
@@ -1004,6 +1006,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/ui/storefront/checkout/embedded-checkout.ts](../components/checkout/ui/storefront/checkout/embedded-checkout.ts) | Only the registered embedding storefront receives the shopper cart receipt capability; it verifies with Core. |
 | [components/checkout/ui/storefront/checkout/independent-checkout.ts](../components/checkout/ui/storefront/checkout/independent-checkout.ts) | Route an admitted, reviewed browser purchase through the independent Checkout service. |
 | [components/checkout/ui/storefront/checkout/payment-return.ts](../components/checkout/ui/storefront/checkout/payment-return.ts) | Parse only the bounded attempt reference; provider-added fragment fields never grant payment authority. |
+| [components/core/migrations/0000-foundation.sql](../components/core/migrations/0000-foundation.sql) | Cross-cutting foundation applied before every component baseline: extensions, the |
+| [components/core/migrations/0001-baseline.sql](../components/core/migrations/0001-baseline.sql) | Baseline schema of the core component (Shared foundation: errors, request context, database scope, outbox, admission and the verified kernel): its tables, sequences, functions, |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
@@ -1042,6 +1046,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/store.rs](../components/core/src/store.rs) | The core store: deployment values, connection pools, row security, cluster-wide leases, the outbox, the shop registry and history attribution. Core SQL lives only here. |
 | [components/core/src/tool_contract.rs](../components/core/src/tool_contract.rs) | Shared wire description for native operations and installed app actions; hints never grant execution rights. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
+| [components/customers/migrations/0001-baseline.sql](../components/customers/migrations/0001-baseline.sql) | Baseline schema of the customers component (Customer accounts, sessions, addresses and the merchant customer directory): its tables, sequences, functions, |
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
 | [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |
 | [components/customers/src/domain.rs](../components/customers/src/domain.rs) | Rules of customer data, free of I/O. |
@@ -1093,6 +1098,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/ui/storefront/account/account.css](../components/customers/ui/storefront/account/account.css) | Customer workspace: quiet fashion palette, clear purchase cards and an accessible mobile sheet. |
 | [components/customers/ui/storefront/account/useCustomerAccount.ts](../components/customers/ui/storefront/account/useCustomerAccount.ts) | Tenant-scoped account loading and mutation lifecycle; expired sessions clear private data and reopen sign-in. |
 | [components/customers/ui/storefront/account/useSavedPaymentMethods.ts](../components/customers/ui/storefront/account/useSavedPaymentMethods.ts) | Account-owned saved-method loading and revocation use the shared Store API and clear stale tenant/session data. |
+| [components/identity/migrations/0001-baseline.sql](../components/identity/migrations/0001-baseline.sql) | Baseline schema of the identity component (Merchant accounts, memberships, sessions, roles and route policy): its tables, sequences, functions, |
 | [components/identity/src/domain/clock.rs](../components/identity/src/domain/clock.rs) | The wall clock in whole seconds, as signed assertions and authenticator codes count it. |
 | [components/identity/src/domain/credentials.rs](../components/identity/src/domain/credentials.rs) | Argon2 password operations run off the asynchronous request executor. |
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
@@ -1152,6 +1158,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/ui/admin/team/team-roles.css](../components/identity/ui/admin/team/team-roles.css) | Native team roles and readable scopes share Studio surfaces and responsive form rhythm. |
 | [components/identity/ui/admin/team/team-workspace.css](../components/identity/ui/admin/team/team-workspace.css) | Account, shop creation and team access share a clear action and form hierarchy. |
 | [components/identity/ui/admin/team/workspace-create-i18n.ts](../components/identity/ui/admin/team/workspace-create-i18n.ts) | Shop creation guidance uses the current Studio interface language. |
+| [components/intelligence/migrations/0001-baseline.sql](../components/intelligence/migrations/0001-baseline.sql) | Baseline schema of the intelligence component (Shop memory, knowledge retrieval, agents, proposals and model inference): its tables, sequences, functions, |
 | [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
 | [components/intelligence/src/domain/claim_batch.rs](../components/intelligence/src/domain/claim_batch.rs) | Bounded claim batches: a compilation certifies only statements that are exact current confirmed public claims. |
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
@@ -1327,6 +1334,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/ui/admin/scenarios/scenario-twin-i18n.ts](../components/intelligence/ui/admin/scenarios/scenario-twin-i18n.ts) | Shop twin vocabulary: readiness steps of a private copy in EN/DE/FR/ES; counts and country names are parameters. |
 | [components/intelligence/ui/admin/scenarios/scenario-types.ts](../components/intelligence/ui/admin/scenarios/scenario-types.ts) | Safe public projections; cart tokens and provider checkpoints are never part of this contract. |
 | [components/intelligence/ui/admin/scenarios/scenarios.css](../components/intelligence/ui/admin/scenarios/scenarios.css) | Private customer lab: compact profiles, scoped progress and evidence comparison. |
+| [components/inventory/migrations/0001-baseline.sql](../components/inventory/migrations/0001-baseline.sql) | Baseline schema of the inventory component (Stock, reservations and supply): its tables, sequences, functions, |
 | [components/inventory/src/domain/lines.rs](../components/inventory/src/domain/lines.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
 | [components/inventory/src/domain/reorder.rs](../components/inventory/src/domain/reorder.rs) | Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling. |
 | [components/inventory/src/domain/supply.rs](../components/inventory/src/domain/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |
@@ -1339,6 +1347,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/marketing/migrations/0001-baseline.sql](../components/marketing/migrations/0001-baseline.sql) | Baseline schema of the marketing component (Rules, coupons, promotions, flows and sales channels): its tables, sequences, functions, |
 | [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
@@ -1455,6 +1464,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/ui/admin/channels/studio-extension.ts](../components/marketing/ui/admin/channels/studio-extension.ts) | Studio extension of sales channels. |
 | [components/marketing/ui/admin/channels/supply-i18n.ts](../components/marketing/ui/admin/channels/supply-i18n.ts) | Vocabulary for supplier links and reorder proposals in EN/DE/FR/ES; figures and names are parameters. |
 | [components/marketing/ui/admin/channels/supply.css](../components/marketing/ui/admin/channels/supply.css) | Supplier links and reorder proposals in the sales channel workspace. |
+| [components/orders/migrations/0001-baseline.sql](../components/orders/migrations/0001-baseline.sql) | Baseline schema of the orders component (Order state, fulfilment, receipts, documents and merchant order work): its tables, sequences, functions, |
 | [components/orders/src/domain/company_model.rs](../components/orders/src/domain/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [components/orders/src/domain/creation_schema.rs](../components/orders/src/domain/creation_schema.rs) | Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders. |
 | [components/orders/src/domain/import_product.rs](../components/orders/src/domain/import_product.rs) | Explicit catalogue-only preview: whitelist current mapped/native fields, bound text/media, reuse native money formatting. |
@@ -1509,6 +1519,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/ui/admin/orders/shipments.css](../components/orders/ui/admin/orders/shipments.css) | Package allocation stays compact on desktop and touch-friendly on narrow order workspaces. |
 | [components/orders/ui/admin/orders/studio-extension.ts](../components/orders/ui/admin/orders/studio-extension.ts) | Studio extension of order operations. |
 | [components/orders/ui/admin/orders/useOrderCreation.ts](../components/orders/ui/admin/orders/useOrderCreation.ts) | Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. |
+| [components/payments/migrations/0001-baseline.sql](../components/payments/migrations/0001-baseline.sql) | Baseline schema of the payments component (Provider-independent payment ledger, captures, refunds and provider workers): its tables, sequences, functions, |
 | [components/payments/src/domain/amounts.rs](../components/payments/src/domain/amounts.rs) | Provider wire amounts: decimal strings at the ISO precision of their currency, exact in minor units. |
 | [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it, with the typed view of its provider context. |
 | [components/payments/src/domain/capture_intent.rs](../components/payments/src/domain/capture_intent.rs) | Capture timing of a payment method: capture at once or authorize first, as configured and as the provider method supports. |
@@ -1610,6 +1621,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/ui/admin/pos/useRegister.ts](../components/pos/ui/admin/pos/useRegister.ts) | Register commands share authenticated Studio transport and persist only the cart capability locally. |
 | [components/pos/ui/admin/pos/useRegisterViewport.ts](../components/pos/ui/admin/pos/useRegisterViewport.ts) | Size the register pane from its actual header position, including translated toolbars and tablet wraps. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
+| [components/pricing/migrations/0001-baseline.sql](../components/pricing/migrations/0001-baseline.sql) | Baseline schema of the pricing component (Money, price calculation, discounts, currencies, taxes and customer groups): its tables, sequences, functions, |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
 | [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. |
@@ -1660,6 +1672,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shipping/src/store/delivery_dates.rs](../components/shipping/src/store/delivery_dates.rs) | Calendar delivery windows by the database's date, so every replica agrees on today. |
 | [components/shipping/src/store/method_usage.rs](../components/shipping/src/store/method_usage.rs) | Where a delivery or payment method is still referenced; order snapshots remain immutable. |
 | [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
+| [components/shop/migrations/0001-baseline.sql](../components/shop/migrations/0001-baseline.sql) | Baseline schema of the shop component (Shop configuration, domains, legal texts and the operator control plane): its tables, sequences, functions, |
 | [components/shop/src/domain/buyer_consent.rs](../components/shop/src/domain/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
 | [components/shop/src/domain/cart_admission.rs](../components/shop/src/domain/cart_admission.rs) | Who may touch a cart: a merchant-created cart only its creating merchant, a POS cart only its admitted cashier, and every cart only its own sales channel. |
 | [components/shop/src/domain/cart_lines.rs](../components/shop/src/domain/cart_lines.rs) | Bounds every set of cart lines keeps: at most 100 distinct products, each once, in a sane quantity. |
@@ -1744,6 +1757,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/ui/storefront/legal/ConsumerRequestForm.tsx](../components/shop/ui/storefront/legal/ConsumerRequestForm.tsx) | Public two-step declaration with immutable downloadable receipt; references never expose order data. |
 | [components/shop/ui/storefront/legal/LegalDocument.tsx](../components/shop/ui/storefront/legal/LegalDocument.tsx) | Published legal text uses selected content language/main-language inheritance; empty content is visible as missing. |
 | [components/shop/ui/storefront/legal/PrivacyProvider.tsx](../components/shop/ui/storefront/legal/PrivacyProvider.tsx) | Unified affirmative consent: server-validated receipt, channel boundaries, expiry and policy revalidation. |
+| [components/studio/migrations/0001-baseline.sql](../components/studio/migrations/0001-baseline.sql) | Baseline schema of the studio component (Merchant overview, reports, private staging shops and history): its tables, sequences, functions, |
 | [components/studio/src/domain/grid_criteria.rs](../components/studio/src/domain/grid_criteria.rs) | One allowlisted list-filter schema for model plans and MCP; no model-supplied SQL or tenant identity. |
 | [components/studio/src/domain/history_access.rs](../components/studio/src/domain/history_access.rs) | Which entities keep a history, the rights their versions need, and what a restoration request must state. |
 | [components/studio/src/domain/merchant_operations.rs](../components/studio/src/domain/merchant_operations.rs) | The merchant operation catalogue shared by HTTP and MCP: the native right of each operation, compound manual-order admission and the operations that touch personal data. |
@@ -2817,7 +2831,6 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/services/connectors/src/integration_contracts.rs](../extensions/services/connectors/src/integration_contracts.rs) | Provider projections reject arbitrary endpoints and preserve asynchronous acceptance semantics. |
 | [extensions/services/connectors/src/integrations/settings.rs](../extensions/services/connectors/src/integrations/settings.rs) | Existing encrypted connector configuration remains the single provider credential owner. |
 | [extensions/services/connectors/src/integrations.rs](../extensions/services/connectors/src/integrations.rs) | API-key app hosting reuses encrypted connector settings, durable jobs and live configuration fences. |
-| [extensions/services/connectors/src/legacy.rs](../extensions/services/connectors/src/legacy.rs) | Explicit offline SQLite export import: all records are rebound/encrypted atomically; ambiguous jobs stay uncertain. |
 | [extensions/services/connectors/src/lib.rs](../extensions/services/connectors/src/lib.rs) | Language-neutral app HTTP contract backed by a Rust-only standard connector runtime: the server, the worker, the app action and event dispatch and the app registries over the provider crates. |
 | [extensions/services/connectors/src/providers.rs](../extensions/services/connectors/src/providers.rs) | Provider-specific read imports and notification mapping stay outside the commerce kernel. |
 | [extensions/services/connectors/src/server.rs](../extensions/services/connectors/src/server.rs) | Authenticated bounded app HTTP service with private OAuth callback and graceful worker lifetime. |
@@ -2854,7 +2867,6 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/app_schema.py](../scripts/app_schema.py) | Real installed-schema evolution, recovery snapshots, rollback on bad conversions and isolation of equal app IDs. |
 | [scripts/app_secrets.py](../scripts/app_secrets.py) | Encrypted tenant/app credentials and real incoming webhooks under strict non-owner RLS; synthetic local service only. |
 | [scripts/app_shared_storage.py](../scripts/app_shared_storage.py) | Actual app APIs prove fixed physical storage, concurrent uniqueness, scoped filters and private preview cleanup. |
-| [scripts/app_storage_migration.py](../scripts/app_storage_migration.py) | Replay original 001–100 SQL, then verify populated inactive/preview cyclic app tables consolidate losslessly and atomically. |
 | [scripts/app_studio.py](../scripts/app_studio.py) | Native App Studio exercised through real HTTP/PostgreSQL: shared IR, version isolation, data, routes, MCP and selective release. |
 | [scripts/app_surfaces.py](../scripts/app_surfaces.py) | Actual app UI registry/API/MCP/data/staging and slow-service isolation against Rust/PostgreSQL. |
 | [scripts/apps.py](../scripts/apps.py) | Real PostgreSQL app lifecycle, managed schema/RLS, typed API/MCP, cart and observation tests. |
@@ -2913,7 +2925,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/formal/layout_tests.py](../scripts/formal/layout_tests.py) | Negative controls for missing claims and Rust facade escapes without editing the real source tree. |
 | [scripts/formal/modules.py](../scripts/formal/modules.py) | Explicit production policy modules; no dynamic Rust module resolution is trusted. |
 | [scripts/formal/mutations.py](../scripts/formal/mutations.py) | Prove the verification gate rejects representative broken policies and stale/disconnected source bindings. |
-| [scripts/formal/registry.py](../scripts/formal/registry.py) | Explicit full-source inventory and reviewed adapter locks, not proof coverage claims. |
+| [scripts/formal/registry.py](../scripts/formal/registry.py) | .sql'),*(root/'extensions/services/connectors/migrations').glob('*.sql'),*(root/'fixtures').glob('*.json'), |
 | [scripts/formal/runners.py](../scripts/formal/runners.py) | Generate conformance drivers from parsed policy signatures, never a second policy implementation. |
 | [scripts/formal.py](../scripts/formal.py) | Run extraction, Lean proofs/axiom audit, compiled conformance and complete source-inventory checks. |
 | [scripts/github_traffic.py](../scripts/github_traffic.py) | Save one private GitHub snapshot; overlapping traffic windows are never summed. |
@@ -2937,7 +2949,6 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/mcp_stdio.py](../scripts/mcp_stdio.py) | Line-delimited MCP stdio bridge for Claude Desktop and other local clients. |
 | [scripts/merchant_operations.py](../scripts/merchant_operations.py) | Real HTTP/PostgreSQL CRM, receipt, scoped-access and paid-download regressions. No PSP traffic. |
 | [scripts/merchant_reports.py](../scripts/merchant_reports.py) | Native report aggregation over real checkout/POS/consent flows plus isolated historical fixtures; no external providers. |
-| [scripts/migrate_connector_state.py](../scripts/migrate_connector_state.py) | Explicit offline legacy-state migration; decrypted data crosses stdin only, never logs or temporary files. |
 | [scripts/migration_assistant.py](../scripts/migration_assistant.py) | Registered migration verification; provider fixtures and runtime code remain under the app package. |
 | [scripts/money_boundary_differential.py](../scripts/money_boundary_differential.py) | Gate the exact checkout boundary using totals from original Shopware calculators, never a PHP rewrite. |
 | [scripts/native_lifecycles.py](../scripts/native_lifecycles.py) | Native accepted app lifecycles through real HTTP/PostgreSQL/MCP and selected release. Synthetic shops only. |
@@ -2958,13 +2969,14 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/production_foundations.py](../scripts/production_foundations.py) | Strict non-owner PostgreSQL runtime, pool isolation, inventory and two-replica invalidation regressions. |
 | [scripts/protocols.py](../scripts/protocols.py) | Protocol flows exercise the same commerce core; model smoke test is opt-in. |
 | [scripts/providers.py](../scripts/providers.py) | Cloud wire-contract tests using local HTTP servers, NOT live cloud inference. |
-| [scripts/read_performance.py](../scripts/read_performance.py) | Two real Rust replicas test coherent read caches; optional matched local HTTP baseline probe. |
+| [scripts/read_performance.py](../scripts/read_performance.py) | .sql'), ROOT/'Cargo.toml', ROOT/'Cargo.lock']): |
 | [scripts/restart.py](../scripts/restart.py) | Persist an API snapshot, restart server+DB externally, verify exact state. |
 | [scripts/roadmap.py](../scripts/roadmap.py) | Render the one roadmap source into the handbook page, the README line and the website data module; --check rejects drift. |
 | [scripts/rule_catalog.py](../scripts/rule_catalog.py) | Inventory original Shopware conditions without claiming unsupported scopes are implemented. |
 | [scripts/rule_differential.py](../scripts/rule_differential.py) | Execute original Shopware numeric comparisons, including epsilon, null and unsupported operator semantics. |
-| [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth/import and adversarial fixtures; no external accounts. |
+| [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth, export and adversarial fixtures; no external accounts. |
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
+| [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |
 | [scripts/security/authenticated_scope.py](../scripts/security/authenticated_scope.py) | Adversarial SQL uses the actual tenant login, not SET ROLE on a privileged fixture session. |
 | [scripts/security/core_hardening.py](../scripts/security/core_hardening.py) | Real replica regressions for auth admission, poison-event isolation, retention and bounded resource leases. |
 | [scripts/security/tenant_schema.py](../scripts/security/tenant_schema.py) | Database adversarial checks: reject cross-shop links even when API predicates are accidentally omitted. |
@@ -2978,7 +2990,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
 | [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
-| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
+| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | /migrations', |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/storefront_urls.py](../scripts/storefront_urls.py) | Real HTTP product deep links and host isolation in disposable shops. |
@@ -3019,7 +3031,6 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/documentation_hygiene.py](../scripts/testing/documentation_hygiene.py) | Keep the README an entrance, status canonical, and scoped instructions bounded; negative controls reject former regressions. |
 | [scripts/testing/extraction.py](../scripts/testing/extraction.py) | Native document-event extraction, review boundary and shared AI quotas; local provider only. |
 | [scripts/testing/host_exchange_contract.py](../scripts/testing/host_exchange_contract.py) | Keep exported host inputs connected to native deserialization fields and admission schemas. |
-| [scripts/testing/hosted_migration.py](../scripts/testing/hosted_migration.py) | Real pre-055 SQL database upgrades through the native migrator; never rewind one ledger entry on a newer store. |
 | [scripts/testing/hotpath.py](../scripts/testing/hotpath.py) | Real HTTP wire bytes and SQL tracing checks for the existing read-performance suite. |
 | [scripts/testing/image_context.py](../scripts/testing/image_context.py) | /Dockerfile')] |
 | [scripts/testing/integration_partitions.py](../scripts/testing/integration_partitions.py) | Disjoint outer integration partitions; nested production-rights repetitions stay intact. |
@@ -3041,7 +3052,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/native_lifecycle_race.py](../scripts/testing/native_lifecycle_race.py) | Force native workflow editing against app installation at the real database boundary. |
 | [scripts/testing/native_tools.py](../scripts/testing/native_tools.py) | Synthetic provider-native wire responses shared by real HTTP integration fixtures; not a model implementation. |
 | [scripts/testing/operation_contracts.py](../scripts/testing/operation_contracts.py) | Generated native operation input contracts; do not edit. |
-| [scripts/testing/outbox_cases.py](../scripts/testing/outbox_cases.py) | Disposable real-transaction counterexamples for subscriber migration and commit-order gaps. |
+| [scripts/testing/outbox_cases.py](../scripts/testing/outbox_cases.py) | Disposable real-transaction counterexamples for subscriber schedules and commit-order gaps. |
 | [scripts/testing/parallel_check.py](../scripts/testing/parallel_check.py) | Owned background verification process group; failures stay fatal and logs survive cleanup. |
 | [scripts/testing/partition_coverage.py](../scripts/testing/partition_coverage.py) | Transfer same-source raw LLVM/Python profiles; official collectors calculate coverage. |
 | [scripts/testing/payment_external_refunds.py](../scripts/testing/payment_external_refunds.py) | Admit provider-initiated refunds through actual HTTP/SQL; malicious receipts leave the ledger untouched. |

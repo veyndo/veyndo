@@ -1,7 +1,7 @@
 # Pinned verification instrumentation; production services do not depend on coverage.
 coverage==7.13.5
 
-# Offline legacy migration and differential reference only; never a runtime service dependency.
+# Differential reference fixtures and signed test offers only; never a runtime service dependency.
 cryptography==46.0.4
 
 # Real-browser journeys (scripts/browser_journeys.py); its bundled Node drives Chromium.

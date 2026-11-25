@@ -179,9 +179,6 @@ pub async fn run() -> Result<()> {
         "Run the commerce setup (BOOTSTRAP_MODE=migrate) first",
     )?;
     store.verify_runtime().await?;
-    if env::args().any(|s| s == "--import-legacy") {
-        return super::legacy::import(&store).await;
-    }
     let (stop, receiver) = tokio::sync::watch::channel(false);
     let workers = env::var("CONNECTOR_WORKERS_PER_APP")
         .ok()

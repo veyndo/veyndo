@@ -2,7 +2,6 @@
 mod actions;
 mod events;
 mod integrations;
-mod legacy;
 mod providers;
 mod server;
 #[cfg(test)]
@@ -12,8 +11,8 @@ use serde_json::{Value, json};
 pub use server::run;
 use std::{env, time::Duration};
 use veyndo_connector_runtime::{
-    Call, Error, OAuth, Result, Settings, Store, checked, crypto, digest, identifier, network,
-    oauth, queue, secret, text,
+    Call, Error, OAuth, Result, Settings, Store, checked, crypto, identifier, network, oauth,
+    queue, secret, text,
 };
 use veyndo_provider_email::{config, email};
 const APPS: [&str; 9] = [

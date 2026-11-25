@@ -1,5 +1,18 @@
 # Testing, coverage and maintenance contracts
 
+## Fresh-install schema equality
+
+The registered `schema_baseline` suite (`scripts/schema_baseline.py`) creates its own
+database, runs the built `target/debug/veyndo` in `BOOTSTRAP_MODE=migrate` without demo
+data and compares a normalized `pg_dump --schema-only` (every statement, sorted,
+owners left out) plus the rows setup creates with `fixtures/schema/reference.sql`.
+Timestamps, generated UUIDs and the per-database scope key are masked; everything else
+must be identical. The reference was taken from a fresh installation of commit
+`ce4285d7`, the last release with incremental migrations, so the component baselines
+are proven to produce the same schema. A deliberate schema change regenerates it with
+`--write`. There are no upgrade or legacy-import tests: a release replaces earlier
+installations and setup refuses a database that an earlier release created.
+
 ## External order batching regression
 
 The registered `marketplaces` suite calls the installed app's real native order
@@ -292,28 +305,12 @@ The registered `app_shared_storage` suite creates eight actual shops and install
 It checks typed keyset filters, equal-ID isolation, six competing unique writes
 (one success, five HTTP 409 conflicts), protected projections and scoped F5 resets.
 
-`app_storage_migration` replays the original SQL migrations 001–100 into a separate
-database and populates historical physical models. Migrations 101–102 preserve
-inactive apps, personal previews, IDs/revisions, large integers, localized NULL/empty
-values, cyclic relationships, immutable histories and app-owned document quotas.
-Missing targets, an unknown dependent SQL view and an idle configured Core login
-must abort atomically; the successful migration drops only the exact verified old
-table set without `CASCADE` and emits no invented business changes.
-
 Existing app, schema, relation, callback, ontology, jobs, assets, native component
 checkout, staging and visual page/form suites exercise the same store. The strict
 `signed_runtime` and real one-backend `signed_pooler` suites additionally exercise
 separate non-owner system/tenant logins, signing-key rotation, restart and denied
-schema/projection access. These are local verification contracts, not proof of a
-completed production migration or unlimited data/throughput capacity.
-
-The existing `identity_broker` suite now constructs an actual separate pre-055
-database from original SQL and ledger checksums. The native migration process must
-upgrade it through storage consolidation, install its missing managed Storyfront
-package and validate the hosted FK before any HTTP read. Two serving processes
-then expose the original managed connection without changing its package revision
-or version history. Rewinding only migration 055 on an already post-102 database
-was an invalid historical fixture; it is not retained as an alternate runtime path.
+schema/projection access. These are local verification contracts, not proof of
+unlimited data/throughput capacity.
 
 ## Agentic directory grids — 14 October 2026
 

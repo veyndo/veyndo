@@ -53,8 +53,7 @@ issuer is introduced. Its non-root runtime image contains no Python or compiler.
 | App `extensions/apps/email/src/smtp.rs`, runtime `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
 | Runtime `oauth.rs`, app `extensions/apps/<app>/src/actions.rs` | Shared single-use state/token fencing over the policy the app declares; app-owned OAuth scope, protocol and field admission |
 | `extensions/apps/{gmail,google-analytics,slack}/src/`, runtime `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
-| `legacy.rs` | Explicit atomic offline migration; no automatic import during normal serving |
-| Migration 049 | Six private tenant-scoped tables and forced RLS |
+| `extensions/services/connectors/migrations/0001-baseline.sql` | Six private tenant-scoped tables and forced RLS, applied by the commerce setup in the global baseline order |
 
 ## Distributed queue semantics
 
@@ -83,9 +82,10 @@ saved configuration revision and fail after an intervening change/disable. Crede
 are write-only and encrypted; provider/SMTP identity changes clear stale credentials.
 An accepted external mail cannot be recalled. The service drains active work on shutdown.
 
-## Deployment and existing data
+## Deployment
 
-1. Deploy and run commerce migration 049 before starting the new connector.
+1. Run the commerce setup (`BOOTSTRAP_MODE=migrate`) before starting the connector; it refuses to
+   start until the ledger records `connectors/0001-baseline`.
 2. Set `CONNECTOR_DATABASE_URL` (or `DATABASE_URL`), `CONNECTOR_SECRET_KEY` (32-byte URL-safe
    Base64), `CONNECTOR_GATEWAY_TOKEN` and `CONNECTOR_PUBLIC_URL`.
 3. Keep the existing `APP_SERVICES` mappings and OAuth callback URLs. The Compose
@@ -125,26 +125,9 @@ a runtime variable, not a build argument or an unparsed `.env` file. Email crede
 are configured through the app's `configure` action and encrypted in PostgreSQL.
 Configure test mode first; changing hosting does not authorize sending test emails.
 
-For a pre-existing SQLite connector: **stop its worker first**, preserve an encrypted
-SQLite backup and the original Fernet key, build both binaries, then run:
-
-```sh
-python3 -m pip install -r scripts/testing/requirements.txt
-# Existing commerce tenants must already exist in the destination PostgreSQL database.
-CONNECTOR_DATABASE_URL=postgres://... python3 scripts/migrate_connector_state.py /path/to/connectors.sqlite
-python3 scripts/connectors.py start
-```
-
-The one-time Python reader decrypts the old Fernet records and pipes them directly to
-`connectors --import-legacy`; decrypted records are not written to a temporary file or
-printed. Rust re-encrypts everything in one PostgreSQL transaction. Original revisions,
-job IDs, source records and export cursors survive. Previously running jobs become
-uncertain; outstanding OAuth states are deliberately discarded and must be restarted.
-Existing destination configs are rejected instead of overwritten. Keep the original
-SQLite backup until verification completes. The local launcher refuses to silently start
-against an unmigrated local SQLite state. Hosted owners must stop their original service
-and explicitly run this migration before cutting over; no production credentials are
-invented or automatically reconnected.
+There is no import of state from the earlier SQLite/Python connector worker: a release
+replaces earlier installations, and connector configuration is entered again through each
+app's `configure` action.
 
 ## Why Python still exists in the repository
 
@@ -152,7 +135,7 @@ invented or automatically reconnected.
 |---|---|
 | Former bundled connector | Ported completely to Rust; archived in `reference/connectors-python/` for differential fixtures, never copied into its runtime image |
 | Verification, original-PHP comparisons, source/coverage checks, documentation generation | Keep as development/CI tools; no request processing or provider delivery |
-| `scripts/connectors.py` and offline migration | Local lifecycle/data migration tools; they launch the compiled Rust service |
+| `scripts/connectors.py` | Local lifecycle tool; it launches the compiled Rust service |
 | `scripts/mcp_stdio.py` | Optional client-side JSON-RPC bridge; hosted `/mcp` runs in Rust |
 | Product Lab / service-example | Explicit independent third-party-style app examples demonstrating language-independent extensions; not a commerce runtime dependency |
 | Private Storyfront/Experience apps | Separate repositories and product boundary; not imported into the public core |
@@ -161,6 +144,44 @@ Removing all Python tooling would not make API latency lower. The architectural 
 **first-party central runtime in Rust; protocol-based external apps language-independent;
 verification tools outside production serving**. Any future bundled provider service must
 follow the Rust rule and use the documented gateway, tenant ownership and durable queue.
+
+## Schema baselines
+
+A fresh installation is the only setup path. `BOOTSTRAP_MODE=migrate` (or `auto`) runs
+`src/migrations.rs`, which applies the files listed in `src/migrations/schema.rs`, each in
+its own transaction under the setup advisory lock, and records `<component>/<file>` with
+the file's SHA-256 in `commerce_migrations`:
+
+| Order | File | Contents |
+| --- | --- | --- |
+| 1 | `components/core/migrations/0000-foundation.sql` | `pg_trgm`/`pgcrypto`, the `veyndo_authority` schema with its per-database random scope key, the signed-scope functions (verbatim section shared with the app-storage host), and the trigger, history and scope functions used by several components |
+| 2 | `components/core/migrations/0001-baseline.sql` | Tenants, outbox, checkpoints, leases and read-context versions, with the two built-in shops |
+| 3 | `extensions/services/connectors/migrations/0001-baseline.sql` | The six `connector_*` tables |
+| 4… | `components/<name>/migrations/0001-baseline.sql` | identity, pricing, catalog, inventory, shop, b2b, marketing, customers, orders, payments, checkout, intelligence, apps, studio |
+
+The order is core first, then dependencies before their users (`components.json` `uses`,
+ties by name); `scripts/components.py` refuses a list in another order or a file that
+creates another component's table. Each baseline holds its tables, sequences and
+functions, the rows a fresh installation starts with, then its constraints, indexes,
+triggers, row security and grants. A foreign key or policy that references a later
+component's table is created in that later component's file.
+
+Readiness (`ready`) requires every baseline with the shipped checksum. Setup refuses a
+database whose ledger records migrations of an earlier release, and a database whose
+recorded baseline differs from the shipped file: there is no upgrade path, rolling
+upgrade or legacy import; set up a new database. The demo data runs after the schema
+from `fixtures/demo/*.sql` and the Rust seed, marked `demo-v1` in the same ledger.
+
+The registered `schema_baseline` suite sets up a new database with the built binary and
+compares a normalized `pg_dump --schema-only` (every statement, sorted, owners left out)
+and the starting rows with `fixtures/schema/reference.sql`. That reference was taken
+from a fresh installation of the last release with incremental migrations (commit
+`ce4285d7`), so the baselines were proven to produce exactly the same schema. A deliberate
+schema change regenerates it with `python3 scripts/schema_baseline.py --write`.
+
+Older guides, audits and the changelog name the incremental migrations 001–113 of
+earlier releases (for example "migration 099"). Their schema is contained in the
+owning component's baseline; the numbered files no longer exist.
 
 ## Typed inputs and checked queries
 
@@ -173,8 +194,8 @@ follow the Rust rule and use the documented gateway, tenant ownership and durabl
 - Store reads written as `sqlx::query_as!` are checked at compile time from the committed
   `.sqlx` cache (`.cargo/config.toml` sets `SQLX_OFFLINE`, so no build depends on a live
   database). After adding or changing such a query run `scripts/sqlx_cache.py --write`; it
-  migrates a scratch database and regenerates the cache. The `sql_prepare` suite runs
-  `--check` and fails when the cache no longer matches the migrated schema. Every other
+  sets up a scratch database from the component baselines and regenerates the cache. The
+  `sql_prepare` suite runs `--check` and fails when the cache no longer matches that schema. Every other
   static statement is still prepared against the schema by `scripts/sql_prepare.py`.
 
 ## Verification and remaining limits
@@ -187,8 +208,7 @@ follow the Rust rule and use the documented gateway, tenant ownership and durabl
   service instances, plus strict unsafe-role rejection and noisy-neighbor admission.
 - `scripts/email_tests.py` preserves the old reference comparisons and uses the actual
   Rust checkout → outbox → Flow Builder → Rust service → SMTP path, including consumer receipts.
-- SMTP STARTTLS/TLS, HTTP wire formats, stale configuration and offline state migration
-  are tested against synthetic fixtures. No real account, payment or external message is used.
+- SMTP STARTTLS/TLS, HTTP wire formats and stale configuration are tested against synthetic fixtures. No real account, payment or external message is used.
 - Lean covers the exact notification retry predicate only; SQL, TLS and provider protocols
   remain tested, unproved adapters. Passing tests does not mean full-system 100% coverage.
 

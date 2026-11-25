@@ -46,7 +46,7 @@ The exact proof boundary and extension procedure are documented in
 - Verified-purchase reviews require original cart or immutable account purchase
   proof. Review identity and customer rule facts use the canonical cart/account
   namespaces; guest contact email cannot reserve another actor's review or count
-  as that actor's submission. Migrations must not guess old author identities.
+  as that actor's submission.
 - Run the registered `tenant_isolation` suite. Do not describe foreign keys,
   app-only RLS or selected Lean policies as complete core/SaaS isolation.
 
@@ -67,8 +67,7 @@ explicit tenant grants; strict startup rejects missing coverage. App model insta
 use fixed forced-RLS tables and transactionally maintained projections. Read
 `docs/app-data-storage.md` before changing these paths. Never reintroduce per-shop,
 per-app, per-model or per-version tables/indexes. Tenant SQL must never own those tables or create public schema
-objects. Preserve historical pre-099 migration replay without a normal serving
-bypass. Test through actual separate database logins, HTTP/MCP, private actors,
+objects. Test through actual separate database logins, HTTP/MCP, private actors,
 pool reuse, restart and signing-key rotation. `SET ROLE` on a migration connection
 does not prove this boundary. Staged rollout and enforced production are distinct;
 do not claim deployment from local tests. Connector storage has its own service
@@ -83,8 +82,7 @@ Use the existing `sales_channels` and `hosted_frontends` owners; see `docs/chann
 Experience onboarding must include `appId: "storyfront"` in the existing hosted-frontend mount.
 `apps/hosted.rs` installs through the existing immutable package registry inside that transaction;
 `hosted_frontends.app_id` is the tenant-aware dependency. Never synthesize an "installed" app
-in the UI, install it from GET, or create another connection/editor registry. Migration 055
-repairs historical mounts once. Preserve deactivation dependency checks and shared connection
+in the UI, install it from GET, or create another connection/editor registry. Preserve deactivation dependency checks and shared connection
 cards in Apps/Storyfronts; original Storyfront code stays in its private repository.
 
 ## Cross-feature integration continuity

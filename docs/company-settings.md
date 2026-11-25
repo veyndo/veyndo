@@ -127,7 +127,7 @@ IDs, so subsequent releases continue to compare against actual live state.
 | `components/orders/src/store/company_release.rs` | Selective company/override/logo release and canonical baseline |
 | `components/shop/ui/admin/settings/Company*.tsx` | Modular factual fields, logo, content-language editor |
 | `frontend/src/storefront/shell/CompanyLegalPage.tsx` | Public channel legal view |
-| `migrations/030-company-settings.sql` | Tenant/channel foreign keys, revisioned overrides and logo storage |
+| `components/shop/migrations/0001-baseline.sql` | Tenant/channel foreign keys, revisioned overrides and logo storage |
 
 ## Verification boundary
 
