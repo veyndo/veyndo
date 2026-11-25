@@ -620,6 +620,28 @@ meaningful for the tables that report "hold shop rows" (35 of 135 on the 25 Nove
 the visibility probe applies to all. In the complete registry the suite runs after the
 HTTP suites have filled the database.
 
+### Port contract tests
+
+`crates/port-contracts` (`veyndo-port-contracts`) holds one contract set per port and an
+in-memory test adapter that meets it. The crate's own tests run every set against its
+adapter; `src/port_contracts_tests.rs` and `src/payments/host_contract_tests.rs` run the
+same sets against the server's real implementations (`cargo test --bin veyndo contract`).
+A mirror repository depends on the crate and calls the same public functions with its
+own implementation.
+
+| Port | Contract | Test adapter | Real implementation |
+| --- | --- | --- | --- |
+| `veyndo_shop::ports::SettingsGuards::condition` | admits an always-valid condition; refuses unknown, non-string or missing types, non-objects and an unknown type nested in a container | `Conditions` | `commerce::Guards` |
+| `veyndo_payments::ports::Host::service` | an unconfigured provider version is refused in every environment; a configured one answers the same service every time | `Services` | `payments::host::PaymentHost` |
+| `veyndo_intelligence::ports::PublicEgress` | no client for plain HTTP, loopback, private, link-local, metadata or `localhost` destinations | `Offline` | `assets::Egress` |
+| `veyndo_app_platform::ports::RecordRules` (pure methods) | records of an app without rules are stored as given, admitted, have no planning format, and normalizing is idempotent; an app with rules refuses its invalid fields and publishes a planning format | `NoRules` | `apps::data::BUNDLED` (site builder) |
+
+Open: the transaction-bound port methods (`lock`, `capture`, `validate`, `captured`, …) and
+the ports whose real implementation needs the server's `App` with a database (pricing,
+inventory, checkout, orders, identity, customers, B2B, POS, studio, intelligence hosts).
+The server is a binary crate, so its implementations are reachable only from its own unit
+tests; running these sets needs a database-backed `App` fixture in those tests.
+
 ## Repeatable checks
 
 From the repository root:

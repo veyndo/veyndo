@@ -814,6 +814,7 @@
     "host": {
       "title": "Process entry, route registry, worker roles, migrations and command-line tools",
       "sources": [
+        "crates/port-contracts",
         "src/accounts",
         "src/agent.rs",
         "src/agent_host.rs",
@@ -898,6 +899,7 @@
         "src/performance/delivery.rs",
         "src/planner.rs",
         "src/platform",
+        "src/port_contracts_tests.rs",
         "src/pos",
         "src/proposal_apply.rs",
         "src/proposal_routes.rs",

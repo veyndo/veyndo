@@ -46,6 +46,8 @@ mod payments;
 mod performance;
 mod planner;
 mod platform;
+#[cfg(test)]
+mod port_contracts_tests;
 mod pos;
 mod proposal_apply;
 mod proposal_routes;

@@ -311,6 +311,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/diagnostics.rs](../src/payments/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
 | [src/payments/generic_receipts.rs](../src/payments/generic_receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
 | [src/payments/host.rs](../src/payments/host.rs) | The server side of the payment ledger port: adapter configuration and the POS sale completion. |
+| [src/payments/host_contract_tests.rs](../src/payments/host_contract_tests.rs) | The server's payment host against the contract set of `veyndo-port-contracts`. |
 | [src/payments/instructions.rs](../src/payments/instructions.rs) | Routes of typed recipient instructions; the payments component owns the customer and compound merchant checks. |
 | [src/payments/instruments.rs](../src/payments/instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [src/payments/merchant.rs](../src/payments/merchant.rs) | Shared merchant payment operation bridge; the payments component owns the rights and durable jobs. |
@@ -340,6 +341,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/platform/quotas.rs](../src/platform/quotas.rs) | Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit. |
 | [src/platform/resources.rs](../src/platform/resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
 | [src/platform/shop_detail.rs](../src/platform/shop_detail.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
+| [src/port_contracts_tests.rs](../src/port_contracts_tests.rs) | The server's real port implementations against the contract sets of `veyndo-port-contracts`; the test adapters there pass the same sets. |
 | [src/pos/config.rs](../src/pos/config.rs) | POS channel setup lives in the POS component. |
 | [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS routes; the POS component owns the cashier gateway behind the register port. |
 | [src/pos/mod.rs](../src/pos/mod.rs) | Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners. |
@@ -439,6 +441,11 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/kernel/src/verified_kernel/fulfillment.rs](../crates/kernel/src/verified_kernel/fulfillment.rs) | Extracted fulfillment policies; pure bool/u64 decisions used by native consumers. |
 | [crates/kernel/src/verified_kernel/intelligence.rs](../crates/kernel/src/verified_kernel/intelligence.rs) | Extracted intelligence policies; pure bool/u64 decisions used by native consumers. |
 | [crates/kernel/src/verified_kernel.rs](../crates/kernel/src/verified_kernel.rs) | Public facade for the closed, domain-owned Rust policies extracted to Lean. |
+| [crates/port-contracts/src/lib.rs](../crates/port-contracts/src/lib.rs) | Contract test sets for component ports: each module states what every implementation of one port must do and ships an in-memory test adapter that satisfies it. |
+| [crates/port-contracts/src/payment_host.rs](../crates/port-contracts/src/payment_host.rs) | Contract of `veyndo_payments::ports::Host::service`, and a test adapter with a fixed service map. |
+| [crates/port-contracts/src/public_egress.rs](../crates/port-contracts/src/public_egress.rs) | Contract of `veyndo_intelligence::ports::PublicEgress`, and a test adapter that refuses every destination. |
+| [crates/port-contracts/src/record_rules.rs](../crates/port-contracts/src/record_rules.rs) | Contract of the pure methods of `veyndo_app_platform::ports::RecordRules`, and a test adapter for apps without rules of their own. |
+| [crates/port-contracts/src/settings_guards.rs](../crates/port-contracts/src/settings_guards.rs) | Contract of `veyndo_shop::ports::SettingsGuards::condition`, and a test adapter that admits a fixed set of condition types. |
 | [crates/runtime/src/database_scope/provision.rs](../crates/runtime/src/database_scope/provision.rs) | Migration-only authority rollout commands; role passwords never pass through command arguments or output. |
 | [crates/runtime/src/database_scope.rs](../crates/runtime/src/database_scope.rs) | Native provisioning adapter over the shared exact role-bound signing protocol; pools and task context remain native. |
 | [crates/runtime/src/http_json.rs](../crates/runtime/src/http_json.rs) | Bound untrusted provider JSON before allocation/deserialization; connection pooling remains with each existing service owner. |

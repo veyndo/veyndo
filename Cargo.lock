@@ -3541,6 +3541,7 @@ dependencies = [
  "veyndo-orders",
  "veyndo-payments",
  "veyndo-paypal",
+ "veyndo-port-contracts",
  "veyndo-pos",
  "veyndo-pricing",
  "veyndo-runtime",
@@ -4046,6 +4047,22 @@ dependencies = [
  "serde_json",
  "sqlx",
  "veyndo-core",
+ "veyndo-payments",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-port-contracts"
+version = "0.5.0"
+dependencies = [
+ "reqwest",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "veyndo-app-model",
+ "veyndo-app-platform",
+ "veyndo-core",
+ "veyndo-intelligence",
  "veyndo-payments",
  "veyndo-shop",
 ]

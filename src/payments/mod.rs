@@ -3,6 +3,8 @@
 mod accounts;
 mod app_commands;
 mod host;
+#[cfg(test)]
+mod host_contract_tests;
 pub(crate) mod instruments;
 pub(crate) use accounts::*;
 pub(crate) use app_commands::{app_command, command_action};
