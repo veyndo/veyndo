@@ -388,7 +388,7 @@ async fn customers_and_payments(f: &Fixture) {
     assert!(paying.is_some());
 }
 
-/// Carts as checkout, B2B, customer sign-in and marketing lock them; orders, roles, settings and exposures.
+/// Carts as checkout and customer sign-in lock them (B2B and marketing reach them through ports); orders, roles, settings and exposures.
 async fn carts_orders_and_reads(f: &Fixture) {
     let (a, b) = (f.a.as_str(), f.b.as_str());
     for (scope, visible) in [(shop(b), false), (shop(a), true)] {
@@ -398,22 +398,15 @@ async fn carts_orders_and_reads(f: &Fixture) {
                     .await
                     .expect("checkout cart")
                     .is_some(),
-                veyndo_b2b::store::carts::lock_by_token(&mut *c, a, &f.token)
-                    .await
-                    .expect("b2b cart")
-                    .is_some(),
                 veyndo_checkout::store::customer_carts::lock_by_token(&mut *c, a, &f.token)
-                    .await
-                    .is_ok(),
-                veyndo_marketing::store::carts::lock(&mut *c, a, &f.token)
                     .await
                     .is_ok(),
             ]
         })
         .await;
         assert_eq!(
-            seen, [visible; 4],
-            "checkout/b2b/customer/marketing carts: visible to A only"
+            seen, [visible; 2],
+            "checkout carts (also reached by B2B and marketing through their ports): visible to A only"
         );
         let reads = within(
             &f.runtime,

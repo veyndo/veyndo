@@ -54,7 +54,9 @@ VENDORED = {'automation': 'crates/automation is imported from github.com/veyndo/
 def components():
     """Component name -> its crate directories (monorepo-relative), from components.json."""
     data = json.loads((ROOT / 'components.json').read_text())['components']
-    return {name: [s for s in row['sources'] if (ROOT / s / 'Cargo.toml').is_file()]
+    # The server is released as the image, never as a mirror, even though shared test crates
+    # such as `crates/port-contracts` are listed among its sources.
+    return {name: [] if name == 'host' else [s for s in row['sources'] if (ROOT / s / 'Cargo.toml').is_file()]
             for name, row in data.items()}
 
 

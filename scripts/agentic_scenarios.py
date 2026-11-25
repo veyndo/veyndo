@@ -297,7 +297,7 @@ with (ROOT / 'artifacts/scenarios.log').open('w') as log:
             mode['hold'].set()
             mode['hold'] = None
             for _ in range(100):
-                waiting = sql("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT * FROM products%FOR UPDATE%'")
+                waiting = sql("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT %FROM products%FOR UPDATE%'")
                 if int(waiting) > 0:
                     break
                 time.sleep(.05)
@@ -334,7 +334,7 @@ with (ROOT / 'artifacts/scenarios.log').open('w') as log:
         try:
             mode['hold'].set(); mode['hold'] = None
             for _ in range(100):
-                if int(sql("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT * FROM products%FOR UPDATE%'")): break
+                if int(sql("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE 'SELECT %FROM products%FOR UPDATE%'")): break
                 time.sleep(.02)
             else: raise AssertionError('Checkout did not reach product lock')
             sql(f"UPDATE tasks SET run_until=clock_timestamp()+interval '1 second' WHERE tenant='{stage}' AND id='{tid}'")
