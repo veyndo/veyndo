@@ -26,9 +26,8 @@ content editing uses one selected language with the shop-main-language fallback.
 To create an invoice and send one order confirmation after a payment capture,
 review and enable the separate [paid order Flow](email-delivery.md#invoice-and-confirmation-after-payment).
 
-Migration 040 backfills missing start definitions once, without overwriting any
-existing definition. Signup provisioning runs the same database function before
-customer creation. Deleted starter rules/flows stay deleted on later server starts.
+Signup provisioning runs the shared database function `seed_shop_automation`
+(core foundation baseline) before customer creation. Deleted starter rules/flows stay deleted on later server starts.
 Sandbox creation copies the current merchant definitions rather than reseeding them.
 
 The main channel can be renamed, translated and assigned catalog/navigation content.
@@ -183,7 +182,7 @@ Graphs are acyclic, contain 1..100 reachable nodes and allow delays up to thirty
 - `src/marketing/{facts,line_facts,customer_facts,rule_snapshot}.rs`: authoritative tenant context and frozen references.
 - `src/marketing/{pipeline,pipeline_runtime,flow_actions,flow_mutations,flow_access}.rs`: graph admission, receipts/delays, action dispatch, transactions and current rights.
 - `components/marketing/ui/admin/automation/`: localized rule/action editors, graph overview and typed graph helpers.
-- `migrations/025-automation-pipelines.sql`: customer metadata, customer groups, delayed jobs and per-node receipts.
+- The customers and marketing baselines (`components/{customers,marketing}/migrations/`): customer metadata, customer groups, delayed jobs and per-node receipts.
 
 Run `python3 scripts/automation_registry.py` to check reflection/native catalog drift (use `--write` only after review); `python3 scripts/automation_differential.py` compares actual PHP classes and the compiled Rust rule evaluator. `python3 scripts/verify_integration.py --only automation` creates a disposable PostgreSQL database and checks the real checkout-to-flow path without provider traffic, including actual tag addition/removal, typed customer fields, attribution codes, customer/group status changes and session revocation. The Studio refreshes execution summaries every three seconds while the automation workspace is open, showing persisted branch decisions and scheduled continuation without reloading all configurations. Tenant/recent-job, ready-time, expired-lease and customer-history indexes bound the common database access paths. Frontend tests exercise graph connections/deletion, incomplete JSON editing, four languages and source payload round-trips.
 

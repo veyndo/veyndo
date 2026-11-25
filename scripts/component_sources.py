@@ -17,6 +17,11 @@ AUTOMATION_FILES = {'Cargo.toml', 'LICENSE', 'PROVENANCE.json', 'reference/autom
 AUTOMATION_KERNEL = 'crates/kernel/src/verified_kernel/automation.rs'
 
 
+# The native signed scope is a marked section of the core foundation baseline; the app host keeps a verbatim copy.
+NATIVE_SCOPE = 'components/core/migrations/0000-foundation.sql'
+SCOPE_BEGIN = '-- BEGIN signed scope'
+SCOPE_END = '-- END signed scope'
+
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -52,9 +57,12 @@ def verify(root=ROOT):
     assert runtime_wit.is_file() and sdk_wit.is_file(), 'Missing runtime/SDK WIT contract'
     assert runtime_wit.read_bytes() == sdk_wit.read_bytes(), 'Runtime/SDK WIT contract drift'
     scope_sql = root / OWNERS['apps'] / 'authority/sql/signed_scope.sql'
-    native_sql = (root / 'migrations/099-authenticated-database-scope.sql').read_text()
+    foundation = (root / NATIVE_SCOPE).read_text()
     assert scope_sql.is_file(), "Missing shared signed database verifier"
-    assert scope_sql.read_text().split('\n', 1)[1] == native_sql.split('-- Keep all existing per-table/actor checks;')[0].rstrip() + '\n', 'App host signed database verifier drifted from native authority'
+    begin, end = foundation.find(SCOPE_BEGIN), foundation.find(SCOPE_END)
+    assert 0 <= begin < end, 'The core foundation has no marked signed scope section'
+    native_sql = foundation[foundation.index('\n', foundation.index('\n', begin) + 1) + 1:end]
+    assert scope_sql.read_text().split('\n', 1)[1] == native_sql, 'App host signed database verifier drifted from native authority'
     automation = root / OWNERS['automation']
     provenance = json.loads((automation / 'PROVENANCE.json').read_text())
     assert provenance['kernelFiles'][AUTOMATION_KERNEL] == digest((root / AUTOMATION_KERNEL).read_bytes()), 'Automation kernel differs from the standalone rule policy'

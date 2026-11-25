@@ -133,13 +133,13 @@ app slots retain their own granted capabilities; they do not inherit catalog wri
 
 | Responsibility | Source |
 | --- | --- |
-| Persisted roles, current grants, history/FKs/RLS | `migrations/082-workspace-roles.sql`, `src/auth/roles.rs` |
+| Persisted roles, current grants, history/FKs/RLS | `components/identity/migrations/0001-baseline.sql`, `src/auth/roles.rs` |
 | Session/key identity and delegation | `components/identity/src/store/identity.sql`, `http/members.rs`, `http/invitations.rs`, `http/access.rs` |
 | UI navigation and refreshed grants | `frontend/src/admin/shell/permissions.ts`, `useStudioPermissions.ts` |
 | Shared permission labels and role editor | `components/identity/ui/admin/team/` |
 | Channel wizard field validation | `components/marketing/ui/admin/channels/ChannelEditor.tsx` |
 | Native B2B configuration/onboarding | `components/b2b/src/service/commands.rs` (feature switches through the revisioned settings writer), `components/b2b/src/service/onboarding.rs` |
-| Bounded customer picker/search | `src/operations/customer_lookup.rs`, `migrations/083-customer-lookup.sql` |
+| Bounded customer picker/search | `src/operations/customer_lookup.rs`, `components/customers/migrations/0001-baseline.sql` |
 | Real concurrent delegation/privacy/MCP checks | `scripts/workspace_roles.py`, `scripts/testing/role_races.py` |
 | Shared access and setup UI regressions | `frontend/tests/unit/workspace-roles.test.tsx`, channel, B2B, App Studio and Studio workspace suites |
 

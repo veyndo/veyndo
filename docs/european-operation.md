@@ -223,7 +223,7 @@ processor contracts and notification targets before sharing private consumer dat
 
 - `src/legal/`: bounded settings, policy fingerprints, transactional consent,
   checkout guard/snapshot, product facts, private request review and MCP adapters.
-- `migrations/048-legal-privacy.sql`: composite tenant/cart/channel ownership,
+- `components/shop/migrations/0001-baseline.sql` (legal and privacy tables): composite tenant/cart/channel ownership,
   five RLS-protected tables, consent log and review audit.
 - `components/shop/ui/admin/legal/`, `shared/legal/`, `storefront/legal/`: inherited
   settings, requirement catalog, single-language editors, actual integration gates

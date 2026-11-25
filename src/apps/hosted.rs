@@ -19,11 +19,6 @@ pub(crate) async fn ensure(
     hosted_apps::ensure(&data::BUNDLED, &install_host::COMMERCE, tx, tenant, id).await
 }
 
-/// Runs after shared-storage consolidation under the migration lock; normal reads never install apps.
-pub(crate) async fn backfill(tx: &mut Transaction<'_, Postgres>) -> Result<()> {
-    hosted_apps::backfill(&data::BUNDLED, &install_host::COMMERCE, tx).await
-}
-
 /// One hosted frontend bound to a channel, as the app list and frontend bindings show it.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

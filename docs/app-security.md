@@ -9,7 +9,7 @@ before adding runtimes, stores or credentials. [Architecture](app-platform.md) a
 | Finding | Current owner and protection | Regression |
 |---|---|---|
 | B1 table bomb | Pinned Apps `runtime/`, native verified resource adapter: preflight, element/memory limits, pooling, fuel, epochs | Rust oversized private table/growth/host-loop tests; `app_components` |
-| B2 shared app storage | `apps/records.rs`, migrations 101–102: fixed tables, full logical keys, signed RLS, managed unique/reference projections and own-version compatibility | `app_shared_storage`, `app_storage_migration`, `apps`, `app_schema`, `tenant_isolation` |
+| B2 shared app storage | `apps/records.rs`, apps baseline: fixed tables, full logical keys, signed RLS, managed unique/reference projections and own-version compatibility | `app_shared_storage`, `apps`, `app_schema`, `tenant_isolation` |
 | B3 service ID impersonation | `apps/approval.rs`: exact Rust-canonical approved digest; reserved names include Payments | `apps`, `app_surfaces`, `payment_providers` |
 | B4 wrong webhook tenant | `webhook_scope.rs`, auth middleware: route tenant admission, reject conflicting header | `app_secrets` strict non-owner RLS |
 | B5 global slow event lane | `events.rs`: eight lanes, bounded batches, lease fences, retry and replay | `app_events`, `services`, `rust_connectors` |
@@ -163,23 +163,16 @@ A validation failure rolls back the relevant transaction. SQL quotas also cover
 concurrent writers, unlike client-only checks. External sends remain at least once;
 no local transaction proves an external effect occurred only once.
 
-## Migration and deployment
+## Schema and deployment
 
-Run numbered schema migrations with the dedicated provisioner. Migrations 101–102
-consolidate managed app data into four fixed shared tables. Drain old Core writers,
-create and verify a backup, migrate and compare original records/references, then
-retire only the verified legacy tables before starting the new runtime. The hosted
-cutover completed on 15 October; other existing installations still require this
-coordinated maintenance. Follow [the exact procedure and evidence](app-data-storage.md).
-
-Migration 058 is retained immutable history: it introduced the earlier physical
-tables. It is not the current storage architecture or a standalone upgrade plan.
+The apps baseline (`components/apps/migrations/0001-baseline.sql`), applied by the
+setup job with the dedicated provisioner, holds managed app data in four fixed shared
+tables, with delivery fences, quota accounting, grants, drafts, activity, callback
+keys, encrypted secrets, private previews, multi-relations, recovery and jobs. The
+exact approved app capabilities are stored separately from team rights. A release
+replaces earlier installations; there is no conversion of earlier per-app tables.
 Strict serving uses separate restricted tenant/system logins, role-bound signed
 contexts and startup audits. Managed app installation never creates SQL objects.
-Migrations 059–070 add delivery fences, quota accounting, grants, drafts, activity,
-callback keys, encrypted secrets, private previews, multi-relations, recovery and jobs.
-Migration 070 stores the exact approved app capabilities separately from team
-rights. Historical callback keys have no implicit grants and must be renewed.
 
 Update independent service receivers for complete batches and new precise event
 permissions. Rebuild/pin custom UIs. Existing services without new tenant secrets

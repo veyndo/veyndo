@@ -2,6 +2,13 @@
 
 Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 
+## Connector service schema
+
+The connector tables are created by `extensions/services/connectors/migrations/0001-baseline.sql`,
+which the commerce setup applies in the global baseline order; the connector binary
+only starts once the ledger records `connectors/0001-baseline`. There is no import of
+state from the earlier SQLite/Python connector worker; do not add one.
+
 ## App lifecycle and independent reference services
 
 Native record lifecycle declarations are generic Manifest contracts implemented

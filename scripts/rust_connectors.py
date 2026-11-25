@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Actual Rust/PostgreSQL multi-process notification, OAuth/import and adversarial fixtures; no external accounts."""
+"""Actual Rust/PostgreSQL multi-process notification, OAuth, export and adversarial fixtures; no external accounts."""
 from testing.database import psql
-import base64,concurrent.futures,hashlib,json,os,pathlib,signal,socket,sqlite3,subprocess,sys,tempfile,threading,time,urllib.parse,uuid
-from cryptography.fernet import Fernet
+import base64,concurrent.futures,json,os,signal,socket,subprocess,tempfile,threading,time,urllib.parse,uuid
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from testing.mail_contracts.wire import http,SMTP
 from testing.mail_contracts.fixtures import MailFixtures
@@ -66,14 +65,15 @@ with tempfile.TemporaryDirectory(prefix='veyndo-rust-connectors-') as directory:
   env={**os.environ,'BIND_ADDR':base.removeprefix('http://'),'APP_SERVICES':json.dumps(mappings),'PROCESS_ROLE':'all'}
   log=open(directory+'/core.log','w');logs.append(log);core=serve(env,base,log)
   ce={**env,'CONNECTOR_GATEWAY_TOKEN':gateway,'CONNECTOR_SECRET_KEY':key,'CONNECTOR_DATABASE_URL':env['DATABASE_URL'],'CONNECTOR_PUBLIC_URL':f'http://127.0.0.1:{p1}','GOOGLE_CLIENT_ID':'synthetic-google','GOOGLE_CLIENT_SECRET':'synthetic-secret','SLACK_CLIENT_ID':'synthetic-slack','SLACK_CLIENT_SECRET':'synthetic-secret','CONNECTOR_TEST_ENDPOINTS':json.dumps({n:origin+('/token' if n=='google_token' else '/oauth.v2.access' if n=='slack_token' else '/global' if n=='sendgrid' else '/eu' if n=='sendgrid_eu' else '') for n in ('resend','sendgrid','sendgrid_eu','google_token','gmail','analytics','slack','slack_token','vercel','hubspot','klaviyo','contentful','algolia')}),'CONNECTOR_TENANT_DAILY':'20','EMAIL_TEST_SMTP':'1','EMAIL_TLS_CA_FILE':MailFixtures.folder.name+'/ca.pem'}
-  unsafe=subprocess.run([binary,'--import-legacy'],input=json.dumps({'format':1,'configs':[],'jobs':[],'sources':[],'changes':[]}),text=True,env={**ce,'DB_RLS_REQUIRED':'true'},capture_output=True)
+  # The service refuses to start on an unsafe database connection before it serves anything.
+  unsafe=subprocess.run([binary],env={**ce,'DB_RLS_REQUIRED':'true','CONNECTOR_PORT':str(port())},capture_output=True,text=True,timeout=30)
   assert unsafe.returncode!=0
   runtime_role='connector_runtime_'+uuid.uuid4().hex[:10];password=uuid.uuid4().hex
   sql(f"CREATE ROLE {runtime_role} LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{password}'; GRANT USAGE ON SCHEMA public TO {runtime_role}; GRANT SELECT ON commerce_migrations TO {runtime_role}; GRANT SELECT,INSERT,UPDATE,DELETE ON connector_config,connector_limits,connector_jobs,connector_oauth,connector_sources,connector_changes TO {runtime_role}; GRANT USAGE,SELECT,UPDATE ON SEQUENCE connector_changes_seq_seq TO {runtime_role};")
   assert sql(f"SELECT has_table_privilege('{runtime_role}','tenants','SELECT')") == 'f'
   db=urllib.parse.urlsplit(env['DATABASE_URL']);ce['CONNECTOR_DATABASE_URL']=urllib.parse.urlunsplit(db._replace(netloc=f'{runtime_role}:{password}@{db.hostname}:{db.port}'));ce['DB_RLS_REQUIRED']='true'
   sql(f'GRANT TRUNCATE ON connector_jobs TO {runtime_role};')
-  unsafe=subprocess.run([binary,'--import-legacy'],input=json.dumps({'format':1,'configs':[],'jobs':[],'sources':[],'changes':[]}),text=True,env=ce,capture_output=True)
+  unsafe=subprocess.run([binary],env={**ce,'CONNECTOR_PORT':str(port())},capture_output=True,text=True,timeout=30)
   assert unsafe.returncode!=0
   sql(f'REVOKE TRUNCATE ON connector_jobs FROM {runtime_role};')
   for p in (p1,p2):
@@ -167,32 +167,6 @@ with tempfile.TemporaryDirectory(prefix='veyndo-rust-connectors-') as directory:
    noisy='aaa-noise-'+uuid.uuid4().hex[:10]
    http(base+'/api/auth/register',{'email':noisy+'@example.test','password':'Synthetic-fixture-2026!','name':'Fixture','workspaceId':noisy,'workspaceName':'Noisy fixture'})
    sql(f"INSERT INTO connector_limits(tenant,app) VALUES('{noisy}','email'); INSERT INTO connector_jobs(tenant,app,id,fingerprint,state,payload,lease_until) VALUES('{noisy}','email','one','fixture','running',''::bytea,now()+interval '120 seconds'),('{noisy}','email','two','fixture','running',''::bytea,now()+interval '120 seconds'),('{noisy}','email','waiting','fixture','queued',''::bytea,NULL);")
-  # Offline import is atomic, preserves cursors and does not replay an old in-flight send.
-  legacy={'format':1,'configs':[{'tenant':other,'app':'email','value':{'revision':4,'settings':settings,'credentials':{}}}],
-          'jobs':[{'tenant':other,'app':'email','id':'legacy-flight','payload':{'mail':{'fixture':True}},'state':'running','attempts':1,'available':time.time(),'result':None}],
-          'sources':[{'tenant':other,'app':'gmail','id':'old-source','value':{'id':'old-source','text':'original'}}],
-          'changes':[{'seq':10000,'tenant':other,'app':'gmail','value':{'id':'old-source','text':'original'}}]}
-  legacy['jobs'].append({'tenant':other,'app':'email','id':'legacy-pending','payload':{'mail':{'to':['buyer@example.test'],'cc':[],'bcc':[],'subject':'Original queued mail','text':'Fixture','html':'','replyTo':'','fromEmail':'shop@example.test','fromName':'Rust Shop'},'revision':4,'dryRun':True,'fingerprint':'original-legacy-digest'},'state':'queued','attempts':0,'available':time.time(),'result':None})
-  # Run the real readonly SQLite/Fernet export utility, not just the Rust stdin importer.
-  source=pathlib.Path(directory)/'old-state.sqlite';cipher=Fernet(ce['CONNECTOR_SECRET_KEY'].encode())
-  def sealed(row):return cipher.encrypt(json.dumps({'tenant':row['tenant'],'app':row['app'],'value':row['value']}).encode()).decode()
-  with sqlite3.connect(source) as old:
-   old.executescript('CREATE TABLE config(tenant TEXT,app TEXT,data TEXT); CREATE TABLE jobs(tenant TEXT,app TEXT,id TEXT,state TEXT,payload TEXT,result TEXT,available REAL,attempts INTEGER); CREATE TABLE sources(tenant TEXT,app TEXT,id TEXT,data TEXT); CREATE TABLE changes(seq INTEGER,tenant TEXT,app TEXT,data TEXT);')
-   for row in legacy['configs']:old.execute('INSERT INTO config VALUES(?,?,?)',(row['tenant'],row['app'],sealed(row)))
-   for row in legacy['jobs']:old.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?,?)',(row['tenant'],row['app'],row['id'],row['state'],sealed({**row,'value':row['payload']}),None,row['available'],row['attempts']))
-   for row in legacy['sources']:old.execute('INSERT INTO sources VALUES(?,?,?,?)',(row['tenant'],row['app'],row['id'],sealed(row)))
-   for row in legacy['changes']:old.execute('INSERT INTO changes VALUES(?,?,?,?)',(row['seq'],row['tenant'],row['app'],sealed(row)))
-  before=hashlib.sha256(source.read_bytes()).hexdigest()
-  imported=subprocess.run([sys.executable,str(ROOT/'scripts/migrate_connector_state.py'),str(source)],text=True,env=ce,capture_output=True)
-  assert imported.returncode==0,imported.stderr
-  assert hashlib.sha256(source.read_bytes()).hexdigest()==before
-  assert call('email','status',headers=oh)['revision']==4
-  wait(lambda:any(j['id']=='legacy-pending' and j['state']=='completed' for j in call('email','status',headers=oh)['jobs']))
-  assert any(j['id']=='legacy-flight' and j['state']=='uncertain' for j in call('email','status',headers=oh)['jobs'])
-  assert http(f'http://127.0.0.1:{p1}/gmail/exports',{'cursor':0},{**direct,'x-tenant':other})['cursor']==10000
-  repeated=subprocess.run([binary,'--import-legacy'],input=json.dumps(legacy),text=True,env=ce,capture_output=True)
-  assert repeated.returncode!=0
-  assert call('email','status',headers=oh)['revision']==4
   role='connector_probe_'+uuid.uuid4().hex[:8]
   sql(f'CREATE ROLE {role} NOLOGIN NOSUPERUSER NOBYPASSRLS; GRANT USAGE ON SCHEMA public TO {role}; GRANT SELECT,UPDATE ON connector_config,connector_jobs TO {role};')
   try:

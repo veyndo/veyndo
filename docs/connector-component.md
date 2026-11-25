@@ -8,7 +8,7 @@ adapters.
 
 ## Run it with Veyndo
 
-The Core profile keeps migration 049 and the existing app gateway contract.
+The Core profile sets up the connector tables (`extensions/services/connectors/migrations/0001-baseline.sql`) and keeps the existing app gateway contract.
 Build the binary from the private [Connector repository](https://github.com/veyndo/connectors)
 with `cargo build --locked --bin connectors`, or build its root Dockerfile.
 For a build from this repository, use the existing Compose connected-apps

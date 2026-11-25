@@ -36,12 +36,12 @@ class OwnedRuntime(unittest.TestCase):
 
     def test_outbox_rehearsal_refuses_named_databases_before_sql(self):
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-        from testing.outbox_cases import migration_states
+        from testing.outbox_cases import tenant_schedules
         for database in ('commerce', 'veyndo_business_ui_20261016', 'restored_shop', 'production'):
             with self.subTest(database=database), patch.dict('os.environ', {'TEST_DATABASE': database}):
                 with patch('testing.outbox_cases.subprocess.run') as execute:
                     with self.assertRaises(AssertionError):
-                        migration_states()
+                        tenant_schedules()
                     execute.assert_not_called()
 
     def test_ci_uses_owned_database_and_checks_migration_before_slow_provider_fleet(self):

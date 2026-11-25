@@ -70,24 +70,6 @@ own_review=req('/store-api/product/mug-sage-350/reviews',{'author':'Authenticate
 assert not own_review['verifiedPurchase']
 assert req('/mcp',rpc,{**merchant,**review_auth})['result']['structuredContent']['matched']
 check('native review-count rules exclude claimed-email guest reviews and consume actual stable-account submissions')
-if os.getenv('TEST_DATABASE'):
-    from testing.database import psql
-    import subprocess
-    from urllib.parse import urlsplit
-    database=os.environ['TEST_DATABASE']
-    assert urlsplit(os.environ['DATABASE_URL']).path[1:]==database
-    legacy_review='legacy-review-'+suffix
-    upgrade=f"""BEGIN; SET LOCAL rac.system='on';
-    INSERT INTO product_reviews(id,tenant,product_id,session,author,rating,title,content,verified,approved)
-      VALUES('{legacy_review}','{workspace['workspace']}','mug','{guest_email}','Historical guest',4,'Legacy title','Legacy content',true,true);
-    DELETE FROM commerce_migrations WHERE version='093-review-identity'; COMMIT;"""
-    pg=psql(os.environ['TEST_DB_CONTAINER'],'commerce',database,'-v','ON_ERROR_STOP=1','-At')
-    subprocess.run(pg,input=upgrade,text=True,check=True,stdout=subprocess.DEVNULL)
-    boot=subprocess.run([str(pathlib.Path(__file__).resolve().parents[1]/'target/debug/veyndo')],env={**os.environ,'BOOTSTRAP_MODE':'migrate','SEED_DEMO':'false'},capture_output=True,text=True,timeout=30)
-    assert boot.returncode==0,(boot.stdout,boot.stderr)
-    persisted=subprocess.check_output(pg,input=f"SELECT verified::text||'|'||approved::text||'|'||title||'|'||content FROM product_reviews WHERE id='{legacy_review}';",text=True).strip()
-    assert persisted=='false|true|Legacy title|Legacy content',persisted
-    check('native upgrade withdraws historical email-derived badges without rewriting review text, rating or moderation')
 req('/api/merchant/orders/'+o['id']+'/transition',{'revision':1,'kind':'delivery','state':'delivered'},merchant,expected=409)
 req('/api/merchant/orders/'+o['id']+'/transition',{'revision':1,'kind':'payment','state':'paid'},expected=401)
 o=req('/api/merchant/orders/'+o['id']+'/transition',{'revision':1,'kind':'payment','state':'paid'},merchant)

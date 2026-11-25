@@ -26,7 +26,7 @@ class ScopeTests(unittest.TestCase):
                                    'docs/testing.md']), 'frontend')
 
     def test_sensitive_and_unknown_changes(self):
-        for path in ['src/auth.rs', 'migrations/103.sql', 'Cargo.lock',
+        for path in ['src/auth.rs', 'components/core/migrations/0001-baseline.sql', 'Cargo.lock',
                      '.github/workflows/verify.yml', 'scripts/testing/ci_scope.py',
                      'frontend/package-lock.json', 'frontend/scripts/localization.mjs',
                      'frontend/tests/browser_sessions.mjs', 'prompts/merchant.md',

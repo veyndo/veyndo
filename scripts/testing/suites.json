@@ -93,7 +93,6 @@
     "app_events",
     "app_export",
     "app_distribution",
-    "app_storage_migration",
     "app_generation",
     "erp_handoff",
     "edi",
@@ -101,7 +100,8 @@
     "shipping_contract",
     "grid_directory",
     "visual_workspace",
-    "browser_journeys"
+    "browser_journeys",
+    "schema_baseline"
   ],
   "browser_contracts": [
     "analytics",

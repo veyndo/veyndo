@@ -38,7 +38,7 @@ Authenticated `GET/PUT /api/settings/frontends` reads or binds `{alias, channel,
 Commerce Studio's **Storyfronts** page reads the existing tenant-bound mounts from
 `GET /api/settings/frontends`. Experience onboarding associates `appId: "storyfront"`
 with that mount and installs the public integration through the normal registry in
-the same transaction. Migration 055 backfills existing Experience mounts. Merchants
+the same transaction. Merchants
 do not reinstall a connector; Apps and Storyfronts show the same owned connections,
 including multiple frontends on one shop. Listing itself has no install side effect.
 
@@ -83,8 +83,8 @@ not evidence of a successful live provider payment.
 | `auth/handoff.rs`, `frontend/src/admin/shell/useStudioAccess.ts` | One-use personal Studio login |
 | `shop_domains.rs`, `shop_domains/frontends.rs` | Authoritative domain scope, guarded registration, public proxy |
 | `commerce/product_create.rs`, `product_edit.rs` | Validated stable import IDs, duplicate conflict and normal revision-bound product saves |
-| `migrations/042-identity-frontends.sql` | Identity, nonce, handoff, hosted frontend and daily inference persistence |
-| `migrations/055-hosted-apps.sql`, `src/apps/hosted.rs` | Idempotent Experience integration ownership and dependency checks |
+| `components/identity/migrations/0001-baseline.sql`, `components/shop/migrations/0001-baseline.sql` | Identity, nonce, handoff, hosted frontend and daily inference persistence |
+| `hosted_frontends` in `components/shop/migrations/0001-baseline.sql`, `src/apps/hosted.rs` | Idempotent Experience integration ownership and dependency checks |
 | `scripts/identity_broker.py` | Real HTTP/PostgreSQL signatures, foreign ownership, empty/fashion provisioning, handoff, mounts, paused shop and restart regressions |
 
 Hermetic provider tests and these integration checks do not demonstrate Google/Apple production OAuth or actual email delivery. The [8 October release review](current-release.md) separately records the observed public deployment, owned app/domain connection and retained editor; it makes no live-provider acceptance claim. New adapters remain explicitly unproved in the formal inventory; existing extracted policies retain their checks.
@@ -135,8 +135,8 @@ network adapters remain **unproved**; no new whole-account Lean guarantee is cla
 ### Automatic Storyfront installation
 
 Private Experience onboarding sets `appId: "storyfront"` on its authenticated
-frontend mount. Core migration 055 repairs existing Experience mounts through the
-normal app installer. Apps and Storyfronts expose the same owned connections and
+frontend mount, which installs the integration through the normal app installer.
+Apps and Storyfronts expose the same owned connections and
 editor; an installed integration package does not copy the private renderer into
 the core. See [channel management](channel-management.md#storyfront-app-ownership-for-experience-shops)
 for lifecycle, dependency protection and migration verification.

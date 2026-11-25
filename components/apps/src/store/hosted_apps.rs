@@ -58,16 +58,3 @@ pub async fn ensure(
     }
     Ok(())
 }
-
-/// Runs after shared-storage consolidation under the migration lock; normal reads never install apps.
-pub async fn backfill(
-    rules: &dyn RecordRules,
-    commerce: &dyn CommerceInstall,
-    tx: &mut Transaction<'_, Postgres>,
-) -> Result<()> {
-    let tenants = veyndo_shop::store::app_frontends::storyfront_tenants(tx).await?;
-    for tenant in tenants {
-        ensure(rules, commerce, tx, &tenant, "storyfront").await?;
-    }
-    veyndo_shop::store::app_frontends::validate_app_reference(tx).await
-}

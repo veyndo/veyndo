@@ -61,6 +61,26 @@ def split_source(text):
     return ''.join(code), strings
 
 
+MIGRATION_LIST = 'src/migrations/schema.rs'
+
+
+def migration_folder(name):
+    """Where a component keeps its schema baseline; the connector service keeps it beside its crate."""
+    return 'extensions/services/connectors/migrations' if name == 'connectors' else f'components/{name}/migrations'
+
+
+def global_order(components):
+    """Setup order of the component migrations: core first, then dependencies before their users, ties by name."""
+    uses = {name: set(row.get('uses', [])) & set(components) for name, row in components.items()}
+    order = []
+    while len(order) < len(uses):
+        ready = sorted(name for name in uses if name not in order and uses[name] <= set(order))
+        if not ready:
+            raise SystemExit('components.json has a dependency cycle; no migration order exists')
+        order.append('core' if 'core' in ready else ready[0])
+    return order
+
+
 class Tree:
     def __init__(self, root=ROOT, mapping=None):
         self.root = root
@@ -70,7 +90,8 @@ class Tree:
         self.files = {}
         for folder in FOLDERS:
             for path in sorted((root / folder).rglob('*')):
-                if path.suffix in ('.rs', '.sql') and 'target' not in path.parts:
+                # Baseline schema files define tables; they are checked by `migrations()`, not counted as accesses.
+                if path.suffix in ('.rs', '.sql') and 'target' not in path.parts and not (path.suffix == '.sql' and 'migrations' in path.parts):
                     self.files[str(path.relative_to(root))] = path
         self.problems = []
         duplicates = [prefix for prefix, count in Counter(prefix for prefix, _ in self.prefixes).items() if count > 1]
@@ -172,12 +193,48 @@ class Tree:
                 scattered[self.owner[file]] += 1
         return untyped, scattered, runtime
 
+    def migration_files(self):
+        """{component: [baseline files]} from each component's `migrations` folder."""
+        found = {}
+        for name in self.map['components']:
+            folder = self.root / migration_folder(name)
+            files = sorted(folder.glob('*.sql')) if folder.is_dir() else []
+            if files:
+                found[name] = files
+        return found
+
     def tables(self):
         names = set()
-        for path in sorted((self.root / 'migrations').glob('*.sql')):
+        paths = [path for files in self.migration_files().values() for path in files]
+        # The demo seed creates its own bookkeeping table.
+        paths += sorted((self.root / 'fixtures/demo').glob('*.sql'))
+        for path in paths:
             names.update(name.lower() for name in TABLE.findall(path.read_text()))
         # `public.%I` in a migration is a format placeholder for per-app tables, not a table called "public".
         return names - {'public'}
+
+    def migrations(self, catalogue=None):
+        """Problems with the baseline layout: the runner list must name every component migration file in the
+        global order (core first, then `uses`), and a component's files create only that component's tables."""
+        problems = []
+        files = self.migration_files()
+        expected = [f'{name}/{path.stem}' for name in global_order(self.map['components']) for path in files.get(name, [])]
+        catalogue = catalogue or (self.root / MIGRATION_LIST).read_text()
+        listed = re.findall(r'\(\s*"([a-z0-9_-]+/[0-9]{4}-[a-z0-9-]+)",\s*include_str!\("\.\./\.\./([^"]+)"\)', catalogue)
+        for version, path in listed:
+            name, stem = version.split('/')
+            if path != f'{migration_folder(name)}/{stem}.sql':
+                problems.append(f'{MIGRATION_LIST}: {version} must include {migration_folder(name)}/{stem}.sql, not {path}')
+        if [version for version, _ in listed] != expected:
+            problems.append(f'{MIGRATION_LIST} must list the component migrations in the global order: ' + ', '.join(expected))
+        owners = {table: name for name, row in self.map['components'].items() for table in row.get('tables', [])}
+        for name, paths in files.items():
+            for path in paths:
+                for table in TABLE.findall(path.read_text()):
+                    owner = owners.get(table.lower())
+                    if table.lower() != 'public' and owner not in (None, name):
+                        problems.append(f'{path.relative_to(self.root)} creates table {table} of {owner}')
+        return problems
 
     def table_use(self, tables):
         """{(component, table): 'write' | 'read'} from the SQL text in each component's sources."""
@@ -217,6 +274,7 @@ def findings(tree):
     use = tree.table_use(tables)
     globs = tree.glob_imports()
     problems += [line for line in tree.problems if line not in problems]
+    problems += tree.migrations()
     for name, row in components.items():
         declared_globs = row.get('glob_imports', 0)
         if globs[name] > declared_globs:
@@ -353,6 +411,8 @@ def main(argv=None):
     owner = next(name for name, row in broken['components'].items() if row.get('tables'))
     broken['components'][owner]['tables'] = broken['components'][owner]['tables'][1:]
     assert any('has no owning component' in line for line in findings(Tree(mapping=broken))[0]), 'an unowned table must fail'
+    swapped = (ROOT / MIGRATION_LIST).read_text().replace('"identity/0001-baseline"', '"<swap>"').replace('"pricing/0001-baseline"', '"identity/0001-baseline"').replace('"<swap>"', '"pricing/0001-baseline"')
+    assert any('global order' in line for line in tree.migrations(swapped)), 'a migration list out of the global order must fail'
     broken = json.loads(json.dumps(tree.map))
     del broken['components'][first]
     assert any('belongs to no component' in line for line in Tree(mapping=broken).problems), 'an unowned source must fail'

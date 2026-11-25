@@ -18,7 +18,7 @@ def artifact_path(name):
     return path
 
 
-RUST_SOURCES = ('src', 'components', 'crates', 'extensions/services', 'migrations')
+RUST_SOURCES = ('src', 'components', 'crates', 'extensions/services', 'fixtures/demo')
 
 
 def stale_binary(binary=None, roots=RUST_SOURCES):

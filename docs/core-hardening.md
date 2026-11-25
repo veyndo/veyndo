@@ -33,13 +33,12 @@ is not evidence that an older public service has received the migration or crede
 
 ## Production configuration and upgrade order
 
-1. Back up the database. Run the owner-only migration job through the selected release’s append-only migration ledger. Migrations 101–102 require stopped/drained old Core writers: [shared app storage maintenance](app-data-storage.md).
+1. Run the owner-only setup job (`BOOTSTRAP_MODE=migrate`) on a new database; it applies the component baselines. A release replaces earlier installations: there is no upgrade of an existing database.
 2. Run the post-migration role provisioning job. Commerce gets only core DML and
    managed app DML; all fixed Core/app tables stay owned by the migration role.
    Connector tables stay with the connector role. App installation needs no CREATE
    privilege or per-app table ownership.
-   Rerun provisioning after an additive migration instead of broadly granting every
-   future table (which could include credentials).
+   Do not broadly grant every future table (which could include credentials).
 3. Start HTTP/worker services with `BOOTSTRAP_MODE=serve`, `DB_RLS_REQUIRED=true`,
    `DB_SCOPE_REQUIRED=true`, distinct `DATABASE_RUNTIME_URL` / `DATABASE_TENANT_URL`
    restricted logins and `ALLOW_BOOTSTRAP_AUTH=false`. Use the canonical

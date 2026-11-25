@@ -1,41 +1,22 @@
-"""Disposable real-transaction counterexamples for subscriber migration and commit-order gaps."""
+"""Disposable real-transaction counterexamples for subscriber schedules and commit-order gaps."""
 import os
 import subprocess
 from .database import psql
-from .runtime import ROOT
 
 
 def command():
     return psql(os.environ['DB_CONTAINER'], 'commerce', os.environ['TEST_DATABASE'], '-XqAt', '-v', 'ON_ERROR_STOP=1')
 
 
-def migration_states():
-    # Rehearse the real old-to-new DDL in one rollback-only transaction. Never
-    # allow this fixture to run in a named UI/restored/production database.
+def tenant_schedules():
+    # Rollback-only checks on the set-up schema. Never run this fixture in a named
+    # UI/restored/production database.
     assert os.environ['TEST_DATABASE'].startswith('commerce_quality_')
-    old = (ROOT / 'migrations/097-outbox-fairness.sql').read_text()
-    old = old[old.index('CREATE FUNCTION register_outbox_tenant()'):old.index('CREATE TRIGGER register_outbox_tenant')].replace('CREATE FUNCTION', 'CREATE OR REPLACE FUNCTION', 1)
-    migration = (ROOT / 'migrations/103-outbox-subscriber-checkpoints.sql').read_text().split('-- Correlation survives')[0]
     body = """
 BEGIN;
 SELECT set_config('rac.system','on',true);
-DROP TRIGGER prepare_outbox_delivery ON outbox;
-DROP FUNCTION prepare_outbox_delivery();
-DROP TRIGGER register_outbox_subscribers ON tenants;
-DROP FUNCTION register_outbox_subscribers();
-DROP TABLE outbox_subscriber_failures;
-DROP TABLE outbox_checkpoints;
-ALTER TABLE outbox DROP COLUMN subscriber_mask, DROP COLUMN dispatch_not_before, DROP COLUMN dispatch_requires_retry;
-""" + old + """
-INSERT INTO outbox(tenant,kind,data,dead_letter_at,available_at)
- VALUES('workshop','fixture.legacy-quarantine','{}',now(),now());
-INSERT INTO outbox(tenant,kind,data,available_at)
- VALUES('workshop','fixture.legacy-delay','{}',now()+interval '1 day');
-""" + migration + """
 DO $$ BEGIN
  IF (SELECT count(*) FROM outbox_checkpoints)<>(SELECT count(*)*4 FROM tenants) THEN RAISE EXCEPTION 'Missing existing tenant schedules'; END IF;
- IF NOT EXISTS(SELECT 1 FROM outbox WHERE kind='fixture.legacy-quarantine' AND dispatch_requires_retry AND subscriber_mask=0) THEN RAISE EXCEPTION 'Legacy quarantine was lost'; END IF;
- IF NOT EXISTS(SELECT 1 FROM outbox WHERE kind='fixture.legacy-delay' AND dispatch_not_before>now() AND NOT dispatch_requires_retry) THEN RAISE EXCEPTION 'Legacy delay was lost'; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='outbox_subscriber_failures'::regclass AND confrelid='outbox'::regclass AND array_length(conkey,1)=2) THEN RAISE EXCEPTION 'Missing tenant-bound pending reference'; END IF;
 END $$;
 DO $$ DECLARE foreign_event bigint; BEGIN
@@ -51,7 +32,7 @@ END $$;
 ROLLBACK;
 """
     subprocess.run(command(), input=body, text=True, check=True, stdout=subprocess.DEVNULL)
-    print('PASS actual migration preserves old quarantine/delay and creates a tenant-bound reference; rehearsal rolled back', flush=True)
+    print('PASS every tenant has its subscriber schedules and pending failures stay tenant-bound; checks rolled back', flush=True)
 
 
 def late_commit(sql, wait):

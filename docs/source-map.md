@@ -745,7 +745,7 @@ starts with its responsibility comment.
 |---|---|---|
 | [`src/catalog_page.rs`](../src/catalog_page.rs), [`components/catalog/src/store/catalog_search.sql`, `catalog_channel.sql`](../components/catalog/src/store/catalog_search.sql) | Tenant cursor pages, literal localized server search and enforced limits. | `scalability.py`: complete traversal, later-page search, mixed-field language fallback, wildcards, tenant boundaries; million-product HTTP benchmark |
 | [`components/core/src/channel_metrics.rs`](../components/core/src/channel_metrics.rs) | Capped best-effort diagnostic buffer and bounded bulk writes. | Rust buffer-bound test + persisted counters in `scalability.py` |
-| [`src/performance/`](../src/performance/README.md), [`migrations/037-read-context-cache.sql`](../migrations/037-read-context-cache.sql) | Atomic settings/override/registry version probes, bounded decoded LRU, explicit read memoization, pool budgets and cache policies. | `read_performance.py`: two real Rust replicas, direct writes, override/delete/recreate/rollback, languages, revocation, restart, overload/recovery; Rust eviction/policy tests |
+| [`src/performance/`](../src/performance/README.md), [`components/shop/migrations/0001-baseline.sql`](../components/shop/migrations/0001-baseline.sql) | Atomic settings/override/registry version probes, bounded decoded LRU, explicit read memoization, pool budgets and cache policies. | `read_performance.py`: two real Rust replicas, direct writes, override/delete/recreate/rollback, languages, revocation, restart, overload/recovery; Rust eviction/policy tests |
 | [`frontend/src/shared/api/request-json.ts`](../frontend/src/shared/api/request-json.ts) | Same in-flight read shared by scoped Studio/storefront transports, immutable per-caller result and mutation barriers. | `request-json.test.ts`: actual transports, tenant/user/locale/channel/cart/customer keys, failures and pre-write-read barriers |
 | [`src/migrations.rs`](../src/migrations.rs) | Serialized checksummed setup and fixed demo seed; no catalog-wide restart scan. | Fresh database full suites; manual serve/migrate/readiness and independent-worker restart checks |
 
@@ -996,7 +996,7 @@ behavioral coverage is implied.
 
 ### Forced-RLS lexical candidates
 
-`migrations/079-knowledge-lexical-indexes.sql` owns transactional word projection
+`components/intelligence/migrations/0001-baseline.sql` owns transactional word projection
 backfill/triggers and composite source containment. `components/intelligence/src/store/search.sql`
 and `components/intelligence/src/store/source_search.sql` narrow candidates, then hydrate/rank/admit current
 native records. `components/intelligence/src/service/retrieval.rs` remains the public/private

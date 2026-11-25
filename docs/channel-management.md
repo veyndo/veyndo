@@ -87,12 +87,9 @@ flowchart LR
     Storyfronts --> Editor
 ```
 
-Migration 055 assigns pre-existing Experience mounts to Storyfront and installs any
-missing package **once**, using the normal installer inside the migration transaction.
 A deferred composite `(tenant,app_id)` foreign key prevents a binding from borrowing
-another tenant's app. GET requests never provision or repair installations. The
-pre-055 hosting contract was Storyfront/Experience; future generic mounts remain
-unassociated unless their application is explicitly supplied.
+another tenant's app. GET requests never provision or repair installations. Generic
+mounts remain unassociated unless their application is explicitly supplied.
 
 `GET /api/apps` reports `managedBy: "experience"` and its owned `connections`. Apps
 and Storyfronts reuse the same connection card and safe editor URLs. While any

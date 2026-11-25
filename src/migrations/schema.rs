@@ -1,156 +1,73 @@
-//! Append-only ordered migration source catalogue; deployed checksums are never rewritten.
-pub(super) const SCHEMA: &[(&str, &str)] = &[
-    // New migrations stay append-only below.
-    // International translation jobs are additive and independent of earlier domain schemas.
-    // Product/category management is append-only; earlier migration hashes stay intact.
-    // Append-only entries are applied in dependency order below.
-    ("001", include_str!("../../migrations/001.sql")),
+//! The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one
+//! baseline per component in the global order (core first, then `components.json` `uses`).
+//! `scripts/components.py` checks that this list names every component migration file in that order.
+pub(super) const BASELINES: &[(&str, &str)] = &[
     (
-        "002-managed",
-        include_str!("../../migrations/002-managed.sql"),
+        "core/0000-foundation",
+        include_str!("../../components/core/migrations/0000-foundation.sql"),
     ),
     (
-        "004-context",
-        include_str!("../../migrations/004-context.sql"),
+        "core/0001-baseline",
+        include_str!("../../components/core/migrations/0001-baseline.sql"),
     ),
     (
-        "006-commerce",
-        include_str!("../../migrations/006-commerce.sql"),
+        "connectors/0001-baseline",
+        include_str!("../../extensions/services/connectors/migrations/0001-baseline.sql"),
     ),
     (
-        "008-workspaces",
-        include_str!("../../migrations/008-workspaces.sql"),
+        "identity/0001-baseline",
+        include_str!("../../components/identity/migrations/0001-baseline.sql"),
     ),
     (
-        "010-apps-intelligence-payments",
-        include_str!("../../migrations/010-apps-intelligence-payments.sql"),
+        "pricing/0001-baseline",
+        include_str!("../../components/pricing/migrations/0001-baseline.sql"),
     ),
     (
-        "011-documents-managed",
-        include_str!("../../migrations/011-documents-managed.sql"),
+        "catalog/0001-baseline",
+        include_str!("../../components/catalog/migrations/0001-baseline.sql"),
     ),
     (
-        "012-checkout-handoff",
-        include_str!("../../migrations/012-checkout-handoff.sql"),
+        "inventory/0001-baseline",
+        include_str!("../../components/inventory/migrations/0001-baseline.sql"),
     ),
     (
-        "014-bounded-catalog",
-        include_str!("../../migrations/014-bounded-catalog.sql"),
+        "shop/0001-baseline",
+        include_str!("../../components/shop/migrations/0001-baseline.sql"),
     ),
     (
-        "013-staging-developer",
-        include_str!("../../migrations/013-staging-developer.sql"),
+        "b2b/0001-baseline",
+        include_str!("../../components/b2b/migrations/0001-baseline.sql"),
     ),
     (
-        "014-customer-accounts",
-        include_str!("../../migrations/014-customer-accounts.sql"),
+        "marketing/0001-baseline",
+        include_str!("../../components/marketing/migrations/0001-baseline.sql"),
     ),
     (
-        "015-rules-flows-channels",
-        include_str!("../../migrations/015-rules-flows-channels.sql"),
+        "customers/0001-baseline",
+        include_str!("../../components/customers/migrations/0001-baseline.sql"),
     ),
     (
-        "016-merchant-operations",
-        include_str!("../../migrations/016-merchant-operations.sql"),
+        "orders/0001-baseline",
+        include_str!("../../components/orders/migrations/0001-baseline.sql"),
     ),
     (
-        "017-integration-access",
-        include_str!("../../migrations/017-integration-access.sql"),
+        "payments/0001-baseline",
+        include_str!("../../components/payments/migrations/0001-baseline.sql"),
     ),
     (
-        "018-order-state-machine",
-        include_str!("../../migrations/018-order-state-machine.sql"),
+        "checkout/0001-baseline",
+        include_str!("../../components/checkout/migrations/0001-baseline.sql"),
     ),
     (
-        "019-workflow-schema",
-        include_str!("../../migrations/019-workflow-schema.sql"),
+        "intelligence/0001-baseline",
+        include_str!("../../components/intelligence/migrations/0001-baseline.sql"),
     ),
     (
-        "020-customer-addresses",
-        include_str!("../../migrations/020-customer-addresses.sql"),
+        "apps/0001-baseline",
+        include_str!("../../components/apps/migrations/0001-baseline.sql"),
     ),
     (
-        "021-demo-addresses",
-        include_str!("../../migrations/021-demo-addresses.sql"),
-    ),
-    (
-        "022-app-evidence",
-        include_str!("../../migrations/022-app-evidence.sql"),
-    ),
-    (
-        "023-app-poll-scheduling",
-        include_str!("../../migrations/023-app-poll-scheduling.sql"),
-    ),
-    (
-        "024-platform",
-        include_str!("../../migrations/024-platform.sql"),
-    ),
-    (
-        "025-automation-pipelines",
-        include_str!("../../migrations/025-automation-pipelines.sql"),
-    ),
-    (
-        "026-product-catalog",
-        include_str!("../../migrations/026-product-catalog.sql"),
-    ),
-    (
-        "027-product-search",
-        include_str!("../../migrations/027-product-search.sql"),
-    ),
-    (
-        "028-translations",
-        include_str!("../../migrations/028-translations.sql"),
-    ),
-    (
-        "029-developer-trash",
-        include_str!("../../migrations/029-developer-trash.sql"),
-    ),
-    (
-        "030-company-settings",
-        include_str!("../../migrations/030-company-settings.sql"),
-    ),
-    (
-        "031-channel-commerce",
-        include_str!("../../migrations/031-channel-commerce.sql"),
-    ),
-    (
-        "032-image-jobs",
-        include_str!("../../migrations/032-image-jobs.sql"),
-    ),
-    (
-        "033-knowledge-workspace",
-        include_str!("../../migrations/033-knowledge-workspace.sql"),
-    ),
-    (
-        "033-managed-knowledge",
-        include_str!("../../migrations/033-managed-knowledge.sql"),
-    ),
-    (
-        "034-entity-history",
-        include_str!("../../migrations/034-entity-history.sql"),
-    ),
-    (
-        "035-history-finalization",
-        include_str!("../../migrations/035-history-finalization.sql"),
-    ),
-    (
-        "036-app-assistants",
-        include_str!("../../migrations/036-app-assistants.sql"),
-    ),
-    (
-        "037-read-context-cache",
-        include_str!("../../migrations/037-read-context-cache.sql"),
-    ),
-    (
-        "038-tenant-references",
-        include_str!("../../migrations/038-tenant-references.sql"),
-    ),
-    (
-        "039-explicit-payment-attribution",
-        include_str!("../../migrations/039-explicit-payment-attribution.sql"),
-    ),
-    (
-        "040-automation-defaults",
-        include_str!("../../migrations/040-automation-defaults.sql"),
+        "studio/0001-baseline",
+        include_str!("../../components/studio/migrations/0001-baseline.sql"),
     ),
 ];

@@ -29,7 +29,7 @@ proof of exact allocator/RSS usage. Cold concurrent misses can duplicate decodin
 there is no distributed single-flight mechanism. Actual query execution, not
 cache membership, determines channel existence on every new request.
 
-Migration [037](../migrations/037-read-context-cache.sql) stamps basis/override rows
+The [shop baseline](../components/shop/migrations/0001-baseline.sql) stamps basis/override rows
 before every insert/update. The global language registry changes version on actual
 inserts, updates, deletes and truncation. Conflict-only registration does not
 invalidate the fleet or lock the global version row. Cache state is local to one

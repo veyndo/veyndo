@@ -55,10 +55,9 @@ def projection_exact():
 try:
     sql("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) SELECT 'workshop','lexical-fixture-'||g,'Synthetic ordinary item','fixture',CASE WHEN g=123 THEN 'distinctiveneedle red cotton' ELSE 'Ordinary synthetic description' END,24.9,19,100 FROM generate_series(1,5000) g;")
     sql("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,visibility,source_type,locale) SELECT 'workshop','lexical-fixture-doc-'||g,'mug','Synthetic sheet','fixture-hash-'||g,'fixture','public','text','en-GB' FROM generate_series(1,5000) g; INSERT INTO knowledge_chunks(tenant,document_id,position,text) SELECT 'workshop','lexical-fixture-doc-'||g,0,CASE WHEN g=123 THEN 'distinctivedocneedle red cotton' ELSE 'Ordinary synthetic source' END FROM generate_series(1,5000) g;")
-    # Recreate the pre-079 state, then execute the actual migration on existing sources.
-    sql('DROP TRIGGER knowledge_product_words_changed ON products; DROP TRIGGER knowledge_chunk_words_changed ON knowledge_chunks; DROP FUNCTION knowledge_product_words(); DROP FUNCTION knowledge_chunk_words(); DROP TABLE knowledge_product_lexemes,knowledge_chunk_lexemes; DROP INDEX knowledge_serves_target; BEGIN; ' + (root / 'migrations/079-knowledge-lexical-indexes.sql').read_text() + ' COMMIT; ANALYZE products; ANALYZE knowledge_documents; ANALYZE knowledge_chunks; ANALYZE knowledge_product_lexemes; ANALYZE knowledge_chunk_lexemes;')
+    sql('ANALYZE products; ANALYZE knowledge_documents; ANALYZE knowledge_chunks; ANALYZE knowledge_product_lexemes; ANALYZE knowledge_chunk_lexemes;')
     projection_exact()
-    print('PASS actual migration backfills both word projections exactly from existing sources', flush=True)
+    print('PASS both word projections match their sources exactly', flush=True)
     sql(f'CREATE ROLE {role} NOLOGIN NOSUPERUSER NOBYPASSRLS; GRANT USAGE ON SCHEMA public TO {role}; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO {role}; GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO {role};')
     assert products('distinctiveneedle') == ['lexical-fixture-123']
     assert products('red cotton') == ['lexical-fixture-123']

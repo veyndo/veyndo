@@ -73,9 +73,6 @@ def start():
             if k.startswith(("GOOGLE_CLIENT_", "SLACK_CLIENT_", "EMAIL_SMTP_", "EMAIL_TLS_", "CONNECTOR_TENANT_", "CONNECTOR_WORKERS_", "CONNECTOR_DATABASE_URL", "DATABASE_URL"))
         },
     }
-    legacy = pathlib.Path(values.get("CONNECTOR_DATABASE", RUNTIME / "connector-state.sqlite"))
-    if legacy.exists() and legacy.stat().st_size and not (RUNTIME / "connector-migrated").exists():
-        raise RuntimeError("Legacy SQLite exists: stop the old service, run scripts/migrate_connector_state.py, and retain its backup")
     log = open(RUNTIME / "connectors.log", "a")
     p = subprocess.Popen(
         [str(SERVER)],

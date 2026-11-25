@@ -12,8 +12,8 @@ use the tenant lifecycle lock, then rehydrate the actor and target grants; retai
 explicit overrides also require delegation checks. New domains need named scopes in
 `auth::SCOPES`, localized shared permission labels, native HTTP/MCP/action guards,
 Studio presentation admission, history/staging policies and real denied-access tests.
-Use an additive migration to evolve existing default definitions; never rewrite a
-deployed seed migration. Generic app/AI Flow results are not safe merely because a
+Default role definitions live in the identity baseline
+(`components/identity/migrations/`); change them there. Generic app/AI Flow results are not safe merely because a
 user can read automation status. Preserve cleaned summaries for limited readers.
 B2B switches live in shared versioned commerce settings; channel inheritance may not
 relax that global policy. See `docs/studio-access-and-setup.md` for the current owners.
