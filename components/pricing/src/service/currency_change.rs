@@ -1,4 +1,5 @@
 //! What a change of the currency configuration must not do: relabel stored amounts or remove a currency still in use.
+use crate::ports::References;
 use crate::store::currency_usage;
 use crate::types::currency::Config;
 use sqlx::PgConnection;
@@ -13,13 +14,19 @@ pub fn removed(old: &Config, next: &Config) -> Vec<String> {
         .collect()
 }
 
-pub async fn guard(tx: &mut PgConnection, tenant: &str, old: &Config, next: &Config) -> Result<()> {
+pub async fn guard(
+    references: &dyn References,
+    tx: &mut PgConnection,
+    tenant: &str,
+    old: &Config,
+    next: &Config,
+) -> Result<()> {
     if old.pricing_currency != next.pricing_currency {
         return Err(conflict(
             "The original monetary storage currency cannot be relabelled",
         ));
     }
-    if currency_usage::any_in_use(tx, tenant, &removed(old, next)).await? {
+    if currency_usage::any_in_use(references, tx, tenant, &removed(old, next)).await? {
         return Err(conflict(
             "Currency is referenced by product prices, open carts or purchasing units; remove channel availability instead",
         ));

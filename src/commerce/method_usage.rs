@@ -12,7 +12,12 @@ pub(crate) async fn method_dependencies(
     h: RequestContext,
     path: Path<(String, String)>,
 ) -> Result<Json<Value>> {
-    let Json(found) =
-        veyndo_shipping::http::method_usage::dependencies(State(a.core.clone()), h, path).await?;
+    let Json(found) = veyndo_shipping::http::method_usage::dependencies(
+        State(a.core.clone()),
+        &super::Guards,
+        h,
+        path,
+    )
+    .await?;
     Ok(Json(json!(found)))
 }

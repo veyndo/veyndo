@@ -56,6 +56,37 @@ pub trait Catalogue: Send + Sync {
     ) -> PortFuture<'a, ()>;
 }
 
+/// Documents of components above pricing that refer to currencies or bound a price job, read in the caller's transaction.
+pub trait References: Send + Sync {
+    /// The highest product ID of the shop, or an empty string.
+    fn product_ceiling<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, String>;
+    /// Whether a product carries fixed prices in, or is priced in, one of the currencies.
+    fn products_use<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+        codes: &'a [String],
+    ) -> PortFuture<'a, bool>;
+    /// Whether an open cart is priced in one of the currencies.
+    fn carts_use<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+        codes: &'a [String],
+    ) -> PortFuture<'a, bool>;
+    /// Whether a purchasing unit buys in one of the currencies.
+    fn units_use<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+        codes: &'a [String],
+    ) -> PortFuture<'a, bool>;
+}
+
 /// The state pricing handlers extract: the core state and the ports.
 #[derive(Clone)]
 pub struct Pricing {
@@ -63,4 +94,5 @@ pub struct Pricing {
     pub settings: Arc<dyn ShopSettings>,
     pub carts: Arc<dyn Carts>,
     pub catalogue: Arc<dyn Catalogue>,
+    pub references: Arc<dyn References>,
 }

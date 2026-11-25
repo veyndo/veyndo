@@ -97,6 +97,7 @@ impl axum::extract::FromRef<App> for Pricing {
             settings: server.clone(),
             carts: server.clone(),
             catalogue: server,
+            references: Arc::new(commerce::Guards),
         }
     }
 }

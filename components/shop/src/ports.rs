@@ -26,8 +26,10 @@ pub trait Carts: Send + Sync {
     ) -> PortFuture<'a, StoredCart>;
 }
 
-/// What settings writes need from components that depend on the shop: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales.
-pub trait SettingsGuards: Send + Sync {
+/// What settings writes need from components that depend on the shop: rule conditions, payment capture configuration, the marketing configuration lock, app lifecycle locales and the documents that refer to a removed currency or method.
+pub trait SettingsGuards:
+    veyndo_pricing::ports::References + veyndo_shipping::ports::MethodReferences
+{
     /// Checks one rule condition of the native rule engine.
     fn condition(&self, v: &Value) -> veyndo_core::Result<()>;
     /// Takes the marketing configuration lock that orders settings with rules, flows and promotions.

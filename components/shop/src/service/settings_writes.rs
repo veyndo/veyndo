@@ -61,7 +61,7 @@ async fn guard(
         ),
     ] {
         for id in previous.into_iter().filter(|id| !current.contains(id)) {
-            if !usage(tx, t, area, id, channel).await?.can_delete {
+            if !usage(guards, tx, t, area, id, channel).await?.can_delete {
                 return Err(conflict("Method is referenced; deactivate it instead"));
             }
         }
@@ -102,7 +102,14 @@ pub async fn save_config(
     if previous.main_locale != s.main_locale {
         host.guards.locale(&mut tx, &t, &s.main_locale).await?;
     }
-    currency_guard(&mut tx, &t, &previous.currencies, &s.currencies).await?;
+    currency_guard(
+        &*host.guards,
+        &mut tx,
+        &t,
+        &previous.currencies,
+        &s.currencies,
+    )
+    .await?;
     group_guard(&mut tx, &t, &previous, &s).await?;
     guard(&*host.guards, &mut tx, &t, &previous, &s, None).await?;
     for patch in settings::overrides(&mut tx, &t).await? {
@@ -163,7 +170,7 @@ pub async fn validate_settings_release(
     let next = decode(settings::basis_for_update(tx, t).await?)?;
     validate(&next, &|v| guards.condition(v))?;
     let previous = decode(previous.clone())?;
-    currency_guard(tx, t, &previous.currencies, &next.currencies).await?;
+    currency_guard(guards, tx, t, &previous.currencies, &next.currencies).await?;
     guard(guards, tx, t, &previous, &next, None).await?;
     let tax_ids = next.taxes.iter().map(|v| v.id.clone()).collect::<Vec<_>>();
     if settings::tax_class_stranded(tx, t, &tax_ids).await? {

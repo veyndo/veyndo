@@ -14,6 +14,7 @@ pub mod product_locks;
 pub mod product_reviews;
 pub mod product_snapshot;
 pub mod purchase;
+pub mod references;
 pub mod selected_customer;
 pub mod session;
 pub mod tax_conditions;

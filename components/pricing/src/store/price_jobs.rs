@@ -22,16 +22,6 @@ pub async fn queued(tx: &mut PgConnection, tenant: &str) -> Result<i64> {
     .await?)
 }
 
-/// The highest product ID at creation; the job stops there, so products added later keep their prices.
-pub async fn product_ceiling(tx: &mut PgConnection, tenant: &str) -> Result<String> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT coalesce(max(id),'') AS "ceiling!" FROM products WHERE tenant=$1"#,
-        tenant
-    )
-    .fetch_one(tx)
-    .await?)
-}
-
 pub async fn insert(
     tx: &mut PgConnection,
     tenant: &str,
