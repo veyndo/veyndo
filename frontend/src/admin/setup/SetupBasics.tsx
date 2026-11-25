@@ -1,6 +1,7 @@
 /** A focused first company form reuses native fields, geography, revisioned settings and the shared save bar. */
+import { useRead } from "../shell/useRead";
 import { Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useStudio } from "../shell/StudioContext";
 import { useSettingsDraft } from "../settings/useSettingsDraft";
 import CompanyField from "../settings/CompanyField";
@@ -23,23 +24,12 @@ export default function SetupBasics({
     request,
     "/api/settings/master-data",
   );
-  const [world, setWorld] = useState<CountryCatalogue>(),
-    [worldError, setWorldError] = useState(false);
+  const worldRead = useRead<CountryCatalogue>(request, "/store-api/countries");
+  const valid = Array.isArray(worldRead.data?.countries);
+  const world = valid ? worldRead.data : undefined;
+  const worldError =
+    worldRead.status === "error" || (!!worldRead.data && !valid);
   const canWrite = access.includes("settings.write");
-  useEffect(() => {
-    let active = true;
-    request("/store-api/countries")
-      .then((v) => {
-        if (!Array.isArray(v.countries)) throw new Error();
-        if (active) setWorld(v);
-      })
-      .catch(() => {
-        if (active) setWorldError(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
   useEffect(() => {
     onDirty(state.dirty || state.busy);
   }, [state.dirty, state.busy, onDirty]);

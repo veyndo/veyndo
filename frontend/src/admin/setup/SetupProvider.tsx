@@ -1,4 +1,5 @@
 /** Personal, revisioned setup progress reuses the existing workspace store and session fences. */
+import { useRead, useSetRead } from "../shell/useRead";
 import {
   createContext,
   useCallback,
@@ -21,42 +22,31 @@ function useSetupController() {
     access.includes("settings.read") && access.includes("settings.write");
   const available = eligible && connected && !environment && !!auth.identity;
   const scope = JSON.stringify([workspace, auth.identity?.user.id]);
-  const [loaded, setLoaded] = useState<{
-    scope: string;
-    record: WorkspaceRecord;
-  }>();
-  const [loading, setLoading] = useState(true),
-    [busy, setBusy] = useState(false);
-  const [error, setError] = useState(""),
-    [reload, setReload] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [saveError, setError] = useState("");
+  const recordRead = useRead<WorkspaceRecord>(
+    liveRequest,
+    available ? "/api/studio/workspace" : null,
+  );
+  const setRead = useSetRead(liveRequest);
+  const loading =
+    available &&
+    (recordRead.status === "idle" || recordRead.status === "loading");
+  const error =
+    saveError ||
+    (available && recordRead.status === "error" ? t("loadError") : "");
   const fence = useRef(0),
     saving = useRef(false);
   const current = useRef({ available, scope, liveRequest });
   current.current = { available, scope, liveRequest };
-  const record =
-    loaded?.scope === scope && available ? loaded.record : undefined;
+  const record = available ? recordRead.data : undefined;
   useEffect(() => {
-    const generation = ++fence.current;
+    ++fence.current;
     setError("");
-    if (!available) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    liveRequest("/api/studio/workspace")
-      .then((value: WorkspaceRecord) => {
-        if (generation === fence.current) setLoaded({ scope, record: value });
-      })
-      .catch(() => {
-        if (generation === fence.current) setError(t("loadError"));
-      })
-      .finally(() => {
-        if (generation === fence.current) setLoading(false);
-      });
     return () => {
       fence.current++;
     };
-  }, [available, liveRequest, scope, reload]);
+  }, [available, liveRequest, scope]);
   const save = useCallback(
     async (setup: SetupProgress) => {
       if (!available || saving.current) return false;
@@ -89,7 +79,7 @@ function useSetupController() {
           "PUT",
         )) as WorkspaceRecord;
         if (!stillCurrent()) return false;
-        setLoaded({ scope, record: next });
+        setRead("/api/studio/workspace", next, undefined);
         return true;
       } catch {
         if (stillCurrent()) setError(t("saveError"));
@@ -109,7 +99,10 @@ function useSetupController() {
     busy,
     loading,
     error,
-    reload: () => setReload((v) => v + 1),
+    reload: () => {
+      setError("");
+      void recordRead.refetch();
+    },
     save,
     autoOpen:
       available &&

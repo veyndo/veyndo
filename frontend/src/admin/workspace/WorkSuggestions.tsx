@@ -1,6 +1,7 @@
 /** Actual permission-filtered work links open native owners; late responses cannot survive a scope change. */
+import { useRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useStudio } from "../shell/StudioContext";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -15,24 +16,10 @@ type Item = {
 export default function WorkSuggestions() {
   const { request, openEntity, selectTab, load, intent } = useStudio(),
     t = useAgentWorkspaceText();
-  const [items, setItems] = useState<Item[]>([]),
-    [error, setError] = useState(false),
-    [reload, setReload] = useState(0);
-  useEffect(() => {
-    let active = true;
-    setItems([]);
-    setError(false);
-    request("/api/studio/work")
-      .then((v) => {
-        if (active) setItems(Array.isArray(v.items) ? v.items : []);
-      })
-      .catch(() => {
-        if (active) setError(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, reload]);
+  const [failed, setError] = useState(false);
+  const work = useRead(request, "/api/studio/work");
+  const items: Item[] = Array.isArray(work.data?.items) ? work.data.items : [];
+  const error = failed || work.status === "error";
   const open = async (item: Item) => {
     if (item.kind === "stock" && item.entity)
       openEntity("productData", item.entity);
@@ -59,7 +46,13 @@ export default function WorkSuggestions() {
         {t("work")}
       </h2>
       <p>{t("hint")}</p>
-      <Button type="submit" onClick={() => setReload((n) => n + 1)}>
+      <Button
+        type="submit"
+        onClick={() => {
+          setError(false);
+          void work.refetch();
+        }}
+      >
         {t("reload")}
       </Button>
       {error ? (

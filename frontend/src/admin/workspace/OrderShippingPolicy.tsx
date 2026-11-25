@@ -1,6 +1,6 @@
 /** Current source passages for the order workspace. The query contains no order or customer data. */
+import { useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { PreviewResult } from "../intelligence/knowledge-types";
 import { useCompositionText } from "./composition-i18n";
@@ -12,38 +12,14 @@ export default function OrderShippingPolicy({
 }) {
   const t = useCompositionText();
   const query = t("shippingQuery");
-  const [retry, setRetry] = useState(0);
-  const [response, setResponse] = useState<{
-    request: RequestFn;
-    query: string;
-    retry: number;
-    sources?: PreviewResult["sources"];
-  }>();
-
-  useEffect(() => {
-    let current = true;
-    request("/api/knowledge/preview", {
-      audience: "merchant",
-      query,
-      includeExternal: false,
-    })
-      .then(({ sources }: PreviewResult) => {
-        if (current) setResponse({ request, query, retry, sources });
-      })
-      .catch(() => {
-        if (current) setResponse({ request, query, retry });
-      });
-    return () => {
-      current = false;
-    };
-  }, [request, query, retry]);
-
-  const latest =
-    response?.request === request &&
-    response.query === query &&
-    response.retry === retry
-      ? response
-      : undefined;
+  const preview = useRead<PreviewResult>(request, "/api/knowledge/preview", {
+    body: { audience: "merchant", query, includeExternal: false },
+  });
+  const latest = preview.fetching
+    ? undefined
+    : preview.status === "error"
+      ? { sources: undefined }
+      : preview.data && { sources: preview.data.sources };
   const sources = latest?.sources;
   return (
     <section className="agent-shipping-policy" aria-label={t("shippingPolicy")}>
@@ -53,7 +29,7 @@ export default function OrderShippingPolicy({
       ) : !sources ? (
         <>
           <Notice tone="danger">{t("shippingError")}</Notice>
-          <Button type="button" onClick={() => setRetry(retry + 1)}>
+          <Button type="button" onClick={() => void preview.refetch()}>
             {t("shippingRetry")}
           </Button>
         </>

@@ -1,6 +1,7 @@
 /** Goals reference the existing proposal owner; no parallel worker, executor or approval queue. */
+import { useRead } from "../shell/useRead";
 import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { canOpenStudio } from "../shell/permissions";
 import type { Tab } from "../shell/navigation";
 import type { RequestFn } from "../shell/studio-types";
@@ -27,25 +28,11 @@ export default function WorkspaceGoals({
   onOpen: (tab: Tab) => void;
 }) {
   const t = useWorkspaceText(),
-    [title, setTitle] = useState(""),
-    [tasks, setTasks] = useState<Task[]>([]),
-    [error, setError] = useState("");
+    [title, setTitle] = useState("");
   const allowed = canOpenStudio("assistant", rights);
-  useEffect(() => {
-    let active = true;
-    setTasks([]);
-    if (allowed)
-      void request("/api/agent/tasks")
-        .then((v) => {
-          if (active) setTasks(v.tasks ?? []);
-        })
-        .catch(() => {
-          if (active) setError(t("error"));
-        });
-    return () => {
-      active = false;
-    };
-  }, [request, allowed]);
+  const taskRead = useRead(request, allowed ? "/api/agent/tasks" : null);
+  const tasks: Task[] = taskRead.data?.tasks ?? [];
+  const error = taskRead.status === "error" ? t("error") : "";
   const patch = (id: string, value: Partial<Goal>) =>
     onChange(goals.map((g) => (g.id === id ? { ...g, ...value } : g)));
   return (

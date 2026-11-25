@@ -1,5 +1,6 @@
 /** Composition mounts existing domain directories, filters and native entity editors without a second renderer. */
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useRead } from "../shell/useRead";
+import { lazy, Suspense } from "react";
 import CatalogDirectory from "../catalog/CatalogDirectory";
 import OrderDirectory from "../orders/OrderDirectory";
 import CustomerDirectory from "../customers/CustomerDirectory";
@@ -34,30 +35,10 @@ export default function AgentViewDirectory({
   headers: Record<string, string>;
 }) {
   const t = useCompositionText();
-  const [catalogue, setCatalogue] = useState<{
-    request: RequestFn;
-    categories: Category[];
-    mainLocale: string;
-  }>();
-  useEffect(() => {
-    let active = true;
-    if (entity === "products")
-      request("/api/merchant/categories")
-        .then((v) => {
-          if (active)
-            setCatalogue({
-              request,
-              categories: v.elements,
-              mainLocale: v.mainLocale ?? "en-GB",
-            });
-        })
-        .catch(() => {
-          if (active) setCatalogue(undefined);
-        });
-    return () => {
-      active = false;
-    };
-  }, [entity, request]);
+  const catalogue = useRead(
+    request,
+    entity === "products" ? "/api/merchant/categories" : null,
+  ).data;
   if (selected)
     return (
       <Suspense fallback={<p role="status">{t("loading")}</p>}>
@@ -117,10 +98,8 @@ export default function AgentViewDirectory({
       request={request}
       queryState={queryState}
       onOpen={onSelect}
-      categories={catalogue?.request === request ? catalogue.categories : []}
-      mainLocale={
-        catalogue?.request === request ? catalogue.mainLocale : "en-GB"
-      }
+      categories={(catalogue?.elements as Category[] | undefined) ?? []}
+      mainLocale={catalogue?.mainLocale ?? "en-GB"}
       canWrite={false}
       onNew={() => {}}
     />
