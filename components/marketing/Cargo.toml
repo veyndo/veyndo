@@ -23,3 +23,6 @@ veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }
 axum.workspace = true
 reqwest.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

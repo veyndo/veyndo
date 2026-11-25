@@ -44,6 +44,7 @@ webpki-roots = "1"
 rustls-pemfile = "2"
 scraper = "0.24"
 json-patch = "4.2.0"
+proptest = { version = "1.7", default-features = false, features = ["std"] }
 
 
 [package]

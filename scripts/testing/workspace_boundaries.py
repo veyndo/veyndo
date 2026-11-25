@@ -146,6 +146,9 @@ EXTERNAL = {
                          'base64', 'sha2', 'sqlx', 'tracing', 'image'},
 }
 
+# Reviewed test-only crates: admitted as dev-dependencies only, never in a production build.
+TEST_ONLY = {'proptest'}
+
 
 def check(packages):
     names = {p['name'] for p in packages}
@@ -161,6 +164,8 @@ def check(packages):
         allowed = ALLOWED[name] | EXTERNAL[name]
         for dependency in package['dependencies']:
             dep = dependency['name']
+            if dependency.get('kind') == 'dev' and dep in TEST_ONLY:
+                continue
             assert dep in allowed, (name, 'Unreviewed dependency capability', dep)
             if dep == 'veyndo-app-authority':
                 if name == 'veyndo-cognition':

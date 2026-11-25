@@ -29,3 +29,6 @@ veyndo-inventory = { path = "../inventory" }
 veyndo-orders = { path = "../orders" }
 veyndo-payments = { path = "../payments" }
 veyndo-runtime = { path = "../../crates/runtime" }
+
+[dev-dependencies]
+proptest.workspace = true

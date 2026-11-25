@@ -31,4 +31,5 @@ veyndo-customers = { path = "../customers" }
 veyndo-runtime = { path = "../../crates/runtime" }
 
 [dev-dependencies]
+proptest.workspace = true
 pdf-extract.workspace = true

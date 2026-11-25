@@ -317,6 +317,9 @@ struct Used {
 }
 
 #[cfg(test)]
+#[path = "promotion_property_tests.rs"]
+mod properties;
+#[cfg(test)]
 mod tests {
     use super::apply;
     use crate::types::promotion::Promotion;

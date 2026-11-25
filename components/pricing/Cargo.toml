@@ -17,6 +17,9 @@ regex = { workspace = true, optional = true }
 reqwest = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
+[dev-dependencies]
+proptest.workspace = true
+
 [features]
 # Without `service` the crate is the pure domain only, for consumers such as independent apps.
 default = ["service"]

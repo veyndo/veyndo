@@ -66,6 +66,14 @@ provides CPU limits and Linux address-space limits for its child process.
 Dependencies remain external registry packages and retain their bundled license files.
 No OCR, parser microVM, or arbitrary customer-code execution is implied.
 
+## Test-only tools
+
+`proptest` 1.x (MIT OR Apache-2.0) generates inputs for the property tests of the
+pricing, inventory, orders, payments, checkout and marketing crates. It is a
+dev-dependency only (`scripts/testing/workspace_boundaries.py` refuses it anywhere
+else) and is never part of a production build. `cargo-mutants` (MIT) is installed
+on demand into `target/tools` for the mutation run; it is not a dependency.
+
 ## Bundled geography
 
 `fixtures/geography.json` derives country codes/continents and localized names

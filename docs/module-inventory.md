@@ -985,6 +985,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
+| [components/checkout/tests/properties.rs](../components/checkout/tests/properties.rs) | Property tests for the cart quote: totals are the sum of line totals plus tax in whole minor units, and the same cart always gives the same quote. |
 | [components/checkout/ui/storefront/checkout/CheckoutApproval.tsx](../components/checkout/ui/storefront/checkout/CheckoutApproval.tsx) | Request approval only after native checkout review, then refresh that exact cart without changing its revision. |
 | [components/checkout/ui/storefront/checkout/CheckoutDetails.tsx](../components/checkout/ui/storefront/checkout/CheckoutDetails.tsx) | Address book, guest contact and delivery/payment selection share the authoritative cart context API. |
 | [components/checkout/ui/storefront/checkout/CheckoutIdentity.tsx](../components/checkout/ui/storefront/checkout/CheckoutIdentity.tsx) | Inline guest/login/registration step rotates the cart on authentication and refreshes owning defaults. |
@@ -1339,6 +1340,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/inventory/tests/properties.rs](../components/inventory/tests/properties.rs) | Property tests for stock: reservations against the proved stock rule, checked inventory batches and the reorder ceiling. |
 | [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
@@ -1389,6 +1391,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/flow_mutations.rs](../components/marketing/src/store/flow_mutations.rs) | Local flow mutations journal the effect in the same transaction; customer authority changes revoke existing sessions. |
 | [components/marketing/src/store/flow_projection.rs](../components/marketing/src/store/flow_projection.rs) | Turns one outbox event into durable flow jobs inside the outbox transaction; a broken flow fails alone, never the whole event. |
 | [components/marketing/src/store/flow_steps.rs](../components/marketing/src/store/flow_steps.rs) | The per-node execution record of a flow job: an action runs once, and an unfinished record stays uncertain. Columns checked at compile time. |
+| [components/marketing/src/store/promotion_property_tests.rs](../components/marketing/src/store/promotion_property_tests.rs) | Property tests for applying promotions to a priced quote: every discount stays within its base, no total or line goes negative, exclusive promotions stop the chain. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_entities.rs](../components/marketing/src/store/rule_entities.rs) | Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read. |
 | [components/marketing/src/store/rule_history.rs](../components/marketing/src/store/rule_history.rs) | Rule comparison on bounded, tenant-owned frozen Flow order inputs; it never reads current commerce data. |
@@ -1494,6 +1497,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
 | [components/orders/src/types.rs](../components/orders/src/types.rs) | Stored and exchanged records of the orders component. |
+| [components/orders/tests/properties.rs](../components/orders/tests/properties.rs) | Property tests for the order state machine: reachable states are listed, terminal states take no transition, payment or fulfilment. |
 | [components/orders/ui/admin/orders/OrderCreate.tsx](../components/orders/ui/admin/orders/OrderCreate.tsx) | Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. |
 | [components/orders/ui/admin/orders/OrderDetail.tsx](../components/orders/ui/admin/orders/OrderDetail.tsx) | Order workspace: server actions, exact-once commands, provider progress and visible event history. |
 | [components/orders/ui/admin/orders/OrderDirectory.tsx](../components/orders/ui/admin/orders/OrderDirectory.tsx) | Native server-paged order directory supplies the reusable grid with fulfillment columns and current rights. |
@@ -1561,6 +1565,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/payments/tests/properties.rs](../components/payments/tests/properties.rs) | Property tests for the payment ledger: listed transitions only, no backward monetary step, captures and refunds within their bounds. |
 | [components/payments/ui/admin/payments/OrderPayment.tsx](../components/payments/ui/admin/payments/OrderPayment.tsx) | One order's payment ledger in Studio: provider commands with exact-once keys, job progress and details; contributed to the order page. |
 | [components/payments/ui/admin/payments/PaymentActions.tsx](../components/payments/ui/admin/payments/PaymentActions.tsx) | Shared native order/provider controls; an accepted job is observed before another financial action. |
 | [components/payments/ui/admin/payments/PaymentDetails.tsx](../components/payments/ui/admin/payments/PaymentDetails.tsx) | Read-only transaction observation and native financial history, shared across Studio views. |
@@ -1648,6 +1653,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/types/product_currency.rs](../components/pricing/src/types/product_currency.rs) | The currency fields of a product's `extra` document: the currency its base prices are stated in and the fixed prices per currency as exact decimal strings. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
+| [components/pricing/tests/properties.rs](../components/pricing/tests/properties.rs) | Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models. |
 | [components/shipping/src/domain/booking.rs](../components/shipping/src/domain/booking.rs) | A carrier booking occupies one open package; only the intent that reserved it can release it. |
 | [components/shipping/src/domain/geography.rs](../components/shipping/src/domain/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
 | [components/shipping/src/domain/split.rs](../components/shipping/src/domain/split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |

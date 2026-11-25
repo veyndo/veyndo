@@ -33,6 +33,9 @@ def negative_controls(packages):
         variant('veyndo-apps')['dependencies'].append(
             {'name': 'sqlx', 'rename': 'harmless_helpers', 'kind': kind, 'optional': True,
              'target': 'cfg(target_os = "linux")'})
+    # A test-only crate stays test-only: as a normal or build dependency it is unreviewed.
+    for kind in [None, 'build']:
+        variant('veyndo-pricing')['dependencies'].append({'name': 'proptest', 'kind': kind})
     variant('veyndo-pricing')['dependencies'].append({'name': 'business-helper'})
     variant('veyndo-pricing')['dependencies'].append(
         {'name': 'serde', 'path': str(ROOT / 'src')})
