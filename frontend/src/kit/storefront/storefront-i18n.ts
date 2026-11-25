@@ -150,6 +150,18 @@ const words = {
     "más envío",
   ],
   deliveryLabel: ["Delivery", "Lieferung", "Livraison", "Entrega"],
+  waiting: [
+    "Waiting for results…",
+    "Warte auf Ergebnisse …",
+    "En attente des résultats…",
+    "Esperando resultados…",
+  ],
+  unavailable: [
+    "This result cannot be shown here.",
+    "Dieses Ergebnis kann hier nicht angezeigt werden.",
+    "Ce résultat ne peut pas être affiché ici.",
+    "Este resultado no se puede mostrar aquí.",
+  ],
   summary: ["Your order", "Deine Bestellung", "Votre commande", "Tu pedido"],
   remove: ["Remove", "Entfernen", "Retirer", "Eliminar"],
   tax: ["VAT", "Mehrwertsteuer", "TVA", "IVA"],

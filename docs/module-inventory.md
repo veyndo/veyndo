@@ -272,6 +272,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/rule_history.rs](../src/marketing/rule_history.rs) | Rule comparison lives in the marketing component; these entries keep the server-side signatures. |
 | [src/mcp/poppy.rs](../src/mcp/poppy.rs) | Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed. |
 | [src/mcp/protocol.rs](../src/mcp/protocol.rs) | JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization. |
+| [src/mcp/storefront_views.rs](../src/mcp/storefront_views.rs) | Storefront kit parts as an MCP App view: the `ui://` document, the tool links and each tool result's part payload. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |
 | [src/migrations/identity_checksums.rs](../src/migrations/identity_checksums.rs) | Explicit source-hash pairs for the reviewed identity-only migration source update. |
@@ -1841,6 +1842,9 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/storefront/elements.tsx](../frontend/src/kit/storefront/elements.tsx) | Embeddable web elements from part contracts: validated `props` attributes, buyer intents as DOM events. |
 | [frontend/src/kit/storefront/embed.ts](../frontend/src/kit/storefront/embed.ts) | Standalone embed entry (`/assets/elements.js`): injects the kit styles once and defines every storefront part as a web element. |
 | [frontend/src/kit/storefront/index.ts](../frontend/src/kit/storefront/index.ts) | Public interface of kit/storefront: part contracts and the parts they define. |
+| [frontend/src/kit/storefront/mcp-app.tsx](../frontend/src/kit/storefront/mcp-app.tsx) | MCP App view (`ui://veyndo/kit/storefront`): renders kit parts from a commerce tool result inside the host sandbox. |
+| [frontend/src/kit/storefront/mcp-entry.ts](../frontend/src/kit/storefront/mcp-entry.ts) | Build entry of the MCP App view bundle (`dist/mcp/storefront-parts.js`); the server wraps it into the `ui://` document. |
+| [frontend/src/kit/storefront/standalone-styles.ts](../frontend/src/kit/storefront/standalone-styles.ts) | Kit styles for standalone entries (web elements, MCP App views) that load without the Veyndo app stylesheet. |
 | [frontend/src/kit/storefront/storefront-i18n.ts](../frontend/src/kit/storefront/storefront-i18n.ts) | Vocabulary of the storefront parts in English, German, French and Spanish; hosts pass only the locale. |
 | [frontend/src/kit/storefront/storefront.css](../frontend/src/kit/storefront/storefront.css) | Storefront parts on design tokens only: card, product summary, cart, checkout steps and account. |
 | [frontend/src/kit/tokens/index.ts](../frontend/src/kit/tokens/index.ts) | Typed design tokens: the JSON source, CSS custom property names and the stylesheet that defines them. |

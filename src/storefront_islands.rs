@@ -183,6 +183,117 @@ pub(crate) fn props(detail: &Detail, locale: &str) -> Option<Island> {
     })
 }
 
+/// The fields of a `catalog.search` answer the product cards read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub(crate) struct Listing {
+    elements: Vec<ListedProduct>,
+    currency_context: CurrencyContext,
+}
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ListedProduct {
+    id: String,
+    name: String,
+    description: Option<String>,
+    media: Vec<Media>,
+    stock: Option<u64>,
+    price: Option<f64>,
+    currency: Option<String>,
+    calculated_price: TierPrice,
+}
+
+/// Props of the kit `product-card` part.
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct Card {
+    pub locale: String,
+    pub price_kind: &'static str,
+    pub product: CardProduct,
+}
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct CardProduct {
+    pub id: String,
+    pub name: String,
+    pub url: String,
+    pub price: f64,
+    pub currency: String,
+    pub stock: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image: Option<String>,
+}
+
+/// The storefront path of a product page in a shop.
+pub(crate) fn product_path(tenant: &str, id: &str) -> String {
+    let encode = |s: &str| {
+        s.bytes()
+            .map(|b| match b {
+                b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                    (b as char).to_string()
+                }
+                _ => format!("%{b:02X}"),
+            })
+            .collect::<String>()
+    };
+    format!("/products/{}?shop={}", encode(id), encode(tenant))
+}
+
+/// Product cards from a `catalog.search` answer: at most 24, with shop links under `origin`.
+pub(crate) fn cards(
+    listing: &Listing,
+    locale: &str,
+    tenant: &str,
+    origin: Option<&str>,
+) -> Vec<Card> {
+    let absolute = |path: &str| origin.map(|o| format!("{o}{path}"));
+    listing
+        .elements
+        .iter()
+        .filter(|p| !p.id.is_empty() && !p.name.is_empty())
+        .take(24)
+        .filter_map(|p| {
+            let price = p.calculated_price.unit_price.or(p.price)?;
+            let currency = listing
+                .currency_context
+                .code
+                .clone()
+                .or(p.currency.clone())?;
+            let path = product_path(tenant, &p.id);
+            Some(Card {
+                locale: bounded(locale, 35),
+                price_kind: "gross",
+                product: CardProduct {
+                    id: bounded(&p.id, 200),
+                    name: bounded(&p.name, 300),
+                    url: bounded(&absolute(&path).unwrap_or(path), 2000),
+                    price,
+                    currency,
+                    stock: p.stock.unwrap_or(0),
+                    description: p
+                        .description
+                        .as_deref()
+                        .filter(|d| !d.is_empty())
+                        .map(|d| bounded(d, 2000)),
+                    image: p.media.first().and_then(|m| media_url(&m.url, origin)),
+                },
+            })
+        })
+        .collect()
+}
+
+/// Media as an absolute HTTPS URL: same-origin paths join the shop origin, HTTPS stays.
+pub(crate) fn media_url(url: &str, origin: Option<&str>) -> Option<String> {
+    if url.starts_with("https://") {
+        return Some(bounded(url, 2000));
+    }
+    (url.starts_with('/') && !url.starts_with("//"))
+        .then(|| origin.map(|o| bounded(&format!("{o}{url}"), 2000)))
+        .flatten()
+}
+
 fn escape(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     for c in text.chars() {

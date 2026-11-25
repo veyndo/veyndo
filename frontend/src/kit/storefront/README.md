@@ -21,6 +21,9 @@ locale and data, and receive buyer intents as callbacks (`onAddToCart`,
 - [`AccountOverview.tsx`](AccountOverview.tsx): The account home (greeting, counts, recent orders) and the order list part.
 - [`elements.tsx`](elements.tsx): `registerPartElements` defines `<veyndo-<id>>` web elements that validate their `props` attribute, upgrade server-rendered fallback markup (islands) and emit `veyndo:add-to-cart`, `veyndo:checkout`, `veyndo:quantity` and `veyndo:open` events.
 - [`PartForm.tsx`](PartForm.tsx): The Visual Builder form of a part's configuration, generated from its configuration JSON Schema; hosts supply localized labels and pickers for special formats such as `product-id`.
+- [`standalone-styles.ts`](standalone-styles.ts): Injects the token, ui and part styles for entries that load without the app stylesheet.
+- [`mcp-app.tsx`](mcp-app.tsx): The MCP App view: speaks the MCP Apps bridge (`2026-01-26`), renders the part payload of a tool result and sends buying to the shop through `ui/open-link`.
+- [`mcp-entry.ts`](mcp-entry.ts): Build entry of the view bundle (`vite.mcp.config.ts` → `dist/mcp/storefront-parts.js`).
 - [`embed.ts`](embed.ts): The standalone entry built as `/assets/elements.js`: it injects the token, ui and part styles once and defines every part element.
 - [`storefront.css`](storefront.css): Part styles; the architecture check refuses colour literals here.
 
@@ -52,6 +55,17 @@ Prices, stock and totals always come from the server; parts only show them.
   and set `data-invalid`) and emits `veyndo:add-to-cart`, `veyndo:checkout`,
   `veyndo:quantity` and `veyndo:open` events; the host decides what they do. Cross-origin hosts need the shop to serve
   the script with CORS.
+
+- **Agents (MCP Apps).** The hosted `/mcp` server links `catalog.detail` and
+  `catalog.search` to the view `ui://veyndo/kit/storefront`
+  (`_meta.ui.resourceUri`, plus the `openai/outputTemplate` alias ChatGPT still
+  honours) and serves it as a self-contained `text/html;profile=mcp-app` document
+  built from these contracts (`src/mcp/storefront_views.rs`). Each result carries
+  its part props in `_meta["ai.veyndo/part"]`, derived from the same Store API
+  answer the model sees; hosts do not pass `_meta` to the model. The view never
+  takes payment: add to cart and checkout open the shop's own product page or
+  checkout, and only HTTPS links leave the sandbox. Images and links need
+  `COMMERCE_PUBLIC_ORIGIN`; without it the view shows the parts without them.
 
 ## Verification
 

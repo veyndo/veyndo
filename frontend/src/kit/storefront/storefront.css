@@ -607,3 +607,8 @@
   display: grid;
   gap: var(--vy-space-3);
 }
+.vy-sf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: var(--vy-space-4);
+}

@@ -162,9 +162,9 @@ for (const file of files) {
       errors.push(
         `${relative(file)} breaks the kit layering (${from} may not import ${to})`,
       );
-    // A standalone embed entry inlines lower kit stylesheets (`*.css?inline`).
+    // The standalone style module inlines lower kit stylesheets (`*.css?inline`).
     const inlineStyle =
-      path.basename(file) === "embed.ts" &&
+      path.basename(file) === "standalone-styles.ts" &&
       /\.css\?inline$/.test(spec) &&
       (kitLayers[from] ?? []).includes(to);
     if (

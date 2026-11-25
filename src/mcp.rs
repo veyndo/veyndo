@@ -17,6 +17,7 @@ use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 pub(crate) mod poppy;
 mod protocol;
+mod storefront_views;
 mod transport;
 use protocol::RpcError;
 /// The JSON-RPC request fields this endpoint reads besides its envelope.
@@ -32,6 +33,7 @@ struct RpcRequest {
 struct RpcParams {
     protocol_version: Value,
     uri: Value,
+    name: Value,
     #[serde(deserialize_with = "lenient")]
     capabilities: ClientCapabilities,
 }
@@ -43,22 +45,27 @@ struct ClientCapabilities {
     extensions: serde_json::Map<String, Value>,
 }
 
+/// The configured public HTTPS origin of this deployment, if any.
+fn public_origin() -> Option<String> {
+    env::var("COMMERCE_PUBLIC_ORIGIN").ok().and_then(|v| {
+        reqwest::Url::parse(&v)
+            .ok()
+            .filter(|u| {
+                u.scheme() == "https"
+                    && u.username().is_empty()
+                    && u.password().is_none()
+                    && u.path() == "/"
+                    && u.query().is_none()
+                    && u.fragment().is_none()
+            })
+            .map(|u| u.origin().ascii_serialization())
+    })
+}
+
 pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<Value>) -> Response {
+    let public = public_origin();
     if let Some(origin) = header(&h, "origin") {
         // Trust only explicit deployment configuration, never Host or forwarded headers.
-        let public = env::var("COMMERCE_PUBLIC_ORIGIN").ok().and_then(|v| {
-            reqwest::Url::parse(&v)
-                .ok()
-                .filter(|u| {
-                    u.scheme() == "https"
-                        && u.username().is_empty()
-                        && u.password().is_none()
-                        && u.path() == "/"
-                        && u.query().is_none()
-                        && u.fragment().is_none()
-                })
-                .map(|u| u.origin().ascii_serialization())
-        });
         let bind = env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8787".into());
         let local = bind
             .parse::<std::net::SocketAddr>()
@@ -100,7 +107,11 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
             let mut tools = OPERATIONS
                 .iter()
                 .filter(|operation| operation.admitted(&a, &h))
-                .map(|operation| operation.tool())
+                .map(|operation| {
+                    let mut tool = operation.tool();
+                    storefront_views::link(operation.name, &mut tool);
+                    tool
+                })
                 .collect::<Vec<_>>();
             match apps::app_tools(&a, &h).await {
                 Ok(apps) => {
@@ -110,10 +121,16 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
                 Err(e) => Err(RpcError::server(e)),
             }
         }
-        "tools/call" => protocol::call(&a, &h, &params.raw).await,
+        "tools/call" => protocol::call(&a, &h, &params.raw).await.map(|mut result| {
+            if let Some(name) = params.name.as_str() {
+                storefront_views::attach(&h, name, &mut result, public.as_deref());
+            }
+            result
+        }),
         "resources/list" => apps::mcp_views::list(&a, &h)
             .await
             .map(|mut resources| {
+                resources.insert(0, storefront_views::listing());
                 resources.insert(0, json!({"uri":"commerce://capabilities","name":"Commerce capabilities","mimeType":"application/json"}));
                 json!({"resources":resources})
             })
@@ -121,6 +138,12 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
         "resources/read" if params.uri == "commerce://capabilities" => Ok(
             json!({"contents":[{"uri":"commerce://capabilities","mimeType":"application/json","text":json!({"capabilities": OPERATIONS.iter().map(|operation|operation.description()).collect::<Vec<_>>()}).to_string()}]}),
         ),
+        "resources/read" if params.uri == storefront_views::URI => {
+            storefront_views::read(public.as_deref())
+                .await
+                .map(|content| json!({"contents":[content]}))
+                .ok_or_else(|| RpcError::invalid("Resource not found"))
+        }
         "resources/read" => match params.uri.as_str() {
             Some(uri) => apps::mcp_views::read(&a, &h, uri).await
                 .map_err(RpcError::server)

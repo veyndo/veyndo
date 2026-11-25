@@ -888,7 +888,8 @@ App assistants compile the shared Manifest in `frontend/src/admin/developer/assi
 `src/auth/{broker,broker_inference,handoff}.rs` owns route-bound signatures, one-use personal login and inherited inference. `src/shop_domains/frontends.rs` owns guarded public mounts and credential-stripping proxying. `components/studio/src/http/product_editor.rs` (`create_product`) accepts stable import IDs through the normal product save pipeline. `scripts/identity_broker.py` covers actual HTTP/PostgreSQL ownership, replay, scope, paused-shop and restart behavior. See [configuration and trust boundaries](experience-integration.md).
 
 - `src/storefront_pages.rs`: direct product URL HTML admission using existing tenant/channel policy.
-- `src/storefront_islands.rs`: server-rendered storefront-kit `veyndo-product-summary` island for admitted product pages, with props from the Store API product owner.
+- `src/storefront_islands.rs`: server-side storefront-kit props (buy box island for admitted product pages, product cards for listings) from Store API answers.
+- `src/mcp/storefront_views.rs`: the storefront-kit MCP App view (`ui://veyndo/kit/storefront`), its tool links and the part payload of catalog tool results.
 - `frontend/src/storefront/catalog/product-url.ts`: localized product URLs, legacy SKU routes and collection navigation.
 
 ## European operation
