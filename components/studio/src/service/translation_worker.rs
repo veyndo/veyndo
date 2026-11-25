@@ -150,7 +150,7 @@ async fn step(m: Models<'_>, job: &db::Job, lease: &str) -> Result<()> {
         &t,
         &id,
         lease,
-        db::Item {
+        db::TranslationItem {
             product: row.id.clone(),
             revision: row.revision,
             source: src,

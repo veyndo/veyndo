@@ -90,7 +90,7 @@ pub async fn current_lease(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Option<
 }
 
 /// One translated (or skipped) product of a job.
-pub struct Item<'a> {
+pub struct TranslationItem<'a> {
     pub product: String,
     pub revision: i64,
     pub source: Value,
@@ -105,7 +105,7 @@ pub async fn store_item(
     t: &str,
     id: &str,
     lease: &str,
-    item: Item<'_>,
+    item: TranslationItem<'_>,
 ) -> Result<()> {
     sqlx::query!("INSERT INTO translation_items(tenant,job_id,product_id,revision,source,result,status,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING", t, id, &item.product, item.revision, item.source, item.result, item.status, item.evidence).execute(&mut **tx).await?;
     sqlx::query!("UPDATE translation_jobs SET cursor=$1,processed=processed+1,status='queued',lease=NULL,lease_until=NULL WHERE tenant=$2 AND id=$3 AND lease=$4", &item.product, t, id, lease).execute(&mut **tx).await?;
