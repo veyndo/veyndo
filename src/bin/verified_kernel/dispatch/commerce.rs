@@ -8,6 +8,11 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
     match j["function"].as_str() {
         Some("discount_cap") => Ok(json!(discount_cap(n("total")?, n("requested")?))),
         Some("stock_admissible") => Ok(json!(stock_admissible(n("stock")?, n("quantity")?))),
+        Some("reservation_admissible") => Ok(json!(reservation_admissible(
+            n("ordered")?,
+            n("held")?,
+            n("requested")?
+        ))),
         Some("refund_admissible") => Ok(json!(refund_admissible(
             n("captured")?,
             n("refunded")?,

@@ -5,6 +5,10 @@ pub fn discount_cap(total: u64, requested: u64) -> u64 {
 pub fn stock_admissible(stock: u64, quantity: u64) -> bool {
     quantity > 0 && quantity <= stock
 }
+/// An order holds at most what it ordered: what it already holds plus a new reservation stays within the ordered quantity.
+pub fn reservation_admissible(ordered: u64, held: u64, requested: u64) -> bool {
+    held <= ordered && requested > 0 && requested <= ordered.saturating_sub(held)
+}
 pub fn refund_admissible(captured: u64, refunded: u64, requested: u64) -> bool {
     refunded <= captured && requested > 0 && requested <= captured.saturating_sub(refunded)
 }

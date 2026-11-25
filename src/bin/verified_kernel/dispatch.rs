@@ -61,6 +61,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("pos_discount_admissible")
         | Some("refund_admissible")
         | Some("replay_admissible")
+        | Some("reservation_admissible")
         | Some("revision_admissible")
         | Some("stock_admissible") => commerce::eval(j),
         Some("cancellation_admissible")

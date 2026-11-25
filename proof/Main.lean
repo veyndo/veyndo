@@ -43,6 +43,7 @@ def evalRequest (j : Json) : Except String Json := do
   | "notification_retry_admissible" => pure (toJson (notification_retry_admissible ((← (args.getObjVal? "rate_limited") >>= Json.getBool?)) ((← (args.getObjVal? "attempts") >>= Json.getNat?))))
   | "discount_cap" => pure (toJson (discount_cap ((← (args.getObjVal? "total") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "stock_admissible" => pure (toJson (stock_admissible ((← (args.getObjVal? "stock") >>= Json.getNat?)) ((← (args.getObjVal? "quantity") >>= Json.getNat?))))
+  | "reservation_admissible" => pure (toJson (reservation_admissible ((← (args.getObjVal? "ordered") >>= Json.getNat?)) ((← (args.getObjVal? "held") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "refund_admissible" => pure (toJson (refund_admissible ((← (args.getObjVal? "captured") >>= Json.getNat?)) ((← (args.getObjVal? "refunded") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "capture_admissible" => pure (toJson (capture_admissible ((← (args.getObjVal? "authorized") >>= Json.getNat?)) ((← (args.getObjVal? "captured") >>= Json.getNat?)) ((← (args.getObjVal? "reserved") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "revision_admissible" => pure (toJson (revision_admissible ((← (args.getObjVal? "current") >>= Json.getNat?)) ((← (args.getObjVal? "expected") >>= Json.getNat?))))

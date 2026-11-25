@@ -140,7 +140,16 @@ import Commerce.Claims
 #print axioms CommerceKernel.replay_same_cart
 #print axioms CommerceKernel.reservation_authorized_unvoided
 #print axioms CommerceKernel.reservation_captured_denied
+#print axioms CommerceKernel.reservation_exact
+#print axioms CommerceKernel.reservation_over_denied
 #print axioms CommerceKernel.reservation_release_exact
+#print axioms CommerceKernel.reservation_release_idempotent
+#print axioms CommerceKernel.reservation_release_restores
+#print axioms CommerceKernel.reservation_run_bounded
+#print axioms CommerceKernel.reservation_run_conserves
+#print axioms CommerceKernel.reservation_step_bounded
+#print axioms CommerceKernel.reservation_step_conserves
+#print axioms CommerceKernel.reservation_zero_denied
 #print axioms CommerceKernel.resource_quota_exact
 #print axioms CommerceKernel.resource_quota_zero_denied
 #print axioms CommerceKernel.revision_exact

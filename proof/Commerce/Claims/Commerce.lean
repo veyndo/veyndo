@@ -301,4 +301,100 @@ theorem net_plus_tax_is_gross (gross tax : Nat) (h : tax ≤ gross) :
 theorem net_not_above_gross (gross tax : Nat) : net_amount gross tax ≤ gross := by
   simp only [net_amount]; exact Nat.sub_le _ _
 
+
+/-! ### Per-order stock bound and reservation sequences -/
+
+/-- Exact per-order bound: a reservation is admitted iff it is positive and fits beside what the order already holds. -/
+theorem reservation_exact (ordered held requested : Nat) :
+    reservation_admissible ordered held requested = true ↔ 0 < requested ∧ held + requested ≤ ordered := by
+  simp only [reservation_admissible, Bool.and_eq_true, decide_eq_true_eq]
+  omega
+
+theorem reservation_zero_denied (ordered held : Nat) : reservation_admissible ordered held 0 = false := by
+  simp [reservation_admissible]
+
+/-- A reservation that would make the order hold more than it ordered is refused. -/
+theorem reservation_over_denied (ordered held requested : Nat) (h : ordered < held + requested) :
+    reservation_admissible ordered held requested = false := by
+  cases hr : reservation_admissible ordered held requested
+  · rfl
+  · have := (reservation_exact ordered held requested).mp hr
+    omega
+
+/-- One order's inventory events: reserve a quantity of one product, or release everything it holds. -/
+inductive ReservationEvent where
+  | reserve (quantity : Nat)
+  | release
+
+/-- Stock on hand and the quantity the order holds. Refused reservations change nothing;
+release returns exactly what is held and is idempotent, as the persisted ledger does. -/
+def reservationStep (ordered : Nat) (s : Nat × Nat) : ReservationEvent → Nat × Nat
+  | .reserve q =>
+    if stock_admissible s.1 q && reservation_admissible ordered s.2 q then (s.1 - q, s.2 + q) else s
+  | .release => (s.1 + s.2, 0)
+
+def reservationRun (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) : Nat × Nat :=
+  events.foldl (reservationStep ordered) s
+
+theorem reservation_step_bounded (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent)
+    (h : s.2 ≤ ordered) : (reservationStep ordered s e).2 ≤ ordered := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (reservation_exact ordered s.2 q).mp hq.2
+      simp only
+      omega
+    · exact h
+  | release => simp [reservationStep]
+
+/-- Across any sequence of reservations and releases, an order holds at most what it ordered. -/
+theorem reservation_run_bounded (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, s.2 ≤ ordered → (reservationRun ordered s events).2 ≤ ordered := by
+  induction events with
+  | nil => intro s h; simpa [reservationRun] using h
+  | cons e rest ih =>
+    intro s h
+    exact ih (reservationStep ordered s e) (reservation_step_bounded ordered s e h)
+
+theorem reservation_step_conserves (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent) :
+    (reservationStep ordered s e).1 + (reservationStep ordered s e).2 = s.1 + s.2 := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (stock_exact s.1 q).mp hq.1
+      simp only
+      omega
+    · rfl
+  | release => simp [reservationStep]
+
+/-- Stock plus what the order holds is conserved by every sequence; nothing is created or lost. -/
+theorem reservation_run_conserves (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, (reservationRun ordered s events).1 + (reservationRun ordered s events).2 = s.1 + s.2 := by
+  induction events with
+  | nil => intro s; rfl
+  | cons e rest ih =>
+    intro s
+    have := ih (reservationStep ordered s e)
+    simp only [reservationRun, List.foldl_cons] at this ⊢
+    rw [this, reservation_step_conserves]
+
+/-- Releasing twice changes nothing more than releasing once. -/
+theorem reservation_release_idempotent (ordered : Nat) (s : Nat × Nat) :
+    reservationStep ordered (reservationStep ordered s .release) .release = reservationStep ordered s .release := by
+  simp [reservationStep]
+
+/-- Any sequence followed by a release restores the stock to what it was plus what the order held at the start. -/
+theorem reservation_release_restores (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) :
+    (reservationRun ordered s (events ++ [.release])).1 = s.1 + s.2 ∧
+    (reservationRun ordered s (events ++ [.release])).2 = 0 := by
+  have h := reservation_run_conserves ordered events s
+  simp only [reservationRun, List.foldl_append, List.foldl_cons, List.foldl_nil, reservationStep] at h ⊢
+  exact ⟨h, trivial⟩
+
 end CommerceKernel

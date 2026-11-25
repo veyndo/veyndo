@@ -59,6 +59,7 @@ pub use commerce::pos_cash_admissible;
 pub use commerce::pos_discount_admissible;
 pub use commerce::refund_admissible;
 pub use commerce::replay_admissible;
+pub use commerce::reservation_admissible;
 pub use commerce::revision_admissible;
 pub use commerce::stock_admissible;
 pub use fulfillment::cancellation_admissible;

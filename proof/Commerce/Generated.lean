@@ -114,6 +114,9 @@ def discount_cap (total : Nat) (requested : Nat) : Nat :=
 def stock_admissible (stock : Nat) (quantity : Nat) : Bool :=
   ((decide (quantity > 0)) && (decide (quantity ≤ stock)))
 
+def reservation_admissible (ordered : Nat) (held : Nat) (requested : Nat) : Bool :=
+  (((decide (held ≤ ordered)) && (decide (requested > 0))) && (decide (requested ≤ (ordered - held))))
+
 def refund_admissible (captured : Nat) (refunded : Nat) (requested : Nat) : Bool :=
   (((decide (refunded ≤ captured)) && (decide (requested > 0))) && (decide (requested ≤ (captured - refunded))))
 

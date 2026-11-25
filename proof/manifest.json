@@ -683,6 +683,22 @@
         "workspace_length_exact",
         "workspace_length_short_denied"
       ]
+    },
+    "reservation_admissible": {
+      "bindings": [
+        "components/inventory/src/domain/lines.rs"
+      ],
+      "theorems": [
+        "reservation_exact",
+        "reservation_zero_denied",
+        "reservation_over_denied",
+        "reservation_step_bounded",
+        "reservation_run_bounded",
+        "reservation_step_conserves",
+        "reservation_run_conserves",
+        "reservation_release_idempotent",
+        "reservation_release_restores"
+      ]
     }
   },
   "sources": {
