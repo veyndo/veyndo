@@ -1,4 +1,5 @@
 /** Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. */
+import { useRead } from "../shell/useRead";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type {
@@ -46,8 +47,7 @@ export default function useOrderCreation(request: RequestFn) {
     ]),
     [channel, setChannel] = useState("default"),
     [language, setLanguage] = useState<string>("");
-  const [context, setContext] = useState<Context>(),
-    [currency, setCurrency] = useState(""),
+  const [currency, setCurrency] = useState(""),
     [customer, setCustomer] = useState<Customer>();
   const [items, setItems] = useState<
       { id: string; name: string; quantity: number }[]
@@ -72,51 +72,49 @@ export default function useOrderCreation(request: RequestFn) {
     [terms, setTerms] = useState(false),
     [digital, setDigital] = useState(false),
     [requestKey, setRequestKey] = useState(() => crypto.randomUUID());
+  const contextRead = useRead<Context>(
+    request,
+    "/api/merchant/order-drafts/context",
+    {
+      body: { channelId: channel, ...(language ? { locale: language } : {}) },
+    },
+  );
+  const context = contextRead.data;
+  useEffect(() => setReview(undefined), [channel, language, request]);
   useEffect(() => {
-    let active = true;
-    setContext(undefined);
-    setReview(undefined);
-    request("/api/merchant/order-drafts/context", {
-      channelId: channel,
-      ...(language ? { locale: language } : {}),
-    })
-      .then((v) => {
-        if (!active) return;
-        setContext(v);
-        setChannels(
-          v.channels.map((c: any) => ({
-            id: c.id,
-            name:
-              c.name?.[locale] ??
-              c.name?.[v.mainLocale] ??
-              Object.values(c.name ?? {})[0] ??
-              c.id,
-          })),
-        );
-        setGroups(v.customerGroups);
-        setMainLocale(v.mainLocale);
-        if (!language) setLanguage(v.options.mainLocale);
-        setCurrency(v.currencies.defaultCurrency);
-        setSelection((prev) => ({
-          ...prev,
-          country: v.options.countries.includes(prev.country)
-            ? prev.country
-            : v.options.countries[0],
-          shippingMethodId: v.options.shipping[0]?.id ?? "",
-          paymentMethodId:
-            v.options.payments.find((p: any) =>
-              ["manual", "simulated"].includes(p.mode),
-            )?.id ?? "",
-        }));
-        setError("");
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [channel, language, request]);
+    if (contextRead.error) setError((contextRead.error as Error).message);
+  }, [contextRead.error]);
+  // A loaded context fills channels, groups and the selection defaults.
+  useEffect(() => {
+    const v: any = context;
+    if (!v) return;
+    setChannels(
+      v.channels.map((c: any) => ({
+        id: c.id,
+        name:
+          c.name?.[locale] ??
+          c.name?.[v.mainLocale] ??
+          Object.values(c.name ?? {})[0] ??
+          c.id,
+      })),
+    );
+    setGroups(v.customerGroups);
+    setMainLocale(v.mainLocale);
+    if (!language) setLanguage(v.options.mainLocale);
+    setCurrency(v.currencies.defaultCurrency);
+    setSelection((prev) => ({
+      ...prev,
+      country: v.options.countries.includes(prev.country)
+        ? prev.country
+        : v.options.countries[0],
+      shippingMethodId: v.options.shipping[0]?.id ?? "",
+      paymentMethodId:
+        v.options.payments.find((p: any) =>
+          ["manual", "simulated"].includes(p.mode),
+        )?.id ?? "",
+    }));
+    setError("");
+  }, [context]);
   const customerEpoch = useRef(0);
   useEffect(
     () => () => {

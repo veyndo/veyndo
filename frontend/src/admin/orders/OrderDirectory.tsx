@@ -1,6 +1,6 @@
 /** Native server-paged order directory supplies the reusable grid with fulfillment columns and current rights. */
+import { useRead } from "../shell/useRead";
 import type { GridQueryState } from "../../shared/grid/types";
-import { useEffect, useState } from "react";
 import { contentText } from "../../shared/i18n/content-language";
 import AgenticGrid from "../../shared/grid/AgenticGrid";
 import { useGridPage } from "../../shared/grid/useGridPage";
@@ -20,24 +20,10 @@ export default function OrderDirectory({
 }) {
   const { o, locale } = useOperationsText();
   const { g } = useGridText();
-  const [mainLocale, setMainLocale] = useState("en-GB");
-  const [states, setStates] = useState<
-    { id: string; label: Record<string, string> }[]
-  >([]);
-  useEffect(() => {
-    let current = true;
-    request("/api/merchant/order-state-machine")
-      .then((v) => {
-        if (current) {
-          setStates(v.effectiveStates ?? v.data?.states ?? []);
-          setMainLocale(v.mainLocale ?? "en-GB");
-        }
-      })
-      .catch(() => {});
-    return () => {
-      current = false;
-    };
-  }, [request]);
+  const machine = useRead(request, "/api/merchant/order-state-machine").data;
+  const mainLocale: string = machine?.mainLocale ?? "en-GB";
+  const states: { id: string; label: Record<string, string> }[] =
+    machine?.effectiveStates ?? machine?.data?.states ?? [];
   const stateName = (id: string) => {
     const state = states.find((s) => s.id === id);
     return state ? contentText(state.label, locale, mainLocale) : o(id);

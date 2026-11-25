@@ -1,4 +1,5 @@
 /** Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. */
+import { useRead } from "../../shell/useRead";
 import { Button, Field, Select } from "../../../kit/ui";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -27,32 +28,28 @@ export default function BehaviorView({
     [channel, setChannel] = useState("default"),
     [channels, setChannels] = useState<{ id: string; name: string }[]>([]),
     [revision, setRevision] = useState(0),
-    [report, setReport] = useState<BehaviorReport>(),
     [journey, setJourney] = useState<Journey>(),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState(false);
+    [failed, setError] = useState(false);
+  const reportRead = useRead<BehaviorReport>(
+    request,
+    "/api/knowledge/behavior",
+    {
+      body: { days, salesChannelId: channel },
+      version: revision,
+    },
+  );
+  const report = reportRead.fetching ? undefined : reportRead.data;
+  const busy = reportRead.status === "idle" || reportRead.fetching;
+  const error = failed || reportRead.status === "error";
+  // Channels stay listed while another range or channel loads.
   useEffect(() => {
-    let active = true;
+    if (reportRead.data) setChannels((reportRead.data as any).channels ?? []);
+  }, [reportRead.data]);
+  useEffect(() => {
     ++epoch.current;
-    setBusy(true);
-    setReport(undefined);
     setJourney(undefined);
     setError(false);
-    request("/api/knowledge/behavior", { days, salesChannelId: channel })
-      .then((v) => {
-        if (active) {
-          setReport(v);
-          setChannels(v.channels ?? []);
-        }
-      })
-      .catch(() => {
-        if (active) setError(true);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
     return () => {
-      active = false;
       ++epoch.current;
     };
   }, [request, days, channel, revision]);

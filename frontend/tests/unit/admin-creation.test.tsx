@@ -203,7 +203,8 @@ it("customer creation inside an order is a separate form and returning preserves
   await user.click(screen.getByRole("button", { name: "Add customer" }));
   expect(container.querySelectorAll("form")).toHaveLength(1);
   await user.click(screen.getByRole("button", { name: "Back to overview" }));
+  // The selected line survives; the picker may also list the product again.
   expect(
-    await screen.findByText("Test tee", { selector: "strong" }),
+    await screen.findByText("Test tee", { selector: ".orders-line strong" }),
   ).toBeVisible();
 });

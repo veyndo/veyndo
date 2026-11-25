@@ -1,7 +1,9 @@
 /** Bounded, debounced native product/SKU lookup; prices are only committed through the reviewed checkout quote. */
+import { useDebouncedValue } from "../../kit/query";
+import { useRead } from "../shell/useRead";
 import { Field, Notice, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type { Product } from "../../shared/api/shop-api";
 import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
@@ -16,37 +18,14 @@ export default function OrderProductPicker({
 }) {
   const { n } = useAdminCreationText();
   const [query, setQuery] = useState(""),
-    [products, setProducts] = useState<Product[]>([]),
-    [error, setError] = useState(""),
-    [loading, setLoading] = useState(true);
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      setLoading(true);
-      request(
-        `/api/merchant/products?active=true&limit=20&search=${encodeURIComponent(query)}`,
-      )
-        .then((v) => {
-          if (active) {
-            setProducts(v.elements);
-            setError("");
-          }
-        })
-        .catch((e) => {
-          if (active) {
-            setError(e.message);
-            setProducts([]);
-          }
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    }, 250);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [query, request]);
+    term = useDebouncedValue(query, 250);
+  const search = useRead(
+    request,
+    `/api/merchant/products?active=true&limit=20&search=${encodeURIComponent(term)}`,
+  );
+  const loading = query !== term || search.status === "idle" || search.fetching;
+  const error = (search.error as Error | undefined)?.message ?? "";
+  const products: Product[] = search.error ? [] : (search.data?.elements ?? []);
   return (
     <div>
       <Field label={n("productSearch")}>

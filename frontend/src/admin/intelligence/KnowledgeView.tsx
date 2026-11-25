@@ -1,4 +1,5 @@
 /** Unified knowledge workspace connects sources, product evidence, observations and no-model retrieval previews. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import {
@@ -57,10 +58,15 @@ export function KnowledgeView({
         ? "scenarios"
         : "overview",
     ),
-    [workspace, setWorkspace] = useState<Workspace>(),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
+    [actionError, setError] = useState(""),
+    [working, setBusy] = useState(false),
     [create, setCreate] = useState(false);
+  const workspaceRead = useRead<Workspace>(request, "/api/knowledge/workspace");
+  const setRead = useSetRead(request);
+  const workspace = workspaceRead.data;
+  const busy = working || workspaceRead.status === "loading";
+  const error =
+    actionError || (workspaceRead.error as Error | undefined)?.message || "";
   useEffect(() => {
     const url = new URL(location.href);
     if (tab === "scenarios") url.searchParams.set("knowledgeSection", tab);
@@ -71,30 +77,16 @@ export function KnowledgeView({
     setBusy(true);
     setError("");
     try {
-      setWorkspace(await request("/api/knowledge/workspace"));
+      setRead(
+        "/api/knowledge/workspace",
+        await request("/api/knowledge/workspace"),
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   };
-  useEffect(() => {
-    let active = true;
-    setBusy(true);
-    request("/api/knowledge/workspace")
-      .then((v) => {
-        if (active) setWorkspace(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
   const newSource = () => {
     setTab("sources");
     setCreate(true);
