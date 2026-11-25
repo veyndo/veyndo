@@ -1,5 +1,5 @@
 /** The first-party Studio extensions in route order; every Studio area registers here exactly like an app manifest. */
-import setup from "../../../../../components/shop/ui/admin/setup/studio-extension";
+import setup from "../../../../../components/studio/ui/admin/setup/studio-extension";
 import design from "../../../../../components/studio/ui/admin/workspace/studio-extension";
 import assistant from "../../../../../components/intelligence/ui/admin/assistant/studio-extension";
 import dashboard from "../../../../../components/studio/ui/admin/dashboard/studio-extension";
@@ -7,6 +7,7 @@ import intelligence from "../../../../../components/intelligence/ui/admin/intell
 import agents from "../../../../../components/intelligence/ui/admin/agents/studio-extension";
 import catalog from "../../../../../components/catalog/ui/admin/catalog/studio-extension";
 import orders from "../../../../../components/orders/ui/admin/orders/studio-extension";
+import payments from "../../../../../components/payments/ui/admin/payments/studio-extension";
 import customers from "../../../../../components/customers/ui/admin/customers/studio-extension";
 import b2b from "../../../../../components/b2b/ui/admin/b2b/studio-extension";
 import pos from "../../../../../components/pos/ui/admin/pos/studio-extension";
@@ -31,6 +32,7 @@ export const studioRegistry = createStudioRegistry<Tab>([
   agents,
   catalog,
   orders,
+  payments,
   customers,
   b2b,
   pos,

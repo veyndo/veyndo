@@ -1,6 +1,6 @@
 /** Fine-grained team overrides, revocable invitations and personal session inventory. */
 import { Button, Card, Notice } from "../../../../../frontend/src/kit/ui";
-import IntegrationKeys from "../../../../apps/ui/admin/developer/api/IntegrationKeys";
+import IntegrationKeys from "./IntegrationKeys";
 import RolesManager from "./RolesManager";
 import PermissionPicker from "./PermissionPicker";
 import { usePermissionText } from "./permission-i18n";

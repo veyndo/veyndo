@@ -20,7 +20,7 @@ event, fiscal-snapshot and direct-carrier boundaries.
 
 ## Shared parts
 
-The area is built on [`kit/ui`](../../../kit/ui/README.md) (buttons, cards, fields, notices, badges) and reads access rights and receipts through [`kit/query`](../../../kit/query/README.md); generating a receipt invalidates the order's receipt list. Order detail keeps its own exact-once command flow (request keys, revision, payment job observation).
+The area is built on [`kit/ui`](../../../../../frontend/src/kit/ui/README.md) (buttons, cards, fields, notices, badges) and reads access rights and receipts through [`kit/query`](../../../../../frontend/src/kit/query/README.md); generating a receipt invalidates the order's receipt list. Order detail keeps its own exact-once command flow for order transitions (request keys, revision); the payment ledger is the payments component's panel in the `admin.order.payment` slot.
 
 ## Studio registration
 

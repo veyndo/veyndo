@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import AgentControls from "../../../components/apps/ui/admin/developer/api/AgentControls";
-import IntegrationKeys from "../../../components/apps/ui/admin/developer/api/IntegrationKeys";
-import { agentBudget } from "../../../components/apps/ui/admin/developer/api/AgentBudgetFields";
+import IntegrationKeys from "../../../components/identity/ui/admin/team/IntegrationKeys";
+import { agentBudget } from "../../../components/identity/ui/admin/team/AgentBudgetFields";
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <LocaleProvider>{children}</LocaleProvider>
 );

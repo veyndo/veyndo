@@ -1,6 +1,6 @@
 /** Personal goals open the native proposal review and apply owner; no second approval/execution path. */
 import { useState } from "react";
-import ProposalCard from "../../../../intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "../../../../../frontend/src/admin/shell/ProposalCard";
 import AgentRunCard from "../../../../../frontend/src/admin/shell/AgentRunCard";
 import type {
   Preview,

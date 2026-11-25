@@ -26,7 +26,7 @@ import {
 import { logicTopology } from "../../../components/apps/ui/admin/developer/AppLogicTopology";
 import AppSettings from "../../../components/apps/ui/admin/apps/AppSettings";
 import AppSettingsEditor from "../../../components/apps/ui/admin/developer/AppSettingsEditor";
-import IntegrationKeys from "../../../components/apps/ui/admin/developer/api/IntegrationKeys";
+import IntegrationKeys from "../../../components/identity/ui/admin/team/IntegrationKeys";
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <LocaleProvider>
     <ContentLanguage locales={["en-GB", "sv-SE"]} mainLocale="en-GB">

@@ -3,7 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 import { tokenDrift } from "./tokens.mjs";
-import { appFiles, componentUiRoots, logicalPath } from "./source-roots.mjs";
+import {
+  appFiles,
+  componentDependencies,
+  componentUiRoots,
+  componentsRoot,
+} from "./source-roots.mjs";
 const root = path.resolve(import.meta.dirname, "..");
 const source = path.resolve(root, process.argv[2] ?? "src");
 const walk = (dir) =>
@@ -19,12 +24,30 @@ const pluginFiles = process.argv[2]
       (f) => /\.(tsx?|css)$/.test(f) && !f.includes("/tests/"),
     );
 // Component UI folders (components/<name>/ui) belong to the same source tree.
-const uiRoots = process.argv[2] ? [] : componentUiRoots();
+// A fixture run passes its own components folder (with components.json beside it).
+const componentsDir = process.argv[3]
+  ? path.resolve(process.argv[3])
+  : process.argv[2]
+    ? undefined
+    : componentsRoot;
+const uiRoots = componentsDir ? componentUiRoots(componentsDir) : [];
+const dependsOn = componentsDir
+  ? componentDependencies(path.join(componentsDir, "../components.json"))
+  : new Map();
+/** The component whose UI folder holds `file`, if any. */
+const componentOf = (file) => {
+  const root = uiRoots.find((dir) => file.startsWith(dir + path.sep));
+  return root && path.basename(path.dirname(root));
+};
 const files = [
   ...[source, ...uiRoots].flatMap(walk).filter((f) => /\.(tsx?|css)$/.test(f)),
   ...pluginFiles,
 ];
-const relative = (f) => logicalPath(f, source);
+// A component UI file reads like a frontend/src file: components/x/ui/admin/a -> admin/a.
+const relative = (f) =>
+  path
+    .relative(uiRoots.find((dir) => f.startsWith(dir + path.sep)) ?? source, f)
+    .replaceAll("\\", "/");
 const errors = [];
 const edges = new Map();
 const owners = [
@@ -185,6 +208,18 @@ for (const file of files) {
       );
       return;
     }
+    // A component's UI builds only on the UI of components it depends on (5.1).
+    const fromComponent = componentOf(file),
+      toComponent = componentOf(target);
+    if (
+      fromComponent &&
+      toComponent &&
+      fromComponent !== toComponent &&
+      !dependsOn.get(fromComponent)?.has(toComponent)
+    )
+      errors.push(
+        `${relative(file)} imports the UI of component ${toComponent}, which ${fromComponent} does not depend on (components.json uses); move the shared part to its owner or frontend/src/shared, or contribute it through a Studio slot`,
+      );
     const a = owner(file),
       b = owner(target);
     if (a === "kit" && b !== "kit" && owners.includes(b))

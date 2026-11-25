@@ -19,7 +19,7 @@ import { inheritedContext } from "../../../components/apps/ui/admin/developer/co
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { AppStudio } from "../../../components/apps/ui/admin/developer/useAppStudio";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
-import ProposalCard from "../../../components/intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "../../src/admin/shell/ProposalCard";
 import type { Message } from "../../src/admin/shell/studio-types";
 for (const kind of recipeIds)
   it(`compiles the ${kind} pattern with explicit access and bindings`, () => {

@@ -75,7 +75,7 @@ Existing workspace row security, revisions and history apply.
 
 | Responsibility | Existing or feature owner |
 | --- | --- |
-| Welcome, guide, progress and return banner | `components/shop/ui/admin/setup/` |
+| Welcome, guide, progress and return banner | `components/studio/ui/admin/setup/` |
 | Inline company form | `SetupBasics.tsx`, reusing `settings/useSettingsDraft`, `CompanyField` and `SettingsSaveBar` |
 | Saved progress validation | `components/studio/src/domain/workspace.rs` |
 | Bounded current setup context for AI | `components/intelligence/src/service/agent_runs.rs` |

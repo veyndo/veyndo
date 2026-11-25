@@ -3,14 +3,14 @@ import { useRead } from "../../../../../frontend/src/admin/shell/useRead";
 import { Notice } from "../../../../../frontend/src/kit/ui";
 import { useEffect } from "react";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
-import { useSettingsDraft } from "../settings/useSettingsDraft";
-import CompanyField from "../settings/CompanyField";
-import SettingsSaveBar from "../settings/SettingsSaveBar";
-import type { CompanyData } from "../settings/company-types";
+import { useSettingsDraft } from "../../../../shop/ui/admin/settings/useSettingsDraft";
+import CompanyField from "../../../../shop/ui/admin/settings/CompanyField";
+import SettingsSaveBar from "../../../../shop/ui/admin/settings/SettingsSaveBar";
+import type { CompanyData } from "../../../../shop/ui/admin/settings/company-types";
 import type { CountryCatalogue } from "../../../../../frontend/src/shared/geography/geography-types";
 import type { CompanyWord } from "../../../../../frontend/src/shared/i18n/company-i18n";
 import { useSetupText } from "./setup-i18n";
-import "../settings/company-settings.css";
+import "../../../../shop/ui/admin/settings/company-settings.css";
 export default function SetupBasics({
   onDirty,
   onSaved,

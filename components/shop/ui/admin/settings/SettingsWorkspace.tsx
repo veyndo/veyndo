@@ -2,7 +2,7 @@
 import { Button } from "../../../../../frontend/src/kit/ui";
 import { useAdminCreationText } from "../../../../../frontend/src/shared/i18n/admin-creation-i18n";
 import B2BSettings from "./B2BSettings";
-import { useB2BExperienceText } from "../../../../b2b/ui/admin/b2b/experience-i18n";
+import { useB2BText } from "../../../../../frontend/src/shared/i18n/b2b-i18n";
 import { useCurrencyText } from "../../../../../frontend/src/shared/i18n/currency-i18n";
 import { useCrmText } from "../../../../../frontend/src/shared/i18n/crm-i18n";
 import LegalSettings from "../legal/LegalSettings";
@@ -53,7 +53,7 @@ export default function SettingsWorkspace({
 }) {
   const { n } = useAdminCreationText();
   const [query, setQuery] = useState("");
-  const b = useB2BExperienceText();
+  const b = useB2BText();
   const { c } = useCustomerText(),
     { s, t } = useShopText(),
     { w } = useWorkbenchText(),
@@ -88,8 +88,8 @@ export default function SettingsWorkspace({
   const entries: { id: Area; label: string; hint: string; icon: IconName }[] = [
     {
       id: "b2b",
-      label: b("settings"),
-      hint: b("settingsHint"),
+      label: b("purchasingSettings"),
+      hint: b("purchasingSettingsHint"),
       icon: "building",
     },
     { id: "currencies", label: ct("title"), hint: ct("hint"), icon: "globe" },

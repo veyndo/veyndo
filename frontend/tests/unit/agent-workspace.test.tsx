@@ -15,7 +15,7 @@ import {
 } from "../../src/shared/grid/pinned-view";
 import { useGridPage } from "../../src/shared/grid/useGridPage";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import ProposalCard from "../../../components/intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "../../src/admin/shell/ProposalCard";
 it("opens agent filters in the real server grid, allows manual editing and never persists personal criteria", async () => {
   history.replaceState(null, "", "?studio=orders");
   openReviewedView("orders", { customer: "Synthetic Alex", state: "open" });

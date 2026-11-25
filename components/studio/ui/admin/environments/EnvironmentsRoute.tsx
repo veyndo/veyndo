@@ -1,7 +1,7 @@
 /** Environments route: sandbox stages of the live shop, with scoped requests, test scenarios and stage selection. */
 import { useCallback } from "react";
 import EnvironmentManager from "./EnvironmentManager";
-import { useScenarioNavigation } from "../../../../intelligence/ui/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "../../../../../frontend/src/admin/shell/useScenarioNavigation";
 import { createStudioRequest } from "../../../../../frontend/src/admin/shell/requests";
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";

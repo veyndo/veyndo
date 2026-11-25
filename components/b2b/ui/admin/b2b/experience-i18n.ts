@@ -1,23 +1,11 @@
 /** Guided company purchasing and shared settings copy in all bundled interface languages. */
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 const words = {
-  settings: [
-    "Company purchasing",
-    "Firmeneinkauf",
-    "Achats d’entreprise",
-    "Compras empresariales",
-  ],
-  settingsHint: [
-    "Enable the tools your business needs. Company-specific budgets, approvals and catalogues remain under each purchasing unit.",
-    "Aktiviere die benötigten Werkzeuge. Firmenspezifische Budgets, Freigaben und Kataloge pflegst du weiterhin je Einkaufseinheit.",
-    "Active les outils nécessaires. Budgets, validations et catalogues restent configurés par unité d’achat.",
-    "Activa las herramientas necesarias. Los presupuestos, aprobaciones y catálogos se configuran por unidad de compra.",
-  ],
-  enabled: [
-    "Enable B2B purchasing",
-    "B2B-Einkauf aktivieren",
-    "Activer les achats B2B",
-    "Activar compras B2B",
+  budgetsHint: [
+    "Set currency, budget period, cost centre, purchase-order requirement and available payment/shipping methods per unit.",
+    "Währung, Budgetzeitraum, Kostenstelle, Bestellreferenz sowie erlaubte Zahlungs- und Versandarten je Einheit konfigurieren.",
+    "Configurer devise, période budgétaire, centre de coûts, référence et méthodes par unité.",
+    "Configurar moneda, período presupuestario, centro de costes, referencia y métodos por unidad.",
   ],
   quotes: [
     "Offers & negotiation",
@@ -114,12 +102,6 @@ const words = {
     "Budgets & Zahlungsbedingungen",
     "Budgets et conditions",
     "Presupuestos y condiciones",
-  ],
-  budgetsHint: [
-    "Set currency, budget period, cost centre, purchase-order requirement and available payment/shipping methods per unit.",
-    "Währung, Budgetzeitraum, Kostenstelle, Bestellreferenz sowie erlaubte Zahlungs- und Versandarten je Einheit konfigurieren.",
-    "Configurer devise, période budgétaire, centre de coûts, référence et méthodes par unité.",
-    "Configurar moneda, período presupuestario, centro de costes, referencia y métodos por unidad.",
   ],
   openSettings: [
     "Configure B2B",

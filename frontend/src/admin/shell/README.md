@@ -25,6 +25,8 @@ expiry dialog. Old-token replies cannot expire a new session.
 
 ## Modules
 
+- [`ProposalCard.tsx`](ProposalCard.tsx): A reviewed change proposal in the Studio conversation, workspace tasks and flow reviews.
+- [`useScenarioNavigation.ts`](useScenarioNavigation.ts): Opens a scenario from any Studio area through the shell navigation.
 - [`Merchant.tsx`](Merchant.tsx): Studio composition root: layout, scoped controller and modular workspace views.
 - [`StudioComposer.tsx`](StudioComposer.tsx): StudioComposer: focused Studio view; state and commands come from the session-scoped controller.
 - [`StudioContext.ts`](StudioContext.ts): Typed, local Studio context; never shared across a different mounted Studio.

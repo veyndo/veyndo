@@ -1,8 +1,5 @@
 /** Order workspace: server actions, exact-once commands, provider progress and visible event history. */
 import { forApps } from "../../../../../frontend/src/shared/api/types";
-import { paymentCommand } from "../../../../payments/ui/admin/payments/payment-command";
-import { usePaymentDiagnosticText } from "../../../../../frontend/src/shared/i18n/payment-diagnostic-i18n";
-import type { PaymentOptions } from "../../../../payments/ui/admin/payments/payment-amount";
 
 import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
 import CoreExtensions from "../../../../../frontend/src/shared/apps/CoreExtensions";
@@ -53,7 +50,6 @@ export default function OrderDetail({
   download: (path: string) => Promise<void>;
 }) {
   const { o, locale } = useOperationsText();
-  const explainPayment = usePaymentDiagnosticText();
   const { r } = useCrmText();
   const shipmentText = useShipmentText();
   const { c } = useCustomerText();
@@ -61,8 +57,7 @@ export default function OrderDetail({
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [feedback, setFeedback] = useState(""),
-    [note, setNote] = useState(""),
-    [pendingJob, setPendingJob] = useState<string>();
+    [note, setNote] = useState("");
   const inflight = useRef(false);
   useUnsavedWorkspace(!!note.trim(), onDirtyChange);
   const retry = useRef<
@@ -128,46 +123,6 @@ export default function OrderDetail({
       });
       setOrder({ ...order, ...result });
       retry.current = undefined;
-    });
-  const observe = async (job: string) => {
-    setPendingJob(job);
-    setFeedback(o("providerWorking"));
-    for (let i = 0; i < 60; i++) {
-      const result = await request(`/api/payments/jobs/${job}`);
-      if (result.state === "succeeded") {
-        setPendingJob(undefined);
-        retry.current = undefined;
-        return true;
-      }
-      if (["failed", "uncertain"].includes(result.state)) {
-        setPendingJob(undefined);
-        throw new Error(explainPayment(result.error) ?? o("providerFailed"));
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-    setFeedback(o("providerPending"));
-    return false;
-  };
-  const payment = (
-    operation: string,
-    amount?: number,
-    options?: PaymentOptions,
-  ) =>
-    run(async () => {
-      if (pendingJob) return observe(pendingJob);
-      const current = paymentCommand(
-        retry.current,
-        order.payment.attemptId,
-        operation,
-        amount,
-        options,
-      );
-      retry.current = current;
-      const result = await request(
-        `/api/payments/${order.payment.attemptId}/${operation}`,
-        { ...current.body, requestKey: current.key },
-      );
-      return observe(result.jobId);
     });
   const money = (n: number) =>
     new Intl.NumberFormat(locale, {
@@ -292,7 +247,6 @@ export default function OrderDetail({
           <small>{c("snapshotHint")}</small>
         </Card>
         <OrderPaymentDelivery
-          request={request}
           order={order}
           busy={busy}
           rights={rights}
@@ -323,9 +277,7 @@ export default function OrderDetail({
               retry.current = undefined;
             })
           }
-          onPayment={payment}
-          pendingJob={!!pendingJob}
-          onCheck={() => void run(() => observe(pendingJob!))}
+          onChanged={load}
         />
       </div>
       {rights.includes("documents.read") && (

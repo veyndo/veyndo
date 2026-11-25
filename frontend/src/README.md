@@ -14,8 +14,9 @@ global styles), the operator console, shared building blocks and the design `kit
 `frontend/` builds, type-checks, tests and formats both roots as one tree;
 `scripts/source-roots.mjs` gives the gates the same view, where
 `components/orders/ui/admin/orders/X.tsx` reads as `admin/orders/X.tsx`. A component UI
-imports `shared/` and `kit/` and the screens of other components only by relative
-path; bare package imports resolve from this frontend (`resolve.dedupe` and
+imports `shared/` and `kit/` by relative path, and the screens of another component
+only when it depends on that component in `components.json` (otherwise that component
+contributes through a Studio slot); bare package imports resolve from this frontend (`resolve.dedupe` and
 `tsconfig.json` `paths`). `admin/apps/AppConsent.tsx` and
 `admin/channels/channel-i18n.ts` only re-export their owners for the hash-locked
 Marketplace Studio app.

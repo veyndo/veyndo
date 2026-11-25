@@ -15,14 +15,14 @@ import { LocaleScope } from "../../src/shared/i18n/i18n";
 import {
   SetupProvider,
   useShopSetup,
-} from "../../../components/shop/ui/admin/setup/SetupProvider";
-import SetupWizard from "../../../components/shop/ui/admin/setup/SetupWizard";
-import SetupBanner from "../../../components/shop/ui/admin/setup/SetupBanner";
+} from "../../../components/studio/ui/admin/setup/SetupProvider";
+import SetupWizard from "../../../components/studio/ui/admin/setup/SetupWizard";
+import SetupBanner from "../../../components/studio/ui/admin/setup/SetupBanner";
 import {
   newProgress,
   reviewStep,
   steps,
-} from "../../../components/shop/ui/admin/setup/setup-model";
+} from "../../../components/studio/ui/admin/setup/setup-model";
 import { canOpenStudio } from "../../src/admin/shell/permissions";
 const rights = [
   "settings.read",

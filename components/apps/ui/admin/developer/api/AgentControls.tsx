@@ -7,7 +7,7 @@ import { Button, Card, Notice } from "../../../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../../../frontend/src/admin/shell/studio-types";
 import ConfirmDialog from "../../../../../../frontend/src/shared/ui/ConfirmDialog";
-import { useAgentControlText } from "./agent-control-i18n";
+import { useAgentControlText } from "../../../../../identity/ui/admin/team/agent-control-i18n";
 type Control = {
   stopped: boolean;
   revision: number;

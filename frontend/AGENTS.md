@@ -9,6 +9,10 @@ A component's Studio and storefront screens belong in its UI folder,
 not in `frontend/src`. `frontend/src` keeps the entry, shells, shared building blocks
 and `kit/`. A new area goes to the component that owns its data and API; these rules
 apply to both roots, and the gates read them as one tree (`scripts/source-roots.mjs`).
+A component's UI imports another component's UI only along its `components.json`
+dependencies. Do not add a `uses` entry to make an import pass: move a shared part to its
+owner or `frontend/src/shared`, or let the dependent component contribute it through a
+Studio slot.
 
 ## Shared grid ownership
 

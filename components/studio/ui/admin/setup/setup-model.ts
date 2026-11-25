@@ -1,5 +1,5 @@
 /** Setup records contain personal guidance only; native settings remain the source of truth. */
-import type { Workspace } from "../../../../studio/ui/admin/workspace/workspace-model";
+import type { Workspace } from "../workspace/workspace-model";
 import type { IconName } from "../../../../../frontend/src/shared/ui/Icon";
 import type { Tab } from "../../../../../frontend/src/admin/shell/navigation";
 export const steps = [

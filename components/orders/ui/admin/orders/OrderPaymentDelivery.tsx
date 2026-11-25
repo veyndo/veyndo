@@ -1,8 +1,5 @@
 /** Payment jobs are observed until confirmation. Delivery actions share the server state machine. */
-import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
-import PaymentDetails from "../../../../payments/ui/admin/payments/PaymentDetails";
-import PaymentActions from "../../../../payments/ui/admin/payments/PaymentActions";
-import type { PaymentOptions } from "../../../../payments/ui/admin/payments/payment-amount";
+import StudioSlot from "../../../../../frontend/src/admin/shell/registry/StudioSlot";
 import { safeRichUrl } from "../../../../../frontend/src/shared/content/rich-document";
 import { useAccountText } from "../../../../../frontend/src/shared/i18n/account-i18n";
 import { useState } from "react";
@@ -21,27 +18,18 @@ import {
 import type { OrderAction } from "./OrderWorkflow";
 export default function OrderPaymentDelivery({
   order,
-  request,
   busy,
   rights,
   onAction,
-  onPayment,
-  pendingJob,
-  onCheck,
+  onChanged,
   onSplit,
 }: {
   order: any;
-  request: RequestFn;
   busy: boolean;
   rights: string[];
   onAction: (a: OrderAction, tracking?: string, trackingUrl?: string) => void;
-  onPayment: (
-    operation: string,
-    amount?: number,
-    options?: PaymentOptions,
-  ) => Promise<boolean>;
-  pendingJob: boolean;
-  onCheck: () => void;
+  /** Reloads the order, for example after a payment command settled. */
+  onChanged: () => Promise<unknown>;
   onSplit?: (index: number, positions: ShipmentPosition[]) => Promise<boolean>;
 }) {
   const { o } = useOperationsText();
@@ -78,29 +66,15 @@ export default function OrderPaymentDelivery({
               {label(a)}
             </Button>
           ))}
-      {rights.includes("payments.manage") && order.payment.attemptId && (
-        <PaymentActions
-          state={order.payment.state}
-          settlement={
-            order.payment.capturedMinor === undefined
-              ? undefined
-              : order.payment
-          }
-          currency={order.cart.price.currency ?? "EUR"}
-          scale={order.cart.price.currencyScale ?? 2}
-          busy={busy}
-          pending={pendingJob}
-          onPayment={onPayment}
-          onCheck={onCheck}
-        />
-      )}
-      {rights.includes("payments.read") && order.payment.attemptId && (
-        <PaymentDetails
-          key={order.payment.attemptId}
-          id={order.payment.attemptId}
-          request={request}
-        />
-      )}
+      <StudioSlot
+        location="admin.order.payment"
+        context={{
+          payment: order.payment,
+          currency: order.cart.price.currency ?? "EUR",
+          scale: order.cart.price.currencyScale ?? 2,
+          onChanged,
+        }}
+      />
       <div className="orders-divider" />
       <h2>{o("delivery")}</h2>
       {order.deliveries.length ? (

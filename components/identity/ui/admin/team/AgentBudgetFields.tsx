@@ -1,9 +1,5 @@
 /** Explicit delegation limits; empty or invalid fields never create unbounded agent authority. */
-import {
-  Field,
-  Select,
-  TextInput,
-} from "../../../../../../frontend/src/kit/ui";
+import { Field, Select, TextInput } from "../../../../../frontend/src/kit/ui";
 import { useAgentControlText } from "./agent-control-i18n";
 export function planningScope(scope: string) {
   return (

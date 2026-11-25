@@ -1,6 +1,7 @@
 /** Types of the Studio extension registry: routes, navigation, page slots, dashboard cards and form fields. */
 import type { ComponentType, LazyExoticComponent } from "react";
 import type { IconName } from "../../../shared/ui/Icon";
+import type { OrderPaymentContext } from "../../../../../components/payments/ui/admin/payments/payment-amount";
 
 /** Presentation admission: every `all` right and at least one `any` right. The server decides again. */
 export type Rights = { any: string[]; all?: string[] };
@@ -34,6 +35,8 @@ export type SlotContexts = {
   "admin.customer": { customerId: string };
   "admin.order": { orderId: string };
   "admin.order.general": { orderId: string };
+  /** The order page hosts the payment ledger of the payments component here. */
+  "admin.order.payment": OrderPaymentContext;
   "admin.product.general": { productId: string };
 };
 export type SlotLocation = keyof SlotContexts;
@@ -41,7 +44,12 @@ export type SlotLocation = keyof SlotContexts;
 /** The kinds of contribution; each kind may only use its own locations. */
 export type ContributionKind = "page-slot" | "dashboard-card" | "form-field";
 export const contributionLocations: Record<ContributionKind, SlotLocation[]> = {
-  "page-slot": ["admin.customer", "admin.order", "admin.order.general"],
+  "page-slot": [
+    "admin.customer",
+    "admin.order",
+    "admin.order.general",
+    "admin.order.payment",
+  ],
   "dashboard-card": ["admin.dashboard"],
   "form-field": ["admin.product.general"],
 };

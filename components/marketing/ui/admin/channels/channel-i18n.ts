@@ -1,6 +1,42 @@
 /** Sales-channel onboarding and inherited settings vocabulary in all interface languages. */
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 const words = {
+  shopDesign: [
+    "Shop design",
+    "Shop gestalten",
+    "Design de boutique",
+    "Diseño de tienda",
+  ],
+  posCountry: [
+    "Store location country",
+    "Land des Kassenstandorts",
+    "Pays du point de vente",
+    "País de la tienda",
+  ],
+  posColumns: [
+    "Product columns",
+    "Produktspalten",
+    "Colonnes de produits",
+    "Columnas de productos",
+  ],
+  posCompact: [
+    "Compact product cards",
+    "Kompakte Produktkarten",
+    "Fiches produits compactes",
+    "Tarjetas compactas",
+  ],
+  posMessage: [
+    "Receipt message",
+    "Belegnachricht",
+    "Message du justificatif",
+    "Mensaje del comprobante",
+  ],
+  posRegisterHint: [
+    "Touch register with shared inventory, orders, receipts and app extensions. Cash is enabled on this channel only.",
+    "Touch-Kasse mit gemeinsamen Beständen, Bestellungen, Belegen und App-Erweiterungen. Barzahlung wird nur für diesen Kanal aktiviert.",
+    "Caisse tactile avec stocks, commandes, justificatifs et apps partagés. Espèces activées uniquement ici.",
+    "Caja táctil con inventario, pedidos, comprobantes y apps compartidos. Efectivo solo en este canal.",
+  ],
   createdHint: [
     "Your channel is saved. Configure its connections and inherited settings when you’re ready.",
     "Dein Kanal ist gespeichert. Richte jetzt seine Verbindungen und geerbten Einstellungen ein.",

@@ -21,7 +21,7 @@ import {
 } from "../../../../../frontend/src/shared/api/shop-api";
 import { useShopText } from "../../../../../frontend/src/shared/i18n/shop-i18n";
 import MemoryRecommendations from "./MemoryRecommendations";
-import ProductSafety from "../../../../shop/ui/storefront/legal/ProductSafety";
+import ProductSafety from "./ProductSafety";
 import ProductQuestion from "./ProductQuestion";
 export default function ProductPage({
   id,

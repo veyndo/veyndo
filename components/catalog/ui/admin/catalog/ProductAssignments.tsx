@@ -6,7 +6,6 @@ import Icon, {
 } from "../../../../../frontend/src/shared/ui/Icon";
 import { useCatalogText } from "../../../../../frontend/src/shared/i18n/catalog-i18n";
 import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
-import { useChannelText } from "../../../../marketing/ui/admin/channels/channel-i18n";
 import {
   assignmentLanguage,
   assignmentSearch,
@@ -22,6 +21,12 @@ const kindIcons: Record<string, IconName> = {
   pos: "register",
   marketplace: "layers",
 };
+const kindLabels = {
+  storefront: "kindStorefront",
+  headless: "kindHeadless",
+  pos: "kindPos",
+  marketplace: "kindMarketplace",
+} as const;
 export default function ProductAssignments({
   draft,
   categories,
@@ -36,8 +41,7 @@ export default function ProductAssignments({
   onChange: (draft: ProductDraft) => void;
 }) {
   const { c } = useCatalogText(),
-    t = useProductAssignmentText(),
-    channelText = useChannelText();
+    t = useProductAssignmentText();
   const [search, setSearch] = useState(""),
     [channelSearch, setChannelSearch] = useState(""),
     [onlySelected, setOnlySelected] = useState(false),
@@ -226,10 +230,12 @@ export default function ProductAssignments({
                     channel.id}
                 </strong>
                 <small>
-                  {channelText(
-                    Object.hasOwn(kindIcons, channel.data.kind)
-                      ? channel.data.kind
-                      : "storefront",
+                  {t(
+                    kindLabels[
+                      Object.hasOwn(kindIcons, channel.data.kind)
+                        ? (channel.data.kind as keyof typeof kindLabels)
+                        : "storefront"
+                    ],
                   )}
                 </small>
                 {channel.data.active === false && (

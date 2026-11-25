@@ -396,7 +396,7 @@ extends the existing planner/approval owner; it is not another agent backend.
 **Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
 
 **Guided shop setup:** [Six review steps, inline native company editing and local acceptance](shop-setup.md).
-`components/shop/ui/admin/setup/` owns the guide and return path, with its scoped
+`components/studio/ui/admin/setup/` owns the guide and return path, with its scoped
 `PRODUCT.md` brief retaining the existing Studio design. Its provider checks saved
 setup changes across tabs while preserving unrelated fresh workspace fields.
 `SetupBasics.tsx`
@@ -626,10 +626,14 @@ operator console, shared building blocks and the design `kit/`. Each component's
 screens live beside its Rust crate in `components/<name>/ui/admin/<area>` (Studio)
 and `components/<name>/ui/storefront/<area>`: orders, customers (and the buyer
 account), catalog (Studio and storefront), checkout, payments, pos, b2b, identity
-(team), shop (settings, setup, legal), marketing (channels, automation), apps (apps,
+(team), shop (settings, legal), marketing (channels, automation), apps (apps,
 developer), intelligence (agents, assistant, intelligence, scenarios, storefront
-analytics) and studio (dashboard, environments, preview, reports, workspace). The
-gates, type check, tests and coverage read both roots as one tree.
+analytics) and studio (dashboard, environments, preview, reports, setup, workspace). The
+gates, type check, tests and coverage read both roots as one tree. A component's UI
+imports another component's UI only when it depends on that component in
+`components.json`; where a screen embeds UI of a component that depends on it (the
+order page and the payment ledger), the other component contributes it through a Studio
+slot (`admin.order.payment`).
 
 | File/group | Responsibility | Verification |
 |---|---|---|

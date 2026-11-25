@@ -9,7 +9,7 @@ import { useProductSeoText } from "./product-seo-i18n";
 import ProductEditorHeader from "./ProductEditorHeader";
 import { useProductEditorText } from "./product-editor-i18n";
 import "./product-workspace.css";
-import ProductCompliance from "../../../../shop/ui/admin/legal/ProductCompliance";
+import ProductCompliance from "./ProductCompliance";
 import { useLegalText } from "../../../../../frontend/src/shared/i18n/legal-i18n";
 import EntityHistory from "../../../../../frontend/src/shared/history/EntityHistory";
 import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";

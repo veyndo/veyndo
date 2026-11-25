@@ -1,5 +1,5 @@
 /** Agent delegation and live stop controls share explicit four-language operational vocabulary. */
-import { useLocale } from "../../../../../../frontend/src/shared/i18n/i18n";
+import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 const words = {
   openai: ["OpenAI", "OpenAI", "OpenAI", "OpenAI"],
   anthropic: ["Anthropic", "Anthropic", "Anthropic", "Anthropic"],

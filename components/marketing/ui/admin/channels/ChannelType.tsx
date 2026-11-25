@@ -6,7 +6,6 @@ import type { Country } from "../../../../../frontend/src/shared/geography/geogr
 import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
 import type { Channel } from "./channel-model";
 import { useChannelText } from "./channel-i18n";
-import { usePosText } from "../../../../pos/ui/admin/pos/pos-i18n";
 import Icon from "../../../../../frontend/src/shared/ui/Icon";
 import LocalizedField from "../../../../../frontend/src/shared/i18n/LocalizedField";
 export default function ChannelType({
@@ -23,7 +22,6 @@ export default function ChannelType({
   countryError?: string;
 }) {
   const t = useChannelText();
-  const p = usePosText();
   const catalogue = useRead(request, "/store-api/countries").data?.countries;
   const world: Country[] = Array.isArray(catalogue) ? catalogue : [];
   const config = draft.data.pos ?? {
@@ -93,7 +91,7 @@ export default function ChannelType({
           <div className={countryError ? "field-invalid" : ""}>
             <CountryPicker
               countries={world.filter((c) => countries.includes(c.code))}
-              label={p("country")}
+              label={t("posCountry")}
               value={[config.country]}
               single
               onChange={(value) =>
@@ -102,7 +100,7 @@ export default function ChannelType({
             />
             {countryError && <small role="alert">{countryError}</small>}
           </div>
-          <Field label={p("columns")}>
+          <Field label={t("posColumns")}>
             <Select
               value={config.columns}
               onChange={(e) =>
@@ -124,10 +122,10 @@ export default function ChannelType({
                 patch({ pos: { ...config, compact: e.target.checked } })
               }
             />
-            {p("compact")}
+            {t("posCompact")}
           </label>
           <LocalizedField
-            label={p("message")}
+            label={t("posMessage")}
             value={config.receiptMessage}
             maxLength={500}
             onChange={(value) =>
@@ -139,7 +137,7 @@ export default function ChannelType({
               })
             }
           />
-          <p>{p("posHint")}</p>
+          <p>{t("posRegisterHint")}</p>
         </section>
       )}
     </>

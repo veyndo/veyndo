@@ -1,7 +1,7 @@
 /** Developer route: the developer workspace on the live shop, with sandbox-scoped requests and test scenarios. */
 import { useCallback } from "react";
 import DeveloperWorkspace from "./DeveloperWorkspace";
-import { useScenarioNavigation } from "../../../../intelligence/ui/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "../../../../../frontend/src/admin/shell/useScenarioNavigation";
 import { createStudioRequest } from "../../../../../frontend/src/admin/shell/requests";
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";

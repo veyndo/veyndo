@@ -35,7 +35,6 @@ Files and their individual responsibilities are listed in [the generated source 
 Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
 
 - [`settings.css`](settings.css): Independent settings navigation, grouped native forms and save feedback in Studio theme tokens.
-- [`international.css`](international.css): International commerce workbench: compact master/detail records, calm colour and clear field hierarchy.
 - [`international-details.css`](international-details.css): Destination rates, translation jobs and responsive international workbench layout.
 - [`company-settings.css`](company-settings.css): Company editor: structured addresses, visible scope inheritance and compact upload controls.
 - [`b2b-settings.css`](b2b-settings.css): Revisioned B2B settings cards, accessible switches and responsive spacing.

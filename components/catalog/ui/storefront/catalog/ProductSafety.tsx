@@ -4,7 +4,7 @@ import {
   useProductLegalText,
 } from "../../../../../frontend/src/shared/i18n/product-legal-i18n";
 import { useLegalText } from "../../../../../frontend/src/shared/i18n/legal-i18n";
-import { useLegalPolicy } from "./PrivacyProvider";
+import { useLegalPolicy } from "../../../../../frontend/src/shared/legal/legal-policy";
 import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
 import { getContentLocale } from "../../../../../frontend/src/shared/api/shop-api";
 export default function ProductSafety({

@@ -7,6 +7,9 @@ Files and their individual responsibilities are listed in [the generated source 
 ## Modules
 
 - [`AccessManager.tsx`](AccessManager.tsx): Fine-grained team overrides, revocable invitations and personal session inventory.
+- [`IntegrationKeys.tsx`](IntegrationKeys.tsx): Integration keys (table `integration_keys`): scoped rights, lifetime, one-time secret display and revocation.
+- [`AgentBudgetFields.tsx`](AgentBudgetFields.tsx): A key's agent authority: model provider, model and allocated budget.
+- [`agent-control-i18n.ts`](agent-control-i18n.ts), [`integration-keys-i18n.ts`](integration-keys-i18n.ts), [`integration-keys.css`](integration-keys.css): Their vocabulary and styles, also used by the developer agent controls.
 - [`PersonalAccountForm.tsx`](PersonalAccountForm.tsx): PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks.
 - [`UsersManager.tsx`](UsersManager.tsx): Users Manager: Personal accounts, memberships, roles, invitations and scoped developer access..
 
@@ -32,5 +35,5 @@ Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architectu
 suggestion. `UsersManager` submits through the native personal account API and
 retains the selected shop on rejection. Invitations use controlled current role
 options, preserving Viewer as the default through asynchronous loading.
-`AccessManager` reuses Developer's `IntegrationKeys` instead of a second key form.
+`AccessManager` and the developer workspace share this folder's `IntegrationKeys` (one key form).
 The key manager imports its own styles, so direct Team entry is fully styled.

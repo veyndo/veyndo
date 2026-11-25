@@ -1,12 +1,5 @@
 /** Unified affirmative consent: server-validated receipt, channel boundaries, expiry and policy revalidation. */
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { shopApi } from "../../../../../frontend/src/shared/api/shop-api";
 import {
   consentCurrent,
@@ -22,9 +15,8 @@ import {
 } from "../../../../../frontend/src/shared/legal/legal-types";
 import { useLegalText } from "../../../../../frontend/src/shared/i18n/legal-i18n";
 import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
+import { LegalPolicyContext } from "../../../../../frontend/src/shared/legal/legal-policy";
 import "../../../../../frontend/src/storefront/styles/legal.css";
-const PolicyContext = createContext<LegalPolicy | undefined>(undefined);
-export const useLegalPolicy = () => useContext(PolicyContext);
 export default function PrivacyProvider({
   token,
   children,
@@ -157,7 +149,7 @@ export default function PrivacyProvider({
   }, [open, policy, token]);
   const allowed = purposes.filter((p) => policy?.data.purposes[p]);
   return (
-    <PolicyContext.Provider value={policy}>
+    <LegalPolicyContext.Provider value={policy}>
       {children}
       {open && policy && token && (
         <dialog
@@ -248,6 +240,6 @@ export default function PrivacyProvider({
           </a>
         </dialog>
       )}
-    </PolicyContext.Provider>
+    </LegalPolicyContext.Provider>
   );
 }

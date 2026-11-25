@@ -6,7 +6,8 @@ import {
   TextInput,
 } from "../../../../../frontend/src/kit/ui";
 import { useMemo, useState, useEffect } from "react";
-import type { Environment } from "../../../../studio/ui/admin/environments/EnvironmentManager";
+/** A staging shop as the developer view lists it (the studio component owns environments). */
+type Environment = { id: string; name: string };
 import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
 import Icon from "../../../../../frontend/src/shared/ui/Icon";
 import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";

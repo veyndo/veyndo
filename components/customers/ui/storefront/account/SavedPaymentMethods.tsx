@@ -1,5 +1,5 @@
 /** Customers can revoke their saved methods without affecting completed purchases or historical receipts. */
-import { useSavedPaymentMethods } from "../../../../checkout/ui/storefront/checkout/useSavedPaymentMethods";
+import { useSavedPaymentMethods } from "./useSavedPaymentMethods";
 import { useCheckoutText } from "../../../../../frontend/src/shared/i18n/checkout-i18n";
 import "../../../../../frontend/src/storefront/styles/saved-payments.css";
 export default function SavedPaymentMethods({

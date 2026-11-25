@@ -1,6 +1,6 @@
 /** Scope-fenced entry from native design, app and migration workspaces. */
 import { useRef } from "react";
-import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
+import { useStudio } from "./StudioContext";
 export function useScenarioNavigation() {
   const {
     request,

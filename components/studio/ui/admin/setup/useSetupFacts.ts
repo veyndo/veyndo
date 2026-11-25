@@ -2,7 +2,7 @@
 import { useRead } from "../../../../../frontend/src/admin/shell/useRead";
 import { useEffect, useState } from "react";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
-import type { CompanyData } from "../settings/company-types";
+import type { CompanyData } from "../../../../shop/ui/admin/settings/company-types";
 import type { Config } from "../../../../../frontend/src/shared/api/shop-api";
 export function useSetupFacts(enabled = true, changed = 0) {
   const { request, access } = useStudio();

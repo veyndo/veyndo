@@ -9,8 +9,10 @@ import type { Config } from "../../../../../frontend/src/shared/api/shop-api";
 import { useSettingsDraft } from "./useSettingsDraft";
 import SettingsSaveBar from "./SettingsSaveBar";
 import EntityHistory from "../../../../../frontend/src/shared/history/EntityHistory";
-import { useB2BExperienceText } from "../../../../b2b/ui/admin/b2b/experience-i18n";
-import { useB2BText } from "../../../../../frontend/src/shared/i18n/b2b-i18n";
+import {
+  useB2BText,
+  type B2BWord,
+} from "../../../../../frontend/src/shared/i18n/b2b-i18n";
 import Icon, {
   type IconName,
 } from "../../../../../frontend/src/shared/ui/Icon";
@@ -43,8 +45,7 @@ export default function B2BSettings({
   onDirty?: (v: boolean) => void;
   onCompanies?: () => void;
 }) {
-  const t = useB2BExperienceText(),
-    b = useB2BText(),
+  const b = useB2BText(),
     state = useSettingsDraft<Config & { b2b?: B2BFeatures }>(
       request,
       "/api/merchant/commerce",
@@ -68,18 +69,26 @@ export default function B2BSettings({
     edi: "code",
     catalogs: "lock",
   };
+  const featureWords = {
+    quotes: ["featureQuotes", "featureQuotesHint"],
+    approvals: ["featureApprovals", "featureApprovalsHint"],
+    lists: ["featureLists", "featureListsHint"],
+    quickOrder: ["featureQuickOrder", "featureQuickOrderHint"],
+    edi: ["featureEdi", "featureEdiHint"],
+    catalogs: ["featureCatalogs", "featureCatalogsHint"],
+  } as const satisfies Record<keyof typeof icons, readonly [B2BWord, B2BWord]>;
   const change = (patch: Partial<B2BFeatures>) =>
     state.change({ ...state.value!.data, b2b: { ...features, ...patch } });
   return (
     <Card className="settings-panel b2b-settings">
       <header className="settings-panel-header">
         <div>
-          <h2>{t("settings")}</h2>
-          <p>{t("settingsHint")}</p>
+          <h2>{b("purchasingSettings")}</h2>
+          <p>{b("purchasingSettingsHint")}</p>
         </div>
         {features.enabled && onCompanies && (
           <Button type="submit" onClick={onCompanies}>
-            {t("companies")} ↗
+            {b("purchasingCompanies")} ↗
           </Button>
         )}
       </header>
@@ -96,15 +105,15 @@ export default function B2BSettings({
               checked={features.enabled}
               onChange={(e) => change({ enabled: e.target.checked })}
             />
-            {t("enabled")}
+            {b("purchasingEnabled")}
           </label>
           <div className="b2b-feature-grid">
             {(Object.keys(icons) as (keyof typeof icons)[]).map((key) => (
               <label className="b2b-feature-card" key={key}>
                 <Icon name={icons[key]} />
                 <span>
-                  <strong>{t(key)}</strong>
-                  <small>{t(`${key}Hint`)}</small>
+                  <strong>{b(featureWords[key][0])}</strong>
+                  <small>{b(featureWords[key][1])}</small>
                 </span>
                 <input
                   type="checkbox"
@@ -115,7 +124,7 @@ export default function B2BSettings({
             ))}
           </div>
           {state.error && <Notice tone="danger">{state.error}</Notice>}
-          <p>{t("budgetsHint")}</p>
+          <p>{b("purchasingBudgetsHint")}</p>
           <SettingsSaveBar
             dirty={state.dirty}
             busy={state.busy}

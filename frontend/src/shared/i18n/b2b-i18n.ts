@@ -1,6 +1,108 @@
 /** B2B interface catalogue; content names use the shop language editor and per-field inheritance. */
 import { useLocale } from "./i18n";
 export const b2bWords = {
+  featureQuotes: [
+    "Offers & negotiation",
+    "Angebote & Verhandlung",
+    "Offres et négociation",
+    "Ofertas y negociación",
+  ],
+  featureQuotesHint: [
+    "Request offers, exchange counterproposals and buy at accepted prices through API, MCP and UCP.",
+    "Angebote anfragen, Gegenangebote besprechen und zu akzeptierten Preisen einkaufen — über API, MCP und UCP.",
+    "Demander des offres, négocier et acheter aux prix acceptés via API, MCP et UCP.",
+    "Solicitar ofertas, negociar y comprar a precios aceptados mediante API, MCP y UCP.",
+  ],
+  featureApprovals: [
+    "Purchasing approval",
+    "Einkaufsfreigaben",
+    "Validation des achats",
+    "Aprobaciones de compra",
+  ],
+  featureApprovalsHint: [
+    "Separate employees approve purchases; existing thresholds never disappear when this tool is disabled.",
+    "Separate Mitarbeiter geben Einkäufe frei. Vorhandene Freigabegrenzen bleiben auch bei deaktiviertem Werkzeug verbindlich.",
+    "Des employés distincts valident les achats. Les seuils existants restent obligatoires même si l’outil est désactivé.",
+    "Empleados distintos aprueban compras. Los umbrales existentes siguen siendo obligatorios aunque se desactive la herramienta.",
+  ],
+  featureLists: [
+    "Order lists",
+    "Bestelllisten",
+    "Listes de commande",
+    "Listas de pedidos",
+  ],
+  featureListsHint: [
+    "Private or shared purchasing lists for repeat orders.",
+    "Private oder gemeinsame Einkaufslisten für wiederkehrende Bestellungen.",
+    "Listes privées ou partagées pour les achats récurrents.",
+    "Listas privadas o compartidas para compras recurrentes.",
+  ],
+  featureQuickOrder: [
+    "Quick order",
+    "Schnellbestellung",
+    "Commande rapide",
+    "Pedido rápido",
+  ],
+  featureQuickOrderHint: [
+    "Add products by SKU and quantity using the same cart.",
+    "Produkte per Artikelnummer und Menge in denselben Warenkorb übernehmen.",
+    "Ajouter des produits par référence et quantité au même panier.",
+    "Añadir productos por referencia y cantidad al mismo carrito.",
+  ],
+  featureEdi: [
+    "EDI requisitions",
+    "EDI-Bestellanforderungen",
+    "Demandes EDI",
+    "Solicitudes EDI",
+  ],
+  featureEdiHint: [
+    "Use the separate EDI app to import reviewed EDIFACT, UBL or cXML requests.",
+    "Über die separate EDI-App geprüfte EDIFACT-, UBL- oder cXML-Anforderungen importieren.",
+    "Importer des demandes EDIFACT, UBL ou cXML vérifiées avec l’app EDI séparée.",
+    "Importar solicitudes EDIFACT, UBL o cXML revisadas con la app EDI independiente.",
+  ],
+  featureCatalogs: [
+    "Private catalogues",
+    "Private Kataloge",
+    "Catalogues privés",
+    "Catálogos privados",
+  ],
+  featureCatalogsHint: [
+    "Select the products each unit can buy. Existing restrictions remain enforced.",
+    "Wähle die Produkte, die eine Einheit einkaufen darf. Bestehende Einschränkungen bleiben verbindlich.",
+    "Choisir les produits autorisés par unité. Les restrictions existantes restent appliquées.",
+    "Elegir productos por unidad. Las restricciones existentes siguen vigentes.",
+  ],
+  purchasingBudgetsHint: [
+    "Set currency, budget period, cost centre, purchase-order requirement and available payment/shipping methods per unit.",
+    "Währung, Budgetzeitraum, Kostenstelle, Bestellreferenz sowie erlaubte Zahlungs- und Versandarten je Einheit konfigurieren.",
+    "Configurer devise, période budgétaire, centre de coûts, référence et méthodes par unité.",
+    "Configurar moneda, período presupuestario, centro de costes, referencia y métodos por unidad.",
+  ],
+  purchasingEnabled: [
+    "Enable B2B purchasing",
+    "B2B-Einkauf aktivieren",
+    "Activer les achats B2B",
+    "Activar compras B2B",
+  ],
+  purchasingSettings: [
+    "Company purchasing",
+    "Firmeneinkauf",
+    "Achats d’entreprise",
+    "Compras empresariales",
+  ],
+  purchasingSettingsHint: [
+    "Enable the tools your business needs. Company-specific budgets, approvals and catalogues remain under each purchasing unit.",
+    "Aktiviere die benötigten Werkzeuge. Firmenspezifische Budgets, Freigaben und Kataloge pflegst du weiterhin je Einkaufseinheit.",
+    "Active les outils nécessaires. Budgets, validations et catalogues restent configurés par unité d’achat.",
+    "Activa las herramientas necesarias. Los presupuestos, aprobaciones y catálogos se configuran por unidad de compra.",
+  ],
+  purchasingCompanies: [
+    "Companies & units",
+    "Firmen & Einkaufseinheiten",
+    "Sociétés et unités",
+    "Empresas y unidades",
+  ],
   reviewApprovalHint: [
     "Review delivery and payment first, then request approval. Refresh here after your colleague approves; changing the cart requires a new approval.",
     "Prüfe zuerst Lieferung und Zahlung, dann frage die Freigabe an. Aktualisiere hier nach der Freigabe durch deinen Kollegen; Änderungen am Warenkorb erfordern eine neue Freigabe.",

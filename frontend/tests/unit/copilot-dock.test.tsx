@@ -151,7 +151,7 @@ it("updates selected context with native navigation and keeps the originating ap
 
 it("blocks an old proposal whose product navigation carries an order view", async () => {
   const { default: ProposalCard } =
-    await import("../../../components/intelligence/ui/admin/assistant/ProposalCard");
+    await import("../../src/admin/shell/ProposalCard");
   const message = {
     id: 1,
     role: "assistant",

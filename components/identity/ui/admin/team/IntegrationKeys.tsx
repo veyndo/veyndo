@@ -2,7 +2,7 @@
 import {
   useRead,
   useSetRead,
-} from "../../../../../../frontend/src/admin/shell/useRead";
+} from "../../../../../frontend/src/admin/shell/useRead";
 import {
   Button,
   Card,
@@ -10,21 +10,21 @@ import {
   Notice,
   Select,
   TextInput,
-} from "../../../../../../frontend/src/kit/ui";
-import "../api-console.css";
+} from "../../../../../frontend/src/kit/ui";
+import "./integration-keys.css";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../../../../../../frontend/src/admin/shell/studio-types";
-import PermissionPicker from "../../../../../identity/ui/admin/team/PermissionPicker";
-import ConfirmDialog from "../../../../../../frontend/src/shared/ui/ConfirmDialog";
-import { usePermissionText } from "../../../../../identity/ui/admin/team/permission-i18n";
-import { useApiText } from "./api-i18n";
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import PermissionPicker from "./PermissionPicker";
+import ConfirmDialog from "../../../../../frontend/src/shared/ui/ConfirmDialog";
+import { usePermissionText } from "./permission-i18n";
+import { useIntegrationKeyText } from "./integration-keys-i18n";
 import AgentBudgetFields, {
   agentBudget,
   planningScope,
   type BudgetFields,
 } from "./AgentBudgetFields";
 import { useAgentControlText } from "./agent-control-i18n";
-import { useLocale } from "../../../../../../frontend/src/shared/i18n/i18n";
+import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 type Key = {
   id: string;
   name: string;
@@ -34,7 +34,7 @@ type Key = {
   agentUsage?: { tokensAllocated: number; costMicrosAllocated: number };
 };
 export default function IntegrationKeys({ request }: { request: RequestFn }) {
-  const t = useApiText();
+  const t = useIntegrationKeyText();
   const at = useAgentControlText();
   const { locale } = useLocale();
   const usd = (n: number) =>

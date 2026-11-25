@@ -9,7 +9,7 @@ import { useLifecycleText } from "./lifecycle-i18n";
 import "./automation-lifecycle.css";
 import EntityHistory from "../../../../../frontend/src/shared/history/EntityHistory";
 import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";
-import "../../../../shop/ui/admin/settings/international.css";
+import "../../../../../frontend/src/shared/styles/international.css";
 import FlowExecution from "./FlowExecution";
 import { useConnectedText } from "../../../../../frontend/src/shared/i18n/connected-i18n";
 import { type Config, type Kind } from "./automation-types";

@@ -18,7 +18,7 @@ import { type Category } from "./catalog-model";
 import TranslationFields from "../../../../../frontend/src/shared/geography/TranslationFields";
 import { useCountryCatalogue } from "../../../../../frontend/src/shared/geography/useCountryCatalogue";
 import { inheritedText } from "../../../../../frontend/src/shared/geography/geography-types";
-import "../../../../shop/ui/admin/settings/international.css";
+import "../../../../../frontend/src/shared/styles/international.css";
 import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";
 import CategoryFactQuery from "./CategoryFactQuery";
 export function orderedCategories(

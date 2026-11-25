@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
-import type { WorkspaceRecord } from "../../../../studio/ui/admin/workspace/workspace-model";
+import type { WorkspaceRecord } from "../workspace/workspace-model";
 import { withSetup, type SetupProgress } from "./setup-model";
 import { useSetupText } from "./setup-i18n";
 function useSetupController() {

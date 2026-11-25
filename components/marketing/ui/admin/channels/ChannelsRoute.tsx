@@ -1,7 +1,7 @@
 /** Channels route: sales channels with stage-scoped requests, test scenarios and the hand-off to channel design. */
 import { useCallback } from "react";
 import SalesChannelsWorkspace from "./SalesChannelsWorkspace";
-import { useScenarioNavigation } from "../../../../intelligence/ui/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "../../../../../frontend/src/admin/shell/useScenarioNavigation";
 import { createStudioRequest } from "../../../../../frontend/src/admin/shell/requests";
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";

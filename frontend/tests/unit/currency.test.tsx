@@ -11,7 +11,8 @@ import ProductCurrencyPrices from "../../../components/catalog/ui/admin/catalog/
 import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
 import { cart as fixture } from "./fixtures";
 import { convertDraftPrice } from "../../src/shared/money/fx-draft";
-import OrderPaymentDelivery from "../../../components/orders/ui/admin/orders/OrderPaymentDelivery";
+import OrderPayment from "../../../components/payments/ui/admin/payments/OrderPayment";
+import { StudioContext } from "../../src/admin/shell/StudioContext";
 import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
 const shared = vi.hoisted(() => ({
   api: vi.fn(),
@@ -115,27 +116,28 @@ describe("currency contexts", () => {
     ).toBe(1584);
   });
   it("accepts a major-unit KWD refund and queues its exact three-digit minor amount", async () => {
-    const onPayment = vi.fn().mockResolvedValue(true);
+    const request = vi.fn(async (path: string) =>
+      path.includes("/jobs/")
+        ? { state: "succeeded" }
+        : path.endsWith("/refund")
+          ? { jobId: "job-1" }
+          : {},
+    );
+    const onChanged = vi.fn().mockResolvedValue(undefined);
     render(
       <LocaleProvider>
-        <OrderPaymentDelivery
-          request={vi.fn()}
-          order={{
-            cart: { price: { currency: "KWD", currencyScale: 3 } },
-            payment: {
-              state: "captured",
-              attemptId: "fixture",
-              provider: "example",
-            },
-            deliveries: [],
-          }}
-          busy={false}
-          rights={["payments.manage"]}
-          onAction={vi.fn()}
-          onPayment={onPayment}
-          pendingJob={false}
-          onCheck={vi.fn()}
-        />
+        <StudioContext.Provider
+          value={{ request, access: ["payments.manage"] } as never}
+        >
+          <OrderPayment
+            context={{
+              payment: { state: "captured", attemptId: "fixture" },
+              currency: "KWD",
+              scale: 3,
+              onChanged,
+            }}
+          />
+        </StudioContext.Provider>
       </LocaleProvider>,
     );
     fireEvent.change(screen.getByLabelText("Refund amount · KWD"), {
@@ -144,7 +146,13 @@ describe("currency contexts", () => {
     fireEvent.submit(
       screen.getByLabelText("Refund amount · KWD").closest("form")!,
     );
-    await waitFor(() => expect(onPayment).toHaveBeenCalledWith("refund", 7123));
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith(
+        "/api/payments/fixture/refund",
+        expect.objectContaining({ approve: true, amountMinor: 7123 }),
+      ),
+    );
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
   });
   it.each([
     ["JPY", 0, 1584, 1584],

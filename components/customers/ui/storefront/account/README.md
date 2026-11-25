@@ -51,3 +51,5 @@ profile. It preserves unrelated graph nodes, defaults AI sharing off and exposes
 the same native revision/export/delete operations. `preference-i18n.ts` supplies
 translated controls; tests include denied consent, deletion after withdrawal and
 stale saves. This is not authenticated cross-device customer memory.
+
+`useSavedPaymentMethods` lists and revokes the signed-in customer's saved payment methods; the account page and the checkout payment choice both use it.

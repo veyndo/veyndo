@@ -1,17 +1,17 @@
 /** ProposalCard keeps merchant interaction separate from workspace orchestration. */
-import { Button, LinkButton, Notice } from "../../../../../frontend/src/kit/ui";
-import { useAgentWorkspaceText } from "../../../../../frontend/src/shared/i18n/agent-workspace-i18n";
-import { useAppText } from "../../../../../frontend/src/shared/i18n/app-i18n";
-import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
-import { useBuildingText } from "../../../../../frontend/src/shared/i18n/app-building-i18n";
-import { useStudioNavigation } from "../../../../../frontend/src/admin/shell/navigation";
-import Icon from "../../../../../frontend/src/shared/ui/Icon";
-import type { Message } from "../../../../../frontend/src/admin/shell/studio-types";
-import { useCompositionText } from "../../../../studio/ui/admin/workspace/composition-i18n";
-import { matchesWorkspaceNavigation } from "../../../../../frontend/src/shared/grid/workspace-view";
-import { useExperienceUIText } from "../../../../../frontend/src/shared/i18n/experience-ui-i18n";
-import type { WorkspaceView } from "../../../../../frontend/src/shared/grid/workspace-view";
-import { useScenarioText } from "../scenarios/scenario-i18n";
+import { Button, LinkButton, Notice } from "../../kit/ui";
+import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
+import { useAppText } from "../../shared/i18n/app-i18n";
+import { useLocale } from "../../shared/i18n/i18n";
+import { useBuildingText } from "../../shared/i18n/app-building-i18n";
+import { useStudioNavigation } from "./navigation";
+import Icon from "../../shared/ui/Icon";
+import type { Message } from "./studio-types";
+import { useCompositionText } from "../../../../components/studio/ui/admin/workspace/composition-i18n";
+import { matchesWorkspaceNavigation } from "../../shared/grid/workspace-view";
+import { useExperienceUIText } from "../../shared/i18n/experience-ui-i18n";
+import type { WorkspaceView } from "../../shared/grid/workspace-view";
+import { useScenarioText } from "../../../../components/intelligence/ui/admin/scenarios/scenario-i18n";
 export default function ProposalCard({
   message,
   onApply,

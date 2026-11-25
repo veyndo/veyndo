@@ -29,7 +29,7 @@ import CountriesSettings from "./CountriesSettings";
 import TaxSettings from "./TaxSettings";
 import MethodSettings from "./MethodSettings";
 import LanguageSettings from "./LanguageSettings";
-import "./international.css";
+import "../../../../../frontend/src/shared/styles/international.css";
 import "./international-details.css";
 export type InternationalConfig = Config & {
   mainLocale: string;

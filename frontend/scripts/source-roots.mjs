@@ -6,11 +6,11 @@ export const frontendRoot = path.resolve(import.meta.dirname, "..");
 export const componentsRoot = path.resolve(frontendRoot, "../components");
 
 /** Every components/<name>/ui folder; each holds `admin/<area>` and `storefront/<area>`. */
-export function componentUiRoots() {
+export function componentUiRoots(components = componentsRoot) {
   return fs
-    .readdirSync(componentsRoot, { withFileTypes: true })
+    .readdirSync(components, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(componentsRoot, entry.name, "ui"))
+    .map((entry) => path.join(components, entry.name, "ui"))
     .filter((dir) => fs.existsSync(dir));
 }
 
@@ -35,6 +35,23 @@ export const walk = (dir) =>
         ? walk(path.join(dir, entry.name))
         : [path.join(dir, entry.name)],
     );
+
+/**
+ * Which components each component may build on: its `uses` in components.json and
+ * theirs, transitively. A component's UI imports only the UI of these components.
+ */
+export function componentDependencies(registryFile) {
+  const registry = JSON.parse(fs.readFileSync(registryFile, "utf8")).components;
+  const closure = (name, seen = new Set()) => {
+    for (const used of registry[name]?.uses ?? [])
+      if (!seen.has(used)) {
+        seen.add(used);
+        closure(used, seen);
+      }
+    return seen;
+  };
+  return new Map(Object.keys(registry).map((name) => [name, closure(name)]));
+}
 
 /** Files of the whole source tree: `frontend/src` and every component UI folder. */
 export const sourceFiles = (source = path.join(frontendRoot, "src")) => [

@@ -1,5 +1,5 @@
 /** Published legal text uses selected content language/main-language inheritance; empty content is visible as missing. */
-import { useLegalPolicy } from "./PrivacyProvider";
+import { useLegalPolicy } from "../../../../../frontend/src/shared/legal/legal-policy";
 import {
   useLegalText,
   type LegalWord,

@@ -4,7 +4,6 @@ import { useState } from "react";
 import AutomationDelete from "../automation/AutomationDelete";
 import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
 import { posUrl, channelUrl, type Channel } from "./channel-model";
-import { useWorkspaceText } from "../../../../studio/ui/admin/workspace/workspace-i18n";
 import { useChannelText } from "./channel-i18n";
 import { connectionUrl } from "../../../../../extensions/apps/storyfront/studio/storyfront-model";
 export default function ChannelActions({
@@ -26,7 +25,6 @@ export default function ChannelActions({
   onMarketplace?: () => void;
   onDesign?: () => void;
 }) {
-  const personal = useWorkspaceText();
   const t = useChannelText(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -58,7 +56,7 @@ export default function ChannelActions({
     <>
       {draft.data.kind === "storefront" && onDesign && (
         <Button type="button" onClick={onDesign}>
-          {personal("design")} ↗
+          {t("shopDesign")} ↗
         </Button>
       )}
       {draft.data.kind === "marketplace" && (

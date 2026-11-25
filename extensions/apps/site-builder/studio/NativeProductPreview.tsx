@@ -6,7 +6,7 @@ import { useShopText } from "../../../../frontend/src/shared/i18n/shop-i18n";
 import ProductGallery from "../../../../components/catalog/ui/storefront/catalog/ProductGallery";
 import ProductPurchase from "../../../../components/catalog/ui/storefront/catalog/ProductPurchase";
 import ProductDetails from "../../../../components/catalog/ui/storefront/catalog/ProductDetails";
-import ProductSafety from "../../../../components/shop/ui/storefront/legal/ProductSafety";
+import ProductSafety from "../../../../components/catalog/ui/storefront/catalog/ProductSafety";
 import ProductQuestion from "../../../../components/catalog/ui/storefront/catalog/ProductQuestion";
 import ProductReviews from "../../../../components/catalog/ui/storefront/catalog/ProductReviews";
 import { useOverviewText } from "./overview-i18n";

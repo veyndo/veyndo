@@ -1,7 +1,7 @@
 /** Current legal-document links and separate non-prechecked digital performance acknowledgement. */
 import { useState, useEffect } from "react";
 import { shopApi } from "../../../../../frontend/src/shared/api/shop-api";
-import { useLegalPolicy } from "./PrivacyProvider";
+import { useLegalPolicy } from "../../../../../frontend/src/shared/legal/legal-policy";
 import { useLegalText } from "../../../../../frontend/src/shared/i18n/legal-i18n";
 export default function CheckoutLegal({
   token,

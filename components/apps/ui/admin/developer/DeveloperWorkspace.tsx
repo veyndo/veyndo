@@ -3,7 +3,7 @@ import { Button } from "../../../../../frontend/src/kit/ui";
 import { lazy, Suspense, useState } from "react";
 import type { ComponentProps } from "react";
 import DeveloperView from "./DeveloperView";
-import IntegrationKeys from "./api/IntegrationKeys";
+import IntegrationKeys from "../../../../identity/ui/admin/team/IntegrationKeys";
 import AgentControls from "./api/AgentControls";
 import ApiExplorer from "./api/ApiExplorer";
 import { useApiText } from "./api/api-i18n";

@@ -1,7 +1,7 @@
 /** StudioConversation: focused Studio view; state and commands come from the session-scoped controller. */
 import { forApps } from "../../shared/api/types";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
-import { useScenarioNavigation } from "../../../../components/intelligence/ui/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "./useScenarioNavigation";
 import { canTestCustomers } from "../../../../components/intelligence/ui/admin/scenarios/scenario-access";
 import { lazy, Suspense, useEffect, useState } from "react";
 import CopilotNavigation from "../../../../components/intelligence/ui/admin/assistant/CopilotNavigation";
@@ -18,7 +18,7 @@ import { conversationAppText } from "../../shared/i18n/conversation-app-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import AssistantMarkdown from "../../shared/content/AssistantMarkdown";
 import { openReviewedView } from "../../shared/grid/pinned-view";
-import ProposalCard from "../../../../components/intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "./ProposalCard";
 import "../styles/operations.css";
 import "../styles/studio.css";
 import "../styles/assistant-layout.css";

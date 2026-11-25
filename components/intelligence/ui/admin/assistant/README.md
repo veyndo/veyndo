@@ -9,7 +9,6 @@ Files and their individual responsibilities are listed in [the generated source 
 ## Modules
 
 - Assistant replies use the [shared Markdown renderer](../../../../../frontend/src/shared/content/AssistantMarkdown.tsx).
-- [`ProposalCard.tsx`](ProposalCard.tsx): ProposalCard keeps merchant interaction separate from workspace orchestration.
 - [`SettingsDialog.tsx`](SettingsDialog.tsx): SettingsDialog keeps merchant interaction separate from workspace orchestration.
 
 ## Studio registration

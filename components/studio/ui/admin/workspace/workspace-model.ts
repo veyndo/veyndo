@@ -27,7 +27,7 @@ export type Workspace = {
   active: string;
   goals: Goal[];
   todayReports?: import("../reports/model").ReportLayout;
-  setup?: import("../../../../shop/ui/admin/setup/setup-model").SetupProgress;
+  setup?: import("../setup/setup-model").SetupProgress;
 };
 export type WorkspaceRecord = {
   revision: number;

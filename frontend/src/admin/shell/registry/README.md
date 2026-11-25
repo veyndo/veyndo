@@ -9,7 +9,11 @@ shell renders only what the registry returns.
 
 Slot locations share their names with app surfaces (`admin.order`,
 `admin.order.general`, `admin.product.general`), so `StudioSlot` renders first-party
-contributions and installed apps at the same place. `admin.dashboard` is Studio's own.
+contributions and installed apps at the same place. `admin.dashboard` is Studio's own,
+and so is `admin.order.payment`: the order page hosts the payments component's ledger
+panel there, so a component whose screen embeds another component's UI receives it as a
+contribution instead of importing it (the architecture check refuses UI imports against
+the `components.json` dependency direction).
 
 Route views are code-split: a descriptor registers its view with `lazy(import(...))`.
 The architecture check does not count these registration loaders as initialisation

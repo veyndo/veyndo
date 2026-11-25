@@ -6,6 +6,7 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 
 ## Modules
 
+- [`ProductSafety.tsx`](ProductSafety.tsx): Factual product safety disclosures from the product data, under the shop legal policy read from `shared/legal/legal-policy`.
 - [`CrossSelling.tsx`](CrossSelling.tsx): Merchant-selected recommendations use bounded current-cart detail reads and the shared native product tile; unavailable products disappear.
 - [`ImagePlaceholder.tsx`](ImagePlaceholder.tsx): Honest empty-media state for newly created products; never invent a product photograph.
 - [`MemoryRecommendations.tsx`](MemoryRecommendations.tsx): Public consumer of merchant-approved learned associations, hydrated with current product state.

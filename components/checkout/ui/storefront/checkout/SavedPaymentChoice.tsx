@@ -4,7 +4,7 @@ import type {
   Selection,
 } from "../../../../../frontend/src/shared/api/shop-api";
 import { useCheckoutText } from "../../../../../frontend/src/shared/i18n/checkout-i18n";
-import { useSavedPaymentMethods } from "./useSavedPaymentMethods";
+import { useSavedPaymentMethods } from "../../../../customers/ui/storefront/account/useSavedPaymentMethods";
 import "../../../../../frontend/src/storefront/styles/saved-payments.css";
 export default function SavedPaymentChoice({
   cart,

@@ -2,9 +2,7 @@
 import { lazy } from "react";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
 import { useShopSetup } from "./SetupProvider";
-const PersonalWorkspace = lazy(
-  () => import("../../../../studio/ui/admin/workspace/PersonalWorkspace"),
-);
+const PersonalWorkspace = lazy(() => import("../workspace/PersonalWorkspace"));
 const SetupWizard = lazy(() => import("./SetupWizard"));
 export default function SetupEntry() {
   const { tab } = useStudio();

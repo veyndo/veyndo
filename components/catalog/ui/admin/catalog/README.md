@@ -6,6 +6,7 @@ Files and their individual responsibilities are listed in [the generated source 
 
 ## Modules
 
+- [`ProductCompliance.tsx`](ProductCompliance.tsx): Edits a product's safety facts in one selected content language.
 - [`AiImageStudio.tsx`](AiImageStudio.tsx): Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked.
 - [`CategoriesWorkspace.tsx`](CategoriesWorkspace.tsx): Localized category tree editor; parent moves and revisions are validated in the API.
 - [`CategoryFactQuery.tsx`](CategoryFactQuery.tsx): Single-language saved fact predicate in the existing category revision, source and staging path; browsing calls no model.

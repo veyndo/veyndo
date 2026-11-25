@@ -6,7 +6,7 @@ import AppDiagnostics from "../../../components/apps/ui/admin/developer/AppDiagn
 import { template } from "../../../components/apps/ui/admin/developer/app-model";
 import DesignReview from "../../../extensions/apps/site-builder/studio/DesignReview";
 import { newPage, newBlock } from "../../../extensions/apps/site-builder/model";
-import ProposalCard from "../../../components/intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "../../src/admin/shell/ProposalCard";
 it("shows every proposed work step for one explicit approval and never executes while rendering", () => {
   const approve = vi.fn();
   const message: any = {

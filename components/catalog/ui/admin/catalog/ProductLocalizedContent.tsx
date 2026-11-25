@@ -7,7 +7,7 @@ const RichEditor = lazy(
 );
 import { useInternationalText } from "../../../../../frontend/src/shared/i18n/international-i18n";
 import type { ProductDraft } from "./catalog-model";
-import "../../../../shop/ui/admin/settings/international.css";
+import "../../../../../frontend/src/shared/styles/international.css";
 import { productRichContent } from "./product-content-model";
 import { useProductContentText } from "./product-content-i18n";
 import { editorDocument } from "../../../../../frontend/src/shared/content/editor/rich-conversion";

@@ -1,6 +1,15 @@
 /** Product category/channel assignment guidance in every supported Studio interface language. */
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 const words = {
+  kindStorefront: ["Storefront", "Storefront", "Boutique", "Tienda"],
+  kindHeadless: [
+    "Headless API",
+    "Headless-API",
+    "API headless",
+    "API headless",
+  ],
+  kindPos: ["Point of sale", "Kasse", "Point de vente", "Punto de venta"],
+  kindMarketplace: ["Marketplace", "Marktplatz", "Marketplace", "Marketplace"],
   categorySearch: [
     "Search categories or paths",
     "Kategorien oder Pfade suchen",

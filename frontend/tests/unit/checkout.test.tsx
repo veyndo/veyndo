@@ -15,7 +15,7 @@ import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import CheckoutPanel from "../../../components/checkout/ui/storefront/checkout/CheckoutPanel";
 import PaymentSession from "../../../components/checkout/ui/storefront/checkout/PaymentSession";
 import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
-vi.mock("../../../components/shop/ui/storefront/legal/PrivacyProvider", () => ({
+vi.mock("../../src/shared/legal/legal-policy", () => ({
   useLegalPolicy: () => ({
     policyVersion: "fixture",
     data: { strictCheckout: false },

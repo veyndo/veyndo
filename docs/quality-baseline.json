@@ -23,7 +23,7 @@
       "components/apps/ui/admin/apps/AppEntity.tsx",
       "components/apps/ui/admin/apps/ConnectorPanel.tsx",
       "components/intelligence/ui/admin/assistant/MessageText.tsx",
-      "components/intelligence/ui/admin/assistant/ProposalCard.tsx",
+      "frontend/src/admin/shell/ProposalCard.tsx",
       "components/intelligence/ui/admin/assistant/SettingsDialog.tsx",
       "components/marketing/ui/admin/automation/CustomFieldCondition.tsx",
       "components/marketing/ui/admin/automation/FlowBuilder.tsx",

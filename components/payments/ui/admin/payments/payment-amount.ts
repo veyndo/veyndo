@@ -27,3 +27,16 @@ export type Settlement = {
   captures: Capture[];
 };
 export type PaymentOptions = { captureId?: string; finalCapture?: boolean };
+
+/** The payment part of an order as Studio's order detail holds it. */
+export type OrderPaymentSnapshot = { attemptId?: string; state: string } & (
+  { capturedMinor?: undefined } | Settlement
+);
+/** What the order page gives the payment panel it hosts (slot `admin.order.payment`). */
+export type OrderPaymentContext = {
+  payment: OrderPaymentSnapshot;
+  currency: string;
+  scale: number;
+  /** Reloads the order after a payment command settled. */
+  onChanged: () => Promise<unknown>;
+};

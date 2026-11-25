@@ -1,7 +1,7 @@
 /** Design route: opens the site builder designer with the design reference that belongs to the current shop and stage. */
 import { forApps } from "../../../../../frontend/src/shared/api/types";
 import { lazy } from "react";
-import { useScenarioNavigation } from "../../../../intelligence/ui/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "../../../../../frontend/src/admin/shell/useScenarioNavigation";
 import { useStudio } from "../../../../../frontend/src/admin/shell/StudioContext";
 
 const ShopDesigner = lazy(

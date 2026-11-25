@@ -22,7 +22,7 @@ import ConfirmDialog from "../../../../../frontend/src/shared/ui/ConfirmDialog";
 import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
 import SettingsSaveBar from "./SettingsSaveBar";
 import { useSettingsDraft } from "./useSettingsDraft";
-import "./international.css";
+import "../../../../../frontend/src/shared/styles/international.css";
 export default function CustomerGroupsSettings({
   request,
   canWrite,

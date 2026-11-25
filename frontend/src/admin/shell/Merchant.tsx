@@ -1,8 +1,8 @@
 /** Studio composition root: layout, scoped controller and modular workspace views. */
 import { forApps } from "../../shared/api/types";
 import { Button } from "../../kit/ui";
-import { SetupProvider } from "../../../../components/shop/ui/admin/setup/SetupProvider";
-import SetupBanner from "../../../../components/shop/ui/admin/setup/SetupBanner";
+import { SetupProvider } from "../../../../components/studio/ui/admin/setup/SetupProvider";
+import SetupBanner from "../../../../components/studio/ui/admin/setup/SetupBanner";
 import WorkspacePinBridge from "../../../../components/studio/ui/admin/workspace/WorkspacePinBridge";
 import { Suspense } from "react";
 

@@ -1,13 +1,13 @@
 /** Flow review observes the original native task, including approval made in another Studio view. */
 import { Notice } from "../../../../../frontend/src/kit/ui";
-import ProposalCard from "../../../../intelligence/ui/admin/assistant/ProposalCard";
+import ProposalCard from "../../../../../frontend/src/admin/shell/ProposalCard";
 import AgentRunCard from "../../../../../frontend/src/admin/shell/AgentRunCard";
 import { useTaskExecution } from "../../../../../frontend/src/admin/shell/useTaskExecution";
 import type {
   Preview,
   RequestFn,
 } from "../../../../../frontend/src/admin/shell/studio-types";
-import { useWorkspaceText } from "../../../../studio/ui/admin/workspace/workspace-i18n";
+import { useAgentWorkspaceText } from "../../../../../frontend/src/shared/i18n/agent-workspace-i18n";
 export default function FlowProposalReview({
   taskId,
   preview,
@@ -26,7 +26,7 @@ export default function FlowProposalReview({
   onTranslations?: (jobId: string) => void;
 }) {
   const progress = useTaskExecution(taskId, applied, request, executionStarted);
-  const t = useWorkspaceText();
+  const t = useAgentWorkspaceText();
   return (
     <section>
       {progress.run && (

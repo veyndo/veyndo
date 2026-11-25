@@ -1,5 +1,5 @@
 /** Typed Studio route ids, their locale-specific labels and the navigation entries the extensions register. */
-import { useSetupText } from "../../../../components/shop/ui/admin/setup/setup-i18n";
+import { useSetupText } from "../../../../components/studio/ui/admin/setup/setup-i18n";
 import { useB2BExperienceText } from "../../../../components/b2b/ui/admin/b2b/experience-i18n";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
 import { usePosText } from "../../../../components/pos/ui/admin/pos/pos-i18n";

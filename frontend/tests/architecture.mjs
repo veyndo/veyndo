@@ -214,10 +214,62 @@ try {
     "/** Consumer fixture. */\nexport const read=()=>1;\n",
   );
   assert.equal(check().status, 0, check().stderr);
+  // Component UI folders: a component's UI imports only the UI of components it depends on.
+  const fixtureRoot = `${directory}-components`;
+  const components = path.join(fixtureRoot, "components");
+  const checkWith = () =>
+    spawnSync(process.execPath, [guard, directory, components], {
+      encoding: "utf8",
+    });
+  const ui = (name, text) => {
+    const target = path.join(components, name);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, text);
+    fs.writeFileSync(
+      path.join(path.dirname(target), "README.md"),
+      "# Fixture area\n",
+    );
+  };
+  fs.mkdirSync(components, { recursive: true });
+  fs.writeFileSync(
+    path.join(components, "../components.json"),
+    JSON.stringify({
+      components: {
+        orders: { uses: ["customers"] },
+        customers: { uses: [] },
+        payments: { uses: ["orders"] },
+      },
+    }),
+  );
+  try {
+    ui(
+      "customers/ui/admin/customers/view.ts",
+      "/** Customer fixture. */\nexport const customer = 1;\n",
+    );
+    ui(
+      "payments/ui/admin/payments/view.ts",
+      "/** Payment fixture. */\nexport const payment = 1;\n",
+    );
+    ui(
+      "orders/ui/admin/orders/view.ts",
+      '/** Order fixture using a dependency. */\nimport { customer } from "../../../../customers/ui/admin/customers/view";\nexport const order = customer;\n',
+    );
+    assert.equal(checkWith().status, 0, checkWith().stderr);
+    ui(
+      "orders/ui/admin/orders/view.ts",
+      '/** Order fixture importing a dependent component. */\nimport type { payment } from "../../../../payments/ui/admin/payments/view";\nexport const order: typeof payment = 1;\n',
+    );
+    assert.match(
+      checkWith().stderr,
+      /imports the UI of component payments, which orders does not depend on/,
+    );
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
   fs.unlinkSync(path.join(directory, "shared/api/README.md"));
   assert.match(check().stderr, /folder contract/);
   console.log(
-    "PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token, lazy-registration, Studio kit-only and catalogued-path negative controls",
+    "PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token, lazy-registration, Studio kit-only, catalogued-path and component UI dependency negative controls",
   );
 } finally {
   fs.rmSync(directory, { recursive: true, force: true });

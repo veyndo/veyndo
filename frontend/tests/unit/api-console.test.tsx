@@ -4,7 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import IntegrationKeys from "../../../components/apps/ui/admin/developer/api/IntegrationKeys";
+import IntegrationKeys from "../../../components/identity/ui/admin/team/IntegrationKeys";
 import ApiExplorer, {
   routePath,
 } from "../../../components/apps/ui/admin/developer/api/ApiExplorer";

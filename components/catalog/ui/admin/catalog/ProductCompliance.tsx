@@ -7,7 +7,7 @@ import {
   useProductLegalText,
 } from "../../../../../frontend/src/shared/i18n/product-legal-i18n";
 import LocalizedField from "../../../../../frontend/src/shared/i18n/LocalizedField";
-import type { ProductDraft } from "../../../../catalog/ui/admin/catalog/catalog-model";
+import type { ProductDraft } from "./catalog-model";
 const sectorFields: Record<string, string[]> = {
   textiles: ["fibres"],
   food: [
