@@ -114,6 +114,9 @@ def discount_cap (total : Nat) (requested : Nat) : Nat :=
 def stock_admissible (stock : Nat) (quantity : Nat) : Bool :=
   ((decide (quantity > 0)) && (decide (quantity ≤ stock)))
 
+def reservation_admissible (ordered : Nat) (held : Nat) (requested : Nat) : Bool :=
+  (((decide (held ≤ ordered)) && (decide (requested > 0))) && (decide (requested ≤ (ordered - held))))
+
 def refund_admissible (captured : Nat) (refunded : Nat) (requested : Nat) : Bool :=
   (((decide (refunded ≤ captured)) && (decide (requested > 0))) && (decide (requested ≤ (captured - refunded))))
 
@@ -170,6 +173,9 @@ def net_amount (gross : Nat) (tax : Nat) : Nat :=
 
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
+
+def order_transition_admissible (edge_listed : Bool) (target_listed : Bool) (source_terminal : Bool) : Bool :=
+  ((edge_listed && target_listed) && (!source_terminal))
 
 def completion_admissible (terminal : Bool) (payment_ready : Bool) (deliveries_ready : Bool) : Bool :=
   (((!terminal) && payment_ready) && deliveries_ready)

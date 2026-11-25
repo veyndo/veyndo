@@ -301,4 +301,176 @@ theorem net_plus_tax_is_gross (gross tax : Nat) (h : tax ≤ gross) :
 theorem net_not_above_gross (gross tax : Nat) : net_amount gross tax ≤ gross := by
   simp only [net_amount]; exact Nat.sub_le _ _
 
+
+/-! ### Per-order stock bound and reservation sequences -/
+
+/-- Exact per-order bound: a reservation is admitted iff it is positive and fits beside what the order already holds. -/
+theorem reservation_exact (ordered held requested : Nat) :
+    reservation_admissible ordered held requested = true ↔ 0 < requested ∧ held + requested ≤ ordered := by
+  simp only [reservation_admissible, Bool.and_eq_true, decide_eq_true_eq]
+  omega
+
+theorem reservation_zero_denied (ordered held : Nat) : reservation_admissible ordered held 0 = false := by
+  simp [reservation_admissible]
+
+/-- A reservation that would make the order hold more than it ordered is refused. -/
+theorem reservation_over_denied (ordered held requested : Nat) (h : ordered < held + requested) :
+    reservation_admissible ordered held requested = false := by
+  cases hr : reservation_admissible ordered held requested
+  · rfl
+  · have := (reservation_exact ordered held requested).mp hr
+    omega
+
+/-- One order's inventory events: reserve a quantity of one product, or release everything it holds. -/
+inductive ReservationEvent where
+  | reserve (quantity : Nat)
+  | release
+
+/-- Stock on hand and the quantity the order holds. Refused reservations change nothing;
+release returns exactly what is held and is idempotent, as the persisted ledger does. -/
+def reservationStep (ordered : Nat) (s : Nat × Nat) : ReservationEvent → Nat × Nat
+  | .reserve q =>
+    if stock_admissible s.1 q && reservation_admissible ordered s.2 q then (s.1 - q, s.2 + q) else s
+  | .release => (s.1 + s.2, 0)
+
+def reservationRun (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) : Nat × Nat :=
+  events.foldl (reservationStep ordered) s
+
+theorem reservation_step_bounded (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent)
+    (h : s.2 ≤ ordered) : (reservationStep ordered s e).2 ≤ ordered := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (reservation_exact ordered s.2 q).mp hq.2
+      simp only
+      omega
+    · exact h
+  | release => simp [reservationStep]
+
+/-- Across any sequence of reservations and releases, an order holds at most what it ordered. -/
+theorem reservation_run_bounded (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, s.2 ≤ ordered → (reservationRun ordered s events).2 ≤ ordered := by
+  induction events with
+  | nil => intro s h; simpa [reservationRun] using h
+  | cons e rest ih =>
+    intro s h
+    exact ih (reservationStep ordered s e) (reservation_step_bounded ordered s e h)
+
+theorem reservation_step_conserves (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent) :
+    (reservationStep ordered s e).1 + (reservationStep ordered s e).2 = s.1 + s.2 := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (stock_exact s.1 q).mp hq.1
+      simp only
+      omega
+    · rfl
+  | release => simp [reservationStep]
+
+/-- Stock plus what the order holds is conserved by every sequence; nothing is created or lost. -/
+theorem reservation_run_conserves (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, (reservationRun ordered s events).1 + (reservationRun ordered s events).2 = s.1 + s.2 := by
+  induction events with
+  | nil => intro s; rfl
+  | cons e rest ih =>
+    intro s
+    have := ih (reservationStep ordered s e)
+    simp only [reservationRun, List.foldl_cons] at this ⊢
+    rw [this, reservation_step_conserves]
+
+/-- Releasing twice changes nothing more than releasing once. -/
+theorem reservation_release_idempotent (ordered : Nat) (s : Nat × Nat) :
+    reservationStep ordered (reservationStep ordered s .release) .release = reservationStep ordered s .release := by
+  simp [reservationStep]
+
+/-- Any sequence followed by a release restores the stock to what it was plus what the order held at the start. -/
+theorem reservation_release_restores (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) :
+    (reservationRun ordered s (events ++ [.release])).1 = s.1 + s.2 ∧
+    (reservationRun ordered s (events ++ [.release])).2 = 0 := by
+  have h := reservation_run_conserves ordered events s
+  simp only [reservationRun, List.foldl_append, List.foldl_cons, List.foldl_nil, reservationStep] at h ⊢
+  exact ⟨h, trivial⟩
+
+/-! ### Payment and revision rules over sequences -/
+
+/-- Refund requests applied in order; refused requests change nothing. -/
+def refundRun (captured refunded : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun r q => if refund_admissible captured r q then r + q else r) refunded
+
+/-- However many refunds are requested, the refunded total never exceeds the captured amount. -/
+theorem refund_run_bounded (captured : Nat) (requests : List Nat) :
+    ∀ refunded, refunded ≤ captured → refundRun captured refunded requests ≤ captured := by
+  induction requests with
+  | nil => intro r h; simpa [refundRun] using h
+  | cons q rest ih =>
+    intro r h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      have := (refund_exact captured r q).mp hq
+      omega
+    · exact h
+
+/-- Capture requests applied in order without in-flight reservations. -/
+def captureRun (authorized captured : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun c q => if capture_admissible authorized c 0 q then c + q else c) captured
+
+/-- However many captures are requested, the captured total never exceeds the authorization. -/
+theorem capture_run_bounded (authorized : Nat) (requests : List Nat) :
+    ∀ captured, captured ≤ authorized → captureRun authorized captured requests ≤ authorized := by
+  induction requests with
+  | nil => intro c h; simpa [captureRun] using h
+  | cons q rest ih =>
+    intro c h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      simp only [capture_admissible, Bool.and_eq_true, decide_eq_true_eq] at hq
+      omega
+    · exact h
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionStep (current expected : Nat) : Nat :=
+  if revision_admissible current expected then current + 1 else current
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionRun (current : Nat) (expected : List Nat) : Nat :=
+  expected.foldl revisionStep current
+
+/-- Revisions never move backwards over any sequence of writes. -/
+theorem revision_run_monotone (expected : List Nat) :
+    ∀ current, current ≤ revisionRun current expected := by
+  induction expected with
+  | nil => intro c; simp [revisionRun]
+  | cons e rest ih =>
+    intro c
+    have step : c ≤ revisionStep c e := by
+      unfold revisionStep; split <;> omega
+    exact Nat.le_trans step (ih (revisionStep c e))
+
+/-- A revision that is already behind is refused after any later sequence of writes: no lost update. -/
+theorem revision_reuse_denied (current stale : Nat) (expected : List Nat) (h : stale < current) :
+    revision_admissible (revisionRun current expected) stale = false := by
+  have := revision_run_monotone expected current
+  cases hr : revision_admissible (revisionRun current expected) stale
+  · rfl
+  · have := (revision_exact_behavior _ _).mp hr
+    omega
+
+/-- A checkout review taken at an older cart revision is refused after any later cart writes. -/
+theorem checkout_review_stale_denied (current stale expectedTotal actualTotal : Nat) (methods : Bool)
+    (edits : List Nat) (h : stale < current) :
+    checkout_review_admissible (decide (revisionRun current edits = stale)) expectedTotal actualTotal methods = false := by
+  have := revision_run_monotone edits current
+  have hne : revisionRun current edits ≠ stale := by omega
+  simp [checkout_review_admissible, hne]
+
 end CommerceKernel

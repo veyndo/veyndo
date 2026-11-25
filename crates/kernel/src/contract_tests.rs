@@ -107,3 +107,29 @@ fn private_agent_continuations_never_inherit_public_admission() {
     assert!(planning_request_admissible(true, false));
     assert!(planning_request_admissible(false, true));
 }
+
+#[test]
+fn per_order_reservations_match_wide_arithmetic_and_never_exceed_the_order() {
+    for ordered in EDGES {
+        for held in EDGES {
+            for request in EDGES {
+                let fits = u128::from(held) + u128::from(request) <= u128::from(ordered);
+                assert_eq!(
+                    reservation_admissible(ordered, held, request),
+                    request > 0 && fits
+                );
+            }
+        }
+        // Repeated reserve/release from an empty hold stays within the ordered quantity.
+        let mut held = 0u64;
+        for request in EDGES.iter().copied().chain(EDGES.iter().copied()) {
+            if reservation_admissible(ordered, held, request) {
+                held += request;
+            }
+            assert!(held <= ordered);
+            if request == u64::MAX {
+                held = 0;
+            }
+        }
+    }
+}

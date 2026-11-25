@@ -126,4 +126,141 @@ theorem carrier_booking_occupied_denied (is_open closed labelled : Bool) :
     carrier_booking_admissible is_open closed labelled true false = false := by
   simp [carrier_booking_admissible]
 
+
+/-! ### Order state machine over transition sequences -/
+
+/-- Exact order transition admission: a listed edge into a listed state from a nonterminal state. -/
+theorem order_transition_exact (edge listed terminal : Bool) :
+    order_transition_admissible edge listed terminal = true ↔
+    edge = true ∧ listed = true ∧ terminal = false := by
+  cases edge <;> cases listed <;> cases terminal <;> simp [order_transition_admissible]
+
+theorem order_transition_terminal_denied (edge listed : Bool) :
+    order_transition_admissible edge listed true = false := by
+  cases edge <;> cases listed <;> rfl
+
+/-- A configurable order machine as production reads it: listed states, terminal states
+(machine-declared plus the system review states) and listed edges, with states as codes. -/
+structure OrderMachineModel where
+  listed : Nat → Bool
+  terminal : Nat → Bool
+  edge : Nat → Nat → Bool
+
+/-- A merchant request: move the order to a state, or change its payment or a delivery. -/
+inductive OrderRequest where
+  | move (target : Nat)
+  | fulfil
+
+/-- Order state code and the number of applied fulfilment changes; refused requests change nothing. -/
+def orderStep (m : OrderMachineModel) (s : Nat × Nat) : OrderRequest → Nat × Nat
+  | .move t =>
+    if order_transition_admissible (m.edge s.1 t) (m.listed t) (m.terminal s.1) then (t, s.2) else s
+  | .fulfil => if order_edit_admissible (m.terminal s.1) then (s.1, s.2 + 1) else s
+
+def orderRun (m : OrderMachineModel) (s : Nat × Nat) (requests : List OrderRequest) : Nat × Nat :=
+  requests.foldl (orderStep m) s
+
+theorem order_step_listed (m : OrderMachineModel) (s : Nat × Nat) (r : OrderRequest)
+    (h : m.listed s.1 = true) : m.listed (orderStep m s r).1 = true := by
+  cases r with
+  | move t =>
+    simp only [orderStep]
+    split
+    · rename_i ht
+      exact ((order_transition_exact _ _ _).mp ht).2.1
+    · exact h
+  | fulfil =>
+    simp only [orderStep]
+    split <;> exact h
+
+/-- Every state reachable from a listed start by any request sequence is a listed state. -/
+theorem order_run_listed (m : OrderMachineModel) (requests : List OrderRequest) :
+    ∀ s : Nat × Nat, m.listed s.1 = true → m.listed (orderRun m s requests).1 = true := by
+  induction requests with
+  | nil => intro s h; exact h
+  | cons r rest ih =>
+    intro s h
+    exact ih (orderStep m s r) (order_step_listed m s r h)
+
+theorem order_step_terminal (m : OrderMachineModel) (s : Nat × Nat) (r : OrderRequest)
+    (h : m.terminal s.1 = true) : orderStep m s r = s := by
+  cases r with
+  | move t => simp [orderStep, h, order_transition_terminal_denied]
+  | fulfil => simp [orderStep, h, order_edit_admissible]
+
+/-- A completed or cancelled (terminal) order never changes again: no move and no fulfilment. -/
+theorem order_run_terminal_absorbing (m : OrderMachineModel) (requests : List OrderRequest) :
+    ∀ s : Nat × Nat, m.terminal s.1 = true → orderRun m s requests = s := by
+  induction requests with
+  | nil => intro s _; rfl
+  | cons r rest ih =>
+    intro s h
+    have hs := order_step_terminal m s r h
+    show orderRun m (orderStep m s r) rest = s
+    rw [hs]
+    exact ih s h
+
+/-- Once any prefix reaches a terminal state, every later request is without effect. -/
+theorem order_run_terminal_final (m : OrderMachineModel) (s : Nat × Nat) (done later : List OrderRequest)
+    (h : m.terminal (orderRun m s done).1 = true) :
+    orderRun m s (done ++ later) = orderRun m s done := by
+  have := order_run_terminal_absorbing m later (orderRun m s done) h
+  simpa [orderRun, List.foldl_append] using this
+
+/-- In particular, no payment or delivery change is applied to a terminal order by any sequence. -/
+theorem order_run_fulfilment_denied (m : OrderMachineModel) (s : Nat × Nat) (requests : List OrderRequest)
+    (h : m.terminal s.1 = true) : (orderRun m s requests).2 = s.2 := by
+  rw [order_run_terminal_absorbing m requests s h]
+
+/-! ### Payment ledger over transition sequences -/
+
+/-- Ledger transitions applied in order; refused transitions leave the state unchanged. -/
+def ledgerRun (state : Nat) (targets : List Nat) : Nat :=
+  targets.foldl (fun s n => if payment_transition_admissible s n then n else s) state
+
+/-- Every ledger state reachable from a listed state is a listed state code. -/
+theorem payment_run_listed (targets : List Nat) :
+    ∀ s, s ≤ 10 → ledgerRun s targets ≤ 10 := by
+  induction targets with
+  | nil => intro s h; simpa [ledgerRun] using h
+  | cons n rest ih =>
+    intro s h
+    apply ih
+    dsimp only
+    split
+    · rename_i hn
+      exact ((payment_transition_exact s n).mp hn).2.1
+    · exact h
+
+/-- Captured, partially refunded, refunded, late-captured or partially captured money never
+returns to pending, authorized, cancelled or expired, over any sequence. -/
+theorem payment_run_captured_kept (targets : List Nat) :
+    ∀ s, (s = 4 ∨ s = 5 ∨ s = 6 ∨ s = 9 ∨ s = 10) →
+    (ledgerRun s targets = 4 ∨ ledgerRun s targets = 5 ∨ ledgerRun s targets = 6 ∨
+     ledgerRun s targets = 9 ∨ ledgerRun s targets = 10) := by
+  induction targets with
+  | nil => intro s h; simpa [ledgerRun] using h
+  | cons n rest ih =>
+    intro s h
+    apply ih
+    dsimp only
+    split
+    · rename_i hn
+      have := (payment_transition_exact s n).mp hn
+      omega
+    · exact h
+
+/-- A fully refunded payment is final over any sequence. -/
+theorem payment_run_refunded_final (targets : List Nat) : ledgerRun 6 targets = 6 := by
+  induction targets with
+  | nil => rfl
+  | cons n rest ih =>
+    show ledgerRun (if payment_transition_admissible 6 n then n else 6) rest = 6
+    split
+    · rename_i hn
+      have := (payment_refunded_terminal n).mp hn
+      subst this
+      exact ih
+    · exact ih
+
 end CommerceKernel

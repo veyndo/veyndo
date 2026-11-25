@@ -2947,6 +2947,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/formal/axioms.py](../scripts/formal/axioms.py) | Audit owned proof sources and transitive Lean dependencies; no extra axioms are allowed. |
 | [scripts/formal/conformance.py](../scripts/formal/conformance.py) | Compare compiled Rust production policies with Lean's extracted executable, |
 | [scripts/formal/coverage_page.py](../scripts/formal/coverage_page.py) | Render docs/proof-coverage.md from proof/manifest.json and the kernel sources; --check rejects drift and broken totals. |
+| [scripts/formal/domain_inventory.py](../scripts/formal/domain_inventory.py) | Closed proof classification of every function in the commerce `domain/` modules. |
 | [scripts/formal/extract.py](../scripts/formal/extract.py) | Fail-closed typed Rust-to-Lean extraction. Trusted boundary: this translator, |
 | [scripts/formal/layout.py](../scripts/formal/layout.py) | Keep domain proof imports, theorem inventory and module sizes closed and reviewable. |
 | [scripts/formal/layout_tests.py](../scripts/formal/layout_tests.py) | Negative controls for missing claims and Rust facade escapes without editing the real source tree. |
@@ -2955,6 +2956,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/formal/registry.py](../scripts/formal/registry.py) | Explicit full-source inventory and reviewed adapter locks, not proof coverage claims. |
 | [scripts/formal/runners.py](../scripts/formal/runners.py) | Generate conformance drivers from parsed policy signatures, never a second policy implementation. |
 | [scripts/formal.py](../scripts/formal.py) | Run extraction, Lean proofs/axiom audit, compiled conformance and complete source-inventory checks. |
+| [scripts/formal_differential.py](../scripts/formal_differential.py) | Differential driver: every proved rule, compiled Rust against its Lean version, with a negative control. |
 | [scripts/github_traffic.py](../scripts/github_traffic.py) | Save one private GitHub snapshot; overlapping traffic windows are never summed. |
 | [scripts/grid_directory.py](../scripts/grid_directory.py) | Real native directories and read-only model planning in an isolated PostgreSQL database and loopback provider. |
 | [scripts/hosted_api.py](../scripts/hosted_api.py) | Check API discovery, explicit shop scope and presentation isolation on the existing HTTP server. |

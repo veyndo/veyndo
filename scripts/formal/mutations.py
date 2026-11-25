@@ -4,6 +4,7 @@ from extract import Parser,generated,kernel_source
 from registry import check
 from axioms import source_check,dependency_check
 from layout_tests import controls
+import domain_inventory
 
 MUTANTS=[
  ("planning_request_admissible", "read_only || planning_post", "true"),
@@ -115,6 +116,9 @@ MUTANTS=[
  ('rule_boolean_comparison','neq && !equal','neq && equal'),
  ('discount_cap','total.min(requested)','requested'),
  ('stock_admissible','quantity <= stock','quantity >= stock'),
+ ('reservation_admissible','requested <= ordered.saturating_sub(held)','requested <= ordered'),
+ ('reservation_admissible','held <= ordered &&','true &&'),
+ ('reservation_admissible','requested > 0','true'),
  ('refund_admissible','requested <= captured.saturating_sub(refunded)','true'),
  ('capture_admissible','requested <= authorized.saturating_sub(captured).saturating_sub(reserved)','true'),
  ('capture_admissible','requested > 0','true'),
@@ -124,6 +128,9 @@ MUTANTS=[
  ('scope_admissible','known_scope &&','true &&'),
  ('scope_admissible','!explicit && default_grant','explicit && default_grant'),
  ('order_edit_admissible','!terminal','true'),
+ ('order_transition_admissible','edge_listed &&','true &&'),
+ ('order_transition_admissible','&& target_listed','&& true'),
+ ('order_transition_admissible','&& !source_terminal','&& true'),
  ('completion_admissible','payment_ready && deliveries_ready','payment_ready || deliveries_ready'),
  ('cancellation_admissible','!external_payment','true'),
  ('manual_payment_admissible','!external_payment','true'),
@@ -219,7 +226,8 @@ def axiom_failures():
 def run(root):
     result={'brokenPoliciesRejectedByLean':proof_failures(root),'unsupportedSyntaxRejected':closed_grammar(),
             'staleUnclassifiedDisconnectedBindingsRejected':registry_failures(root),
-            'proofShortcutsUnexpectedAxiomsMissingAuditsRejected':axiom_failures(),'baselineAccepted':True,'proofAndModuleLayoutBypassesRejected':controls(root)}
+            'proofShortcutsUnexpectedAxiomsMissingAuditsRejected':axiom_failures(),
+            'domainInventoryThirdStatesRejected':domain_inventory.controls(root,set(json.loads((root/'proof/manifest.json').read_text())['policies'])),'baselineAccepted':True,'proofAndModuleLayoutBypassesRejected':controls(root)}
     report=root/'artifacts/formal-mutations.json';report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2));return result
 if __name__=='__main__':run(pathlib.Path(__file__).resolve().parents[2])

@@ -8,6 +8,11 @@ pub(super) fn eval(request: &Request) -> Result<Value, String> {
     let b = |key: &str| args[key].as_bool().ok_or_else(|| format!("Invalid {key}"));
     match request.function.as_deref() {
         Some("order_edit_admissible") => Ok(json!(order_edit_admissible(b("terminal")?))),
+        Some("order_transition_admissible") => Ok(json!(order_transition_admissible(
+            b("edge_listed")?,
+            b("target_listed")?,
+            b("source_terminal")?
+        ))),
         Some("completion_admissible") => Ok(json!(completion_admissible(
             b("terminal")?,
             b("payment_ready")?,
