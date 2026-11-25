@@ -1,5 +1,5 @@
 /** Searchable cursor source library, guarded lifecycle decisions and single-language source editing. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
@@ -157,7 +157,7 @@ export default function KnowledgeSources({
         />
       )}
       {selected && !editing && !newSource && (
-        <section className="studio-card knowledge-source-detail">
+        <Card className="knowledge-source-detail">
           <div className="knowledge-section-heading">
             <div>
               <span className="kicker">{k(selected.kind)}</span>
@@ -248,7 +248,7 @@ export default function KnowledgeSources({
                   }
             }
           />
-        </section>
+        </Card>
       )}
       <div className="knowledge-source-toolbar">
         <form

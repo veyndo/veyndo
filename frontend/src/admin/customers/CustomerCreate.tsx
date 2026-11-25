@@ -1,5 +1,5 @@
 /** Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
 import CustomerFields from "../../shared/customer/CustomerFields";
 import AddressFields from "../../shared/customer/AddressFields";
@@ -61,7 +61,7 @@ export default function CustomerCreate({
   };
   const dirty = !!(email || profile.name || billing.street || shipping.street);
   return (
-    <section className="studio-card admin-create">
+    <Card className="admin-create">
       <header className="admin-create-heading">
         <div>
           <h2>{n("newCustomer")}</h2>
@@ -179,6 +179,6 @@ export default function CustomerCreate({
           <p>{n("pending")}</p>
         </ConfirmDialog>
       )}
-    </section>
+    </Card>
   );
 }

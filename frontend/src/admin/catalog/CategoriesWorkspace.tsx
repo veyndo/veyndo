@@ -1,5 +1,5 @@
 /** Localized category tree editor; parent moves and revisions are validated in the API. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import "./catalog.css";
 import "./catalog-editor.css";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -88,7 +88,7 @@ export default function CategoriesWorkspace({
   };
   return (
     <div className="catalog-category-layout">
-      <section className="studio-card catalog-category-tree">
+      <Card className="catalog-category-tree">
         <div className="catalog-heading">
           <h2>{c("categories")}</h2>
           {canWrite && (
@@ -144,8 +144,8 @@ export default function CategoriesWorkspace({
             <small>{c(category.data.active ? "active" : "inactive")}</small>
           </button>
         ))}
-      </section>
-      <section className="studio-card catalog-category-editor">
+      </Card>
+      <Card className="catalog-category-editor">
         {!selected ? (
           <p>{c("categoryHint")}</p>
         ) : (
@@ -395,7 +395,7 @@ export default function CategoriesWorkspace({
             )}
           </>
         )}
-      </section>
+      </Card>
     </div>
   );
 }

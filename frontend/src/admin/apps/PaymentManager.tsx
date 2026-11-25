@@ -1,5 +1,5 @@
 /** Native payment balances and observed financial jobs, shared with the order detail controls. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
@@ -108,7 +108,7 @@ export default function PaymentManager({
     }
   };
   return (
-    <section className="studio-card app-card">
+    <Card className="app-card">
       <h2>{o("payment")}</h2>
       <p>
         {data?.providers.some((p) => p.configured)
@@ -158,6 +158,6 @@ export default function PaymentManager({
       >
         {a("refresh")}
       </Button>
-    </section>
+    </Card>
   );
 }

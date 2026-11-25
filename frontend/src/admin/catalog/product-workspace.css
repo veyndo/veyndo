@@ -192,14 +192,14 @@
   line-height: 1.6;
 }
 /* Existing standalone panels keep their behavior without nesting a second card. */
-.studio .product-editor .catalog-permission-fields > .studio-card {
+.studio .product-editor .catalog-permission-fields > .vy-card {
   border: 0;
   padding: 0;
   box-shadow: none;
   background: transparent;
   margin: 0;
 }
-.product-editor .catalog-permission-fields > .studio-card > h2:first-child {
+.product-editor .catalog-permission-fields > .vy-card > h2:first-child {
   display: none;
 }
 .product-editor .entity-history {

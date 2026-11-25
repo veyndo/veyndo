@@ -1,5 +1,5 @@
 /** Personal, expiring, least-privilege integration keys; plaintext stays in component memory and is never reloaded. */
-import { Button, Notice } from "../../../kit/ui";
+import { Button, Card, Notice } from "../../../kit/ui";
 import "../api-console.css";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
@@ -97,7 +97,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
     };
   }, [request]);
   return (
-    <section className="studio-card api-key-panel">
+    <Card className="api-key-panel">
       <h2>{t("keys")}</h2>
       <p>{t("manageHint")}</p>
       <form
@@ -304,6 +304,6 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
         </ConfirmDialog>
       )}
       {error && <Notice tone="danger">{error}</Notice>}
-    </section>
+    </Card>
   );
 }

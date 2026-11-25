@@ -1,5 +1,5 @@
 /** Successful native channel creation ends in a clear next action; no provider is connected implicitly. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import type { Channel } from "./channel-model";
 import { useChannelText } from "./channel-i18n";
@@ -19,7 +19,7 @@ export default function ChannelLaunch({
   const t = useChannelText(),
     { locale } = useLocale();
   return (
-    <section className="studio-card channel-launch">
+    <Card className="channel-launch">
       <span className="channel-avatar">
         <Icon name="check" size={30} />
       </span>
@@ -36,6 +36,6 @@ export default function ChannelLaunch({
           {t("edit")}
         </Button>
       </div>
-    </section>
+    </Card>
   );
 }

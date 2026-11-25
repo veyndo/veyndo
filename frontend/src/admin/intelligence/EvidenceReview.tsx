@@ -1,5 +1,5 @@
 /** Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import type { Product, RequestFn } from "../shell/studio-types";
@@ -64,7 +64,7 @@ export default function EvidenceReview({
     (s) => !s.archived && (!s.product_id || s.product_id === product),
   );
   return (
-    <section className="studio-card evidence-review">
+    <Card className="evidence-review">
       <header>
         <h2>{k("claimReview")}</h2>
         <p className="muted">{k("claimBoundary")}</p>
@@ -162,6 +162,6 @@ export default function EvidenceReview({
         </article>
       ))}
       {!claims.length && <p className="muted">{k("noClaimCandidates")}</p>}
-    </section>
+    </Card>
   );
 }

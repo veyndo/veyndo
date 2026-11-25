@@ -1,5 +1,5 @@
 /** AgentsView renders verified shop state and typed user actions. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
@@ -41,7 +41,7 @@ export function AgentsView({
       </section>
       <div className="connection-grid">
         {["ChatGPT", "Claude"].map((name) => (
-          <section className="studio-card connection-card" key={name}>
+          <Card className="connection-card" key={name}>
             <div className="provider-symbol">{name.slice(0, 1)}</div>
             <div>
               <h2>{name}</h2>
@@ -57,9 +57,9 @@ export function AgentsView({
               {t("setupGuide")}
               <Icon name="arrow" size={16} />
             </a>
-          </section>
+          </Card>
         ))}
-        <section className="studio-card connection-card">
+        <Card className="connection-card">
           <div className="provider-symbol">
             <Icon name="link" />
           </div>
@@ -86,10 +86,10 @@ export function AgentsView({
             <Icon name={copied ? "check" : "copy"} size={16} />
           </Button>
           {copyFailed && <Notice tone="danger">{t("copyFailed")}</Notice>}
-        </section>
+        </Card>
       </div>
       <div className="overview-columns">
-        <section className="studio-card">
+        <Card>
           <div className="card-heading">
             <h2>{t("channelCalls")}</h2>
             <span className="soft-tag">{t("api")}</span>
@@ -107,8 +107,8 @@ export function AgentsView({
             </div>
           ))}
           <p className="muted">{t("channelHint")}</p>
-        </section>
-        <section className="studio-card">
+        </Card>
+        <Card>
           <div className="card-heading">
             <h2>UCP · {t("orders")}</h2>
             <span className="soft-tag positive">{t("readyLocal")}</span>
@@ -125,15 +125,15 @@ export function AgentsView({
             {t("checkoutDemo")}
             <Icon name="arrow" size={16} />
           </Button>
-        </section>
+        </Card>
       </div>
-      <section className="studio-card explanation-card">
+      <Card className="explanation-card">
         <Icon name="spark" />
         <div>
           <h2>{t("modelVsChannel")}</h2>
           <p>{t("modelVsChannelText")}</p>
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

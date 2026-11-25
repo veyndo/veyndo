@@ -39,7 +39,9 @@ export function Card({
   children,
   level = 3,
   as: Tag = "section",
-}: {
+  className,
+  ...rest
+}: Omit<HTMLAttributes<HTMLElement>, "title"> & {
   title?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
@@ -49,7 +51,7 @@ export function Card({
 }) {
   const Heading = `h${level}` as const;
   return (
-    <Tag className="vy-card">
+    <Tag className={["vy-card", className].filter(Boolean).join(" ")} {...rest}>
       {(title || actions) && (
         <header>
           {title && <Heading>{title}</Heading>}

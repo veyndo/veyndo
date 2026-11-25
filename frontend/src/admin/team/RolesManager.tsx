@@ -1,5 +1,5 @@
 /** Tenant role editor uses the canonical roles API, shared translation editor, audit and dependency confirmation. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -90,7 +90,7 @@ export default function RolesManager({
   const patch = (v: Partial<WorkspaceRole["data"]>) =>
     selected && setSelected({ ...selected, data: { ...selected.data, ...v } });
   return (
-    <section className="studio-card roles-manager">
+    <Card className="roles-manager">
       <header className="roles-header">
         <div>
           <h2>{t("roles")}</h2>
@@ -267,6 +267,6 @@ export default function RolesManager({
           )}
         </ContentLanguage>
       )}
-    </section>
+    </Card>
   );
 }

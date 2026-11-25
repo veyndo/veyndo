@@ -1,5 +1,5 @@
 /** Product-centred evidence inspector reads canonical facts and graph relationships beyond overview sampling. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import {
@@ -88,7 +88,7 @@ export default function KnowledgeExplorer({
   const p = evidence?.product;
   return (
     <div className="knowledge-explorer">
-      <section className="studio-card">
+      <Card>
         <h2>{k("pickProduct")}</h2>
         <form
           className="knowledge-search"
@@ -133,13 +133,13 @@ export default function KnowledgeExplorer({
             </button>
           ))}
         </div>
-      </section>
+      </Card>
       <div>
         {error && <Notice tone="danger">{error}</Notice>}
         {busy && <p role="status">{k("loading")}</p>}
         {evidence && p && (
           <>
-            <section className="studio-card knowledge-product-summary">
+            <Card className="knowledge-product-summary">
               <div className="knowledge-product-image">
                 {mediaImage(p.media) ? (
                   <img src={mediaImage(p.media)} alt="" />
@@ -156,9 +156,9 @@ export default function KnowledgeExplorer({
                   <Icon name="arrow" />
                 </Button>
               </div>
-            </section>
+            </Card>
             <KnowledgeFacts product={p} stats={evidence.stats} />
-            <section className="studio-card">
+            <Card>
               <h2>{k("explorer")}</h2>
               <p className="muted">{k("sample")}</p>
               <div className="knowledge-relation-list">
@@ -241,7 +241,7 @@ export default function KnowledgeExplorer({
                 {k("sendAssistant")}
                 <Icon name="chat" />
               </Button>
-            </section>
+            </Card>
           </>
         )}
       </div>

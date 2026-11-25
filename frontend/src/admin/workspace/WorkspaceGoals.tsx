@@ -1,5 +1,5 @@
 /** Goals reference the existing proposal owner; no parallel worker, executor or approval queue. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { canOpenStudio } from "../shell/permissions";
 import type { Tab } from "../shell/navigation";
@@ -49,7 +49,7 @@ export default function WorkspaceGoals({
   const patch = (id: string, value: Partial<Goal>) =>
     onChange(goals.map((g) => (g.id === id ? { ...g, ...value } : g)));
   return (
-    <section className="personal-goals studio-card">
+    <Card className="personal-goals">
       <h2>
         <Icon name="spark" />
         {t("goals")}
@@ -174,6 +174,6 @@ export default function WorkspaceGoals({
           <button onClick={() => onOpen("automation")}>{t("flow")} ↗</button>
         </details>
       )}
-    </section>
+    </Card>
   );
 }

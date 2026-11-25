@@ -55,7 +55,7 @@
   font-size: 11px;
   margin: 24px 0;
 }
-.studio-card > p {
+:is(.studio-card, .vy-card) > p {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.85;

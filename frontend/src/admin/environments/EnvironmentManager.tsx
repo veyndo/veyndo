@@ -1,5 +1,5 @@
 /** Private environment creation and digest-bound selective release. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReleaseScenarios from "./ReleaseScenarios";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
@@ -133,7 +133,7 @@ export default function EnvironmentManager({
         <h1>{w("environments")}</h1>
         <p>{w("stageHint")}</p>
       </div>
-      <section className="studio-card">
+      <Card>
         <form
           className="workbench-row"
           onSubmit={(e) => {
@@ -161,9 +161,9 @@ export default function EnvironmentManager({
           </Button>
         </form>
         <p className="muted">{w("exclusion")}</p>
-      </section>
+      </Card>
       {environments.length > 0 && (
-        <section className="studio-card">
+        <Card>
           <div className="workbench-row">
             <label>
               {w("stage")}
@@ -260,18 +260,18 @@ export default function EnvironmentManager({
           >
             {w("release")} · {visibleSelected.length}
           </Button>
-        </section>
+        </Card>
       )}
       {notice && <p role="status">{w("released")}</p>}
       {error && <Notice tone="danger">{error}</Notice>}
-      <section className="studio-card">
+      <Card>
         <h2>{w("history")}</h2>
         {(historyRequest === request ? history : []).map((r) => (
           <p key={r.id}>
             {date(r.createdAt)} · {r.selections.join(", ")}
           </p>
         ))}
-      </section>
+      </Card>
     </div>
   );
 }

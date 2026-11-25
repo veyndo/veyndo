@@ -1,5 +1,5 @@
 /** Source-derived static route explorer, runtime app discovery and isolated same-origin read tests. */
-import { Button } from "../../../kit/ui";
+import { Button, Card } from "../../../kit/ui";
 import { useState } from "react";
 import { useQuery } from "../../../kit/query";
 import { fillPath, routes, type Route } from "../../../kit/api";
@@ -69,7 +69,7 @@ export default function ApiExplorer({
     }
   };
   return (
-    <section className="studio-card">
+    <Card>
       <h2>{t("routes")}</h2>
       <p>{t("readOnly")}</p>
       <p>
@@ -177,6 +177,6 @@ export default function ApiExplorer({
           </article>
         ))}
       </details>
-    </section>
+    </Card>
   );
 }

@@ -1,5 +1,5 @@
 /** Tenant-scoped company workspace; canonical API operations are also exposed through MCP. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import CompanyCreate from "./CompanyCreate";
 import { useB2BExperienceText } from "./experience-i18n";
 import { useEffect, useState } from "react";
@@ -201,10 +201,10 @@ export default function B2BWorkspace({
               ))}
           </div>
           {feature && feature !== "quotes" && (
-            <aside className="studio-card b2b-feature-guide" role="status">
+            <Card as="aside" className="b2b-feature-guide" role="status">
               <h2>{x(feature)}</h2>
               <p>{x("moduleEntry")}</p>
-            </aside>
+            </Card>
           )}
           <nav className="workbench-row">
             <button aria-pressed={tab === "companies"} onClick={openCompanies}>

@@ -1,5 +1,5 @@
 /** Bounded field-to-event mapping over the original native operations, never a second executor. */
-import { Notice } from "../../kit/ui";
+import { Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import {
   scalarFields,
@@ -93,7 +93,7 @@ export default function WorkTemplateEditor({
         );
         const source = binding?.source ?? "";
         return (
-          <article className="studio-card" key={index}>
+          <Card as="article" key={index}>
             <strong>
               {index + 1}. {step.label}
             </strong>
@@ -165,7 +165,7 @@ export default function WorkTemplateEditor({
               <summary>{t("exact")}</summary>
               <pre>{JSON.stringify(args, null, 2)}</pre>
             </details>
-          </article>
+          </Card>
         );
       })}
       <p className="muted">{t("revisions")}</p>

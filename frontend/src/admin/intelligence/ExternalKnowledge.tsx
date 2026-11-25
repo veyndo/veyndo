@@ -1,5 +1,5 @@
 /** Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -28,7 +28,7 @@ export default function ExternalKnowledge({ request }: { request: RequestFn }) {
     };
   }, [request]);
   return (
-    <section className="studio-card">
+    <Card>
       <div className="knowledge-section-heading">
         <h2>{k("external")}</h2>
         <span className="knowledge-badge">
@@ -90,6 +90,6 @@ export default function ExternalKnowledge({ request }: { request: RequestFn }) {
         </details>
       ))}
       <p className="muted">{k("sample")}</p>
-    </section>
+    </Card>
   );
 }

@@ -95,11 +95,11 @@
   display: grid;
   gap: 20px;
 }
-.team-access > .studio-card {
+.team-access > .vy-card {
   display: grid;
   gap: 16px;
 }
-.team-access > .studio-card > p {
+.team-access > .vy-card > p {
   max-width: 70ch;
   color: var(--muted);
 }

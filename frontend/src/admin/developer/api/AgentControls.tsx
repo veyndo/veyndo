@@ -1,5 +1,5 @@
 /** Personal current-rights stop control; operational revisions cannot be published from a sandbox. */
-import { Button, Notice } from "../../../kit/ui";
+import { Button, Card, Notice } from "../../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
 import ConfirmDialog from "../../../shared/ui/ConfirmDialog";
@@ -43,7 +43,7 @@ export default function AgentControls({ request }: { request: RequestFn }) {
   }, [request]);
   if (state?.owner !== request && !error) return null;
   return (
-    <section className="studio-card api-key-panel">
+    <Card className="api-key-panel">
       <h2>{t("title")}</h2>
       {state && (
         <>
@@ -92,6 +92,6 @@ export default function AgentControls({ request }: { request: RequestFn }) {
         </ConfirmDialog>
       )}
       {error && <Notice tone="danger">{error}</Notice>}
-    </section>
+    </Card>
   );
 }

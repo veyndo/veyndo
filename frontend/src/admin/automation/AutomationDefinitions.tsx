@@ -1,5 +1,5 @@
 /** Searchable, explicitly editable definitions with visible active state and version. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "./automation-types";
 import { contentText } from "../../shared/i18n/content-language";
@@ -29,7 +29,7 @@ export default function AutomationDefinitions({
       .includes(search.toLocaleLowerCase()),
   );
   return (
-    <section className="studio-card automation-definitions">
+    <Card className="automation-definitions">
       <Button
         tone="primary"
         type="submit"
@@ -65,6 +65,6 @@ export default function AutomationDefinitions({
           </span>
         </button>
       ))}
-    </section>
+    </Card>
   );
 }

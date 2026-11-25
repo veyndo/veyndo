@@ -1,5 +1,5 @@
 /** No-model evidence preview makes customer/private retrieval boundaries and missing facts inspectable. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -25,7 +25,7 @@ export default function KnowledgePreview({
     [error, setError] = useState("");
   return (
     <div className="knowledge-preview-layout">
-      <section className="studio-card">
+      <Card>
         <span className="kicker">{k("preview")}</span>
         <h2>{k("question")}</h2>
         <p>{k("previewHint")}</p>
@@ -135,8 +135,8 @@ export default function KnowledgePreview({
         </form>
         {busy && <p role="status">{k("loading")}</p>}
         {error && <Notice tone="danger">{error}</Notice>}
-      </section>
-      <section className="studio-card">
+      </Card>
+      <Card>
         <h2>{k("usageTitle")}</h2>
         <ul className="knowledge-usage-list">
           {(
@@ -156,9 +156,9 @@ export default function KnowledgePreview({
           {k("sendAssistant")}
           <Icon name="chat" />
         </Button>
-      </section>
+      </Card>
       {result && (
-        <section className="studio-card knowledge-preview-results">
+        <Card className="knowledge-preview-results">
           <div className="knowledge-section-heading">
             <h2>{k("sources")}</h2>
             <span className="knowledge-badge">
@@ -206,7 +206,7 @@ export default function KnowledgePreview({
           {!result.sources.length && !result.external.length && (
             <p className="knowledge-empty">{k("previewEmpty")}</p>
           )}
-        </section>
+        </Card>
       )}
     </div>
   );

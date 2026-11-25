@@ -1,5 +1,5 @@
 /* Merchant workbench uses the studio's light-blue design tokens and responsive review panels. */
-.workbench .studio-card {
+.workbench :is(.studio-card, .vy-card) {
   margin-bottom: 22px;
   padding: 26px;
 }

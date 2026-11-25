@@ -1,5 +1,5 @@
 /** Revision-aware product aggregate editor: one save, translation tabs and product-scoped linked capabilities. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import "./catalog.css";
 import "./catalog-editor.css";
 import { useCoreExtensions } from "../../shared/apps/CoreExtensions";
@@ -271,8 +271,9 @@ export default function ProductEditor({
                 editorPending ? setError(c("unsaved")) : setTab(next)
               }
             />
-            <section
-              className="studio-card catalog-detail-panel"
+            <Card
+              className="catalog-detail-panel"
+
               role="tabpanel"
               id={panelId}
               aria-labelledby={`${panelId}-tab-${tab}`}
@@ -384,7 +385,7 @@ export default function ProductEditor({
                   onRestored={async () => setReloadIndex((v) => v + 1)}
                 />
               )}
-            </section>
+            </Card>
           </div>
         </div>
       </EditorBuffer.Provider>

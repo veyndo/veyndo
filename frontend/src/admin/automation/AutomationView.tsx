@@ -1,5 +1,5 @@
 /** Typed merchant rule/campaign/flow/channel forms with exact JSON available for advanced review. */
-import { Notice } from "../../kit/ui";
+import { Card, Notice } from "../../kit/ui";
 import { useGoalTemplate } from "./goal-template";
 import { useAutomationAccess } from "./useAutomationAccess";
 import AutomationDefinitions from "./AutomationDefinitions";
@@ -255,7 +255,7 @@ export default function AutomationView({
             onCreate={() => fresh(kind)}
             onSelect={(r) => choose(r)}
           />
-          <section className="studio-card">
+          <Card>
             <AutomationEditor
               canCompare={canCompare}
               run={run}
@@ -331,10 +331,10 @@ export default function AutomationView({
                 }}
               />
             )}
-          </section>
+          </Card>
         </div>
         {error && <Notice tone="danger">{error}</Notice>}
-        <section className="studio-card">
+        <Card>
           <h2>{w("executions")}</h2>
           {jobs.map((j) => (
             <article key={j.id}>
@@ -368,7 +368,7 @@ export default function AutomationView({
               {j.error && <p>{j.error}</p>}
             </article>
           ))}
-        </section>
+        </Card>
         <p className="muted">{w("nativeSubset")}</p>
       </div>
     </ContentLanguage>

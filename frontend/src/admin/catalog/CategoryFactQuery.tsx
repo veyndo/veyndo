@@ -1,4 +1,5 @@
 /** One saved predicate on current public evidence; reuses category CAS and the editor's selected content language. */
+import { Card } from "../../kit/ui";
 import type { Category } from "./catalog-model";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -13,7 +14,7 @@ export default function CategoryFactQuery({
   const g = useGraphNavigationText();
   const { mainLocale } = useContentLanguage();
   return (
-    <section className="studio-card">
+    <Card>
       <label className="checkbox-label">
         <input
           type="checkbox"
@@ -89,6 +90,6 @@ export default function CategoryFactQuery({
           />
         </div>
       )}
-    </section>
+    </Card>
   );
 }

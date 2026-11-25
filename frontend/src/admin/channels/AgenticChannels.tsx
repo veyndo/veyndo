@@ -1,5 +1,5 @@
 /** One merchant entry for inbound shops and native agent checkout; technical support never masquerades as external approval. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
@@ -121,7 +121,7 @@ export default function AgenticChannels({
       </header>
       {!canRead && <p role="status">{t("permission")}</p>}
       {error && <Notice tone="danger">{error}</Notice>}
-      <article className="studio-card agentic-protocol">
+      <Card as="article" className="agentic-protocol">
         <div>
           <Icon name="spark" />
           <h3>{t("google")}</h3>
@@ -144,9 +144,9 @@ export default function AgenticChannels({
           </dl>
           {readiness && <p className="soft-tag">{t("approval")}</p>}
         </div>
-      </article>
+      </Card>
       {readiness?.poppy && (
-        <article className="studio-card agentic-protocol">
+        <Card as="article" className="agentic-protocol">
           <div>
             <Icon name="agents" />
             <h3>{t("poppyTitle")}</h3>
@@ -169,10 +169,10 @@ export default function AgenticChannels({
               <p role="status">{t("poppyMissing")}</p>
             )}
           </div>
-        </article>
+        </Card>
       )}
       {readiness?.signedOffers && (
-        <article className="studio-card agentic-protocol">
+        <Card as="article" className="agentic-protocol">
           <div>
             <Icon name="lock" />
             <h3>{t("offerTitle")}</h3>
@@ -208,11 +208,11 @@ export default function AgenticChannels({
               <p role="status">{t("offerMissing")}</p>
             )}
           </div>
-        </article>
+        </Card>
       )}
       <div className="agentic-import-cards">
         {cards.map((c) => (
-          <article className="studio-card" key={c.id}>
+          <Card as="article" key={c.id}>
             <span className="channel-avatar">
               <Icon name={c.icon} size={24} />
             </span>
@@ -235,10 +235,10 @@ export default function AgenticChannels({
                 {t("url")}
               </Button>
             )}
-          </article>
+          </Card>
         ))}
       </div>
-      <aside className="studio-card">
+      <Card as="aside">
         <h3>{t("payment")}</h3>
         <p>{t("paymentHint")}</p>
         <div>
@@ -248,7 +248,7 @@ export default function AgenticChannels({
             </span>
           ))}
         </div>
-      </aside>
+      </Card>
     </section>
   );
 }

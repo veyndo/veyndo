@@ -1,5 +1,5 @@
 /** Bounded upload and explicit digest-bound publication of attachments and paid files. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useCallback, useEffect, useState } from "react";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import type { LocalizedText } from "../../shared/i18n/content-language";
@@ -38,7 +38,7 @@ export default function ProductAssets({
     }
   };
   return (
-    <section className="studio-card">
+    <Card>
       <h2>{o("assets")}</h2>
       <p>{o("digitalHint")}</p>
       <form
@@ -100,6 +100,6 @@ export default function ProductAssets({
         </div>
       ))}
       {error && <Notice tone="danger">{error}</Notice>}
-    </section>
+    </Card>
   );
 }

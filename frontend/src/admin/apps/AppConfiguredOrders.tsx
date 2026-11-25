@@ -1,5 +1,5 @@
 /** Immutable app purchase cards reuse native order navigation and preserve source-currency and rule snapshots. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import { useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { contentText } from "../../shared/i18n/content-language";
@@ -51,7 +51,7 @@ export default function AppConfiguredOrders({
   const contract = app.manifest.configuration;
   const [cursors, setCursors] = useState<string[]>([""]);
   return (
-    <section className="studio-card app-card app-configured-orders">
+    <Card className="app-card app-configured-orders">
       <h2>{a("personalizedOrders")}</h2>
       {!result.elements.length && <p>{a("emptyOrders")}</p>}
       {result.elements.map((order) => (
@@ -167,6 +167,6 @@ export default function AppConfiguredOrders({
           </Button>
         </nav>
       )}
-    </section>
+    </Card>
   );
 }

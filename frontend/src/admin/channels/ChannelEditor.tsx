@@ -1,5 +1,5 @@
 /** Guided channel creation/editing reuses the native revisioned API and shared content-language inheritance. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import ChannelReview from "./ChannelReview";
 import ChannelLaunch from "./ChannelLaunch";
 import ChannelActions from "./ChannelActions";
@@ -145,7 +145,7 @@ export default function ChannelEditor({
       language={language}
       onLanguageChange={setLanguage}
     >
-      <section className="studio-card channel-editor">
+      <Card className="channel-editor">
         <header className="channel-editor-heading">
           <Button
             type="submit"
@@ -387,7 +387,7 @@ export default function ChannelEditor({
             <p>{t(confirm === "back" ? "discard" : "deactivateHint")}</p>
           </ConfirmDialog>
         )}
-      </section>
+      </Card>
     </ContentLanguage>
   );
 }

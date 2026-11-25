@@ -343,8 +343,8 @@
   align-items: flex-end;
 }
 .vy-card {
-  display: grid;
-  gap: var(--vy-space-3);
+  display: block;
+  min-width: 0;
   padding: var(--vy-space-5);
   border: 1px solid var(--vy-color-border);
   border-radius: var(--vy-radius-lg);
@@ -352,6 +352,7 @@
   box-shadow: var(--vy-shadow-sm);
 }
 .vy-card > header {
+  margin-bottom: var(--vy-space-3);
   display: flex;
   align-items: center;
   justify-content: space-between;

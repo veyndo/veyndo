@@ -1,5 +1,5 @@
 /** Actual permission-filtered work links open native owners; late responses cannot survive a scope change. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
@@ -53,7 +53,7 @@ export default function WorkSuggestions() {
     } else intent(`${t("app")}: ${item.app}`);
   };
   return (
-    <section className="personal-goals studio-card">
+    <Card className="personal-goals">
       <h2>
         <Icon name="spark" />
         {t("work")}
@@ -77,6 +77,6 @@ export default function WorkSuggestions() {
           ))}
         </div>
       )}
-    </section>
+    </Card>
   );
 }

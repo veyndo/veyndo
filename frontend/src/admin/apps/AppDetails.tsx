@@ -1,5 +1,5 @@
 /** AppDetails: Installed app details, activation, version, data and isolated interface. */
-import { Button } from "../../kit/ui";
+import { Button, Card } from "../../kit/ui";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
 import type { ConfiguredOrders } from "./AppConfiguredOrders";
@@ -74,7 +74,7 @@ export default function AppDetails({
       setConfirm(false);
     });
   return (
-    <section className="studio-card app-card app-detail" key={p.id}>
+    <Card className="app-card app-detail" key={p.id}>
       <AppArtwork
         id={p.id}
         category={appCategory(p)}
@@ -296,6 +296,6 @@ export default function AppDetails({
           </div>
         )}
       </div>
-    </section>
+    </Card>
   );
 }

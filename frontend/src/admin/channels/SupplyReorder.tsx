@@ -1,5 +1,5 @@
 /** Supplier links in the native settings revision and reorder proposals with signed supplier offers; approval hands over to the supplier checkout. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -120,7 +120,7 @@ export default function SupplyReorder({
       setLinks((old) => ({ ...old, [line.productId]: done.checkoutPath }));
     });
   return (
-    <article className="studio-card supply-reorder">
+    <Card as="article" className="supply-reorder">
       <header>
         <Icon name="box" />
         <div>
@@ -328,6 +328,6 @@ export default function SupplyReorder({
           )}
         </div>
       ))}
-    </article>
+    </Card>
   );
 }

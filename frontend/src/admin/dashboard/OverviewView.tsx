@@ -1,4 +1,5 @@
 /** OverviewView renders verified shop state and typed user actions. */
+import { Card } from "../../kit/ui";
 import { useReportText } from "../reports/report-i18n";
 import StudioSlot from "../shell/registry/StudioSlot";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
@@ -31,7 +32,7 @@ export function OverviewView({
       </div>
       <StudioSlot location="admin.dashboard" context={{}} />
       <div className="overview-columns">
-        <section className="studio-card inventory-card">
+        <Card className="inventory-card">
           <div className="card-heading">
             <h2>{t("inventory")}</h2>
             <span className="soft-tag">{t("api")}</span>
@@ -64,9 +65,9 @@ export function OverviewView({
               <a href={storefrontURL(data.tenant)}>{t("storefront")} ↗</a>
             </p>
           )}
-        </section>
+        </Card>
       </div>
-      <section className="studio-card">
+      <Card>
         <div className="card-heading">
           <h2>{t("recentOrders")}</h2>
         </div>
@@ -91,9 +92,9 @@ export function OverviewView({
         ) : (
           <p className="empty-note">{t("emptyOrders")}</p>
         )}
-      </section>
+      </Card>
       <div className="overview-columns">
-        <section className="studio-card">
+        <Card>
           <div className="card-heading">
             <h2>{t("activity")}</h2>
           </div>
@@ -111,8 +112,8 @@ export function OverviewView({
             </div>
           ))}
           {!data.activity.length && <p>{t("noActivity")}</p>}
-        </section>
-        <section className="studio-card next-actions">
+        </Card>
+        <Card className="next-actions">
           <h2>{t("actions")}</h2>
           <button onClick={() => onIntent(t("askStock"))}>
             <Icon name="box" />
@@ -129,7 +130,7 @@ export function OverviewView({
             {t("productKnowledge")}
             <Icon name="arrow" />
           </button>
-        </section>
+        </Card>
       </div>
     </div>
   );

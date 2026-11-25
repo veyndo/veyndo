@@ -1,4 +1,5 @@
 /** Whole-shop knowledge census, operational next steps and provenance activity; examples never masquerade as learned facts. */
+import { Card } from "../../kit/ui";
 import {
   useKnowledgeText,
   type KnowledgeWord,
@@ -50,7 +51,7 @@ export default function KnowledgeOverview({
           </button>
         ))}
       </div>
-      <section className="studio-card knowledge-how">
+      <Card className="knowledge-how">
         <h2>{k("how")}</h2>
         <div>
           {(["collect", "connect", "apply"] as const).map((step, i) => (
@@ -64,9 +65,9 @@ export default function KnowledgeOverview({
           ))}
         </div>
         <p className="knowledge-boundary">{k("boundary")}</p>
-      </section>
+      </Card>
       <div className="knowledge-overview-grid">
-        <section className="studio-card">
+        <Card>
           <h2>{k("gaps")}</h2>
           <div className="knowledge-next">
             {workspace.canWrite && (
@@ -99,8 +100,8 @@ export default function KnowledgeOverview({
               <Icon name="arrow" />
             </button>
           </div>
-        </section>
-        <section className="studio-card">
+        </Card>
+        <Card>
           <h2>{k("activity")}</h2>
           {!workspace.activity.length && <p>{k("emptyActivity")}</p>}
           <ol className="knowledge-timeline">
@@ -122,7 +123,7 @@ export default function KnowledgeOverview({
               </li>
             ))}
           </ol>
-        </section>
+        </Card>
       </div>
     </>
   );

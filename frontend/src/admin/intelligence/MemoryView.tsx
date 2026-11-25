@@ -1,5 +1,5 @@
 /** Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. */
-import { Notice } from "../../kit/ui";
+import { Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -70,7 +70,7 @@ export default function MemoryView({
             : "proposed",
     );
   return (
-    <section className="studio-card knowledge-memory">
+    <Card className="knowledge-memory">
       <span className="kicker">
         {k("processed")} · {number(data?.processedEvents ?? 0)}
       </span>
@@ -189,6 +189,6 @@ export default function MemoryView({
           <p>{label(decision.state)}</p>
         </ConfirmDialog>
       )}
-    </section>
+    </Card>
   );
 }

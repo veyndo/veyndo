@@ -1,5 +1,5 @@
 /** Customer groups share the translation/inheritance editor and revisioned settings aggregate. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { CustomerGroup } from "../../shared/customer/customer-types";
@@ -54,7 +54,7 @@ export default function CustomerGroupsSettings({
       language={language}
       onLanguageChange={setLanguage}
     >
-      <section className="studio-card settings-panel intl-panel">
+      <Card className="settings-panel intl-panel">
         <header className="settings-panel-header">
           <div>
             <h2>{r("groups")}</h2>
@@ -169,7 +169,7 @@ export default function CustomerGroupsSettings({
           dirty={state.dirty || state.busy}
           onRestored={state.reload}
         />
-      </section>
+      </Card>
       {removing && group && (
         <ConfirmDialog
           title={r("removeGroup")}

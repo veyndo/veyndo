@@ -1,5 +1,5 @@
 /** Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -96,7 +96,7 @@ export default function SourceEditor({
     }
   };
   return (
-    <section className="studio-card knowledge-editor">
+    <Card className="knowledge-editor">
       <div className="knowledge-section-heading">
         <h2>{source ? source.title : k("newSource")}</h2>
         <Button type="submit" disabled={busy} onClick={onCancel}>
@@ -240,6 +240,6 @@ export default function SourceEditor({
           {k("save")}
         </Button>
       </footer>
-    </section>
+    </Card>
   );
 }

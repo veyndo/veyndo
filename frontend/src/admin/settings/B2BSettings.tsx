@@ -1,5 +1,5 @@
 /** B2B controls edit the shared revisioned settings aggregate; no separate policy store or checkout engine. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import "../../shared/b2b/b2b.css";
 import "./b2b-settings.css";
 import { b2bChanged } from "../shell/useB2BNavigation";
@@ -69,7 +69,7 @@ export default function B2BSettings({
   const change = (patch: Partial<B2BFeatures>) =>
     state.change({ ...state.value!.data, b2b: { ...features, ...patch } });
   return (
-    <section className="studio-card settings-panel b2b-settings">
+    <Card className="settings-panel b2b-settings">
       <header className="settings-panel-header">
         <div>
           <h2>{t("settings")}</h2>
@@ -133,6 +133,6 @@ export default function B2BSettings({
           window.dispatchEvent(new Event(b2bChanged));
         }}
       />
-    </section>
+    </Card>
   );
 }

@@ -1,4 +1,5 @@
 /** Campaign scheduling uses ISO instants in the API and local times in the editor. */
+import { Card } from "../../kit/ui";
 import { useLifecycleText } from "./lifecycle-i18n";
 export function localDate(iso: string | null): string {
   if (!iso) return "";
@@ -19,7 +20,7 @@ export default function PromotionSchedule({
   return (
     <div className="promotion-schedule">
       {data.sourceImport && (
-        <section className="studio-card">
+        <Card>
           <strong>{t("sourceCoupon")}</strong>
           <p>
             {data.sourceImport.source} · {data.sourceImport.sourceId} ·{" "}
@@ -39,7 +40,7 @@ export default function PromotionSchedule({
             />
             {t("sourceCouponReviewed")}
           </label>
-        </section>
+        </Card>
       )}
       {(["start", "end"] as const).map((key) => (
         <label key={key}>

@@ -1,4 +1,5 @@
 /** Canonical catalogue facts shown alongside graph evidence; prices and inventory come from current product state. */
+import { Card } from "../../kit/ui";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -35,7 +36,7 @@ export default function KnowledgeFacts({
               .join(", ")
           : JSON.stringify(v);
   return (
-    <section className="studio-card">
+    <Card>
       <h2>{k("snapshot")}</h2>
       <dl className="knowledge-facts">
         <div>
@@ -77,6 +78,6 @@ export default function KnowledgeFacts({
           </div>
         ))}
       </dl>
-    </section>
+    </Card>
   );
 }

@@ -1,5 +1,5 @@
 /** Product-scoped review publication; authoritative authorization stays in the API. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
@@ -55,7 +55,7 @@ export default function ReviewModeration({
     };
   }, [request, productId]);
   return (
-    <section className="studio-card">
+    <Card>
       <h2>{s("moderation")}</h2>
       <p>{s("reviewHint")}</p>
       {error && <Notice tone="danger">{error}</Notice>}
@@ -115,6 +115,6 @@ export default function ReviewModeration({
           </Button>
         </article>
       ))}
-    </section>
+    </Card>
   );
 }

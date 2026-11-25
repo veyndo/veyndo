@@ -1,5 +1,5 @@
 /** Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -73,7 +73,7 @@ export default function LegalSettings({
       language={language}
       onLanguageChange={setLanguage}
     >
-      <section className="studio-card settings-panel legal-settings">
+      <Card className="settings-panel legal-settings">
         <header className="settings-panel-header">
           <div>
             <h2>{l("title")}</h2>
@@ -267,7 +267,7 @@ export default function LegalSettings({
           dirty={state.dirty || state.busy}
           onRestored={state.reload}
         />
-      </section>
+      </Card>
     </ContentLanguage>
   );
 }

@@ -89,7 +89,7 @@
   }
 }
 
-.api-console .studio-card > label,
+.api-console .vy-card > label,
 .api-explorer-grid > div > label {
   display: grid;
   gap: 8px;

@@ -1,5 +1,5 @@
 /** One revisioned international settings aggregate: drafts survive navigation between countries, taxes, methods and languages. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import CurrencySettings from "./CurrencySettings";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -130,7 +130,7 @@ export default function CommerceSettings({
       language={contentLanguage}
       onLanguageChange={setContentLanguage}
     >
-      <section className="studio-card settings-panel intl-panel">
+      <Card className="settings-panel intl-panel">
         <header className="settings-panel-header">
           <div>
             <h2>{area === "currencies" ? ct("title") : i(area)}</h2>
@@ -257,7 +257,7 @@ export default function CommerceSettings({
           dirty={state.dirty || state.busy}
           onRestored={state.reload}
         />
-      </section>
+      </Card>
     </ContentLanguage>
   );
 }

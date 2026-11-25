@@ -1,5 +1,5 @@
 /** Structured company profile with single-language content, inherited channel scopes, logo drafts and revision-bound saves. */
-import { Notice } from "../../kit/ui";
+import { Card, Notice } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
 import {
@@ -111,7 +111,7 @@ export default function MasterDataSettings({
     />
   );
   return (
-    <section className="studio-card settings-panel company-panel">
+    <Card className="settings-panel company-panel">
       <header className="settings-panel-header">
         <div>
           <h2>{co("company")}</h2>
@@ -268,6 +268,6 @@ export default function MasterDataSettings({
           onRestored={state.reload}
         />
       )}
-    </section>
+    </Card>
   );
 }

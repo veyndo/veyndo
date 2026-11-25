@@ -1,5 +1,5 @@
 /** Fine-grained team overrides, revocable invitations and personal session inventory. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import IntegrationKeys from "../developer/api/IntegrationKeys";
 import RolesManager from "./RolesManager";
 import PermissionPicker from "./PermissionPicker";
@@ -50,7 +50,7 @@ export default function AccessManager({ request }: { request: RequestFn }) {
       {canManage && (
         <RolesManager request={request} onChanged={() => void load()} />
       )}
-      <section className="studio-card">
+      <Card>
         <h2>{o("access")}</h2>
         <p>{o("accessHint")}</p>
         {members
@@ -139,8 +139,8 @@ export default function AccessManager({ request }: { request: RequestFn }) {
             ))}
           </>
         )}
-      </section>
-      <section className="studio-card">
+      </Card>
+      <Card>
         <h2>{o("sessions")}</h2>
         {sessions.map((s) => (
           <div className="operation-row" key={s.id}>
@@ -162,7 +162,7 @@ export default function AccessManager({ request }: { request: RequestFn }) {
             )}
           </div>
         ))}
-      </section>
+      </Card>
       {canManage && <IntegrationKeys request={request} />}
       {error && <Notice tone="danger">{error}</Notice>}
     </div>

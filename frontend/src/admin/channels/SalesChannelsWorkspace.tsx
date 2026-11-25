@@ -1,5 +1,5 @@
 /** Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Category } from "../catalog/catalog-model";
@@ -203,7 +203,7 @@ export default function SalesChannelsWorkspace({
         <>
           <div className="channel-card-grid">
             {channels.map((c) => (
-              <article className="studio-card channel-card" key={c.id}>
+              <Card as="article" className="channel-card" key={c.id}>
                 <span className="channel-avatar">
                   <Icon
                     name={
@@ -246,15 +246,15 @@ export default function SalesChannelsWorkspace({
                 <Button type="submit" onClick={() => setSelected(c)}>
                   {t("edit")} ↗
                 </Button>
-              </article>
+              </Card>
             ))}
           </div>
-          <aside className="studio-card">
+          <Card as="aside">
             <p>{t("independent")}</p>
             <Button type="submit" onClick={onTeam}>
               {t("team")} ↗
             </Button>
-          </aside>
+          </Card>
         </>
       )}
       {error && <Notice tone="danger">{error}</Notice>}

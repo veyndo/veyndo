@@ -1,5 +1,5 @@
 /** Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Card, Notice } from "../../kit/ui";
 import OrderReview from "./OrderReview";
 import useOrderCreation from "./useOrderCreation";
 import type { RequestFn } from "../../shared/api/types";
@@ -90,7 +90,7 @@ export default function OrderCreate({
       />
     );
   return (
-    <section className="studio-card admin-create">
+    <Card className="admin-create">
       <header className="admin-create-heading">
         <div>
           <h2>{n("newOrder")}</h2>
@@ -373,6 +373,6 @@ export default function OrderCreate({
           <p>{n("pending")}</p>
         </ConfirmDialog>
       )}
-    </section>
+    </Card>
   );
 }
