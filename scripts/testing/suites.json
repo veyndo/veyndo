@@ -116,6 +116,7 @@
     "testing/test_parallel_check",
     "branding",
     "money_boundary_differential",
+    "formal_differential",
     "testing/test_integration_partitions",
     "testing/test_partition_coverage"
   ]
