@@ -2542,8 +2542,8 @@
     },
     "components/core/src/store/outbox/retention.rs": {
       "status": "unproved",
-      "sha256": "46e14ddefc7cd6a7877207b9c3dc0593093afb50ff0b8ec60090bbe4e625ca2c",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "e449f3589cd6cc253e4e06f39679e55a783ef665263d2b65788570204a9f9120",
+      "review": "Outbox retention gate returns its admission expression directly (clippy needless_bool); behaviour unchanged"
     },
     "components/core/src/store/outbox.rs": {
       "status": "unproved",
