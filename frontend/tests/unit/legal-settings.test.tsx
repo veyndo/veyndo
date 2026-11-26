@@ -1,7 +1,7 @@
 /** Actual legal settings editing: default-channel basis, revisions, sparse translations and read-only enforcement. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import LegalSettings from "../../src/admin/legal/LegalSettings";
+import LegalSettings from "../../../components/shop/ui/admin/legal/LegalSettings";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { defaultLegal } from "../../src/shared/legal/legal-types";
 function transport() {

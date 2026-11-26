@@ -1,12 +1,13 @@
 /** Developer API console exercises scopes, key lifetime, revoke confirmation and read-only route safety. */
+import { QueryProvider } from "../../src/kit/query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import IntegrationKeys from "../../src/admin/developer/api/IntegrationKeys";
+import IntegrationKeys from "../../../components/identity/ui/admin/team/IntegrationKeys";
 import ApiExplorer, {
   routePath,
-} from "../../src/admin/developer/api/ApiExplorer";
+} from "../../../components/apps/ui/admin/developer/api/ApiExplorer";
 it("creates a bounded explicit-scope key, shows it once and revokes only after confirmation", async () => {
   const user = userEvent.setup();
   let keys: any[] = [];
@@ -90,7 +91,9 @@ it("live tests the existing scoped request and prevents path escape and write te
     );
   render(
     <LocaleProvider>
-      <ApiExplorer request={request} workspace="shop-test" />
+      <QueryProvider scope="shop-test">
+        <ApiExplorer request={request} workspace="shop-test" />
+      </QueryProvider>
     </LocaleProvider>,
   );
   await user.click(screen.getByRole("button", { name: "Run read request" }));

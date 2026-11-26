@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customer_addresses SET data=$1,revision=revision+1,updated_at=now() WHERE tenant=$2 AND email=$3 AND id=$4 AND revision=$5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "59a282cd9dedb513ddc567ef24bd1f5a88cedf473e0fa2792da6834c35620c71"
+}

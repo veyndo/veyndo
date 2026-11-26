@@ -39,7 +39,7 @@ pub async fn slack(store: &Store, t: &str, payload: &Value, settings: &Value) ->
         .take(3000)
         .collect::<String>();
     let before = store.get(t, "slack").await?;
-    let token = oauth::token(store, t, "slack").await?;
+    let token = oauth::token(store, t, "slack", &crate::actions::OAUTH).await?;
     let mut fence = store.tx(t).await?;
     store.lock(&mut fence, t, "slack").await?;
     let current = store.get_tx(&mut fence, t, "slack").await?;

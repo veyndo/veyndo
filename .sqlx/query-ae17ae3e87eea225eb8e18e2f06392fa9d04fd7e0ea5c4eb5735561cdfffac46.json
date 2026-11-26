@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO shop_environments(tenant,live_tenant,name,baseline) VALUES($1,$2,$3,$4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae17ae3e87eea225eb8e18e2f06392fa9d04fd7e0ea5c4eb5735561cdfffac46"
+}

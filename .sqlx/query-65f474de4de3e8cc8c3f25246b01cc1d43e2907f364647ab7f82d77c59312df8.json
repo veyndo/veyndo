@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox_checkpoints SET last_event_id=greatest(last_event_id,$3) WHERE tenant=$1 AND subscriber=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65f474de4de3e8cc8c3f25246b01cc1d43e2907f364647ab7f82d77c59312df8"
+}

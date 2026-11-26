@@ -1,0 +1,474 @@
+{
+  "version": 1,
+  "components": {
+    "apps": {
+      "repository": "https://github.com/veyndo/app-platform",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "29779928c363a3f741561bb3b9f29db3fea3061f18f39b9d27cd7391566c4dd8",
+      "crates": [
+        "components/apps",
+        "crates/apps"
+      ],
+      "dependencies": [
+        "components/core",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "extensions/services/app-storage",
+        "crates/runtime",
+        "components/identity",
+        "components/pricing",
+        "components/catalog",
+        "components/orders",
+        "components/checkout",
+        "components/inventory",
+        "components/shipping",
+        "components/shop",
+        "components/b2b",
+        "components/marketing",
+        "components/intelligence",
+        "crates/cognition",
+        "extensions/services/app-storage/runtime",
+        "extensions/services/app-storage/authority",
+        "components/customers",
+        "components/payments",
+        "crates/automation",
+        "crates/flow-graph",
+        "extensions/apps/catalog-import"
+      ],
+      "published": null
+    },
+    "automation": {
+      "repository": "https://github.com/veyndo/automation",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "039ec88d03cf212346871b824aaa0270ab174d238aea5f7f9fb7b57de47ca71e",
+      "crates": [
+        "crates/automation",
+        "crates/flow-graph"
+      ],
+      "dependencies": [
+        "crates/kernel"
+      ],
+      "published": null,
+      "publish": false,
+      "reason": "crates/automation is imported from github.com/veyndo/automation at the commit in components.lock.json"
+    },
+    "b2b": {
+      "repository": "https://github.com/veyndo/b2b",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "bcea672f189dff55e582f0c79912a48cf0df740f6f0241617e686a15d1d3214b",
+      "crates": [
+        "components/b2b"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/identity",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "components/pricing",
+        "components/shop",
+        "crates/runtime",
+        "crates/cognition",
+        "components/catalog",
+        "components/inventory",
+        "components/shipping",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "catalog": {
+      "repository": "https://github.com/veyndo/catalog",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "e1275768ead1dbc7b42c6010eaeb2a23e64fb13a7acdccf587b1c5c91f920224",
+      "crates": [
+        "components/catalog"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/identity",
+        "components/pricing",
+        "crates/runtime",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "crates/cognition",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "checkout": {
+      "repository": "https://github.com/veyndo/checkout",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "15dff668a8bed0cd924162883c764f2203459d8855fd69384c7738816663c63b",
+      "crates": [
+        "components/checkout"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/pricing",
+        "components/shop",
+        "components/shipping",
+        "components/catalog",
+        "components/b2b",
+        "components/marketing",
+        "components/identity",
+        "components/customers",
+        "components/inventory",
+        "components/orders",
+        "components/payments",
+        "crates/runtime",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "crates/automation",
+        "crates/cognition",
+        "crates/flow-graph",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "core": {
+      "repository": "https://github.com/veyndo/core",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "129d9249d564d9d180be93036ded6045e0c184f836e69a3cff25e1dd9f3dff90",
+      "crates": [
+        "crates/kernel",
+        "crates/runtime",
+        "components/core"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/authority",
+        "extensions/services/app-storage/model"
+      ],
+      "published": null
+    },
+    "customers": {
+      "repository": "https://github.com/veyndo/customers",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "11430b0e0c6a9f7b51059a406487f88ef03c200e7d1868d0a5780adb8311a569",
+      "crates": [
+        "components/customers"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/pricing",
+        "components/identity",
+        "components/shipping",
+        "components/shop",
+        "components/marketing",
+        "crates/runtime",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "crates/cognition",
+        "components/catalog",
+        "components/inventory",
+        "crates/automation",
+        "components/b2b",
+        "crates/flow-graph",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "identity": {
+      "repository": "https://github.com/veyndo/identity",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "2d75d5cc2635f64dcf4545d2b185f71851da1b832641a645d2704a7ddeb3e335",
+      "crates": [
+        "components/identity"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/model",
+        "components/core",
+        "crates/kernel",
+        "crates/cognition",
+        "crates/runtime",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "inference": {
+      "repository": "https://github.com/veyndo/cognition",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "a7fc746c086ee8c0a704145fbf481a0b98e7e11f2c288ecae891f76155eb02f1",
+      "crates": [
+        "crates/cognition"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/authority",
+        "crates/runtime",
+        "crates/kernel",
+        "components/core",
+        "extensions/services/app-storage/model"
+      ],
+      "published": null
+    },
+    "intelligence": {
+      "repository": "https://github.com/veyndo/intelligence",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "95b02d0430a9ba3c89f2fa43dce560ea072013c5672b0f23a1d62a62339e963b",
+      "crates": [
+        "components/intelligence"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/identity",
+        "components/shop",
+        "components/marketing",
+        "crates/runtime",
+        "components/pricing",
+        "components/catalog",
+        "crates/kernel",
+        "components/shipping",
+        "components/checkout",
+        "components/inventory",
+        "crates/cognition",
+        "extensions/apps/catalog-import",
+        "extensions/services/app-storage/model",
+        "components/customers",
+        "crates/automation",
+        "components/b2b",
+        "crates/flow-graph",
+        "extensions/services/app-storage/authority",
+        "components/orders",
+        "components/payments"
+      ],
+      "published": null
+    },
+    "inventory": {
+      "repository": "https://github.com/veyndo/inventory",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "9fd8241e951acb24db075e358dbdfa5b21a95b0627490f3b069b3bcda494b514",
+      "crates": [
+        "components/inventory"
+      ],
+      "dependencies": [
+        "components/catalog",
+        "components/core",
+        "components/pricing",
+        "components/identity",
+        "crates/runtime",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "crates/cognition",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "marketing": {
+      "repository": "https://github.com/veyndo/marketing",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "717f5e1c879ae0c1adfd6ccb76c6f65c1acae546aa6a4cfef8e2a683d54ca22c",
+      "crates": [
+        "components/marketing"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/model",
+        "crates/automation",
+        "components/b2b",
+        "components/catalog",
+        "crates/cognition",
+        "components/core",
+        "components/identity",
+        "crates/kernel",
+        "crates/runtime",
+        "crates/flow-graph",
+        "components/pricing",
+        "components/shop",
+        "extensions/services/app-storage/authority",
+        "components/inventory",
+        "components/shipping"
+      ],
+      "published": null
+    },
+    "orders": {
+      "repository": "https://github.com/veyndo/orders",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "73cb34c068394d7f513960468bf2e064917a6e5951021c88b67ccdd2818550a6",
+      "crates": [
+        "components/orders"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/model",
+        "components/core",
+        "crates/kernel",
+        "components/b2b",
+        "components/inventory",
+        "components/catalog",
+        "components/identity",
+        "components/shipping",
+        "components/pricing",
+        "components/shop",
+        "components/customers",
+        "crates/runtime",
+        "crates/cognition",
+        "components/marketing",
+        "extensions/services/app-storage/authority",
+        "crates/automation",
+        "crates/flow-graph"
+      ],
+      "published": null
+    },
+    "payments": {
+      "repository": "https://github.com/veyndo/payments",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "c7902ddccef5ca780c6b7310dbd4883fd87e12b2eb6abf14b6a7c586bb4c6239",
+      "crates": [
+        "components/payments"
+      ],
+      "dependencies": [
+        "components/core",
+        "extensions/services/app-storage/model",
+        "crates/kernel",
+        "components/pricing",
+        "components/shop",
+        "components/inventory",
+        "components/orders",
+        "components/identity",
+        "crates/runtime",
+        "components/catalog",
+        "components/shipping",
+        "components/b2b",
+        "components/customers",
+        "crates/cognition",
+        "extensions/services/app-storage/authority",
+        "components/marketing",
+        "crates/automation",
+        "crates/flow-graph"
+      ],
+      "published": null
+    },
+    "pos": {
+      "repository": "https://github.com/veyndo/pos",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "68824b3d30ecb0f4c66b9b296bd2433aee0af3f7bc181c9d7f9ae3f359647ffc",
+      "crates": [
+        "components/pos"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/shop",
+        "components/marketing",
+        "components/pricing",
+        "components/checkout",
+        "components/customers",
+        "components/identity",
+        "components/payments",
+        "components/intelligence",
+        "components/orders",
+        "components/catalog",
+        "extensions/services/app-storage/model",
+        "crates/runtime",
+        "crates/kernel",
+        "components/inventory",
+        "components/shipping",
+        "crates/automation",
+        "components/b2b",
+        "crates/cognition",
+        "crates/flow-graph",
+        "extensions/apps/catalog-import",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "pricing": {
+      "repository": "https://github.com/veyndo/pricing",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "db96b0f13efe01905942d0c5b5ee045951975e2217fa790f4f3e666da37f79cd",
+      "crates": [
+        "components/pricing"
+      ],
+      "dependencies": [
+        "crates/kernel",
+        "components/core",
+        "components/identity",
+        "crates/runtime",
+        "extensions/services/app-storage/model",
+        "crates/cognition",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "shipping": {
+      "repository": "https://github.com/veyndo/shipping",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "740daee7470414b6f7eb371812ecc0262c5f837ae3cdb7e2eb65a8c7bc55a405",
+      "crates": [
+        "components/shipping"
+      ],
+      "dependencies": [
+        "components/core",
+        "components/identity",
+        "components/pricing",
+        "crates/runtime",
+        "crates/kernel",
+        "extensions/services/app-storage/model",
+        "crates/cognition",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "shop": {
+      "repository": "https://github.com/veyndo/shop",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "e56d4408b68a163bbaa46bf4277f0c847e0d81e02ff77a01f85c8cc406611c0f",
+      "crates": [
+        "components/shop"
+      ],
+      "dependencies": [
+        "extensions/services/app-storage/model",
+        "components/catalog",
+        "components/core",
+        "components/inventory",
+        "components/pricing",
+        "components/shipping",
+        "components/identity",
+        "crates/kernel",
+        "crates/runtime",
+        "crates/cognition",
+        "extensions/services/app-storage/authority"
+      ],
+      "published": null
+    },
+    "studio": {
+      "repository": "https://github.com/veyndo/studio",
+      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
+      "digest": "cfbe0e1e1ac2d66a44ad53e2ab6f37ef5e79d6963f278d42dbeaf16a1c775ddb",
+      "crates": [
+        "components/studio"
+      ],
+      "dependencies": [
+        "components/core",
+        "extensions/services/app-storage/model",
+        "components/identity",
+        "components/apps",
+        "components/orders",
+        "components/pricing",
+        "components/checkout",
+        "components/shop",
+        "components/marketing",
+        "components/catalog",
+        "components/intelligence",
+        "components/customers",
+        "crates/cognition",
+        "crates/runtime",
+        "components/b2b",
+        "components/pos",
+        "crates/kernel",
+        "extensions/services/app-storage",
+        "crates/apps",
+        "components/inventory",
+        "components/shipping",
+        "components/payments",
+        "crates/automation",
+        "crates/flow-graph",
+        "extensions/apps/catalog-import",
+        "extensions/services/app-storage/authority",
+        "extensions/services/app-storage/runtime"
+      ],
+      "published": null
+    }
+  },
+  "generator": "scripts/component_mirrors.py",
+  "not_mirrored": {
+    "protocols": "MCP/UCP/capability adapters still live in the server crate (src/mcp, src/ucp); no crate of their own yet",
+    "host": "the server binary itself (src/); it composes the components and is released as the Veyndo image",
+    "connectors": "separate connector service (extensions/services/connectors), released with its own image, not a component crate"
+  }
+}

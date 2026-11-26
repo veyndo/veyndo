@@ -254,4 +254,392 @@ theorem capture_zero_denied (authorized captured reserved : Nat) :
     capture_admissible authorized captured reserved 0 = false := by
   simp [capture_admissible]
 
+/-- A signed offer is honoured exactly when it has not expired and cart, revision and total are unchanged. -/
+theorem offer_honoured_exact (expired cart revision total : Bool) :
+    offer_honoured expired cart revision total = true ↔
+    expired = false ∧ cart = true ∧ revision = true ∧ total = true := by
+  cases expired <;> cases cart <;> cases revision <;> cases total <;> simp [offer_honoured]
+
+/-- An expired offer is never honoured, whatever the cart looks like. -/
+theorem offer_expired_denied (cart revision total : Bool) :
+    offer_honoured true cart revision total = false := by simp [offer_honoured]
+
+/-- A changed total is never honoured, even before expiry. -/
+theorem offer_changed_total_denied (expired cart revision : Bool) :
+    offer_honoured expired cart revision false = false := by
+  cases expired <;> cases cart <;> cases revision <;> simp [offer_honoured]
+
+/-- A changed cart revision is never honoured, even before expiry. -/
+theorem offer_changed_revision_denied (expired cart total : Bool) :
+    offer_honoured expired cart false total = false := by
+  cases expired <;> cases cart <;> cases total <;> simp [offer_honoured]
+
+/-- Below the largest representable amount the sum of two amounts is their exact sum. -/
+theorem amount_sum_exact (a b : Nat) (h : a + b ≤ 18446744073709551615) :
+    amount_sum a b = a + b := by
+  simp only [amount_sum]; exact Nat.min_eq_left h
+
+/-- A sum never wraps around: it stays within the representable range. -/
+theorem amount_sum_bounded (a b : Nat) : amount_sum a b ≤ 18446744073709551615 := by
+  simp only [amount_sum]; exact Nat.min_le_right _ _
+
+/-- Adding an amount never makes a representable total smaller. -/
+theorem amount_sum_not_below (a b : Nat) (h : a ≤ 18446744073709551615) :
+    a ≤ amount_sum a b := by
+  simp only [amount_sum]; exact Nat.le_min.mpr ⟨Nat.le_add_right a b, h⟩
+
+/-- The order in which two amounts are added does not matter. -/
+theorem amount_sum_comm (a b : Nat) : amount_sum a b = amount_sum b a := by
+  simp only [amount_sum, Nat.add_comm]
+
+/-- Net plus tax equals gross whenever the tax is part of the gross amount. -/
+theorem net_plus_tax_is_gross (gross tax : Nat) (h : tax ≤ gross) :
+    net_amount gross tax + tax = gross := by
+  simp only [net_amount]; exact Nat.sub_add_cancel h
+
+/-- A net amount never exceeds its gross amount and is never negative. -/
+theorem net_not_above_gross (gross tax : Nat) : net_amount gross tax ≤ gross := by
+  simp only [net_amount]; exact Nat.sub_le _ _
+
+
+/-! ### Per-order stock bound and reservation sequences -/
+
+/-- Exact per-order bound: a reservation is admitted iff it is positive and fits beside what the order already holds. -/
+theorem reservation_exact (ordered held requested : Nat) :
+    reservation_admissible ordered held requested = true ↔ 0 < requested ∧ held + requested ≤ ordered := by
+  simp only [reservation_admissible, Bool.and_eq_true, decide_eq_true_eq]
+  omega
+
+theorem reservation_zero_denied (ordered held : Nat) : reservation_admissible ordered held 0 = false := by
+  simp [reservation_admissible]
+
+/-- A reservation that would make the order hold more than it ordered is refused. -/
+theorem reservation_over_denied (ordered held requested : Nat) (h : ordered < held + requested) :
+    reservation_admissible ordered held requested = false := by
+  cases hr : reservation_admissible ordered held requested
+  · rfl
+  · have := (reservation_exact ordered held requested).mp hr
+    omega
+
+/-- One order's inventory events: reserve a quantity of one product, or release everything it holds. -/
+inductive ReservationEvent where
+  | reserve (quantity : Nat)
+  | release
+
+/-- Stock on hand and the quantity the order holds. Refused reservations change nothing;
+release returns exactly what is held and is idempotent, as the persisted ledger does. -/
+def reservationStep (ordered : Nat) (s : Nat × Nat) : ReservationEvent → Nat × Nat
+  | .reserve q =>
+    if stock_admissible s.1 q && reservation_admissible ordered s.2 q then (s.1 - q, s.2 + q) else s
+  | .release => (s.1 + s.2, 0)
+
+def reservationRun (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) : Nat × Nat :=
+  events.foldl (reservationStep ordered) s
+
+theorem reservation_step_bounded (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent)
+    (h : s.2 ≤ ordered) : (reservationStep ordered s e).2 ≤ ordered := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (reservation_exact ordered s.2 q).mp hq.2
+      simp only
+      omega
+    · exact h
+  | release => simp [reservationStep]
+
+/-- Across any sequence of reservations and releases, an order holds at most what it ordered. -/
+theorem reservation_run_bounded (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, s.2 ≤ ordered → (reservationRun ordered s events).2 ≤ ordered := by
+  induction events with
+  | nil => intro s h; simpa [reservationRun] using h
+  | cons e rest ih =>
+    intro s h
+    exact ih (reservationStep ordered s e) (reservation_step_bounded ordered s e h)
+
+theorem reservation_step_conserves (ordered : Nat) (s : Nat × Nat) (e : ReservationEvent) :
+    (reservationStep ordered s e).1 + (reservationStep ordered s e).2 = s.1 + s.2 := by
+  cases e with
+  | reserve q =>
+    simp only [reservationStep]
+    split
+    · rename_i hq
+      simp only [Bool.and_eq_true] at hq
+      have := (stock_exact s.1 q).mp hq.1
+      simp only
+      omega
+    · rfl
+  | release => simp [reservationStep]
+
+/-- Stock plus what the order holds is conserved by every sequence; nothing is created or lost. -/
+theorem reservation_run_conserves (ordered : Nat) (events : List ReservationEvent) :
+    ∀ s : Nat × Nat, (reservationRun ordered s events).1 + (reservationRun ordered s events).2 = s.1 + s.2 := by
+  induction events with
+  | nil => intro s; rfl
+  | cons e rest ih =>
+    intro s
+    have := ih (reservationStep ordered s e)
+    simp only [reservationRun, List.foldl_cons] at this ⊢
+    rw [this, reservation_step_conserves]
+
+/-- Releasing twice changes nothing more than releasing once. -/
+theorem reservation_release_idempotent (ordered : Nat) (s : Nat × Nat) :
+    reservationStep ordered (reservationStep ordered s .release) .release = reservationStep ordered s .release := by
+  simp [reservationStep]
+
+/-- Any sequence followed by a release restores the stock to what it was plus what the order held at the start. -/
+theorem reservation_release_restores (ordered : Nat) (s : Nat × Nat) (events : List ReservationEvent) :
+    (reservationRun ordered s (events ++ [.release])).1 = s.1 + s.2 ∧
+    (reservationRun ordered s (events ++ [.release])).2 = 0 := by
+  have h := reservation_run_conserves ordered events s
+  simp only [reservationRun, List.foldl_append, List.foldl_cons, List.foldl_nil, reservationStep] at h ⊢
+  exact ⟨h, trivial⟩
+
+/-! ### Payment and revision rules over sequences -/
+
+/-- Refund requests applied in order; refused requests change nothing. -/
+def refundRun (captured refunded : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun r q => if refund_admissible captured r q then r + q else r) refunded
+
+/-- However many refunds are requested, the refunded total never exceeds the captured amount. -/
+theorem refund_run_bounded (captured : Nat) (requests : List Nat) :
+    ∀ refunded, refunded ≤ captured → refundRun captured refunded requests ≤ captured := by
+  induction requests with
+  | nil => intro r h; simpa [refundRun] using h
+  | cons q rest ih =>
+    intro r h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      have := (refund_exact captured r q).mp hq
+      omega
+    · exact h
+
+/-- Capture requests applied in order without in-flight reservations. -/
+def captureRun (authorized captured : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun c q => if capture_admissible authorized c 0 q then c + q else c) captured
+
+/-- However many captures are requested, the captured total never exceeds the authorization. -/
+theorem capture_run_bounded (authorized : Nat) (requests : List Nat) :
+    ∀ captured, captured ≤ authorized → captureRun authorized captured requests ≤ authorized := by
+  induction requests with
+  | nil => intro c h; simpa [captureRun] using h
+  | cons q rest ih =>
+    intro c h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      simp only [capture_admissible, Bool.and_eq_true, decide_eq_true_eq] at hq
+      omega
+    · exact h
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionStep (current expected : Nat) : Nat :=
+  if revision_admissible current expected then current + 1 else current
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionRun (current : Nat) (expected : List Nat) : Nat :=
+  expected.foldl revisionStep current
+
+/-- Revisions never move backwards over any sequence of writes. -/
+theorem revision_run_monotone (expected : List Nat) :
+    ∀ current, current ≤ revisionRun current expected := by
+  induction expected with
+  | nil => intro c; simp [revisionRun]
+  | cons e rest ih =>
+    intro c
+    have step : c ≤ revisionStep c e := by
+      unfold revisionStep; split <;> omega
+    exact Nat.le_trans step (ih (revisionStep c e))
+
+/-- A revision that is already behind is refused after any later sequence of writes: no lost update. -/
+theorem revision_reuse_denied (current stale : Nat) (expected : List Nat) (h : stale < current) :
+    revision_admissible (revisionRun current expected) stale = false := by
+  have := revision_run_monotone expected current
+  cases hr : revision_admissible (revisionRun current expected) stale
+  · rfl
+  · have := (revision_exact_behavior _ _).mp hr
+    omega
+
+/-- A checkout review taken at an older cart revision is refused after any later cart writes. -/
+theorem checkout_review_stale_denied (current stale expectedTotal actualTotal : Nat) (methods : Bool)
+    (edits : List Nat) (h : stale < current) :
+    checkout_review_admissible (decide (revisionRun current edits = stale)) expectedTotal actualTotal methods = false := by
+  have := revision_run_monotone edits current
+  have hne : revisionRun current edits ≠ stale := by omega
+  simp [checkout_review_admissible, hne]
+
+/-! ### Money in whole minor units: line totals, scaling, rounding and quote totals -/
+
+/-- Below the largest representable amount a line total is the exact product. -/
+theorem line_total_exact (unit quantity : Nat) (h : unit * quantity ≤ 18446744073709551615) :
+    line_total unit quantity = unit * quantity := by
+  simp only [line_total]; exact Nat.min_eq_left h
+
+/-- A line total never wraps around. -/
+theorem line_total_bounded (unit quantity : Nat) : line_total unit quantity ≤ 18446744073709551615 := by
+  simp only [line_total]; exact Nat.min_le_right _ _
+
+/-- No units cost nothing; one unit costs its unit price. -/
+theorem line_total_zero (unit : Nat) : line_total unit 0 = 0 := by
+  simp [line_total]
+
+theorem line_total_one (unit : Nat) (h : unit ≤ 18446744073709551615) : line_total unit 1 = unit := by
+  simp only [line_total, Nat.mul_one]; exact Nat.min_eq_left h
+
+/-- Splitting a quantity splits its line total: `unit * (a + b) = unit * a + unit * b`. -/
+theorem line_total_split (unit a b : Nat) (h : unit * (a + b) ≤ 18446744073709551615) :
+    line_total unit (a + b) = line_total unit a + line_total unit b := by
+  have ha : unit * a ≤ unit * (a + b) := Nat.mul_le_mul_left _ (Nat.le_add_right a b)
+  have hb : unit * b ≤ unit * (a + b) := Nat.mul_le_mul_left _ (Nat.le_add_left b a)
+  rw [line_total_exact _ _ h, line_total_exact _ _ (Nat.le_trans ha h),
+    line_total_exact _ _ (Nat.le_trans hb h), Nat.mul_add]
+
+/-- A larger quantity never gives a smaller line total. -/
+theorem line_total_monotone (unit a b : Nat) (h : a ≤ b) : line_total unit a ≤ line_total unit b := by
+  have hm := Nat.mul_le_mul_left unit h
+  simp only [line_total]
+  generalize unit * a = x at hm ⊢
+  generalize unit * b = y at hm ⊢
+  omega
+
+/-- In range, the rounded quotient is `(n + d / 2) / d`. -/
+theorem rounded_quotient_eq (n d : Nat) (hd : 0 < d) (h : n + d / 2 ≤ 18446744073709551615) :
+    rounded_quotient n d = (n + d / 2) / d := by
+  have hm : max d 1 = d := Nat.max_eq_left hd
+  simp only [rounded_quotient, hm, Nat.min_eq_left h]
+
+/-- Rounding is to the nearest whole minor unit: `|r * d - n| ≤ d / 2`, written without
+subtraction as two inequalities on doubled values. -/
+theorem rounded_quotient_nearest (n d : Nat) (hd : 0 < d) (h : n + d / 2 ≤ 18446744073709551615) :
+    2 * (rounded_quotient n d * d) ≤ 2 * n + d ∧ 2 * n ≤ 2 * (rounded_quotient n d * d) + d := by
+  rw [rounded_quotient_eq n d hd h]
+  have below : (n + d / 2) / d * d ≤ n + d / 2 := Nat.div_mul_le_self _ _
+  have above : n + d / 2 < ((n + d / 2) / d + 1) * d := by
+    have := Nat.lt_mul_div_succ (n + d / 2) hd
+    rw [Nat.mul_comm] at this; exact this
+  rw [Nat.add_mul, Nat.one_mul] at above
+  generalize (n + d / 2) / d * d = p at below above ⊢
+  omega
+
+/-- A tie rounds up (away from zero for a magnitude): `k + 1/2` becomes `k + 1`. -/
+theorem rounded_quotient_half_up (k h : Nat) (hh : 0 < h)
+    (hr : k * (2 * h) + h + h ≤ 18446744073709551615) :
+    rounded_quotient (k * (2 * h) + h) (2 * h) = k + 1 := by
+  have hd : 0 < 2 * h := by omega
+  have half : 2 * h / 2 = h := by omega
+  rw [rounded_quotient_eq _ _ hd (by rw [half]; exact hr), half]
+  have : k * (2 * h) + h + h = (2 * h) * (k + 1) := by
+    rw [Nat.mul_add, Nat.mul_one, Nat.mul_comm]; omega
+  rw [this, Nat.mul_div_cancel_left _ hd]
+
+/-- Cash rounding to an interval of `step` minor units, as the calculator does it: the
+amount's quotient by the interval rounded to the nearest whole step (halves up), times the
+interval, is exactly that multiple and within half an interval of the amount. -/
+theorem cash_round_nearest_multiple (n step : Nat) (hs : 0 < step)
+    (h : n + step / 2 ≤ 18446744073709551615)
+    (hp : rounded_quotient n step * step ≤ 18446744073709551615) :
+    line_total (rounded_quotient n step) step = rounded_quotient n step * step ∧
+      2 * line_total (rounded_quotient n step) step ≤ 2 * n + step ∧
+      2 * n ≤ 2 * line_total (rounded_quotient n step) step + step := by
+  rw [line_total_exact _ _ hp]
+  exact ⟨rfl, rounded_quotient_nearest n step hs h⟩
+
+/-- Scaling and rounding back: an amount scaled up by a factor and rounded at that factor is unchanged. -/
+theorem scaled_round_trip (amount factor : Nat) (hf : 0 < factor)
+    (h : amount * factor + factor / 2 ≤ 18446744073709551615) :
+    rounded_quotient (line_total amount factor) factor = amount := by
+  have hp : amount * factor ≤ 18446744073709551615 := by omega
+  rw [line_total_exact _ _ hp, rounded_quotient_eq _ _ hf h]
+  have hl : factor / 2 < factor := Nat.div_lt_self hf (by decide)
+  rw [Nat.add_comm, Nat.mul_comm, Nat.add_mul_div_left _ _ hf, Nat.div_eq_of_lt hl, Nat.zero_add]
+
+/-- Rounding never decreases when the amount grows. -/
+theorem rounded_quotient_monotone (a b d : Nat) (h : a ≤ b) :
+    rounded_quotient a d ≤ rounded_quotient b d := by
+  simp only [rounded_quotient]
+  exact Nat.div_le_div_right (by omega)
+
+/-- The tax contained in a gross amount at `rate` per `base` (e.g. 19 per 100), rounded to the
+nearest minor unit, never exceeds the gross amount; so net plus that tax is the gross amount. -/
+theorem included_tax_within_gross (gross rate base : Nat) (hb : 0 < base)
+    (h : gross * rate + (base + rate) / 2 ≤ 18446744073709551615) :
+    rounded_quotient (line_total gross rate) (base + rate) ≤ gross ∧
+      net_amount gross (rounded_quotient (line_total gross rate) (base + rate))
+        + rounded_quotient (line_total gross rate) (base + rate) = gross := by
+  have hp : gross * rate ≤ 18446744073709551615 := by omega
+  have hd : 0 < base + rate := by omega
+  have within : rounded_quotient (line_total gross rate) (base + rate) ≤ gross := by
+    rw [line_total_exact _ _ hp, rounded_quotient_eq _ _ hd h]
+    apply Nat.le_of_lt_succ
+    rw [Nat.div_lt_iff_lt_mul hd, Nat.succ_mul, Nat.mul_add]
+    generalize gross * base = gb
+    generalize gross * rate = gr at h ⊢
+    have : (base + rate) / 2 < base + rate := Nat.div_lt_self hd (by decide)
+    omega
+  exact ⟨within, net_plus_tax_is_gross _ _ within⟩
+
+/-- The quote's goods total: its line totals added with the proved sum, in order. -/
+def linesTotal (lines : List Nat) : Nat := lines.foldl amount_sum 0
+
+theorem lines_fold_exact (lines : List Nat) (start : Nat)
+    (h : start + lines.sum ≤ 18446744073709551615) :
+    lines.foldl amount_sum start = start + lines.sum := by
+  induction lines generalizing start with
+  | nil => simp
+  | cons line rest ih =>
+    simp only [List.foldl_cons, List.sum_cons] at h ⊢
+    rw [amount_sum_exact _ _ (by omega), ih _ (by omega)]
+    omega
+
+/-- In range, the goods total is exactly the sum of the line totals. -/
+theorem lines_total_exact (lines : List Nat) (h : lines.sum ≤ 18446744073709551615) :
+    linesTotal lines = lines.sum := by
+  have := lines_fold_exact lines 0 (by simpa using h)
+  simpa [linesTotal] using this
+
+/-- The same lines in any order give the same goods total. -/
+theorem lines_total_order_free (a b : List Nat) (p : a.Perm b) (h : a.sum ≤ 18446744073709551615) :
+    linesTotal a = linesTotal b := by
+  rw [lines_total_exact a h, lines_total_exact b (by rw [← p.sum_nat]; exact h), p.sum_nat]
+
+/-- A net quote (tax added on top): payable = (lines + line tax) + gross shipping, and that is
+the lines plus net shipping plus all tax (line tax and shipping tax). -/
+theorem net_quote_total (lines : List Nat) (tax shipping shippingTax : Nat)
+    (hs : shippingTax ≤ shipping)
+    (h : lines.sum + tax + shipping ≤ 18446744073709551615) :
+    amount_sum (amount_sum (linesTotal lines) tax) shipping
+      = lines.sum + net_amount shipping shippingTax + (tax + shippingTax) := by
+  rw [lines_total_exact lines (by omega), amount_sum_exact lines.sum tax (by omega),
+    amount_sum_exact _ _ (by omega)]
+  simp only [net_amount]; omega
+
+/-- A gross quote (tax contained): payable = lines + shipping, and that is the net lines plus
+net shipping plus all tax, whenever each tax is part of its gross amount. -/
+theorem gross_quote_total (lines : List Nat) (tax shipping shippingTax : Nat)
+    (ht : tax ≤ lines.sum) (hs : shippingTax ≤ shipping)
+    (h : lines.sum + shipping ≤ 18446744073709551615) :
+    amount_sum (linesTotal lines) shipping
+      = net_amount lines.sum tax + net_amount shipping shippingTax + (tax + shippingTax) := by
+  rw [lines_total_exact lines (by omega), amount_sum_exact _ _ h]
+  simp only [net_amount]; omega
+
+/-- A quote total is never below its goods total: adding shipping or tax never lowers it. -/
+theorem quote_total_not_below_lines (lines : List Nat) (extra : Nat)
+    (h : lines.sum ≤ 18446744073709551615) :
+    linesTotal lines ≤ amount_sum (linesTotal lines) extra := by
+  apply amount_sum_not_below; rw [lines_total_exact lines h]; exact h
+
+/-- The same input gives the same quote total: the total is a function of the lines,
+tax and shipping only (no hidden state), so equal inputs give equal totals. -/
+theorem quote_total_deterministic (a b : List Nat) (tax shipping : Nat) (p : a.Perm b)
+    (h : a.sum ≤ 18446744073709551615) :
+    amount_sum (amount_sum (linesTotal a) tax) shipping
+      = amount_sum (amount_sum (linesTotal b) tax) shipping := by
+  rw [lines_total_order_free a b p h]
+
 end CommerceKernel

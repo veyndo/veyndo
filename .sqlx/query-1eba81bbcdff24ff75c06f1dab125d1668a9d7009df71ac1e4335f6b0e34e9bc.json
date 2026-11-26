@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM identity_nonces WHERE expires_at<now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "1eba81bbcdff24ff75c06f1dab125d1668a9d7009df71ac1e4335f6b0e34e9bc"
+}

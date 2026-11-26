@@ -1,40 +1,29 @@
 //! Shop locale resolution, translated catalog hydration and non-mutating merchant quote.
-use super::*;
-use veyndo::context::{Language, language_chain};
+use super::{commerce, currencies, marketing};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use axum::Json;
+use axum::extract::State;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_checkout::domain::cart_quote::normalized_quantity;
+use veyndo_checkout::domain::cart_quote::quote;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
+use veyndo_pricing::catalog::Product;
+use veyndo_shop::types::cart::Cart;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 
 pub(super) async fn language_context(a: &App, h: &RequestContext) -> Result<(String, Vec<String>)> {
-    let (settings, _) = commerce::config(a, &tenant(h)?).await?;
-    let locale = header(h, "x-commerce-locale").unwrap_or(&settings.main_locale);
-    let rows = performance::languages(a).await?;
-    let selected = if let Some(id) = header(h, "sw-language-id") {
-        rows.iter().find(|r| r.id == id)
-    } else {
-        rows.iter().find(|r| r.locale == locale)
-    }
-    .ok_or(bad("Language unavailable"))?;
-    let available = rows.iter().map(|r| r.id.clone()).collect::<Vec<_>>();
-    let languages = rows
-        .iter()
-        .map(|r| Language {
-            id: r.id.clone(),
-            parent_id: r.parent_id.clone(),
-        })
-        .collect::<Vec<_>>();
-    let mut chain = language_chain(&selected.id, &available, &languages).map_err(bad)?;
-    if settings.main_locale != "en-GB" {
-        let main = rows
-            .iter()
-            .find(|r| r.locale == settings.main_locale)
-            .ok_or(bad("Main language unavailable"))?
-            .id
-            .clone();
-        let current = selected.id.clone();
-        chain.retain(|id| id != veyndo::context::SYSTEM_LANGUAGE || id == &current);
-        if !chain.contains(&main) {
-            chain.push(main);
-        }
-    }
-    Ok((selected.locale.clone(), chain))
+    veyndo_shop::service::language::language_context(&a.core, h).await
 }
 pub(super) async fn localize_products(
     a: &App,
@@ -42,95 +31,14 @@ pub(super) async fn localize_products(
     chain: &[String],
     ps: Vec<Product>,
 ) -> Result<Vec<Product>> {
-    if ps.is_empty() {
-        return Ok(ps);
-    }
-    let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let rows=sqlx::query("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND language_id=ANY($2) AND product_id=ANY($3)").bind(t).bind(chain).bind(&ids).fetch_all(&a.db).await?;
-    let languages = performance::languages(a).await?;
-    let locale_chain = chain
-        .iter()
-        .filter_map(|id| {
-            languages
-                .iter()
-                .find(|l| l.id == *id)
-                .map(|l| l.locale.clone())
-        })
-        .collect::<Vec<_>>();
-    Ok(hydrate_products(ps, &rows, chain, &locale_chain))
+    veyndo_catalog::service::catalog_reads::localize(
+        &axum::extract::FromRef::from_ref(a),
+        t,
+        chain,
+        ps,
+    )
+    .await
 }
-/// Hydrate locked rows using the same field-level inheritance as catalog reads.
-pub(crate) fn hydrate_products(
-    mut ps: Vec<Product>,
-    rows: &[sqlx::postgres::PgRow],
-    chain: &[String],
-    locale_chain: &[String],
-) -> Vec<Product> {
-    let mut translations: HashMap<String, ProductTranslations> = HashMap::new();
-    for row in rows {
-        translations
-            .entry(row.get("product_id"))
-            .or_default()
-            .insert(
-                row.get("language_id"),
-                (row.get("name"), row.get("description")),
-            );
-    }
-    for p in &mut ps {
-        super::commerce::localize_extra(&mut p.extra, locale_chain);
-        if let Some(media) = p.media.as_array_mut() {
-            for m in media {
-                if m["caption"].is_object() {
-                    m["caption"] = json!(
-                        locale_chain
-                            .iter()
-                            .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                            .find_map(|l| m["caption"][l].as_str())
-                            .unwrap_or("")
-                    );
-                }
-                if m["alt"].is_object() {
-                    let text = locale_chain
-                        .iter()
-                        .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                        .find_map(|l| m["alt"][l].as_str())
-                        .map(str::to_owned);
-                    if let Some(text) = text {
-                        m["view"] = json!(text);
-                    }
-                }
-            }
-        }
-        if let Some(values) = translations.get(&p.id) {
-            if let Some(name) = translated_field(values, chain, false) {
-                p.name = name.to_owned();
-            }
-            if let Some(description) = translated_field(values, chain, true) {
-                p.description = description.to_owned();
-            }
-        }
-    }
-    ps
-}
-type ProductTranslations = HashMap<String, (Option<String>, Option<String>)>;
-
-fn translated_field<'a>(
-    values: &'a ProductTranslations,
-    chain: &[String],
-    description: bool,
-) -> Option<&'a str> {
-    // Resolve each field independently: NULL falls back, an empty string does not.
-    chain.iter().find_map(|id| {
-        values.get(id).and_then(|(name, text)| {
-            if description {
-                text.as_deref()
-            } else {
-                name.as_deref()
-            }
-        })
-    })
-}
-
 pub(super) async fn context_info(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let (locale, chain) = language_context(&a, &h).await?;
     let (settings, _) =
@@ -147,14 +55,30 @@ pub(super) async fn context_info(State(a): State<App>, h: RequestContext) -> Res
         json!({"locale":locale,"mainLocale":settings.main_locale,"languageIdChain":chain,"availableLocales":settings.locales,"currency":currency.code,"currencyContext":currencies::context(&settings.currencies,currency),"currencies":settings.currencies.enabled,"taxStates":["gross","net"]}),
     ))
 }
+/// A localized price preview for a product, quantity and customer group.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuotePreview {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    customer_group: Option<String>,
+}
+
 pub(super) async fn preview_quote(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: QuotePreview = view(&v);
     let t = merchant(&a, &h)?;
     let (locale, chain) = language_context(&a, &h).await?;
-    let id = v["productId"].as_str().ok_or(bad("Product ID required"))?;
+    let id = input
+        .product_id
+        .as_deref()
+        .ok_or(bad("Product ID required"))?;
     let ps = commerce::cart_products(
         &a,
         &t,
@@ -169,11 +93,11 @@ pub(super) async fn preview_quote(
         .iter()
         .find(|p| p.id == id)
         .ok_or(bad("Unknown product"))?;
-    let requested = v["quantity"]
-        .as_u64()
+    let requested = input
+        .quantity
         .filter(|q| *q > 0 && *q <= 10000)
         .ok_or(bad("Quantity must be 1..10000"))? as u32;
-    let group = v["customerGroup"].as_str().unwrap_or("consumer");
+    let group = input.customer_group.as_deref().unwrap_or("consumer");
     let (settings, _) = commerce::config(&a, &t).await?;
     if !settings.customer_groups.iter().any(|g| g.id == group) {
         return Err(bad("Unknown customer group"));
@@ -213,30 +137,4 @@ pub(super) async fn preview_quote(
     Ok(Json(
         json!({"locale":locale,"requestedQuantity":requested,"effectiveQuantity":quantity,"quote":quote(&c,&ps,&settings)?,"sideEffects":false}),
     ))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn indexed_translations_preserve_field_fallback_and_empty_values() {
-        let values = HashMap::from([
-            ("child".into(), (Some(String::new()), None)),
-            (
-                "parent".into(),
-                (
-                    Some("Parent name".into()),
-                    Some("Parent description".into()),
-                ),
-            ),
-        ]);
-        let chain = vec!["missing".into(), "child".into(), "parent".into()];
-        assert_eq!(translated_field(&values, &chain, false), Some(""));
-        assert_eq!(
-            translated_field(&values, &chain, true),
-            Some("Parent description")
-        );
-        assert_eq!(translated_field(&values, &["absent".into()], false), None);
-    }
 }

@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO channel_previews(digest,tenant,channel,session_digest,channel_revision,alias,expires_at) VALUES($1,$2,$3,$4,$5,$6,now()+interval '60 seconds')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "39aff7cca5f83c420ccc0b57a82dccf5ad60f8cf1b381a00f129819fec4b03ad"
+}

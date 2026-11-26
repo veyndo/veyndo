@@ -3,9 +3,9 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
-import ReviewModeration from "../../src/admin/catalog/ReviewModeration";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import ReviewModeration from "../../../components/catalog/ui/admin/catalog/ReviewModeration";
 
 it("preserves edits and the fifth content language across keyboard and mobile navigation", async () => {
   const user = userEvent.setup();

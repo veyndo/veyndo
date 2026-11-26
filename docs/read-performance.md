@@ -29,7 +29,7 @@ proof of exact allocator/RSS usage. Cold concurrent misses can duplicate decodin
 there is no distributed single-flight mechanism. Actual query execution, not
 cache membership, determines channel existence on every new request.
 
-Migration [037](../migrations/037-read-context-cache.sql) stamps basis/override rows
+The [shop baseline](../components/shop/migrations/0001-baseline.sql) stamps basis/override rows
 before every insert/update. The global language registry changes version on actual
 inserts, updates, deletes and truncation. Conflict-only registration does not
 invalidate the fleet or lock the global version row. Cache state is local to one
@@ -62,7 +62,7 @@ and validated without an error.
 The after build was measured from the recorded working tree; its source-tree
 digest is retained. SQL tracing was enabled for separate statement counts and
 disabled during timing. These figures measure the shared backend path, not
-browser rendering, AI latency or relative Shopware performance.
+browser rendering or AI latency.
 
 ## Local matched hotpath result, 8 October 2026
 
@@ -104,7 +104,7 @@ message is involved.
 [Raw samples, binary/source hashes and delivery checks](assets/read-performance-2026-10-08.json).
 The changed build was measured from a working tree with its source-tree digest
 retained. These figures do not measure browser rendering, slow AI requests, cold
-database behavior, large shops, production capacity or a Shopware speed ratio.
+database behavior, large shops or production capacity.
 
 ## Configuration and reproduction
 
@@ -230,7 +230,7 @@ HTTP has bounded local and shared tenant permits, reserved checkout capacity,
 429/Retry-After saturation responses, persistent login throttles, daily interactive
 AI quotas and operator histogram buckets. Actual model calls and app/provider work
 have shared concurrency caps. Token/spend quotas and telemetry export remain open.
-[Configuration, tradeoffs and tests](core-hardening.md).
+[Security and database configuration](security.md).
 
 ## CPU and RLS changes deliberately requiring measurement
 

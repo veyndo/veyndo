@@ -1,29 +1,35 @@
 /** Navigation guards preserve an embedded native editor's dirty draft. */
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AgentWorkSurface from "../../src/admin/workspace/AgentWorkSurface";
+import AgentWorkSurface from "../../../components/studio/ui/admin/workspace/AgentWorkSurface";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-vi.mock("../../src/admin/workspace/AgentViewDirectory", () => ({
-  default: ({ selected, onSelect, onDirtyChange }: any) =>
-    selected ? (
-      <>
-        <input aria-label="Native draft" onChange={() => onDirtyChange(true)} />
-        <button onClick={() => onSelect(undefined)}>Back to records</button>
-        <button
-          onClick={() => {
-            onDirtyChange(false);
-            onSelect(undefined);
-          }}
-        >
-          Confirmed native discard
-        </button>
-      </>
-    ) : (
-      <button onClick={() => onSelect("desk")}>Open native record</button>
-    ),
-}));
-vi.mock("../../src/admin/catalog/CatalogIntake", () => ({
+vi.mock(
+  "../../../components/studio/ui/admin/workspace/AgentViewDirectory",
+  () => ({
+    default: ({ selected, onSelect, onDirtyChange }: any) =>
+      selected ? (
+        <>
+          <input
+            aria-label="Native draft"
+            onChange={() => onDirtyChange(true)}
+          />
+          <button onClick={() => onSelect(undefined)}>Back to records</button>
+          <button
+            onClick={() => {
+              onDirtyChange(false);
+              onSelect(undefined);
+            }}
+          >
+            Confirmed native discard
+          </button>
+        </>
+      ) : (
+        <button onClick={() => onSelect("desk")}>Open native record</button>
+      ),
+  }),
+);
+vi.mock("../../../components/catalog/ui/admin/catalog/CatalogIntake", () => ({
   default: () => (
     <dialog
       open

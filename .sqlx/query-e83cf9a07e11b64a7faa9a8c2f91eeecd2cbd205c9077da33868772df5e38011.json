@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO embedding_jobs(tenant,kind,object_id) SELECT $1,$2,unnest($3::text[]) ON CONFLICT(tenant,kind,object_id) DO UPDATE SET revision=embedding_jobs.revision+1,attempts=0,error_code=NULL,available_at=now(),lease=NULL,lease_until=NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e83cf9a07e11b64a7faa9a8c2f91eeecd2cbd205c9077da33868772df5e38011"
+}

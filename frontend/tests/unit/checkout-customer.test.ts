@@ -1,6 +1,6 @@
 /** Final checkout carries the current buyer identity; another tenant or merchant session cannot substitute for it. */
 import { expect, it, vi } from "vitest";
-import { placeCheckoutOrder } from "../../src/storefront/checkout/checkout-order";
+import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
 import { forgetCustomerSession } from "../../src/shared/api/customer-session";
 import { cart } from "./fixtures";
 it("uses the current buyer session and stops forwarding it after logout", async () => {

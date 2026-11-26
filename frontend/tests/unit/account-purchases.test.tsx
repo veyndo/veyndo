@@ -2,7 +2,7 @@
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import CustomerAccount from "../../src/storefront/account/CustomerAccount";
+import CustomerAccount from "../../../components/customers/ui/storefront/account/CustomerAccount";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { cart } from "./fixtures";
 const token = "synthetic-purchase-session";

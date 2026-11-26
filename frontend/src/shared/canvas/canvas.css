@@ -5,8 +5,8 @@
   flex-direction: column;
   height: min(76dvh, 880px);
   min-height: 420px;
-  background: var(--panel, #edf4fb);
-  color: var(--text, #142432);
+  background: var(--panel, var(--vy-color-panel));
+  color: var(--text, var(--vy-color-text));
 }
 .visual-canvas-toolbar {
   display: flex;
@@ -14,8 +14,8 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 10px 16px;
-  background: var(--surface, #fff);
-  border-bottom: 1px solid var(--border, #d4e2ef);
+  background: var(--surface, var(--vy-color-surface));
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
 }
 .visual-canvas-zoom,
 .visual-canvas-paging {
@@ -31,16 +31,16 @@
   gap: 8px;
   min-height: 36px;
   padding: 6px 10px;
-  border: 1px solid var(--border, #d4e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 8px;
   color: inherit;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   cursor: pointer;
   font: inherit;
   font-size: 12px;
 }
 .visual-canvas-toolbar button:hover:not(:disabled) {
-  background: var(--hover, #e5f3ff);
+  background: var(--hover, var(--vy-color-hover));
 }
 .visual-canvas button:disabled {
   opacity: 0.45;
@@ -56,7 +56,7 @@
   width: 84px;
   min-height: 32px;
   padding: 0;
-  accent-color: var(--accent, #0668c9);
+  accent-color: var(--accent, var(--vy-color-accent-strong));
 }
 .visual-canvas-zoom output {
   min-width: 38px;
@@ -69,7 +69,7 @@
   overflow: auto;
   overscroll-behavior-inline: contain;
   cursor: grab;
-  scrollbar-color: var(--border, #c8d8e8) transparent;
+  scrollbar-color: var(--border, var(--vy-color-border)) transparent;
 }
 .visual-canvas-viewport:active {
   cursor: grabbing;
@@ -106,32 +106,33 @@
   font-size: 13px;
   line-height: 1.5;
   margin: 5px 0 0;
-  color: var(--muted, #607182);
+  color: var(--muted, var(--vy-color-muted));
 }
 .visual-canvas-scene header small {
-  color: var(--accent, #0668c9);
+  color: var(--accent, var(--vy-color-accent-strong));
   font-size: 12px;
   flex-shrink: 0;
 }
 .visual-canvas-scene-preview {
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   height: 520px;
   overflow: auto;
   border-radius: 12px;
-  box-shadow: 0 8px 24px #14243212;
+  box-shadow: 0 8px 24px
+    color-mix(in srgb, var(--vy-color-text) 7%, transparent);
 }
 .visual-canvas-scene[aria-current="true"] .visual-canvas-scene-preview {
-  outline: 2px solid var(--accent, #0668c9);
+  outline: 2px solid var(--accent, var(--vy-color-accent-strong));
   outline-offset: 4px;
 }
 .visual-canvas .visual-canvas-open,
 .visual-canvas .visual-canvas-quick-open button {
   min-height: 44px;
   padding: 10px 14px;
-  border: 1px solid var(--accent, #0668c9);
+  border: 1px solid var(--accent, var(--vy-color-accent-strong));
   border-radius: 8px;
-  background: var(--accent, #0668c9);
-  color: #fff;
+  background: var(--accent, var(--vy-color-accent-strong));
+  color: var(--vy-color-accent-text);
   font: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -144,8 +145,8 @@
 }
 .visual-canvas .visual-canvas-open:hover:not(:disabled),
 .visual-canvas .visual-canvas-quick-open button:hover:not(:disabled) {
-  background: var(--text, #142432);
-  border-color: var(--text, #142432);
+  background: var(--text, var(--vy-color-text));
+  border-color: var(--text, var(--vy-color-text));
 }
 .visual-canvas-quick-open {
   display: flex;
@@ -159,9 +160,9 @@
   max-width: 260px;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid var(--border, #d4e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 8px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   color: inherit;
   font: inherit;
   font-size: 13px;
@@ -175,17 +176,17 @@
 .visual-canvas-hint {
   font-size: 11px;
   padding: 8px 16px;
-  color: var(--muted, #607182);
+  color: var(--muted, var(--vy-color-muted));
   margin: 0;
-  border-top: 1px solid var(--border, #d4e2ef);
+  border-top: 1px solid var(--border, var(--vy-color-border));
 }
 .visual-canvas :focus-visible {
-  outline: 2px solid var(--accent, #0668c9);
+  outline: 2px solid var(--accent, var(--vy-color-accent-strong));
   outline-offset: 3px;
 }
 .visual-canvas ::selection {
-  background: var(--hover, #e5f3ff);
-  color: var(--text, #142432);
+  background: var(--hover, var(--vy-color-hover));
+  color: var(--text, var(--vy-color-text));
 }
 .visual-workspace-toolbar {
   display: flex;
@@ -193,8 +194,8 @@
   gap: 8px;
   flex-wrap: wrap;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border, #d4e2ef);
-  background: var(--surface, #fff);
+  border-bottom: 1px solid var(--border, var(--vy-color-border));
+  background: var(--surface, var(--vy-color-surface));
 }
 .visual-workspace-toolbar button {
   display: inline-flex;
@@ -204,15 +205,15 @@
   padding: 8px 12px;
   font: inherit;
   font-size: 12px;
-  border: 1px solid var(--border, #d4e2ef);
-  background: var(--surface, #fff);
+  border: 1px solid var(--border, var(--vy-color-border));
+  background: var(--surface, var(--vy-color-surface));
   color: inherit;
   border-radius: 8px;
   cursor: pointer;
 }
 .visual-workspace-toolbar button[aria-pressed="true"] {
-  background: var(--hover, #e5f3ff);
-  color: var(--accent, #0668c9);
+  background: var(--hover, var(--vy-color-hover));
+  color: var(--accent, var(--vy-color-accent-strong));
   border-color: currentColor;
 }
 .canvas-reference-inputs {
@@ -229,18 +230,18 @@
   width: 100%;
   min-height: 76px;
   padding: 10px;
-  border: 1px solid var(--border, #d4e2ef);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 10px;
   font: inherit;
   color: inherit;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
 }
 .canvas-reference-inputs input[type="file"] {
   width: 100%;
   font-size: 12px;
 }
 .canvas-reference-inputs small {
-  color: var(--muted, #607182);
+  color: var(--muted, var(--vy-color-muted));
   line-height: 1.6;
 }
 .canvas-reference-images {

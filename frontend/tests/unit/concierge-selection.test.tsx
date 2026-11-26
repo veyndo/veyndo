@@ -27,7 +27,8 @@ it("shows native images and prices, deduplicates suggestions and permits reversi
     "src",
     "/fixture.svg",
   );
-  expect(screen.getByText("49.90 EUR")).toBeVisible();
+  // The card formats with the shop language (de-DE) and the cart currency.
+  expect(screen.getByText(/49,90\s€/)).toBeVisible();
   expect(screen.getAllByRole("article")).toHaveLength(1);
   await userEvent.click(
     screen.getByRole("button", {

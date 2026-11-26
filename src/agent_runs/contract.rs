@@ -1,31 +1,20 @@
-//! HTTP/MCP share revision-bound run controls and safe progress; checkpoints and credentials are never exported.
-use super::*;
-pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
-    (
-        "merchant.run.create",
-        "Queue a durable native planning task; no automatic business writes",
-    ),
-    (
-        "merchant.run.status",
-        "Read a saved run and completed proposal with current rights",
-    ),
-    (
-        "merchant.run.cancel",
-        "Cancel a saved run with its expected revision",
-    ),
-    (
-        "merchant.run.resume",
-        "Explicitly resume a failed or ambiguous run from completed checkpoints",
-    ),
-];
+//! HTTP/MCP share revision-bound run controls and safe progress; scenarios, agent controls and run operations are dispatched by name.
+use super::scenarios;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_intelligence::http::agents;
+pub(crate) use veyndo_intelligence::service::agent_runs::CAPABILITIES;
+use veyndo_intelligence::service::agent_runs::{operate, schema as run_schema};
 pub(crate) fn schema(name: &str) -> Option<Value> {
-    if let Some(schema) = scenarios::schema(name) {
-        return Some(schema);
-    }
-    if let Some(schema) = super::controls::schema(name) {
-        return Some(schema);
-    }
-    CAPABILITIES.iter().any(|(n,_)|*n==name).then(||json!({"type":"object","properties":{"requestId":{"type":"string","minLength":1,"maxLength":64},"id":{"type":"string","maxLength":64},"revision":{"type":"integer","minimum":1},"approve":{"type":"boolean"},"instruction":{"type":"string","minLength":1,"maxLength":4000},"inference":{"type":"object","properties":{"provider":{"type":"string","enum":["platform","ollama","openai","anthropic"]},"model":{"type":["string","null"],"maxLength":128}},"required":["provider"],"additionalProperties":false}},"required":if name=="merchant.run.create" {vec!["instruction"]}else if name=="merchant.run.status" {vec!["id"]}else{vec!["id","revision","approve"]},"additionalProperties":false})).map(|mut schema| { schema["properties"]["workspaceContext"] = context::schema(); schema })
+    scenarios::schema(name)
+        .or_else(|| super::controls::schema(name))
+        .or_else(|| run_schema(name))
 }
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -34,57 +23,23 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/agent/runs",
             &[("POST", "assistant.use")],
-            post(create),
+            post(agents::create),
         )
         .secure_route(
             "/api/agent/runs/{id}",
             &[("GET", "assistant.use")],
-            get(status),
+            get(agents::status),
         )
         .secure_route(
             "/api/agent/runs/{id}/cancel",
             &[("POST", "assistant.use")],
-            post(cancel),
+            post(agents::cancel),
         )
         .secure_route(
             "/api/agent/runs/{id}/resume",
             &[("POST", "assistant.use")],
-            post(resume),
+            post(agents::resume),
         )
-}
-async fn create(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, "merchant.run.create", &v).await?))
-}
-async fn status(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    Ok(Json(
-        invoke(&a, &h, "merchant.run.status", &json!({"id":id})).await?,
-    ))
-}
-async fn cancel(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    Json(mut v): Json<Value>,
-) -> Result<Json<Value>> {
-    v["id"] = json!(id);
-    Ok(Json(invoke(&a, &h, "merchant.run.cancel", &v).await?))
-}
-async fn resume(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    Json(mut v): Json<Value>,
-) -> Result<Json<Value>> {
-    v["id"] = json!(id);
-    Ok(Json(invoke(&a, &h, "merchant.run.resume", &v).await?))
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     if scenarios::schema(name).is_some() {
@@ -93,176 +48,5 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     if super::controls::schema(name).is_some() {
         return super::controls::invoke(a, h, name, v).await;
     }
-    let schema = schema(name).ok_or(bad("Unknown agent run operation"))?;
-    apps::validate_native_input(&schema, v)?;
-    agent::assistant_access(h)?;
-    let t = merchant(a, h)?;
-    if name == "merchant.run.create" {
-        return enqueue(a,h,json!({"instruction":v["instruction"],"inference":v.get("inference"),"locale":language_context(a,h).await?.0,"channel":marketing::channel_id(h),"requestId":v["requestId"],"workspaceContext":v["workspaceContext"]}),None).await;
-    }
-    // Resume charges the shared live-shop budget in the same transaction.
-    // Status/cancel retain the ordinary actor-scoped connection.
-    let mut tx = if name == "merchant.run.resume" {
-        a.db.begin_privileged().await?
-    } else {
-        a.db.begin().await?
-    };
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,2))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    let row = sqlx::query(
-        "SELECT *,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND id=$2 AND run_state IS NOT NULL FOR UPDATE",
-    )
-    .bind(&t)
-    .bind(v["id"].as_str().unwrap())
-    .fetch_optional(&mut *tx)
-    .await?
-    .ok_or(Error(StatusCode::NOT_FOUND, "Agent run not found".into()))?;
-    let actor: String = row.get("run_actor");
-    let request: Value = row.get("run_request");
-    if !h.principal.personal_session
-        && actor != "bootstrap"
-        && (h.principal.agent_key.is_none()
-            || request["agentId"].as_str() != h.principal.agent_key.as_deref())
-    {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Run belongs to another agent identity".into(),
-        ));
-    }
-    if header(h, "x-rac-user") != Some(actor.as_str())
-        && !(name == "merchant.run.cancel"
-            && h.principal.personal_session
-            && header(h, "x-rac-role") == Some("owner"))
-    {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Only the original run actor may access its continuation".into(),
-        ));
-    }
-    let scopes: Value = row.get("run_scopes");
-    if name != "merchant.run.cancel"
-        && scopes.as_array().is_none_or(|s| {
-            s.iter()
-                .any(|s| s.as_str().is_none_or(|s| !auth::allowed(h, s)))
-        })
-    {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Run evidence requires its original permissions".into(),
-        ));
-    }
-    let state: String = row.get("run_state");
-    let revision: i64 = row.get("run_revision");
-    if name == "merchant.run.status" {
-        let mut value = project(&row);
-        if state == "running"
-            && value["conversationId"].is_string()
-            && h.principal.agent_key.is_none()
-            && let Some(views) = row.get::<Value, _>("run_checkpoint").get("app-views")
-        {
-            value["appViews"] = views.clone();
-        }
-        return Ok(value);
-    }
-    if v["approve"] != true || v["revision"].as_i64() != Some(revision) {
-        return Err(conflict(
-            "Explicit approval and current run revision required",
-        ));
-    }
-    let next = if name == "merchant.run.cancel" {
-        if state == "ready" || state == "cancelled" {
-            return Err(conflict(
-                "Completed run cannot be cancelled; its proposal still needs approval",
-            ));
-        }
-        "cancelled"
-    } else {
-        if !["failed", "uncertain"].contains(&state.as_str()) {
-            return Err(conflict("Only a stopped run can be explicitly resumed"));
-        }
-        let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(&t).fetch_one(&mut *tx).await?;
-        if stopped {
-            return Err(Error(
-                StatusCode::FORBIDDEN,
-                "Shop agents are stopped by an administrator".into(),
-            ));
-        }
-        performance::reserve_ai_attempt_tx(a, &t, &mut tx).await?;
-        "queued"
-    };
-    if next == "queued"
-        && let Some(c) = row.get::<Option<String>, _>("conversation_id")
-    {
-        claim_conversation(&mut tx, &t, &c, &row.get::<String, _>("id")).await?;
-    }
-    if next == "queued" && row.get::<bool, _>("run_personal") != h.principal.personal_session {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Use the original personal or integration credential kind to continue".into(),
-        ));
-    }
-    let credential = header(h, "authorization")
-        .and_then(|s| s.strip_prefix("Bearer "))
-        .map(hash);
-    if actor != "bootstrap" && credential.is_none() {
-        return Err(bad("Current run credential required"));
-    }
-    sqlx::query("UPDATE tasks SET run_state=$3,run_error=NULL,run_pending=NULL,run_lease=NULL,run_until=NULL,run_credential=$4,run_personal=$5,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2")
-   .bind(&t).bind(row.get::<String,_>("id")).bind(next).bind(credential).bind(h.principal.personal_session).execute(&mut *tx).await?;
-    sqlx::query("UPDATE tasks SET run_after=now() WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(row.get::<String, _>("id"))
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("UPDATE translation_jobs SET status=$3,error=NULL,error_code=NULL,lease=NULL,lease_until=NULL WHERE tenant=$1 AND run_task=$2 AND status IN ('queued','processing','failed')")
-        .bind(&t).bind(row.get::<String,_>("id")).bind(if next=="cancelled" {"cancelled"} else {"queued"}).execute(&mut *tx).await?;
-    if next == "cancelled" {
-        sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(&t).bind(row.get::<Option<String>,_>("conversation_id")).bind(row.get::<String,_>("id")).execute(&mut *tx).await?;
-    }
-    tx.commit().await?;
-    Ok(
-        json!({"taskId":row.get::<String,_>("id"),"state":next,"revision":revision+1,"approvalRequired":true}),
-    )
-}
-/// Share one conversation turn fence between explicit continuation and approved work.
-pub(super) async fn claim_conversation(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    conversation: &str,
-    task: &str,
-) -> Result<()> {
-    let row=sqlx::query("SELECT turn_owner,(turn_until IS NULL OR turn_until<now()) AS available FROM conversations WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(conversation).fetch_optional(&mut **tx).await?.ok_or(conflict("Conversation unavailable"))?;
-    let busy:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tasks WHERE tenant=$1 AND conversation_id=$2 AND id<>$3 AND run_state IN ('queued','running','uncertain'))").bind(t).bind(conversation).bind(task).fetch_one(&mut **tx).await?;
-    if busy
-        || (row.get::<Option<String>, _>("turn_owner").as_deref() != Some(task)
-            && !row.get::<bool, _>("available"))
-    {
-        return Err(conflict("A newer conversation turn is active"));
-    }
-    sqlx::query(
-        "UPDATE conversations SET turn_owner=$3,turn_until='infinity' WHERE tenant=$1 AND id=$2",
-    )
-    .bind(t)
-    .bind(conversation)
-    .bind(task)
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
-}
-pub(super) fn project(row: &sqlx::postgres::PgRow) -> Value {
-    let state: String = row.get("run_state");
-    let cp: Value = row.get("run_checkpoint");
-    let request: Value = row.get("run_request");
-    let execution=request["execution"].as_array().map(|plan|json!({"total":plan.len(),"completed":cp.as_object().map_or(0,|o|o.keys().filter(|k|k.starts_with("operation-")).count()),"steps":plan.iter().enumerate().map(|(n,s)|json!({"name":s["name"],"label":s["label"],"completed":cp.get(format!("operation-{n}")).is_some(),"translationJobId":cp.get(format!("translation-{n}"))})).collect::<Vec<_>>()}));
-    let steps = cp
-        .as_object()
-        .map_or(0, |o| o.keys().filter(|k| k.starts_with("model-")).count());
-    let scenario = request.get("scenario").map(|s| {
-        let mut result = s.clone();
-        result["steps"] = cp["scenario-state"]["steps"].clone();
-        result
-    });
-    json!({"taskId":row.get::<String,_>("id"),"agentId":row.get::<Value,_>("run_request")["agentId"],"channel":request["channel"],"state":state,"revision":row.get::<i64,_>("run_revision"),"completedModelSteps":steps,"scenario":scenario,"execution":execution,"error":row.get::<Option<Value>,_>("run_error"),"conversationId":row.get::<Option<String>,_>("conversation_id"),"approvalRequired":!row.get::<bool,_>("applied"),"preview":if state=="ready" {row.get::<Value,_>("proposal")}else{Value::Null},"updatedAt":row.get::<String,_>("updated_text")})
+    operate(a, h, name, v).await
 }

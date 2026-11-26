@@ -12,6 +12,7 @@ import { useWorkspaceText } from "./workspace-i18n";
 import BlockPreview from "./BlockPreview";
 import { useBlocks } from "./useBlockEditing";
 import { useInteractionText } from "./interaction-i18n";
+import { newPartRef, partWords, siteParts } from "../site-parts";
 const builtIn = [
   "hero",
   "text",
@@ -83,6 +84,40 @@ export default function BlockPalette({
               <span>
                 <strong>{t(kind)}</strong>
                 <small>{w(`${kind}Hint`)}</small>
+              </span>
+              <Icon name="plus" size={15} />
+            </button>
+          ))}
+      </div>
+      <h3 className="designer-palette-section">{t("parts")}</h3>
+      <div className="designer-palette-grid">
+        {siteParts
+          .filter((part) => part.id in partWords)
+          .map((part) => {
+            const [name, hint] = partWords[part.id as keyof typeof partWords];
+            const make = () => {
+              const block = create("part", t(name));
+              block.part = newPartRef(part);
+              return block;
+            };
+            return { part, name, hint, make };
+          })
+          .filter(({ name }) => matches(t(name)))
+          .map(({ part, name, hint, make }) => (
+            <button
+              className="designer-element-card"
+              key={part.id}
+              disabled={disabled}
+              {...editing?.pointer(make)}
+              draggable={!disabled && !!editing}
+              onDragStart={(e: DragEvent) => editing?.begin(e, make())}
+              onDragEnd={() => editing?.cancel()}
+              onClick={() => onAdd(make())}
+            >
+              <BlockPreview kind="products" />
+              <span>
+                <strong>{t(name)}</strong>
+                <small>{t(hint)}</small>
               </span>
               <Icon name="plus" size={15} />
             </button>

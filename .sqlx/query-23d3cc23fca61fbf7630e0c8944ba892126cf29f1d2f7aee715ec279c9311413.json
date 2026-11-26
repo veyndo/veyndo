@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT agent_budget AS \"agent_budget!\" FROM integration_keys WHERE tenant=$1 AND id=$2 AND expires_at>now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "agent_budget!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "integration_keys",
+            "name": "agent_budget"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "23d3cc23fca61fbf7630e0c8944ba892126cf29f1d2f7aee715ec279c9311413"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE knowledge_relations SET data=jsonb_set(jsonb_set(jsonb_set(data,'{causalUpliftProven}','false'),'{interval95}','null'),'{stoppedEarly}','true') WHERE tenant=$1 AND kind='EXPERIMENT_RESULT' AND source_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ce744b044ce365bef8ad3e817cdcfeb5e4986797564bbcdcbb7174d051885fba"
+}

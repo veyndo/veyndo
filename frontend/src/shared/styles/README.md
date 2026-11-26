@@ -6,6 +6,7 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 
 ## Modules
 
+- [`international.css`](international.css): International commerce workbench (catalogue, settings, automation): compact master/detail records and clear field hierarchy.
 - [`app-surfaces.css`](app-surfaces.css): app surfaces: Shared customer, app and workbench styles; application workspaces must not import each other..
 - [`apps.css`](apps.css): apps: Shared customer, app and workbench styles; application workspaces must not import each other..
 - [`customers.css`](customers.css): Shared light account/address workspace, responsive and keyboard-accessible.

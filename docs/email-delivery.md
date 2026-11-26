@@ -3,8 +3,7 @@
 Install **Email Delivery** in **VEYNDO Studio → Apps**, open its detail page,
 and choose SMTP, Resend or SendGrid. The workspace and order-confirmation templates
 support English, German, French and Spanish. Gmail remains a separate read-only
-support-mail import app. Email Delivery is a new transactional service; it is not
-an exact port of Shopware's entire mail-template/document/message-queue subsystem.
+support-mail import app. Email Delivery is a transactional mail service of its own.
 
 ![Current Email Delivery app configuration; no provider connected and no message sent](assets/product-tour-20261102/email.jpg)
 
@@ -232,7 +231,7 @@ automatic invitation dispatch or attachment/PDF sending are claimed in this vers
 - `extensions/apps/email/src/templates.rs`: bounded envelopes and EN/DE/FR/ES order/consumer rendering.
 - `extensions/apps/email/src/email.rs`: published app actions/events and Resend/SendGrid delivery.
 - `extensions/apps/email/src/smtp.rs`: pinned SMTP/STARTTLS/TLS, verified certificates and MIME.
-- `extensions/services/connectors/src/{store,crypto,queue,worker}.rs`: encrypted PostgreSQL persistence, quotas and fenced workers.
+- `extensions/services/connector-runtime/src/{store,crypto,queue}.rs` and `extensions/services/connectors/src/worker.rs`: encrypted PostgreSQL persistence, quotas and fenced workers.
 - `src/bin/connectors.rs`: independent standard-service process.
 - `extensions/apps/email/studio/EmailPanel.tsx`, `email-i18n.ts`: native multilingual app workspace.
 - `src/marketing/flows.rs`: durable order-customer snapshot for the existing app flow adapter.
@@ -279,4 +278,4 @@ payment, order and customer-data rights. Existing 1.2.0 packages retain their
 original permissions. A Flow can use `send_payment_instructions` instead of the
 automatic subscription. Do not configure both for the same intended notification.
 The Flow reloads the original order's recipient at execution rather than storing
-bank data in its job definition. [Invoice integration and local acceptance](payment-invoice-checkout.md).
+bank data in its job definition. [Invoice integration and local acceptance](payments.md#invoice-payment-and-recipient-details).

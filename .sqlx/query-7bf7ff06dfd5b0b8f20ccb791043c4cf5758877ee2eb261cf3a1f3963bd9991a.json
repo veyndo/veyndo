@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox SET subscriber_mask=subscriber_mask|$3::smallint,attempts=CASE WHEN (subscriber_mask|$3::smallint)=15 THEN 0 ELSE attempts END,delivered_at=CASE WHEN (subscriber_mask|$3::smallint)=15 THEN now() ELSE delivered_at END,dead_letter_at=CASE WHEN (subscriber_mask|$3::smallint)=15 THEN NULL ELSE dead_letter_at END,error_code=CASE WHEN (subscriber_mask|$3::smallint)=15 THEN NULL ELSE error_code END WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7bf7ff06dfd5b0b8f20ccb791043c4cf5758877ee2eb261cf3a1f3963bd9991a"
+}

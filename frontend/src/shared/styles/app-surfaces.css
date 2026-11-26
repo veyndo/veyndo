@@ -2,8 +2,8 @@
 .app-surface {
   margin: 24px 0;
   padding: 24px;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #dce5ef);
+  background: var(--surface, var(--vy-color-surface));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 20px;
   overflow: hidden;
 }
@@ -19,7 +19,7 @@
   font-size: 1.25rem;
 }
 .app-surface-heading span {
-  color: var(--muted, #64748b);
+  color: var(--muted, var(--vy-color-muted));
   font-size: 0.75rem;
 }
 .app-surface .app-frame {

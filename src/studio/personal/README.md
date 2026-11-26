@@ -1,7 +1,7 @@
 # Personal Studio presentation
 
-`model.rs` validates bounded work areas, card IDs, safe grid projections and
-personal goals. `../personal.rs` is the shared HTTP/MCP operation owner.
+`components/studio/src/domain/workspace.rs` validates bounded work areas, card IDs, safe grid projections and
+personal goals. `../personal.rs` is the shared HTTP/MCP entry point; `components/studio/src/store/workspaces.rs` owns the revisioned store.
 
 Preferences use the current personal session and active membership, forced
 tenant-and-actor RLS, optimistic revisions and twenty retained versions. An

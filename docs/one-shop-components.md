@@ -35,7 +35,7 @@ uses a simulated payment.*
 flowchart TB
   UI["Shop · Studio · POS · Agents"]
   API["SDK / HTTP / MCP"]
-  C["Commerce Core"]
+  C["Commerce server<br/>22 components"]
   Q["Checkout"]
   P["Payments"]
   E["Order · Stock · Event"]
@@ -51,10 +51,13 @@ flowchart TB
   E --> K
 ```
 
-The purchase commits in Core. Workers process follow-up jobs from committed
+The purchase commits in the commerce server, where checkout, pricing, inventory and
+orders are components of one transaction. Workers process follow-up jobs from committed
 events. Knowledge and reporting read from sources that can be rebuilt. That
 keeps the price and inventory authoritative across interfaces and lets teams
-use the same shop from a native screen, a custom frontend or an agent.
+use the same shop from a native screen, a custom frontend or an agent. Inside the
+server each component owns its tables, rules, schema and screens and reaches others only
+through declared dependencies and ports: [component architecture](architecture.md).
 
 ### What the agent sees
 
@@ -157,7 +160,7 @@ the same Commerce owner for quote, commit and receipt. Studio refunded both
 Sandbox captures. A separate demo order generated an invoice through the app
 worker. The hosted mail delivery test still needs a sender and transport.
 [Live pilot and verification](checkout-component.md#hosted-lumen-pilot-10-november-2026).
-[Current shared Cart rollout and public demo purchase](status.md#shared-cart-contract-on-northflank).
+[Current shared Cart rollout and public demo purchase](status.md#hosted-pilot-earlier-release).
 [Reproduce purchase recovery and compare the isolated Northflank runs](evidence/composed-release-rehearsal-2026-11-10.md#northflank-rehearsal-with-deployed-executables).
 
 The original Core and App Worker images also passed native purchase and
@@ -182,13 +185,14 @@ The storefront and Studio use that same shop identity and transaction boundary. 
 
 ## Choose a starting point
 
-For Rust integrations, the [Commerce crate guide](../crates/commerce/README.md)
+For Rust integrations, the [pricing crate guide](../components/pricing/README.md)
 shows shared product, cart, contact and address contracts. Its contact example
-runs without a server. The host still owns account identity, PII admission and
-the atomic order transaction. Independent HTTP/MCP hosting for the remaining
-Commerce domains is tracked in CORE-02..10.
+runs without a server. Account identity, PII admission and the atomic order
+transaction stay with the customers, orders and checkout components. Every
+component with a crate can be generated as a standalone mirror that builds and
+tests alone: [component mirrors](component-mirrors.md).
 
-The four public development repositories are linked below. The other links explain the component's contract and its place in the complete shop. Some have separate builds or access-controlled source, and some are still domains in the product repository. The [implementation plan](commerce-components.md) tracks each extraction and the [current status](status.md) records what has been released and tested.
+The four public development repositories are linked below. The other links explain the component's contract and its place in the complete shop. Some have separate builds or access-controlled source, and some are still domains in the product repository. [Component repositories and release acceptance](commerce-components.md) separates the components inside the server from separately run services, and the [current status](status.md) records what has been released and tested.
 
 The same release checker prepares a pinned update for any build-backed
 component while retaining every peer. A presentation update does not move
@@ -239,8 +243,8 @@ The [benchmarks](benchmarks.md) explain which paths, workloads and environments 
 The hosted shop now runs its app worker separately from Core. The worker
 owns Flow execution, app scheduling and delivery from the existing queues.
 The checkout and its original receipt still use the same Commerce owner.
-[Hosted cutover and measurements](status.md#live-flow-draft-check-and-separate-app-worker-9-november-2026).
+[Hosted cutover and measurements](status.md#hosted-pilot-earlier-release).
 
-[Connector composition and hosted response times](status.md#connector-composition-and-public-response-times-9-november-2026).
+[Connector composition and hosted response times](status.md#hosted-pilot-earlier-release).
 
 [Checkout composition measurements, 8 November 2026](evidence/checkout-composition-performance-2026-11-08.md).

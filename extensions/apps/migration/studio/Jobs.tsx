@@ -1,4 +1,5 @@
 /** Saved job controls use native CAS, explicit uncertain-outcome acknowledgement and current action permissions. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import Comparison from "./Comparison";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
@@ -62,9 +63,9 @@ export default function Jobs({
           {["running", "queued", "failed", "uncertain"].includes(
             job.status,
           ) && (
-            <button
+            <Button
+              type="submit"
               disabled={busy || !manage}
-              className="studio-secondary"
               onClick={async () => {
                 onBusy(true);
                 onError("");
@@ -89,7 +90,7 @@ export default function Jobs({
                   ? "retry"
                   : "cancel",
               )}
-            </button>
+            </Button>
           )}
           {job.status === "succeeded" && job.result?.nextCursor && (
             <button disabled={busy} onClick={() => void onNext(job.result!)}>

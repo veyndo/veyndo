@@ -12,6 +12,14 @@ import { layoutKind } from "../commerce-layout";
 import AppearanceControls from "./AppearanceControls";
 import { useDesignText } from "./design-i18n";
 import { useEditorText } from "./editor-i18n";
+import { PartForm } from "../../../../frontend/src/kit/storefront";
+import { Field, Select } from "../../../../frontend/src/kit/ui";
+import {
+  partChoiceWords,
+  partFieldWords,
+  partProducts,
+  sitePart,
+} from "../site-parts";
 function localTime(iso: string | null) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -187,6 +195,63 @@ export default function PageInspector({
                 onChange={editBlock}
               />
             )}
+            {block.kind === "part" &&
+              block.part &&
+              sitePart(block.part.id) &&
+              (() => {
+                const ref = block.part;
+                return (
+                  <>
+                    <PartForm
+                      part={sitePart(ref.id)!}
+                      value={ref.config}
+                      disabled={disabled}
+                      onChange={(config) =>
+                        editBlock({ part: { ...ref, config } })
+                      }
+                      label={(field) =>
+                        t(
+                          partFieldWords[
+                            field as keyof typeof partFieldWords
+                          ] ?? "part",
+                        )
+                      }
+                      choice={(_, value) =>
+                        t(
+                          partChoiceWords[
+                            value as keyof typeof partChoiceWords
+                          ] ?? "part",
+                        )
+                      }
+                      renderFormat={(format, field, value, set) =>
+                        format === "product-id" ? (
+                          <Field
+                            label={t(
+                              partFieldWords[
+                                field as keyof typeof partFieldWords
+                              ] ?? "partProduct",
+                            )}
+                          >
+                            <Select
+                              value={typeof value === "string" ? value : ""}
+                              disabled={disabled}
+                              onChange={(event) => set(event.target.value)}
+                            >
+                              <option value="">{t("partChooseProduct")}</option>
+                              {products.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.name}
+                                </option>
+                              ))}
+                            </Select>
+                          </Field>
+                        ) : null
+                      }
+                    />
+                    {!partProducts(block).length && <p>{t("partMissing")}</p>}
+                  </>
+                );
+              })()}
             {block.kind === "products" && (
               <>
                 <label>

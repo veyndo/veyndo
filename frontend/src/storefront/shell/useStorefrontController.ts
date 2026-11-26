@@ -1,7 +1,7 @@
 /** Cart lifecycle, authoritative checkout commands and storefront coordination. */
 import { useShopperAdvice } from "./useShopperAdvice";
 import { useStorefrontActions } from "./useStorefrontActions";
-import { routeProductId } from "../catalog/product-url";
+import { routeProductId } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { shopScope } from "../../shared/api/shop-scope";
 import { useCompanyIdentity } from "./useCompanyIdentity";
 import {
@@ -21,9 +21,9 @@ import {
   type Selection,
 } from "../../shared/api/shop-api";
 import { newStorefrontCart } from "./cart-commands";
-import { placeCheckoutOrder } from "../checkout/checkout-order";
-import { checkoutParent } from "../checkout/embedded-checkout";
-import type { AccountPage } from "../account/account-types";
+import { placeCheckoutOrder } from "../../../../components/checkout/ui/storefront/checkout/checkout-order";
+import { checkoutParent } from "../../../../components/checkout/ui/storefront/checkout/embedded-checkout";
+import type { AccountPage } from "../../../../components/customers/ui/storefront/account/account-types";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { useCheckoutText } from "../../shared/i18n/checkout-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";

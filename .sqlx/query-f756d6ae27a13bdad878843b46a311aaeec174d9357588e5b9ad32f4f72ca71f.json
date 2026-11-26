@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO outbox_subscriber_failures(tenant,event_id,subscriber,available_at) VALUES($1,$2,$3,now()+interval '2 seconds') ON CONFLICT(tenant,event_id,subscriber) DO UPDATE SET attempts=outbox_subscriber_failures.attempts+1,available_at=now()+least(300,power(2,least(outbox_subscriber_failures.attempts+1,8))::int)*interval '1 second',dead_letter_at=CASE WHEN outbox_subscriber_failures.attempts+1>=8 THEN now() ELSE NULL END",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f756d6ae27a13bdad878843b46a311aaeec174d9357588e5b9ad32f4f72ca71f"
+}

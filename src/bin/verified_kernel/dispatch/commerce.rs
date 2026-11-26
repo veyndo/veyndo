@@ -1,13 +1,19 @@
 //! Generated conformance driver; invokes the same production policy functions as the commerce server.
+use super::Request;
 use serde_json::{Value, json};
 use veyndo::verified_kernel::*;
-pub(super) fn eval(j: &Value) -> Result<Value, String> {
-    let args = &j["args"];
+pub(super) fn eval(request: &Request) -> Result<Value, String> {
+    let args = &request.args;
     let n = |key: &str| args[key].as_u64().ok_or_else(|| format!("Invalid {key}"));
     let b = |key: &str| args[key].as_bool().ok_or_else(|| format!("Invalid {key}"));
-    match j["function"].as_str() {
+    match request.function.as_deref() {
         Some("discount_cap") => Ok(json!(discount_cap(n("total")?, n("requested")?))),
         Some("stock_admissible") => Ok(json!(stock_admissible(n("stock")?, n("quantity")?))),
+        Some("reservation_admissible") => Ok(json!(reservation_admissible(
+            n("ordered")?,
+            n("held")?,
+            n("requested")?
+        ))),
         Some("refund_admissible") => Ok(json!(refund_admissible(
             n("captured")?,
             n("refunded")?,
@@ -83,6 +89,16 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("manual")?,
             b("simulated")?
         ))),
+        Some("offer_honoured") => Ok(json!(offer_honoured(
+            b("expired")?,
+            b("same_cart")?,
+            b("same_revision")?,
+            b("same_total")?
+        ))),
+        Some("amount_sum") => Ok(json!(amount_sum(n("left")?, n("right")?))),
+        Some("net_amount") => Ok(json!(net_amount(n("gross")?, n("tax")?))),
+        Some("line_total") => Ok(json!(line_total(n("unit")?, n("quantity")?))),
+        Some("rounded_quotient") => Ok(json!(rounded_quotient(n("numerator")?, n("denominator")?))),
         _ => Err("Unknown policy".into()),
     }
 }

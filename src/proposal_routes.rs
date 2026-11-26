@@ -1,47 +1,37 @@
 //! HTTP proposal creation, approval and task listing.
-use crate::*;
+use crate::agent;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::proposal_apply::apply;
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
 
-pub(crate) async fn agent_plan(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    agent::assistant_access(&h)?;
-    merchant(&a, &h)?;
-    auth::permit(&h, "knowledge.read")?;
-    let selection = choice(&v)?;
-    let queued=agent_runs::enqueue(&a,&h,json!({"instruction":v["instruction"],"workspaceContext":v["workspaceContext"],"inference":selection,"locale":language_context(&a,&h).await?.0,"channel":marketing::channel_id(&h)}),None).await?;
-    if v["background"] == true {
-        return Ok(Json(queued));
-    }
-    let run = agent_runs::wait(&a, &h, queued["taskId"].as_str().unwrap()).await?;
-    Ok(Json(agent_runs::plan_result(run)?))
+/// The JSON fields `agent_apply` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AgentApplyInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
 }
+
 pub(crate) async fn agent_apply(
     State(a): State<App>,
     h: RequestContext,
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: AgentApplyInput = view(&v);
     agent::assistant_access(&h)?;
     let t = merchant(&a, &h)?;
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad("Explicit approve=true required"));
     }
     Ok(Json(apply(&a, &t, &id, &h).await?))
-}
-pub(crate) async fn tasks(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    agent::assistant_access(&h)?;
-    let t = merchant(&a, &h)?;
-    let rs = sqlx::query(
-        "SELECT id,proposal,applied,coalesce(run_request ? 'execution',false) AS execution_started FROM tasks WHERE tenant=$1 AND (run_state IS NULL OR run_state='ready' OR run_request ? 'execution') AND coalesce(run_actor,proposal->>'actor')=$2 AND (run_scopes IS NULL OR run_scopes <@ $3) ORDER BY created_at DESC LIMIT 30",
-    )
-    .bind(t)
-    .bind(header(&h,"x-rac-user"))
-    .bind(json!(auth::SCOPES.iter().filter(|s|auth::allowed(&h,s)).collect::<Vec<_>>()))
-    .fetch_all(&a.db)
-    .await?;
-    Ok(Json(
-        json!({"tasks":rs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"preview":r.get::<Value,_>("proposal"),"applied":r.get::<bool,_>("applied"),"executionStarted":r.get::<bool,_>("execution_started")})).collect::<Vec<_>>()}),
-    ))
 }

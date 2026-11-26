@@ -1,4 +1,5 @@
 /** Merchant setup follows native owners, persists only personal progress and rejects stale/failed writes. */
+import { QueryProvider } from "../../src/kit/query";
 import {
   act,
   fireEvent,
@@ -14,14 +15,14 @@ import { LocaleScope } from "../../src/shared/i18n/i18n";
 import {
   SetupProvider,
   useShopSetup,
-} from "../../src/admin/setup/SetupProvider";
-import SetupWizard from "../../src/admin/setup/SetupWizard";
-import SetupBanner from "../../src/admin/setup/SetupBanner";
+} from "../../../components/studio/ui/admin/setup/SetupProvider";
+import SetupWizard from "../../../components/studio/ui/admin/setup/SetupWizard";
+import SetupBanner from "../../../components/studio/ui/admin/setup/SetupBanner";
 import {
   newProgress,
   reviewStep,
   steps,
-} from "../../src/admin/setup/setup-model";
+} from "../../../components/studio/ui/admin/setup/setup-model";
 import { canOpenStudio } from "../../src/admin/shell/permissions";
 const rights = [
   "settings.read",
@@ -110,6 +111,7 @@ function Content() {
     </>
   );
 }
+let tabs = 0;
 function view(
   f: ReturnType<typeof fixture>,
   options: {
@@ -135,14 +137,18 @@ function view(
     selectTab,
     intent,
   };
+  // Each view is its own browser tab: Studio gives every tab its own query cache.
+  const tab = `tab-${++tabs}`;
   const component = (value = studio) => (
-    <LocaleScope locale={options.locale ?? "en-GB"}>
-      <StudioContext.Provider value={value as any}>
-        <SetupProvider>
-          <Content />
-        </SetupProvider>
-      </StudioContext.Provider>
-    </LocaleScope>
+    <QueryProvider scope={tab}>
+      <LocaleScope locale={options.locale ?? "en-GB"}>
+        <StudioContext.Provider value={value as any}>
+          <SetupProvider>
+            <Content />
+          </SetupProvider>
+        </StudioContext.Provider>
+      </LocaleScope>
+    </QueryProvider>
   );
   return { ...render(component()), studio, component, selectTab, intent };
 }

@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH candidate AS (SELECT d.tenant,d.app,d.event_id FROM app_deliveries d JOIN app_packages p ON p.tenant=d.tenant AND p.id=d.app AND p.active JOIN tenants owner ON owner.id=d.tenant AND owner.status='active' WHERE NOT EXISTS(SELECT 1 FROM shop_environments s WHERE s.tenant=d.tenant) AND (d.app=ANY($1) OR p.manifest#>>'{eventDelivery,url}' IS NOT NULL) AND d.available_at<=now() AND (d.state='queued' OR d.state='running' AND d.lease_until<now()) AND (SELECT count(DISTINCT lease_token) FROM app_deliveries busy WHERE busy.tenant=d.tenant AND busy.state='running' AND busy.lease_until>now())<2 ORDER BY (SELECT max(last_attempt_at) FROM app_deliveries previous WHERE previous.tenant=d.tenant AND previous.app=d.app) NULLS FIRST,d.event_id LIMIT 1 FOR UPDATE OF d,owner SKIP LOCKED) UPDATE app_deliveries d SET state='running',attempts=attempts+1,lease_token=$2,last_attempt_at=now(),lease_until=now()+interval '30 seconds' FROM candidate c WHERE d.tenant=c.tenant AND d.app=c.app AND d.event_id=c.event_id RETURNING d.tenant,d.app,d.event_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_deliveries",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_deliveries",
+            "name": "app"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "event_id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "app_deliveries",
+            "name": "event_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "57b30384974f1831e5aecaad8300ce9dea99305c8a3c8d3387c09fe6f398e5f8"
+}

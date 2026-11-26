@@ -92,4 +92,32 @@ theorem auth_factor_exact (required verified : Bool) :
 theorem auth_factor_required_denied : auth_factor_admissible true false = false := by
   rfl
 
+/-- A workspace ID passes exactly when it has between 2 and 48 characters. -/
+theorem workspace_length_exact (length : Nat) :
+    workspace_length_admissible length = true ↔ 2 ≤ length ∧ length ≤ 48 := by
+  simp only [workspace_length_admissible, Bool.and_eq_true, decide_eq_true_eq]
+  omega
+
+/-- An empty or one-character workspace ID never passes. -/
+theorem workspace_length_short_denied (length : Nat) (h : length < 2) :
+    workspace_length_admissible length = false := by
+  have bound : ¬ (2 ≤ length ∧ length ≤ 48) := by omega
+  cases value : workspace_length_admissible length
+  · rfl
+  · exact absurd ((workspace_length_exact length).mp value) bound
+
+/-- A merchant request is admitted exactly with a credential for the same shop. -/
+theorem merchant_scope_exact (credential same : Bool) :
+    merchant_scope_admissible credential same = true ↔ credential = true ∧ same = true := by
+  cases credential <;> cases same <;> simp [merchant_scope_admissible]
+
+/-- A credential of one shop never satisfies a check for another shop. -/
+theorem merchant_scope_other_shop_denied (credential : Bool) :
+    merchant_scope_admissible credential false = false := by
+  cases credential <;> simp [merchant_scope_admissible]
+
+/-- Without a shop credential nothing is admitted, whatever shop is addressed. -/
+theorem merchant_scope_missing_credential_denied (same : Bool) :
+    merchant_scope_admissible false same = false := by simp [merchant_scope_admissible]
+
 end CommerceKernel

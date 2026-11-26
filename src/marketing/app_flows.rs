@@ -1,170 +1,39 @@
-//! App flow dispatch uses the same permission/schema gateway as HTTP/MCP, with a stable job key.
-use super::*;
-pub(super) fn validate_manifest_flow(
-    h: &RequestContext,
-    f: &flows::Flow,
-    m: &apps::Manifest,
-) -> Result<()> {
-    auth::permit(h, "apps.manage")?;
-    let target = f
-        .app_action
-        .as_ref()
-        .ok_or(bad("Flow app action required"))?;
-    let act = m
-        .actions
-        .iter()
-        .find(|x| x.name == target.action)
-        .ok_or(bad("Unknown flow app action"))?;
-    eligible(act)?;
-    if f.event == "payment.instructions.available"
-        && act.input_schema["properties"].get("event").is_some()
-    {
-        for scope in ["payments.read", "orders.read", "customers.pii"] {
-            auth::permit(h, scope)?;
-        }
-        if !["payments.instructions.read", "customers.pii"]
-            .iter()
-            .all(|scope| m.permissions.iter().any(|p| p == scope))
-        {
-            return Err(bad(
-                "App needs explicit payment and PII permission for recipient instructions",
-            ));
-        }
-    }
-    auth::permit(h, act.permission.as_deref().unwrap_or("catalog"))?;
-    apps::additional_permissions(h, act)?;
-    if let Some(entity) = m
-        .entities
-        .iter()
-        .find(|e| Some(&e.name) == act.entity.as_ref())
-    {
-        apps::core_extensions::access(entity, h, act.handler == "save")?;
-    }
-    validate_contract(f, m)
+//! App flow dispatch uses the same permission/schema gateway as HTTP/MCP, with a stable job key; admission lives in the app platform.
+use super::flows;
+use crate::foundation::App;
+use crate::{apps, auth, payments};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_json::{Map, Value};
+pub(crate) use veyndo_app_platform::service::flow_apps::validate_replacement;
+use veyndo_app_platform::service::flow_apps::{arguments, eligible, require_instruction_grants};
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, merge, view};
+/// The saved flow job an app action runs for.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowJob {
+    order_id: Value,
+    order_snapshot: Value,
+    event_context: Value,
 }
-fn validate_contract(f: &flows::Flow, m: &apps::Manifest) -> Result<()> {
-    let target = f
-        .app_action
-        .as_ref()
-        .ok_or(bad("Flow app action required"))?;
-    let act = m
-        .actions
-        .iter()
-        .find(|a| a.name == target.action)
-        .ok_or(conflict(
-            "Upgrade would remove an action used by an active flow",
-        ))?;
-    eligible(act)?;
-    let args = arguments(
-        act,
-        &target.arguments,
-        "schema-check",
-        "schema-check",
-        &if ["order.", "delivery.", "document.", "payment.", "pos."]
-            .iter()
-            .any(|prefix| f.event.starts_with(prefix))
-        {
-            json!({"orderId":"00000000000000000000000000000000"})
-        } else {
-            json!({})
-        },
-        &f.event,
-    );
-    apps::validate_input(&act.input_schema, &args)?;
-    if act.handler == "save" {
-        let entity = m
-            .entities
-            .iter()
-            .find(|e| Some(&e.name) == act.entity.as_ref())
-            .ok_or(bad("Flow app model missing"))?;
-        apps::data::fields(entity, &args["fields"])?;
-    }
-    Ok(())
+
+/// The property names an app action declares for its input.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InputSchema {
+    #[serde(deserialize_with = "lenient")]
+    properties: Map<String, Value>,
 }
-/// Configuration save and app replacement inspect the same pipeline app steps.
-pub(super) fn steps(f: &flows::Flow) -> Vec<flows::Flow> {
-    let mut steps = vec![];
-    if f.action == "app_action" {
-        steps.push(f.clone());
-    }
-    if let Some(p) = &f.pipeline {
-        for node in &p.nodes {
-            if let pipeline::Node::Action { action, config, .. } = node
-                && (action == "app_action" || action == "action.mail.send")
-            {
-                let mut step = f.clone();
-                step.action = "app_action".into();
-                step.app_action = Some(flows::AppFlowAction {
-                    app: config["app"].as_str().unwrap_or("email").into(),
-                    action: config["action"].as_str().unwrap_or("send_order").into(),
-                    arguments: if action == "action.mail.send" {
-                        json!({"locale":&f.locale[..2],"dryRun":false})
-                    } else {
-                        config["arguments"].clone()
-                    },
-                });
-                steps.push(step);
-            }
-        }
-    }
-    steps
+
+/// The payment instructions added to the event an app action receives.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Instructions {
+    payment_instructions: Value,
 }
-/// Called under the existing automation lock, on every installation transport and release.
-pub(crate) async fn validate_replacement(
-    conn: &mut sqlx::PgConnection,
-    t: &str,
-    m: &apps::Manifest,
-) -> Result<()> {
-    let rows =
-        sqlx::query("SELECT data FROM commerce_flows WHERE tenant=$1 AND data->>'active'='true'")
-            .bind(t)
-            .fetch_all(&mut *conn)
-            .await?;
-    for row in rows {
-        let f: flows::Flow =
-            serde_json::from_value(row.get("data")).map_err(|_| bad("Invalid stored flow"))?;
-        for step in steps(&f) {
-            if step.app_action.as_ref().is_some_and(|a| a.app == m.id) {
-                let h = super::flow_access::headers_on(&mut *conn, t, f.actor.as_deref()).await
-                    .map_err(|_| conflict("Upgrade would invalidate an active flow; update its action and arguments first"))?;
-                validate_manifest_flow(&h, &step, m).map_err(|_| conflict("Upgrade would invalidate an active flow; update its action and arguments first"))?;
-            }
-        }
-    }
-    Ok(())
-}
-fn arguments(
-    action: &apps::Action,
-    base: &Value,
-    key: &str,
-    instruction: &str,
-    event: &Value,
-    kind: &str,
-) -> Value {
-    let mut args = base.clone();
-    let props = &action.input_schema["properties"];
-    // Native order-bound events supply their canonical ID; explicit non-empty
-    // merchant arguments remain unchanged. No string interpolation or AI identity.
-    if props.get("orderId").is_some()
-        && args["orderId"].as_str().is_none_or(str::is_empty)
-        && let Some(id) = event["orderId"].as_str().filter(|id| !id.is_empty())
-    {
-        args["orderId"] = json!(id);
-    }
-    if props.get("kind").is_some() {
-        args["kind"] = json!(kind);
-    }
-    if props.get("requestKey").is_some() {
-        args["requestKey"] = json!(key);
-    }
-    if props.get("event").is_some() {
-        args["event"] = event.clone();
-    }
-    if props.get("template").is_some() && args.get("template").is_none() {
-        args["template"] = json!(instruction);
-    }
-    args
-}
+
 pub(crate) async fn execute_app_flow(
     a: &App,
     t: &str,
@@ -173,6 +42,7 @@ pub(crate) async fn execute_app_flow(
     instruction: &str,
     definition: &Value,
 ) -> Result<Value> {
+    let job: FlowJob = view(definition);
     let target = f
         .app_action
         .as_ref()
@@ -193,40 +63,51 @@ pub(crate) async fn execute_app_flow(
         .find(|x| x.name == target.action)
         .ok_or(bad("Unknown flow app action"))?;
     eligible(act)?;
-    let mut event = if definition["orderId"]
-        .as_str()
-        .is_some_and(|s| !s.is_empty())
-    {
-        json!({"order":definition["orderSnapshot"],"orderId":definition["orderId"]})
+    let mut event = if job.order_id.as_str().is_some_and(|s| !s.is_empty()) {
+        json!({"order":job.order_snapshot,"orderId":job.order_id})
     } else {
-        definition["eventContext"].clone()
+        job.event_context.clone()
     };
     if f.event == "payment.instructions.available"
-        && act.input_schema["properties"].get("event").is_some()
+        && view::<InputSchema>(&act.input_schema)
+            .properties
+            .contains_key("event")
     {
-        if !["payments.instructions.read", "customers.pii"]
-            .iter()
-            .all(|scope| m.permissions.iter().any(|p| p == scope))
-        {
-            return Err(bad(
-                "App needs explicit payment and PII permission for recipient instructions",
-            ));
-        }
-        event["paymentInstructions"] =
-            payments::flow_instructions(a, &h, definition["orderId"].as_str().unwrap_or(""))
-                .await?;
+        require_instruction_grants(&m)?;
+        let payment_instructions =
+            payments::flow_instructions(a, &h, job.order_id.as_str().unwrap_or("")).await?;
+        merge(
+            &mut event,
+            Instructions {
+                payment_instructions,
+            },
+        )?;
     }
-    let args = arguments(act, &target.arguments, id, instruction, &event, &f.event);
+    let args = arguments(act, &target.arguments, (id, instruction), &event, &f.event);
     apps::invoke_app(a, &h, &target.app, &target.action, &args).await
 }
 
-fn eligible(action: &apps::Action) -> Result<()> {
-    if !veyndo::verified_kernel::app_flow_admissible(
-        action.flow_allowed,
-        action.read_only,
-        action.public,
-    ) {
-        return Err(bad("Action is not eligible for flows"));
+#[cfg(test)]
+mod tests {
+    use super::Instructions;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn payment_instructions_keep_the_indexed_event_shape() {
+        let instructions = json!({"iban":"DE00","reference":"R-1"});
+        for event in [json!({"order":{"id":"o-1"},"orderId":"o-1"}), json!(null)] {
+            let mut old = event.clone();
+            old["paymentInstructions"] = instructions.clone();
+            let mut new = event;
+            merge(
+                &mut new,
+                Instructions {
+                    payment_instructions: instructions.clone(),
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
+        }
     }
-    Ok(())
 }

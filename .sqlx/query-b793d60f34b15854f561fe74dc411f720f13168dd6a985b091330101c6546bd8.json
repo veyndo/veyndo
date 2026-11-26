@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE orders SET data=jsonb_set(data,'{revision}',to_jsonb((data->>'revision')::bigint+1)) WHERE tenant=$1 AND id=$2 AND (data->>'revision')::bigint=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b793d60f34b15854f561fe74dc411f720f13168dd6a985b091330101c6546bd8"
+}

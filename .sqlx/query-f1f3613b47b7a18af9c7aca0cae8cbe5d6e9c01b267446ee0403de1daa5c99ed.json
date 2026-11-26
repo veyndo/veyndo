@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id FROM product_assets a JOIN products p ON p.tenant=$1 AND p.id=a.product_id WHERE a.tenant=$2 AND a.id=$3 FOR SHARE OF p",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f1f3613b47b7a18af9c7aca0cae8cbe5d6e9c01b267446ee0403de1daa5c99ed"
+}

@@ -9,13 +9,13 @@ pub struct Money {
 }
 impl Money {
     pub fn decimal(&self) -> String {
-        let currency = veyndo_commerce::money::Currency::new(&self.currency, self.scale)
+        let currency = veyndo_pricing::money::Currency::new(&self.currency, self.scale)
             .expect("parsed source currency");
-        veyndo_commerce::money::Money::new(self.minor, currency).decimal()
+        veyndo_pricing::money::Money::new(self.minor, currency).decimal()
     }
     pub fn parse(v: &Value, currency: &str, scale: u8) -> Result<Self> {
         let currency =
-            veyndo_commerce::money::Currency::new(currency, scale).map_err(str::to_owned)?;
+            veyndo_pricing::money::Currency::new(currency, scale).map_err(str::to_owned)?;
         let s = match v {
             Value::String(s) => s.clone(),
             Value::Number(n) => n.to_string(),
@@ -40,7 +40,7 @@ impl Money {
             format!("{whole}.{kept:0<width$}", width = usize::from(scale))
         };
         let money =
-            veyndo_commerce::money::Money::parse(&decimal, currency).map_err(str::to_owned)?;
+            veyndo_pricing::money::Money::parse(&decimal, currency).map_err(str::to_owned)?;
         Ok(Self {
             currency: money.currency().code().into(),
             scale,

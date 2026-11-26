@@ -178,7 +178,7 @@ impl Inference {
     }
 }
 use protocol::parse;
-mod schema;
 #[cfg(test)]
-mod tests;
+mod provider_tests;
+mod schema;
 use schema::strict_schema;

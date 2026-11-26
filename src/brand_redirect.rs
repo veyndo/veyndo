@@ -1,20 +1,11 @@
 //! Move browser pages to the configured domain while retaining integration and checkout endpoints.
-use crate::*;
+use axum::response::IntoResponse;
+use axum::response::Response;
 use axum::{extract::Request, http::Method, middleware::Next};
+use std::env;
+use veyndo_core::shop_scope::header;
 
-pub(crate) fn domain(value: &str) -> bool {
-    value.len() <= 253
-        && value.contains('.')
-        && value.split('.').all(|part| {
-            !part.is_empty()
-                && part.len() <= 63
-                && !part.starts_with('-')
-                && !part.ends_with('-')
-                && part
-                    .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
-        })
-}
+pub(crate) use veyndo_core::host_names::domain;
 fn destination(host: &str, path: &str, canonical: &str, legacy: &str) -> Option<String> {
     if !domain(canonical) || host.contains('@') || host.contains('/') {
         return None;

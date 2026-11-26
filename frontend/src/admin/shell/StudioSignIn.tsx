@@ -1,4 +1,5 @@
 /** Dedicated login page and blocking reauthentication dialog preserve mounted private editors. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BRAND } from "../../shared/ui/Brand";
@@ -6,7 +7,9 @@ import Icon from "../../shared/ui/Icon";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import { locales } from "../../shared/i18n/i18n";
-import PersonalAccountForm from "../team/PersonalAccountForm";
+import PersonalAccountForm, {
+  type AccountMode,
+} from "../../../../components/identity/ui/admin/team/PersonalAccountForm";
 import AuthenticationChallenge from "../../shared/auth/AuthenticationChallenge";
 import type { useStudioAccess } from "./useStudioAccess";
 import "../styles/studio-sign-in.css";
@@ -21,7 +24,7 @@ export default function StudioSignIn({
 }) {
   const { s, t, locale, setLocale } = useShopText();
   const { x } = useConnectedText();
-  const [mode, setMode] = useState("login"),
+  const [mode, setMode] = useState<AccountMode>("login"),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -68,23 +71,22 @@ export default function StudioSignIn({
       {overlay && (
         <div className="studio-auth-resume">
           <p>{x("resumeBrowserHint")}</p>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
             type="button"
             disabled={busy || auth.checking}
             onClick={() => void run(auth.resume)}
           >
             {x("resumeBrowser")}
-          </button>
+          </Button>
         </div>
       )}
       {!overlay && (
         <div className="account-tabs">
-          {["login", "register", "join"].map((m) => (
-            <button
+          {(["login", "register", "join"] as const).map((m) => (
+            <Button
               key={m}
               type="button"
-              className="studio-secondary"
               aria-pressed={mode === m}
               disabled={busy || auth.checking}
               onClick={() => {
@@ -93,7 +95,7 @@ export default function StudioSignIn({
               }}
             >
               {s(m)}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -120,18 +122,14 @@ export default function StudioSignIn({
       )}
       {auth.checking && <p role="status">{x("checkingSession")}</p>}
       {!overlay && auth.error && (
-        <button className="studio-secondary" onClick={auth.retry}>
+        <Button type="submit" onClick={auth.retry}>
           {t("refresh")}
-        </button>
+        </Button>
       )}
       <div className="studio-auth-footer">
-        <button
-          className="studio-secondary"
-          type="button"
-          onClick={overlay ? auth.logout : onExit}
-        >
+        <Button type="button" onClick={overlay ? auth.logout : onExit}>
           {overlay ? x("leaveStudio") : t("storefront")}
-        </button>
+        </Button>
         {!overlay && (
           <select
             aria-label={t("language")}

@@ -10,7 +10,7 @@ pub async fn once(store: &Store, a: &str) -> Result<bool> {
     let (state, result, delay) = match result {
         Ok(v) => ("completed", v, 0),
         Err(Error::Http(code, retry)) => {
-            let retryable = crate::verified_kernel::notification_retry_admissible(
+            let retryable = veyndo_kernel::verified_kernel::notification_retry_admissible(
                 code == 429,
                 job.attempts as u64,
             );

@@ -1,11 +1,12 @@
 //! Generated conformance driver; invokes the same production policy functions as the commerce server.
+use super::Request;
 use serde_json::{Value, json};
 use veyndo::verified_kernel::*;
-pub(super) fn eval(j: &Value) -> Result<Value, String> {
-    let args = &j["args"];
+pub(super) fn eval(request: &Request) -> Result<Value, String> {
+    let args = &request.args;
     let n = |key: &str| args[key].as_u64().ok_or_else(|| format!("Invalid {key}"));
     let b = |key: &str| args[key].as_bool().ok_or_else(|| format!("Invalid {key}"));
-    match j["function"].as_str() {
+    match request.function.as_deref() {
         Some("ai_price_admissible") => Ok(json!(ai_price_admissible(
             n("price")?,
             n("minimum")?,
@@ -33,6 +34,11 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("final_look")?,
             b("enough_units")?,
             b("positive_bound")?
+        ))),
+        Some("sovereign_request_admissible") => Ok(json!(sovereign_request_admissible(
+            b("sovereign")?,
+            b("own_provider")?,
+            b("self_hosted")?
         ))),
         _ => Err("Unknown policy".into()),
     }

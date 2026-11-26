@@ -2,8 +2,6 @@
 
 This folder owns the Rust modules listed below. Each source begins with its responsibility contract. The crate currently shares internal types/imports through a facade; APIs, MCP and UCP delegate to shared domain operations.
 
-- [`archive.rs`](archive.rs): Recoverable App Studio project deletion; installed packages and app records retain their independent lifecycle.
-- [`version_storage.rs`](version_storage.rs): Required native current environment/compiler/actor/installer admission for the shared version/staging component.
 - [`builds.rs`](builds.rs): Immutable development versions are validated before storage; installation targets only private environments.
 - [`generation.rs`](generation.rs): Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools.
 - [`mod.rs`](mod.rs): Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code.

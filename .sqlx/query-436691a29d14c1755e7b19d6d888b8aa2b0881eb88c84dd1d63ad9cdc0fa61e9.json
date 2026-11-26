@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('rows',rows,'bytes',bytes,'rowLimit',100000,'byteLimit',67108864) AS \"usage!\" FROM app_storage_usage WHERE tenant=$1 AND app=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "usage!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "436691a29d14c1755e7b19d6d888b8aa2b0881eb88c84dd1d63ad9cdc0fa61e9"
+}

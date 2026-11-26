@@ -45,7 +45,7 @@ publication also require the respective domain rights.
 
 Retrieval supplies eligible evidence; it does not train model weights. Sources,
 proposals and actions are distinct steps. See the [intelligence guide](cognitive-commerce.md)
-and [system consistency audit](system-consistency-audit.md) for actual ownership
+and the [source map](source-map.md) for actual ownership
 and remaining gaps. This workshop is not complete MCP/UCP conformance or whole-system
 security certification.
 

@@ -2,6 +2,18 @@
 
 Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 
+## Where screens live
+
+A component's Studio and storefront screens belong in its UI folder,
+`components/<name>/ui/admin/<area>` or `components/<name>/ui/storefront/<area>`,
+not in `frontend/src`. `frontend/src` keeps the entry, shells, shared building blocks
+and `kit/`. A new area goes to the component that owns its data and API; these rules
+apply to both roots, and the gates read them as one tree (`scripts/source-roots.mjs`).
+A component's UI imports another component's UI only along its `components.json`
+dependencies. Do not add a `uses` entry to make an import pass: move a shared part to its
+owner or `frontend/src/shared`, or let the dependent component contribute it through a
+Studio slot.
+
 ## Shared grid ownership
 
 New Studio entity directories reuse `frontend/src/shared/grid/AgenticGrid` and native
@@ -27,7 +39,7 @@ or infer historical order ownership from email. Manual-order review/complete bel
 to `operations/manual_orders.rs`; it uses actor-private native carts, current
 compound rights/PII, selected channel/language/currency and original checkout.
 Keep settings → channel → customer FOR UPDATE → cart lock ordering for this path.
-`manual_order_admission.rs` rechecks final native payment mode and channel/catalog
+`components/checkout/src/store/admin_order.rs` rechecks final native payment mode and channel/catalog
 admission under those locks; no real provider is called by manual orders. The small
 admin-payment decision is an extracted Lean policy; async SQL remains unproved.
 Direct token SQL paths (especially account logout and purchased downloads) must
@@ -48,7 +60,7 @@ Experience self-service entry with public identifiers only. The private service
 owns current Core admission, its durable creation job and original Storyfront import;
 never build a public renderer, second catalogue or new identity broker for this link.
 The ordinary SaaS/channel path must not install Storyfront until explicitly connected.
-See `docs/channel-setup.md` for ownership, setup and evidence boundaries.
+See `docs/channel-management.md` for ownership, setup and evidence boundaries.
 
 ## Personal workspace and standard storefront design ownership
 

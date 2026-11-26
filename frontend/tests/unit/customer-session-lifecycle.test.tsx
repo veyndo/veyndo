@@ -1,7 +1,7 @@
 /** Exercise the actual account consumer: late pagination cannot clear or contaminate a renewed customer. */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useCustomerAccount } from "../../src/storefront/account/useCustomerAccount";
+import { useCustomerAccount } from "../../../components/customers/ui/storefront/account/useCustomerAccount";
 import {
   acceptCustomerSession,
   customerBrowserRequest,

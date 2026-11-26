@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT checksum FROM public.commerce_migrations WHERE version=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "checksum",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "commerce_migrations",
+            "name": "checksum"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f2f4e77676097bf37d3167858a73aaaa64ee34188b31edbfc03f9dae51c7eae8"
+}

@@ -1,7 +1,5 @@
 # Rust standard services and language boundaries
 
-**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. [How to use it, ownership and verification boundaries](connected-workbench.md).
-
 VEYNDO's commerce server and bundled Email Delivery / Google Analytics / Gmail / Slack
 service run in Rust. The connector is a separate process (`cargo build --locked --bin
 connectors`), not provider logic embedded in checkout handlers. Both services use
@@ -44,17 +42,16 @@ issuer is introduced. Its non-root runtime image contains no Python or compiler.
 
 | Module | Responsibility |
 |---|---|
-| `src/bin/connectors.rs` | Process entry only |
+| `src/bin/connectors.rs` | Process entry only; calls the `veyndo-connectors` service crate (`extensions/services/connectors`), which composes the `veyndo-connector-runtime` crate and one `veyndo-provider-<app>` crate per bundled app |
 | `extensions/services/connectors/src/server.rs` | HTTP authentication, OAuth completion, size limits, graceful shutdown |
 | Host `actions.rs`, app `extensions/apps/email/src/email.rs` | Existing app actions, events and exports; unchanged API/MCP/flow contracts |
 | `extensions/apps/email/src/{config,templates}.rs` | Rust setting types, runtime validation, bounded multilingual templates |
-| `crypto.rs`, `store.rs` | Authenticated encryption and transaction-local RLS/configuration context |
-| `queue.rs`, `worker.rs` | PostgreSQL idempotency, tenant admission, fair claims, leases and outcome handling |
-| App `extensions/apps/email/src/smtp.rs`, host `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
-| Host `oauth.rs`, app `src/actions.rs` | Shared single-use state/token fencing; app-owned OAuth scope, protocol and field admission |
-| `extensions/apps/{gmail,google-analytics,slack}/src/`, host `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
-| `legacy.rs` | Explicit atomic offline migration; no automatic import during normal serving |
-| Migration 049 | Six private tenant-scoped tables and forced RLS |
+| Runtime `crypto.rs`, `store.rs` (`extensions/services/connector-runtime/src/`) | Authenticated encryption and transaction-local RLS/configuration context |
+| Runtime `queue.rs`, service `worker.rs` | PostgreSQL idempotency, tenant admission, fair claims, leases and outcome handling |
+| App `extensions/apps/email/src/smtp.rs`, runtime `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
+| Runtime `oauth.rs`, app `extensions/apps/<app>/src/actions.rs` | Shared single-use state/token fencing over the policy the app declares; app-owned OAuth scope, protocol and field admission |
+| `extensions/apps/{gmail,google-analytics,slack}/src/`, runtime `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
+| `extensions/services/connectors/migrations/0001-baseline.sql` | Six private tenant-scoped tables and forced RLS, applied by the commerce setup in the global baseline order |
 
 ## Distributed queue semantics
 
@@ -83,9 +80,10 @@ saved configuration revision and fail after an intervening change/disable. Crede
 are write-only and encrypted; provider/SMTP identity changes clear stale credentials.
 An accepted external mail cannot be recalled. The service drains active work on shutdown.
 
-## Deployment and existing data
+## Deployment
 
-1. Deploy and run commerce migration 049 before starting the new connector.
+1. Run the commerce setup (`BOOTSTRAP_MODE=migrate`) before starting the connector; it refuses to
+   start until the ledger records `connectors/0001-baseline`.
 2. Set `CONNECTOR_DATABASE_URL` (or `DATABASE_URL`), `CONNECTOR_SECRET_KEY` (32-byte URL-safe
    Base64), `CONNECTOR_GATEWAY_TOKEN` and `CONNECTOR_PUBLIC_URL`.
 3. Keep the existing `APP_SERVICES` mappings and OAuth callback URLs. The Compose
@@ -125,34 +123,17 @@ a runtime variable, not a build argument or an unparsed `.env` file. Email crede
 are configured through the app's `configure` action and encrypted in PostgreSQL.
 Configure test mode first; changing hosting does not authorize sending test emails.
 
-For a pre-existing SQLite connector: **stop its worker first**, preserve an encrypted
-SQLite backup and the original Fernet key, build both binaries, then run:
-
-```sh
-python3 -m pip install -r scripts/testing/requirements.txt
-# Existing commerce tenants must already exist in the destination PostgreSQL database.
-CONNECTOR_DATABASE_URL=postgres://... python3 scripts/migrate_connector_state.py /path/to/connectors.sqlite
-python3 scripts/connectors.py start
-```
-
-The one-time Python reader decrypts the old Fernet records and pipes them directly to
-`connectors --import-legacy`; decrypted records are not written to a temporary file or
-printed. Rust re-encrypts everything in one PostgreSQL transaction. Original revisions,
-job IDs, source records and export cursors survive. Previously running jobs become
-uncertain; outstanding OAuth states are deliberately discarded and must be restarted.
-Existing destination configs are rejected instead of overwritten. Keep the original
-SQLite backup until verification completes. The local launcher refuses to silently start
-against an unmigrated local SQLite state. Hosted owners must stop their original service
-and explicitly run this migration before cutting over; no production credentials are
-invented or automatically reconnected.
+There is no import of state from the earlier SQLite/Python connector worker: a release
+replaces earlier installations, and connector configuration is entered again through each
+app's `configure` action.
 
 ## Why Python still exists in the repository
 
 | Python scope | Decision |
 |---|---|
 | Former bundled connector | Ported completely to Rust; archived in `reference/connectors-python/` for differential fixtures, never copied into its runtime image |
-| Verification, original-PHP comparisons, source/coverage checks, documentation generation | Keep as development/CI tools; no request processing or provider delivery |
-| `scripts/connectors.py` and offline migration | Local lifecycle/data migration tools; they launch the compiled Rust service |
+| Verification, source/coverage checks, documentation generation | Keep as development/CI tools; no request processing or provider delivery |
+| `scripts/connectors.py` | Local lifecycle tool; it launches the compiled Rust service |
 | `scripts/mcp_stdio.py` | Optional client-side JSON-RPC bridge; hosted `/mcp` runs in Rust |
 | Product Lab / service-example | Explicit independent third-party-style app examples demonstrating language-independent extensions; not a commerce runtime dependency |
 | Private Storyfront/Experience apps | Separate repositories and product boundary; not imported into the public core |
@@ -162,6 +143,59 @@ Removing all Python tooling would not make API latency lower. The architectural 
 verification tools outside production serving**. Any future bundled provider service must
 follow the Rust rule and use the documented gateway, tenant ownership and durable queue.
 
+## Schema baselines
+
+A fresh installation is the only setup path. `BOOTSTRAP_MODE=migrate` (or `auto`) runs
+`src/migrations.rs`, which applies the files listed in `src/migrations/schema.rs`, each in
+its own transaction under the setup advisory lock, and records `<component>/<file>` with
+the file's SHA-256 in `commerce_migrations`:
+
+| Order | File | Contents |
+| --- | --- | --- |
+| 1 | `components/core/migrations/0000-foundation.sql` | `pg_trgm`/`pgcrypto`, the `veyndo_authority` schema with its per-database random scope key, the signed-scope functions (verbatim section shared with the app-storage host), and the trigger, history and scope functions used by several components |
+| 2 | `components/core/migrations/0001-baseline.sql` | Tenants, outbox, checkpoints, leases and read-context versions, with the two built-in shops |
+| 3 | `extensions/services/connectors/migrations/0001-baseline.sql` | The six `connector_*` tables |
+| 4… | `components/<name>/migrations/0001-baseline.sql` | identity, pricing, catalog, inventory, shop, b2b, marketing, customers, orders, payments, checkout, intelligence, apps, studio |
+
+The order is core first, then dependencies before their users (`components.json` `uses`,
+ties by name); `scripts/components.py` refuses a list in another order or a file that
+creates another component's table. Each baseline holds its tables, sequences and
+functions, the rows a fresh installation starts with, then its constraints, indexes,
+triggers, row security and grants. A foreign key or policy that references a later
+component's table is created in that later component's file.
+
+Readiness (`ready`) requires every baseline with the shipped checksum. Setup refuses a
+database whose ledger records migrations of an earlier release, and a database whose
+recorded baseline differs from the shipped file: there is no upgrade path, rolling
+upgrade or legacy import; set up a new database. The demo data runs after the schema
+from `fixtures/demo/*.sql` and the Rust seed, marked `demo-v1` in the same ledger.
+
+The registered `schema_baseline` suite sets up a new database with the built binary and
+compares a normalized `pg_dump --schema-only` (every statement, sorted, owners left out)
+and the starting rows with `fixtures/schema/reference.sql`. That reference was taken
+from a fresh installation of the last release with incremental migrations (commit
+`ce4285d7`), so the baselines were proven to produce exactly the same schema. A deliberate
+schema change regenerates it with `python3 scripts/schema_baseline.py --write`.
+
+Older guides, audits and the changelog name the incremental migrations 001–113 of
+earlier releases (for example "migration 099"). Their schema is contained in the
+owning component's baseline; the numbered files no longer exist.
+
+## Typed inputs and checked queries
+
+- Component and server functions read JSON inputs and stored documents through typed views
+  (`veyndo_core::document::{view, lenient, Raw, merge}`): a lenient field reads exactly what
+  the JSON accessor read for every shape, proven once in `components/core/src/document.rs`.
+  `scripts/testing/typed_inputs.py` (part of `scripts/structure.py`) refuses a new untyped
+  read of a JSON parameter; the remaining readers are listed by category in
+  `scripts/testing/typed-inputs.json` and the list only shrinks.
+- Store reads written as `sqlx::query_as!` are checked at compile time from the committed
+  `.sqlx` cache (`.cargo/config.toml` sets `SQLX_OFFLINE`, so no build depends on a live
+  database). After adding or changing such a query run `scripts/sqlx_cache.py --write`; it
+  sets up a scratch database from the component baselines and regenerates the cache. The
+  `sql_prepare` suite runs `--check` and fails when the cache no longer matches that schema. Every other
+  static statement is still prepared against the schema by `scripts/sql_prepare.py`.
+
 ## Verification and remaining limits
 
 - Rust parser/template/encryption tests include wrong tenant/app binding, tampering,
@@ -170,96 +204,31 @@ follow the Rust rule and use the documented gateway, tenant ownership and durabl
   provider fixtures: raced idempotency, quotas, leases, ambiguity, OAuth callbacks,
   Gmail/GA4/Slack, knowledge/MCP ingestion, bounded source exports and non-owner/non-bypass
   service instances, plus strict unsafe-role rejection and noisy-neighbor admission.
-- `scripts/email_tests.py` preserves the old reference comparisons and uses the actual
+- `scripts/email_tests.py` compares against the archived Python implementation and uses the actual
   Rust checkout → outbox → Flow Builder → Rust service → SMTP path, including consumer receipts.
-- SMTP STARTTLS/TLS, HTTP wire formats, stale configuration and offline state migration
-  are tested against synthetic fixtures. No real account, payment or external message is used.
+- SMTP STARTTLS/TLS, HTTP wire formats and stale configuration are tested against synthetic fixtures. No real account, payment or external message is used.
 - Lean covers the exact notification retry predicate only; SQL, TLS and provider protocols
   remain tested, unproved adapters. Passing tests does not mean full-system 100% coverage.
 
 No bounce/delivery webhooks, attachments, campaign/suppression system, rotating Slack
 bot tokens, unrestricted mailbox backfill or measured provider throughput are claimed.
 
-## Core hardening owners
+## Runtime hardening owners
 
-- `src/request_context.rs`, `src/auth/{route_policy,identity,abuse,dto}.rs` and `identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
-- `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security,cluster_lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
-- `src/sandbox_cache.rs`, `src/apps/runtime.rs`, `src/assets/image_provider.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
-- `src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
+- `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/identity.rs`, `components/identity/src/http/abuse.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
+- `crates/runtime/src/scoped_pool.rs`, `components/core/src/store/{pool,row_security,lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
+- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `extensions/apps/marketplaces/service/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
+- `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/retention.rs`, `components/core/src/store/outbox_control.rs`, `retention.sql` and the core baseline: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 
-[All eighteen findings, shared architecture and exact limits](core-hardening.md).
+[Security boundaries](security.md).
 
-## Modular B2B and EDI — 12 October 2026
+## Related services
 
-Native company units, current employee rights, private catalogs, currency-bound
-budgets, separate approval, RFQ negotiation, quick order and repeat lists reuse
-the existing checkout, inventory, order, document and Flow owners. The Studio and
-customer account use the same API/MCP contracts. [Setup, source owners and precise
-B2B comparison](b2b-commerce.md). The independent `extensions/apps/edi/` package owns
-bounded EDIFACT/UBL/cXML parsing, mapped private requisition import and immutable
-native document export; no Core codec or second ledger. [EDI profiles, deployment
-and network/certification limits](edi.md).
-
-## Marketplace service
-
-`marketplace-gateway` is a separate Rust binary packaged in
-`extensions/apps/marketplaces/Dockerfile`. Provider logic and UI remain app-owned.
-It uses existing commerce callbacks, revisioned app records, native PostgreSQL job
-leases and outbox; it has no direct database credential or second order queue.
-[Setup, seller authorization and review boundaries](marketplaces.md).
-
-## UCP B2B protocol boundary
-
-`src/ucp/` adapts checkout and the versioned VEYNDO negotiation extension to existing `src/b2b/` owners. Platform-profile fetching reuses the bounded public HTTPS egress client; identity never comes from a profile. RFQs, prices, approvals, budgets, events and orders share native storage and transactions. [Contract, sequence and executable flow](b2b-ucp-negotiation.md).
-
-## Service integrations
-
-Five additional provider packages reuse the Rust connector host: `vercel`,
-`klaviyo`, `hubspot`, `contentful`, `algolia`. Generic key-configuration/dispatch
-is in `extensions/services/connectors/src/integrations/`; protocol code stays
-in each app package. There are no new per-app tables. Contentful feeds the
-existing private knowledge export consumer. See [integration contracts and limits](service-integrations.md).
-
-## Independent App Data reads
-
-The [App Data reader](app-data-service.md) supplies standalone HTTP/OpenAPI/MCP
-and JavaScript access to installed private App list actions with current rights,
-a restricted read-only database and signed shop isolation. Native pages share the
-same query/projection and scope protocol. Complete write/lifecycle hosting and
-cross-service generated UI remain separate tasks.
-
-## Managed portable App records
-
-The [optional App Data write profile](app-data-writes.md) adds approved
-package-bound record changes, original state/history rules and atomic events via
-HTTP/MCP/SDK. Default reader permissions remain separate; native field/reference/
-language/commerce policies retain their owners. Full native-resource,
-settings/jobs and publication hosting remain tracked in the component plan.
-
-## Independent App job supervision
-
-The [optional job supervisor](app-job-supervision-service.md) exposes existing
-job history/detail and approved cancel/retry/resolve/archive through HTTP, MCP
-and SDK. Shared projection/event ownership preserves current rights, package
-binding and original control/lease/CAS semantics in Veyndo. The schema-5 serving
-login cannot create jobs or change worker input/results; execution retains its
-actual producer/consumer owner. [Acceptance](evidence/app-job-supervision-component-2026-11-06.md).
-
-## Independent portable package installation
-
-The [explicit App installation profile](app-package-installation-service.md) uses
-Apps 0.28.0 / Data service 0.4.0 for package review/install through HTTP, MCP and
-the unchanged SDK. The full compiler and original installer/model sequence retain
-exact approval, immutable versions, current personal/live authority and fixed-table
-row/byte budgets. Native model installation supplies its actual compatibility
-policy to the same owner. [Independent and native acceptance](evidence/app-package-installer-component-2026-11-06.md).
-
-## Independent installation settings
-
-The [optional App settings profile](app-settings-service.md) provides HTTP, MCP
-and JavaScript access to declared configuration. It shares native encrypted
-partial updates, package/revision fences and secret-safe projection, with explicit
-personal live administrator admission. The serving role cannot install packages
-or create schema objects. Reader/write profiles retain their separate grants.
-The original vault envelope is shared; existing native ciphertext stays readable.
+| Service | Guide |
+| --- | --- |
+| EDI parsing and export (`extensions/apps/edi/`) | [EDI](edi.md), [B2B commerce](b2b-commerce.md) |
+| Marketplace gateway (`marketplace-gateway`, `extensions/apps/marketplaces/`) | [Marketplace channels](marketplaces.md) |
+| UCP B2B negotiation (`src/ucp/`) | [B2B negotiations through UCP](b2b-ucp-negotiation.md) |
+| Vercel, Klaviyo, HubSpot, Contentful and Algolia packages on the connector host (`extensions/services/connectors/src/integrations/`) | [Service integrations](service-integrations.md) |
+| App Data reader, writes, job supervision, package installation and settings (`extensions/services/app-storage/`) | [Reads](app-data-service.md), [writes](app-data-writes.md), [jobs](app-job-supervision-service.md), [installation](app-package-installation-service.md), [settings](app-settings-service.md) |

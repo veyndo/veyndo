@@ -1,5 +1,38 @@
 # Changelog
 
+## Component architecture (release candidate)
+
+- Split the commerce server into 22 components declared in `components.json`, each
+  with its tables, `types/`, `domain/`, `store/`, `service/`, `http/` and `ports.rs`;
+  the server composes them and keeps the MCP, UCP and capability adapters.
+- Refuse dependency cycles and mutual component pairs; replace most direct accesses to
+  another component's tables with owner store functions and 47 port traits (61
+  remaining accesses, each with a written reason).
+- Keep SQL in `store/` modules only; check 1,267 queries at compile time from the
+  committed `.sqlx` cache.
+- Read stored JSON and request bodies through typed views and DTOs instead of untyped
+  field access.
+- Replace the 110 incremental migrations by one schema baseline per component plus a
+  shared foundation; prove a fresh installation equals the last incremental release.
+- Move every Studio and storefront screen into its component's `ui/` folder; type every
+  request path from the route catalogue; enforce the component dependency direction in
+  the UI.
+- Add property tests, store isolation under forced row security, port contract tests,
+  generated HTTP and MCP contract cases, mutation testing of `domain/`, coverage floors
+  per component and browser journeys.
+- Prove the per-order stock bound and the order and payment state machines over request
+  sequences (72 proved rules, 197 properties); list every commerce `domain/` function as
+  bound to a proved rule or unproved with a reason; compare Rust and Lean on 228,195 cases.
+- Generate standalone mirrors of the 19 components with a crate and check that each builds
+  and tests alone.
+- Remove the upgrade path: legacy migrations and checksum compatibility, the hosted-app
+  backfill, the connector `--import-legacy` flag and `scripts/migrate_connector_state.py`.
+  Setup refuses a database created by an earlier release; data of a deployed earlier
+  release is not carried over.
+- Open before acceptance: one complete suite run on the merged build, the two-replica
+  regression, the benchmark comparison and the production image check.
+  [Release notes](docs/current-release.md#component-architecture--release-candidate).
+
 ## Sovereign AI mode
 
 - Add one operator switch, and the deployment variable `SOVEREIGN_AI=true`,
@@ -829,7 +862,7 @@ minimized Flow events preserve existing boundaries. Local actual-service tests
 cover second purchase, guest/foreign denial, idempotent revocation, delayed
 confirmation and restart without duplicate capture. Hosted rollout and actual
 provider acceptance remain pending; automatic recurring debits remain separate.
-See [saved payment methods](docs/payment-saved-methods.md).
+See [saved payment methods](docs/payments.md#saved-payment-methods).
 
 ## Invoice PDFs and email, 3 November 2026
 
@@ -844,7 +877,7 @@ and external account acceptance remain separate.
 
 ## Invoice checkout 1.5.0, 3 November 2026
 
-Feature branch: deferred private invoice-source creation, immutable recipient instructions, durable pending review, stable native references, same-key and verified-webhook recovery, and conservative cancellation. Typed customer/compound merchant HTTP/MCP reads and a four-language responsive checkout display reuse the existing payment ledger and worker. Local Rust/Core/PostgreSQL and 17-method simulation acceptance; hosted migration/rollout and external account tests remain separate. See [the invoice guide](docs/payment-invoice-checkout.md).
+Feature branch: deferred private invoice-source creation, immutable recipient instructions, durable pending review, stable native references, same-key and verified-webhook recovery, and conservative cancellation. Typed customer/compound merchant HTTP/MCP reads and a four-language responsive checkout display reuse the existing payment ledger and worker. Local Rust/Core/PostgreSQL and 17-method simulation acceptance; hosted migration/rollout and external account tests remain separate. See [the invoice guide](docs/payments.md#invoice-payment-and-recipient-details).
 
 ## Payment transaction details, 3 November 2026
 
@@ -2059,7 +2092,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Expose B2B entity history over the shared MCP schema and company/unit Studio controls. Restore configuration with current revision and native allocation/hierarchy validation; financial history remains inspection-only.
 - Clone/publish selected B2B company/unit policies and catalog selection through shared transactional writers, preserving live employees/spending and denying hidden/unauthorized changes.
 - Include B2B method/currency dependencies and monetary-storage guards in existing configuration/release owners. Add actual PostgreSQL/HTTP and UI regressions; no new commerce ledger or plugin source relocation.
-- Refresh owner documentation, README and complete rendered documentation. [Audit matrix and boundaries](docs/feature-integration.md).
+- Refresh owner documentation, README and complete rendered documentation. Audit matrix and boundaries.
 
 ## Visitor behavior intelligence — 12 October 2026
 
@@ -2168,7 +2201,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Route approved whole-catalogue translation proposals into the existing durable draft queue, with a direct review link and idempotent replay.
 - Explain consent-bound personalization and prevent cross-shop/cart state or delayed-response reuse.
 - Companion private changes checkpoint completed imports and protect payment referral replay/disconnect state.
-- [Architecture, usage, tests and precise remaining boundaries](docs/connected-workbench.md). Local fixtures are not live-provider or hosted acceptance.
+- Architecture, usage, tests and precise remaining boundaries. Local fixtures are not live-provider or hosted acceptance.
 
 ## Storyfront connection consent — 2026-10-09
 
@@ -2233,7 +2266,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Fix merchant-registration slug validation for modern browsers; add valid/invalid slug regression coverage. Repeat the full original Storyfront suite and actual product history/app publish journeys.
 - Fix the real mail/Flow regression fixture to honor the existing native PostgreSQL selector instead of hard-coding Docker; the same fixture retains Docker CI support.
 
-[Detailed changes, tests and limitations](docs/release-acceptance-2026-10-09.md). Historical recordings and performance measurements keep their original source/date.
+Detailed changes, tests and limitations. Historical recordings and performance measurements keep their original source/date.
 
 ## Request hotpath and delivery — 8 October 2026
 
@@ -2282,5 +2315,5 @@ production-readiness or complete Shopware-compatibility claim.
 - Sandbox verification uses local contract fixtures; live Sandbox traffic is unverified.
 - Clear commerce-first quickstart, searchable guides and contributor information.
 
-Payments are simulated, manual or Sandbox; no real money is charged. See [the feature matrix](docs/shopware-parity.md),
-[verification record](docs/verification.json) and current CI for exact scope.
+Payments are simulated, manual or Sandbox; no real money is charged. See [feature overview](docs/features.md),
+verification record and current CI for exact scope.

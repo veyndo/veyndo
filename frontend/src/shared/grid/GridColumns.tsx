@@ -1,4 +1,5 @@
 /** Accessible column ordering/visibility controls provide keyboard and touch alternatives to drag headers. */
+import { Button } from "../../kit/ui";
 import { useRef, useEffect } from "react";
 import Icon from "../ui/Icon";
 import { useGridText } from "./grid-i18n";
@@ -115,9 +116,9 @@ export default function GridColumns({
           />
           {g("compact")}
         </label>
-        <button type="button" className="studio-secondary" onClick={onReset}>
+        <Button type="button" onClick={onReset}>
           {g("reset")}
-        </button>
+        </Button>
       </div>
     </details>
   );

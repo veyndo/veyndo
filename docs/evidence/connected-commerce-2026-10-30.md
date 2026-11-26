@@ -2,7 +2,6 @@
 
 30 October 2026. Branch `feat/connected-commerce-followups-20261030`, based on
 `20dd5dad`. Local development and subsequent public observations are separated below.
-The [13-area checklist](../plans/2026-10-30-connected-commerce.md) remains open.
 
 ## Native behavior
 

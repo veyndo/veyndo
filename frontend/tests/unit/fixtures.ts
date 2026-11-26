@@ -1,4 +1,4 @@
-import { permissionScopes } from "../../src/admin/team/permission-i18n";
+import { permissionScopes } from "../../../components/identity/ui/admin/team/permission-i18n";
 export const ownerRights = permissionScopes;
 /** Explicit synthetic domain fixtures; never copied from real merchant/customer data. */
 import type { Cart, Product, Detail } from "../../src/shared/api/shop-api";

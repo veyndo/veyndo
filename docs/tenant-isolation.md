@@ -39,16 +39,11 @@ member of both; an integration key remains bound to one workspace.
 On the pre-migration schema, an internal SQL write could associate a record under
 shop A with shop B's cart. Only cart ID existence was checked. Adversarial API
 probes did **not** demonstrate a remote bypass; the defect was missing relational
-containment if an application query were wrong. Migration 038 makes PostgreSQL
+containment if an application query were wrong. The schema baseline makes PostgreSQL
 reject these relationships with SQLSTATE `23503`. Refunds additionally bind the
 job and its exact payment attempt. Environment/build references bind the same
-live workspace. Existing rows are validated atomically: migration failure leaves
-the ledger/data unchanged and requires investigation, never silent reassignment.
-
-The migration retains legacy keys and adds indexed unique target tuples. It scans
-existing rows and takes DDL locks; schedule it as a controlled migration on a
-large/live installation. It does not add per-request network trips or change
-canonical object IDs. Its write/index overhead is not yet benchmarked at SaaS scale.
+live workspace. The baselines keep the object keys and add indexed unique target tuples. They do
+not add per-request network trips or change canonical object IDs. Its write/index overhead is not yet benchmarked at SaaS scale.
 
 ## Continuous real regression
 
@@ -80,7 +75,7 @@ claim of exhaustive endpoint coverage or a penetration-test certificate.
 
 ## Core RLS and strict runtime mode
 
-Migration 044 adds forced row policies to current public core tenant tables.
+Every tenant table of the commerce baselines has forced row policies.
 Managed app tables retain their existing forced policy. `tenant_scope.rs` carries
 server-derived task context; SQLx pool hooks bind fresh/reused connections and
 clear them on release. The actual query uses that same borrowed connection.

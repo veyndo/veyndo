@@ -1,12 +1,15 @@
 //! Tenant-scoped, resumable AI translation drafts; applying is revision checked and emits native product events.
-use crate::*;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 mod apply;
-mod fields;
 mod routes;
 pub(crate) mod selection;
 mod worker;
 pub(crate) use apply::apply;
-pub(crate) use routes::{admit_provider, control, create, detail, enqueue, list};
+pub(crate) use routes::{control, create, detail, list};
 pub(crate) use worker::once;
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -23,6 +26,6 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/translations/{id}/apply",
             &[("POST", "catalog.write")],
-            post(apply::apply),
+            post(veyndo_catalog::http::translations::apply),
         )
 }

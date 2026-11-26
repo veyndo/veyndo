@@ -3,7 +3,7 @@ import { contentText } from "../../../../frontend/src/shared/i18n/content-langua
 import { useEffect, type ReactNode } from "react";
 import { useAppRegistry } from "../../../../frontend/src/shared/apps/AppSurfaces";
 import { useStorefront } from "../../../../frontend/src/storefront/shell/StorefrontContext";
-import { productURL } from "../../../../frontend/src/storefront/catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { effectivePages, inheritedTheme, explicitTheme } from "../model";
 import SiteRenderer from "../Renderer";
 import { useEditorText } from "../studio/editor-i18n";
@@ -122,9 +122,9 @@ export default function ShopSite({ fallback }: { fallback: ReactNode }) {
           const product = selection.products.find((p) => p.id === id);
           if (product) location.href = productURL(product);
         }}
-        onAdd={(id) => {
+        onAdd={(id, quantity = 1) => {
           const p = selection.products.find((p) => p.id === id);
-          if (p) void c.add(p.id, 1);
+          if (p) void c.add(p.id, quantity);
         }}
       />
     </main>

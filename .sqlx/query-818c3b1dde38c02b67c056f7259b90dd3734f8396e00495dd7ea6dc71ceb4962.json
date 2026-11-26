@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tasks SET run_state='cancelled',run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE (tenant=$1 OR tenant IN(SELECT tenant FROM shop_environments WHERE live_tenant=$1)) AND run_state IN('queued','running','uncertain')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "818c3b1dde38c02b67c056f7259b90dd3734f8396e00495dd7ea6dc71ceb4962"
+}

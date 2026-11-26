@@ -8,12 +8,12 @@ adapters.
 
 ## Run it with Veyndo
 
-The Core profile keeps migration 049 and the existing app gateway contract.
+The Core profile sets up the connector tables (`extensions/services/connectors/migrations/0001-baseline.sql`) and keeps the existing app gateway contract.
 Build the binary from the private [Connector repository](https://github.com/veyndo/connectors)
 with `cargo build --locked --bin connectors`, or build its root Dockerfile.
 For a build from this repository, use the existing Compose connected-apps
 profile. Keep the existing provider configuration and encryption key when
-switching images. See [Rust services](rust-services.md#deployment-and-existing-data)
+switching images. See [Rust services](rust-services.md#deployment)
 for database roles, configuration and recovery.
 
 On 10 November 2026, Northflank switched the existing service to the
@@ -71,7 +71,7 @@ The standalone journey commits an order while the app worker is stopped,
 starts that worker, and replays checkout with the same key. It checks the
 original order ID, one completed Flow and one SMTP receipt with its order
 number. The shop's order transaction stays on Core. See [current hosted
-status](status.md#connector-composition-and-public-response-times-9-november-2026)
+status](status.md#hosted-pilot-earlier-release)
 for the image and measurement scope.
 
 To include the private Checkout service, build it separately and use its

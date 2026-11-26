@@ -1,0 +1,388 @@
+/* Styles of the kit/ui atoms and molecules; colours, spacing, radii and type come only from design tokens. */
+.vy-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.vy-button {
+  /* Content width in grid layouts; contexts that want full width set it. */
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vy-space-2);
+  min-height: 40px;
+  padding: 0 var(--vy-space-4);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  font: inherit;
+  font-size: var(--vy-font-size-base);
+  font-weight: var(--vy-font-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--vy-motion-fast) var(--vy-motion-easing),
+    border-color var(--vy-motion-fast) var(--vy-motion-easing);
+}
+a.vy-button {
+  text-decoration: none;
+}
+.vy-button[data-size="sm"] {
+  min-height: 32px;
+  padding: 0 var(--vy-space-3);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-button:hover:not(:disabled) {
+  background: var(--vy-color-hover);
+}
+.vy-button[data-tone="primary"] {
+  border-color: var(--vy-color-accent);
+  background: var(--vy-color-accent);
+  color: var(--vy-color-accent-text);
+}
+.vy-button[data-tone="primary"]:hover:not(:disabled) {
+  background: var(--vy-color-accent);
+  filter: brightness(1.08);
+}
+.vy-button[data-tone="ghost"] {
+  border-color: transparent;
+  background: transparent;
+}
+.vy-button[data-tone="danger"] {
+  border-color: var(--vy-color-danger);
+  color: var(--vy-color-danger);
+}
+.vy-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.vy-icon-button {
+  width: 40px;
+  padding: 0;
+}
+.vy-icon-button[data-size="sm"] {
+  width: 32px;
+}
+:where(
+  .vy-button,
+  .vy-input,
+  .vy-switch button,
+  [role="tab"],
+  [role="menuitem"],
+  .vy-check input
+):focus-visible {
+  outline: 2px solid var(--vy-color-focus);
+  outline-offset: 2px;
+}
+.vy-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--vy-radius-pill);
+  animation: vy-spin 0.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vy-spinner {
+    animation-duration: 2.4s;
+  }
+}
+@keyframes vy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.vy-spinner-status {
+  display: inline-flex;
+}
+.vy-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--vy-space-2);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-panel);
+  color: var(--vy-color-text);
+  font-size: var(--vy-font-size-xs);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-badge[data-tone="accent"] {
+  background: var(--vy-color-accent-soft);
+  color: var(--vy-color-accent);
+}
+.vy-badge[data-tone="positive"],
+.vy-notice[data-tone="positive"] {
+  color: var(--vy-color-positive);
+}
+.vy-badge[data-tone="warning"],
+.vy-notice[data-tone="warning"] {
+  color: var(--vy-color-warning);
+}
+.vy-badge[data-tone="danger"],
+.vy-notice[data-tone="danger"] {
+  color: var(--vy-color-danger);
+}
+.vy-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vy-space-3);
+  padding: var(--vy-space-3) var(--vy-space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--vy-radius-md);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+}
+.vy-notice[data-tone="accent"] {
+  border-color: var(--vy-color-accent);
+  background: var(--vy-color-accent-soft);
+}
+.vy-notice div {
+  display: grid;
+  gap: var(--vy-space-1);
+}
+.vy-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--vy-space-2);
+  padding: var(--vy-space-8) var(--vy-space-4);
+  color: var(--vy-color-muted);
+  text-align: center;
+}
+.vy-empty h3 {
+  margin: 0;
+  color: var(--vy-color-text);
+  font-size: var(--vy-font-size-lg);
+}
+.vy-empty p {
+  margin: 0;
+}
+.vy-field {
+  display: grid;
+  gap: var(--vy-space-1);
+}
+.vy-field > label {
+  font-size: var(--vy-font-size-md);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-field-hint,
+.vy-field-error {
+  margin: 0;
+  font-size: var(--vy-font-size-sm);
+  color: var(--vy-color-muted);
+}
+.vy-field-error {
+  color: var(--vy-color-danger);
+}
+.vy-input {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--vy-space-2) var(--vy-space-3);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  font: inherit;
+}
+/* Doubled class: page-wide input rules must not override the token colours. */
+.vy-input.vy-input {
+  border-color: var(--vy-color-border);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+}
+.vy-input.vy-input[aria-invalid="true"] {
+  border-color: var(--vy-color-danger);
+}
+.vy-check,
+.vy-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vy-space-2);
+}
+.vy-check {
+  display: flex;
+  width: fit-content;
+}
+.vy-check input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+.vy-switch button {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-panel);
+  cursor: pointer;
+}
+.vy-switch button span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-muted);
+  transition: transform var(--vy-motion-fast) var(--vy-motion-easing);
+}
+.vy-switch button[aria-checked="true"] {
+  border-color: var(--vy-color-accent);
+  background: var(--vy-color-accent);
+}
+.vy-switch button[aria-checked="true"] span {
+  background: var(--vy-color-accent-text);
+  transform: translateX(16px);
+}
+.vy-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: var(--vy-space-4);
+  background: color-mix(in srgb, var(--vy-color-text) 40%, transparent);
+}
+.vy-dialog {
+  display: grid;
+  /* One column no wider than the dialog: a long token (package hash, URL) wraps
+     instead of widening the content and pushing the actions out of view. */
+  grid-template-columns: minmax(0, 1fr);
+  overflow-wrap: anywhere;
+  gap: var(--vy-space-3);
+  width: min(520px, 100%);
+  max-height: calc(100dvh - 2 * var(--vy-space-4));
+  overflow: auto;
+  padding: var(--vy-space-6);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  box-shadow: var(--vy-shadow-lg);
+}
+.vy-dialog h2 {
+  margin: 0;
+  font-size: var(--vy-font-size-xl);
+}
+.vy-dialog > p {
+  margin: 0;
+  color: var(--vy-color-muted);
+}
+.vy-dialog footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--vy-space-2);
+}
+.vy-tabs [role="tablist"] {
+  display: flex;
+  gap: var(--vy-space-1);
+  border-bottom: 1px solid var(--vy-color-border);
+  overflow-x: auto;
+}
+.vy-tabs[data-orientation="vertical"] {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--vy-space-4);
+}
+.vy-tabs[data-orientation="vertical"] [role="tablist"] {
+  flex-direction: column;
+  border-bottom: 0;
+  border-right: 1px solid var(--vy-color-border);
+}
+.vy-tabs [role="tab"] {
+  padding: var(--vy-space-2) var(--vy-space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--vy-color-muted);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.vy-tabs [role="tab"][aria-selected="true"] {
+  border-bottom-color: var(--vy-color-accent);
+  color: var(--vy-color-text);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-tabs [role="tabpanel"] {
+  padding-top: var(--vy-space-4);
+}
+.vy-menu {
+  position: relative;
+  display: inline-block;
+}
+.vy-menu-list {
+  position: absolute;
+  z-index: 900;
+  top: calc(100% + var(--vy-space-1));
+  left: 0;
+  display: grid;
+  min-width: 180px;
+  padding: var(--vy-space-1);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-md);
+  background: var(--vy-color-surface);
+  box-shadow: var(--vy-shadow-sm);
+}
+.vy-menu-list [role="menuitem"] {
+  padding: var(--vy-space-2) var(--vy-space-3);
+  border: 0;
+  border-radius: var(--vy-radius-sm);
+  background: transparent;
+  color: var(--vy-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.vy-menu-list [role="menuitem"]:hover:not(:disabled),
+.vy-menu-list [role="menuitem"]:focus-visible {
+  background: var(--vy-color-hover);
+}
+.vy-menu-list [role="menuitem"][data-tone="danger"] {
+  color: var(--vy-color-danger);
+}
+.vy-stack {
+  display: flex;
+  flex-direction: column;
+}
+.vy-stack[data-direction="row"] {
+  flex-direction: row;
+}
+.vy-stack[data-wrap] {
+  flex-wrap: wrap;
+}
+.vy-stack[data-align="start"] {
+  align-items: flex-start;
+}
+.vy-stack[data-align="center"] {
+  align-items: center;
+}
+.vy-stack[data-align="end"] {
+  align-items: flex-end;
+}
+.vy-card {
+  display: block;
+  min-width: 0;
+  padding: var(--vy-space-5);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+  box-shadow: var(--vy-shadow-sm);
+}
+.vy-card > header {
+  margin-bottom: var(--vy-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vy-space-3);
+}
+.vy-card > header :is(h2, h3, h4) {
+  margin: 0;
+  font-size: var(--vy-font-size-lg);
+}

@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import AutopilotToday, {
   type AutopilotStatus,
-} from "../../src/admin/intelligence/AutopilotToday";
+} from "../../../components/intelligence/ui/admin/intelligence/AutopilotToday";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
 const status = (change: Partial<AutopilotStatus> = {}): AutopilotStatus => ({

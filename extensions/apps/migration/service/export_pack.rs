@@ -88,7 +88,7 @@ pub fn run(args: &[String]) -> Result<()> {
         timezone: c.timezone.clone(),
     };
     context.validate()?;
-    veyndo_commerce::money::Currency::new(&c.currency, c.scale).map_err(str::to_owned)?;
+    veyndo_pricing::money::Currency::new(&c.currency, c.scale).map_err(str::to_owned)?;
     if ![
         "products",
         "categories",

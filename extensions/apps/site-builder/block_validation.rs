@@ -1,5 +1,9 @@
 //! App-owned block admission with bounded field paths; never echo untrusted content in errors.
-use super::*;
+use super::{Block, safe_image};
+use veyndo_app_model::declarations::identifier;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
 
 fn invalid(index: usize, field: &str, rule: &str) -> Error {
     bad(format!("content.blocks[{index}].{field}: {rule}"))
@@ -19,15 +23,26 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
             return Err(invalid(i, "id", "must be unique within this page"));
         }
         if ![
-            "hero", "text", "products", "image", "form", "articles", "app", "native",
+            "hero", "text", "products", "image", "form", "articles", "app", "native", "part",
         ]
         .contains(&b.kind.as_str())
         {
             return Err(invalid(
                 i,
                 "kind",
-                "use hero, text, products, image, form, articles, app or native",
+                "use hero, text, products, image, form, articles, app, native or part",
             ));
+        }
+        if (b.kind == "part") != b.part.is_some() {
+            return Err(invalid(
+                i,
+                "part",
+                "required only for kind=part; omit it for other kinds",
+            ));
+        }
+        if let Some(part) = &b.part {
+            super::part_schemas::validate(&part.id, part.version, &part.config)
+                .map_err(|(path, rule)| invalid(i, &path, &rule))?;
         }
         if (b.kind == "app") != b.extension.is_some() {
             return Err(invalid(
@@ -47,7 +62,8 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
         }
         if b.text.len() > 100
             || b.text.iter().any(|(k, v)| {
-                !commerce::valid_locale_key(k) || v.as_ref().is_some_and(|s| s.len() > 2000)
+                !veyndo_core::localized::valid_locale_key(k)
+                    || v.as_ref().is_some_and(|s| s.len() > 2000)
             })
         {
             return Err(invalid(
@@ -62,7 +78,8 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
         ] {
             if map.len() > 100
                 || map.iter().any(|(l, v)| {
-                    !commerce::valid_locale_key(l) || v.as_ref().is_some_and(|s| s.len() > limit)
+                    !veyndo_core::localized::valid_locale_key(l)
+                        || v.as_ref().is_some_and(|s| s.len() > limit)
                 })
             {
                 return Err(invalid(
@@ -89,7 +106,8 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
             return Err(invalid(i, "fields", "use at most 12 form fields"));
         }
         if !b.rich.is_null() {
-            assets::validate_rich(&b.rich).map_err(|e| invalid(i, "rich", &e.1))?;
+            veyndo_catalog::domain::rich::validate_rich(&b.rich)
+                .map_err(|e| invalid(i, "rich", &e.1))?;
         }
         if !b.image.is_empty() && !safe_image(&b.image) {
             return Err(invalid(
@@ -118,7 +136,7 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
                 || f.label.len() > 100
                 || f.label
                     .iter()
-                    .any(|(l, s)| !commerce::valid_locale_key(l) || s.len() > 100)
+                    .any(|(l, s)| !veyndo_core::localized::valid_locale_key(l) || s.len() > 100)
             {
                 return Err(invalid(
                     i,

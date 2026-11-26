@@ -4,9 +4,12 @@ import { it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import ReportBoard from "../../src/admin/reports/ReportBoard";
-import { defaultReports, type ReportData } from "../../src/admin/reports/model";
-import { reportCSV } from "../../src/admin/reports/export";
+import ReportBoard from "../../../components/studio/ui/admin/reports/ReportBoard";
+import {
+  defaultReports,
+  type ReportData,
+} from "../../../components/studio/ui/admin/reports/model";
+import { reportCSV } from "../../../components/studio/ui/admin/reports/export";
 const report: ReportData = {
   totals: [
     {

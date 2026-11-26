@@ -1,7 +1,7 @@
 /** Cross-view diagnostics locate broken references without demanding optional features. */
 import { expect, it } from "vitest";
-import { template } from "../../src/admin/developer/app-model";
-import { diagnoseConnections } from "../../src/admin/developer/app-connections";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
+import { diagnoseConnections } from "../../../components/apps/ui/admin/developer/app-connections";
 it("accepts a compiled native template without demanding optional hooks or secrets", () => {
   expect(diagnoseConnections(template())).toEqual([]);
 });

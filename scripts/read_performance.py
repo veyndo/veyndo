@@ -275,7 +275,7 @@ if env.get('PERFORMANCE_BASELINE_BIN'):
             close(server)
         reports[label] = {'binarySha256': hashlib.sha256(Path(binary).read_bytes()).hexdigest(), 'workloads': measured}
     source = hashlib.sha256()
-    for path in sorted([*ROOT.joinpath('src').rglob('*.rs'), *ROOT.joinpath('src').rglob('*.sql'), *ROOT.joinpath('migrations').glob('*.sql'), ROOT/'Cargo.toml', ROOT/'Cargo.lock']):
+    for path in sorted([*ROOT.joinpath('src').rglob('*.rs'), *ROOT.joinpath('src').rglob('*.sql'), *ROOT.joinpath('components').glob('*/migrations/*.sql'), ROOT/'Cargo.toml', ROOT/'Cargo.lock']):
         source.update(str(path.relative_to(ROOT)).encode());source.update(path.read_bytes())
     for name in delivery['before']:
         assert delivery['before'][name]['responseSha256'] == delivery['after'][name]['responseSha256'], 'Delivery model changed: '+name

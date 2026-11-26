@@ -1,4 +1,5 @@
 /** Read-only model planning over domain-owned criteria; explicit review precedes any list query. */
+import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import Icon from "../ui/Icon";
 import { useGridText } from "./grid-i18n";
@@ -128,14 +129,14 @@ export default function GridAgent({
                 )}
               />
             </label>
-            <button
+            <Button
+              tone="primary"
               type="submit"
-              className="studio-primary"
               disabled={busy || !prompt.trim()}
             >
               <Icon name="spark" />
               {g(busy ? "planning" : "plan")}
-            </button>
+            </Button>
           </form>
           <p className="muted">{g("agentHint")}</p>
           {error && <p role="alert">{error}</p>}
@@ -154,23 +155,19 @@ export default function GridAgent({
                   </span>
                 ))}
               </div>
-              <button
+              <Button
+                tone="primary"
                 type="button"
-                className="studio-primary"
                 onClick={() => {
                   onApply(plan);
                   close();
                 }}
               >
                 {g("apply")}
-              </button>
-              <button
-                type="button"
-                className="studio-secondary"
-                onClick={close}
-              >
+              </Button>
+              <Button type="button" onClick={close}>
                 {g("cancel")}
-              </button>
+              </Button>
             </div>
           )}
         </div>

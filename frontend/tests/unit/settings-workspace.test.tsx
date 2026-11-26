@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import SettingsWorkspace from "../../src/admin/settings/SettingsWorkspace";
-import MasterDataSettings from "../../src/admin/settings/MasterDataSettings";
+import SettingsWorkspace from "../../../components/shop/ui/admin/settings/SettingsWorkspace";
+import MasterDataSettings from "../../../components/shop/ui/admin/settings/MasterDataSettings";
 const initial = {
   revision: 3,
   data: {

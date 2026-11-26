@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET language_id=$1,sales_channel_id=$2,company=NULLIF($5,'') WHERE tenant=$3 AND email=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "062a815a6d99b3eeaa250890e7c19a6b39805e6adfd1527150560b188f40e397"
+}

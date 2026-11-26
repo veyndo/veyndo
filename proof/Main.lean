@@ -15,6 +15,8 @@ def evalRequest (j : Json) : Except String Json := do
   | "native_asset_bypass" => pure (toJson (native_asset_bypass ((← (args.getObjVal? "native_asset") >>= Json.getBool?)) ((← (args.getObjVal? "hosted") >>= Json.getBool?))))
   | "auth_factor_admissible" => pure (toJson (auth_factor_admissible ((← (args.getObjVal? "required") >>= Json.getBool?)) ((← (args.getObjVal? "verified") >>= Json.getBool?))))
   | "persistent_key_admissible" => pure (toJson (persistent_key_admissible ((← (args.getObjVal? "personal") >>= Json.getBool?)) ((← (args.getObjVal? "administrator") >>= Json.getBool?))))
+  | "merchant_scope_admissible" => pure (toJson (merchant_scope_admissible ((← (args.getObjVal? "has_credential") >>= Json.getBool?)) ((← (args.getObjVal? "same_shop") >>= Json.getBool?))))
+  | "workspace_length_admissible" => pure (toJson (workspace_length_admissible ((← (args.getObjVal? "length") >>= Json.getNat?))))
   | "planning_request_admissible" => pure (toJson (planning_request_admissible ((← (args.getObjVal? "read_only") >>= Json.getBool?)) ((← (args.getObjVal? "planning_post") >>= Json.getBool?))))
   | "agent_preview_admissible" => pure (toJson (agent_preview_admissible ((← (args.getObjVal? "active") >>= Json.getBool?)) ((← (args.getObjVal? "private_preview") >>= Json.getBool?)) ((← (args.getObjVal? "personal") >>= Json.getBool?)) ((← (args.getObjVal? "same_owner") >>= Json.getBool?)) ((← (args.getObjVal? "current") >>= Json.getBool?))))
   | "app_flow_admissible" => pure (toJson (app_flow_admissible ((← (args.getObjVal? "allowed") >>= Json.getBool?)) ((← (args.getObjVal? "read_only") >>= Json.getBool?)) ((← (args.getObjVal? "is_public") >>= Json.getBool?))))
@@ -41,6 +43,7 @@ def evalRequest (j : Json) : Except String Json := do
   | "notification_retry_admissible" => pure (toJson (notification_retry_admissible ((← (args.getObjVal? "rate_limited") >>= Json.getBool?)) ((← (args.getObjVal? "attempts") >>= Json.getNat?))))
   | "discount_cap" => pure (toJson (discount_cap ((← (args.getObjVal? "total") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "stock_admissible" => pure (toJson (stock_admissible ((← (args.getObjVal? "stock") >>= Json.getNat?)) ((← (args.getObjVal? "quantity") >>= Json.getNat?))))
+  | "reservation_admissible" => pure (toJson (reservation_admissible ((← (args.getObjVal? "ordered") >>= Json.getNat?)) ((← (args.getObjVal? "held") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "refund_admissible" => pure (toJson (refund_admissible ((← (args.getObjVal? "captured") >>= Json.getNat?)) ((← (args.getObjVal? "refunded") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "capture_admissible" => pure (toJson (capture_admissible ((← (args.getObjVal? "authorized") >>= Json.getNat?)) ((← (args.getObjVal? "captured") >>= Json.getNat?)) ((← (args.getObjVal? "reserved") >>= Json.getNat?)) ((← (args.getObjVal? "requested") >>= Json.getNat?))))
   | "revision_admissible" => pure (toJson (revision_admissible ((← (args.getObjVal? "current") >>= Json.getNat?)) ((← (args.getObjVal? "expected") >>= Json.getNat?))))
@@ -56,7 +59,13 @@ def evalRequest (j : Json) : Except String Json := do
   | "external_amount_admissible" => pure (toJson (external_amount_admissible ((← (args.getObjVal? "gross") >>= Json.getNat?)) ((← (args.getObjVal? "tax") >>= Json.getNat?)) ((← (args.getObjVal? "rate") >>= Json.getNat?))))
   | "external_paid_total_admissible" => pure (toJson (external_paid_total_admissible ((← (args.getObjVal? "paid") >>= Json.getBool?)) ((← (args.getObjVal? "calculated") >>= Json.getNat?)) ((← (args.getObjVal? "declared") >>= Json.getNat?))))
   | "admin_payment_admissible" => pure (toJson (admin_payment_admissible ((← (args.getObjVal? "is_admin") >>= Json.getBool?)) ((← (args.getObjVal? "manual") >>= Json.getBool?)) ((← (args.getObjVal? "simulated") >>= Json.getBool?))))
+  | "offer_honoured" => pure (toJson (offer_honoured ((← (args.getObjVal? "expired") >>= Json.getBool?)) ((← (args.getObjVal? "same_cart") >>= Json.getBool?)) ((← (args.getObjVal? "same_revision") >>= Json.getBool?)) ((← (args.getObjVal? "same_total") >>= Json.getBool?))))
+  | "amount_sum" => pure (toJson (amount_sum ((← (args.getObjVal? "left") >>= Json.getNat?)) ((← (args.getObjVal? "right") >>= Json.getNat?))))
+  | "net_amount" => pure (toJson (net_amount ((← (args.getObjVal? "gross") >>= Json.getNat?)) ((← (args.getObjVal? "tax") >>= Json.getNat?))))
+  | "line_total" => pure (toJson (line_total ((← (args.getObjVal? "unit") >>= Json.getNat?)) ((← (args.getObjVal? "quantity") >>= Json.getNat?))))
+  | "rounded_quotient" => pure (toJson (rounded_quotient ((← (args.getObjVal? "numerator") >>= Json.getNat?)) ((← (args.getObjVal? "denominator") >>= Json.getNat?))))
   | "order_edit_admissible" => pure (toJson (order_edit_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?))))
+  | "order_transition_admissible" => pure (toJson (order_transition_admissible ((← (args.getObjVal? "edge_listed") >>= Json.getBool?)) ((← (args.getObjVal? "target_listed") >>= Json.getBool?)) ((← (args.getObjVal? "source_terminal") >>= Json.getBool?))))
   | "completion_admissible" => pure (toJson (completion_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "payment_ready") >>= Json.getBool?)) ((← (args.getObjVal? "deliveries_ready") >>= Json.getBool?))))
   | "cancellation_admissible" => pure (toJson (cancellation_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "external_payment") >>= Json.getBool?)) ((← (args.getObjVal? "refund_required") >>= Json.getBool?)) ((← (args.getObjVal? "deliveries_open") >>= Json.getBool?))))
   | "manual_payment_admissible" => pure (toJson (manual_payment_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "external_payment") >>= Json.getBool?)) ((← (args.getObjVal? "current_pending") >>= Json.getBool?)) ((← (args.getObjVal? "target_paid") >>= Json.getBool?))))
@@ -70,6 +79,7 @@ def evalRequest (j : Json) : Except String Json := do
   | "ai_autonomy_admissible" => pure (toJson (ai_autonomy_admissible ((← (args.getObjVal? "enabled") >>= Json.getBool?)) ((← (args.getObjVal? "authorized") >>= Json.getBool?)) ((← (args.getObjVal? "price_only") >>= Json.getBool?)) ((← (args.getObjVal? "daily_budget") >>= Json.getBool?)) ((← (args.getObjVal? "within_delta") >>= Json.getBool?))))
   | "claim_render_admissible" => pure (toJson (claim_render_admissible ((← (args.getObjVal? "confirmed") >>= Json.getBool?)) ((← (args.getObjVal? "public_source") >>= Json.getBool?)) ((← (args.getObjVal? "current_source") >>= Json.getBool?)) ((← (args.getObjVal? "valid_time") >>= Json.getBool?)) ((← (args.getObjVal? "exact_text") >>= Json.getBool?))))
   | "experiment_result_admissible" => pure (toJson (experiment_result_admissible ((← (args.getObjVal? "final_look") >>= Json.getBool?)) ((← (args.getObjVal? "enough_units") >>= Json.getBool?)) ((← (args.getObjVal? "positive_bound") >>= Json.getBool?))))
+  | "sovereign_request_admissible" => pure (toJson (sovereign_request_admissible ((← (args.getObjVal? "sovereign") >>= Json.getBool?)) ((← (args.getObjVal? "own_provider") >>= Json.getBool?)) ((← (args.getObjVal? "self_hosted") >>= Json.getBool?))))
   | _ => throw "Unknown policy"
 
 def main : IO Unit := do

@@ -9,13 +9,13 @@ before adding runtimes, stores or credentials. [Architecture](app-platform.md) a
 | Finding | Current owner and protection | Regression |
 |---|---|---|
 | B1 table bomb | Pinned Apps `runtime/`, native verified resource adapter: preflight, element/memory limits, pooling, fuel, epochs | Rust oversized private table/growth/host-loop tests; `app_components` |
-| B2 shared app storage | `apps/records.rs`, migrations 101–102: fixed tables, full logical keys, signed RLS, managed unique/reference projections and own-version compatibility | `app_shared_storage`, `app_storage_migration`, `apps`, `app_schema`, `tenant_isolation` |
+| B2 shared app storage | `components/apps/src/store/records.rs`, apps baseline: fixed tables, full logical keys, signed RLS, managed unique/reference projections and own-version compatibility | `app_shared_storage`, `apps`, `app_schema`, `tenant_isolation` |
 | B3 service ID impersonation | `apps/approval.rs`: exact Rust-canonical approved digest; reserved names include Payments | `apps`, `app_surfaces`, `payment_providers` |
 | B4 wrong webhook tenant | `webhook_scope.rs`, auth middleware: route tenant admission, reject conflicting header | `app_secrets` strict non-owner RLS |
 | B5 global slow event lane | `events.rs`: eight lanes, bounded batches, lease fences, retry and replay | `app_events`, `services`, `rust_connectors` |
-| B6 event disclosure | `event_contract.rs`, `event_projection.rs`: family/own scopes plus minimized payloads | `app_events`, Rust projection tests |
+| B6 event disclosure | `components/apps/src/domain/event_projection.rs`: family/own scopes plus minimized payloads | `app_events`, Rust projection tests |
 | B7 client-only surface ACL | `surface_grants.rs`: actor/package/context/action-bound five-minute grant | `apps`, `app_surfaces`, `app_assets` |
-| B8 input/storage/drafts | `input_schema.rs`, `storage.rs`, `developer/drafts.rs`: recursive bounds, database quotas, actor-private CAS autosave | `apps`, `app_preview`, frontend safety tests |
+| B8 input/storage/drafts | `components/apps/src/domain/input_schema.rs`, the apps storage quotas and developer drafts (`developer_drafts`): recursive bounds, database quotas, actor-private CAS autosave | `apps`, `app_preview`, frontend safety tests |
 
 ## Independent execution and native authority
 
@@ -117,7 +117,7 @@ operator bootstrap secrets remain usable only where no tenant secret was configu
 
 App callback credentials store only hashes, never raw tokens. Keys bind creator,
 tenant, app, package, scopes and expiry. Current membership is checked on every call;
-revocation, permission loss or package changes remove authority. Original app capabilities are stored separately from their mapped core rights: `products.read` cannot imply `assets.read`, and `jobs.read` cannot imply `jobs.write`. Migration 070 leaves legacy app keys without callback capabilities; rotate them with explicit consent before use. Core callbacks
+revocation, permission loss or package changes remove authority. Original app capabilities are stored separately from their mapped core rights: `products.read` cannot imply `assets.read`, and `jobs.read` cannot imply `jobs.write`. Core callbacks
 project personal data only with separate `customers.pii` consent. Surface grants are
 short-lived browser capabilities with an even narrower action/context boundary.
 
@@ -163,23 +163,16 @@ A validation failure rolls back the relevant transaction. SQL quotas also cover
 concurrent writers, unlike client-only checks. External sends remain at least once;
 no local transaction proves an external effect occurred only once.
 
-## Migration and deployment
+## Schema and deployment
 
-Run numbered schema migrations with the dedicated provisioner. Migrations 101–102
-consolidate managed app data into four fixed shared tables. Drain old Core writers,
-create and verify a backup, migrate and compare original records/references, then
-retire only the verified legacy tables before starting the new runtime. The hosted
-cutover completed on 15 October; other existing installations still require this
-coordinated maintenance. Follow [the exact procedure and evidence](app-data-storage.md).
-
-Migration 058 is retained immutable history: it introduced the earlier physical
-tables. It is not the current storage architecture or a standalone upgrade plan.
+The apps baseline (`components/apps/migrations/0001-baseline.sql`), applied by the
+setup job with the dedicated provisioner, holds managed app data in four fixed shared
+tables, with delivery fences, quota accounting, grants, drafts, activity, callback
+keys, encrypted secrets, private previews, multi-relations, recovery and jobs. The
+exact approved app capabilities are stored separately from team rights. A release
+replaces earlier installations; there is no conversion of earlier per-app tables.
 Strict serving uses separate restricted tenant/system logins, role-bound signed
 contexts and startup audits. Managed app installation never creates SQL objects.
-Migrations 059–070 add delivery fences, quota accounting, grants, drafts, activity,
-callback keys, encrypted secrets, private previews, multi-relations, recovery and jobs.
-Migration 070 stores the exact approved app capabilities separately from team
-rights. Historical callback keys have no implicit grants and must be renewed.
 
 Update independent service receivers for complete batches and new precise event
 permissions. Rebuild/pin custom UIs. Existing services without new tenant secrets

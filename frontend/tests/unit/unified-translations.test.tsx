@@ -17,8 +17,8 @@ import {
   contentKey,
   type LocalizedText,
 } from "../../src/shared/i18n/content-language";
-import FlowCanvas from "../../src/admin/automation/FlowCanvas";
-import ProductAssets from "../../src/admin/catalog/ProductAssets";
+import FlowCanvas from "../../../components/marketing/ui/admin/automation/FlowCanvas";
+import ProductAssets from "../../../components/catalog/ui/admin/catalog/ProductAssets";
 const languages = ["es-ES", "de-DE", "it-IT"];
 it("edits one graphical flow instruction in the selected language, preserves other translations and restores Spanish inheritance", async () => {
   let latest: any = {

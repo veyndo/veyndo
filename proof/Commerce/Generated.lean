@@ -30,6 +30,12 @@ def auth_factor_admissible (required : Bool) (verified : Bool) : Bool :=
 def persistent_key_admissible (personal : Bool) (administrator : Bool) : Bool :=
   (personal && administrator)
 
+def merchant_scope_admissible (has_credential : Bool) (same_shop : Bool) : Bool :=
+  (has_credential && same_shop)
+
+def workspace_length_admissible (length : Nat) : Bool :=
+  ((decide (length ≥ 2)) && (decide ((length - 48) = 0)))
+
 def planning_request_admissible (read_only : Bool) (planning_post : Bool) : Bool :=
   (read_only || planning_post)
 
@@ -108,6 +114,9 @@ def discount_cap (total : Nat) (requested : Nat) : Nat :=
 def stock_admissible (stock : Nat) (quantity : Nat) : Bool :=
   ((decide (quantity > 0)) && (decide (quantity ≤ stock)))
 
+def reservation_admissible (ordered : Nat) (held : Nat) (requested : Nat) : Bool :=
+  (((decide (held ≤ ordered)) && (decide (requested > 0))) && (decide (requested ≤ (ordered - held))))
+
 def refund_admissible (captured : Nat) (refunded : Nat) (requested : Nat) : Bool :=
   (((decide (refunded ≤ captured)) && (decide (requested > 0))) && (decide (requested ≤ (captured - refunded))))
 
@@ -153,8 +162,26 @@ def external_paid_total_admissible (paid : Bool) (calculated : Nat) (declared : 
 def admin_payment_admissible (is_admin : Bool) (manual : Bool) (simulated : Bool) : Bool :=
   (((!is_admin) || manual) || simulated)
 
+def offer_honoured (expired : Bool) (same_cart : Bool) (same_revision : Bool) (same_total : Bool) : Bool :=
+  ((((!expired) && same_cart) && same_revision) && same_total)
+
+def amount_sum (left : Nat) (right : Nat) : Nat :=
+  (min (left + right) 18446744073709551615)
+
+def net_amount (gross : Nat) (tax : Nat) : Nat :=
+  (gross - tax)
+
+def line_total (unit : Nat) (quantity : Nat) : Nat :=
+  (min (unit * quantity) 18446744073709551615)
+
+def rounded_quotient (numerator : Nat) (denominator : Nat) : Nat :=
+  ((min (numerator + ((max denominator 1) / 2)) 18446744073709551615) / (max denominator 1))
+
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
+
+def order_transition_admissible (edge_listed : Bool) (target_listed : Bool) (source_terminal : Bool) : Bool :=
+  ((edge_listed && target_listed) && (!source_terminal))
 
 def completion_admissible (terminal : Bool) (payment_ready : Bool) (deliveries_ready : Bool) : Bool :=
   (((!terminal) && payment_ready) && deliveries_ready)
@@ -194,5 +221,8 @@ def claim_render_admissible (confirmed : Bool) (public_source : Bool) (current_s
 
 def experiment_result_admissible (final_look : Bool) (enough_units : Bool) (positive_bound : Bool) : Bool :=
   ((final_look && enough_units) && positive_bound)
+
+def sovereign_request_admissible (sovereign : Bool) (own_provider : Bool) (self_hosted : Bool) : Bool :=
+  ((!sovereign) || (own_provider && self_hosted))
 
 end CommerceKernel

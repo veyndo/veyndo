@@ -8,9 +8,9 @@ import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import {
   newDraft,
   type ProductDraft,
-} from "../../src/admin/catalog/catalog-model";
-import ProductModels from "../../src/admin/catalog/ProductModels";
-import Gallery from "../../src/storefront/catalog/ProductGallery";
+} from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import ProductModels from "../../../components/catalog/ui/admin/catalog/ProductModels";
+import Gallery from "../../../components/catalog/ui/storefront/catalog/ProductGallery";
 import { mediaImage } from "../../src/shared/media/product-media";
 import { product } from "./fixtures";
 vi.mock("../../src/shared/media/ModelViewer", () => ({

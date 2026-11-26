@@ -69,8 +69,8 @@ until those actual owners are connected. There are no permissive fallback
 validators. Native Veyndo keeps its complete existing field/reference/language/
 commerce admission and does not use this portable profile as a replacement.
 
-Native `src/apps/record_write.rs` now delegates its original state/history hooks to
-Apps `src/managed_hooks.rs` on the same transaction around the existing mutation
+Native `components/apps/src/store/record_write.rs` now delegates its original state/history hooks to
+Apps `extensions/services/app-storage/src/managed_hooks.rs` on the same transaction around the existing mutation
 and outbox owner. This keeps normal native App functionality while making the
 portable operation independently usable.
 

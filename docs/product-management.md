@@ -107,9 +107,8 @@ original aggregate CAS. Both HTTP and `merchant.product.save` use this same owne
 neither the agent nor an app bypasses the decision. A conflict includes the actual
 `currentRevision` and `/revision` or `/contentRevision` pointer identifying its clock.
 
-Migration 098 adds the clock without resetting stock or aggregate revisions. A
-database trigger also observes writes from existing replicas during a rolling
-release. Versioned translation/FX/proposal owners continue to invalidate content;
+The catalog baseline keeps the content clock next to stock and the aggregate
+revision; a database trigger advances it for every content write. Versioned translation/FX/proposal owners continue to invalidate content;
 their own existing conservative aggregate revision checks are preserved. History
 restores omit quantities. Sandbox diffs/publication exclude both revision clocks
 and stock; a released content unit advances the live clock without importing a
@@ -125,23 +124,20 @@ phrases use that claim language; absent phrases inherit the shop main language,
 while explicit empty phrases add no matches. Source archive/privacy changes remove
 graph membership immediately. Active products, channel restrictions and cursor
 pagination remain native. Definitions use the same category revision/history and
-selective staging release. This is a VEYNDO extension, not original Shopware
-dynamic-product-group equivalence. See [connected cognition](cognitive-commerce.md).
+selective staging release. See [connected cognition](cognitive-commerce.md).
 
-Reference: Shopware **6.7.14.2**, commit [`29535190246fcaf0b091d7bdf02dd16358c943c4`](https://github.com/shopware/shopware/blob/29535190246fcaf0b091d7bdf02dd16358c943c4/src/Core/Content/Category/CategoryDefinition.php), and the official [category guide](https://docs.shopware.com/en/shopware-6-en/catalogues/categories) / [product guide](https://docs.shopware.com/en/shopware-6-en/catalogues/products).
-
-| Shopware behavior | Native implementation | Exact scope |
+| Behaviour | Implementation | Exact scope |
 |---|---|---|
-| Parent/child category tree, position, translations | `categories/admin.rs`; migration 026; `CategoriesWorkspace.tsx` | Four languages, revision checks, same-tenant parent FK, ancestor/cycle validation and shop-local edit lock |
+| Parent/child category tree, position, translations | `categories/admin.rs`; the schema baseline; `CategoriesWorkspace.tsx` | Four languages, revision checks, same-tenant parent FK, ancestor/cycle validation and shop-local edit lock |
 | Page / folder / external-link category types | Category data and public navigation renderer | `page`, `folder`, HTTPS `link`; legacy `structuring` remains readable |
 | Multiple product-category associations | `product_categories`; `categories::assignments` | Tenant-bound many-to-many links, at most 100 assignments per product |
-| Parent listing includes descendant assignments | `categories/listing.sql` | Active subtree, enabled by default; `displayNestedProducts=false` limits the listing to direct assignments |
+| Parent listing includes descendant assignments | `components/catalog/src/store/category_listing.sql` | Active subtree, enabled by default; `displayNestedProducts=false` limits the listing to direct assignments |
 | Active and visible are different | `categories/navigation.rs` | Inactive branches are inaccessible; invisible branches disappear from navigation but active category listings remain directly addressable |
 | Sales-channel navigation root | `marketing/channels.rs`, `categories/navigation.rs`, channel settings form | Independent `navigationCategoryId` per storefront/headless channel; default root is `catalog-root` |
 | Storefront navigation and category listing | `/store-api/navigation`, `/store-api/product` with `categoryId`; `CatalogNavigation.tsx` | Localized tree and real product filtering before pagination; no hard-coded category names |
-| Catalog content staging | `staging/categories.rs`, `clone.rs`, `release.rs` | Category and product units can publish selectively in one transaction; dependency order, staged digest and live baseline checks; live stock stays live-owned |
+| Catalog content staging | `components/studio/src/store/{staging_categories,staging_clone,staging_release}.rs` | Category and product units can publish selectively in one transaction; dependency order, staged digest and live baseline checks; live stock stays live-owned |
 
-This is a behavioral port to native APIs and storage, not original DAL/UUID/wire-schema compatibility. Missing upstream features include product streams/dynamic product groups, complete CMS category layouts, breadcrumbs/deep category routes, service/footer navigation roots, arbitrary language/currency context, manufacturer/property-group entities, full inheritance masks, bulk import/export beyond the bounded creation CSV and deletion workflows. Automatic authenticated image previews inside private staging editors are not yet implemented; private source URLs do not become publicly accessible. Category navigation is deliberately bounded to 2,000 nodes per channel; large product catalogs remain cursor-paginated and are not loaded into the browser.
+Not implemented: product streams/dynamic product groups, complete CMS category layouts, breadcrumbs/deep category routes, service/footer navigation roots, arbitrary language/currency context, manufacturer/property-group entities, full inheritance masks, bulk import/export beyond the bounded creation CSV and deletion workflows. Automatic authenticated image previews inside private staging editors are not yet implemented; private source URLs do not become publicly accessible. Category navigation is deliberately bounded to 2,000 nodes per channel; large product catalogs remain cursor-paginated and are not loaded into the browser.
 
 ## APIs and MCP
 
@@ -169,7 +165,7 @@ Reads require `catalog.read`; writes require `catalog.write`. Native product que
 
 `python3 scripts/catalog_management.py` creates isolated synthetic tenants and runs actual HTTP/PostgreSQL/MCP/worker tests: creation, translations, formatting, duplicate numbers, cursor pages, active/channel admission, parent-category listings, nested listing control, hidden ancestry, cycles, tenant isolation, unsafe document rejection, uploaded byte delivery, event consumption and selective release of new products/categories. Existing commerce, account/marketing, merchant operations, protocol and scalability suites cover shared consumers. `frontend/tests/unit/catalog-management.test.tsx` exercises the actual list/editor, save conflicts and safe rich renderer; the browser check creates and reloads a real synthetic product.
 
-These tests are regressions, not 100% coverage or complete Shopware equivalence. New SQL, asynchronous adapters and editor code are recorded as unproved in the formal manifest; the existing extracted Lean policy contracts remain unchanged.
+These tests are regressions, not 100% coverage. New SQL, asynchronous adapters and editor code are recorded as unproved in the formal manifest; the existing extracted Lean policy contracts remain unchanged.
 
 `production_foundations` additionally exercises purchase → content-only save →
 stale content/stock rejection → cancellation → MCP content save across two real
@@ -184,7 +180,7 @@ continues to identify carts, associations and API routes.
 
 ## Channel settings and media workspaces (2026-10-05)
 
-See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish additional full Shopware API/DAL parity, current tax law, paid-provider quality or whole-system formal certification.
+See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish current tax law, paid-provider quality or whole-system formal certification.
 
 For Markdown editing, guided variants, integration keys and channel onboarding, see [the Studio integration guide](studio-api-and-channels.md).
 

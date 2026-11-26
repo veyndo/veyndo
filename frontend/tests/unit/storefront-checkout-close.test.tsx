@@ -22,7 +22,7 @@ vi.mock("../../src/storefront/shell/useStorefrontController", () => ({
     s: (key: string) => key,
   }),
 }));
-vi.mock("../../src/storefront/legal/PrivacyProvider", () => ({
+vi.mock("../../../components/shop/ui/storefront/legal/PrivacyProvider", () => ({
   default: ({ children }: PropsWithChildren) => children,
 }));
 vi.mock("../../src/shared/apps/AppSurfaces", () => ({

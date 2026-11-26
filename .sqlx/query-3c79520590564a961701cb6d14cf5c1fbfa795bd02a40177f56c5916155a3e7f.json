@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM public.commerce_migrations WHERE version='demo-v1') AS \"seeded!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seeded!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3c79520590564a961701cb6d14cf5c1fbfa795bd02a40177f56c5916155a3e7f"
+}

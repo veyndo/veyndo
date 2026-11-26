@@ -1,9 +1,9 @@
 /** Package consent shows native upgrade admission and cannot activate a blocked proposal. */
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AppConsent from "../../src/admin/apps/AppConsent";
+import AppConsent from "../../../components/apps/ui/admin/apps/AppConsent";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AppUpgradeCheck from "../../src/admin/developer/AppUpgradeCheck";
+import AppUpgradeCheck from "../../../components/apps/ui/admin/developer/AppUpgradeCheck";
 it("blocks installation when the native data migration preflight fails", async () => {
   const install = vi.fn();
   const request = vi.fn().mockResolvedValue({

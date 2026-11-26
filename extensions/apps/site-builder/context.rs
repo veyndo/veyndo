@@ -1,6 +1,26 @@
 //! Designer context projects native channels, languages and calculated products; no second catalogue or price engine.
-use crate::*;
-pub(super) fn router() -> Router<App> {
+use crate::SiteState;
+use axum::Json;
+use axum::Router;
+use axum::extract::FromRef;
+use axum::extract::State;
+use axum::routing::get;
+use serde_json::Value;
+use serde_json::json;
+use sqlx::Row;
+use std::collections::HashMap;
+use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_identity::route_policy::SecureRoutes;
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::service::read_cache::settings;
+pub(super) fn router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    SiteState: FromRef<S>,
+{
     Router::new().secure_route(
         "/api/merchant/site/context",
         &[("GET", "channels.read")],
@@ -8,13 +28,14 @@ pub(super) fn router() -> Router<App> {
     )
 }
 async fn context(
-    State(a): State<App>,
+    State(SiteState(site)): State<SiteState>,
     mut h: RequestContext,
     axum::extract::Query(q): axum::extract::Query<HashMap<String, String>>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "catalog.read")?;
-    let (settings, _) = commerce::config(&a, &t).await?;
+    let a = site.core();
+    let t = merchant(&h)?;
+    permit(&h, "catalog.read")?;
+    let (settings, _) = settings(a, &t, "default").await?;
     if let Some(locale) = q.get("locale") {
         if !settings.locales.contains(locale) {
             return Err(bad("Content language unavailable"));
@@ -61,14 +82,14 @@ async fn context(
         after: q.get("after").cloned(),
         ..Default::default()
     };
-    let elements = apps::surfaces::registry(&a, &h, true).await?["surfaces"]
+    let elements = site.surfaces(&h, true).await?["surfaces"]
         .as_array()
         .cloned()
         .unwrap_or_default()
         .into_iter()
         .filter(|s| s["surface"]["location"] == "storefront.block")
         .collect::<Vec<_>>();
-    let Json(products) = catalog_page(State(a.clone()), h, criteria).await?;
+    let products = site.catalog(&h, criteria).await?;
     Ok(Json(
         json!({"channels":rows.iter().filter(|r|r.get::<Value,_>("data")["kind"]=="storefront").map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data")})).collect::<Vec<_>>(),"mainLocale":settings.main_locale,"locales":settings.locales,"installed":installed,"catalogue":products,"elements":elements}),
     ))

@@ -85,6 +85,8 @@ export const de = {
   lighting: "Licht",
   objects: "Alltagsobjekte",
   search: "Produkt suchen",
+  noMatches: "Keine Produkte passen zu dieser Auswahl.",
+  clearSearch: "Suche zurücksetzen",
   details: "Produkt ansehen",
   add: "In den Warenkorb",
   back: "Zur Kollektion",

@@ -17,12 +17,12 @@ def lean_runner(functions):
 
 def rust_domain(functions):
     lines = ['//! Generated conformance driver; invokes the same production policy functions as the commerce server.',
-        'use veyndo::verified_kernel::*;', 'use serde_json::{Value, json};',
-        'pub(super) fn eval(j: &Value) -> Result<Value, String> {',
-        '    let args = &j["args"];',
+        'use super::Request;', 'use veyndo::verified_kernel::*;', 'use serde_json::{Value, json};',
+        'pub(super) fn eval(request: &Request) -> Result<Value, String> {',
+        '    let args = &request.args;',
         *(['    let n = |key: &str| args[key].as_u64().ok_or_else(|| format!("Invalid {key}"));'] if any(t=='u64' for f in functions for _,t in f.args) else []),
         *(['    let b = |key: &str| args[key].as_bool().ok_or_else(|| format!("Invalid {key}"));'] if any(t=='bool' for f in functions for _,t in f.args) else []),
-        '    match j["function"].as_str() {']
+        '    match request.function.as_deref() {']
     for f in functions:
         args = ', '.join(f'{"n" if t == "u64" else "b"}("{n}")?' for n,t in f.args)
         lines.append(f'        Some("{f.name}") => Ok(json!({f.name}({args}))),')
@@ -31,7 +31,7 @@ def rust_domain(functions):
 
 def rust_runner(functions):
     lines = ['//! Generated input/output driver; production policies are dispatched by the generated module.',
-        '#[path = "verified_kernel/dispatch.rs"] mod dispatch;',
+        'mod dispatch;',
         'use serde_json::Value;',
         'fn main() -> Result<(), Box<dyn std::error::Error>> {',
         '    use std::io::{self, BufRead};',
@@ -42,12 +42,16 @@ def rust_runner(functions):
 
 def rust_dispatch(functions):
     from modules import KERNEL_MODULES
-    lines=['//! Generated domain dispatcher; each bounded module calls the original production policies.','use serde_json::Value;']
-    lines += ['#[path = "dispatch/'+name+'.rs"] mod '+name+';' for name in KERNEL_MODULES]
-    lines += ['pub(super) fn eval(j: &Value) -> Result<Value,String> {','    match j["function"].as_str() {']
+    lines=['//! Generated domain dispatcher; each bounded module calls the original production policies.',
+        'use serde::Deserialize;','use serde_json::Value;','use veyndo_core::document::{lenient, view};']
+    lines += ['mod '+name+';' for name in KERNEL_MODULES]
+    lines += ['/// One conformance request: the policy to evaluate and its arguments.',
+        '#[derive(Deserialize, Default)]','#[serde(default)]','pub(super) struct Request {',
+        '    #[serde(deserialize_with = "lenient")]','    pub(super) function: Option<String>,','    pub(super) args: Value,','}']
+    lines += ['pub(super) fn eval(j: &Value) -> Result<Value,String> {','    let request: Request = view(j);','    match request.function.as_deref() {']
     for name,names in KERNEL_MODULES.items():
         choices=' | '.join('Some("'+n+'")' for n in names)
-        lines.append('        '+choices+' => '+name+'::eval(j),')
+        lines.append('        '+choices+' => '+name+'::eval(&request),')
     lines += ['        _ => Err("Unknown policy".into()),','    }','}']
     return '\n'.join(lines)+'\n'
 

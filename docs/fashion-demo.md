@@ -26,10 +26,10 @@ These products, prices, stocks, material descriptions and illustrative tax setti
 - `frontend/public/media/demo/fashion/`: 12 optimized 1000 × 1000 WebP photographs, approximately 500 KB total.
 - `src/demo_catalog.rs`: tenant-scoped fixture insertion, category translations, idempotent built-in demo and fixture checks.
 - `src/auth/provision.rs`: registration and additional-workspace provisioning use this template whenever `seed_catalog` is true. An empty catalog remains empty when demo data is explicitly declined.
-- `src/knowledge/relations.rs`: curated styling and use-case links for the fashion set. Curated links are labeled and are not learned customer behavior.
+- `components/intelligence/src/knowledge/relations.rs`: curated styling and use-case links for the fashion set. Curated links are labeled and are not learned customer behavior.
 - `scripts/fashion_demo.py`: real PostgreSQL/HTTP checks for the shipped default, translations, categories, variant checkout, cross-shop stock isolation, assets and fresh-process persistence.
 
-`DEMO_CATALOG=fashion` is the default for new shops. `DEMO_CATALOG=legacy-furniture` remains available for explicitly selected compatibility fixtures and the existing differential suite; it is not the shipping default. Unknown template names fail instead of silently choosing an unrelated catalog.
+`DEMO_CATALOG=fashion` is the default for new shops. `DEMO_CATALOG=legacy-furniture` remains available for explicitly selected integration fixtures (for example `verify_integration.py`); it is not the shipping default. Unknown template names fail instead of silently choosing an unrelated catalog.
 
 When `SEED_DEMO` is enabled, a separate `nord-atelier` built-in demo is created once. The frontend opens this demo when no shop is selected. Existing `atelier` and `workshop` compatibility shops stay available by their explicit shop IDs. Restarting never overwrites a merchant's prices, inventory or orders. `SEED_DEMO=false` suppresses built-in demo tenants and demo customer accounts; the onboarding choice of whether to insert a demo **product** catalog is a separate explicit setting.
 

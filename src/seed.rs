@@ -1,5 +1,13 @@
 //! Idempotent synthetic template catalogue initialization.
-use crate::*;
+use crate::accounts;
+use crate::foundation::App;
+use crate::store::shops;
+use argon2::Argon2;
+use argon2::PasswordHasher;
+use argon2::password_hash::SaltString;
+use serde_json::json;
+use uuid::Uuid;
+use veyndo_core::Result;
 
 pub(crate) async fn seed(a: &App) -> Result<()> {
     let demo = [
@@ -60,28 +68,32 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
     ];
     for t in ["atelier", "workshop"] {
         for (id, name, category, description, price, tax, stock) in demo {
-            sqlx::query("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING").bind(t).bind(id).bind(name).bind(category).bind(description).bind(price).bind(tax).bind(stock).execute(&a.db).await?;
+            veyndo_catalog::store::demo_template::insert_basic(
+                a,
+                t,
+                (id, name, category, description),
+                (price, tax, stock),
+            )
+            .await?;
         }
         let salt = SaltString::encode_b64(Uuid::new_v4().as_bytes()).unwrap();
         let password_hash = Argon2::default()
             .hash_password(b"demo-business", &salt)
             .unwrap()
             .to_string();
-        sqlx::query("INSERT INTO customers(tenant,email,password_hash,company,group_name) VALUES($1,'buyer@example.test',$2,'Example Studio','business') ON CONFLICT DO NOTHING").bind(t).bind(password_hash).execute(&a.db).await?;
+        shops::insert_demo_customer(&a.db, t, &password_hash, true).await?;
         let mut address_tx = a.db.begin().await?;
         accounts::seed_demo_address(&mut address_tx, t).await?;
         address_tx.commit().await?;
-        sqlx::query("INSERT INTO experiences(tenant,data) VALUES($1,$2) ON CONFLICT DO NOTHING")
-            .bind(t)
-            .bind(json!({"mode":"balanced","headline":"Objects for a more considered everyday."}))
-            .execute(&a.db)
-            .await?;
+        shops::insert_experience(
+            &a.db,
+            t,
+            json!({"mode":"balanced","headline":"Objects for a more considered everyday."}),
+            true,
+        )
+        .await?;
         for v in ["discovery", "comparison"] {
-            sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,$2) ON CONFLICT DO NOTHING")
-                .bind(t)
-                .bind(v)
-                .execute(&a.db)
-                .await?;
+            shops::insert_policy(&a.db, t, v, true).await?;
         }
     }
     Ok(())

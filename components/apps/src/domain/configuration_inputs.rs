@@ -1,0 +1,107 @@
+//! Native policy adapter for shared configuration grammar, library selection and exact guest arguments.
+use crate::domain::{field_values, model_contract};
+use serde_json::Value;
+use veyndo_app_model::configuration::Contract;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::Result;
+
+/// Checks the configuration contract of a package.
+pub fn validate(m: &Manifest) -> Result<()> {
+    veyndo_app_model::configuration::validate(
+        &veyndo_app_model::configuration::Context {
+            entities: &m.entities,
+            actions: &m.actions,
+            configuration: m.configuration.as_ref(),
+        },
+        &field_values::Policy,
+    )
+    .map_err(model_contract::error)
+}
+/// The library record a shopper selected.
+pub fn record<'a>(c: &'a Contract, fields: &'a Value) -> Result<&'a str> {
+    veyndo_app_model::configuration::record(c, fields, &field_values::Policy)
+        .map_err(model_contract::error)
+}
+/// The exact guest arguments of accepted inputs.
+pub fn arguments(c: &Contract, fields: &Value) -> Result<Vec<i64>> {
+    veyndo_app_model::configuration::arguments(c, fields, &field_values::Policy)
+        .map_err(model_contract::error)
+}
+#[cfg(test)]
+mod tests {
+    use super::{arguments, record, validate};
+    use crate::domain::manifest_validation;
+    use serde_json::json;
+    use veyndo_app_model::manifest::Manifest;
+    use veyndo_apps::sandbox::Sandbox;
+    fn package() -> Manifest {
+        serde_json::from_str(include_str!(
+            "../../../../extensions/apps/furniture-configurator/manifest.json"
+        ))
+        .unwrap()
+    }
+    #[test]
+    fn library_and_dimensions_share_real_field_validation_and_legacy_digests() {
+        let m = package();
+        manifest_validation::validate(&m, &json!({})).unwrap();
+        let c = m.configuration.unwrap();
+        let fields = json!({"material":"oak","width_cm":260,"depth_cm":80});
+        assert_eq!(arguments(&c, &fields).unwrap(), vec![260, 80]);
+        assert_eq!(record(&c, &fields).unwrap(), "oak");
+        let guest = Sandbox::new(&c.wasm_source).unwrap();
+        assert_eq!(
+            guest
+                .contribution_args(0, &arguments(&c, &fields).unwrap())
+                .unwrap(),
+            4800
+        );
+        assert_eq!(guest.contribution_args(2000, &[240, 80]).unwrap(), 2000);
+        for invalid in [
+            json!({"material":"oak","width_cm":401,"depth_cm":80}),
+            json!({"material":"oak","width_cm":"260","depth_cm":80}),
+            json!({"material":"oak","width_cm":260,"depth_cm":80,"price":0}),
+            json!({"material":"oak","width_cm":260}),
+        ] {
+            assert!(arguments(&c, &invalid).is_err());
+        }
+        let legacy: Manifest = serde_json::from_str(include_str!(
+            "../../../../extensions/apps/gift-message/manifest.json"
+        ))
+        .unwrap();
+        assert!(json!(legacy)["configuration"].get("inputs").is_none());
+        assert!(json!(legacy)["configuration"].get("currency").is_none());
+        assert_eq!(
+            arguments(
+                legacy.configuration.as_ref().unwrap(),
+                &json!({"message":"Hello"})
+            )
+            .unwrap(),
+            vec![5]
+        );
+    }
+    #[test]
+    fn structured_contract_cannot_select_private_data_or_undeclared_arguments() {
+        let mut omitted = json!(package());
+        omitted["configuration"]["inputs"]["examples"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("expectedFeeMinor");
+        assert!(serde_json::from_value::<Manifest>(omitted).is_err());
+        let mut m = package();
+        m.entities[0].public_read = false;
+        assert!(validate(&m).is_err());
+        let mut m = package();
+        m.configuration
+            .as_mut()
+            .unwrap()
+            .inputs
+            .as_mut()
+            .unwrap()
+            .arguments
+            .push("missing".into());
+        assert!(validate(&m).is_err());
+        let mut m = package();
+        m.configuration.as_mut().unwrap().currency = Some("BAD".into());
+        assert!(validate(&m).is_err());
+    }
+}

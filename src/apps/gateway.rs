@@ -1,10 +1,104 @@
 //! One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured.
-use super::*;
-pub(crate) fn validate_input(schema: &Value, v: &Value) -> Result<()> {
-    input_schema::validate(schema, v)
+use super::{
+    configurations, configure, input_schema, mcp_views, purge_sources, service_limits, submissions,
+};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
+use crate::{assets, auth, marketing, staging};
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_app_platform::ports::{
+    ActionFuture, EnvironmentFuture, HostActions, HostCall, HostedFuture, RuleFuture,
+};
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+/// The id of a newly created preview environment.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Created {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
 }
 pub(crate) fn validate_native_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate_native(schema, v)
+}
+/// The handlers the server owns, reached by the gateway after it admitted the call.
+pub(super) struct ServerActions(pub(super) App);
+impl HostActions for ServerActions {
+    fn hosted<'a>(&'a self, tenant: &'a str, app: &'a str, action: &'a str) -> HostedFuture<'a> {
+        Box::pin(super::hosted::action(&self.0, tenant, app, action))
+    }
+    fn run<'a>(&'a self, call: HostCall<'a>) -> ActionFuture<'a> {
+        Box::pin(async move {
+            let (a, h, v, id) = (&self.0, call.actor, call.input, call.manifest.id.as_str());
+            match call.action.handler.as_str() {
+                "assets" | "asset_preview" => {
+                    auth::permit(h, "catalog.read")?;
+                    assets::app_file_callback(a, h, &call.action.handler, v).await
+                }
+                "asset_upload" => Err(bad(
+                    "Asset uploads require the bounded multipart surface endpoint",
+                )),
+                "submit" => {
+                    submissions::submit(
+                        a,
+                        h,
+                        call.manifest,
+                        call.entity.ok_or(bad("Entity required"))?,
+                        v,
+                    )
+                    .await
+                }
+                "configure" => configure(a, h, id, v).await,
+                "configurations" => {
+                    merchant(a, h)?;
+                    configurations(a, call.tenant, id, v).await
+                }
+                "payment_command" => crate::payments::app_command(a, h, id, v).await,
+                "payment_onboarding" => crate::payments::onboarding(a, h, id, v).await,
+                _ => Err(bad("Unsupported app action")),
+            }
+        })
+    }
+    fn visitor_object<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        key: &'a str,
+        id: &'a str,
+    ) -> RuleFuture<'a> {
+        Box::pin(async move {
+            let a = &self.0;
+            match key {
+                "customerId" | "unitId" => crate::b2b::surface_context(a, h, key, id).await?,
+                "productId" => marketing::admit_product(a, h, id).await?,
+                _ => {
+                    if id != marketing::channel_id(h) {
+                        return Err(bad("Surface channel differs from the current shop context"));
+                    }
+                    marketing::channel(a, h, id, &language_context(a, h).await?.0).await?;
+                }
+            }
+            Ok(())
+        })
+    }
+    fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a> {
+        Box::pin(purge_sources(&self.0, tenant, app, cursor))
+    }
+    fn create_preview<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        actor: &'a str,
+    ) -> EnvironmentFuture<'a> {
+        Box::pin(async move {
+            let created = staging::create_preview(&self.0, h, "App Studio", actor).await?;
+            view::<Created>(&created)
+                .id
+                .ok_or(bad("Preview environment unavailable"))
+        })
+    }
 }
 pub(crate) async fn invoke_app(
     a: &App,
@@ -23,120 +117,8 @@ pub(super) async fn invoke(
     v: &Value,
     mcp: Option<mcp_views::Mode<'_>>,
 ) -> Result<Value> {
-    let start = std::time::Instant::now();
-    let result = execute(a, h, id, name, v, mcp).await;
-    let status = result
-        .as_ref()
-        .map(|_| StatusCode::OK)
-        .unwrap_or_else(|e| e.0);
-    observability::record(a, h, id, name, v, status, start.elapsed().as_millis()).await;
-    result
-}
-// A job callback holds its admitted manifest/action through enqueue. Re-reading
-// the package must never turn a formerly declared job into a service invocation.
-pub(super) async fn invoke_job(
-    a: &App,
-    h: &RequestContext,
-    m: &Manifest,
-    name: &str,
-    v: &Value,
-) -> Result<Value> {
-    let action = m
-        .actions
-        .iter()
-        .find(|action| action.name == name && action.handler == "job")
-        .ok_or(bad("Callback requires a declared job action"))?;
-    action_admission::check(a, h, action, v)?;
-    tool_contract::checked_output(action, jobs::enqueue(a, h, m, action, v).await?)
-}
-async fn execute(
-    a: &App,
-    h: &RequestContext,
-    id: &str,
-    name: &str,
-    v: &Value,
-    mcp: Option<mcp_views::Mode<'_>>,
-) -> Result<Value> {
-    let t = tenant(h)?;
-    let m = package(a, &t, id, true).await?;
-    let action = m
-        .actions
-        .iter()
-        .find(|act| act.name == name)
-        .ok_or(bad("Unknown app action"))?;
-    if let Some(mode) = mcp {
-        mcp_views::admit_tool(a, h, &m, action, &t, mode)?;
-    }
-    action_admission::check(a, h, action, v)?;
-    if let Some(result) = super::hosted::action(a, &t, id, name).await? {
-        return tool_contract::checked_output(action, result);
-    }
-    let e = action
-        .entity
-        .as_ref()
-        .and_then(|n| m.entities.iter().find(|e| e.name == *n));
-    if let Some(e) = e {
-        core_extensions::access(e, h, action.handler == "save")?;
-    }
-    let result = match action.handler.as_str() {
-        "assets" | "asset_preview" => {
-            auth::permit(h, "catalog.read")?;
-            assets::app_file_callback(a, h, &action.handler, v).await
-        }
-        "asset_upload" => Err(bad(
-            "Asset uploads require the bounded multipart surface endpoint",
-        )),
-        "list" => {
-            data::list_scoped(
-                a,
-                &t,
-                &m,
-                e.ok_or(bad("Entity required"))?,
-                v,
-                action.public.then(|| marketing::channel_id(h)),
-            )
-            .await
-        }
-        "submit" => submissions::submit(a, h, &m, e.ok_or(bad("Entity required"))?, v).await,
-        "save" => data::save(a, &t, &m, e.ok_or(bad("Entity required"))?, v, h).await,
-        "configure" => configure(a, h, id, v).await,
-        "configurations" => {
-            merchant(a, h)?;
-            configurations(a, &t, id, v).await
-        }
-        "payment_command" => crate::payments::app_command(a, h, id, v).await,
-        "payment_onboarding" => crate::payments::onboarding(a, h, id, v).await,
-        "service" => {
-            if !m.permissions.contains(&"service.call".into()) || m.runtime != "service" {
-                return Err(Error(
-                    StatusCode::FORBIDDEN,
-                    "Service permission required".into(),
-                ));
-            }
-            let result = service_call(a, &t, id, &format!("actions/{name}"), v).await?;
-            if result["purgeSources"] == true && m.permissions.contains(&"knowledge.write".into()) {
-                purge_sources(a, &t, id, result["exportCursor"].as_i64().unwrap_or(0)).await?;
-            }
-            Ok(result)
-        }
-        "job" => jobs::enqueue(a, h, &m, action, v).await,
-        "emit" => {
-            if v.to_string().len() > 16384 {
-                return Err(bad("App event exceeds limit"));
-            }
-            let event: i64 = sqlx::query_scalar(
-                "INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id",
-            )
-            .bind(&t)
-            .bind(format!("app.{id}.{name}"))
-            .bind(v)
-            .fetch_one(&a.db)
-            .await?;
-            Ok(json!({"eventId":event,"accepted":true}))
-        }
-        _ => Err(bad("Unsupported app action")),
-    }?;
-    tool_contract::checked_output(action, result)
+    veyndo_app_platform::service::gateway::invoke(&service_limits::platform(a), h, id, name, v, mcp)
+        .await
 }
 pub(crate) async fn service_call(
     a: &App,
@@ -145,156 +127,18 @@ pub(crate) async fn service_call(
     path: &str,
     v: &Value,
 ) -> Result<Value> {
-    service_call_pinned(a, t, id, path, v, None).await
-}
-pub(super) async fn service_call_pinned(
-    a: &App,
-    t: &str,
-    id: &str,
-    path: &str,
-    v: &Value,
-    digest: Option<&str>,
-) -> Result<Value> {
-    if crate::staging::parent(a, t).await?.is_some() {
-        return Err(bad("External services are disabled in private sandboxes"));
-    }
-    // Background collectors/flows have no HTTP admission middleware. Recheck the
-    // current live-shop status at the shared egress boundary as well.
-    let status: Option<String> = sqlx::query_scalar("SELECT status FROM tenants WHERE id=$1")
-        .bind(t)
-        .fetch_optional(&a.db)
-        .await?;
-    if !verified_kernel::shop_request_admissible(
-        status.as_deref() == Some("active"),
-        status.as_deref() == Some("paused"),
-        false,
-        false,
-    ) {
-        return Err(Error(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Shop is unavailable for external app calls".into(),
-        ));
-    }
-    // No URL or credential comes from the manifest, merchant, model or event payload.
-    let _admission = service_limits::admit(a, t, id).await?;
-    if v.to_string().len() > 65536 {
-        return Err(bad("App request exceeds limit"));
-    }
-    let configured = &crate::runtime_config::get().services;
-    let config = &configured[id];
-    let manifest = package(a, t, id, true).await?;
-    if digest.is_some_and(|d| d != approval::canonical_digest(&manifest)) {
-        return Err(conflict("App package changed before service dispatch"));
-    }
-    if !approval::approved(&manifest, config) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Package is not approved for this operator service".into(),
-        ));
-    }
-    let url = config["url"].as_str().ok_or(Error(
-        StatusCode::SERVICE_UNAVAILABLE,
-        "App service is not configured".into(),
-    ))?;
-    let parsed = reqwest::Url::parse(url).map_err(|_| bad("Invalid service URL"))?;
-    if !service_policy::allowed(
-        &parsed,
-        &crate::runtime_config::get().private_service_origins,
-    ) {
-        return Err(bad(
-            "Service requires HTTPS, loopback or an explicitly approved private origin",
-        ));
-    }
-    let service_token = secrets::resolve(a, t, &manifest, "service")
-        .await?
-        .unwrap_or_else(|| config["token"].as_str().unwrap_or("").to_owned());
-    let mut body = v.clone();
-    if !manifest.settings.is_empty() {
-        let private_action = path
-            .strip_prefix("actions/")
-            .and_then(|name| manifest.actions.iter().find(|action| action.name == name))
-            .is_some_and(|action| !action.public);
-        if private_action {
-            let values = settings::resolve(a, t, &manifest).await?;
-            if manifest.settings.iter().any(|f| {
-                f.required
-                    && values
-                        .get(&f.key)
-                        .is_none_or(|v| v.is_null() || v.as_str().is_some_and(str::is_empty))
-            }) {
-                return Err(bad(
-                    "Complete this app's settings in Apps before running this action",
-                ));
-            }
-            body.as_object_mut()
-                .ok_or(bad("Configured service actions require object input"))?
-                .insert("_appSettings".into(), values);
-        }
-    }
-    // Installed configuration shares the transport budget with caller input.
-    if body.to_string().len() > 65536 {
-        return Err(bad(
-            "App request including installed settings exceeds 64 KiB",
-        ));
-    }
-    let response = egress::client(&parsed)
-        .await?
-        .post(format!("{}/{path}", url.trim_end_matches('/')))
-        .timeout(std::time::Duration::from_secs(5))
-        .bearer_auth(service_token)
-        .header("x-tenant", t)
-        .json(&body)
-        .send()
-        .await
-        .map_err(|_| Error(StatusCode::BAD_GATEWAY, "App service unavailable".into()))?;
-    if !response.status().is_success() {
-        return Err(Error(
-            StatusCode::BAD_GATEWAY,
-            "App service rejected request".into(),
-        ));
-    }
-    if response.content_length().is_some_and(|n| n > 65536) {
-        return Err(bad("App response exceeds limit"));
-    }
-    http_limits::json_body(response).await
+    veyndo_app_platform::service::service_call::service_call(
+        &service_limits::platform(a),
+        t,
+        id,
+        path,
+        v,
+    )
+    .await
 }
 
 pub(crate) fn ui_url(id: &str) -> Option<String> {
-    let configured = &crate::runtime_config::get().services;
-    let url = configured[id]["uiUrl"].as_str()?;
-    let parsed = reqwest::Url::parse(url).ok()?;
-    if parsed.scheme() == "https"
-        || parsed.scheme() == "http"
-            && ["localhost", "127.0.0.1"].contains(&parsed.host_str().unwrap_or(""))
-    {
-        Some(url.into())
-    } else {
-        None
-    }
+    veyndo_app_platform::domain::service_ui::ui_url(id, &crate::runtime_config::get().services)
 }
 
-/// The registry uses the same live permission check as direct actions.
-pub(super) fn action_authorized(a: &App, h: &RequestContext, action: &Action) -> bool {
-    action.public
-        || merchant(a, h).is_ok()
-            && additional_permissions(h, action).is_ok()
-            && (!(["save", "service", "emit", "job"].contains(&action.handler.as_str())
-                || action.permission.is_some())
-                || auth::permit(
-                    h,
-                    action
-                        .permission
-                        .as_deref()
-                        .unwrap_or(if action.handler == "job" {
-                            "apps.manage"
-                        } else {
-                            "catalog"
-                        }),
-                )
-                .is_ok())
-}
-
-/// Additional current team rights apply equally to UI, HTTP, MCP, Flow and leased workers.
-pub(crate) fn additional_permissions(h: &RequestContext, action: &Action) -> Result<()> {
-    veyndo_app_model::admission::additional(&action_admission::Current(h), action)
-}
+pub(crate) use veyndo_app_platform::domain::action_admission::additional as additional_permissions;

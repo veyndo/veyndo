@@ -1,77 +1,61 @@
-//! Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry.
-use super::*;
+//! Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers.
+use super::{data, install_host};
+use crate::foundation::App;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
 use sqlx::{Postgres, Transaction};
-pub(crate) const STORYFRONT: &str = include_str!("../../extensions/apps/storyfront/manifest.json");
+use std::env;
+use veyndo_app_platform::store::hosted_apps;
+use veyndo_core::Result;
+use veyndo_core::conflict;
+use veyndo_core::document::view;
 
 pub(crate) async fn ensure(
     tx: &mut Transaction<'_, Postgres>,
     tenant: &str,
     id: &str,
 ) -> Result<()> {
-    if id != "storyfront" {
-        return Err(bad("Unknown hosted app"));
-    }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-        .bind(id)
-        .execute(&mut **tx)
-        .await?;
-    let active: Option<bool> =
-        sqlx::query_scalar("SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(tenant)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?;
-    match active {
-        None => {
-            install_tx(
-                tx,
-                tenant,
-                serde_json::from_str(STORYFRONT).map_err(|_| bad("Invalid built-in"))?,
-            )
-            .await?;
-        }
-        Some(false) => {
-            sqlx::query(
-                "UPDATE app_packages SET active=true,revision=revision+1 WHERE tenant=$1 AND id=$2",
-            )
-            .bind(tenant)
-            .bind(id)
-            .execute(&mut **tx)
-            .await?;
-            sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'app.activated',$2)")
-                .bind(tenant)
-                .bind(json!({"app":id,"reason":"hosted_frontend"}))
-                .execute(&mut **tx)
-                .await?;
-        }
-        Some(true) => {}
-    }
-    Ok(())
+    hosted_apps::ensure(&data::BUNDLED, &install_host::COMMERCE, tx, tenant, id).await
 }
 
-/// Runs after shared-storage consolidation under the migration lock; normal reads never install apps.
-pub(crate) async fn backfill(tx: &mut Transaction<'_, Postgres>) -> Result<()> {
-    let tenants: Vec<String> = sqlx::query_scalar(
-        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant",
-    )
-    .fetch_all(&mut **tx)
-    .await?;
-    for tenant in tenants {
-        ensure(tx, &tenant, "storyfront").await?;
-    }
-    sqlx::query("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
-        .execute(&mut **tx)
-        .await?;
-    Ok(())
+/// One hosted frontend bound to a channel, as the app list and frontend bindings show it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct HostedConnection {
+    alias: String,
+    channel: String,
+    experience_alias: String,
+    revision: i64,
+    pub(crate) app_id: Option<String>,
+    url: Value,
+    editor_url: Option<String>,
 }
 
-pub(crate) async fn connections(a: &App, tenant: &str) -> Result<Vec<Value>> {
-    let rows=sqlx::query("SELECT alias,channel,experience_alias,revision,app_id FROM hosted_frontends WHERE tenant=$1 ORDER BY alias")
-        .bind(tenant).fetch_all(&a.db).await?;
-    Ok(rows.iter().map(|r| {
-        let alias:String=r.get("alias"); let experience:String=r.get("experience_alias");
-        json!({"alias":alias,"channel":r.get::<String,_>("channel"),"experienceAlias":experience,"revision":r.get::<i64,_>("revision"),"appId":r.get::<Option<String>,_>("app_id"),"url":crate::shop_domains::links(&alias)["storefrontUrl"],"editorUrl":crate::shop_domains::frontend_editor::url(&experience,env::var("HOSTED_FRONTEND_EDITOR_URL").ok().as_deref())})
-    }).collect())
+/// The storefront address of a shop's links.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ShopLinks {
+    storefront_url: Value,
+}
+
+pub(crate) async fn connections(a: &App, tenant: &str) -> Result<Vec<HostedConnection>> {
+    let rows = veyndo_app_platform::store::app_host_reads::connections(a, tenant).await?;
+    Ok(rows
+        .into_iter()
+        .map(|c| HostedConnection {
+            url: view::<ShopLinks>(&crate::shop_domains::links(&c.alias)).storefront_url,
+            editor_url: crate::shop_domains::frontend_editor::url(
+                &c.experience,
+                env::var("HOSTED_FRONTEND_EDITOR_URL").ok().as_deref(),
+            ),
+            alias: c.alias,
+            channel: c.channel,
+            experience_alias: c.experience,
+            revision: c.revision,
+            app_id: c.app,
+        })
+        .collect())
 }
 
 /// Existing action contract resolves managed connections locally, without inventing a second generator.
@@ -79,10 +63,10 @@ pub(crate) async fn action(a: &App, tenant: &str, id: &str, name: &str) -> Resul
     if id != "storyfront" {
         return Ok(None);
     }
-    let bindings: Vec<Value> = connections(a, tenant)
+    let bindings: Vec<HostedConnection> = connections(a, tenant)
         .await?
         .into_iter()
-        .filter(|f| f["appId"] == id)
+        .filter(|f| f.app_id.as_deref() == Some(id))
         .collect();
     if bindings.is_empty() {
         return Ok(None);
@@ -98,4 +82,27 @@ pub(crate) async fn action(a: &App, tenant: &str, id: &str, name: &str) -> Resul
         ));
     }
     Ok(None)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::HostedConnection;
+    use serde_json::json;
+
+    #[test]
+    fn hosted_connection_keeps_the_literal_shape() {
+        let app: Option<String> = Some("storyfront".into());
+        let editor: Option<String> = None;
+        let old = json!({"alias":"demo-shop","channel":"web","experienceAlias":"demo-exp","revision":4,"appId":app,"url":"https://demo-shop.example.test/","editorUrl":editor});
+        let new = json!(HostedConnection {
+            alias: "demo-shop".into(),
+            channel: "web".into(),
+            experience_alias: "demo-exp".into(),
+            revision: 4,
+            app_id: app,
+            url: json!("https://demo-shop.example.test/"),
+            editor_url: editor,
+        });
+        assert_eq!(new, old);
+    }
 }

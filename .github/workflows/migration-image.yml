@@ -8,6 +8,7 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'crates/**'
+      - 'components/**'
       - 'extensions/**'
   push:
     branches: [main]

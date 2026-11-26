@@ -1,12 +1,29 @@
 //! Customer payment status/capture and merchant refund operations share the durable command API.
-use super::{
-    account, customer, enqueue, environment, onboarding_route, provider_webhooks, providers_route,
-    sessions, webhooks,
-};
-use crate::{
-    App, Error, Json, Path, RequestContext, Result, Router, Row, SecureRoutes, State, StatusCode,
-    Value, auth, bad, get, header, json, merchant, post, tenant,
-};
+use super::{customer, enqueue, onboarding_route, provider_webhooks, providers_route, sessions};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
+/// The intent of a stored payment, compared exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PaymentIntent {
+    intent: Value,
+}
 
 pub(crate) fn payment_router() -> Router<App> {
     Router::new()
@@ -41,7 +58,7 @@ pub(crate) fn payment_router() -> Router<App> {
         .secure_route(
             "/api/payments/jobs/{id}",
             &[("GET", "payments.read")],
-            get(job_status),
+            get(veyndo_payments::http::status::job_status),
         )
         .secure_route(
             "/api/payments/{id}/instructions",
@@ -65,40 +82,12 @@ pub(crate) fn payment_router() -> Router<App> {
         )
         .route(
             "/store-api/payments/paypal/webhooks",
-            post(webhooks::webhook),
+            post(veyndo_paypal::webhooks::webhook),
         )
 }
 pub(crate) async fn status(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "payments.read")?;
-    let rows = sqlx::query(
-        "SELECT * FROM payment_attempts WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
-    )
-    .bind(&t)
-    .fetch_all(&a.db)
-    .await?;
-    let jobs=sqlx::query("SELECT id,attempt_id,operation,state,error FROM payment_jobs WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(&t).fetch_all(&a.db).await?;
-    let generic = providers_route(State(a.clone()), h.clone()).await?.0;
-    let mut providers = vec![
-        json!({"id":"paypal","environment":environment(),"configured":account(&t).is_ok(),"apiContract":"PayPal Orders v2"}),
-    ];
-    for p in generic["providers"].as_array().unwrap() {
-        let mut p = p.clone();
-        p["configured"] = json!(
-            p["active"] == true
-                && generic["accounts"]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .any(|c| c["provider"] == p["id"] && c["ready"] == true)
-        );
-        providers.push(p);
-    }
-    if !providers.iter().any(|p| p["id"] == "shopware_payments") {
-        providers.push(json!({"id":"shopware_payments","configured":false,"status":"private-adapter-required"}));
-    }
     Ok(Json(
-        json!({"providers":providers,"attempts":rows.iter().map(|r|json!({"provider":r.get::<String,_>("provider"),"id":r.get::<String,_>("id"),"orderId":r.get::<String,_>("order_id"),"state":r.get::<String,_>("state"),"amountMinor":r.get::<i64,_>("amount_minor"),"currency":r.get::<String,_>("currency"),"currencyScale":r.get::<i16,_>("currency_scale"),"refundedMinor":r.get::<i64,_>("refunded_minor"),"adapterVersion":r.get::<String,_>("adapter_version"),"environment":r.get::<String,_>("environment"),"settlement":super::settlements::summary(&super::attempt(r))})).collect::<Vec<_>>(),"jobs":jobs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"attemptId":r.get::<String,_>("attempt_id"),"operation":r.get::<String,_>("operation"),"state":r.get::<String,_>("state"),"error":r.get::<Option<String>,_>("error")})).collect::<Vec<_>>()}),
+        veyndo_payments::service::providers::status(&super::host::Gateway(&a), &a, &h).await?,
     ))
 }
 async fn customer_status(
@@ -109,44 +98,12 @@ async fn customer_status(
     customer(&a, &h, &id).await?;
     Ok(Json(read(&a, &tenant(&h)?, &id).await?))
 }
-// All status components come from one PostgreSQL statement snapshot. A provider
-// commit must never combine a new payment with an older admitted cart/order.
-const STATUS_FIELDS: &str = "SELECT p.*,(SELECT jsonb_build_object('id',j.id,'operation',j.operation,'state',j.state) FROM payment_jobs j WHERE j.tenant=p.tenant AND j.attempt_id=p.id ORDER BY j.created_at DESC,j.id DESC LIMIT 1) AS job";
-async fn status_row(
-    a: &App,
-    t: &str,
-    id: &str,
-    cart: Option<&str>,
-) -> Result<sqlx::postgres::PgRow> {
-    let mut q = sqlx::QueryBuilder::<sqlx::Postgres>::new(STATUS_FIELDS);
-    if cart.is_some() {
-        q.push(",o.data AS sale FROM payment_attempts p JOIN orders o ON o.tenant=p.tenant AND o.id=p.order_id");
-    } else {
-        q.push(" FROM payment_attempts p");
-    }
-    q.push(" WHERE p.tenant=")
-        .push_bind(t)
-        .push(" AND p.id=")
-        .push_bind(id);
-    if let Some(cart) = cart {
-        q.push(" AND o.cart_id=").push_bind(cart);
-    }
-    q.build()
-        .fetch_optional(&a.db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))
-}
-fn payment_status(r: &sqlx::postgres::PgRow, id: &str) -> Value {
-    let settled = super::settlements::summary(&super::attempt(r));
-    json!({"provider":r.get::<String,_>("provider"),"capturedMinor":settled["capturedMinor"],"captureClosed":settled["captureClosed"],"checkout":r.get::<Value,_>("provider_context")["checkout"],"intent":r.get::<Value,_>("provider_context")["intent"],"job":r.get::<Option<Value>,_>("job"),"id":id,"state":r.get::<String,_>("state"),"approvalUrl":r.get::<Option<String>,_>("approval_url"),"amountMinor":r.get::<i64,_>("amount_minor"),"currency":r.get::<String,_>("currency"),"currencyScale":r.get::<i16,_>("currency_scale"),"refundedMinor":r.get::<i64,_>("refunded_minor"),"revision":r.get::<i64,_>("revision"),"environment":r.get::<String,_>("environment"),"savedPaymentMethodStatus":r.get::<Value,_>("provider_context")["vaultStatus"],"instructionsAvailable":r.get::<Value,_>("provider_context")["capabilities"].as_array().is_some_and(|cs|cs.iter().any(|c|c=="instructions")),"realMoneyCharged":r.get::<String,_>("environment")=="live" && ["captured","partially_captured","captured_late","partially_refunded","refunded"].contains(&r.get::<String,_>("state").as_str())})
-}
-pub(crate) async fn read(a: &App, t: &str, id: &str) -> Result<Value> {
-    Ok(payment_status(&status_row(a, t, id, None).await?, id))
-}
-/// Caller must first admit the exact cashier/cart capability through the native POS owner.
-pub(crate) async fn read_sale(a: &App, t: &str, id: &str, cart: &str) -> Result<Value> {
-    let r = status_row(a, t, id, Some(cart)).await?;
-    Ok(json!({"payment":payment_status(&r,id),"order":r.get::<Value,_>("sale")}))
+/// The JSON fields `customer_command` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerCommandInput {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
 }
 
 async fn customer_command(
@@ -155,6 +112,7 @@ async fn customer_command(
     Path((id, op)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: CustomerCommandInput = view(&v);
     customer(&a, &h, &id).await?;
     if !["capture", "reconcile", "cancel"].contains(&op.as_str()) {
         return Err(bad("Unsupported customer payment operation"));
@@ -168,7 +126,7 @@ async fn customer_command(
         ));
     }
     let status = read(&a, &tenant(&h)?, &id).await?;
-    let op = if op == "capture" && status["intent"] == "authorize" {
+    let op = if op == "capture" && view::<PaymentIntent>(&status).intent == "authorize" {
         "authorize"
     } else {
         &op
@@ -180,32 +138,31 @@ async fn customer_command(
             &id,
             op,
             header(&h, "idempotency-key")
-                .or_else(|| v["requestKey"].as_str())
+                .or(input.request_key.as_deref())
                 .ok_or(bad("Idempotency-Key required"))?,
             &v,
         )
         .await?,
     ))
 }
+/// The JSON fields `merchant_command` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MerchantCommandInput {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 async fn merchant_command(
     State(a): State<App>,
     h: RequestContext,
     Path((id, op)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: MerchantCommandInput = view(&v);
     merchant(&a, &h)?;
     auth::permit(&h, "payments.manage")?;
-    if ![
-        "refund",
-        "reconcile",
-        "cancel",
-        "capture",
-        "authorize",
-        "void",
-    ]
-    .contains(&op.as_str())
-        || v["approve"] != true
-    {
+    if !veyndo_payments::service::merchant_operations::admitted(&op, &v) {
         return Err(bad("Supported payment operation and approve=true required"));
     }
     Ok(Json(
@@ -215,7 +172,7 @@ async fn merchant_command(
             &id,
             &op,
             header(&h, "idempotency-key")
-                .or_else(|| v["requestKey"].as_str())
+                .or(input.request_key.as_deref())
                 .ok_or(bad("Idempotency-Key required"))?,
             &v,
         )
@@ -223,22 +180,4 @@ async fn merchant_command(
     ))
 }
 
-/// Merchant polling observes the durable job instead of dispatching another financial command.
-async fn job_status(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "payments.manage")?;
-    let r =
-        sqlx::query("SELECT id,state,error,attempt_id FROM payment_jobs WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Payment job not found".into()))?;
-    Ok(Json(
-        json!({"id":r.get::<String,_>("id"),"state":r.get::<String,_>("state"),"error":r.get::<Option<String>,_>("error"),"payment":read(&a,&t,&r.get::<String,_>("attempt_id")).await?}),
-    ))
-}
+pub(crate) use veyndo_payments::http::status::read;

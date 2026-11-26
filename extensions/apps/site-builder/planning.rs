@@ -1,7 +1,9 @@
 //! App-owned nested page format shared by merchant planning and external coding agents.
-use super::*;
+use serde_json::Value;
+use serde_json::json;
 
-pub(crate) fn contract() -> Value {
+/// The JSON contract of the page fields a planning agent edits.
+pub fn contract() -> Value {
     json!({
         "slug":"1–100 lowercase ASCII letters, digits or hyphens",
         "content":{
@@ -11,17 +13,19 @@ pub(crate) fn contract() -> Value {
                 "additionalProperties":false,
                 "properties":{
                     "id":"unique within page; ^[a-z][a-z0-9_]{0,31}$; underscores allowed, hyphens not allowed",
-                    "kind":["hero","text","products","image","form","articles","app","native"],
+                    "kind":["hero","text","products","image","form","articles","app","native","part"],
                     "text":"optional locale-to-string/null map; enabled shop locale keys (e.g. it-IT), at most 100 locales, 2000 UTF-8 bytes per value; null means inherit",
                     "rich":"optional locale-to-array map (not Tiptap root directly), at most 100 locales and 40 blocks per locale; basic blocks are {type:paragraph/heading/list,text:string} (max 4000 UTF-8 bytes); media blocks are {type:image/video,url:HTTPS}; omit when plain text suffices",
                     "image":"optional owned public product-media path or HTTPS URL; omit if unavailable",
                     "products":"optional array of at most 24 product IDs from the current shop/channel; each ID at most 100 bytes",
                     "productMode":["all","selected"],
                     "fields":"optional array of at most 12 form fields: {id,kind,required:boolean,label:locale-to-string map}; id unique in block matching ^[a-z][a-z0-9_]{0,31}$; kind text/email/textarea/checkbox/number; label 1–100 enabled locales, max 100 UTF-8 bytes per label",
-                    "extension":"only kind=app requires {app,surface}, both identifiers matching ^[a-z][a-z0-9_]{0,31}$; installed enabled app other than site_builder; omit for all other kinds"
+                    "extension":"only kind=app requires {app,surface}, both identifiers matching ^[a-z][a-z0-9_]{0,31}$; installed enabled app other than site_builder; omit for all other kinds",
+                    "part":"only kind=part requires {id,version,config}; id and version from partSchemas, config valid against its JSON Schema with observed product IDs; preserve existing part blocks unless asked; omit for all other kinds"
                 }
             }
         },
+        "partSchemas": super::part_schemas::catalogue(),
         "nativeSections": "Only layout-product and layout-category may contain kind=native. Preserve each native section exactly once. Product IDs: purchase, details, assistance, reviews. Category IDs: filters, listing. Reorder existing sections by their block positions.",
         "theme":{"optionalProperties":{"accent":"#RRGGBB","background":"#RRGGBB","foreground":"#RRGGBB","font":["sans","serif","mono"],"radius":"integer 0..32","spacing":"integer 12..96","columns":"integer 1..4"},"additionalProperties":false},
         "example":{"content":{"blocks":[{"id":"collection_intro","kind":"hero","text":{"it-IT":"La nostra collezione"}},{"id":"selected_products","kind":"products","products":["replace_with_observed_product_id"],"productMode":"selected"}]},"theme":{}},

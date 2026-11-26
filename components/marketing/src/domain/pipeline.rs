@@ -1,0 +1,125 @@
+//! A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes.
+use crate::domain::{flow_actions, rules};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use veyndo_app_model::declarations::identifier;
+use veyndo_core::{Result, bad};
+use veyndo_flow_graph::execution::{Branches, Directive, ExecutableNode};
+use veyndo_flow_graph::{Graph, Invalid};
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Pipeline {
+    pub entry: String,
+    pub nodes: Vec<Node>,
+}
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Node {
+    Condition {
+        id: String,
+        condition: rules::Condition,
+        on_true: Option<String>,
+        on_false: Option<String>,
+    },
+    Action {
+        id: String,
+        action: String,
+        #[serde(default)]
+        config: Value,
+        next: Option<String>,
+    },
+    Delay {
+        id: String,
+        seconds: u64,
+        next: Option<String>,
+    },
+    Stop {
+        id: String,
+    },
+}
+impl Node {
+    pub fn id(&self) -> &str {
+        match self {
+            Self::Condition { id, .. }
+            | Self::Action { id, .. }
+            | Self::Delay { id, .. }
+            | Self::Stop { id } => id,
+        }
+    }
+}
+impl veyndo_flow_graph::Node for Node {
+    fn id(&self) -> &str {
+        self.id()
+    }
+    fn successors(&self) -> [Option<&str>; 2] {
+        self.directive().successors()
+    }
+}
+impl ExecutableNode for Node {
+    type Condition = rules::Condition;
+    type Config = Value;
+
+    fn directive(&self) -> Directive<'_, rules::Condition, Value> {
+        match self {
+            Self::Condition {
+                condition,
+                on_true,
+                on_false,
+                ..
+            } => Directive::Branch {
+                condition,
+                branches: Branches {
+                    on_true: on_true.as_deref(),
+                    on_false: on_false.as_deref(),
+                },
+            },
+            Self::Action {
+                action,
+                config,
+                next,
+                ..
+            } => Directive::Effect {
+                action,
+                config,
+                next: next.as_deref(),
+            },
+            Self::Delay { seconds, next, .. } => Directive::Defer {
+                seconds: *seconds,
+                next: next.as_deref(),
+            },
+            Self::Stop { .. } => Directive::Stop,
+        }
+    }
+}
+impl Pipeline {
+    pub fn validate(&self) -> Result<()> {
+        self.graph().map(|_| ())
+    }
+
+    pub fn graph(&self) -> Result<Graph<'_, Node>> {
+        Graph::validate(&self.entry, &self.nodes, identifier, |node| match node {
+            Node::Condition { condition, .. } => condition.validate(0),
+            Node::Delay { seconds, .. }
+                if !veyndo_pricing::verified_kernel::flow_delay_admissible(*seconds) =>
+            {
+                Err(bad("Flow delay exceeds 30 days"))
+            }
+            Node::Action { action, config, .. } => flow_actions::validate(action, config),
+            _ => Ok(()),
+        })
+        .map_err(|error| match error {
+            Invalid::EntryOrSize => bad(format!(
+                "Flow needs an entry and 1..{} nodes",
+                veyndo_flow_graph::MAX_NODES
+            )),
+            Invalid::NodeId => bad("Invalid or duplicate flow node"),
+            Invalid::Node(error) => error,
+            Invalid::MissingSuccessor => bad("Flow edge references an absent node"),
+            Invalid::Cycle => bad("Flow graph contains a cycle"),
+            Invalid::Unreachable => bad("Flow graph contains unreachable nodes"),
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests;

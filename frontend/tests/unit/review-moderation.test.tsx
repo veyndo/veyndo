@@ -1,9 +1,9 @@
 /** Product-specific moderation respects API failures and publishes only after confirmation. */
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ReviewModeration from "../../src/admin/catalog/ReviewModeration";
+import ReviewModeration from "../../../components/catalog/ui/admin/catalog/ReviewModeration";
 const review = {
   id: "r1",
   productId: "lamp",
@@ -91,24 +91,16 @@ it("reports failed reads and ignores results after unmount", async () => {
   second.unmount();
   resolve({ reviews: [review] });
 });
-it("clears old product reviews while the next product is loading", async () => {
-  let reply!: (value: unknown) => void;
-  const request = vi
-    .fn()
-    .mockResolvedValueOnce({ reviews: [review] })
-    .mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          reply = resolve;
-        }),
-    );
+it("shows only the next product's reviews right after switching products", async () => {
+  // Reviews come from one shared commerce read; switching filters, it does not reload.
+  const request = vi.fn().mockResolvedValue({ reviews: [review] });
   const view = render(<ReviewModeration request={request} productId="lamp" />, {
     wrapper: LocaleProvider,
   });
   await screen.findByText("Useful lamp");
   view.rerender(<ReviewModeration request={request} productId="chair" />);
   expect(screen.queryByText("Useful lamp")).not.toBeInTheDocument();
-  await act(async () => reply({ reviews: [] }));
+  expect(request).toHaveBeenCalledTimes(1);
 });
 it("labels imported provenance without presenting source claims as a verified purchase", async () => {
   const request = vi.fn().mockResolvedValue({

@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT turn_owner,(turn_until IS NULL OR turn_until<now()) AS \"available!\" FROM conversations WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "turn_owner",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "turn_owner"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "available!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "823598b4e2bf421beff643bda2981f55365dab382b36e596d1080603173b28e7"
+}

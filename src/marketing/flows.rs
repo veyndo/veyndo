@@ -1,184 +1,41 @@
 //! Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations.
-use super::*;
-use veyndo_flow_graph::catalog::{EVENTS, FLOW_ACTIONS};
-fn knowledge_event(kind: &str) -> bool {
-    EVENTS.contains(&kind)
-        && (kind.starts_with("knowledge.")
-            || kind.starts_with("intelligence.")
-            || kind == "merchant.change.applied"
-            || kind == "app.configuration.changed"
-            || kind.starts_with("consumer.")
-            || kind.starts_with("privacy.")
-            || kind.starts_with("b2b.")
-            || kind.starts_with("pos."))
+use super::execute_app_flow;
+use crate::commerce;
+use crate::foundation::App;
+use crate::planner::plan_with;
+use axum::http::StatusCode;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::view;
+pub(crate) use veyndo_marketing::store::flow_projection::project as project_flows;
+pub(crate) use veyndo_marketing::types::flow::{AppFlowAction, Flow};
+/// The saved flow job: its flow, the event it answers and the order it names, each as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct JobDefinition {
+    flow: Value,
+    event: Value,
+    order_id: Value,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Flow {
-    #[serde(default)]
-    pub pipeline: Option<super::pipeline::Pipeline>,
-    pub name: HashMap<String, String>,
-    pub active: bool,
-    pub event: String,
-    pub condition: rules::Condition,
-    pub action: String,
-    pub instruction: HashMap<String, Option<String>>,
-    pub locale: String,
-    #[serde(default)]
-    pub inference: Option<Choice>,
-    #[serde(default)]
-    pub actor: Option<String>,
-    #[serde(default)]
-    pub app_action: Option<AppFlowAction>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub work_template: Option<super::work_template::WorkTemplate>,
+/// The execution state of a delayed pipeline job.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Execution {
+    finish_after_delay: Value,
 }
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct AppFlowAction {
-    pub app: String,
-    pub action: String,
-    #[serde(default)]
-    pub arguments: Value,
-}
-impl Flow {
-    pub(crate) fn validate(&self) -> Result<()> {
-        self.condition.validate(0)?;
-        if self.action == "work_proposal" {
-            self.work_template
-                .as_ref()
-                .ok_or(bad("Work template required"))?
-                .validate()?;
-        } else if self.work_template.is_some() {
-            return Err(bad("Work template requires its review action"));
-        }
-        if self.action == "pipeline" {
-            self.pipeline
-                .as_ref()
-                .ok_or(bad("Flow pipeline required"))?
-                .validate()?;
-        }
-        if self.action == "app_action"
-            && self.app_action.as_ref().is_none_or(|x| {
-                !apps::identifier(&x.app)
-                    || !apps::identifier(&x.action)
-                    || !x.arguments.is_object()
-                    || x.arguments.to_string().len() > 8000
-            })
-        {
-            return Err(bad("Invalid flow app action"));
-        }
-        if !EVENTS.contains(&self.event.as_str()) && !valid_app_event(&self.event)
-            || !FLOW_ACTIONS.contains(&self.action.as_str())
-            || !commerce::valid_locale_key(&self.locale)
-        {
-            return Err(bad("Unsupported flow action, event or locale"));
-        }
-        if self.action != "pipeline" {
-            super::flow_text::shape(&json!(self.instruction))?;
-        }
-        Ok(())
-    }
-}
-pub(crate) async fn project_flows(
-    tx: &mut sqlx::PgConnection,
-    t: &str,
-    event: i64,
-    kind: &str,
-    data: &Value,
-) -> Result<()> {
-    if !EVENTS.contains(&kind) && !valid_app_event(kind) {
-        return Ok(());
-    }
-    // Generic automation access is not customer-data access. Email apps receive their explicitly subscribed raw event.
-    let mut public_event = data.clone();
-    if kind.starts_with("consumer.") {
-        public_event.as_object_mut().map(|v| v.remove("receipt"));
-    }
-    if kind == "payment.instructions.available" {
-        public_event
-            .as_object_mut()
-            .map(|v| v.remove("paymentInstructions"));
-    }
-    let data = &public_event;
-    let rows = sqlx::query("SELECT id,data FROM commerce_flows WHERE tenant=$1 AND data->>'event'=$2 AND data->>'active'='true' ORDER BY id FOR SHARE")
-        .bind(t)
-        .bind(kind)
-        .fetch_all(&mut *tx)
-        .await?;
-    if rows.is_empty() {
-        return Ok(());
-    }
-    let order_id = data["orderId"].as_str().unwrap_or("");
-    let order=sqlx::query("SELECT c.* ,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2").bind(t).bind(order_id).fetch_optional(&mut *tx).await?;
-    let (cart, q) = if let Some(order) = order {
-        (
-            stored(&order)?,
-            data.get("order")
-                .cloned()
-                .unwrap_or_else(|| order.get("order_data")),
-        )
-    } else {
-        if !valid_app_event(kind)
-            && !knowledge_event(kind)
-            && !["product.created", "product.updated"].contains(&kind)
-        {
-            return Ok(());
-        }
-        (StoredCart{id:String::new(),tenant:t.into(),token:String::new(),data:serde_json::from_value(json!({"items":[],"group":"consumer","email":null,"company":null,"session":"app-event","buyer":null,"order":null})).map_err(|_|bad("Invalid event context"))?,revision:0,status:"event".into()},json!({"cart":{}}))
-    };
-    let mut context = q["cart"].clone();
-    context["event"] = data.clone();
-    context["eventKind"] = json!(kind);
-    context["orderState"] = q["state"].clone();
-    context["paymentState"] = q["payment"]["state"].clone();
-    context["deliveryStates"] = json!(
-        q["deliveries"]
-            .as_array()
-            .map(|ds| ds.iter().map(|d| d["state"].clone()).collect::<Vec<_>>())
-            .unwrap_or_default()
-    );
-    context["ruleFacts"] = facts::rule_facts(tx, &cart, &context).await?;
-    if !order_id.is_empty() {
-        facts::order_facts(tx, t, order_id, &q, &mut context["ruleFacts"]).await?;
-    }
-    for row in rows {
-        let raw: Value = row.get("data");
-        let f: Flow = match serde_json::from_value(raw.clone()) {
-            Ok(flow) => flow,
-            Err(_) => {
-                sqlx::query("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition,state,error) VALUES($1,$2,$3,$4,$5,'failed','Invalid stored flow schema') ON CONFLICT(tenant,flow,event_id) DO NOTHING").bind(uid()).bind(t).bind(row.get::<String,_>("id")).bind(event).bind(json!({"flow":raw,"orderId":order_id})).execute(&mut *tx).await?;
-                continue;
-            }
-        };
-        if !f.active || f.event != kind {
-            continue;
-        }
-        // Reference limits and malformed definitions belong to this flow, not to the whole outbox event.
-        let mut frozen = context.clone();
-        let matched =
-            match super::rule_snapshot::attach(tx, t, &raw, &mut frozen["ruleFacts"]).await {
-                Ok(()) => f.condition.checked_matches(&cart, &frozen),
-                Err(error) => Err(error),
-            };
-        if let Err(error) = &matched {
-            sqlx::query("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition,state,error) VALUES($1,$2,$3,$4,$5,'failed',$6) ON CONFLICT(tenant,flow,event_id) DO NOTHING").bind(uid()).bind(t).bind(row.get::<String,_>("id")).bind(event).bind(json!({"flow":f,"orderId":order_id})).bind(&error.1).execute(&mut *tx).await?;
-            continue;
-        }
-        if matched.unwrap_or(false) {
-            sqlx::query("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,flow,event_id) DO NOTHING").bind(uid()).bind(t).bind(row.get::<String,_>("id")).bind(event).bind(json!({"flow":f,"orderId":order_id,"orderNumber":q["orderNumber"],"totalPrice":q["cart"]["price"]["totalPrice"],"event":kind,"transition":data,"eventContext":data,"cartData":cart.data,"ruleContext":frozen,"orderSnapshot":{"orderCustomer":q["orderCustomer"],"currencyId":q["currencyId"],"orderNumber":q["orderNumber"],"state":q["state"],"cart":{"price":q["cart"]["price"]}}})).execute(&mut *tx).await?;
-        }
-    }
-    Ok(())
-}
+
 pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     let Some(job) = super::flow_jobs::claim(a).await? else {
         return Ok(false);
     };
     let (id, t, definition) = (job.id.as_str(), job.tenant.as_str(), &job.definition);
-    let f: Flow =
-        serde_json::from_value(definition["flow"].clone()).map_err(|_| bad("Invalid flow"))?;
+    let job_definition: JobDefinition = view(definition);
+    let f: Flow = serde_json::from_value(job_definition.flow).map_err(|_| bad("Invalid flow"))?;
     let (settings, _) = commerce::config(a, t).await?;
     let instruction =
         super::flow_text::effective(&json!(f.instruction), &f.locale, &settings.main_locale)
@@ -192,7 +49,7 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
             "Flow owner lost access".into(),
         ))
     } else if f.action == "pipeline" {
-        if job.execution["finishAfterDelay"] == true {
+        if view::<Execution>(&job.execution).finish_after_delay == true {
             Ok(json!({"completed":true}))
         } else {
             match super::pipeline_runtime::run(a, &job, &f).await {
@@ -204,18 +61,25 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     } else if f.action == "work_proposal" {
         match f.work_template.as_ref() {
             Some(template) => {
-                super::work_template::prepare(a, t, &f, id, template, definition).await
+                veyndo_studio::service::flow_templates::prepare(
+                    &crate::agent_host::Host(a),
+                    (t, id),
+                    &f,
+                    template,
+                    definition,
+                )
+                .await
             }
             None => Err(bad("Work template required")),
         }
     } else if f.action == "app_action" {
         execute_app_flow(a, t, &f, id, &instruction, definition).await
     } else if f.action == "note" {
-        Ok(json!({"note":instruction,"orderId":definition["orderId"],"locale":f.locale}))
+        Ok(json!({"note":instruction,"orderId":job_definition.order_id,"locale":f.locale}))
     } else if f.action == "ai_proposal" {
         let context = format!(
             "Flow event {}. {}. Create a reviewable proposal only.",
-            definition["event"], instruction
+            job_definition.event, instruction
         );
         match super::flow_access::proposal_headers(a, t, f.actor.as_deref(), id).await {
             Ok(h) => match crate::performance::reserve_ai_attempt(a, t).await {
@@ -235,19 +99,19 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     if job.finish(&mut tx, state, &value, error).await?
         && state == "completed"
         && f.action == "note"
-        && !definition["orderId"].as_str().unwrap_or("").is_empty()
+        && !job_definition.order_id.as_str().unwrap_or("").is_empty()
     {
-        sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'flow',$4)").bind(t).bind(definition["orderId"].as_str().unwrap_or("")).bind(f.actor.as_deref().unwrap_or("flow")).bind(json!({"text":instruction,"flowJob":id,"event":definition["event"],"locale":f.locale})).execute(&mut *tx).await?;
+        veyndo_orders::store::order_reads::flow_note(
+            &mut tx,
+            t,
+            (
+                job_definition.order_id.as_str().unwrap_or(""),
+                f.actor.as_deref().unwrap_or("flow"),
+            ),
+            &json!({"text":instruction,"flowJob":id,"event":job_definition.event,"locale":f.locale}),
+        )
+        .await?;
     }
     tx.commit().await?;
     Ok(true)
-}
-
-/// Only namespaced app events can extend the standard event catalogue.
-pub(crate) fn valid_app_event(name: &str) -> bool {
-    let parts = name.split('.').collect::<Vec<_>>();
-    parts.len() == 3
-        && parts[0] == "app"
-        && apps::identifier(parts[1])
-        && apps::identifier(parts[2])
 }

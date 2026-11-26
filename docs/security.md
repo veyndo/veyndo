@@ -41,8 +41,8 @@ use the existing native ledgers through host-only HttpOnly cookies, exact origin
 and per-tab anti-CSRF fences. API bearer clients remain compatible. The merchant
 credential origin permits only build-owned scripts; shared checkout keeps manual
 addresses rather than loading third-party code with merchant authority. See the
-[browser session contract and migration limits](browser-sessions.md),
-[account MFA/recovery](account-security.md) and [eighteen review fixes](core-hardening.md).
+[browser session contract and migration limits](browser-sessions.md)
+and [account MFA/recovery](account-security.md).
 
 Studio validates a visible connected session once per minute and on return to
 the tab. An authoritative merchant-authentication rejection from either JSON
@@ -59,7 +59,7 @@ membership before resuming; failed writes are never replayed.
 Native object handlers bind tenant scope in HTTP, graph/vector and MCP paths.
 The adversarial [tenant isolation suite](tenant-isolation.md) tests ID/header
 swaps and unchanged victim state; it is not an exhaustive endpoint audit.
-Migration 038 additionally scopes 22 critical foreign-key relationships by
+The schema baseline additionally scopes 22 critical foreign-key relationships by
 tenant, preventing wrong-shop order/payment/event/staging associations. Migration
 044 adds core FORCE RLS, connection-bound tenant context and strict runtime role
 checks. Managed app tables retain their forced policy. Enable the separate
@@ -105,7 +105,7 @@ Wasm guests have no host imports/WASI and bounded fuel/memory/stack/source.
 Cold compilation uses a bounded LRU and blocking-pool slots before cart/product locks; checkout verifies its persisted digest under the lock. Pure app Wasm shares the same cache implementation, without compilation under its global cache mutex. Traps roll back
 purchase. A process-isolated compiler is still a production requirement.
 
-See [app and payment boundaries](intelligence-apps-payments.md) for the opaque
+See [app security](app-security.md) and the [payment provider API](payment-provider-api.md) for the opaque
 iframe/action gateway, native adapter, exact receipt checks and remaining gaps.
 
 Learning counts use synthetic sessions/orders; they are not LLM weight
@@ -187,7 +187,7 @@ sandboxed shop configuration and cannot be restored through content history.
 
 ## Authenticated database authority
 
-See [the signed-scope contract and deployment sequence](authenticated-database-scope.md) for separate tenant/system logins, private actor binding, atomic app-table protection and key rotation. Existing `rac.*` values alone are not this boundary. Production activation is explicit and follows verified replica cutover.
+See [the signed-scope contract and deployment sequence](authenticated-database-scope.md) for separate tenant/system logins, private actor binding, atomic app-table protection and key rotation. Existing `rac.*` values alone are not this boundary.
 
 ## Independent App Data reader boundary
 

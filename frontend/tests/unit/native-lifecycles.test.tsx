@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AppConnections from "../../src/admin/developer/AppConnections";
-import AppNativeLifecycles from "../../src/admin/developer/AppNativeLifecycles";
-import OrderWorkflow from "../../src/admin/orders/OrderWorkflow";
-import { template, compile } from "../../src/admin/developer/app-model";
+import AppConnections from "../../../components/apps/ui/admin/developer/AppConnections";
+import AppNativeLifecycles from "../../../components/apps/ui/admin/developer/AppNativeLifecycles";
+import OrderWorkflow from "../../../components/orders/ui/admin/orders/OrderWorkflow";
+import {
+  template,
+  compile,
+} from "../../../components/apps/ui/admin/developer/app-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import type { Manifest } from "../../src/shared/apps/native/types";

@@ -14,10 +14,11 @@ import EntityHistory from "../../src/shared/history/EntityHistory";
 import { changes, printable } from "../../src/shared/history/history-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { useEntityNavigation } from "../../src/admin/shell/useEntityNavigation";
-import OrderDetail from "../../src/admin/orders/OrderDetail";
-import CustomersManager from "../../src/admin/customers/CustomersManager";
-import CustomerGroupsSettings from "../../src/admin/settings/CustomerGroupsSettings";
+import OrderDetail from "../../../components/orders/ui/admin/orders/OrderDetail";
+import CustomersManager from "../../../components/customers/ui/admin/customers/CustomersManager";
+import CustomerGroupsSettings from "../../../components/shop/ui/admin/settings/CustomerGroupsSettings";
 import type { Tab } from "../../src/admin/shell/navigation";
+import type { ApiRoutePath } from "../../src/kit/api";
 const address = {
   name: "Unit Buyer",
   firstName: "Unit",
@@ -54,7 +55,11 @@ it("sets billing and shipping defaults independently from the cards, and confirm
     return structuredClone(book);
   });
   render(
-    <AddressBook request={request} path="/addresses" countries={["DE"]} />,
+    <AddressBook
+      request={request}
+      path={"/addresses" as ApiRoutePath}
+      countries={["DE"]}
+    />,
     { wrapper: LocaleProvider },
   );
   const user = userEvent.setup();

@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import CustomersManager from "../../src/admin/customers/CustomersManager";
+import CustomersManager from "../../../components/customers/ui/admin/customers/CustomersManager";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const guest = {
   id: null,

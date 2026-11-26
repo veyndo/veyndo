@@ -16,8 +16,8 @@ pub async fn action(store: &Store, t: &str, a: &str, name: &str, v: &Value) -> R
     }
     match name {
         "status" => public(store, t, a).await,
-        "connect" => oauth::start(store, t, a).await,
-        "disconnect" => oauth::disconnect(store, t, a).await,
+        "connect" => oauth::start(store, t, a, providers::oauth(a)?).await,
+        "disconnect" => oauth::disconnect(store, t, a, providers::oauth(a)?).await,
         "configure" => configure(store, t, a, v).await,
         _ => providers::action(store, t, a, name, v).await,
     }

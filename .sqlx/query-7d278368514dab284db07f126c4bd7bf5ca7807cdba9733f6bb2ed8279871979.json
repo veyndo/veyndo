@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE b2b_quotes SET state='accepted',revision=revision+1 WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7d278368514dab284db07f126c4bd7bf5ca7807cdba9733f6bb2ed8279871979"
+}

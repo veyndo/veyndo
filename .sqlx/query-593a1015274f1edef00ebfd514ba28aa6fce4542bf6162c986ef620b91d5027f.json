@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ciphertext AS \"ciphertext!\",last_step,recovery_digests FROM merchant_mfa WHERE user_id=$1 AND enabled FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ciphertext!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_mfa",
+            "name": "ciphertext"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "last_step",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "merchant_mfa",
+            "name": "last_step"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "recovery_digests",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "merchant_mfa",
+            "name": "recovery_digests"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "593a1015274f1edef00ebfd514ba28aa6fce4542bf6162c986ef620b91d5027f"
+}

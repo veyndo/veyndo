@@ -1,13 +1,17 @@
 //! Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility.
-use crate::*;
-mod content;
-pub(crate) mod guidance;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
+use knowledge_host::Knowledge;
+use veyndo_intelligence::service::product_questions;
 mod ingestion;
+mod knowledge_host;
 mod lifecycle;
 mod preview;
 mod product_knowledge;
 mod tools;
-mod workspace;
 pub(crate) use tools::{knowledge_invoke, knowledge_schema};
 mod parser;
 mod questions;
@@ -33,7 +37,7 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/knowledge/workspace",
             &[("GET", "knowledge.read")],
-            get(workspace::workspace),
+            get(veyndo_intelligence::http::workspace::workspace),
         )
         .secure_route(
             "/api/knowledge/product/{id}",

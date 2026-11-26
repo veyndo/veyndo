@@ -2,9 +2,9 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi, beforeEach } from "vitest";
-import DeveloperView from "../../src/admin/developer/DeveloperView";
+import DeveloperView from "../../../components/apps/ui/admin/developer/DeveloperView";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { template } from "../../src/admin/developer/app-model";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 beforeEach(() => {
   vi.spyOn(HTMLDialogElement.prototype, "showModal").mockImplementation(
     function (this: HTMLDialogElement) {

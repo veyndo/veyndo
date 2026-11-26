@@ -24,14 +24,13 @@ images are unedited captures of the actual prototype.
 
 The Rust crate and HTTP binary are `veyndo`; Rust imports use `veyndo::`.
 The frontend package is `veyndo-experience`. The application image uses `veyndo`; fresh local database/search containers use
-standard PostgreSQL and Qdrant images. The legacy `veyndo-db` image is retained
-for existing AGE/pgvector conversions. Fresh local installations use Compose project `veyndo` and
-container `veyndo-postgres-1`. Start and worker commands, differential runners,
+standard PostgreSQL and Qdrant images. Fresh local installations use Compose project `veyndo` and
+container `veyndo-postgres-1`. Start and worker commands,
 MCP examples, deployment files and CI use these names consistently.
 
-Existing checkouts can stay in their original folder. `scripts/dev.sh` detects
-an existing legacy Compose project and reuses its data volume. An explicit
-`COMPOSE_PROJECT_NAME` takes precedence. Integration verification propagates its
+`scripts/dev.sh` detects an older `rust-ai-commerce` Compose project and reuses it;
+an explicit `COMPOSE_PROJECT_NAME` takes precedence. A database created by an earlier
+release is refused at setup, so start a new project for this release. Integration verification propagates its
 selected container to every child suite, so both new and existing instances can
 be checked. To stop an older installation use its actual Compose project name;
 never delete its database volume to perform a rename.
@@ -44,12 +43,9 @@ never delete its database volume to perform a rename.
   headers retain their existing security behavior; renaming them is unnecessary
   and would invalidate sessions or integrations. Client principal headers remain
   untrusted and cannot grant access.
-- Stored migration-ledger checksums remain unchanged. Six historical sources
-  receive the explicit identity-only update requested for this rename. The
-  migration runner accepts only the documented exact old/new SHA-256 pairs in
-  `src/migrations/identity_checksums.rs`; an unreviewed byte change still fails.
-  Additive migration `090-veyndo-identity` updates the active trigger contracts
-  and renames the diagnostic function while retaining its grants and behavior.
+- The renamed trigger contracts and diagnostic function are part of the component
+  baselines; a release replaces earlier installations, so no ledger compatibility
+  for the old names is kept.
   No orders, customer records, IDs or audit history are rewritten.
 - Existing Qdrant projections are preserved through additive collection aliases.
   Run the migration-only job with `QDRANT_NAMESPACE_MIGRATE_FROM` set to the

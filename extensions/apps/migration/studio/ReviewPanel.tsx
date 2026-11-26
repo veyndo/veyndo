@@ -1,4 +1,5 @@
 /** Exact source review keeps unacknowledged gaps and missing target choices from starting a write. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useProgressText } from "./run-progress-i18n";
 import ExportEvidence from "./ExportEvidence";
 import PriceOptions from "./PriceOptions";
@@ -207,8 +208,9 @@ export default function ReviewPanel({
         />
         {t("approve")}
       </label>
-      <button
-        className="studio-primary"
+      <Button
+        tone="primary"
+        type="submit"
         disabled={
           busy ||
           !approved ||
@@ -227,7 +229,7 @@ export default function ReviewPanel({
         {review.records.length
           ? t(busy ? "busy" : "start")
           : progressText("acceptEmpty")}
-      </button>
+      </Button>
       {!canImport && <p>{t("denied")}</p>}
     </>
   );

@@ -26,6 +26,7 @@ const blockIcon = {
   articles: "layers",
   app: "agents",
   native: "layers",
+  part: "box",
 } as const;
 export default function PageTree({
   d,

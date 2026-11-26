@@ -1,41 +1,44 @@
 //! Independent customer sessions, profile/password management and owning-account order history.
-use crate::*;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 mod payment_preference;
 pub(crate) use payment_preference::remember_payment;
-mod address_restore;
-pub(crate) mod browser;
-pub(crate) use address_restore::restore_book;
 mod address_store;
-mod addresses;
-mod contacts;
-mod metadata;
-pub(crate) use metadata::decorate;
+pub(crate) mod browser;
 mod demo;
-mod order_snapshot;
 mod orders;
-mod profile;
 pub(crate) use address_store::*;
-pub(crate) use contacts::*;
 pub(crate) use demo::seed_address as seed_demo_address;
-pub(crate) use order_snapshot::snapshot as order_snapshot;
-/// One immutable account binding for order history, receipts and purchased files.
-/// `$2` is the authenticated account email; it resolves its tenant-owned stable ID.
-/// Matching a legacy guest's contact email alone never establishes ownership.
-pub(crate) const ORDER_ACCOUNT_SCOPE: &str = "(o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2)";
 pub(crate) fn router() -> Router<App> {
     Router::new()
-        .route("/store-api/account/register", post(register))
+        .route(
+            "/store-api/account/register",
+            post(veyndo_customers::http::account::register),
+        )
         .route(
             "/store-api/account/addresses",
-            get(addresses::list).post(addresses::create),
+            get(veyndo_customers::http::addresses::list)
+                .post(veyndo_customers::http::addresses::create),
         )
         .route(
             "/store-api/account/addresses/{id}",
-            axum::routing::put(addresses::save).delete(addresses::remove),
+            axum::routing::put(veyndo_customers::http::addresses::save)
+                .delete(veyndo_customers::http::addresses::remove),
         )
         .route(
             "/store-api/account/profile",
-            get(profile::get).put(profile::save),
+            get(veyndo_customers::http::account::get).put(veyndo_customers::http::account::save),
         )
         .route("/store-api/account/orders", get(orders::list))
         .route("/store-api/account/orders/{id}", get(orders::detail))
@@ -44,118 +47,32 @@ pub(crate) fn router() -> Router<App> {
             get(orders::receipt),
         )
         .route("/store-api/account/logout", post(logout))
-        .route("/store-api/account/password", post(profile::password))
+        .route(
+            "/store-api/account/password",
+            post(veyndo_customers::http::account::password),
+        )
 }
-pub(crate) async fn session(a: &App, t: &str, email: &str) -> Result<String> {
-    let token = uid();
-    sqlx::query("INSERT INTO customer_sessions(digest,tenant,email) VALUES($1,$2,$3)")
-        .bind(hash(&token))
-        .bind(t)
-        .bind(email)
-        .execute(&a.db)
-        .await?;
-    Ok(token)
-}
-pub(crate) fn session_digest(h: &RequestContext) -> Result<String> {
-    if let Some(buyer) = &h.checkout_buyer {
-        return Ok(buyer.digest.clone());
-    }
-    let token = header(h, "x-customer-token").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Customer login required".into(),
-    ))?;
-    Ok(hash(token))
-}
+pub(crate) use veyndo_core::shop_scope::session_digest;
 
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
     let t = tenant(h)?;
     let digest = session_digest(h)?;
-    let email: Option<String> = sqlx::query_scalar(
-        "SELECT s.email FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active",
-    )
-    .bind(&t)
-    .bind(digest)
-    .fetch_optional(&a.db)
-    .await?;
-    Ok((
-        t,
-        email.ok_or(Error(
-            StatusCode::UNAUTHORIZED,
-            "Customer session expired".into(),
-        ))?,
-    ))
-}
-async fn register(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    let t = tenant(&h)?;
-    let email = auth::email(&v)?;
-    let name = auth::name(&v)?;
-    let password = auth::hash_password(auth::password(&v)?).await?;
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1)")
-        .bind(&t)
-        .fetch_one(&a.db)
-        .await?;
-    if !exists {
-        return Err(bad("Unknown shop"));
-    }
-    let mut contact:Contact=serde_json::from_value(json!({"name":name,"firstName":v["firstName"].as_str().unwrap_or(""),"lastName":v["lastName"].as_str().unwrap_or(""),"company":v["company"].as_str().unwrap_or(""),"phoneNumber":v["phoneNumber"].as_str().unwrap_or("")})).map_err(|_|bad("Invalid customer contact"))?;
-    contact.validate()?;
-    let mut initial = Vec::new();
-    let (settings, _) = commerce::config(&a, &t).await?;
-    for field in ["billingAddress", "shippingAddress"] {
-        if !v[field].is_null() {
-            let mut ad: commerce::Address = serde_json::from_value(v[field].clone())
-                .map_err(|_| bad("Invalid registration address"))?;
-            ad.validate()?;
-            commerce::validate_address_geography(&ad, &settings)?;
-            if !settings.countries.contains(&ad.country) {
-                return Err(bad("Address country unavailable"));
-            }
-            initial.push((field, ad));
-        }
-    }
-    let locale = language_context(&a, &h).await?.0;
-    let channel = marketing::channel_id(&h);
-    marketing::channel(&a, &h, channel, &locale).await?;
-    let mut tx = a.db.begin().await?;
-    history::customer_context(&mut tx, &email).await?;
-    let n=sqlx::query("INSERT INTO customers(tenant,email,password_hash,profile) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING").bind(&t).bind(&email).bind(password).bind(json!(contact)).execute(&mut *tx).await?.rows_affected();
-    if n != 1 {
-        return Err(conflict("Account already exists"));
-    }
-    for (field, ad) in initial {
-        address_save_conn(&mut tx,&t,&email,None,&json!({"defaultBilling":field=="billingAddress","defaultShipping":field=="shippingAddress"}),&ad).await?;
-    }
-    sqlx::query(
-        "UPDATE customers SET language_id=$1,sales_channel_id=$2,company=NULLIF($5,'') WHERE tenant=$3 AND email=$4",
-    )
-    .bind(locale)
-    .bind(channel)
-    .bind(&t)
-    .bind(&email)
-    .bind(&contact.company)
-    .execute(&mut *tx)
-    .await?;
-    tx.commit().await?;
-    Ok(Json(
-        json!({"customerToken":session(&a,&t,&email).await?,"email":email}),
-    ))
+    let email = veyndo_customers::service::sessions::identify(&a.core, &t, &digest).await?;
+    Ok((t, email))
 }
 async fn logout(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let (t, email) = identity(&a, &h).await?;
     if header(&h, "sw-context-token").is_some() {
         load_cart(&a, &h).await?;
     }
-    sqlx::query("DELETE FROM customer_sessions WHERE tenant=$1 AND digest=$2")
-        .bind(&t)
-        .bind(hash(header(&h, "x-customer-token").unwrap()))
-        .execute(&a.db)
-        .await?;
+    veyndo_customers::service::sessions::close(
+        &a.core,
+        &t,
+        header(&h, "x-customer-token").unwrap(),
+    )
+    .await?;
     if let Some(token) = header(&h, "sw-context-token") {
-        sqlx::query("UPDATE carts SET data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),'{b2b}','null'),token=$1,revision=revision+1 WHERE tenant=$2 AND token=$3 AND status='open' AND data->>'email'=$4").bind(uid()).bind(&t).bind(token).bind(&email).execute(&a.db).await?;
+        veyndo_checkout::store::cart_load::forget_customer(&a, &t, token, &email).await?;
     }
     Ok(Json(json!({"loggedOut":true})))
 }

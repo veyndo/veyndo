@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE payment_attempts SET provider_context=jsonb_set(jsonb_set(provider_context,'{funding}',$3),'{vaultStatus}',to_jsonb(CASE WHEN $3::jsonb->>'save'='true' THEN 'pending'::text ELSE 'reused'::text END)) WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "36f9573dda4798404f3e8532991913ab57a23cfc6c88b11f8b4533c6548bf8ab"
+}

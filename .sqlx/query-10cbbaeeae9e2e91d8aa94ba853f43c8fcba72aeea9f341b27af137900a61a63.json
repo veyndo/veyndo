@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO public.commerce_migrations(version,checksum) VALUES('demo-v1','bounded-built-in-fixtures')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "10cbbaeeae9e2e91d8aa94ba853f43c8fcba72aeea9f341b27af137900a61a63"
+}

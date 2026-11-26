@@ -1,0 +1,614 @@
+/* Storefront parts on design tokens only: card, product summary, cart, checkout steps and account. */
+.vy-sf-card,
+.vy-sf-summary,
+.vy-sf-cart,
+.vy-sf-account {
+  color: var(--vy-color-text);
+  font-family: var(--vy-font-family);
+}
+.vy-sf-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+}
+.vy-sf-card a {
+  color: inherit;
+  text-decoration: none;
+}
+.vy-sf-card-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 5 / 4;
+  background: var(--vy-color-panel);
+}
+.vy-sf-card-media img,
+.vy-sf-summary-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vy-sf-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 160px;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-stock {
+  color: var(--vy-color-positive);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-card-media .vy-sf-stock {
+  position: absolute;
+  inset: var(--vy-space-3) auto auto var(--vy-space-3);
+  padding: 2px var(--vy-space-2);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-surface);
+}
+.vy-sf-stock[data-empty] {
+  color: var(--vy-color-danger);
+}
+.vy-sf-card-body {
+  display: grid;
+  align-content: start;
+  gap: var(--vy-space-2);
+  padding: var(--vy-space-4);
+}
+.vy-sf-card-body h3,
+.vy-sf-card-body p {
+  margin: 0;
+}
+.vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-md);
+}
+.vy-sf-kicker {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.vy-sf-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--vy-space-2);
+  margin: 0;
+}
+.vy-sf-price strong {
+  font-size: var(--vy-font-size-lg);
+}
+.vy-sf-price s,
+.vy-sf-price small {
+  color: var(--vy-color-muted);
+}
+.vy-sf-card-link {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--vy-space-3) var(--vy-space-4);
+  border-top: 1px solid var(--vy-color-border);
+  color: var(--vy-color-accent);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-sf-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--vy-space-8);
+}
+.vy-sf-summary-media {
+  overflow: hidden;
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-panel);
+  aspect-ratio: 5 / 4;
+}
+.vy-sf-summary-body {
+  display: grid;
+  align-content: start;
+  gap: var(--vy-space-4);
+}
+.vy-sf-summary-body h1 {
+  margin: 0;
+  font-size: var(--vy-font-size-2xl);
+}
+.vy-sf-summary-body > p {
+  margin: 0;
+}
+.vy-sf-summary .vy-sf-price strong {
+  font-size: var(--vy-font-size-xl);
+}
+.vy-sf-buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--vy-space-3);
+}
+.vy-sf-buy label {
+  display: grid;
+  gap: var(--vy-space-1);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-buy input {
+  width: 96px;
+  min-height: 40px;
+  padding: var(--vy-space-2);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  font: inherit;
+}
+.vy-sf-summary:not(:has(> .vy-sf-summary-media)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.vy-sf-rating {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--vy-color-muted);
+  font: inherit;
+  font-size: var(--vy-font-size-xs);
+  cursor: pointer;
+}
+.vy-sf-rating span {
+  color: var(--vy-color-warning);
+  letter-spacing: 1px;
+}
+.vy-sf-description {
+  color: var(--vy-color-muted);
+  line-height: 1.75;
+}
+.vy-sf-reference,
+.vy-sf-rules {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-variants {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.vy-sf-variants legend {
+  margin-bottom: var(--vy-space-3);
+  font-size: var(--vy-font-size-sm);
+  font-weight: var(--vy-font-weight-bold);
+}
+.vy-sf-variants legend span {
+  margin-left: var(--vy-space-2);
+  color: var(--vy-color-muted);
+  font-weight: normal;
+}
+.vy-sf-variants > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vy-space-2);
+}
+.vy-sf-variants button,
+.vy-sf-more {
+  display: flex;
+  align-items: center;
+  gap: var(--vy-space-1);
+  min-height: 44px;
+  padding: var(--vy-space-2) var(--vy-space-3);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  font: inherit;
+  font-size: var(--vy-font-size-sm);
+  cursor: pointer;
+}
+.vy-sf-variants button[aria-pressed="true"] {
+  border-color: var(--vy-color-accent);
+  background: var(--vy-color-accent-soft);
+  color: var(--vy-color-accent);
+}
+.vy-sf-variants button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.vy-sf-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-panel);
+}
+.vy-sf-more {
+  justify-self: start;
+}
+.vy-sf-availability {
+  display: flex;
+  align-items: center;
+  gap: var(--vy-space-2);
+  margin: 0;
+  color: var(--vy-color-positive);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-availability i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--vy-radius-pill);
+  background: currentColor;
+}
+.vy-sf-availability span {
+  margin-left: auto;
+  color: var(--vy-color-muted);
+}
+.vy-sf-availability[data-empty] {
+  color: var(--vy-color-danger);
+}
+.vy-sf-tiers {
+  padding: var(--vy-space-4);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+}
+.vy-sf-tiers h3 {
+  margin: 0 0 var(--vy-space-3);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-tiers table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--vy-font-size-xs);
+  text-align: start;
+}
+.vy-sf-tiers th {
+  padding: var(--vy-space-1) 0;
+  color: var(--vy-color-muted);
+  font-weight: var(--vy-font-weight-medium);
+  text-align: start;
+}
+.vy-sf-tiers td {
+  padding: var(--vy-space-2);
+  border-top: 1px solid var(--vy-color-border);
+}
+.vy-sf-tiers td:last-child {
+  text-align: end;
+}
+.vy-sf-tiers td span {
+  margin-left: var(--vy-space-2);
+  color: var(--vy-color-accent);
+}
+.vy-sf-tiers tr[data-selected] {
+  background: var(--vy-color-accent-soft);
+  color: var(--vy-color-accent);
+}
+.vy-sf-delivery-note {
+  display: flex;
+  gap: var(--vy-space-3);
+  padding-top: var(--vy-space-5);
+  border-top: 1px solid var(--vy-color-border);
+}
+.vy-sf-delivery-note > svg {
+  flex-shrink: 0;
+  color: var(--vy-color-accent);
+}
+.vy-sf-delivery-note strong {
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-delivery-note p {
+  margin: var(--vy-space-2) 0;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-delivery-note small {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-cart,
+.vy-sf-account {
+  display: grid;
+  gap: var(--vy-space-3);
+  padding: var(--vy-space-5);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+}
+.vy-sf-cart-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  font-size: var(--vy-font-size-lg);
+}
+.vy-sf-cart-title span {
+  padding: 2px var(--vy-space-2);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-accent-soft);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-cart-lines {
+  display: grid;
+  gap: var(--vy-space-4);
+}
+.vy-sf-cart-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--vy-space-3);
+  padding-bottom: var(--vy-space-4);
+  border-bottom: 1px solid var(--vy-color-border);
+}
+.vy-sf-cart-line a {
+  display: grid;
+  gap: var(--vy-space-1);
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.vy-sf-cart-line a:has(img) {
+  grid-template-columns: 48px 1fr;
+  column-gap: var(--vy-space-2);
+}
+.vy-sf-cart-line img {
+  grid-row: 1 / 3;
+  border-radius: var(--vy-radius-md);
+  object-fit: cover;
+}
+.vy-sf-cart-line small {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-stepper {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-md);
+  background: var(--vy-color-surface);
+}
+.vy-sf-stepper button,
+.vy-sf-text-button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.vy-sf-stepper span {
+  min-width: 30px;
+  text-align: center;
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-text-button {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-totals {
+  display: grid;
+  margin: 0;
+}
+.vy-sf-totals > div {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--vy-space-2) 0;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-totals dd {
+  margin: 0;
+}
+.vy-sf-totals .vy-sf-total {
+  margin-top: var(--vy-space-2);
+  padding-top: var(--vy-space-4);
+  border-top: 1px solid var(--vy-color-border);
+  color: var(--vy-color-text);
+}
+.vy-sf-total {
+  font-size: var(--vy-font-size-lg);
+  font-weight: var(--vy-font-weight-bold);
+}
+.vy-sf-delivery {
+  margin: 0;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-account {
+  display: block;
+}
+.vy-sf-account-welcome {
+  margin-bottom: var(--vy-space-6);
+}
+.vy-sf-account-welcome small,
+.vy-sf-account-welcome p {
+  color: var(--vy-color-muted);
+}
+.vy-sf-account-welcome h2 {
+  margin: var(--vy-space-1) 0 var(--vy-space-2);
+  font-size: var(--vy-font-size-2xl);
+}
+.vy-sf-account-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--vy-space-3);
+  margin-bottom: var(--vy-space-6);
+}
+.vy-sf-account-metrics button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--vy-space-2);
+  padding: var(--vy-space-5);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.vy-sf-account-metrics strong {
+  grid-column: 1 / -1;
+  font-size: var(--vy-font-size-2xl);
+}
+.vy-sf-account-metrics button > span {
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-account-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vy-space-3);
+  margin: var(--vy-space-5) 0;
+}
+.vy-sf-account-toolbar h3 {
+  margin: 0;
+}
+.vy-sf-link-button {
+  padding: var(--vy-space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--vy-color-accent);
+  font: inherit;
+  font-size: var(--vy-font-size-xs);
+  font-weight: var(--vy-font-weight-bold);
+  cursor: pointer;
+}
+.vy-sf-orders {
+  display: grid;
+  gap: var(--vy-space-3);
+}
+.vy-sf-order {
+  width: 100%;
+  padding: var(--vy-space-5);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+.vy-sf-order:hover {
+  border-color: var(--vy-color-muted);
+}
+.vy-sf-order-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--vy-space-3);
+}
+.vy-sf-order-heading > div {
+  display: grid;
+  gap: var(--vy-space-1);
+}
+.vy-sf-order-heading small {
+  color: var(--vy-color-muted);
+}
+.vy-sf-order-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vy-space-3);
+  padding: var(--vy-space-4) 0 0;
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-order-items > span {
+  display: flex;
+  align-items: center;
+  gap: var(--vy-space-2);
+}
+.vy-sf-order-items img {
+  width: 42px;
+  height: 52px;
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-panel);
+  object-fit: cover;
+}
+.vy-sf-order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vy-space-3);
+  margin-top: var(--vy-space-4);
+  color: var(--vy-color-accent);
+  font-size: var(--vy-font-size-xs);
+}
+.vy-sf-badge {
+  padding: 6px 10px;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-panel);
+  color: var(--vy-color-text);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-sf-orders-empty {
+  padding: var(--vy-space-10) var(--vy-space-5);
+  border: 1px dashed var(--vy-color-border);
+  border-radius: var(--vy-radius-lg);
+  background: var(--vy-color-panel);
+  text-align: center;
+}
+.vy-sf-orders-empty > span {
+  display: block;
+  margin-bottom: var(--vy-space-3);
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-2xl);
+}
+.vy-sf-orders-empty p {
+  max-width: 360px;
+  margin: 0 auto var(--vy-space-5);
+  color: var(--vy-color-muted);
+}
+@media (max-width: 760px) {
+  .vy-sf-account-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+.vy-sf-steps {
+  display: flex;
+  gap: var(--vy-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vy-sf-steps li {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--vy-space-2);
+  padding: var(--vy-space-2) var(--vy-space-3);
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-panel);
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-sm);
+}
+.vy-sf-steps li[data-active] {
+  background: var(--vy-color-accent-soft);
+  color: var(--vy-color-accent);
+  font-weight: var(--vy-font-weight-medium);
+}
+.vy-sf-steps span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--vy-radius-pill);
+  background: var(--vy-color-surface);
+}
+@media (max-width: 760px) {
+  .vy-sf-summary {
+    grid-template-columns: 1fr;
+    gap: var(--vy-space-5);
+  }
+  .vy-sf-steps {
+    flex-direction: column;
+  }
+}
+.vy-sf-form {
+  display: grid;
+  gap: var(--vy-space-3);
+}
+.vy-sf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: var(--vy-space-4);
+}

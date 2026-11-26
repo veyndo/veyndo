@@ -1,31 +1,9 @@
 //! Versioned source pages keep cursors separate from URLs; unsupported plugin domains remain explicit.
 pub use super::slices::page;
 use super::*;
-pub async fn source_page(
-    c: &config::Connection,
-    source_id: &str,
-    kind: &str,
-    cursor: Option<&str>,
-    fixture: bool,
-) -> Result<Value> {
-    if c.export_manifest.is_some() {
-        return super::export_source::page(c, source_id, kind, cursor, fixture).await;
-    }
-    if c.system == Source::Shopware6 {
-        return super::shopware6::page(c, source_id, kind, cursor, fixture).await;
-    }
-    if c.system == Source::Shopify {
-        return super::shopify::page(c, source_id, kind, cursor, fixture).await;
-    }
-    let page = match cursor {
-        None => 1,
-        Some(s) => s
-            .strip_prefix("page:")
-            .and_then(|n| n.parse::<u32>().ok())
-            .filter(|n| *n > 0 && *n <= 1_000_000)
-            .ok_or("invalid source cursor; it must not contain a URL")?,
-    };
-    let path = match (c.system, kind) {
+/// The fixed API path of a source system for one record kind.
+fn source_path(system: Source, kind: &str) -> Result<String> {
+    Ok(match (system, kind) {
         (Source::Woocommerce, "pages") => "wp-json/wp/v2/pages".into(),
         (Source::Woocommerce, "reviews") => "wp-json/wc/v3/products/reviews".into(),
         (Source::Woocommerce, "categories") => "wp-json/wc/v3/products/categories".into(),
@@ -47,11 +25,11 @@ pub async fn source_page(
             "unsupported direct API domain; use the source export profile and review its coverage"
                 .into(),
         ),
-    };
-    let client = transport::client(&c.origin, fixture).await?;
-    let mut u = reqwest::Url::parse(&format!("{}/{path}", c.origin.trim_end_matches('/')))
-        .map_err(|_| "invalid fixed source path")?;
-    match c.system {
+    })
+}
+/// Asks for one page of fifty records in the source's own stable order.
+fn paginate(u: &mut reqwest::Url, system: Source, page: u32) {
+    match system {
         Source::Woocommerce => {
             u.query_pairs_mut()
                 .append_pair("page", &page.to_string())
@@ -80,35 +58,14 @@ pub async fn source_page(
         }
         _ => {}
     }
-    let request = client.get(u);
-    let request = match c.system {
-        Source::Prestashop => request.basic_auth(&c.token, Some("")),
-        Source::Shopware5 => request.basic_auth(&c.username, Some(&c.token)),
-        Source::Woocommerce if !c.username.is_empty() => {
-            request.basic_auth(&c.username, Some(&c.token))
-        }
-        _ => request.bearer_auth(&c.token),
-    };
-    let (value, headers) = transport::json(request).await?;
-    let mut list = if let Some(xs) = value.as_array() {
-        xs.clone()
-    } else {
-        value
-            .get("items")
-            .or_else(|| value.get("data"))
-            .or_else(|| value.get(kind))
-            .or_else(|| match kind {
-                "pages" => value.get("content_management_system"),
-                "coupons" => value.get("cart_rules"),
-                _ => None,
-            })
-            .and_then(Value::as_array)
-            .cloned()
-            .ok_or("source page shape differs from API profile; cursor not advanced")?
-    };
-    if list.len() > 50 {
-        return Err("source ignored requested page limit".into());
-    }
+}
+/// Whether more pages follow; counts that changed or a short nonterminal page stop the cursor.
+fn more_pages(
+    value: &Value,
+    headers: &reqwest::header::HeaderMap,
+    page: u32,
+    len: usize,
+) -> Result<bool> {
     let pages = headers
         .get("x-wp-totalpages")
         .map(|value| {
@@ -139,27 +96,86 @@ pub async fn source_page(
     };
     if let Some(count) = count {
         let expected = count.saturating_sub(u64::from(page - 1) * 50).min(50);
-        if list.len() as u64 != expected
-            || pages.is_some_and(|n| u64::from(n) != count.div_ceil(50))
-        {
+        if len as u64 != expected || pages.is_some_and(|n| u64::from(n) != count.div_ceil(50)) {
             return Err("Source record/page counts changed or source ignored pagination; no cursor advanced".into());
         }
     }
     let more = match pages {
-        Some(0) if !list.is_empty() => {
+        Some(0) if len > 0 => {
             return Err("Source reports zero pages with nonempty records".into());
         }
         Some(n) if n > 0 && page > n => {
             return Err("Source cursor exceeds declared page count".into());
         }
         Some(n) => page < n,
-        None => count.map_or(list.len() == 50, |n| u64::from(page) * 50 < n),
+        None => count.map_or(len == 50, |n| u64::from(page) * 50 < n),
     };
-    if more && list.len() != 50 {
+    if more && len != 50 {
         return Err(
             "Source returned a short nonterminal page; no source records were skipped".into(),
         );
     }
+    Ok(more)
+}
+pub async fn source_page(
+    c: &config::Connection,
+    source_id: &str,
+    kind: &str,
+    cursor: Option<&str>,
+    fixture: bool,
+) -> Result<Value> {
+    if c.export_manifest.is_some() {
+        return super::export_source::page(c, source_id, kind, cursor, fixture).await;
+    }
+    if c.system == Source::Shopware6 {
+        return super::shopware6::page(c, source_id, kind, cursor, fixture).await;
+    }
+    if c.system == Source::Shopify {
+        return super::shopify::page(c, source_id, kind, cursor, fixture).await;
+    }
+    let page = match cursor {
+        None => 1,
+        Some(s) => s
+            .strip_prefix("page:")
+            .and_then(|n| n.parse::<u32>().ok())
+            .filter(|n| *n > 0 && *n <= 1_000_000)
+            .ok_or("invalid source cursor; it must not contain a URL")?,
+    };
+    let path = source_path(c.system, kind)?;
+    let client = transport::client(&c.origin, fixture).await?;
+    let mut u = reqwest::Url::parse(&format!("{}/{path}", c.origin.trim_end_matches('/')))
+        .map_err(|_| "invalid fixed source path")?;
+    paginate(&mut u, c.system, page);
+    let request = client.get(u);
+    let request = match c.system {
+        Source::Prestashop => request.basic_auth(&c.token, Some("")),
+        Source::Shopware5 => request.basic_auth(&c.username, Some(&c.token)),
+        Source::Woocommerce if !c.username.is_empty() => {
+            request.basic_auth(&c.username, Some(&c.token))
+        }
+        _ => request.bearer_auth(&c.token),
+    };
+    let (value, headers) = transport::json(request).await?;
+    let mut list = if let Some(xs) = value.as_array() {
+        xs.clone()
+    } else {
+        value
+            .get("items")
+            .or_else(|| value.get("data"))
+            .or_else(|| value.get(kind))
+            .or_else(|| match kind {
+                "pages" => value.get("content_management_system"),
+                "coupons" => value.get("cart_rules"),
+                _ => None,
+            })
+            .and_then(Value::as_array)
+            .cloned()
+            .ok_or("source page shape differs from API profile; cursor not advanced")?
+    };
+    if list.len() > 50 {
+        return Err("source ignored requested page limit".into());
+    }
+    let more = more_pages(&value, &headers, page, list.len())?;
     if c.system == Source::Woocommerce && kind == "products" {
         super::woo::enrich(c, &mut list, fixture).await?;
     }

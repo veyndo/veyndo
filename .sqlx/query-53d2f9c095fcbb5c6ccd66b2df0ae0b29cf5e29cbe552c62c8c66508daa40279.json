@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO auth_attempt_buckets(key,attempts) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN 1 ELSE auth_attempt_buckets.attempts+1 END,window_at=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN now() ELSE auth_attempt_buckets.window_at END,updated_at=now() WHERE auth_attempt_buckets.blocked_until<=now() AND (auth_attempt_buckets.window_at<now()-interval '1 minute' OR auth_attempt_buckets.attempts<$2) RETURNING attempts",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "auth_attempt_buckets",
+            "name": "attempts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "53d2f9c095fcbb5c6ccd66b2df0ae0b29cf5e29cbe552c62c8c66508daa40279"
+}

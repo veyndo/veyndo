@@ -33,9 +33,9 @@ with tempfile.TemporaryDirectory() as directory:
     for file in (runtime_wit, sdk_wit):
         file.parent.mkdir(parents=True, exist_ok=True);file.write_text('package fixture:commerce;')
     lock['components']['apps']['files']['runtime/wit/commerce.wit'] = digest(runtime_wit.read_bytes())
-    native_scope = root / 'migrations/099-authenticated-database-scope.sql'
+    native_scope = root / 'components/core/migrations/0000-foundation.sql'
     native_scope.parent.mkdir(parents=True)
-    native_scope.write_text('SELECT 1;\n\n-- Keep all existing per-table/actor checks;\n')
+    native_scope.write_text('-- head\n-- BEGIN signed scope: copy\n-- (path)\nSELECT 1;\n-- END signed scope\n\nSELECT 2;\n')
     app_scope = root / OWNERS['apps'] / 'authority/sql/signed_scope.sql'
     app_scope.parent.mkdir(parents=True)
     app_scope.write_text('-- provenance\nSELECT 1;\n')

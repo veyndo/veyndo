@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS(SELECT 1 FROM jsonb_to_recordset($2) AS s(\"sourceId\" text,\"documentId\" text,\"contentHash\" text,\"productId\" text,revision bigint,locale text,text text) WHERE NOT EXISTS(SELECT 1 FROM knowledge_documents d JOIN knowledge_chunks c ON c.tenant=d.tenant AND c.document_id=d.id WHERE d.tenant=$1 AND d.id=s.\"documentId\" AND NOT d.archived AND d.revision=s.revision AND d.content_hash=s.\"contentHash\" AND d.product_id IS NOT DISTINCT FROM s.\"productId\" AND d.id||':'||c.position=s.\"sourceId\" AND c.text=s.text AND c.locale=s.locale)) AS \"current!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "current!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0dd5bab717223f173014a1e693cc7a466339eec8435f42262314ba895d3dfac3"
+}

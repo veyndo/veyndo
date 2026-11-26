@@ -1,0 +1,39 @@
+[package]
+name = "veyndo-intelligence"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Shop memory: knowledge relations, vectors, embeddings, reranking and document parsing"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-identity = { path = "../identity" }
+veyndo-shop = { path = "../shop" }
+veyndo-marketing = { path = "../marketing" }
+axum.workspace = true
+reqwest.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+image.workspace = true
+scraper.workspace = true
+uuid.workspace = true
+veyndo-runtime = { path = "../../crates/runtime" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-catalog = { path = "../catalog" }
+libc.workspace = true
+pdf-extract.workspace = true
+chrono.workspace = true
+ring.workspace = true
+base64.workspace = true
+tracing.workspace = true
+veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-shipping = { path = "../shipping" }
+veyndo-checkout = { path = "../checkout" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-cognition = { path = "../../crates/cognition" }
+veyndo-catalog-import = { path = "../../extensions/apps/catalog-import" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+veyndo-customers = { path = "../customers" }

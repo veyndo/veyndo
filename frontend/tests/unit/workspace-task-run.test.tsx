@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { useTaskExecution } from "../../src/admin/shell/useTaskExecution";
-import WorkspaceTask from "../../src/admin/workspace/WorkspaceTask";
+import WorkspaceTask from "../../../components/studio/ui/admin/workspace/WorkspaceTask";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 import type { SavedRun } from "../../src/admin/shell/useChatTurns";
 afterEach(() => vi.useRealTimers());

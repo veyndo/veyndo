@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM knowledge_documents WHERE tenant=$1 AND id<>$2 AND product_id IS NOT DISTINCT FROM $3 AND content_hash=$4) AS \"duplicate!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "duplicate!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "875488dc6fd909f6f71bebbb1ef51976b4c83193b15bcc92f96d54bfa7f62eba"
+}

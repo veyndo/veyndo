@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID.\nWITH scope AS (\n    SELECT s.revision, s.data, o.data AS patch,\n           s.cache_version::text || ':' || coalesce(o.cache_version::text, '-') AS version,\n           ($2 = 'default' OR c.id IS NOT NULL) AS channel_exists\n    FROM commerce_settings s\n    LEFT JOIN sales_channels c ON c.tenant=s.tenant AND c.id=$2\n    LEFT JOIN commerce_overrides o ON o.tenant=s.tenant AND o.channel_id=$2 AND $2 <> 'default'\n    WHERE s.tenant=$1\n)\nSELECT revision AS \"revision!\", version AS \"version!\", channel_exists AS \"channel_exists!\",\n       CASE WHEN version IS DISTINCT FROM $3 THEN data END AS data,\n       CASE WHEN version IS DISTINCT FROM $3 THEN patch END AS patch\nFROM scope\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revision!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "commerce_settings",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "channel_exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "patch",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "852386a3f34f11600f2115db413a6b8a19a0cf2366971e08388582275837cdae"
+}

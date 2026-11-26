@@ -1,5 +1,15 @@
 //! Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed.
-use crate::*;
+use crate::foundation::App;
+use crate::{runtime_config, shop_domains};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::shop_scope::header;
 pub(crate) const PATH: &str = "/.well-known/poppy.json";
 /// The published path of a shop's document, or nothing when shops have no own domain on this installation.
 pub(crate) fn published_url(shop: &str) -> Option<String> {
@@ -54,9 +64,7 @@ pub(crate) async fn discovery(State(a): State<App>, request: axum::extract::Requ
     // The display name is public shop identity; a failed read falls back to the alias instead of failing discovery.
     let name = veyndo::tenant_scope::scoped(
         veyndo::tenant_scope::Scope::Tenant(shop.access.tenant.clone()),
-        sqlx::query_scalar::<_, String>("SELECT name FROM tenants WHERE id=$1")
-            .bind(&shop.access.tenant)
-            .fetch_optional(&a.db),
+        veyndo_core::store::tenants::name(&a.db, &shop.access.tenant),
     )
     .await
     .ok()

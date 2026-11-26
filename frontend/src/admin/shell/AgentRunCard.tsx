@@ -1,4 +1,5 @@
 /** Saved native run progress and explicit continuation share the conversation's permission-scoped request owner. */
+import { Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useAgentRunText } from "../../shared/i18n/agent-runs-i18n";
 import { useBuildingText } from "../../shared/i18n/app-building-i18n";
@@ -73,7 +74,7 @@ export default function AgentRunCard({
         )}
       </small>
       {value.error && (
-        <p role="alert">
+        <Notice tone="danger">
           {text(
             value.error.code === "agent_authority_changed"
               ? "authority"
@@ -81,7 +82,7 @@ export default function AgentRunCard({
                 ? "capacity"
                 : "failed",
           )}
-        </p>
+        </Notice>
       )}
       {value.state === "uncertain" && (
         <p>{text(value.execution ? "workAmbiguous" : "ambiguous")}</p>

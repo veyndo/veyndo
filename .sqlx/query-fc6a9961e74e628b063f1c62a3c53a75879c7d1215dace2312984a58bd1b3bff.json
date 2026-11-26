@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('left',r.source_id,'right',r.target_id,'source',r.data->'source') AS \"pair!\" FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id JOIN products q ON q.tenant=r.tenant AND q.id=r.target_id WHERE r.tenant=$1 AND r.kind='PAIRS_WITH' ORDER BY r.source_id,r.target_id LIMIT 48",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pair!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fc6a9961e74e628b063f1c62a3c53a75879c7d1215dace2312984a58bd1b3bff"
+}

@@ -4,13 +4,13 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { ProductRich } from "../../src/admin/catalog/ProductLocalizedContent";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
-import { productRichContent } from "../../src/admin/catalog/product-content-model";
+import { ProductRich } from "../../../components/catalog/ui/admin/catalog/ProductLocalizedContent";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
+import { productRichContent } from "../../../components/catalog/ui/admin/catalog/product-content-model";
 import {
   newDraft,
   type ProductDraft,
-} from "../../src/admin/catalog/catalog-model";
+} from "../../../components/catalog/ui/admin/catalog/catalog-model";
 
 function fixture(): ProductDraft {
   const d = newDraft();

@@ -1,0 +1,335 @@
+/** Coding agents receive the current Manifest IR and authoritative schema; imported edits round-trip to the canvas. */
+import {
+  Button,
+  Field,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import { useBuildingText } from "../../../../../frontend/src/shared/i18n/app-building-i18n";
+import ReferenceInputs from "../../../../../frontend/src/shared/canvas/ReferenceInputs";
+import { designUrls } from "../../../../../frontend/src/shared/agents/reference-images";
+import { useCanvasText } from "../../../../../frontend/src/shared/canvas/canvas-i18n";
+import type { AppCanvasContext } from "./AppCanvasAgent";
+import AppProposalTest from "./AppProposalTest";
+import AppProposalReview from "./AppProposalReview";
+import { useControlText } from "../../../../../frontend/src/shared/i18n/control-i18n";
+import { useState, useEffect, useRef } from "react";
+import AgentComposer, {
+  type AgentEngine,
+} from "../../../../../frontend/src/shared/agents/AgentComposer";
+import AgentTaskTransfer from "../../../../../frontend/src/shared/agents/AgentTaskTransfer";
+import { useAppStudioText } from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import { useWorkbenchText } from "../../../../../frontend/src/shared/i18n/workbench-i18n";
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import type { Manifest } from "../../../../../frontend/src/shared/apps/native/types";
+import type { AppStudio } from "./useAppStudio";
+import { compile } from "./app-model";
+export function downloadJson(name: string, value: unknown) {
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }),
+  );
+  const el = document.createElement("a");
+  el.href = url;
+  el.download = name;
+  el.click();
+  URL.revokeObjectURL(url);
+}
+export type AppAgentRequest = {
+  app: string;
+  environment: string;
+  prompt: string;
+  mode?: "edit" | "compose";
+};
+export default function AppAgentPanel({
+  studio,
+  request,
+  requestSeed,
+  onRequestConsumed,
+  sandboxRequest,
+  context,
+  comparing,
+  onPreview,
+}: {
+  context?: AppCanvasContext;
+  comparing?: boolean;
+  onPreview?: (value: boolean) => void;
+  studio: AppStudio;
+  request: RequestFn;
+  sandboxRequest?: (environment: string) => RequestFn;
+  requestSeed?: AppAgentRequest;
+  onRequestConsumed?: () => void;
+}) {
+  const workspace = useAppWorkspaceText(),
+    cv = useCanvasText();
+  const [urls, setUrls] = useState(""),
+    [images, setImages] = useState<string[]>([]),
+    [preparing, setPreparing] = useState(false);
+  const referenceScope = `${studio.env}:${studio.manifest.id}:${context?.view}:${context?.selected}:${context?.language}`;
+  const currentScope = useRef(referenceScope);
+  currentScope.current = referenceScope;
+  useEffect(() => {
+    setUrls("");
+    setImages([]);
+    setTask("");
+  }, [referenceScope]);
+  const c = useControlText(),
+    t = useBuildingText();
+  const { a } = useAppStudioText(),
+    { w } = useWorkbenchText();
+  const [prompt, setPrompt] = useState(""),
+    [mode, setMode] = useState<"edit" | "compose">("edit"),
+    [provider, setProvider] = useState("platform"),
+    [model, setModel] = useState(""),
+    [agent, setAgent] = useState<AgentEngine>("platform"),
+    [task, setTask] = useState(""),
+    [json, setJson] = useState("");
+  useEffect(() => {
+    if (!requestSeed) return;
+    if (
+      requestSeed.app === studio.manifest.id &&
+      requestSeed.environment === studio.env
+    ) {
+      setPrompt(requestSeed.prompt);
+      setMode(requestSeed.mode ?? "edit");
+    }
+    onRequestConsumed?.();
+  }, [requestSeed, studio.manifest.id, studio.env, onRequestConsumed]);
+  const configured = studio.providers.find(
+    (p) => p.id === provider,
+  )?.configured;
+  return (
+    <div className="app-agent-panel">
+      <section className="app-model-card">
+        <h2>{a("prompt")}</h2>
+        <p>{a("hint")}</p>
+        {context ? (
+          <details className="app-canvas-agent-ideas">
+            <summary>{cv("ideas")}</summary>
+            <div className="app-agent-options">
+              <button
+                type="button"
+                onClick={() => setPrompt(cv("spaciousPrompt"))}
+              >
+                {cv("spacious")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrompt(cv("labelsPrompt"))}
+              >
+                {cv("labels")}
+              </button>
+            </div>
+          </details>
+        ) : (
+          <div className="app-agent-options">
+            <Button type="button" onClick={() => setPrompt(t("formPrompt"))}>
+              {t("formIdea")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setPrompt(t("validationPrompt"))}
+            >
+              {t("validationIdea")}
+            </Button>
+          </div>
+        )}
+        <AgentComposer
+          prompt={prompt}
+          onPrompt={setPrompt}
+          engine={agent}
+          onEngine={setAgent}
+          busy={studio.busy}
+          disabled={
+            preparing || !studio.env || (agent === "platform" && !configured)
+          }
+          placeholder={context ? cv("spaciousPrompt") : w("promptExample")}
+          onSubmit={() =>
+            void studio.run(async () => {
+              const scope = referenceScope;
+              let references;
+              try {
+                references = { urls: designUrls(urls), images };
+              } catch {
+                throw Error(cv("invalidUrls"));
+              }
+              if (agent === "platform")
+                await studio.generate(
+                  prompt,
+                  provider,
+                  model ||
+                    studio.providers.find((p) => p.id === provider)?.model ||
+                    "",
+                  mode,
+                  { context, references },
+                  () => currentScope.current === scope,
+                );
+              else {
+                const value = await request("/api/developer/task", {
+                  environment: studio.env,
+                  prompt,
+                  agent,
+                  manifest: studio.manifest,
+                  context,
+                  references,
+                });
+                if (currentScope.current === scope)
+                  setTask(JSON.stringify(value, null, 2));
+              }
+            })
+          }
+        >
+          <ReferenceInputs
+            urls={urls}
+            images={images}
+            onUrls={setUrls}
+            onImages={setImages}
+            disabled={studio.busy}
+            scope={referenceScope}
+            onBusy={setPreparing}
+            onError={studio.setError}
+          />
+          {agent === "platform" && (
+            <div className="app-agent-options">
+              <Field label={t("generationMode")}>
+                <Select
+                  value={mode}
+                  onChange={(e) =>
+                    setMode(e.target.value as "edit" | "compose")
+                  }
+                >
+                  <option value="edit">{t("editMode")}</option>
+                  <option value="compose">{t("composeMode")}</option>
+                </Select>
+              </Field>
+              <Field label={w("provider")}>
+                <Select
+                  value={provider}
+                  onChange={(event) => {
+                    setProvider(event.target.value);
+                    setModel("");
+                  }}
+                >
+                  {studio.providers.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.id === "platform" ? c("platformDefault") : p.name}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={w("model")}>
+                <TextInput
+                  value={
+                    model ||
+                    studio.providers.find((p) => p.id === provider)?.model ||
+                    ""
+                  }
+                  onChange={(event) => setModel(event.target.value)}
+                  maxLength={128}
+                />
+              </Field>
+            </div>
+          )}
+          {agent === "platform" && !configured && (
+            <small>{w("providerMissing")}</small>
+          )}
+        </AgentComposer>
+      </section>
+      <AppProposalReview
+        studio={studio}
+        comparing={comparing}
+        onPreview={onPreview}
+      />
+      {studio.proposal && sandboxRequest && (
+        <AppProposalTest
+          key={studio.proposal.build.digest}
+          build={studio.proposal.build}
+          request={request}
+          sandboxRequest={sandboxRequest}
+          onRepair={setPrompt}
+        />
+      )}
+      {task && (
+        <AgentTaskTransfer
+          task={JSON.parse(task)}
+          name={`${studio.manifest.id}-agent-task.json`}
+          busy={studio.busy}
+          onImport={async (value) => {
+            const parsed = value as { manifest?: Manifest };
+            const m = (parsed.manifest ?? parsed) as Manifest;
+            if (
+              !m ||
+              !["declarative", "service"].includes(m.runtime) ||
+              !Array.isArray(m.entities) ||
+              !Array.isArray(m.views) ||
+              !Array.isArray(m.surfaces)
+            )
+              throw Error(a("invalid"));
+            await studio.run(() => studio.proposeImport(compile(m)));
+          }}
+        />
+      )}
+      <details className="app-agent-advanced">
+        <summary>{workspace("agentAdvanced")}</summary>
+        <div className="app-agent-options">
+          <Button
+            type="submit"
+            disabled={studio.busy}
+            onClick={() =>
+              void studio.run(async () =>
+                downloadJson(
+                  "app-studio-schema.json",
+                  await request("/api/developer/schema"),
+                ),
+              )
+            }
+          >
+            {a("schema")}
+          </Button>
+          <Button
+            type="submit"
+            onClick={() =>
+              downloadJson(`${studio.manifest.id}.json`, studio.manifest)
+            }
+          >
+            {a("download")}
+          </Button>
+        </div>
+        <section className="app-model-card">
+          <h2>{a("import")}</h2>
+          <textarea
+            aria-label={w("contract")}
+            rows={10}
+            value={json}
+            onChange={(e) => setJson(e.target.value)}
+          />
+          <Button
+            tone="primary"
+            type="submit"
+            disabled={!json || !studio.env || studio.busy}
+            onClick={() => {
+              try {
+                const parsed = JSON.parse(json),
+                  m = (parsed.manifest ?? parsed) as Manifest;
+                if (
+                  !m ||
+                  !["declarative", "service"].includes(m.runtime) ||
+                  !Array.isArray(m.entities) ||
+                  !Array.isArray(m.views) ||
+                  !Array.isArray(m.surfaces)
+                )
+                  throw Error(a("invalid"));
+                void studio.run(() => studio.proposeImport(compile(m)));
+                studio.setError("");
+              } catch (e) {
+                studio.setError((e as Error).message);
+              }
+            }}
+          >
+            {a("import")}
+          </Button>
+        </section>
+      </details>
+    </div>
+  );
+}

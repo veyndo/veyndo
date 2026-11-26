@@ -1,0 +1,20 @@
+[package]
+name = "veyndo-provider-email"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Email app: configuration, templates, SMTP/provider delivery and order events over the connector runtime"
+
+[dependencies]
+base64.workspace = true
+lettre.workspace = true
+regex.workspace = true
+rustls-pemfile.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
+webpki-roots.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }
+veyndo-pricing = { path = "../../../components/pricing" }
+veyndo-runtime = { path = "../../../crates/runtime" }

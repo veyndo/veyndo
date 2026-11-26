@@ -1,7 +1,14 @@
 //! Resolve the current credential and membership once; bootstrap and sandbox checks share the same boundary.
 use super::{credentials, permissions, resolve_identity_channel};
-use crate::{App, Error, RequestContext, Result, StatusCode, bad, header, tenant};
+use crate::foundation::App;
+use axum::http::StatusCode;
 use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 fn denied(message: &str) -> Error {
     Error(StatusCode::FORBIDDEN, message.into())
 }
@@ -50,7 +57,7 @@ pub(super) async fn resolve(
         }
         return Ok(None);
     };
-    if credentials::bootstrap_matches(&token, &a.token) {
+    if credentials::bootstrap_matches(&token, &a.identity.bootstrap_token) {
         if !crate::runtime_config::get().allow_bootstrap {
             return Err(Error(
                 StatusCode::UNAUTHORIZED,
@@ -58,7 +65,7 @@ pub(super) async fn resolve(
             ));
         }
         let t = tenant(h)?;
-        let private: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL)").bind(&t).fetch_one(&a.db).await?;
+        let private = veyndo_studio::store::workspaces::is_personal_preview(a, &t).await?;
         if private {
             return Err(denied("Personal preview requires its owner session"));
         }
@@ -144,21 +151,16 @@ pub(super) async fn resolve(
 
 // Identity remains uncached. This only reuses the same request's authoritative shop/channel read.
 async fn ensure_access(a: &App, h: &mut RequestContext) -> Result<()> {
-    if h.access
-        .as_ref()
-        .is_some_and(|s| s.matches(h) && s.channel_id == crate::marketing::channel_id(h))
-    {
+    if h.access.as_ref().is_some_and(|s| {
+        crate::performance::access_snapshot::matches(s, h)
+            && s.channel_id == crate::marketing::channel_id(h)
+    }) {
         return Ok(());
     }
     let t = tenant(h)?;
     h.access = Some(
-        crate::performance::access_snapshot::AccessSnapshot::load(
-            a,
-            None,
-            &t,
-            crate::marketing::channel_id(h),
-        )
-        .await?,
+        crate::performance::access_snapshot::load(a, None, &t, crate::marketing::channel_id(h))
+            .await?,
     );
     Ok(())
 }

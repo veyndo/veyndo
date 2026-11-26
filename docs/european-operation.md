@@ -90,7 +90,7 @@ sales channel, nonempty browser session and immutable customer identity. For a
 company purchase, the original cart also requires the currently authenticated
 buyer and current purchasing grant. POS/operator carts do not participate.
 
-Migration 108 adds a scoped reference on the existing receipt table. Successive
+The schema baseline has a scoped reference on the existing receipt table. Successive
 carts resolve the same original receipt in one hop; they do not copy grants or
 extend the deadline. Withdrawing through any linked cart changes the shared
 receipt and removes their private preferences, observations and experiment
@@ -223,9 +223,9 @@ processor contracts and notification targets before sharing private consumer dat
 
 - `src/legal/`: bounded settings, policy fingerprints, transactional consent,
   checkout guard/snapshot, product facts, private request review and MCP adapters.
-- `migrations/048-legal-privacy.sql`: composite tenant/cart/channel ownership,
+- `components/shop/migrations/0001-baseline.sql` (legal and privacy tables): composite tenant/cart/channel ownership,
   five RLS-protected tables, consent log and review audit.
-- `frontend/src/admin/legal/`, `shared/legal/`, `storefront/legal/`: inherited
+- `components/shop/ui/admin/legal/`, `shared/legal/`, `storefront/legal/`: inherited
   settings, requirement catalog, single-language editors, actual integration gates
   and public forms. Product safety shares these data, not another legal database.
 - `extensions/services/connectors/email_*`: existing encrypted service settings,

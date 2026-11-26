@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE carts SET status='completed',data=$1,revision=revision+1 WHERE id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cfa30d8ecf16cc2c68df276149d73303cb5ad88b8e1434a2016d0c29d39fcfb5"
+}

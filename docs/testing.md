@@ -1,5 +1,18 @@
 # Testing, coverage and maintenance contracts
 
+## Fresh-install schema equality
+
+The registered `schema_baseline` suite (`scripts/schema_baseline.py`) creates its own
+database, runs the built `target/debug/veyndo` in `BOOTSTRAP_MODE=migrate` without demo
+data and compares a normalized `pg_dump --schema-only` (every statement, sorted,
+owners left out) plus the rows setup creates with `fixtures/schema/reference.sql`.
+Timestamps, generated UUIDs and the per-database scope key are masked; everything else
+must be identical. The reference was taken from a fresh installation of commit
+`ce4285d7`, the last release with incremental migrations, so the component baselines
+are proven to produce the same schema. A deliberate schema change regenerates it with
+`--write`. There are no upgrade or legacy-import tests: a release replaces earlier
+installations and setup refuses a database that an earlier release created.
+
 ## External order batching regression
 
 The registered `marketplaces` suite calls the installed app's real native order
@@ -55,57 +68,11 @@ the real Rust commerce process. The separate `rust_connectors` suite and native
 mail journey exercise the shipping Rust service. Production ownership remains
 documented in [Rust services](rust-services.md); no runtime moved into Python.
 
-## Formal and module-boundary regression — 23 October 2026
-
-The [current formal/module audit](evidence/formal-modularity-2026-10-23.md) records
-63 extracted production policies and 149 Lean properties, including successive
-stock, refund and budget decisions and saved private agent admission. Compiled
-Rust/Lean comparison covers 156,741 cases. Four additional Rust tests exercise
-actual `u64` implementations against independent `u128` arithmetic and private
-context truth tables, including `u64::MAX` and lowered limits.
-
-The complete [Linux CI run 39934011164](https://github.com/sthamann/veyndo/actions/runs/39934011164)
-passed with 317 Rust tests, 816 frontend tests in 140 files, native PostgreSQL/HTTP
-integration, separate restricted runtime connections and transaction pooling.
-Measured line coverage is 86.62% Rust, 69.92% frontend and 80.72% Python tooling;
-all reviewed coverage gates passed. The delayed-flow revocation regression now
-waits for the committed delay cursor before changing access and the timer, so it
-checks actual continuation denial instead of racing initial queue admission.
-
-The existing mandatory proof and Cargo checks now also enforce seven handwritten
-proof domains and reviewed dependency ownership, with negative controls for hidden
-dependencies, aliases, wrong-owner targets and missing/extra claims. They supplement
-the existing Rust/frontend size and responsibility checks. Recorded measurements
-below retain their original dates; consult the linked audit for this revision.
-
-The [17 October buyer/POS follow-up](evidence/buyer-pos-hosted-2026-10-17.md)
-records the complete required 100-suite check and 115 frontend files / 648 tests,
-plus public preserved-cart, simulated checkout and native POS invoice acceptance.
-Coverage floors remain unchanged. Public provider payments and a fresh original
-embedded checkout are not inferred from these local/CI results.
-
-The [17 October native app-field receipt](evidence/native-app-fields-hosted-2026-10-17.md)
-records the complete required Linux check, 99 registered local suites, 636 frontend
-tests, actual hosted product-app publication and the original embedded simulated
-checkout. Older measurements below retain their own source/date and coverage scope.
-
 ## Prototype feedback loop
 
-The public handbook renders Markdown Mermaid fences through the shared
-`site/docs-diagrams.js` module. The unmodified Mermaid 11.15.0 browser distribution
-and its MIT notice are stored in `site/vendor/`; its package integrity and bundle
-SHA-256 are recorded in `mermaid.json`. Build and site checks reject a missing or
-changed bundle or a disconnected loader. No CDN or network package installation is
-needed to build or read diagrams, and pages without diagrams do not load Mermaid.
-Strict rendering disables diagram-defined click actions and sanitizes SVG. Readers
-can fit wide diagrams to the article, scroll at full size and inspect the original
-source. Without JavaScript, or when one diagram fails, its source remains readable.
-Diagram controls follow the handbook's EN/DE/FR/ES language selection.
-
-The 18 October browser repeat rendered all 33 actual handbook diagrams as SVG;
-two previously invalid sequence labels were repaired without changing their
-meaning. This real browser check complements the complete static site check:
-`python3 scripts/build_site.py && python3 scripts/check_site.py`.
+Required checks on every change are short; the complete suite runs once a day and on
+request. The handbook build and its link check are described in
+[the documentation site](documentation-site.md).
 
 ### Daily full verification and short per-change checks
 
@@ -113,7 +80,7 @@ Since 29 October 2026, the prototype runs its complete test suite **once daily
 at 02:17 UTC** on the default branch. **Run workflow** starts the same complete
 suite manually, including on a selected branch when a change needs it. A normal
 push or PR update no longer starts complete frontend coverage, Rust compilation,
-Lean/mutation tests, PHP differential tests or PostgreSQL/provider integration.
+Lean/mutation tests or PostgreSQL/provider integration.
 
 | Trigger | What actually runs |
 | --- | --- |
@@ -206,9 +173,7 @@ process group, mandatory join and failure behavior are unchanged.
 Run the registered `test_integration_partitions`, `test_partition_coverage` and
 `test_parallel_check` tooling tests for complete partition admission, rejected
 coverage substitutions and actual child-process cleanup. Each integration suite
-continues to print its duration. The successful pre-split native job on 29 October
-2026 took 37m13s, of which integration consumed 1781.33s. New wall-clock results
-must come from a complete successful run, not a projection from isolated suites.
+continues to print its duration.
 
 Each job uploads an immutable coverage artifact. The final job downloads the exact
 IDs returned by those jobs, checks the checkout SHA, workflow run and SHA-256 of
@@ -222,12 +187,6 @@ remain available beside the final combined summary; coverage floors are unchange
 Run `python3 scripts/testing/test_ci_gate.py` for failed/skipped job and report
 transfer controls. It is also registered in the native tooling suite. Workflow
 syntax is checked with `actionlint .github/workflows/verify.yml`.
-The [23 October complete run and actual targeted retry](evidence/parallel-verification-2026-10-23.md)
-passed: frontend feedback after 3m55s, full required verification after 48m15s,
-and frontend-only repetition with reused native reports after 3m41s. The evidence
-also records summed runner time and native-test variation; these observations are
-separate from the older sequential baselines below.
-
 Frontend-only coverage reuses the same policy and source completeness check; it
 does not fabricate fresh Rust/Python measurements or change their full-run floors.
 Full runs retain both native separate-login and pooler/multi-replica regressions.
@@ -244,291 +203,242 @@ acceptance or evidence of live provider payments. The current prototype can use
 short, coordinated deployment restarts; no zero-downtime fleet migration is required
 for an ordinary UI or documentation release. Existing demo data is still retained.
 
-Build and rollout time are separate from verification time. The 16 October
-`bustling-bulb-1104` hosted release took 9m12s to build and 11m50s through the
-complete serialized workflow. Northflank displayed remote cache disabled; its
-BuildKit disk-cache option was also disabled. No cache capacity was provisioned
-in this acceptance. The existing Dockerfile separates frontend and Rust stages,
-so retaining unchanged layers is the next concrete optimization, followed by a
-measured cold/warm comparison. Northflank's [cache guide](https://northflank.com/docs/v1/application/build/build-with-a-dockerfile#layer-caching)
-requires persistent cache capacity and an initial successful population build;
-enabling a setting alone is not evidence of a faster release.
-
-### Measured full-run cost: 21 October
-
-The successful [PR #190 full run](https://github.com/sthamann/veyndo/actions/runs/39657005708)
-took approximately 52 minutes. Its timestamped logs show 38.8 minutes in the
-registered integration step, 4.9 minutes in formal mutation controls, 3.1 minutes
-in the complete frontend step and 2.1 minutes in the Rust test/build step. Inside
-the integration step, the signed-runtime repetition took 14.5 minutes and the
-signed transaction-pooler repetition 3.7 minutes; these are nested timings,
-not additional time outside the 38.8 minutes.
-
-The succeeding [PR #191 full run](https://github.com/sthamann/veyndo/actions/runs/39665097450)
-completed in 45 minutes 29 seconds, including 33 minutes 13 seconds in registered
-integration tests. All 133 frontend test files / 779 tests passed alongside the
-Rust workspace, native HTTP/PostgreSQL, formal controls and coverage checks.
-This run-to-run difference is an observation, not an attributed optimization.
-
-The signed-runtime path intentionally repeats the native HTTP registry using the
-separate restricted tenant/system logins. The pooler path additionally checks
-small-pool transactions, current authority and two-replica/key-rotation behavior.
-Removing these repetitions would remove meaningful production-boundary coverage.
-The next optimization to measure is concurrent independent database/runner lanes,
-with separate logs and complete merged coverage. No such speedup is claimed yet;
-the complete daily/manual run keeps this verification scope unchanged.
-
-**Merchant catalogue setup:** [Current source/upload workflow, native CSV/model/media suites and evidence limits](merchant-catalogue-setup.md#verification-and-limits).
-
-**Agent authority:** [Current hosted control, checkout and session acceptance](evidence/agent-authority-hosted-2026-10-16.md), including separate full/backend and frontend-only source boundaries; older measurements below retain their original dates.
-
-**Studio setup and access:** [Channel wizard fixes, reusable roles, current grants, central B2B configuration and guided company creation](studio-access-and-setup.md).
-
-## Fixed shared app storage — 15 October 2026
-
-[Storage model, limits and maintenance cutover](app-data-storage.md).
-The registered `app_shared_storage` suite creates eight actual shops and installs
-32 indexed packages through HTTP. Physical table/index counts remain unchanged.
-It checks typed keyset filters, equal-ID isolation, six competing unique writes
-(one success, five HTTP 409 conflicts), protected projections and scoped F5 resets.
-
-`app_storage_migration` replays the original SQL migrations 001–100 into a separate
-database and populates historical physical models. Migrations 101–102 preserve
-inactive apps, personal previews, IDs/revisions, large integers, localized NULL/empty
-values, cyclic relationships, immutable histories and app-owned document quotas.
-Missing targets, an unknown dependent SQL view and an idle configured Core login
-must abort atomically; the successful migration drops only the exact verified old
-table set without `CASCADE` and emits no invented business changes.
-
-Existing app, schema, relation, callback, ontology, jobs, assets, native component
-checkout, staging and visual page/form suites exercise the same store. The strict
-`signed_runtime` and real one-backend `signed_pooler` suites additionally exercise
-separate non-owner system/tenant logins, signing-key rotation, restart and denied
-schema/projection access. These are local verification contracts, not proof of a
-completed production migration or unlimited data/throughput capacity.
-
-The existing `identity_broker` suite now constructs an actual separate pre-055
-database from original SQL and ledger checksums. The native migration process must
-upgrade it through storage consolidation, install its missing managed Storyfront
-package and validate the hosted FK before any HTTP read. Two serving processes
-then expose the original managed connection without changing its package revision
-or version history. Rewinding only migration 055 on an already post-102 database
-was an invalid historical fixture; it is not retained as an alternate runtime path.
-
-## Agentic directory grids — 14 October 2026
-
-[Guide and actual browser captures](agentic-grids.md). The complete local frontend
-run passes **493 tests in 88 files**. V8 coverage measures **64.63% lines, 63.33%
-statements, 57.23% branches and 52.27% functions** across the declared host and
-trusted app scope. These are measured figures, not 100% coverage. All **243 Rust
-unit tests**, format/all-target Clippy, source/route inventory and four-language
-gates pass.
-
-Seven affected real PostgreSQL/HTTP/provider suites pass: `workspace_roles`,
-`merchant_operations`, `catalog_management`, `customer_accounts`, `grid_directory`,
-`tenant_isolation` and `read_performance`. Grid counterexamples check whole-directory
-filters and sorting, localized product-name order, tuple cursors, SQL-looking text,
-current role/PII denial, foreign tenants/cursors, empty operational staging,
-invalid model fields and provider failure. HTTP and MCP return the same native rows.
-Fixtures create customers/orders through native Store API, use isolated databases
-and a loopback model; no live payment, real customer or paid model call is made.
-
-Chrome acceptance verifies reviewed customer filtering, order detail/return with
-criteria retained, category/customer-group filters, persisted column ordering,
-explicit/keyboard popup close, dark appearance and a 390 × 844 viewport without
-page overflow. App table forms preserve existing actions and use the same layout
-shell. This does not establish arbitrary app full-text/model support or live-model
-semantic quality. The existing **54-policy / 156,657-case** formal gate passes with
-zero mismatches and **155** rejected mutations; the grid's SQL, async code and UI
-are reviewed/tested adapters, not new whole-system proofs.
-The additional strict-provider counterexample initially failed on unused null
-fields. Real HTTP/MCP OpenAI Responses fixtures now pass after central configuration
-and a native restart: only recognized optional nulls disappear, false stays a
-filter, null identity keys fail closed, and empty supported plans are rejected.
-These checks use a synthetic loopback key, not an external model account.
-The rendered site checks **211 pages**, all **204 Markdown sources** and **5,032
-local links/assets**, including the illustrated guide and capture provenance.
-
-The full PR run exposed a navigation-test cold-import timing assumption: its
-default one-second wait expired while the real lazy workspace was still loading.
-A temporary 1.4-second delay on the actual order-module import reproduces that
-failure. The corrected readiness wait passes the same delayed path, retains its
-content/request assertions and bounded budgets, and the diagnostic delay is removed
-from the committed test. This is functional readiness evidence, not a performance
-claim. Native workflow/group metadata are now explicit navigation fixtures.
-
-## System consistency audit — 14 October 2026
-
-The subsequent legacy-ownership case exposed a separate real admission defect:
-a new account could see an old email-only guest order. The new regression models
-the historical persisted shape only in the disposable database. The corrected
-native account/download owners share one immutable customer-ID SQL predicate;
-existing digital/PDF tests additionally verify denied claimant access, preserved
-original guest-cart capability and admitted CRM/merchant access. Unbound old
-records are not silently assigned or financially rewritten. SQL execution remains
-outside the selected Lean proofs.
-
-The identity-class follow-up also reproduces a forged verified-purchase badge
-through typed guest email. The corrected review producer and native `numberOfReviews`
-rule consumer are tested together: guest-email inheritance is excluded, actual
-account submission is counted, and the real original cart can still review its
-purchase. All nine affected native suites pass. A separate native migration-only
-upgrade confirms 093 withdraws the old badge while retaining approval/text/rating.
-
-[Second pass and full component matrix](system-consistency-audit.md#component-status-at-the-second-pass):
-**49 registered native HTTP/PostgreSQL/provider suites** pass at `b4fb561`, followed
-by a reproduced history-discovery counterexample and its targeted repair. MCP now
-requires the same entity read/write/PII conjunctions as invocation. Rust format,
-all-target Clippy and **243 tests** pass. Private Experience `6563b2d` passes its
-complete check with **230 tests**, type/structure/localization checks and build.
-The private entry-chunk size warning remains visible. This refresh adds no paid
-provider calls, fresh dense-Qdrant test, public full-flow acceptance or claim of
-100% coverage. The targeted repaired roles/history/isolation rerun passes, including
-the new denied-access cases. The regenerated site validates 211 pages, all 204
-Markdown sources and 5,036 local links/assets. The previous pass's evidence remains
-dated below.
-
-The old empty-registration public probe failed before native policy admission.
-`hosting_check.py` now uses the native DTO shape with deliberately invalid email
-and an empty password, so no account/shop can be created even if signup is open.
-The refreshed public health/unauthorized-operator/closed-signup checks pass.
-Fifteen tooling tests cover expected JSON, non-JSON denials, wrong status/shape
-and oversized responses; failures retain bounded diagnostics rather than becoming
-successful gateway claims. Typed-body extraction can still produce a plain-text
-422. This is not completed public onboarding or authenticated end-to-end acceptance.
-
-[Full findings and boundaries](system-consistency-audit.md). Thirteen selected
-isolated HTTP/PostgreSQL/provider suites passed before new counterexamples
-exposed knowledge-source stage rights and HTTP/MCP automation admission defects.
-The repaired paths passed seven affected suites plus new narrow-role regressions
-in `testing/consistency_boundaries.py`. Existing tests alone had missed those
-cross-boundary cases. All **242 Rust tests**, format/all-target Clippy, exact
-source/route inventory and existing **54-policy / 156,657-case** formal gates pass;
-the mutation gate rejects **155** broken policies. Private Experience's complete
-check passes **230 tests**. No new coverage percentage or whole-system guarantee
-is inferred; no live provider or paid AI call was made.
-The rebuilt documentation passes **208 pages**, all **201 Markdown sources** and
-**4,957 local links/assets**, including this audit.
-
-## Fulfillment, carrier app and identity verification — 14 October 2026
-
-The local fulfillment run passes **483 frontend tests in 87 files** and **242 Rust
-unit tests** across the native library/core and independent service binaries.
-Measured frontend coverage is **64.12% lines, 62.84% statements, 56.89% branches
-and 51.56% functions**. These figures are dated local measurements, not 100% coverage.
-
-Real PostgreSQL/HTTP/MCP suites cover package quantity/price/stock conservation,
-concurrent replay, current rights, customer projection, one Flow effect, selected
-package delivery-note PDFs, immutable private carrier documents, quota recount and
-atomic saturation denial. A carrier-neutral test-only service drives actual native
-jobs, PDF/tracking, confirmed-no-effect release and unknown-effect allocation/dispatch
-fences across a native restart. A real split event drives a current-actor idempotent
-Flow job and attaches one original label. A shipping clerk cannot read another
-actor's job and loses private results immediately on permission removal. No live
-carrier, email or paid booking is used. Source ownership, route rights, inventory and localization checks
-pass; [shipping setup and limitations](shipping-workflows.md).
-The rendered documentation checks **207 pages**, all **200 Markdown sources** and
-**4,919 local links/assets**. Manual Chrome acceptance confirms one click produces
-two native packages with conserved order value and a package-specific delivery-note selector.
-
-Native merchant/operator MFA, verified-email recovery and scoped handoffs were
-landed separately; their source/HTTP/browser checks are recorded in
-[account security](account-security.md). The combined local formal check covers
-54 extracted policies and 156,657 compiled Rust/Lean cases with no mismatches;
-SQL, provider effects and the rest of the runtime remain unproved.
-
-## Studio setup and access verification — 13 October 2026
-
-The isolated local run passes **477 frontend tests in 85 files**, plus **232 Rust
-unit tests** across the library, core and bundled service binaries. The frontend
-V8 report includes the declared host and trusted app source scope: **64.04% lines,
-62.73% statements, 56.93% branches and 51.34% functions**. These are measured local
-values, not 100% coverage or confirmation of public deployment.
-
-Real PostgreSQL/HTTP checks cover channel creation, role changes and concurrent
-delegation, current key/callback grants, PII denial, tenant isolation, native
-B2B/UCP setup and feature switches. Browser checks use synthetic accounts and
-confirm POS/marketplace creation, preserved App Studio drafts, company/customer
-linking, B2B settings and read-only product navigation. The complete documentation
-build checks **203 pages, all 196 Markdown sources and 4,983 local links/assets**.
-
-## Connected feature audit — 12 October 2026
-
-[Integration map and repaired boundaries](feature-integration.md). Real isolated
-PostgreSQL/HTTP regression runs cover POS, B2B history and policy staging, inherited
-analytics settings/capture, selective release, settings scopes, customer history,
-foreign-tenant references, legal consent, currency behavior, native/app automation,
-EDI and marketplace provider fixtures. Denied writes inspect unchanged live state;
-B2B staging checks current live spending and preserves employee grants. App Flow
-publication checks the current installed target, action-specific rights and activation.
-No real AI, customer email, payment or seller account is used by these fixtures.
-
-The current frontend run passes **470 tests in 84 files**. The complete Rust unit
-run passes **224 tests** across the library, Core and bundled service binaries;
-formatting, all-target lint and production builds pass. The existing **51 extracted
-policies** match compiled Rust/Lean in **155,347 cases**, with no mismatch; this
-adds no whole-server proof. The documentation build checks **200 pages**, all
-**193 Markdown sources** and **4,850 local links/assets**. Explicit API rights,
-modular source inventory and four-language gates remain required. Dated coverage numbers below belong to their
-original source/CI; this audit does not claim 100% coverage or whole-system proof.
-
-
-## MCP stack regression — 13 October 2026
-
-The complete Linux coverage build found a worker stack overflow at MCP `pos.cart`
-after native POS setup succeeded. The server log confirmed stack overflow rather
-than a payment/order failure. Small future-state size checks failed to expose the
-much larger unoptimized poll frame, so they are not an acceptance test.
-
-The shared dispatcher now chooses a boxed domain future synchronously before its
-child is polled. Existing real `pos` and `b2b` HTTP/PostgreSQL/MCP suites pass locally
-with `RUST_MIN_STACK=1572864` (1.5 MiB), including sales, receipts, history and policy
-publication. This is a constrained local regression run, not a portable stack-size
-guarantee. Production stack limits remain unchanged; full Linux coverage CI must
-pass before release.
-
-## Behavioral intelligence verification — 12 October 2026
-
-The new registered `behavior_intelligence` suite runs real PostgreSQL/API/MCP
-requests with synthetic guests and customers, native cart changes and a simulated
-order. It rejects forged identity/purchases, foreign tenants, conflicting replay
-and consentless intake; checks independent withdrawal, self-export/erase, expired
-reads, hourly admission and ledger RLS with `NOSUPERUSER NOBYPASSRLS`. The existing
-`tenant_isolation` suite additionally checks all four new composite foreign keys.
-Related legal/account/knowledge suites remain green. Six UI regressions cover
-consent, scope reset, links, graph keyboard access, failed reload, search privacy
-and stale private-journey responses. Desktop/mobile screenshots use an isolated
-synthetic shop, with no paid models, customer mail or real payment calls.
-[Ownership and functional boundaries](behavior-intelligence.md).
-
-
-The prototype has automated behavior checks, actual PostgreSQL/Qdrant integration (plus legacy conversion checks),
-original Shopware comparisons and partial Lean contracts. **It is not fully tested
-at 100%, and neither coverage nor the Lean subset proves the entire system bug-free.**
-
-## Current acceptance (9 October 2026)
-
-[Complete change and end-to-end record](release-acceptance-2026-10-09.md) joins the
-source owners, all registered suites, actual browser/private purchase checks and
-remaining audit work. The completed merged-Core CI at `598bbec` measures Rust
-**90.55% lines / 87.94% functions / 87.24% regions**, frontend **63.23% lines /
-54.78% branches / 51.14% functions / 61.94% statements** and Python tooling/reference
-scope **81.34% lines / 57.80% branches**. [Exact source/CI artifact summary](evidence/release-acceptance-2026-10-09.json).
-
-Dated measurements below retain their original source. That dated suite had
-187 Rust unit tests and 388 frontend tests; the private Experience application and
-original Storyfront container have separate evidence and no claimed percentage.
-
 ## Source architecture
 
-- Rust: 414 source modules (merged cognitive release, 9 October 2026), each with a responsibility header, at most 320 lines; `main.rs` at most 120. Existing domain folders remain independent of extension app implementations.
-- Frontend: separate `admin/`, `storefront/`, `platform/` and `shared/` ownership. Views/controllers and styles are limited to 400 lines; locale data has a documented 700-line allowance. Runtime cycles, unresolved local imports, crossing application boundaries, missing folder contracts and undocumented source files fail CI.
-- Bundled Email/GA4/Gmail/Slack implementations are Rust modules under their `extensions/apps/<app>/` package; shared service hosting is in `extensions/services/connectors/src/`; independent app examples and browser SDKs remain under `extensions/`. Python test tooling lives under `scripts/` and the previous connector is an archived comparison oracle in `reference/`. [The generated inventory](module-inventory.md) covers runtime/tooling sources and is checked for drift.
-- Studio workspaces load lazily. Root application routing is isolated in `frontend/src/application/`; error boundaries keep workspace failures inside the current view and provide reload recovery for rejected cached module imports. The removed `CommerceManager` had no call site and duplicated old operational UI. Order state management remains in `admin/orders/OrderWorkflow.tsx`; product review moderation lives in `admin/catalog/ReviewModeration.tsx`.
+- Rust: 22 components declared in `components.json`, each with its own crate or source
+  paths, tables and allowed dependencies ([architecture](architecture.md)). Every source
+  file starts with a responsibility comment; file length is not limited. Clippy limits
+  function length; `scripts/components.py` rejects undeclared or mutual component
+  dependencies and foreign table access without a written reason.
+- Frontend: `frontend/src/` holds the entry, shells, shared building blocks and `kit/`;
+  screens live in `components/<name>/ui/{admin,storefront}/`. Runtime cycles, unresolved
+  local imports, imports against the component dependencies, missing folder contracts
+  and undocumented source files fail `npm --prefix frontend run architecture`.
+- Bundled Email/GA4/Gmail/Slack implementations are Rust crates under
+  `extensions/apps/<app>/`; service hosting is in `extensions/services/connectors/` and
+  `extensions/services/connector-runtime/`. Python test tooling lives under `scripts/`;
+  the former Python connector is an archived comparison oracle in `reference/`.
+  [The generated inventory](module-inventory.md) covers runtime and tooling sources and
+  is checked for drift.
 
 `frontend/tests/architecture.mjs` also inserts deliberately broken synthetic imports,
 a cycle, an oversized file and absent documentation into temporary directories;
 it verifies that the architecture checker actually rejects each defect.
+
+## Local Studio development account
+
+Visual checks of Studio need a signed-in merchant. With the local server running
+(`.claude/launch.json` entry `veyndo`, or `./scripts/dev.sh`), run:
+
+```sh
+python3 scripts/dev_account.py
+```
+
+The first run registers the shop `dev-shop` and its owner `owner@dev-shop.test`
+through the ordinary `/api/auth/register` endpoint and stores the generated
+password in the ignored `.run/dev-account.env` (mode 600); later runs only prove the
+stored account still signs in. `DEV_ACCOUNT_PASSWORD` chooses the password and
+`--shop`, `--name`, `--email` change the defaults. The script refuses any host other
+than this machine and never prints the password. Sign in at
+`http://127.0.0.1:8787/?shop=dev-shop#login`. After a frontend rebuild, run
+`node scripts/precompress.mjs` too: the server prefers the precompressed sidecars.
+
+## Browser journeys
+
+`browser_journeys` (provider suite group) drives Studio and storefront in a real
+Chromium: a guest purchase that then appears in Studio, a Studio refund of a
+captured provider payment (local provider fixture), a product content edit saved
+while another shopper's order changes stock (the stock decrement survives), an app
+installation through its permission review, and a Spanish main language with Italian
+as a fifth content language (the merchant's Italian name reaches the storefront;
+untouched fields inherit Spanish and are not saved as translations). It starts its own
+server on a free loopback port and registers one disposable shop per journey;
+setup goes through the API, every step under test through the browser.
+
+The driver is the pinned `playwright` package from `scripts/testing/requirements.txt`
+plus `python3 -m playwright install chromium-headless-shell`; its bundled Node runs
+`scripts/testing/browser_journeys.mjs`, so a working system Node is not needed.
+`BROWSER_NODE` and `BROWSER_MODULE` select another Node and Playwright module. Run it
+alone with `python3 scripts/verify_integration.py --container <postgres> --only
+browser_journeys` after `cargo build --workspace --bins` and a frontend build. A
+failing journey leaves a screenshot in `artifacts/browser-journeys/`.
+
+## Component test suite (phase 7)
+
+Phase 7 of [the component plan](plans/2026-11-19-component-architecture.md#phase-7-test-suite)
+adds test sets beside the per-function domain tests. Each is listed with what it proves.
+
+### Property tests
+
+`proptest` (dev-dependency only; `scripts/testing/workspace_boundaries.py` refuses it as
+a normal or build dependency) generates inputs for 37 properties in
+`components/<name>/tests/properties.rs` and `components/marketing/src/store/promotion_property_tests.rs`.
+Where a Lean property exists the test names it and states the same claim on the compiled
+Rust; the others are open proof obligations of phase 8 tested here first.
+
+| Crate | Properties |
+| --- | --- |
+| pricing (16) | currency scale bound; decimal text ↔ minor units bijection for every `i64` and scale; parsing refuses a wrong scale; half-away-from-zero rounding against an integer model; scaling error at most half a minor unit; checked addition exact or refused, never across currencies; float wire amounts round-trip in the exact range; negative/non-finite amounts have no minor units; `discount_cap` within base, requested, idempotent, monotone; discount allocation conserves cents, never takes a line below zero or above itself, monotone in the request; `amount_sum` exact or saturating and commutative; net plus tax equals gross; `math_round` idempotent, symmetric, within half a unit; quote totals add up for net and gross quotes; a line price is the rounded unit times the quantity, deterministic, tax within the gross |
+| inventory (5) | `stock_admissible` exact; any sequence of reservations and releases keeps stock non-negative, conserves units, keeps every order within what it ordered, and releasing all restores the opening stock; inventory batches aligned and positive; reorder ceiling; an admitted supplier offer is never above the ceiling |
+| orders (6) | every state reached from `placed` in a valid (app-extended) machine is listed and terminal states have no edge; validation admits only closed reachable machines; terminal orders refuse every action, including fulfilment and payment; the cancellation guard agrees with the blocker; completion needs payment and delivery; manual payments move only pending/authorized to paid |
+| payments (6) | exactly the listed ledger transitions are admitted; no walk returns money to a pre-capture state; captures stay within the authorization and refunds within the capture over any request sequence; provider refund totals; wire amounts round-trip and are never negative |
+| checkout (2) | the cart quote's total is the sum of its line totals (gross) or lines plus tax (net), net plus tax is the gross, the same cart gives the same quote; normalized quantities are on the step grid |
+| marketing (2) | applied promotions stay within their base: no negative total, line or discount and no line rises; an exclusive promotion ends the chain and free shipping changes no amount |
+
+Run them with `cargo test -p <crate> --test properties` (marketing: `cargo test -p
+veyndo-marketing --lib promotion`). The order total's shipping part is added by the
+checkout service (`service/delivery.rs`), not by a domain function, so the quote property
+covers lines and tax; shipping is covered by the HTTP contract and checkout suites.
+
+### Store isolation under forced row security
+
+`store_isolation` (provider group) runs on the isolated suite database with a dedicated
+login that is `NOSUPERUSER NOBYPASSRLS`, owns no table and has only row privileges, as the
+production runtime role.
+
+1. `tests/store_isolation.rs` calls component store functions through the scoped pool:
+   it writes under shop A (outbox event, webhook receipt, product, stock reservation,
+   price job, customer session; operator limits with system authority) and proves that
+   under shop B the same functions read nothing (`exists`, `queued`, `find`, `valid`,
+   cart locks of checkout, B2B, POS and marketing, orders, roles, settings, locale) and
+   change nothing (updates affect no row, releases leave the reservation held, every
+   insert for A is refused by row security). Fifteen components' stores take part.
+2. A sweep over every tenant table each component declares in `components.json` (135
+   tables in 16 components): under shop B no row of another shop is visible and an update
+   or delete aimed at a holding shop touches no row; under that shop a row cannot be moved
+   to another shop (row security `WITH CHECK`, SQLSTATE 42501). Every tenant table must
+   force row security and belong to a component.
+3. Negative control: a `BYPASSRLS` login sees shop A's products under the same probe.
+
+On an isolated run only seeded tables hold rows, so update, delete and move probes are
+meaningful for the tables that report "hold shop rows" (35 of 135 on the 25 November run);
+the visibility probe applies to all. In the complete registry the suite runs after the
+HTTP suites have filled the database.
+
+### Port contract tests
+
+`crates/port-contracts` (`veyndo-port-contracts`) holds one contract set per port and an
+in-memory test adapter that meets it. The crate's own tests run every set against its
+adapter; `src/port_contracts_tests.rs` and `src/payments/host_contract_tests.rs` run the
+same sets against the server's real implementations (`cargo test --bin veyndo contract`).
+A mirror repository depends on the crate and calls the same public functions with its
+own implementation.
+
+| Port | Contract | Test adapter | Real implementation |
+| --- | --- | --- | --- |
+| `veyndo_shop::ports::SettingsGuards::condition` | admits an always-valid condition; refuses unknown, non-string or missing types, non-objects and an unknown type nested in a container | `Conditions` | `commerce::Guards` |
+| `veyndo_payments::ports::Host::service` | an unconfigured provider version is refused in every environment; a configured one answers the same service every time | `Services` | `payments::host::PaymentHost` |
+| `veyndo_intelligence::ports::PublicEgress` | no client for plain HTTP, loopback, private, link-local, metadata or `localhost` destinations | `Offline` | `assets::Egress` |
+| `veyndo_app_platform::ports::RecordRules` (pure methods) | records of an app without rules are stored as given, admitted, have no planning format, and normalizing is idempotent; an app with rules refuses its invalid fields and publishes a planning format | `NoRules` | `apps::data::BUNDLED` (site builder) |
+
+Open: the transaction-bound port methods (`lock`, `capture`, `validate`, `captured`, …) and
+the ports whose real implementation needs the server's `App` with a database (pricing,
+inventory, checkout, orders, identity, customers, B2B, POS, studio, intelligence hosts).
+The server is a binary crate, so its implementations are reachable only from its own unit
+tests; running these sets needs a database-backed `App` fixture in those tests.
+
+### HTTP and MCP contracts generated from the schema
+
+`scripts/testing/schema_contracts.py` reads the route catalogue
+(`frontend/src/kit/api/generated/routes.ts`, generated by `scripts/api_catalogue.py`) and the
+operation contracts (`extensions/sdk/generated/operations.json`, generated by
+`scripts/testing/operation_contracts.py`) and builds one valid and one invalid case per
+route and per MCP tool. Its own check (tooling suite `testing/schema_contracts`) proves
+every generated valid tool input satisfies its schema and every invalid one breaks it,
+with negative controls. The HTTP suite `schema_contracts` runs the cases against the
+running server on two disposable shops (session-ending routes last):
+
+- HTTP valid: the route with path parameters set to a probe value, the shop's credential
+  and, for body methods, `{}`. Invalid: a malformed JSON body for body methods, otherwise
+  an invalid bearer credential. Six POST routes read no body (listed with reasons in
+  `NO_BODY`; the list fails when a route leaves the catalogue) and get the credential case.
+- MCP valid: the minimal arguments the input schema requires. Invalid: a missing required
+  property, an unknown property of a closed schema, or a wrongly typed property.
+- Assertions: no 5xx, except the documented 502/503/504 problem (retryable or
+  `provider_unavailable`) of the dependencies the suite leaves offline; a malformed body is
+  refused with 4xx; an invalid credential gets 4xx on every `/api/` route; every invalid
+  MCP input is refused (JSON-RPC -32602 or a tool error with a 4xx problem).
+
+25 November run: 350 routes (valid: 92 2xx, 251 4xx, 7 offline 503 from the unconfigured
+identity broker, checkout identity and PayPal webhooks; invalid: 348 refused with 4xx), 212 tools (all
+212 invalid inputs refused; of the valid inputs 50 succeed, 160 are refused for unknown
+probe IDs or missing setup, 2 report the offline model service). No unexplained server error.
+
+### Coverage floors per component
+
+`coverage_report.py` maps every measured file to its component through `components.json`
+(component UI under `components/<name>/ui/` counts for that component) and enforces a
+line floor per component and scope (`components` in `coverage-policy.json`), beside the
+global floors. A component measured without a floor, a floor with nothing measured, and
+a value below its floor each fail; `--ratchet` raises floors to the measured values and
+never lowers one. `--frontend-only` (every PR) enforces the frontend floors; the full
+report (nightly) enforces both. Tests with negative controls are in
+`scripts/testing/tooling_tests.py` (`ComponentCoverageFloors`); on the real policy,
+dropping one POS module to zero hits fails the gate.
+
+Floors of 25 November (Rust: workspace unit, property and contract tests instrumented
+with `-C instrument-coverage` and LLVM 23, so the nightly run with the integration suites
+measures more; frontend: vitest over this tree):
+
+| Component | Rust lines | UI lines | | Component | Rust lines | UI lines |
+| --- | --- | --- | --- | --- | --- | --- |
+| apps | 41.70 | 69.53 | | inventory | 70.90 | – |
+| automation | 75.13 | – | | marketing | 47.77 | 66.80 |
+| b2b | 8.02 | 54.25 | | orders | 59.90 | 63.14 |
+| catalog | 47.36 | 83.19 | | payments | 32.85 | 85.27 |
+| checkout | 34.33 | 81.91 | | pos | 28.56 | 46.93 |
+| core | 60.92 | – | | pricing | 81.57 | – |
+| customers | 2.81 | 73.50 | | protocols | 42.34 | – |
+| host | 10.56 | – | | shipping | 75.58 | – |
+| identity | 21.52 | 73.59 | | shop | 52.92 | 61.79 |
+| inference | 59.80 | – | | studio | 21.43 | 74.71 |
+| intelligence | 18.68 | 79.27 | | | | |
+
+Low Rust values (customers, B2B, host) are code reached only through the HTTP suites;
+the nightly measurement covers it, and its first run should be ratcheted.
+
+### Mutation testing of `domain/` (on demand)
+
+`scripts/testing/mutation_domain.py` runs `cargo-mutants` (27.1.0, installed with
+`cargo install --locked --root target/tools cargo-mutants`) on `src/domain/**` of pricing,
+inventory, checkout, payments and orders against each crate's own tests, in parallel
+copies of the tree (`--jobs`, default 8; about 20 minutes for all five on 32 cores).
+Every surviving mutant must be listed with its reason in
+`scripts/testing/mutation-survivors.json`; an unlisted survivor fails and so does a listed
+one that is now caught. It is too slow for every run and, like the coverage audit, is
+not in the suite registry: run it after changing `domain/` code.
+
+```sh
+python3 scripts/testing/mutation_domain.py [--crates pricing ...] [--jobs 12]
+python3 scripts/testing/mutation_domain.py --check-only   # evaluate artifacts/mutants again
+```
+
+Run of 25 November 2026 (1,137 mutants):
+
+| Crate | Mutants | First run: caught / survived | After the new tests: caught / survived | Unviable |
+| --- | --- | --- | --- | --- |
+| pricing | 341 | 227 / 101 | 325 / 3 | 13 |
+| inventory | 51 | 45 / 6 | 51 / 0 | 0 |
+| checkout | 192 | 123 / 67 | 186 / 4 | 2 |
+| payments | 293 | 255 / 35 | 289 / 1 | 3 |
+| orders | 260 | 224 / 34 | 256 / 2 | 2 |
+
+The killing tests are `components/<crate>/tests/domain_mutants.rs` (52 tests). They pin
+what the first run showed untested: inclusive limits of every validator, each clause of
+`||`/`&&` chains on its own, `calculate`'s net input, duplicate tax rates and
+list/regulation/reference prices, exact consumer and business quote amounts with app fees,
+tiers, a 7 % product and a zero-decimal currency, IBAN bounds with valid checksums, and
+order-machine limits. The ten remaining survivors, with reasons in the survivor list:
+
+- pricing `math_round` (3): equivalent; the exact-hit correction is redundant because the
+  half-unit check after it adds the same unit.
+- checkout `cart_quote` (4): equivalent; `calculated: true` and `round_for_net: false` equal
+  the defaults, and the cash interval `10^-decimals` never changes an amount already
+  rounded to the decimals (line price and app fee).
+- payments IBAN checksum (1): equivalent; adding 97 instead of reducing keeps the residue,
+  and a reducing digit step always follows.
+- orders (2): a re-encoded logo of exactly 2 MiB cannot be constructed; the NUL arm of the
+  PDF text encoder is defensive (NUL is refused upstream) and observable only in a PDF.
 
 ## Repeatable checks
 
@@ -573,18 +483,6 @@ roles, then restarts a worker after its first 100-product batch and verifies com
 exact midpoint rounding and exclusion of products created after the job snapshot.
 See [multi-currency commerce](currencies.md) for the configuration and proof boundaries.
 
-The original-PHP comparisons and reflected automation catalog checks are:
-
-```sh
-python3 scripts/differential.py
-python3 scripts/context_differential.py
-python3 scripts/delivery_differential.py
-python3 scripts/rule_differential.py
-python3 scripts/automation_registry.py
-python3 scripts/automation_differential.py
-python3 scripts/money_boundary_differential.py
-```
-
 The automation suite also executes `scripts/playground.py` as documented: a new
 owner-owned shop, repeat setup after an edited rule, both checkout branches and
 actual invoice records. `tooling_tests.py` checks refusal of remote credential
@@ -621,15 +519,15 @@ supplied by a test. Cases include:
 
 ## Coverage collection
 
-Frontend coverage includes **every** `frontend/src/**/*.ts` and
-`frontend/src/**/*.tsx`, plus TypeScript/React modules owned by
+Frontend coverage includes **every** `frontend/src/**/*.{ts,tsx}`, every
+`components/*/ui/**/*.{ts,tsx}` and the TypeScript/React modules owned by
 `extensions/apps/**`, including modules never imported by a test.
 HTML, JSON, LCOV and summaries go to
 `frontend/coverage/`. App source globs resolve to absolute package paths and V8 external-file collection is enabled; the report rejects omitted app modules as well as omitted host modules. Styles and independent guest app bundles are outside that
 statement metric and explicitly listed as separate scopes.
 
 For Rust install `cargo-llvm-cov` 0.9.1 and `llvm-tools-preview`. Use the same
-instrumented binaries for units, original-PHP comparisons and the actual HTTP
+instrumented binaries for units and the actual HTTP
 integration run:
 
 ```sh
@@ -638,7 +536,7 @@ cargo llvm-cov clean --workspace
 eval "$(cargo llvm-cov show-env --sh)"
 cargo test --locked
 cargo build --locked --bins
-# Run the integration and comparison commands above, then:
+# Run the integration commands above, then:
 mkdir -p artifacts/coverage
 cargo llvm-cov report --json --output-path artifacts/coverage/rust.json
 cargo llvm-cov report --html --output-dir artifacts/coverage/rust
@@ -685,8 +583,7 @@ system claim while browser SDK/example-app JavaScript and Wasm instruction cover
 remain unmeasured. CSS requires visual behavior checks; live OAuth credentials,
 external inference and production deployment need their own verification.
 
-The initial measured snapshot is in [quality-baseline.json](quality-baseline.json).
-The largest remaining frontend gaps include order-detail edits/documents,
+The per-component floors are in `scripts/testing/coverage-policy.json`. The largest remaining frontend gaps include order-detail edits/documents,
 customer/address edge cases, full operator workflows, app iframe errors and
 complex rule/flow interactions. Coverage HTML shows individual missed statements
 and branches, not only totals. Future changes must add behavior regressions in
@@ -710,83 +607,6 @@ login attempts, old-token replies after reauthentication, coalesced reads, hidde
 tabs, overlapping checks and timer/listener cleanup. Browser verification uses
 the existing personal test account; no expiry bypass or new privileges are added.
 
-## International configuration regression scope (2026-10-05)
-
-New PostgreSQL suites cover complete bundled geography, custom countries/regions,
-US destination taxes in actual product/cart/order paths, saved-rule conditions,
-non-English main-language inheritance and stale/foreign configuration rejection.
-Translation fixtures cover Ollama/OpenAI/Claude wire formats, durable full-catalogue
-drafts, cold restart, stale apply, repeated apply and permission/tenant denial.
-They perform no paid model calls. React tests exercise keyboard/group country
-selection, missing-field inheritance and a shared settings draft across navigation.
-UI screenshots supplement these tests; neither replaces whole-source coverage.
-
-## Recorded international-commerce verification
-
-[CI run 37285967720](https://github.com/sthamann/veyndo/actions/runs/37285967720)
-verified the international-commerce tree merged as `852f3d1` on 5 October 2026:
-67 Rust unit tests, 90 frontend tests and the registered 25 HTTP / 3 provider /
-4 browser-contract suites. The complete measured report, including untouched
-modules and unmeasured scopes, is checked into [quality-baseline.json](quality-baseline.json).
-
-| Scope | Lines | Other measured metrics |
-|---|---|---|
-| Rust | 81.00% | Functions 78.41%; regions 77.84% |
-| Frontend | 42.28% | Branches 36.34%; functions 32.49% |
-| Python | 74.11% | Branches 52.78% |
-
-These percentages retain the separate source scopes above and do not establish
-100% coverage or whole-system correctness. Regression floors were preserved.
-
-Company profile HTTP/database checks run in the suite registry as `company_settings`; the scope, decoder/ACL, issuer snapshot, translation and selective release cases are detailed in [company settings](company-settings.md). They use synthetic tenants and local image bytes, with no external payment/model/OAuth traffic.
-
-## Channel settings and media workspaces (2026-10-05)
-
-See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish additional full Shopware API/DAL parity, current tax law, paid-provider quality or whole-system formal certification.
-
-## App library regression scope (2026-10-05)
-
-Eight component regressions exercise translated search, categories/status/discovery,
-installation followed by the real detail page, cancellation and failed activation,
-viewer restrictions, registered native interfaces, locale inheritance and
-independent artwork failure fallbacks. The isolated PostgreSQL app suite checks
-metadata round trips, tenant separation, immutable same-version digests, unsafe
-artwork refusal and the actual shop main language. Strict model-schema regression
-keeps optional presentation compatible with both provider request formats.
-
-The app-library clean frontend run passed 137 tests: 50.16% statements, 43.76% branches,
-41.35% functions and 50.98% lines across all included source. These measurements
-are not whole-system 100% coverage. Actual browser checks supplement component
-tests with desktop and 375px layouts. The affected apps, app surfaces, App Studio
-and developer-document HTTP suites pass using local fixtures, without paid calls.
-
-## Connected knowledge workspace (2026-10-05)
-
-The current clean frontend run passes 151 tests across 26 test files, including
-ten knowledge regressions: whole-shop census, a single inherited-language editor,
-explicit empty values, non-English main language, guarded publication, viewers,
-retrieval scope, failed edits, actual product navigation and recommendation review.
-Across all included source the run measures 52.16% statements, 45.88% branches,
-43.10% functions and 52.99% lines. This is a measured frontend scope, not a
-whole-system coverage update or a 100% claim.
-
-84 Rust unit tests, strict lint/format, the extraction/Lean gates and negative
-mutations pass. The affected isolated PostgreSQL/AGE suites (`knowledge_workspace`,
-`developer_documents`, `apps`, `staging`, `connected_apps`, `automation`) exercise source hashes,
-public/private/archive fences, enabled-language retrieval, >50-source pagination,
-optimistic revisions, graph reassignment, granular HTTP/MCP access and selective
-release. Local provider fixtures prove private document passages reach the actual
-merchant model prompt and disappear after archive. No paid provider calls are used.
-
-The knowledge suite also follows source ingestion through a product-scoped event
-rule into a durable completed flow without an order. Four UI regressions retain
-the stable trigger IDs while translating their labels EN/DE/FR/ES.
-
-Browser checks cover inherited source creation in App Studio Lab, private customer
-exclusion versus merchant retrieval, the real product preview, desktop and 375px
-layouts. See [the knowledge guide](knowledge-workspace.md) for source ownership,
-HTTP/MCP contracts, screenshots and the fixed-model/causality boundaries.
-
 ## Adversarial tenant isolation
 
 The registered `tenant_isolation` HTTP suite uses two synthetic workspaces, real
@@ -801,58 +621,7 @@ the existing CI integration registry, with zero provider calls.
 [Exact scope and remaining core-RLS boundary](tenant-isolation.md). Grouped
 checks are behavioral evidence, not 100% endpoint/authorization coverage.
 
-## Checkout verification (6 October 2026)
-
-The checkout change passes 226 frontend tests across 34 files (including twelve
-checkout regressions) and 96 Rust unit tests. The preceding `75bd24a` whole-source
-frontend coverage snapshot measured lines 60.78%, statements 59.70%, branches
-53.50% and functions 49.32%. These figures are
-frontend-only and do not replace the older full-stack baseline report.
-
-Real isolated SQL/HTTP suites verify review admission (five checks), native payment
-wire behavior (ten checks) and tenant isolation (38 checks). The browser saved a
-synthetic order after explicit review; 390-pixel emulation had no checkout content
-overflow. No paid model/PSP calls were used. The public Studio's origin fix was
-verified separately with allowed-origin 200, foreign-origin 403 and a fresh
-merchant-owned test shop with products, eight discoverable apps and browser MCP.
-
-## Platform control-plane regressions (6 October 2026)
-
-`platform.py` runs `platform_control.py` against disposable PostgreSQL shops and
-a local synthetic model service. Sixteen combined checks include independent
-operator grants, two-shop/fresh-process encrypted provider inheritance, stale
-revisions, pause/background deferral, reversible trash, Host-based routing and
-persisted measured-call latency. No external model or payment call is made.
-
-`shop-scope.test.ts` covers public subdomain upgrades and protected/local URL
-exceptions. `platform-control.test.tsx` covers independent entry links, write-only
-key editing and typed-ID/reason confirmation before trash. The complete frontend
-unit run passed 38 files / 261 tests; Rust passed 100 tests. Affected provider,
-transaction/payment, app/flow/staging, translation/image/document/search and
-tenant-isolation integration suites also run through their real local paths.
-These checks are not live provider capability or a full-system security proof.
-
-`managed_search.py` allocates its own loopback port, so an open local Studio
-fixture cannot accidentally satisfy its readiness check. Qdrant-backed suites
-require the actual configured local Qdrant address.
-
-## Core hardening regressions (8 October 2026)
-
-The existing strict-runtime suite now checks persistent login backoff across two
-processes, poison-event savepoint isolation and recovery, referenced/unsettled
-retention, and database-wide admission saturation/expiry. `transaction_pooler`
-repeats real checkout, customer registration/login, CRM, app/staging and RLS paths
-through one actual PgBouncer backend; listeners stay on a direct runtime connection.
-This exposed and removed nested pooled borrows under checkout/login locks.
-CI installs PgBouncer 1.21+ and uses the same suite registry. Native execution may
-select `TEST_PSQL` and `TEST_PGBOUNCER`; all databases and pooler processes are
-isolated fixtures and cleaned up. Unknown route rights and trusted Principal
-extraction also have unit/static controls. [Implementation and boundaries](core-hardening.md).
-
-These checks establish those behaviors, not 100% whole-system coverage, public
-rollout status, a speed-up percentage or protection against a compromised server.
-
-## App-platform v2 verification
+## App platform suites
 
 Registered PostgreSQL suites exercise `app_consent`, `app_callbacks`,
 `app_preview`, `app_relations`, `app_schema`, `app_jobs`, `app_components`,
@@ -871,18 +640,3 @@ by a mocked successful semantic result. See [the security matrix](app-security.m
 ## App ownership checks
 
 Architecture, localization, translation export and frontend coverage include trusted app UI under `extensions/apps/`. The Rust source inventory and verification review ledger include app and service Rust modules. `scripts/testing/plugin_ownership.py` checks canonical package layout and has rejecting controls for leaked core files and escaping symlinks. Provider and checkout integration suites continue to test existing HTTP/MCP/Flow behavior after relocations. This is source ownership and regression coverage, not a proof that every trusted compatibility adapter executes in a sandbox. See [exact boundaries](plugin-ownership.md).
-
-### EDI export identity — repeated consistency audit, 14 October 2026
-
-A full CI run exposed an intermittent repeated-export `sourceHash` mismatch.
-The deterministic existing EDI suite now adds a native operational order note
-between exports. Before repair, only the source hash changes while the document
-is identical. After repair, the app fingerprints the actual serialized document
-and explicit native source IDs/format/kind; the complete response stays identical.
-Real EDI and native B2B suites, seven EDI Rust tests and targeted Clippy pass.
-The original failure is retained; no equality assertion was weakened.
-
-A separate read-only hosted check of Core `540e066` found the mandatory RLS switch
-unset and no separate runtime credential. This is an open hosting configuration
-issue, not evidence that local strict-RLS tests enable production protection.
-See the [complete status and prepared provisioning boundary](system-consistency-audit.md).

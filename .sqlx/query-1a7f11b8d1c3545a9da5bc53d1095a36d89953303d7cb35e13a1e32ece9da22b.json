@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channel_previews SET digest=$1,redeemed=true,expires_at=now()+interval '15 minutes' WHERE digest=$2 AND tenant=$3 AND channel=$4 AND NOT redeemed AND expires_at>now() AND alias IS NOT DISTINCT FROM $5::text RETURNING alias,channel",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "alias",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_previews",
+            "name": "alias"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "channel",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_previews",
+            "name": "channel"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "1a7f11b8d1c3545a9da5bc53d1095a36d89953303d7cb35e13a1e32ece9da22b"
+}

@@ -1,93 +1,72 @@
 //! Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path.
-use super::*;
+use super::{Manifest, approval, service_limits, validate};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::post;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+/// The JSON fields `decode` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DecodeInput {
+    #[serde(deserialize_with = "lenient")]
+    built_in: Option<String>,
+    manifest: Value,
+}
+
 pub(super) fn decode(v: &Value) -> Result<Manifest> {
-    let m = if let Some(s) = v["builtIn"].as_str().and_then(approval::built_in) {
+    let input: DecodeInput = view(v);
+    let m = if let Some(s) = input.built_in.as_deref().and_then(approval::built_in) {
         serde_json::from_str(s).map_err(|_| bad("Invalid built-in"))?
     } else {
-        serde_json::from_value(v["manifest"].clone()).map_err(|e| bad(e.to_string()))?
+        serde_json::from_value(input.manifest.clone()).map_err(|e| bad(e.to_string()))?
     };
     validate(&m)?;
     approval::installation(&m)?;
     Ok(m)
 }
-pub(crate) fn actor_permissions(h: &RequestContext, m: &Manifest) -> Result<()> {
-    if !m.lifecycles.is_empty() {
-        auth::permit(h, "settings.write")?;
-        for c in &m.lifecycles {
-            auth::permit(
-                h,
-                if c.object == "order" {
-                    "orders.write"
-                } else {
-                    "b2b.manage"
-                },
-            )?;
-            for edge in &c.transitions {
-                for permission in &edge.required_permissions {
-                    auth::permit(h, permission)?;
-                }
-            }
-        }
-    }
-    for p in &m.permissions {
-        if let Some(scope) = credentials::scope(p) {
-            auth::permit(h, scope)?;
-        }
-        if p == "knowledge.write" {
-            auth::permit(h, "apps.manage")?;
-        }
-        if p == "payments.instructions.read" {
-            for scope in ["payments.read", "orders.read", "customers.pii"] {
-                auth::permit(h, scope)?;
-            }
-        }
-        if p == "payments.provider" {
-            auth::permit(h, "payments.manage")?;
-        }
-        if p == "commerce.hooks" {
-            auth::permit(h, "catalog.write")?;
-            auth::permit(h, "settings.write")?;
-        }
-    }
-    Ok(())
-}
-pub(super) fn approved(h: &RequestContext, m: &Manifest, v: &Value) -> Result<()> {
-    actor_permissions(h, m)?;
-    let mut expected = m.permissions.clone();
-    expected.sort();
-    expected.dedup();
-    let Some(requested) = v["permissions"].as_array() else {
-        return Err(conflict("Review and approve the package permissions"));
-    };
-    let mut actual = requested
-        .iter()
-        .map(|v| v.as_str().map(str::to_owned))
-        .collect::<Option<Vec<_>>>()
-        .ok_or(bad("Invalid consent permissions"))?;
-    actual.sort();
-    if v["approve"] != true || v["digest"] != approval::canonical_digest(m) || actual != expected {
-        return Err(conflict(
-            "Package approval must match its current digest and complete permission list",
-        ));
-    }
-    Ok(())
-}
+pub(crate) use veyndo_app_platform::domain::consent::{actor_permissions, approved};
 pub(super) fn router() -> Router<App> {
     Router::new().secure_route("/api/apps/review", &[("POST", "apps.manage")], post(review))
 }
+/// The JSON fields `review` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewInput {
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+}
+
 async fn review(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: ReviewInput = view(&v);
     let t = merchant(&a, &h)?;
-    let environment = v["environment"].as_str().filter(|e| !e.is_empty());
+    let environment = input.environment.as_deref().filter(|e| !e.is_empty());
     if environment.is_some() {
         auth::permit(&h, "developer.manage")?;
     }
     let m = decode(&v)?;
     actor_permissions(&h, &m)?;
-    let (previous, upgrade) = upgrade_review::inspect(&a, &t, environment, &m).await?;
+    let (previous, upgrade) = veyndo_app_platform::service::upgrade_review::inspect(
+        &service_limits::platform(&a),
+        &t,
+        environment,
+        &m,
+    )
+    .await?;
     let old = previous.as_ref().map(|v| &v.permissions);
     let added = m
         .permissions

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id FROM payment_attempts p WHERE ((p.provider='paypal' AND p.tenant=ANY($1)) OR p.provider=ANY($2)) AND EXISTS(SELECT 1 FROM payment_jobs j WHERE j.tenant=p.tenant AND j.attempt_id=p.id AND j.available_at<=now() AND (j.state='queued' OR j.state='running' AND j.lease_until<now())) AND NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.tenant=p.tenant AND j.attempt_id=p.id AND j.state='running' AND j.lease_until>now()) ORDER BY p.created_at LIMIT 1 FOR UPDATE OF p SKIP LOCKED",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_attempts",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a8edd26d0c2165443befed7ff5fc1060bb47846968982f525bb702e79d6eb7f7"
+}

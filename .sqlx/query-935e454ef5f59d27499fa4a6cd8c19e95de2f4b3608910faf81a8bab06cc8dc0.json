@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(jsonb_array_length(proposal->'proposal'->'operations'),0)>0 AS \"work!\" FROM tasks WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "work!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "935e454ef5f59d27499fa4a6cd8c19e95de2f4b3608910faf81a8bab06cc8dc0"
+}

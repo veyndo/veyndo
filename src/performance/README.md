@@ -48,7 +48,7 @@ These SQL/async behaviors are tested, not covered by the extracted Lean policies
   checkout continues to use the locked authoritative configuration.
 
 The same owner contains decoded caches, delivery and admission; no second read
-engine or request-held SQL connection was added. `src/studio/overview.sql`
+engine or request-held SQL connection was added. `components/studio/src/store/overview.sql`
 consolidates facts while `studio.rs` admits at most three concurrent read branches.
 Inventory statements live in `commerce/inventory.rs` / `inventory_release.sql`.
 SQL/build inputs are review-hash locked but are **unproved adapters**. The

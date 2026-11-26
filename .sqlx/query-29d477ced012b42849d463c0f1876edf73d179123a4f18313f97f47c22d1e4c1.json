@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO session_signals(tenant,session,product_id,views,cart_adds) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,session,product_id) DO UPDATE SET views=least(session_signals.views+EXCLUDED.views,1000),cart_adds=least(session_signals.cart_adds+EXCLUDED.cart_adds,1000),updated_at=now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "29d477ced012b42849d463c0f1876edf73d179123a4f18313f97f47c22d1e4c1"
+}

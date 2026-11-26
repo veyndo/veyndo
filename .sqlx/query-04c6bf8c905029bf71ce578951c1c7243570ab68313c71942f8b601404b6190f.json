@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT app,version FROM developer_builds WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "developer_builds",
+            "name": "app"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "developer_builds",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "04c6bf8c905029bf71ce578951c1c7243570ab68313c71942f8b601404b6190f"
+}

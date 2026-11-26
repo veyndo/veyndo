@@ -1,12 +1,12 @@
 /* platform: platform-console styles. Source order is preserved by the entry stylesheet. */
 /* Light, responsive operator workspace. Scoped styles avoid changing merchant/storefront themes. */
 .platform-console {
-  --platform-ink: #152843;
-  --platform-muted: #637792;
-  --platform-line: #dce5f0;
+  --platform-ink: var(--vy-color-text);
+  --platform-muted: var(--vy-color-muted);
+  --platform-line: var(--vy-color-border);
   font-family: Inter, system-ui, sans-serif;
   color: var(--platform-ink);
-  background: #f5f8fd;
+  background: var(--vy-color-bg);
   min-height: 100vh;
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
@@ -34,14 +34,14 @@
 }
 .platform-console button:hover,
 .platform-console .platform-actions a:hover {
-  background: #edf4ff;
+  background: var(--vy-color-panel);
 }
 .platform-console button:disabled {
   opacity: 0.55;
   cursor: wait;
 }
 .platform-console :focus-visible {
-  outline: 3px solid #7aafff;
+  outline: 3px solid var(--vy-color-accent-border);
   outline-offset: 3px;
 }
 .platform-console .platform-primary {
@@ -69,7 +69,11 @@
   width: 44px;
   height: 44px;
   border-radius: 15px;
-  background: linear-gradient(135deg, var(--veyndo-blue-text), #48bdf4);
+  background: linear-gradient(
+    135deg,
+    var(--veyndo-blue-text),
+    var(--vy-color-accent-border)
+  );
   font-weight: 800;
   font-size: 24px;
   color: white;
@@ -85,8 +89,8 @@
   border-color: transparent;
 }
 .platform-console nav .selected {
-  background: #eaf2ff;
-  color: #1464df;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-accent-strong);
   font-weight: 650;
 }
 .platform-profile {
@@ -135,7 +139,8 @@
   border-radius: 18px;
   padding: 26px;
   margin: 24px 0;
-  box-shadow: 0 8px 25px #213b6b04;
+  box-shadow: 0 8px 25px
+    color-mix(in srgb, var(--vy-color-accent) 2%, transparent);
 }
 .platform-stats {
   display: grid;
@@ -181,7 +186,7 @@
   display: grid;
   gap: 12px;
   padding: 18px;
-  background: #f6f9fd;
+  background: var(--vy-color-bg);
   border-radius: 12px;
 }
 .platform-channel-list b {
@@ -256,7 +261,7 @@
   place-items: center;
   width: 48px;
   height: 48px;
-  background: #eaf3ff;
+  background: var(--vy-color-panel);
   color: var(--veyndo-blue-text);
   border-radius: 14px;
   font-size: 20px;
@@ -287,7 +292,7 @@
 }
 .platform-http-outcomes summary {
   cursor: pointer;
-  color: var(--accent, #2463eb);
+  color: var(--accent, var(--vy-color-accent-strong));
 }
 .platform-http-outcomes p {
   max-width: 42rem;

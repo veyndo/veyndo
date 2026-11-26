@@ -42,4 +42,22 @@ theorem experiment_undersized_denied (final_look positive_bound : Bool) :
     experiment_result_admissible final_look false positive_bound = false := by
   simp [experiment_result_admissible]
 
+/-- In sovereign mode an admitted model request uses the self-operated provider on a self-hosted endpoint. -/
+theorem sovereign_request_exact (own hosted : Bool) :
+    sovereign_request_admissible true own hosted = true ↔ own = true ∧ hosted = true := by
+  cases own <;> cases hosted <;> simp [sovereign_request_admissible]
+
+/-- A hosted provider is refused in sovereign mode even on a self-hosted endpoint. -/
+theorem sovereign_foreign_provider_denied (hosted : Bool) :
+    sovereign_request_admissible true false hosted = false := by simp [sovereign_request_admissible]
+
+/-- A foreign endpoint is refused in sovereign mode even for the self-operated provider. -/
+theorem sovereign_foreign_endpoint_denied (own : Bool) :
+    sovereign_request_admissible true own false = false := by
+  cases own <;> simp [sovereign_request_admissible]
+
+/-- Outside sovereign mode the rule refuses nothing; other checks decide. -/
+theorem sovereign_off_admits (own hosted : Bool) :
+    sovereign_request_admissible false own hosted = true := by simp [sovereign_request_admissible]
+
 end CommerceKernel

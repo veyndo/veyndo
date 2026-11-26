@@ -1,4 +1,5 @@
 /** Shared passive navigation from Apps and Storyfronts to the same authorized original editor. */
+import { Card, LinkButton } from "../../../../frontend/src/kit/ui";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
 import { useStoryfrontText } from "./storyfront-i18n";
@@ -17,7 +18,7 @@ export default function StoryfrontConnections({
         const url = connectionUrl(f.url),
           editor = connectionUrl(f.editorUrl, locale);
         return (
-          <article className="studio-card storyfront-card" key={f.alias}>
+          <Card as="article" className="storyfront-card" key={f.alias}>
             <div className="storyfront-card-cover">
               <Icon name="layers" />
               <span>{text("connected")}</span>
@@ -33,32 +34,31 @@ export default function StoryfrontConnections({
               </dl>
               <div className="storyfront-card-actions">
                 {editor ? (
-                  <a
-                    className="studio-primary"
+                  <LinkButton
+                    tone="primary"
                     href={editor}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Icon name="settings" />
                     {text("edit")}
-                  </a>
+                  </LinkButton>
                 ) : (
                   <p>{text("editorMissing")}</p>
                 )}
                 {url && (
-                  <a
-                    className="studio-secondary"
+                  <LinkButton
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Icon name="arrow" />
                     {text("open")}
-                  </a>
+                  </LinkButton>
                 )}
               </div>
             </div>
-          </article>
+          </Card>
         );
       })}
     </div>

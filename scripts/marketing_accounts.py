@@ -44,6 +44,7 @@ config('promotions','once',fixed_coupon)
 x,xh=cart();x=items(x,xh,[('mug',1),('notebook',1),('chair',1)]);before=x['price']['positionPrice']
 original_lines=[(line['id'],round(line['price']['totalPrice']*100)) for line in x['lineItems']]
 x=coupon(x,xh,'ONCE');assert round(before-x['price']['positionPrice'],2)==1.01 and x['discountTotal']==1.01
+call('/store-api/checkout/coupons',{'revision':x['revision'],'codes':['ONCE']},{**xh,'sw-context-token':'expired-'+uid},expected=404,method='PUT');passed('An unknown or expired cart token on coupon selection is 404, not a database failure')
 goods=sum(amount for _,amount in original_lines);prefix=previous=0;expected_lines={}
 for product,amount in original_lines:
  prefix+=amount;rounded=(prefix*101+goods//2)//goods

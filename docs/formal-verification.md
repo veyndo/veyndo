@@ -9,9 +9,6 @@ only. This is **not a certificate that the entire commerce core is correct or
 bug-free**. Binding review is not proof of the surrounding modules.
 The [manifest](../proof/manifest.json) and per-revision CI artifact are authoritative.
 The operational-record exclusion remains part of the generic app release policy.
-The original compatibility experiment and its dated evidence are retained on the
-[separate branch](https://github.com/sthamann/veyndo/blob/experiment/shopware-compatibility/docs/evidence/shopware-compatibility-2026-10-25.md);
-its original PHP runtime is outside this proof scope.
 The earlier published CI evidence below retains its own date and counts.
 The 23 October local and Linux CI verification compare **156,741 compiled Rust/Lean cases
 without mismatches** and reject 183 deliberately broken policy variants.
@@ -50,11 +47,15 @@ Production Rust operations → crates/kernel/src/verified_kernel.rs → seven po
 The application calls the Rust functions directly. There is no separate
 handwritten Lean implementation of their behavior. `scripts/formal/extract.py`
 loads the exact reviewed module registration, then accepts only `bool`/`u64` arguments/results, literals, comparisons, Boolean
-operators, `min` and `saturating_sub`. It rejects unsupported syntax instead of
+operators, `min`, `max`, `saturating_sub`, `saturating_add`, `saturating_mul` and
+division by a divisor the parser can see is positive (a positive literal or
+`x.max(k)` with a positive literal `k`). It rejects unsupported syntax instead of
 silently approximating it. Lean `Nat` subtraction saturates at zero, matching
-`u64::saturating_sub`; this subset cannot overflow through addition/multiplication
-because those operators are excluded. Claims quantify over all natural inputs,
-including all representable `u64` values.
+`u64::saturating_sub`; the saturating sum and product become `min (a + b) u64::MAX`
+and `min (a * b) u64::MAX`, and `Nat` floor division equals `u64` division because
+the divisor is never zero. Plain `+`, `-`, `*` and `%` stay excluded, so the subset
+cannot overflow. Claims quantify over all natural inputs, including all
+representable `u64` values.
 
 **The extractor is a trusted, tested translator, not a verified Rust compiler.**
 Correct production input conversion and surrounding state handling remain part
@@ -68,8 +69,7 @@ apps, automation, commerce, fulfillment and intelligence**. The corresponding
 seven Lean modules independently import the extracted model. Each theorem must
 appear in the manifest and the stable `Claims.lean` entry must import every domain.
 The extractor rejects extra code, conditional registrations, path overrides and
-wildcard reexports in the facade. Each handwritten proof module is limited to 320
-lines; the current largest is 240. The 61 policies that preceded this split retain
+wildcard reexports in the facade. Handwritten proof modules have no length limit; there is one per domain. The 61 policies that preceded this split retain
 identical typed expressions, argument types and results.
 
 The 18 added properties cover two kinds of real guarantees:
@@ -92,37 +92,39 @@ verified separately by native integration tests rather than proved by Lean.
 
 | Production policy | Lean guarantee | Actual consumer |
 |---|---|---|
-| `discount_cap` | Discount is bounded by both requested amount and goods total; remainder plus discount conserves the total | `crates/commerce/src/discount.rs` |
+| `discount_cap` | Discount is bounded by both requested amount and goods total; remainder plus discount conserves the total | `components/pricing/src/domain/discount.rs` |
 | `stock_admissible` | Admitted quantities are positive, within stock and conserve stock under subtraction | `src/order_checkout.rs`, `src/commerce/external_orders.rs` |
+| `reservation_admissible` | An order holds at most what it ordered; over any reserve/release sequence stock plus held is conserved and release restores stock | `components/inventory/src/domain/lines.rs` |
 | `refund_admissible` | Prior/reserved plus requested refund cannot exceed captured amount; zero refunds fail | `src/payments/operations.rs` |
 | `revision_admissible` | Admission requires an exact positive revision | `src/commerce/fulfillment.rs` |
 | `replay_admissible` | A replay belongs to the same cart; an open cart requires the same fingerprint | `src/order_checkout.rs` |
 | `scope_admissible` | Admission requires authentication and a known scope; explicit denial cannot inherit role defaults | `src/auth/permissions.rs` |
-| `order_edit_admissible` | Terminal orders cannot admit operational edits | `src/commerce/order_workflow.rs` |
-| `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `src/commerce/order_workflow.rs` |
-| `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `src/commerce/order_workflow.rs` |
+| `order_edit_admissible` | Terminal orders cannot admit operational edits | `components/orders/src/domain/order_workflow.rs` |
+| `order_transition_admissible` | Over any request sequence and any configured machine, every reachable state is listed and a terminal order never changes again | `components/orders/src/domain/order_workflow.rs` |
+| `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `components/orders/src/domain/order_workflow.rs` |
+| `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `components/orders/src/domain/order_workflow.rs` |
 | `manual_payment_admissible` | Manual payment cannot confirm an external provider; it requires a pending payment and nonterminal order | `src/commerce/fulfillment.rs` |
-| `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `src/assets/download.rs` |
+| `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `components/orders/src/http/downloads.rs` |
 | `checkout_review_admissible` | Exact revision and amount equality plus confirmed methods are required when a client supplies the review headers | `src/order_checkout.rs` |
-| `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `src/operations/manual_order_admission.rs`, `src/order_checkout.rs` |
+| `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `components/checkout/src/domain/admin_order.rs`, `src/order_checkout.rs` |
 | `checkout_contact_admissible` | Financial checkout requires email and billing data; simulated checkout has an explicit exception | `src/order_checkout.rs` |
-| `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `src/payments/receipt_guard.rs` |
+| `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `components/payments/src/domain/receipt_guard.rs` |
 | `platform_admissible` | Operator access requires a personal identity, active grant and account | `src/platform/auth.rs` |
 | `app_read_admissible` | Read aliases admit declared read-only, non-mutating handlers | `src/apps/surfaces.rs` |
-| `rule_authenticated` | A guest cannot satisfy the authenticated-customer condition; both Boolean branches match exactly | `src/marketing/rule_match.rs` |
+| `rule_authenticated` | A guest cannot satisfy the authenticated-customer condition; both Boolean branches match exactly | `components/marketing/src/domain/rule_match.rs` |
 | `rule_boolean_comparison` | Equality, inequality and emptiness select the exact Boolean result | `crates/automation/src/rule_comparison.rs` |
-| `app_flow_admissible` | Only explicitly eligible private mutation actions can be flow targets | `src/marketing/app_flows.rs` |
+| `app_flow_admissible` | Only explicitly eligible private mutation actions can be flow targets | `components/apps/src/service/flow_apps.rs` |
 | `rule_xor_count` | XOR matches exactly one child; no matches cannot satisfy it | `crates/automation/src/rules/evaluation.rs` |
-| `flow_delay_admissible` | Durable delays are positive and at most thirty days | `src/marketing/pipeline.rs` |
-| `destination_tax_admissible` | Condition, country, state, postcode and date guards must all match | `src/commerce/tax_rules.rs` |
+| `flow_delay_admissible` | Durable delays are positive and at most thirty days | `components/marketing/src/domain/pipeline.rs` |
+| `destination_tax_admissible` | Condition, country, state, postcode and date guards must all match | `components/shop/src/domain/tax_rules.rs` |
 | `customer_group_net` | Net basis requires a configured business group; unknown groups cannot claim it | `src/commerce/customer_groups.rs` |
 | `app_tool_admissible` | Tool admission requires explicit enablement and current authorization | `src/apps/gateway.rs` |
-| `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `src/apps/editor_contract.rs` |
+| `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `components/apps/src/domain/entity_access.rs` |
 | `planning_request_admissible` | Admission is exactly a read classification or an explicitly allowed planning operation | `src/agent_runs/controls.rs` |
 | `agent_preview_admissible` | Private continuation requires an active shop, personal session, matching owner and current preview | `src/agent_runs/authority.rs` |
-| `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `src/platform/lifecycle.rs` |
-| `external_amount_admissible` | Gross and tax are bounded, tax cannot exceed gross, rates are bounded and zero rate cannot carry nonzero tax | `crates/commerce/src/external_order.rs` |
-| `external_paid_total_admissible` | A source order is paid with a positive, exactly reconciled total | `crates/commerce/src/external_order.rs` |
+| `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `components/shop/src/service/availability.rs` |
+| `external_amount_admissible` | Gross and tax are bounded, tax cannot exceed gross, rates are bounded and zero rate cannot carry nonzero tax | `components/pricing/src/domain/external_order.rs` |
+| `external_paid_total_admissible` | A source order is paid with a positive, exactly reconciled total | `components/pricing/src/domain/external_order.rs` |
 
 These last two properties constrain source snapshots. They do not verify tax law
 or authenticate a marketplace's payment assertion. The import adapter rejects
@@ -141,6 +143,92 @@ algorithm, and stock admission does **not** prove transaction isolation.
 Authentication is supplied by the middleware; the theorem does not prove that
 middleware or the older aggregate `read` permission path. Provider receipt
 identity/signature checks and their parsers remain outside the pure theorem.
+
+## Phase 8: per-order stock, order runs and the domain inventory (25 November 2026)
+
+**Per-order stock bound.** `reservation_admissible(ordered, held, requested)` admits
+a positive reservation only when the order then holds at most what it ordered.
+Lean models one order's reserve/release events (a refused reservation changes
+nothing, release returns exactly what is held) and proves for every sequence:
+held never exceeds ordered, stock plus held is conserved, releasing twice equals
+releasing once, and a final release restores the stock. Production reserves once,
+when the order is created (`InventoryLines::new` with nothing held, used by checkout
+and external orders); release is the idempotent `release` in `components/inventory/src/store/reservations.rs`. The sequence
+theorems therefore also cover any later re-reservation path, provided it passes
+the persisted held quantity to the same rule. The SQL lock order and the
+`released_at` fence are reviewed adapters.
+
+**Order state machine.** `order_transition_admissible(edge_listed, target_listed,
+source_terminal)` is the move rule; `order_workflow::admitted_edge` feeds it for the
+transition endpoint, and the terminal predicate is shared with the business guard
+(machine terminal states plus `expired` and `payment_review`). Lean models any
+machine (listed states, terminal states, listed edges) and any sequence of moves
+and fulfilment requests (payment or delivery changes, gated by
+`order_edit_admissible`). Proved: every state reachable from a listed start is
+listed; a terminal order is unchanged by every sequence, so a completed or
+cancelled order accepts no fulfilment; once a prefix reaches a terminal state the
+rest has no effect. The binding also rechecks a stored machine snapshot, so a
+snapshot that bypassed validation can no longer move an order into an unlisted
+state. Ledger-driven order writes (`cancelled`, `expired`, `payment_review` from
+`order_ledger::update_order`) are outside this model; they need a pre-capture
+ledger state, and the ledger runs below show captured money never returns to one.
+
+**Single steps lifted to sequences.** Payment ledger runs stay within the listed
+codes, captured money never returns to pending, authorized, cancelled or expired,
+and refunded is final. Refund and capture totals stay within captured and
+authorized over any request list. Revisions never decrease, and a stale revision
+or checkout review is refused after any later writes. The replay rule stays
+single-step: at most one order per idempotency key comes from the key lookup in
+SQL, not from the rule.
+
+**Comparison driver.** The registered tooling suite `formal_differential` runs the
+extracted rules (72 when the suite was registered), compiled Rust from the fresh build against the executable built from the
+extracted Lean model, on 228,195 generated inputs (all Boolean assignments crossed
+with numeric edges up to `u64::MAX`, plus seeded random cases). Its negative
+control alters five rules in a temporary Lean model and must catch each.
+
+**Domain inventory.** Every function in `domain/` of core, pricing, inventory,
+checkout, payments and orders is either bound to proved rules or listed as
+unproved with one of nine reasons in `proof/domain-inventory.json`: 206 functions,
+20 bound, 186 unproved (26 Nov); `core` has no `domain/` module yet. `scripts/formal.py
+--check` fails on any third state; the generated page is
+[formal-coverage.md](formal-coverage.md). "Bound" means the decision is a proved
+rule; the input mapping around it stays reviewed Rust.
+
+**Money in whole minor units (26 Nov).** The calculation path carries amounts as
+`Minor` (whole minor units with the currency's exponent) and exact `Decimal`/`Ratio`
+values; JSON numbers cross one boundary conversion, `Decimal::from_wire` (the
+shortest decimal that reads back as the number) and `Decimal::to_wire` (the nearest
+number) in `components/pricing/src/domain/decimal.rs`. Two rules were added: `line_total` (unit
+price times quantity, bound in `Minor::times`, which the calculator's line totals
+use) and `rounded_quotient` (a quotient rounded to the nearest minor unit, halves
+up, bound in `Ratio::rounded`, through which every exact amount is rounded into minor
+units). Proved: exact products, splitting a quantity splits the total, rounding to
+the nearest unit with halves up, scaling up and rounding back is the identity, the
+tax contained in a gross amount never exceeds it so net plus tax is the gross, and
+over any list of lines the quote total is the lines plus net shipping plus all tax
+for net and gross quotes, never below the goods total and independent of line
+order (`net_quote_total`, `gross_quote_total`, `lines_total_order_free`). The cart
+quote, the delivery totals and the quote totals compute exactly these sums with
+`amount_sum` and `net_amount`.
+
+**Exact calculator (26 Nov).** Shopware compatibility is no longer a goal, so the
+quantity calculator no longer reproduces Shopware's binary64 steps (the integer
+emulation `Binary` and its float-reference oracle are deleted). It computes on exact
+`Ratio` values and rounds each amount once, half away from zero, per currency
+exponent: plain rounding goes through `Ratio::rounded` (proved `rounded_quotient`),
+the cash interval of gross prices is `rounded_quotient` of the minor units by the
+interval's, times the interval by `line_total` (bound directly in
+`Rounding::price`; theorem `cash_round_nearest_multiple`: an exact multiple within
+half an interval), and the line total is the proved `line_total`. The rule mix
+(shares, gross/net, list, regulation and reference prices) is not extracted; property
+tests check it against an independent integer model (`components/pricing/tests/properties.rs`).
+Results differ from the binary64 port only at decimal ties, by one minor unit:
+130.4835 × 670 = 87423.945 now rounds to 87423.95 (binary64: 87423.94). Of 40,344
+generated inputs of the former differential population 481 outputs changed, 280 on
+clean inputs, each an exact decimal tie, and 201 on inputs carrying binary noise
+(such as `price * 1.3`) that the original's fourteen-digit step had snapped onto a
+tie; `components/pricing/tests/decimal_ties.rs` pins representative cases.
 
 ## Consent and legal checkout additions
 
@@ -176,7 +264,7 @@ The existing **Verify prototype / verify** job now also:
    proof/module-layout bypasses. The Cargo boundary check additionally rejects
    17 dependency/owner bypasses, including aliases, optional dependencies, build
    scripts and targets placed in another domain's directory.
-7. Runs existing Rust, PHP-reference and real PostgreSQL HTTP regressions.
+7. Runs the Rust tests and the real PostgreSQL HTTP regressions.
 
 CI never regenerates the policy model or refreshes review hashes automatically.
 It uploads `formal-verification-<commit>` JSON evidence, including explicit
@@ -300,8 +388,8 @@ The provider extension adds `reservation_release_admissible`: only uncaptured at
 Three further extracted decisions add seven properties: `currency_scale_admissible`
 limits decimal precision, `resource_quota_admissible` admits positive bounded operator
 limits, and `payment_transition_admissible` defines the monotonic ledger graph,
-including late capture. `crates/commerce/src/money.rs`, `src/platform/quotas.rs` and
-`src/payments/state.rs` are their real consumers. This increment brought the then-reviewed
+including late capture. `components/pricing/src/domain/money.rs`, `src/platform/quotas.rs` and
+`components/payments/src/domain/state.rs` are their real consumers. This increment brought the then-reviewed
 manifest to 34 policies and 72 named theorems; compiled Rust/Lean comparisons and negative
 mutations remain required. These proofs do not cover signed integer parsing,
 floating-point conversion, SQL hooks/transactions, provider evidence, or the whole
@@ -332,7 +420,7 @@ for the private hosting configuration.
 
 ## Multi-currency admission (2026-10-07)
 
-`currency_context_admissible` is consumed by `src/currencies/model.rs`: only a
+`currency_context_admissible` is consumed by `components/pricing/src/types/currency.rs`: only a
 configured, channel-enabled currency with an admitted saved rate may be selected.
 Exact Boolean equivalence and stale-rate rejection brought the then-reviewed manifest to
 35 policies and 74 named properties. Explicit mutations bypassing availability
@@ -343,7 +431,7 @@ Lean proofs and are covered by separate unit/real integration checks.
 
 ## Channel admission (2026-10-08)
 
-`channel_access_admissible` is consumed by `src/marketing/channel_access.rs`.
+`channel_access_admissible` is consumed by `components/marketing/src/service/channel_access.rs`.
 Four named properties cover exact admission, private-channel identity, paused-channel
 preview requirements and preview mutation denial. The manifest at this increment contained
 **36 extracted policies and 78 properties**. Core HTTP/MCP/UCP and hosted request

@@ -1,8 +1,53 @@
 //! HTTP transport registry; domain behavior lives in dedicated modules.
-use crate::*;
+use crate::agent::model_providers;
+use crate::agent::semantic_search;
+use crate::auth::SecureRoutes;
+use crate::cart_routes::add_items;
+use crate::cart_routes::create_cart;
+use crate::cart_routes::edit_cart;
+use crate::cart_routes::get_cart;
+use crate::cart_routes::place_order;
+use crate::cart_routes::preview_cart;
+use crate::catalog_routes::catalog_request;
+use crate::catalog_routes::health;
+use crate::customer::login;
+use crate::extensions::activate_extension;
+use crate::extensions::admin_catalog;
+use crate::extensions::extension_state;
+use crate::foundation::App;
+use crate::localization::context_info;
+use crate::localization::preview_quote;
+use crate::order_routes::orders;
+use crate::proposal_routes::agent_apply;
+use crate::studio::merchant_overview;
+use crate::studio::track_channels;
+use crate::{
+    accounts, agent_runs, apps, assets, auth, b2b, brand_redirect, categories, checkout,
+    checkout_handoff, cognition, commerce, currencies, developer, documents, history, legal,
+    marketing, mcp, operations, payments, performance, platform, pos, security_headers,
+    shop_domains, staging, storefront_pages, studio, translations, ucp,
+};
+use axum::Router;
+use axum::http::StatusCode;
+use axum::routing::get;
+use axum::routing::post;
+use veyndo_core::http_limits;
+use veyndo_core::observability;
+use veyndo_intelligence::http::agents::chat as merchant_chat;
+use veyndo_intelligence::http::agents::conversation;
+use veyndo_intelligence::http::agents::conversation_list as conversations;
+use veyndo_intelligence::http::agents::knowledge_graph;
+use veyndo_intelligence::http::agents::knowledge_status;
+use veyndo_intelligence::http::agents::reindex;
+use veyndo_intelligence::http::experience::forget_personalization;
+use veyndo_intelligence::http::experience::personalization;
+use veyndo_intelligence::http::experience::policy_stats;
+use veyndo_studio::http::proposals::agent_plan;
+use veyndo_studio::http::proposals::tasks;
 mod http_profile;
 pub(crate) use http_profile::api_host;
-pub(crate) fn router(a: App) -> Router {
+/// Routers that the owning modules build themselves.
+fn modules() -> Router<App> {
     Router::new()
         .merge(auth::entry_router())
         .route("/products/{id}", get(storefront_pages::product_page))
@@ -38,6 +83,10 @@ pub(crate) fn router(a: App) -> Router {
         .merge(payments::payment_router())
         .merge(cognition::cognition_router())
         .merge(agent_runs::router())
+}
+/// Channel settings, the outbox retry, health, sign-in and the workspace.
+fn workspace_routes() -> Router<App> {
+    Router::new()
         .secure_route(
             "/api/merchant/commerce/channels/{channel}",
             &[("GET", "settings.read"), ("PUT", "settings.write")],
@@ -56,7 +105,7 @@ pub(crate) fn router(a: App) -> Router {
         .secure_route(
             "/api/runtime/outbox/{id}/retry",
             &[("POST", "settings.write")],
-            post(retry_outbox),
+            post(veyndo_studio::http::outbox::retry),
         )
         .route("/health", get(health))
         .secure_route(
@@ -130,6 +179,10 @@ pub(crate) fn router(a: App) -> Router {
             &[("POST", "team.manage")],
             post(auth::invite_user),
         )
+}
+/// Storefront catalogue, cart and checkout, and the merchant side of commerce.
+fn commerce_routes() -> Router<App> {
+    Router::new()
         .route("/store-api/context", get(context_info))
         .route("/store-api/countries", get(commerce::country_catalogue))
         .secure_route(
@@ -142,7 +195,11 @@ pub(crate) fn router(a: App) -> Router {
             &[("POST", "catalog.read")],
             post(preview_quote),
         )
-        .secure_route("/api/capabilities", &[("GET", "public")], get(capabilities))
+        .secure_route(
+            "/api/capabilities",
+            &[("GET", "public")],
+            get(crate::capabilities::capabilities),
+        )
         .route("/store-api/product", post(catalog_request))
         .route(
             "/store-api/product/{id}",
@@ -150,7 +207,7 @@ pub(crate) fn router(a: App) -> Router {
         )
         .route(
             "/store-api/product/{id}/reviews",
-            post(commerce::submit_review),
+            post(veyndo_catalog::http::reviews::submit),
         )
         .route("/store-api/checkout/options", get(commerce::options))
         .merge(checkout::router())
@@ -171,7 +228,7 @@ pub(crate) fn router(a: App) -> Router {
         .secure_route(
             "/api/merchant/reviews/{id}",
             &[("PUT", "catalog.write")],
-            axum::routing::put(commerce::moderate),
+            axum::routing::put(veyndo_catalog::http::reviews::moderate),
         )
         .secure_route(
             "/api/merchant/orders/{id}/transition",
@@ -201,6 +258,10 @@ pub(crate) fn router(a: App) -> Router {
             &[("POST", "orders.read")],
             post(orders),
         )
+}
+/// Assistant, knowledge, personalization, extensions and the agent protocols.
+fn assistant_routes() -> Router<App> {
+    Router::new()
         .secure_route(
             "/api/agent/plan",
             &[("POST", "assistant.use")],
@@ -257,14 +318,26 @@ pub(crate) fn router(a: App) -> Router {
             &[("GET", "knowledge.read")],
             get(policy_stats),
         )
-        .secure_route("/api/experience", &[("POST", "public")], post(experience))
+        .secure_route(
+            "/api/experience",
+            &[("POST", "public")],
+            post(crate::experience::experience),
+        )
         .route("/store-api/personalization/events", post(personalization))
         .route(
             "/store-api/personalization",
             axum::routing::delete(forget_personalization),
         )
-        .secure_route("/api/concierge", &[("POST", "public")], post(concierge))
-        .secure_route("/api/runtime", &[("GET", "settings.read")], get(runtime))
+        .secure_route(
+            "/api/concierge",
+            &[("POST", "public")],
+            post(crate::concierge::concierge),
+        )
+        .secure_route(
+            "/api/runtime",
+            &[("GET", "settings.read")],
+            get(veyndo_studio::http::outbox::runtime),
+        )
         .secure_route(
             "/api/extensions/activate",
             &[("POST", "apps.manage")],
@@ -277,9 +350,16 @@ pub(crate) fn router(a: App) -> Router {
         )
         .route(
             "/mcp",
-            post(mcp).get(|| async { StatusCode::METHOD_NOT_ALLOWED }),
+            post(crate::mcp::mcp).get(|| async { StatusCode::METHOD_NOT_ALLOWED }),
         )
         .merge(ucp::ucp_router())
+}
+pub(crate) fn router(a: App) -> Router {
+    Router::new()
+        .merge(modules())
+        .merge(workspace_routes())
+        .merge(commerce_routes())
+        .merge(assistant_routes())
         .fallback_service(performance::delivery::assets())
         .layer(axum::extract::DefaultBodyLimit::max(64 * 1024))
         .layer(axum::middleware::from_fn(performance::memoize))
@@ -296,11 +376,11 @@ pub(crate) fn router(a: App) -> Router {
             auth::authenticate,
         ))
         .layer(axum::middleware::from_fn_with_state(
-            a.clone(),
+            a.core.clone(),
             auth::browser::apply,
         ))
         .layer(axum::middleware::from_fn_with_state(
-            a.clone(),
+            a.core.clone(),
             accounts::browser::apply,
         ))
         .layer(axum::middleware::from_fn(performance::delivery::classify))

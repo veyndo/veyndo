@@ -3,14 +3,14 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AppsManager from "../../src/admin/apps/AppsManager";
-import AppArtwork from "../../src/admin/apps/AppArtwork";
+import AppsManager from "../../../components/apps/ui/admin/apps/AppsManager";
+import AppArtwork from "../../../components/apps/ui/admin/apps/AppArtwork";
 import {
   artworkSource,
   appName,
   appSummary,
-} from "../../src/admin/apps/library-model";
-import type { Package } from "../../src/admin/apps/app-types";
+} from "../../../components/apps/ui/admin/apps/library-model";
+import type { Package } from "../../../components/apps/ui/admin/apps/app-types";
 import { libraryWords } from "../../src/shared/i18n/app-library-i18n";
 const p: Package = {
   id: "care_example",
@@ -171,7 +171,9 @@ it("discovers and installs through the existing API, and makes the installed det
       }),
     ),
   );
-  expect(screen.getByRole("heading", { name: "Storyfront" })).toBeVisible();
+  expect(
+    await screen.findByRole("heading", { name: "Storyfront" }),
+  ).toBeVisible();
 });
 it("disables privileged lifecycle actions for viewers and shows honest empty interface/data states", async () => {
   setup("viewer");
@@ -230,7 +232,7 @@ it("shows registry-backed native app interfaces using the same permitted surface
   const { AppSurfaceProvider } =
     await import("../../src/shared/apps/AppSurfaces");
   const { default: AppInterfaces } =
-    await import("../../src/admin/apps/AppInterfaces");
+    await import("../../../components/apps/ui/admin/apps/AppInterfaces");
   const request = vi.fn(async () => ({
     surfaces: [
       {

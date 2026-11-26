@@ -1,5 +1,28 @@
 //! UCP transport adapters reuse native cart, B2B, pricing, approval and checkout owners.
-use crate::*;
+use crate::cart_mutation;
+use crate::cart_price::cart_json;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::order_checkout::checkout;
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::document::view;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_shop::domain::cart_lines::validate as validate_items;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 mod cart;
 mod consent;
 mod document;
@@ -7,26 +30,29 @@ mod messages;
 mod negotiation;
 mod profile;
 mod readiness;
-use document::ucp_document;
+mod views;
+use document::{UcpDocument, ucp_document};
 pub(crate) use negotiation::command as ucp_b2b;
 pub(crate) use profile::{schema as ucp_b2b_schema, ucp_meta, ucp_profile};
 pub(crate) use readiness::readiness;
+pub(crate) use views::keep_present;
+use views::{BuyerContact, LineInput, SessionInput};
 pub(crate) const UCP_VERSION: &str = "2026-08-25";
 pub(crate) fn ucp_items(v: &Value) -> Result<Vec<Item>> {
-    let rows = v["line_items"]
+    let input: SessionInput = view(v);
+    let rows = input
+        .line_items
         .as_array()
         .ok_or(bad("line_items required"))?;
     let mut items = vec![];
     for i in rows {
-        let q = i["quantity"]
-            .as_u64()
+        let line: LineInput = view(i);
+        let q = line
+            .quantity
             .filter(|q| *q <= 10000)
             .ok_or(bad("quantity required"))?;
         items.push(Item {
-            id: i["item"]["id"]
-                .as_str()
-                .ok_or(bad("item.id required"))?
-                .into(),
+            id: line.item.id.ok_or(bad("item.id required"))?,
             quantity: q as u32,
         });
     }
@@ -38,33 +64,34 @@ pub(crate) async fn ucp_create(
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    create_session(a, h, v, false).await
+    Ok(Json(create_session(a, h, v, false).await?.json()))
 }
 pub(super) async fn create_session(
     a: App,
     h: RequestContext,
     v: Value,
     cart_only: bool,
-) -> Result<Json<Value>> {
+) -> Result<UcpDocument> {
     let selected = profile::select(&h, cart_only).await?;
     consent::admit(&v, selected.consent)?;
     let items = ucp_items(&v)?;
     let buyer = consent::buyer(&v, None)?;
+    let input: SessionInput = view(&v);
     let mut h = h;
-    if let Some(code) = v["currency"].as_str() {
+    if let Some(code) = input.currency.as_deref() {
         h.insert(
             "x-commerce-currency",
             code.parse().map_err(|_| bad("Invalid currency"))?,
         );
     }
-    let c = new_cart_context(&a, &h, v["session"].as_str().unwrap_or(""), "ucp").await?;
+    let c = new_cart_context(&a, &h, input.session.as_deref().unwrap_or(""), "ucp").await?;
     let mut ch = h.clone();
     ch.insert("sw-context-token", c.token.parse().unwrap());
     let privacy = consent::prepare(&a, &ch, &v).await?;
     let c = cart_mutation::set_consented_cart(&a, &ch, items, 1, buyer, privacy, None).await?;
     let mut doc = negotiation::response(&a, &ch, &c, selected).await?;
-    doc["context_token"] = json!(c.token);
-    Ok(Json(doc))
+    doc.context_token = Some(c.token);
+    Ok(doc)
 }
 pub(crate) async fn ucp_load(a: &App, h: &RequestContext, id: &str) -> Result<StoredCart> {
     let c = load_cart(a, h).await?;
@@ -80,7 +107,9 @@ pub(crate) async fn ucp_get(
 ) -> Result<Json<Value>> {
     let selected = profile::select(&h, false).await?;
     let c = ucp_load(&a, &h, &id).await?;
-    Ok(Json(negotiation::response(&a, &h, &c, selected).await?))
+    Ok(Json(
+        negotiation::response(&a, &h, &c, selected).await?.json(),
+    ))
 }
 pub(crate) async fn ucp_update(
     State(a): State<App>,
@@ -88,6 +117,7 @@ pub(crate) async fn ucp_update(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SessionInput = view(&v);
     let selected = profile::select(&h, false).await?;
     consent::admit(&v, selected.consent)?;
     let c = ucp_load(&a, &h, &id).await?;
@@ -100,10 +130,12 @@ pub(crate) async fn ucp_update(
         c.revision,
         buyer,
         privacy,
-        v["currency"].as_str(),
+        input.currency.as_deref(),
     )
     .await?;
-    Ok(Json(negotiation::response(&a, &h, &c, selected).await?))
+    Ok(Json(
+        negotiation::response(&a, &h, &c, selected).await?.json(),
+    ))
 }
 pub(crate) async fn ucp_complete(
     State(a): State<App>,
@@ -114,7 +146,7 @@ pub(crate) async fn ucp_complete(
     let selected = profile::select(&h, false).await?;
     consent::admit(&v, selected.consent)?;
     let mut current = ucp_load(&a, &h, &id).await?;
-    if current.status == "open" && v.get("buyer").is_some() {
+    if current.status == "open" && view::<SessionInput>(&v).buyer.is_some() {
         let buyer = consent::buyer(&v, current.data.buyer.as_ref())?;
         let privacy = consent::prepare(&a, &h, &v).await?;
         current = cart_mutation::set_consented_cart(
@@ -130,19 +162,14 @@ pub(crate) async fn ucp_complete(
     }
     let mut projected = ucp_document(&current, &cart_json(&a, &current).await?);
     consent::project(&a, &h, &current, &mut projected).await?;
-    if current.status == "open" && consent::missing(&projected["buyer"]) {
+    if current.status == "open"
+        && consent::missing(projected.buyer.as_ref().unwrap_or(&Value::Null))
+    {
         return Err(conflict(
             "missing_consent_data: provide the contact required for the explicit consent",
         ));
     }
-    if current.status == "open"
-        && current
-            .data
-            .buyer
-            .as_ref()
-            .and_then(|b| b["email"].as_str())
-            .is_none_or(|s| !s.contains('@'))
-    {
+    if current.status == "open" && !BuyerContact::has_email(current.data.buyer.as_ref()) {
         return Err(conflict("Buyer email is required before demo completion"));
     }
     checkout(
@@ -152,7 +179,9 @@ pub(crate) async fn ucp_complete(
     )
     .await?;
     let c = load_cart(&a, &h).await?;
-    Ok(Json(negotiation::response(&a, &h, &c, selected).await?))
+    Ok(Json(
+        negotiation::response(&a, &h, &c, selected).await?.json(),
+    ))
 }
 pub(crate) async fn ucp_cancel(
     State(a): State<App>,
@@ -161,18 +190,14 @@ pub(crate) async fn ucp_cancel(
 ) -> Result<Json<Value>> {
     let selected = profile::select(&h, false).await?;
     let c = ucp_load(&a, &h, &id).await?;
-    let n = sqlx::query(
-        "UPDATE carts SET status='cancelled',revision=revision+1 WHERE id=$1 AND status='open'",
-    )
-    .bind(&c.id)
-    .execute(&a.db)
-    .await?
-    .rows_affected();
+    let n = veyndo_checkout::store::carts::cancel_open(&a.core, &c.id).await?;
     if n != 1 && c.status != "cancelled" {
         return Err(conflict("Completed checkout cannot be cancelled"));
     }
     let c = load_cart(&a, &h).await?;
-    Ok(Json(negotiation::response(&a, &h, &c, selected).await?))
+    Ok(Json(
+        negotiation::response(&a, &h, &c, selected).await?.json(),
+    ))
 }
 
 /// Routes remain under the shared tenant, channel, admission and authentication middleware.

@@ -18,6 +18,32 @@ def artifact_path(name):
     return path
 
 
+RUST_SOURCES = ('src', 'components', 'crates', 'extensions/services', 'fixtures/demo')
+
+
+def stale_binary(binary=None, roots=RUST_SOURCES):
+    """The newest Rust, SQL or manifest source that is newer than the server binary, if any.
+
+    The suites start the prebuilt `target/debug/veyndo`; they never compile it.
+    """
+    binary = Path(binary or ROOT / 'target/debug/veyndo')
+    if not binary.exists():
+        return binary
+    built = binary.stat().st_mtime
+    for root in roots:
+        for path in (ROOT / root).rglob('*'):
+            if path.suffix in ('.rs', '.sql', '.toml') and 'target' not in path.parts and path.stat().st_mtime > built:
+                return path
+    return None
+
+
+def require_fresh_binary():
+    """Refuse to verify an old build: run `cargo build --workspace --bins` first."""
+    newer = stale_binary()
+    if newer is not None:
+        raise SystemExit(f'target/debug/veyndo is missing or older than {newer}; run cargo build --workspace --bins first')
+
+
 def run(args, env):
     label = ' '.join(str(arg) for arg in args[:2])
     started = time.monotonic()

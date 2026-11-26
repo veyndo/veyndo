@@ -1,0 +1,404 @@
+/** Visual App Studio orchestrates modular editors over the same executable schema used by coding agents. */
+import {
+  Button,
+  Field,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import { useMemo, useState, useEffect } from "react";
+/** A staging shop as the developer view lists it (the studio component owns environments). */
+type Environment = { id: string; name: string };
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import Icon from "../../../../../frontend/src/shared/ui/Icon";
+import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";
+import ContentLanguagePicker from "../../../../../frontend/src/shared/i18n/ContentLanguagePicker";
+import {
+  useAppStudioText,
+  type AppStudioKey,
+} from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import { useWorkbenchText } from "../../../../../frontend/src/shared/i18n/workbench-i18n";
+import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
+import { useAppStudio } from "./useAppStudio";
+import { problems } from "./app-model";
+import { AppFlowNavigation } from "./AppFlowNavigation";
+import AppCanvasAgent from "./AppCanvasAgent";
+import AppDesignWorkspace from "./AppDesignWorkspace";
+import AppDraftEntry from "./AppDraftEntry";
+import AppCapabilityEditor from "./AppCapabilityEditor";
+import AppSettingsEditor from "./AppSettingsEditor";
+import AppDataEditor from "./AppDataEditor";
+import AppEditorNavigation from "./AppEditorNavigation";
+import AppPayments from "./AppPayments";
+import AppConnections from "./AppConnections";
+import { useAppAgentEntry } from "./AppAgentDrawer";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import AppVersions from "./AppVersions";
+import AppLibrary from "./AppLibrary";
+import { useAppPreview } from "./useAppPreview";
+import AppStudioStatus from "./AppStudioStatus";
+import AppCurrentIdentity from "./AppCurrentIdentity";
+import AppStudioIntro from "./AppStudioIntro";
+import { useDesignerKeys } from "./useDesignerKeys";
+import "./app-studio.css";
+import "./app-assistant.css";
+import "./app-building.css";
+import "./app-studio-inspector.css";
+import "./app-studio-panels.css";
+import "./app-studio-responsive.css";
+import "./app-studio-preview.css";
+import "./app-workspace.css";
+import "./app-agent-drawer.css";
+export default function DeveloperView({
+  request,
+  environments,
+  role,
+  sandboxRequest,
+  onRefresh,
+  onFlows,
+  rights,
+  homeRevision,
+  onTest,
+}: {
+  request: RequestFn;
+  environments: Environment[];
+  role: string;
+  rights?: string[];
+  homeRevision?: number;
+  sandboxRequest: (environment: string) => RequestFn;
+  onRefresh: () => Promise<void>;
+  onFlows: () => void;
+  onTest?: (target: string) => void | Promise<void>;
+}) {
+  useEffect(() => {
+    if (homeRevision) setAssistant(true);
+  }, [homeRevision]);
+  const [assistant, setAssistant] = useState(true);
+  const { a, locale } = useAppStudioText(),
+    { w } = useWorkbenchText();
+  const studio = useAppStudio(request, environments[0]?.id ?? "", onRefresh),
+    m = studio.manifest;
+  const agent = useAppAgentEntry(studio, request, sandboxRequest);
+  const workspaceText = useAppWorkspaceText();
+  const [section, setSection] = useState<AppStudioKey>("design"),
+    [viewId, setViewId] = useState("workspace"),
+    [selected, setSelected] = useState(""),
+    [preview, setPreview] = useState(false),
+    [stageName, setStageName] = useState("");
+  const showAgent: typeof agent.show = (...args) => {
+    setSection("design");
+    agent.show(...args);
+  };
+  const [comparison, setComparison] = useState(false);
+  const [previewLanguages, setPreviewLanguages] = useState<{
+    mainLocale: string;
+    locales: string[];
+  } | null>(null);
+  const immediate = useAppPreview(m, request);
+  const environment =
+    immediate.active && immediate.result
+      ? immediate.result.environment
+      : studio.env;
+  const scoped = useMemo(
+    () => sandboxRequest(environment),
+    [sandboxRequest, environment],
+  );
+  useEffect(() => {
+    if (studio.draftStorage.restored) setAssistant(false);
+  }, [studio.draftStorage.restored]);
+  const view = m.views?.find((v) => v.id === viewId) ?? m.views?.[0];
+  const manage = rights
+    ? rights.includes("developer.manage")
+    : ["owner", "admin"].includes(role);
+  const canPreview = immediate.active && !!immediate.result;
+  const openForEditing = (build: Parameters<typeof studio.editVersion>[0]) => {
+    setAssistant(false);
+    studio.editVersion(build);
+    setPreview(false);
+    immediate.close();
+    setSelected("");
+    setSection(build.manifest.capability ? "capability" : "design");
+  };
+  const pureCapability = !!m.capability && !m.views?.length;
+  useEffect(() => {
+    if (pureCapability) setSection("capability");
+  }, [m.id, pureCapability]);
+  useDesignerKeys(
+    !assistant && manage && !studio.busy,
+    immediate.run,
+    () => setPreview(true),
+    studio.dispatch,
+  );
+  return (
+    <AppFlowNavigation.Provider value={onFlows}>
+      <div
+        className={`studio-page app-studio ${assistant ? "" : "app-studio-editing"}`}
+      >
+        {assistant && (
+          <AppStudioIntro
+            disabled={!manage || studio.busy}
+            onNew={() => {
+              setAssistant(true);
+              setPreview(false);
+              immediate.close();
+            }}
+            overview={!assistant}
+          />
+        )}
+        {assistant && (
+          <ContentLanguage
+            locales={studio.locales}
+            mainLocale={studio.mainLocale}
+          >
+            <AppDraftEntry
+              key={agent.drawer.key}
+              studio={studio}
+              show={agent.show}
+              onClose={() => setAssistant(false)}
+              onReady={() => {
+                setAssistant(false);
+                setPreview(false);
+                setSelected("");
+                setSection("design");
+              }}
+            />
+          </ContentLanguage>
+        )}
+        {assistant && (
+          <AppLibrary
+            builds={studio.builds}
+            archived={studio.archivedBuilds}
+            onArchive={(app, archived) =>
+              void studio.run(() => studio.archiveApp(app, archived))
+            }
+            mainLocale={studio.mainLocale}
+            busy={studio.busy || !manage}
+            onOpen={openForEditing}
+          />
+        )}
+        {!assistant && (
+          <fieldset
+            className="app-studio-fieldset"
+            disabled={!manage || studio.busy}
+          >
+            <div className="app-studio-toolbar">
+              <AppStudioIntro
+                compact
+                overview
+                disabled={!manage || studio.busy}
+                onNew={() => {
+                  setAssistant(true);
+                  setPreview(false);
+                  immediate.close();
+                }}
+              />
+              <AppCurrentIdentity
+                title={contentText(m.name, locale, studio.mainLocale) || m.id}
+                id={m.id}
+                version={m.version}
+                status={a(
+                  studio.draftStorage.pending
+                    ? "autosaving"
+                    : studio.dirty
+                      ? "draftSaved"
+                      : "saved",
+                )}
+              />
+              <AppEditorNavigation
+                compact
+                section={section}
+                onSelect={(key) =>
+                  key === "agent" ? showAgent() : setSection(key)
+                }
+                versions={studio.builds.length}
+                payments={m.category === "payment" || !!m.paymentProvider}
+              />
+              <div className="app-toolbar-actions">
+                <Button
+                  type="button"
+                  className="app-agent-toggle"
+                  aria-expanded={agent.drawer.open}
+                  onClick={() => {
+                    setSection("design");
+                    agent.show();
+                  }}
+                >
+                  <Icon name="spark" size={17} />
+                  {workspaceText("agentTitle")}
+                </Button>
+                <Field label={a("sandbox")}>
+                  <Select
+                    value={studio.env}
+                    onChange={(e) => {
+                      studio.setEnv(e.target.value);
+                      setPreview(false);
+                    }}
+                  >
+                    <option value="">{w("chooseStage")}</option>
+                    {environments.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <Button
+                  tone="primary"
+                  type="submit"
+                  disabled={!studio.env || problems(m) || !studio.dirty}
+                  onClick={() => void studio.run(studio.importVersion)}
+                >
+                  <Icon name="check" size={16} />
+                  {a("saveVersion")}
+                </Button>
+              </div>
+            </div>
+            {!environments.length && (
+              <form
+                className="app-new-sandbox"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void studio.run(async () => {
+                    await studio.createSandbox(stageName);
+                  });
+                }}
+              >
+                <Field label={w("stageName")}>
+                  <TextInput
+                    required
+                    maxLength={80}
+                    value={stageName}
+                    onChange={(e) => setStageName(e.target.value)}
+                  />
+                </Field>
+                <Button type="submit">{w("newStage")}</Button>
+              </form>
+            )}
+            <ContentLanguage
+              locales={
+                preview && canPreview && previewLanguages
+                  ? previewLanguages.locales
+                  : studio.locales
+              }
+              mainLocale={
+                preview && canPreview && previewLanguages
+                  ? previewLanguages.mainLocale
+                  : studio.mainLocale
+              }
+            >
+              <div className="app-language-toolbar">
+                <ContentLanguagePicker />
+                {section === "design" && (
+                  <div className="app-canvas-actions">
+                    <button
+                      className="app-icon-button"
+                      disabled={!studio.history.past.length}
+                      aria-label={a("undo")}
+                      onClick={() => studio.dispatch("undo")}
+                    >
+                      ↶
+                    </button>
+                    <button
+                      className="app-icon-button"
+                      disabled={!studio.history.future.length}
+                      aria-label={a("redo")}
+                      onClick={() => studio.dispatch("redo")}
+                    >
+                      ↷
+                    </button>
+                    <Button
+                      type="submit"
+                      disabled={immediate.busy || !!problems(m)}
+                      aria-pressed={preview && canPreview}
+                      onClick={() => {
+                        if (preview && canPreview) {
+                          setPreview(false);
+                          immediate.close();
+                        } else {
+                          setPreview(true);
+                          void immediate.run();
+                        }
+                      }}
+                    >
+                      {a(preview && canPreview ? "design" : "realPreview")}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div hidden={section !== "design"}>
+                <AppDesignWorkspace
+                  studio={studio}
+                  immediate={immediate}
+                  view={view}
+                  selected={selected}
+                  onSelect={setSelected}
+                  onView={setViewId}
+                  preview={preview}
+                  request={scoped}
+                  onLanguages={(mainLocale, locales) =>
+                    setPreviewLanguages({ mainLocale, locales })
+                  }
+                  onEditFields={() => setSection("data")}
+                  onSettings={() => setSection("settings")}
+                  agentOpen={agent.drawer.open}
+                  onAgent={() => agent.show()}
+                  onAgentClose={agent.drawer.onClose}
+                  comparison={comparison}
+                  onComparison={setComparison}
+                  agent={
+                    <AppCanvasAgent
+                      {...agent.drawer}
+                      view={view?.id ?? ""}
+                      selected={selected}
+                      onClose={agent.drawer.onClose}
+                      comparing={comparison}
+                      onPreview={setComparison}
+                    />
+                  }
+                />
+              </div>
+              {section === "capability" && (
+                <AppCapabilityEditor
+                  manifest={m}
+                  onChange={studio.edit}
+                  onAssist={showAgent}
+                  onDesign={() => setSection("design")}
+                />
+              )}
+              {section === "settings" && (
+                <AppSettingsEditor manifest={m} onChange={studio.edit} />
+              )}
+              {section === "data" && (
+                <AppDataEditor manifest={m} onChange={studio.edit} />
+              )}
+              {section === "connect" && (
+                <AppConnections
+                  manifest={m}
+                  onChange={studio.edit}
+                  onFlows={onFlows}
+                />
+              )}
+              {section === "payments" && (
+                <AppPayments
+                  manifest={m}
+                  onChange={studio.edit}
+                  request={request}
+                />
+              )}
+              {section === "versions" && (
+                <AppVersions
+                  studio={studio}
+                  onTest={onTest}
+                  rights={rights}
+                  onEdit={openForEditing}
+                  onNavigate={setSection}
+                  onAssist={showAgent}
+                />
+              )}
+            </ContentLanguage>
+          </fieldset>
+        )}
+        <AppStudioStatus studio={studio} preview={immediate} />
+      </div>
+    </AppFlowNavigation.Provider>
+  );
+}

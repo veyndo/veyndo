@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE payment_attempts SET provider_context=jsonb_set(provider_context,'{vaultStatus}',$3) WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4f22eb3dedc259624c7cae550434728468224a454108fd6e9c2c37d6b8765e4d"
+}

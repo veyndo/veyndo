@@ -1,0 +1,74 @@
+/* Supplier links and reorder proposals in the sales channel workspace. */
+.supply-reorder {
+  display: grid;
+  gap: 14px;
+}
+.supply-reorder > header {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.supply-reorder h3,
+.supply-reorder p {
+  margin: 0 0 6px;
+}
+.supply-reorder fieldset {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.supply-reorder label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+}
+.supply-reorder label small {
+  font-weight: 400;
+  color: var(--muted, var(--vy-color-muted));
+}
+.supply-reorder input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 10px;
+  padding: 9px 11px;
+  font: inherit;
+  background: var(--panel, var(--vy-color-surface));
+  color: inherit;
+}
+.supply-ceiling {
+  max-width: 320px;
+}
+.supply-link {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 12px;
+}
+.supply-line {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 12px;
+}
+.supply-line button {
+  justify-self: start;
+}
+.supply-line .soft-tag.is-ok {
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
+}
+.supply-line .soft-tag.is-warn {
+  background: var(--vy-color-warning-soft);
+  color: var(--vy-color-warning);
+}

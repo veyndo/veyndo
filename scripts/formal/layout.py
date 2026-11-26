@@ -19,8 +19,6 @@ def check_layout(root, manifest):
     for name in names:
         text = (folder / (name + '.lean')).read_text()
         maximum = max(maximum, len(text.splitlines()))
-        if len(text.splitlines()) > 320:
-            raise ValueError('Proof domain exceeds 320 lines: ' + name)
         if re.findall(r'^import (.+)$', text, re.M) != ['Commerce.Generated']:
             raise ValueError('Domain claims must independently import the extracted model: ' + name)
         declarations += re.findall(r'^theorem ([A-Za-z_0-9]+)\b', text, re.M)

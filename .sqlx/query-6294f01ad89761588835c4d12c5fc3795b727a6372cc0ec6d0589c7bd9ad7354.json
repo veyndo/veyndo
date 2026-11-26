@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"count!\" FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND ($4::text IS NULL OR COALESCE(c.data->>'sales_channel','default')=$4) AND (o.data #>> $2::text[]=$3 OR o.data->'cart'->'checkout'->>$5=$3)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6294f01ad89761588835c4d12c5fc3795b727a6372cc0ec6d0589c7bd9ad7354"
+}

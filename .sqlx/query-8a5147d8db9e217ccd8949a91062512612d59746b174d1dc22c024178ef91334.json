@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_units(tenant,id,company_id,parent_id,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET parent_id=excluded.parent_id,data=excluded.data,revision=b2b_units.revision+1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8a5147d8db9e217ccd8949a91062512612d59746b174d1dc22c024178ef91334"
+}

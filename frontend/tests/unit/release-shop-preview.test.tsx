@@ -1,9 +1,9 @@
 /** Current shop previews preserve native scope and never treat iframe loading as saved evidence. */
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import ReleaseShopPreview from "../../src/admin/environments/ReleaseShopPreview";
+import ReleaseShopPreview from "../../../components/studio/ui/admin/environments/ReleaseShopPreview";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import type { Report } from "../../src/admin/scenarios/scenario-types";
+import type { Report } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 const report: Report = {
   id: "saved",
   runs: [

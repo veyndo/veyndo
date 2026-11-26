@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c7d3b82089ce62bc7c0ca3058a068253a070ef978b74dfaef04ce59f14fd3b89"
+}

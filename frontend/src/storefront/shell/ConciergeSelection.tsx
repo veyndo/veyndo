@@ -4,7 +4,7 @@ import type { Product } from "../../shared/api/shop-api";
 import { useExperienceUIText } from "../../shared/i18n/experience-ui-i18n";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import Icon from "../../shared/ui/Icon";
-import { productURL } from "../catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import ProductTile from "./ProductTile";
 import "../styles/concierge-selection.css";
 
@@ -15,6 +15,7 @@ export default function ConciergeSelection({
   onRestore,
   products,
   money,
+  currency,
   business = false,
   compareInitially = false,
 }: {
@@ -24,6 +25,8 @@ export default function ConciergeSelection({
   onRestore: () => void;
   products: Product[];
   money: (n: number) => string;
+  /** Display currency of the cards, matching `money`. */
+  currency?: string;
   business?: boolean;
   compareInitially?: boolean;
 }) {
@@ -139,7 +142,7 @@ export default function ConciergeSelection({
               {product ? (
                 <ProductTile
                   product={product}
-                  money={money}
+                  currency={currency}
                   business={business}
                 />
               ) : (

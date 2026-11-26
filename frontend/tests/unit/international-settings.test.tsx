@@ -6,7 +6,7 @@ import { useState } from "react";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import CountryPicker from "../../src/shared/geography/CountryPicker";
 import TranslationFields from "../../src/shared/geography/TranslationFields";
-import SettingsWorkspace from "../../src/admin/settings/SettingsWorkspace";
+import SettingsWorkspace from "../../../components/shop/ui/admin/settings/SettingsWorkspace";
 import {
   inheritedText,
   type Country,

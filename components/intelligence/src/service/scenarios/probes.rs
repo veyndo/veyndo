@@ -1,0 +1,294 @@
+//! Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect.
+use super::shopper::{Changed, Created, Outcome, Stocked};
+use super::{catalogue, evidence, shopper};
+use crate::ports::AgentHost;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_checkout::store::cart_load::load as load_cart;
+use veyndo_core::Error;
+use veyndo_core::RequestContext;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::shop_scope::channel as channel_id;
+use veyndo_core::uid;
+/// A refusal by the native owner is the expected result; an accepted attack is reported with a closed finding code.
+fn verdict(
+    id: &str,
+    result: Result<Value>,
+    accepted: impl FnOnce(&Value) -> (&'static str, &'static str),
+) -> Value {
+    match result {
+        Err(e) if e.0.is_client_error() => {
+            json!({"id":id,"outcome":"held","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()})
+        }
+        Err(e) => {
+            json!({"id":id,"outcome":"review","finding":"failed_unexpectedly","status":e.0.as_u16()})
+        }
+        Ok(v) => {
+            let (outcome, finding) = accepted(&v);
+            json!({"id":id,"outcome":outcome,"finding":finding})
+        }
+    }
+}
+async fn fresh<H: AgentHost>(
+    host: &H,
+    t: &str,
+    request: &Value,
+    run: &str,
+    n: u8,
+) -> Result<(RequestContext, i64)> {
+    let a = host.models().core;
+    let guest = shopper::headers(t, request, None)?;
+    let cart = shopper::call(
+        host,
+        &guest,
+        "cart.create",
+        &json!({"session":format!("probe-{run}-{n}")}),
+    )
+    .await?;
+    let h = shopper::headers(t, request, view::<Created>(&cart).token.as_deref())?;
+    let revision = load_cart(a, &h).await?.revision;
+    Ok((h, revision))
+}
+fn total(v: &Value) -> Option<String> {
+    view::<ProbedQuote>(v).price.total_minor
+}
+
+/// The exact total of a probed quote.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProbedQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: ProbedPrice,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProbedPrice {
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+}
+/// The product with this ID, or the first one that has stock.
+fn stocked(products: &Value, id: Option<&str>) -> Option<Stocked> {
+    products
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(view::<Stocked>)
+        .find(|p| match id {
+            Some(id) => p.id.as_deref() == Some(id),
+            None => p.stock.is_some_and(|s| s > 0),
+        })
+}
+/// Forged total, stale review and replayed order against one honestly reviewed basket.
+async fn checkout_probes<H: AgentHost>(
+    host: &H,
+    c: &RequestContext,
+    guest: &RequestContext,
+    country: &str,
+    run: &str,
+    id: &str,
+    stock: i64,
+) -> Result<Vec<Value>> {
+    let mut probes = Vec::new();
+    // The checkout attacks share one honestly reviewed basket; only the claimed review is forged.
+    let reviewed = async {
+        let (revision, minor) = shopper::review(host, c, country).await?;
+        shopper::accept(host, c).await?;
+        Ok::<_, Error>((revision, minor))
+    }
+    .await;
+    match reviewed {
+        Err(e) => {
+            for id in ["forged_total", "stale_review", "replayed_order"] {
+                probes.push(json!({"id":id,"outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()}));
+            }
+        }
+        Ok((revision, minor)) => {
+            let key = format!("probe-{run}");
+            probes.push(verdict(
+                "forged_total",
+                shopper::complete(host, c, &revision, 1, &key).await,
+                |_| ("breached", "accepted"),
+            ));
+            probes.push(verdict(
+                "stale_review",
+                shopper::complete(
+                    host,
+                    c,
+                    &json!(revision.as_i64().unwrap_or(1) - 1),
+                    minor,
+                    &key,
+                )
+                .await,
+                |_| ("breached", "accepted"),
+            ));
+            let first = shopper::complete(host, c, &revision, minor, &key).await;
+            let second = shopper::complete(host, c, &revision, minor, &key).await;
+            let after = stocked(&shopper::products(host, guest, "").await?, Some(id))
+                .and_then(|p| p.stock)
+                .unwrap_or(stock);
+            probes.push(match (first, second) {
+                (Ok(first), Ok(second))
+                    if view::<Created>(&first).id != view::<Created>(&second).id =>
+                {
+                    json!({"id":"replayed_order","outcome":"breached","finding":"duplicate_order"})
+                }
+                (Ok(_), Ok(_)) if stock - after > 1 => {
+                    json!({"id":"replayed_order","outcome":"breached","finding":"stock_double"})
+                }
+                (Ok(first), Ok(_)) => {
+                    json!({"id":"replayed_order","outcome":"held","finding":"same_order","orderId":view::<Created>(&first).id})
+                }
+                (Ok(first), Err(_)) => {
+                    json!({"id":"replayed_order","outcome":"held","finding":"replay_refused","orderId":view::<Created>(&first).id})
+                }
+                (Err(e), _) => {
+                    json!({"id":"replayed_order","outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()})
+                }
+            });
+        }
+    }
+    Ok(probes)
+}
+pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<Value> {
+    let a = host.models().core;
+    let settings = catalogue::settings(a, h, t).await?;
+    let currency = settings.currencies.selected("")?;
+    let locale = settings
+        .locales
+        .iter()
+        .find(|l| *l == &settings.main_locale)
+        .or_else(|| settings.locales.first())
+        .ok_or(bad("Enable a channel language before running attack tests"))?;
+    let country = settings
+        .countries
+        .first()
+        .ok_or(bad("Enable a delivery country before running attack tests"))?;
+    let request =
+        json!({"channel":channel_id(h),"locale":locale,"scenario":{"currency":currency.code}});
+    let guest = shopper::headers(t, &request, None)?;
+    let target = stocked(&shopper::products(host, &guest, "").await?, None).ok_or(conflict(
+        "Add a product with stock to this sandbox before running attack tests",
+    ))?;
+    let id = target.id.as_deref().ok_or(bad("Product unavailable"))?;
+    let stock = target.stock.unwrap_or(0);
+    let run = uid();
+    let one = |extra: Value| {
+        let mut item = json!({"id":id,"quantity":1});
+        if let (Some(item), Some(extra)) = (item.as_object_mut(), extra.as_object()) {
+            item.extend(extra.clone());
+        }
+        json!([item])
+    };
+    let mut probes = Vec::new();
+    let (c, rev) = fresh(host, t, &request, &run, 1).await?;
+    probes.push(verdict(
+        "negative_quantity",
+        shopper::call(
+            host,
+            &c,
+            "cart.replace",
+            &json!({"revision":rev,"items":[{"id":id,"quantity":-1}]}),
+        )
+        .await,
+        |_| ("breached", "accepted"),
+    ));
+    probes.push(verdict(
+        "unknown_product",
+        shopper::call(
+            host,
+            &c,
+            "cart.replace",
+            &json!({"revision":rev,"items":[{"id":format!("probe-missing-{run}"),"quantity":1}]}),
+        )
+        .await,
+        |_| ("breached", "accepted"),
+    ));
+    // A cart may hold more than the stock; what matters is whether that basket can be bought.
+    let excess = shopper::call(
+        host,
+        &c,
+        "cart.replace",
+        &json!({"revision":rev,"items":[{"id":id,"quantity":stock + 1}]}),
+    )
+    .await;
+    let over = excess.as_ref().is_ok_and(|v| {
+        view::<Changed>(v)
+            .line_items
+            .first()
+            .and_then(|l| l.quantity)
+            .is_none_or(|q| q > stock)
+    });
+    probes.push(if over {
+        let bought = async {
+            let (revision, minor) = shopper::review(host, &c, country).await?;
+            shopper::accept(host, &c).await?;
+            shopper::complete(host, &c, &revision, minor, &format!("probe-{run}-excess")).await
+        }
+        .await;
+        let found = verdict("excess_quantity", bought, |_| ("review", "over_stock"));
+        let held = view::<Outcome>(&found).outcome == "held";
+        found.as_object().map_or(Value::Null, |o| {
+            let mut o = o.clone();
+            if held {
+                o.insert("finding".into(), json!("refused_at_checkout"));
+            }
+            Value::Object(o)
+        })
+    } else {
+        verdict("excess_quantity", excess, |_| ("held", "limited"))
+    });
+    // A clean one-item basket is the reference total for the injected-price basket.
+    let (c, rev) = fresh(host, t, &request, &run, 2).await?;
+    let clean = shopper::call(
+        host,
+        &c,
+        "cart.replace",
+        &json!({"revision":rev,"items":one(json!({}))}),
+    )
+    .await?;
+    probes.push(verdict(
+        "stale_cart",
+        shopper::call(
+            host,
+            &c,
+            "cart.replace",
+            &json!({"revision":rev,"items":[{"id":id,"quantity":2}]}),
+        )
+        .await,
+        |_| ("breached", "accepted"),
+    ));
+    let (injected, rev) = fresh(host, t, &request, &run, 3).await?;
+    probes.push(verdict(
+        "price_injection",
+        shopper::call(host, &injected, "cart.replace", &json!({"revision":rev,"items":one(json!({"price":0.01,"unitPrice":0.01,"priceMinor":1}))})).await,
+        |v| if total(v).is_some() && total(v) == total(&clean) { ("held", "ignored") } else { ("breached", "total_changed") },
+    ));
+    probes.push(verdict(
+        "guessed_cart",
+        shopper::call(
+            host,
+            &shopper::headers(t, &request, Some(&format!("probe-guess-{run}")))?,
+            "cart.quote",
+            &json!({}),
+        )
+        .await,
+        |_| ("breached", "accepted"),
+    ));
+    probes.extend(checkout_probes(host, &c, &guest, country, &run, id, stock).await?);
+    let count = |outcome: &str| {
+        probes
+            .iter()
+            .filter(|p| view::<Outcome>(p).outcome == outcome)
+            .count()
+    };
+    Ok(
+        json!({"id":run,"synthetic":true,"execution":"native-commerce-api","channel":channel_id(h),
+        "product":{"id":id,"name":target.name},"configurationDigest":evidence::capture(host, t).await,
+        "summary":{"held":count("held"),"breached":count("breached"),"review":count("review")},"probes":probes}),
+    )
+}

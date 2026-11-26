@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE integration_keys SET expires_at=least(expires_at,now()) WHERE tenant=$1 AND id=$2 AND agent_budget IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6444fee06163f604cd0a0e3a9005ce814bea0b7a9a103ef24ef56c06085a25de"
+}

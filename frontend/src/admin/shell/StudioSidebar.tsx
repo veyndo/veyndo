@@ -1,4 +1,5 @@
 /** StudioSidebar: focused Studio view; state and commands come from the session-scoped controller. */
+import { Button } from "../../kit/ui";
 import { AdminAppNavigation } from "../../shared/apps/AppSurfaces";
 import "../../shared/styles/workbench.css";
 import Icon from "../../shared/ui/Icon";
@@ -7,6 +8,7 @@ import "../styles/operations.css";
 import "../styles/studio.css";
 
 import { canOpenStudio } from "./permissions";
+import { studioRegistry } from "./registry/first-party";
 import { useStudio } from "./StudioContext";
 import { useAppSurfaces } from "../../shared/apps/AppSurfaces";
 import { useCommerceNavText } from "./commerce-nav-i18n";
@@ -56,31 +58,10 @@ export default function StudioSidebar() {
     setAppSurface(surface);
     setMenu(false);
   };
-  const groups: { label: string; tabs: Tab[] }[] = [
-    {
-      label: u("intelligence"),
-      tabs: [
-        "workspace",
-        "setup",
-        "assistant",
-        "overview",
-        "knowledge",
-        "agents",
-      ],
-    },
-    {
-      label: u("commerce"),
-      tabs: ["productData", "orders", "customers", "pos"],
-    },
-    {
-      label: u("experiences"),
-      tabs: ["design", "storyfronts", "channels", "automation", "apps"],
-    },
-    {
-      label: u("workspace"),
-      tabs: ["developers", "environments", "users", "commerce"],
-    },
-  ];
+  const groups = studioRegistry.navigation(access).map((entry) => ({
+    label: u(entry.group),
+    tabs: entry.routes.map((route) => route.id),
+  }));
   return (
     <aside className={`studio-sidebar ${menu ? "open" : ""}`}>
       <a className="studio-brand" href="#merchant" aria-label={t("studio")}>
@@ -100,44 +81,43 @@ export default function StudioSidebar() {
         </span>
         <Icon name="settings" size={16} />
       </button>
-      <button
-        className="studio-primary new-conversation"
+      <Button
+        tone="primary"
+        type="submit"
+        className="new-conversation"
         disabled={busy || !canOpenStudio("assistant", access)}
         onClick={newChat}
       >
         <Icon name="plus" size={18} />
         {t("newChat")}
-      </button>
+      </Button>
       <nav aria-label={t("studio")}>
-        {groups
-          .filter((group) => group.tabs.some((id) => canOpenStudio(id, access)))
-          .map((group) => (
-            <div className="sidebar-nav-group" key={group.label}>
-              <span className="sidebar-group-label">{group.label}</span>
-              {group.tabs
-                .map((id) => nav.find((n) => n.id === id)!)
-                .filter((n) => canOpenStudio(n.id, access))
-                .map((n) => (
-                  <button
-                    key={n.id}
-                    aria-current={
-                      !appSurface && tab === n.id ? "page" : undefined
-                    }
-                    className={!appSurface && tab === n.id ? "active" : ""}
-                    onClick={() => {
-                      selectTab(n.id);
-                      setMenu(false);
-                    }}
-                  >
-                    <Icon name={n.icon} />
-                    <span>{tabLabel(n.id)}</span>
-                    {n.id === "overview" && data?.summary.ordersToday ? (
-                      <b>{data.summary.ordersToday}</b>
-                    ) : null}
-                  </button>
-                ))}
-            </div>
-          ))}
+        {groups.map((group) => (
+          <div className="sidebar-nav-group" key={group.label}>
+            <span className="sidebar-group-label">{group.label}</span>
+            {group.tabs
+              .map((id) => nav.find((n) => n.id === id)!)
+              .map((n) => (
+                <button
+                  key={n.id}
+                  aria-current={
+                    !appSurface && tab === n.id ? "page" : undefined
+                  }
+                  className={!appSurface && tab === n.id ? "active" : ""}
+                  onClick={() => {
+                    selectTab(n.id);
+                    setMenu(false);
+                  }}
+                >
+                  <Icon name={n.icon} />
+                  <span>{tabLabel(n.id)}</span>
+                  {n.id === "overview" && data?.summary.ordersToday ? (
+                    <b>{data.summary.ordersToday}</b>
+                  ) : null}
+                </button>
+              ))}
+          </div>
+        ))}
         {b2bFeatures?.enabled && (
           <details
             className="sidebar-nav-group sidebar-commerce-group"

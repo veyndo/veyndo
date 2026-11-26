@@ -1,0 +1,35 @@
+[package]
+name = "veyndo-orders"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Orders: their state machine, derived fields, audited mutations and receipts"
+
+[dependencies]
+chrono.workspace = true
+reqwest.workspace = true
+sha2.workspace = true
+image.workspace = true
+base64.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+axum.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+veyndo-core = { path = "../core" }
+veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-b2b = { path = "../b2b" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-identity = { path = "../identity" }
+veyndo-shipping = { path = "../shipping" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-shop = { path = "../shop" }
+veyndo-customers = { path = "../customers" }
+veyndo-runtime = { path = "../../crates/runtime" }
+
+[dev-dependencies]
+proptest.workspace = true
+pdf-extract.workspace = true

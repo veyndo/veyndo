@@ -62,6 +62,7 @@ async fn callback(
         &s.store,
         q.get("state").map(String::as_str).unwrap_or(""),
         q.get("code").map(String::as_str).unwrap_or(""),
+        super::providers::oauth,
     )
     .await;
     let ok = result.is_ok();
@@ -168,16 +169,16 @@ pub async fn run() -> Result<()> {
     };
     let mut tx = store.system().await?;
     let ready: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM commerce_migrations WHERE version='049-rust-connectors')",
+        "SELECT EXISTS(SELECT 1 FROM commerce_migrations WHERE version='connectors/0001-baseline')",
     )
     .fetch_one(&mut *tx)
     .await?;
     drop(tx);
-    checked(ready, "Run commerce migration 049 first")?;
+    checked(
+        ready,
+        "Run the commerce setup (BOOTSTRAP_MODE=migrate) first",
+    )?;
     store.verify_runtime().await?;
-    if env::args().any(|s| s == "--import-legacy") {
-        return super::legacy::import(&store).await;
-    }
     let (stop, receiver) = tokio::sync::watch::channel(false);
     let workers = env::var("CONNECTOR_WORKERS_PER_APP")
         .ok()

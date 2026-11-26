@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.tenant,s.app,s.id,s.definition,s.next_run::text AS \"due!\" FROM app_schedules s JOIN app_packages p ON p.tenant=s.tenant AND p.id=s.app WHERE p.active AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=s.tenant),s.tenant) AND t.status='active') AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=s.tenant) AND s.next_run<=now() AND s.definition->>'enabled'='true' ORDER BY s.next_run LIMIT 32 FOR UPDATE OF s,p SKIP LOCKED",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_schedules",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_schedules",
+            "name": "app"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_schedules",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "definition",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_schedules",
+            "name": "definition"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "due!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "9f0eff1d1d1d2f86dc7fce976bb2433171c34ae4ec4d4fa27d6e457c44f9f82e"
+}

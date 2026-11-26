@@ -1,0 +1,11 @@
+[package]
+name = "veyndo-provider-hubspot"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "HubSpot app: contact upserts"
+
+[dependencies]
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }
+veyndo-provider-email = { path = "../email" }

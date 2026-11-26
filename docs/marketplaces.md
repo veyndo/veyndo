@@ -50,7 +50,7 @@ flowchart LR
 ```
 
 All provider logic lives in `extensions/apps/marketplaces/`. The shared Rust
-contract `veyndo_commerce::external_order::PaidOrder` validates the paid
+contract `veyndo_pricing::external_order::PaidOrder` validates the paid
 snapshot, explicit tax and exact minor-unit totals. Core owns the exchange
 gateway, current app and channel admission, replay protection and the
 transaction that books the order and stock. The app uses the native queue,
@@ -200,4 +200,3 @@ proofs do not establish tax-law correctness, provider payment authenticity,
 PostgreSQL execution or whole-system correctness; real provider fixtures and
 tenant/concurrency integration tests cover those adapter boundaries.
 
-[Cross-feature architecture, sandbox and rights audit](feature-integration.md).

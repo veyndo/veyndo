@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox_subscriber_failures c SET attempts=0,available_at=now(),dead_letter_at=NULL WHERE c.tenant=$1 AND c.event_id=$2 AND c.dead_letter_at IS NOT NULL AND EXISTS(SELECT 1 FROM outbox e WHERE e.id=$2 AND e.tenant=c.tenant AND e.delivered_at IS NULL AND e.payload_retired_at IS NULL)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1e820f96fae0b3d04946053d186a8423c56761207606ca151c1b91864143f341"
+}

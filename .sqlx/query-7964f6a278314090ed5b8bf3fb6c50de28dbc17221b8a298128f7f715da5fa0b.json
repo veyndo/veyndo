@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('id',p.id,'name',p.name,'source',r.data->'source') AS \"complement!\" FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=CASE WHEN r.source_id=$2 THEN r.target_id ELSE r.source_id END WHERE r.tenant=$1 AND r.kind='PAIRS_WITH' AND (r.source_id=$2 OR r.target_id=$2) ORDER BY p.id LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "complement!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7964f6a278314090ed5b8bf3fb6c50de28dbc17221b8a298128f7f715da5fa0b"
+}

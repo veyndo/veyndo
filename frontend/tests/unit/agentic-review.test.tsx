@@ -2,11 +2,11 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import AppDiagnostics from "../../src/admin/developer/AppDiagnostics";
-import { template } from "../../src/admin/developer/app-model";
+import AppDiagnostics from "../../../components/apps/ui/admin/developer/AppDiagnostics";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 import DesignReview from "../../../extensions/apps/site-builder/studio/DesignReview";
 import { newPage, newBlock } from "../../../extensions/apps/site-builder/model";
-import ProposalCard from "../../src/admin/assistant/ProposalCard";
+import ProposalCard from "../../src/admin/shell/ProposalCard";
 it("shows every proposed work step for one explicit approval and never executes while rendering", () => {
   const approve = vi.fn();
   const message: any = {

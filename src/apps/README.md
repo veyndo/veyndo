@@ -3,10 +3,8 @@
 This folder owns the Rust modules listed below. Each source begins with its responsibility contract. The crate currently shares internal types/imports through a facade; APIs, MCP and UCP delegate to shared domain operations.
 
 - [`cart_contributions.rs`](cart_contributions.rs): Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs.
-- [`compatibility.rs`](compatibility.rs): Explicit read adapter for persisted v0.5 engraving carts; completed order snapshots remain unchanged.
+- [`compatibility.rs`](../../extensions/apps/paypal/src/compatibility.rs): Explicit read adapter for persisted v0.5 engraving carts; completed order snapshots remain unchanged.
 - [`data.rs`](data.rs): Shared app records: typed writes, optimistic revisions, bounded reads and local RLS context.
-- [`editor_contract.rs`](editor_contract.rs): Editor mounts, enumerated fields and tenant-owned core references; no app alters core tables.
-- [`editor_tests.rs`](editor_tests.rs): Assistant fixture contracts exercise real validation, not only the client-side builder.
 - [`events.rs`](events.rs): Durable at-least-once app events, retry leases and stable event idempotency keys.
 - [`evidence.rs`](evidence.rs): Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers.
 - [`evidence_routes.rs`](evidence_routes.rs): Scoped merchant-only evidence retrieval; sources never enter public product answers.
@@ -15,18 +13,14 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`manifest.rs`](manifest.rs): Strict package contract; identifiers and limits are checked before model registration.
 - [`manifest_validation.rs`](manifest_validation.rs): Package capability, schema and action validation; no executable behavior is inferred from names.
 - [`mod.rs`](mod.rs): Versioned app packages: managed data, UI slots, agent tools and isolated service calls.
-- [`native_data.rs`](native_data.rs): App record translations use configured shop languages and field-level main-language inheritance.
-- [`native_view_tests.rs`](native_view_tests.rs): Native schema security regressions: bindings, public writes, allowlists, bounded blocks and legacy digests.
-- [`native_views.rs`](native_views.rs): Bounded native view definitions; every data binding resolves to the same authorized app action gateway.
+- [`native_views.rs`](../../components/apps/src/domain/native_views.rs): Bounded native view definitions; every data binding resolves to the same authorized app action gateway.
 - [`planning.rs`](planning.rs): Registered managed app actions join the same preview/approve transaction as core changes.
-- [`presentation.rs`](presentation.rs): Optional passive app artwork and localized summaries; omitted metadata preserves published legacy digests.
+- [`presentation.rs`](../../components/apps/src/domain/presentation.rs): Optional passive app artwork and localized summaries; omitted metadata preserves published legacy digests.
 - [`registry.rs`](registry.rs): Atomic installation and additive schema upgrades; immutable version digests preserve history.
-- [`records.rs`](records.rs): One fixed shared store with tenant/app/model identity, field projection, typed model registration and scoped preview resets; no per-installation DDL.
 - [`routes.rs`](routes.rs): Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter.
-- [`runtime.rs`](runtime.rs): Generic pure-Wasm contribution executor; the installed package supplies all business predicates.
+- [`runtime.rs`](../../extensions/apps/marketplaces/service/runtime.rs): Generic pure-Wasm contribution executor; the installed package supplies all business predicates.
 - [`schedules.rs`](schedules.rs): Durable UTC cron ticks emit namespaced outbox events; replicas lock due rows and staging never runs them.
 - [`service_limits.rs`](service_limits.rs): Non-queuing per-process bulkheads isolate slow apps without holding database connections.
-- [`surface_tests.rs`](surface_tests.rs): Contract counterexamples reject cross-scope UI actions, unsafe URLs and mutating GET routes.
 - [`surfaces.rs`](surfaces.rs): App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway.
 - [`webhooks.rs`](webhooks.rs): Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts.
 
@@ -50,7 +44,7 @@ The [source inventory](../../docs/module-inventory.md) is checked in CI. [The be
   decision cases. Existing WIT isolation executes them before build/installation;
   no new executor, live-data reader, approval ledger or pricing implementation.
 
-- [upgrade_review.rs](upgrade_review.rs): Rollback-only actual installation admission and minimized migration metadata.
+- [upgrade_review.rs](../../components/apps/src/service/upgrade_review.rs): Rollback-only actual installation admission and minimized migration metadata.
 
 Shared record_history owns original immutable snapshot/read/retention SQL and the
 historical lookup/admission/restore sequence. Native history_storage supplies

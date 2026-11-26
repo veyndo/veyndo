@@ -1,5 +1,21 @@
 //! App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant.
-use super::*;
+use super::{Manifest, credentials, package, surface_grants};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{assets, auth};
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(super) fn router() -> Router<App> {
     Router::new()
         .secure_route(

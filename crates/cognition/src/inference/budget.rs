@@ -1,11 +1,12 @@
 //! Durable conservative model allocations use existing agent keys and the live shop stop switch.
 //! Counters reserve full envelopes before egress and never refund uncertain calls.
 use super::Admission;
-use crate::{scoped_pool::ScopedPool, tenant_scope};
+use crate::{ports, scoped_pool::ScopedPool, tenant_scope};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::future::Future;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::store::{live_shop, outbox};
 
 #[derive(Clone, Debug)]
 pub struct Authority {
@@ -37,9 +38,15 @@ pub async fn choice(
         return Ok(requested.cloned());
     };
     let db = db.ok_or("Agent model admission requires durable storage")?;
-    let value:Value=tenant_scope::scoped(tenant_scope::Scope::System,sqlx::query_scalar("SELECT agent_budget FROM integration_keys WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND id=$2 AND expires_at>now()")
-        .bind(&authority.tenant).bind(&authority.key_id).fetch_optional(db)).await.map_err(|_|"Agent model admission unavailable")?
-        .ok_or(Admission::Denied("Agent key expired or revoked"))?;
+    let host = ports::host().ok_or("Agent model admission requires durable storage")?;
+    let value: Value = tenant_scope::scoped(tenant_scope::Scope::System, async {
+        let live = live_shop::resolve(db, &authority.tenant).await?;
+        host.approved_budget(db, &live, authority.key_id.as_deref())
+            .await
+    })
+    .await
+    .map_err(|_| "Agent model admission unavailable")?
+    .ok_or(Admission::Denied("Agent key expired or revoked"))?;
     let budget: Budget = serde_json::from_value(value).map_err(|_| "Invalid agent budget")?;
     budget.validate()?;
     if let Some(c) = requested
@@ -90,16 +97,39 @@ impl Budget {
     }
 }
 
+/// The output allowance fields of a provider request, typed as the budget reads them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OutputLimits {
+    #[serde(deserialize_with = "lenient")]
+    max_output_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    max_completion_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    max_tokens: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    options: LocalOptions,
+}
+
+/// The output allowance of a local (Ollama) request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct LocalOptions {
+    #[serde(deserialize_with = "lenient")]
+    num_predict: Option<u64>,
+}
+
 /// The charge is an allocation at the operator-selected ceiling tariff, not a provider invoice.
 pub fn allocation(request: &Value, images: bool, tariff: u64) -> Result<(u64, u64), String> {
     if images {
         return Err("Budgeted agents currently require text-only model input".into());
     }
-    let output = request["max_output_tokens"]
-        .as_u64()
-        .or_else(|| request["max_completion_tokens"].as_u64())
-        .or_else(|| request["max_tokens"].as_u64())
-        .or_else(|| request["options"]["num_predict"].as_u64())
+    let limits: OutputLimits = view(request);
+    let output = limits
+        .max_output_tokens
+        .or(limits.max_completion_tokens)
+        .or(limits.max_tokens)
+        .or(limits.options.num_predict)
         .filter(|n| *n > 0 && *n <= 8192)
         .ok_or("Model request has no bounded output allowance")?;
     // UTF-8 request bytes deliberately overcount ordinary text tokens. Reserve an
@@ -117,12 +147,21 @@ pub fn allocation(request: &Value, images: bool, tariff: u64) -> Result<(u64, u6
     Ok((tokens, cost))
 }
 
+/// The JSON fields `reserve` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReserveInput {
+    #[serde(deserialize_with = "lenient")]
+    model: Option<String>,
+}
+
 pub async fn reserve(
     db: Option<&ScopedPool>,
     request: &Value,
     images: bool,
     provider: &str,
 ) -> Result<(), Admission> {
+    let input: ReserveInput = view(request);
     let Some(authority) = CURRENT.try_with(Clone::clone).ok() else {
         return Ok(());
     };
@@ -130,38 +169,79 @@ pub async fn reserve(
         return Ok(());
     }
     let db = db.ok_or("Agent model admission requires durable storage")?;
+    let host = ports::host().ok_or("Agent model admission requires durable storage")?;
     tenant_scope::scoped(tenant_scope::Scope::System, async {
-        let mut tx=db.begin().await.map_err(|_|"Agent admission unavailable")?;
+        let mut tx = db
+            .begin()
+            .await
+            .map_err(|_| "Agent admission unavailable")?;
         // Same order as stop/key lifecycle: live tenant first, then key. No lock
         // survives the provider call. A stop affects subsequent calls, not past egress.
-        let shop=sqlx::query("SELECT id,agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) FOR NO KEY UPDATE")
-            .bind(&authority.tenant).fetch_one(&mut *tx).await.map_err(|_|"Agent shop unavailable")?;
-        let live:String=shop.get("id");
-        let stopped:bool=shop.get("agents_stopped");
-        if stopped { return Err(Admission::Denied("Shop agents are stopped by an administrator")); }
-        let Some(id)=&authority.key_id else {
-            if authority.require_budget { return Err(Admission::Denied("Use a dedicated agent key with explicit budgets")); }
+        let shop = live_shop::lock(&mut tx, &authority.tenant)
+            .await
+            .map_err(|_| "Agent shop unavailable")?;
+        let live = shop.id;
+        let stopped = shop.agents_stopped;
+        if stopped {
+            return Err(Admission::Denied(
+                "Shop agents are stopped by an administrator",
+            ));
+        }
+        let Some(id) = &authority.key_id else {
+            if authority.require_budget {
+                return Err(Admission::Denied(
+                    "Use a dedicated agent key with explicit budgets",
+                ));
+            }
             return Ok(());
         };
-        let row=sqlx::query("SELECT i.agent_budget,i.agent_tokens_allocated,i.agent_cost_allocated FROM integration_keys i JOIN membership_grants m ON m.tenant=i.tenant AND m.user_id=i.user_id AND m.active WHERE i.tenant=$1 AND i.id=$2 AND i.expires_at>now() AND i.app_id IS NULL FOR UPDATE OF i")
-            .bind(&live).bind(id).fetch_optional(&mut *tx).await.map_err(|_|"Agent admission unavailable")?
-            .ok_or(Admission::Denied("Agent key expired, revoked or membership withdrawn"))?;
-        let budget:Budget=serde_json::from_value(row.get("agent_budget")).map_err(|_|"Agent budget is missing or invalid")?;
+        let row = host
+            .lock_key(&mut tx, &live, id)
+            .await
+            .map_err(|_| "Agent admission unavailable")?
+            .ok_or(Admission::Denied(
+                "Agent key expired, revoked or membership withdrawn",
+            ))?;
+        let budget: Budget = serde_json::from_value(row.agent_budget.unwrap_or_default())
+            .map_err(|_| "Agent budget is missing or invalid")?;
         budget.validate()?;
-        if budget.provider!=provider || request["model"].as_str()!=Some(budget.model.as_str()) {return Err(Admission::Denied("Agent provider or model differs from its approved budget"));}
-        let (tokens,cost)=allocation(request,images,budget.price_per_million_micros)?;
-        let used_tokens=u64::try_from(row.get::<i64,_>("agent_tokens_allocated")).map_err(|_|"Invalid agent usage")?;
-        let used_cost=u64::try_from(row.get::<i64,_>("agent_cost_allocated")).map_err(|_|"Invalid agent usage")?;
-        if !veyndo_kernel::verified_kernel::b2b_budget_admissible(budget.tokens,used_tokens,tokens)
-            || !veyndo_kernel::verified_kernel::b2b_budget_admissible(budget.cost_micros,used_cost,cost) {
+        if budget.provider != provider || input.model.as_deref() != Some(budget.model.as_str()) {
+            return Err(Admission::Denied(
+                "Agent provider or model differs from its approved budget",
+            ));
+        }
+        let (tokens, cost) = allocation(request, images, budget.price_per_million_micros)?;
+        let used_tokens =
+            u64::try_from(row.agent_tokens_allocated).map_err(|_| "Invalid agent usage")?;
+        let used_cost =
+            u64::try_from(row.agent_cost_allocated).map_err(|_| "Invalid agent usage")?;
+        if !veyndo_kernel::verified_kernel::b2b_budget_admissible(
+            budget.tokens,
+            used_tokens,
+            tokens,
+        ) || !veyndo_kernel::verified_kernel::b2b_budget_admissible(
+            budget.cost_micros,
+            used_cost,
+            cost,
+        ) {
             return Err(Admission::Exhausted);
         }
-        sqlx::query("UPDATE integration_keys SET agent_tokens_allocated=agent_tokens_allocated+$3,agent_cost_allocated=agent_cost_allocated+$4 WHERE tenant=$1 AND id=$2")
-            .bind(&live).bind(id).bind(tokens as i64).bind(cost as i64).execute(&mut *tx).await.map_err(|_|"Agent usage could not be reserved")?;
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'intelligence.agent.allocated',$2)")
-            .bind(&live).bind(json!({"agentId":id,"tokens":tokens,"costMicros":cost,"currency":"USD"})).execute(&mut *tx).await.map_err(|_|"Agent audit could not be saved")?;
-        tx.commit().await.map_err(|_|Admission::Unavailable("Agent admission could not commit"))
-    }).await
+        host.allocate(&mut tx, &live, id, tokens as i64, cost as i64)
+            .await
+            .map_err(|_| "Agent usage could not be reserved")?;
+        outbox::publish(
+            &mut tx,
+            &live,
+            "intelligence.agent.allocated",
+            json!({"agentId":id,"tokens":tokens,"costMicros":cost,"currency":"USD"}),
+        )
+        .await
+        .map_err(|_| "Agent audit could not be saved")?;
+        tx.commit()
+            .await
+            .map_err(|_| Admission::Unavailable("Agent admission could not commit"))
+    })
+    .await
 }
 
 #[cfg(test)]

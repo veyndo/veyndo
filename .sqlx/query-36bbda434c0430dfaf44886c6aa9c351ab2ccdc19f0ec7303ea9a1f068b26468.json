@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE carts SET status='cancelled',revision=revision+1 WHERE id=$1 AND status='open'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "36bbda434c0430dfaf44886c6aa9c351ab2ccdc19f0ec7303ea9a1f068b26468"
+}

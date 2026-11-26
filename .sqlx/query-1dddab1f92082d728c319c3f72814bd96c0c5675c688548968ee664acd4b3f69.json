@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM product_channel_visibility WHERE tenant=$1 AND product_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1dddab1f92082d728c319c3f72814bd96c0c5675c688548968ee664acd4b3f69"
+}

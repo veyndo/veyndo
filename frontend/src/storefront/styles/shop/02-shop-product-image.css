@@ -1,52 +1,52 @@
-/* shop: shop-product-image styles. Source order is preserved by the entry stylesheet. */
-.shop-product-image {
+/* shop: product card images and the product page purchase area. Source order is preserved by the entry stylesheet. */
+.vy-sf-card .vy-sf-card-media {
   display: block;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  background: #edf2f4;
+  background: var(--vy-color-panel);
 }
-.shop-product-image img {
+.vy-sf-card .vy-sf-card-media img {
   width: 100%;
   height: auto;
   display: block;
   transition: transform 0.25s;
 }
-.shop-product-image:hover img {
+.vy-sf-card .vy-sf-card-media:hover img {
   transform: scale(1.04);
 }
-.shop-product-image span {
+.vy-sf-card .vy-sf-card-media .vy-sf-stock {
   position: absolute;
   right: 12px;
   bottom: 12px;
-  background: #ffffffdd;
+  background: color-mix(in srgb, var(--vy-color-surface) 87%, transparent);
   padding: 7px 10px;
   border-radius: 4px;
   font-size: 10px;
-  color: #566671;
+  color: var(--vy-color-muted);
 }
-.shop-product-info h3 {
+.vy-sf-card .vy-sf-card-body h3 {
   margin: 8px 0;
   font-size: 21px;
   letter-spacing: -0.4px;
   font-weight: 550;
 }
-.shop-product-info > p:not(.shop-kicker) {
+.vy-sf-card .vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
   color: var(--muted);
   font-size: 13px;
   min-height: 38px;
   line-height: 1.6;
 }
-.shop-product-info strong {
+.vy-sf-card .vy-sf-price strong {
   font-size: 19px;
   display: inline-block;
   margin: 8px 8px 16px 0;
 }
-.shop-product-info small {
+.vy-sf-card .vy-sf-price small {
   font-size: 11px;
   color: var(--muted);
 }
-.shop-product-link {
+.vy-sf-card .vy-sf-card-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +54,7 @@
   padding: 14px 0;
   font-size: 13px;
 }
-.shop-product-link:hover {
+.vy-sf-card .vy-sf-card-link:hover {
   color: var(--blue);
 }
 .shop-footer {
@@ -64,7 +64,7 @@
   justify-content: space-between;
   gap: 24px;
   border-top: 1px solid var(--line);
-  background: #f7f9fc;
+  background: var(--vy-color-bg);
   font-size: 12px;
   color: var(--muted);
 }
@@ -78,8 +78,8 @@
 }
 .shop-error {
   padding: 16px 5%;
-  background: #fff0ed;
-  color: #962f24;
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
   display: flex;
   justify-content: space-between;
 }
@@ -110,7 +110,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 10px;
-  background: #edf2f4;
+  background: var(--vy-color-panel);
 }
 .gallery-main > img {
   display: block;
@@ -136,12 +136,12 @@
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 5px;
-  background: #fff;
+  background: var(--vy-color-surface);
   color: var(--muted);
   min-width: 88px;
 }
 .gallery-thumbs button[aria-pressed="true"] {
-  border: 2px solid #1768eb;
+  border: 2px solid var(--vy-color-accent-strong);
   padding: 4px;
   color: var(--blue);
 }
@@ -156,18 +156,18 @@
   font-size: 10px;
   padding: 7px 0;
 }
-.pdp-purchase h1 {
+.pdp-purchase .vy-sf-summary-body h1 {
   font-size: 40px;
   letter-spacing: -1.5px;
   line-height: 1.1;
   font-weight: 550;
   margin: 16px 0;
 }
-.pdp-purchase > p {
+.pdp-purchase .vy-sf-description {
   color: var(--muted);
   line-height: 1.75;
 }
-.rating-link {
+.pdp-purchase .vy-sf-rating {
   font-size: 12px !important;
   color: var(--muted);
   background: none;
@@ -175,51 +175,51 @@
   padding: 0;
   min-height: 36px;
 }
-.rating-link span {
-  color: #bd7c26;
+.pdp-purchase .vy-sf-rating span {
+  color: var(--vy-color-amber);
   letter-spacing: 1px;
   margin-right: 8px;
 }
-.pdp-price {
+.pdp-purchase .vy-sf-price {
   margin: 26px 0 22px;
 }
-.pdp-price strong {
+.pdp-purchase .vy-sf-price strong {
   font-size: 33px;
   letter-spacing: -1px;
 }
-.pdp-price del {
+.pdp-purchase .vy-sf-price s {
   color: var(--muted);
   margin-left: 12px;
 }
-.pdp-price small {
+.pdp-purchase .vy-sf-price small {
   display: block;
   margin-top: 7px;
   color: var(--muted);
   font-size: 12px;
 }
-.variant-group {
+.pdp-purchase .vy-sf-variants {
   padding: 0;
   border: 0;
   margin: 25px 0;
 }
-.variant-group legend {
+.pdp-purchase .vy-sf-variants legend {
   font-size: 13px;
   font-weight: 650;
   margin-bottom: 12px;
 }
-.variant-group legend span {
+.pdp-purchase .vy-sf-variants legend span {
   font-weight: 400;
   color: var(--muted);
   margin-left: 10px;
 }
-.variant-group > div {
+.pdp-purchase .vy-sf-variants > div {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.variant-group button {
+.pdp-purchase .vy-sf-variants button {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--vy-color-surface);
   border-radius: 6px;
   color: var(--ink);
   min-height: 44px;
@@ -229,39 +229,39 @@
   gap: 5px;
   align-items: center;
 }
-.variant-group button[aria-pressed="true"] {
+.pdp-purchase .vy-sf-variants button[aria-pressed="true"] {
   border-color: var(--blue);
-  background: #edf4ff;
-  color: #1458be;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-accent);
 }
-.swatch {
+.pdp-purchase .vy-sf-swatch {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1px solid #0002;
+  border: 1px solid color-mix(in srgb, var(--vy-color-text) 13%, transparent);
 }
-.swatch-terracotta {
-  background: #b57858;
+.vy-sf-swatch[data-swatch="terracotta"] {
+  background: var(--vy-color-rose);
 }
-.swatch-sage {
-  background: #879299;
+.vy-sf-swatch[data-swatch="sage"] {
+  background: var(--vy-color-muted);
 }
-.swatch-natural {
-  background: #d7cfbc;
+.vy-sf-swatch[data-swatch="natural"] {
+  background: var(--vy-color-border);
 }
-.swatch-dark {
-  background: #545754;
+.vy-sf-swatch[data-swatch="dark"] {
+  background: var(--vy-color-muted);
 }
-.availability {
+.pdp-purchase .vy-sf-availability {
   display: flex;
   align-items: center;
   gap: 7px;
   font-size: 12px;
-  color: #356282;
+  color: var(--vy-color-muted);
   margin-top: 25px;
 }
-.availability i {
+.pdp-purchase .vy-sf-availability i {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -274,4 +274,20 @@
   font-size: 14px;
   line-height: 1.6;
   overflow-wrap: anywhere;
+}
+/* The storefront theme on the kit product-summary part of the product page. */
+.pdp-purchase .vy-sf-summary,
+.pdp-purchase .vy-sf-summary-body {
+  display: block;
+}
+.pdp-purchase .vy-sf-description {
+  margin: 1em 0;
+}
+.pdp-purchase .vy-sf-kicker {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 2px;
+}
+.pdp-purchase .vy-sf-more {
+  margin-bottom: 12px;
 }

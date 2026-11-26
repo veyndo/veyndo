@@ -118,7 +118,7 @@ second purchases and revocation. It preserves the separately recorded capture,
 transaction detail and invoice contracts. Local native-service acceptance covers
 HTTP/MCP, guest/foreign denial and delayed confirmation across restart without a
 second capture. Hosted schema, key and service rollout completed on 4 November; actual PSP saved-method tests remain pending. Automatic
-recurring debits remain open. [Customer guide](payment-saved-methods.md).
+recurring debits remain open. [Customer guide](payments.md#saved-payment-methods).
 
 ## Transaction details, 3 November 2026
 
@@ -126,14 +126,14 @@ Contract 1.4.0 adds owned provider capture/authorization/refund observations,
 exact fees/net amounts and native durable payment history through HTTP, MCP and
 shared Studio controls. Reads do not reconcile or create financial jobs. Native
 services passed local current-rights, isolation and unchanged-ledger checks.
-[Usage and evidence boundary](payment-transaction-details.md).
+[Usage and evidence boundary](payments.md#transaction-details-and-history).
 
 ## Capture management, 3 November 2026
 
 Contract 1.3.0 adds native partial/multiple capture, exact per-capture refunds,
 confirmed remainder void and pending/lost-response recovery. The order and
 payment views share the balance/allocation controls; shop/channel settings choose
-immediate capture or authorization. [Workflow and acceptance boundary](payment-capture-management.md).
+immediate capture or authorization. [Workflow and acceptance boundary](payments.md#capture-and-refund).
 These additions have local native-service acceptance. They are not yet a new
 public provider acceptance. The owner deferred external account tests until later.
 
@@ -429,6 +429,6 @@ parity remain in the comparison above. No bank or card network was charged.
 The feature branch adds source-backed invoice creation, pending-review recipient
 instructions, restart and lost-response recovery, exact native refunds and scoped
 HTTP/MCP reads. Actual local service/PG and explicit 17-method simulation checks
-passed. [Detailed contract and rollout prerequisites](payment-invoice-checkout.md).
+passed. [Detailed contract and rollout prerequisites](payments.md#invoice-payment-and-recipient-details).
 This does not change the public Storyfront acceptance recorded above. External
 provider tests remain deferred; no provider login or saved credential is needed.

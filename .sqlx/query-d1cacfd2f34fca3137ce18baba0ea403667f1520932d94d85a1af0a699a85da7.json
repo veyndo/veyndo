@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM sales_channels WHERE tenant=$1 AND id=$2 AND revision=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d1cacfd2f34fca3137ce18baba0ea403667f1520932d94d85a1af0a699a85da7"
+}

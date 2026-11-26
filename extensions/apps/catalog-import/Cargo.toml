@@ -1,0 +1,15 @@
+[package]
+name = "veyndo-catalog-import"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Catalogue import app: product drafts, Shopify exports and read-only Shop MCP searches"
+
+[dependencies]
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+veyndo-catalog = { path = "../../../components/catalog" }
+veyndo-core = { path = "../../../components/core" }
+veyndo-pricing = { path = "../../../components/pricing" }
+veyndo-shop = { path = "../../../components/shop" }

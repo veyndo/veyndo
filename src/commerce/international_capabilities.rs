@@ -1,5 +1,18 @@
 //! International configuration and translation MCP tools call the exact same scoped native handlers as HTTP.
-use super::*;
+use super::{get_scope, merchant_config, method_dependencies, save_config, save_scope};
+use crate::foundation::App;
+use crate::{auth, translations};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
 pub(crate) fn international_permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.commerce.read" | "merchant.commerce.dependencies" => Some("settings.read"),
@@ -11,6 +24,26 @@ pub(crate) fn international_permission(name: &str) -> Option<&'static str> {
         _ => None,
     }
 }
+/// The arguments an international commerce capability takes from its call.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InternationalArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    area: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    method_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    cursor: Option<String>,
+    action: Value,
+    product_id: Value,
+    #[serde(deserialize_with = "lenient")]
+    after_product_id: Option<String>,
+}
+
 pub(crate) async fn international_invoke(
     a: &App,
     h: &RequestContext,
@@ -23,18 +56,19 @@ pub(crate) async fn international_invoke(
     )?;
     let state = State(a.clone());
     let headers = h.clone();
-    let id = || {
-        v["id"]
-            .as_str()
-            .map(String::from)
-            .ok_or(bad("Translation ID required"))
-    };
+    let args: InternationalArgs = view(v);
+    let id = || args.id.clone().ok_or(bad("Translation ID required"));
     let Json(result) = match name {
         "merchant.commerce.read" => {
-            if let Some(channel) = v["channelId"].as_str() {
-                get_scope(state, headers, Path(channel.into())).await?
+            if let Some(channel) = args.channel_id.as_deref() {
+                get_scope(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Path(channel.into()),
+                )
+                .await?
             } else {
-                merchant_config(state, headers).await?
+                merchant_config(State(axum::extract::FromRef::from_ref(a)), headers).await?
             }
         }
         "merchant.commerce.dependencies" => {
@@ -42,47 +76,52 @@ pub(crate) async fn international_invoke(
                 state,
                 headers,
                 Path((
-                    v["area"]
-                        .as_str()
-                        .ok_or(bad("Method area required"))?
-                        .into(),
-                    v["methodId"]
-                        .as_str()
-                        .ok_or(bad("Method ID required"))?
-                        .into(),
+                    args.area.clone().ok_or(bad("Method area required"))?,
+                    args.method_id.clone().ok_or(bad("Method ID required"))?,
                 )),
             )
             .await?
         }
         "merchant.commerce.save" => {
-            if let Some(channel) = v["channelId"].as_str() {
-                save_scope(state, headers, Path(channel.into()), Json(v.clone())).await?
+            if let Some(channel) = args.channel_id.as_deref() {
+                save_scope(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Path(channel.into()),
+                    Json(v.clone()),
+                )
+                .await?
             } else {
-                save_config(state, headers, Json(v.clone())).await?
+                save_config(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Json(v.clone()),
+                )
+                .await?
             }
         }
-        "merchant.translations.list" => translations::list(state, headers).await?,
+        "merchant.translations.list" => translations::list(State(a.core.clone()), headers).await?,
         "merchant.translations.create" => {
             translations::create(state, headers, Json(v.clone())).await?
         }
         "merchant.translations.detail" => {
             translations::detail(
-                state,
+                State(a.core.clone()),
                 headers,
                 Path(id()?),
                 axum::extract::Query(HashMap::from([(
                     "cursor".into(),
-                    v["cursor"].as_str().unwrap_or("").into(),
+                    args.cursor.clone().unwrap_or_default(),
                 )])),
             )
             .await?
         }
         "merchant.translations.control" => {
             translations::control(
-                state,
+                State(a.core.clone()),
                 headers,
                 Path(id()?),
-                Json(json!({"action":v["action"]})),
+                Json(json!({"action":args.action})),
             )
             .await?
         }
@@ -91,44 +130,108 @@ pub(crate) async fn international_invoke(
                 state,
                 headers,
                 Path(id()?),
-                Json(json!({"productId":v["productId"]})),
+                Json(json!({"productId":args.product_id})),
             )
             .await?
         }
         _ => return Err(bad("Unknown international capability")),
     };
-    if name == "merchant.commerce.read" && v["area"] == "aiPolicy" {
-        return Ok(price_policy_view(&result, v["afterProductId"].as_str()));
+    if name == "merchant.commerce.read" && args.area.as_deref() == Some("aiPolicy") {
+        return Ok(price_policy_view(&result, args.after_product_id.as_deref()));
     }
     Ok(result)
 }
+/// The JSON fields `price_policy_view` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PricePolicyViewInput {
+    #[serde(deserialize_with = "lenient")]
+    data: PolicyData,
+    revision: Value,
+}
+
+/// The settings parts the price policy view projects.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PolicyData {
+    #[serde(deserialize_with = "lenient")]
+    ai_policy: AiPolicy,
+    #[serde(deserialize_with = "lenient")]
+    currencies: PolicyCurrencies,
+}
+
+/// The AI price policy: autonomy passes through, corridors are paged.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AiPolicy {
+    autonomy: Value,
+    #[serde(deserialize_with = "lenient")]
+    corridors: Vec<Value>,
+}
+
+/// The currency settings the view needs; values compare exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PolicyCurrencies {
+    pricing_currency: Value,
+    #[serde(deserialize_with = "lenient")]
+    definitions: Vec<Value>,
+}
+
+/// The fields of one corridor the view sorts, pages and matches by.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Corridor {
+    product_id: Value,
+    currency: Value,
+}
+
+/// The fields of one currency definition the view keeps.
+#[derive(Deserialize, Default, Serialize)]
+#[serde(default)]
+struct Definition {
+    code: Value,
+    scale: Value,
+}
+
 /// Small native projection for the existing MCP/planner read, preserving exact amounts and pagination.
 fn price_policy_view(snapshot: &Value, after: Option<&str>) -> Value {
-    let data = &snapshot["data"];
-    let mut rows = data["aiPolicy"]["corridors"]
-        .as_array()
-        .cloned()
-        .unwrap_or_default();
-    rows.sort_by(|a, b| a["productId"].as_str().cmp(&b["productId"].as_str()));
+    let input: PricePolicyViewInput = view(snapshot);
+    let PolicyData {
+        ai_policy,
+        currencies,
+    } = input.data;
+    let mut rows = ai_policy
+        .corridors
+        .into_iter()
+        .map(|row| (view::<Corridor>(&row), row))
+        .collect::<Vec<_>>();
+    rows.sort_by(|a, b| a.0.product_id.as_str().cmp(&b.0.product_id.as_str()));
     let total = rows.len();
     let remaining = rows
         .iter()
-        .filter(|r| {
-            after.is_none_or(|cursor| r["productId"].as_str().is_some_and(|id| id > cursor))
+        .filter(|(r, _)| {
+            after.is_none_or(|cursor| r.product_id.as_str().is_some_and(|id| id > cursor))
         })
         .collect::<Vec<_>>();
     let page = remaining.iter().take(8).copied().collect::<Vec<_>>();
-    let definitions = data["currencies"]["definitions"]
-        .as_array()
-        .into_iter()
-        .flatten()
+    let definitions = currencies
+        .definitions
+        .iter()
+        .map(view::<Definition>)
         .filter(|c| {
-            page.iter().any(|r| r["currency"] == c["code"])
-                || c["code"] == data["currencies"]["pricingCurrency"]
+            page.iter().any(|(r, _)| r.currency == c.code) || c.code == currencies.pricing_currency
         })
-        .map(|c| json!({"code":c["code"],"scale":c["scale"]}))
         .collect::<Vec<_>>();
-    json!({"revision":snapshot["revision"],"data":{"aiPolicy":{"autonomy":data["aiPolicy"]["autonomy"],"corridors":page},"currencies":{"pricingCurrency":data["currencies"]["pricingCurrency"],"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":if remaining.len()>8 {page.last().map(|r|r["productId"].clone()).unwrap_or(Value::Null)} else {Value::Null}})
+    let next = if remaining.len() > 8 {
+        page.last()
+            .map(|(r, _)| r.product_id.clone())
+            .unwrap_or(Value::Null)
+    } else {
+        Value::Null
+    };
+    let corridors = page.iter().map(|(_, row)| row).collect::<Vec<_>>();
+    json!({"revision":input.revision,"data":{"aiPolicy":{"autonomy":ai_policy.autonomy,"corridors":corridors},"currencies":{"pricingCurrency":currencies.pricing_currency,"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":next})
 }
 
 #[cfg(test)]

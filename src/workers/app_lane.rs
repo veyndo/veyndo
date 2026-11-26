@@ -1,7 +1,9 @@
 //! App jobs stop claiming work before shutdown and get a bounded window to save receipts.
-use crate::*;
+use crate::foundation::App;
+use crate::{apps, marketing};
 use std::{future::Future, time::Duration};
 use tokio::{sync::watch, task::JoinHandle};
+use veyndo_core::work_signal;
 
 mod queue_health;
 

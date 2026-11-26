@@ -99,20 +99,20 @@ may require reconnecting another integration using the same Google OAuth project
 
 For deployment, the optional `connected-apps` Compose profile builds the independent
 Rust service. Configuration, OAuth tokens, source exports and jobs use the shared
-PostgreSQL database (migration 049), encrypted with a persistent 32-byte URL-safe
-Base64 `CONNECTOR_SECRET_KEY`. The key format remains compatible with the original
-operator key, but old Fernet ciphertext needs the explicit offline migration below.
+PostgreSQL database (`extensions/services/connectors/migrations/0001-baseline.sql`),
+encrypted with a persistent 32-byte URL-safe Base64 `CONNECTOR_SECRET_KEY`.
 Set a random 32+ character `CONNECTOR_GATEWAY_TOKEN` and `CONNECTOR_DATABASE_URL`.
 Caddy serves the callback at `https://YOUR_COMMERCE_DOMAIN/connected-apps/oauth/callback`.
 Set `APP_SERVICES` entries such as `https://YOUR_COMMERCE_DOMAIN/connected-apps/gmail`
 with that gateway token; preserve Storyfront/custom app entries. Neither provider
 credentials nor the gateway token reach the public frontend. A startup health check
-requires migration 049; deploy migrations before restarting the service.
+requires the recorded `connectors/0001-baseline`; run the commerce setup before
+starting the service.
 
 Multiple instances claim PostgreSQL jobs with row locks, tenant admission and fenced
 leases. Mailbox imports have separate workers from notifications. Expired leases become
 `uncertain`; starting another instance never steals an unexpired lease. See
-[the runtime architecture, quotas and migration](rust-services.md).
+[the runtime architecture, quotas and schema](rust-services.md).
 
 The Slack implementation supports the ordinary non-rotating bot token setup. Slack
 rotating refresh tokens, Gmail attachment ingestion, unbounded mailbox backfills and
@@ -151,9 +151,7 @@ The current executable production inventory is
 native scope bindings, and 16 Core action names. The graphical builder supports
 branches, sequences, saved references, durable delays and typed domain/app
 nodes. Complete source behavior, original trigger coverage, configuration/UUID
-mapping and FlowSequence interchange remain incomplete. The older
-`reference/rule-catalog.json` is a historical regex inventory, not the current
-production count. [Automation details](automation.md) and the
+mapping and FlowSequence interchange remain incomplete. [Automation details](automation.md) and the
 [provider-free playground](playground.md) explain what can actually be tried.
 
 ## Delivery semantics and tests
@@ -168,7 +166,6 @@ it is not an exactly-once guarantee across Slack's external network.
 python3 scripts/connector_store_tests.py
 python3 scripts/connected_apps.py
 node frontend/tests/analytics.mjs
-python3 scripts/rule_differential.py
 ```
 
 The integration suite uses real local HTTP OAuth/provider fixtures plus the actual Rust

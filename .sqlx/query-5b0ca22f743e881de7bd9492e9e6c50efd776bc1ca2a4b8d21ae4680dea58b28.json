@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('productId',product_id,'sourceAuthor',author,'rating',rating,'title',title,'text',content,'verifiedPurchase',verified,'sourceDigest',source_import->>'recordDigest','createdAt',to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')) AS \"value!\" FROM product_reviews WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "value!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5b0ca22f743e881de7bd9492e9e6c50efd776bc1ca2a4b8d21ae4680dea58b28"
+}

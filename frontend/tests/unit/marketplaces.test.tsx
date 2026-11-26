@@ -8,7 +8,7 @@ import {
   fields,
 } from "../../../extensions/apps/marketplaces/studio/marketplace-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AppsManager from "../../src/admin/apps/AppsManager";
+import AppsManager from "../../../components/apps/ui/admin/apps/AppsManager";
 import manifest from "../../../extensions/apps/marketplaces/manifest.json";
 const connection = {
   id: "amazon",
@@ -211,7 +211,8 @@ it("renders background progress in interface language rather than product editin
       },
     ],
   }));
-  const { default: AppJobs } = await import("../../src/admin/apps/AppJobs");
+  const { default: AppJobs } =
+    await import("../../../components/apps/ui/admin/apps/AppJobs");
   render(
     <LocaleProvider>
       <AppJobs app="marketplaces" request={request} />

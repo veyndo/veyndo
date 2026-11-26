@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(source_cart_id,cart_id) AS \"owner!\" FROM privacy_consents WHERE tenant=$1 AND cart_id=$2 AND channel_id=$3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "27c150490c53498dad7dab273cd8eec9ada72c725f45487c83278b34edb042b0"
+}

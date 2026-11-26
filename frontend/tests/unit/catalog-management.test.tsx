@@ -3,12 +3,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ProductDataView from "../../src/admin/catalog/ProductDataView";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
+import ProductDataView from "../../../components/catalog/ui/admin/catalog/ProductDataView";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
 import RichDescription from "../../src/shared/content/RichDescription";
 import { editorDocument } from "../../src/shared/content/editor/rich-conversion";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
-import { orderedCategories } from "../../src/admin/catalog/CategoriesWorkspace";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import { orderedCategories } from "../../../components/catalog/ui/admin/catalog/CategoriesWorkspace";
 vi.mock("../../src/shared/apps/AppSurfaces", async (original) => ({
   ...(await original<typeof import("../../src/shared/apps/AppSurfaces")>()),
   AppSurfaceSlot: () => null,
@@ -84,6 +84,33 @@ it("creates a revision-zero aggregate without fabricating translations", async (
   expect(payload.translations.de.name).toBeNull();
   expect(payload.catalog.active).toBe(false);
   expect(payload).not.toHaveProperty("id");
+});
+it("asks for the main-language name instead of sending an empty one", async () => {
+  const user = userEvent.setup();
+  const request = vi.fn(async () => ({ id: "created", revision: 1 }));
+  render(
+    <LocaleProvider>
+      <ProductEditor
+        id=""
+        request={request}
+        categories={[]}
+        onBack={vi.fn()}
+        onCreated={vi.fn()}
+      />
+    </LocaleProvider>,
+  );
+  const language = screen.getByLabelText("Content language");
+  await user.selectOptions(language, "de");
+  await user.type(screen.getByLabelText("Name"), "Leinenhemd");
+  await user.type(screen.getByLabelText("Product number"), "LIN-1");
+  await user.click(screen.getByRole("button", { name: "Save product" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Enter the product name in the shop's main language.",
+  );
+  expect(language).toHaveValue("en");
+  expect(request.mock.calls.some((args: any) => args[2] === "POST")).toBe(
+    false,
+  );
 });
 it("retains dirty edits after a conflict and requires an explicit discard when leaving", async () => {
   const user = userEvent.setup();

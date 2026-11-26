@@ -1,0 +1,170 @@
+//! Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate.
+use crate::domain::company_model::CompanyFields;
+use crate::store::order_mutation::Tx;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::{Result, bad, conflict};
+
+pub async fn snapshot(
+    tx: &mut Tx<'_>,
+    t: &str,
+    result: &mut serde_json::Map<String, Value>,
+) -> Result<()> {
+    if let Some(data) = sqlx::query_scalar!(
+        "SELECT data FROM receipt_settings WHERE tenant=$1 FOR UPDATE",
+        t
+    )
+    .fetch_optional(&mut **tx)
+    .await?
+    {
+        result.insert("company".into(), profile(tx, t, data).await?);
+    }
+    for row in sqlx::query!("SELECT channel_id,data FROM company_overrides WHERE tenant=$1 ORDER BY channel_id FOR UPDATE", t).fetch_all(&mut **tx).await?{
+  result.insert(format!("company-channel:{}",row.channel_id),profile(tx,t,row.data).await?);
+ }
+    Ok(())
+}
+/// The digest of the logo a staged company profile links, so the release can find or copy it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LogoDigest {
+    logo_digest: String,
+}
+
+/// The live logo a released company profile links.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LogoId {
+    logo_id: String,
+}
+
+async fn profile(tx: &mut Tx<'_>, t: &str, data: Value) -> Result<Value> {
+    let logo = view::<CompanyFields>(&data).logo_id;
+    let mut result = json!({"data":data});
+    if let Some(id) = logo.as_str().filter(|s| !s.is_empty()) {
+        let digest: String = sqlx::query_scalar!(
+            "SELECT digest FROM company_logos WHERE tenant=$1 AND id=$2",
+            t,
+            id
+        )
+        .fetch_one(&mut **tx)
+        .await?;
+        merge(
+            &mut result,
+            LogoDigest {
+                logo_digest: digest,
+            },
+        )?;
+    }
+    Ok(result)
+}
+/// The JSON fields `publish` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PublishInput {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    logo_digest: Option<String>,
+}
+
+pub async fn publish(
+    tx: &mut Tx<'_>,
+    live: &str,
+    stage: &str,
+    key: &str,
+    value: &Value,
+) -> Result<()> {
+    let input: PublishInput = view(value);
+    let mut data = input.data.clone();
+    if let Some(id) = view::<CompanyFields>(&data)
+        .logo_id
+        .as_str()
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+    {
+        let existing: Option<String> = sqlx::query_scalar!(
+            "SELECT id FROM company_logos WHERE tenant=$1 AND digest=$2",
+            live,
+            input.logo_digest.as_deref()
+        )
+        .fetch_optional(&mut **tx)
+        .await?;
+        if let Some(existing) = existing {
+            merge(&mut data, LogoId { logo_id: existing })?;
+        } else {
+            let n=sqlx::query!("INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) SELECT $1,id,content,digest,mime,width,height FROM company_logos WHERE tenant=$2 AND id=$3 AND digest=$4 ON CONFLICT(tenant,id) DO UPDATE SET digest=company_logos.digest WHERE company_logos.digest=EXCLUDED.digest", live, stage, id, input.logo_digest.as_deref()).execute(&mut **tx).await?.rows_affected();
+            if n != 1 {
+                return Err(conflict("Company logo changed or unavailable"));
+            }
+        }
+    }
+    if key == "company" {
+        sqlx::query!("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1", live, data).execute(&mut **tx).await?;
+    } else {
+        let channel = key
+            .strip_prefix("company-channel:")
+            .ok_or(bad("Invalid company release scope"))?;
+        sqlx::query!("INSERT INTO company_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=company_overrides.revision+1", live, channel, data).execute(&mut **tx).await?;
+    }
+    veyndo_core::store::outbox::publish_on(
+        &mut **tx,
+        live,
+        "settings.master_data_changed",
+        &json!({"release":key}),
+    )
+    .await?;
+    Ok(())
+}
+
+/// Return the canonical published unit after digest deduplication; baseline must match actual live IDs.
+pub async fn live_value(tx: &mut Tx<'_>, t: &str, key: &str) -> Result<Value> {
+    let data: Value = if key == "company" {
+        sqlx::query_scalar!("SELECT data FROM receipt_settings WHERE tenant=$1", t)
+            .fetch_one(&mut **tx)
+            .await?
+    } else {
+        sqlx::query_scalar!(
+            "SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
+            t,
+            &key[16..]
+        )
+        .fetch_one(&mut **tx)
+        .await?
+    };
+    profile(tx, t, data).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{LogoDigest, LogoId};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed release patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_release_patches_match_the_indexed_writes() {
+        let mut indexed = json!({"data":{"logoId":"l1"}});
+        indexed["logoDigest"] = json!("abc");
+        let mut typed = json!({"data":{"logoId":"l1"}});
+        merge(
+            &mut typed,
+            LogoDigest {
+                logo_digest: "abc".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+        let mut indexed = json!({"logoId":"stage"});
+        indexed["logoId"] = json!("live");
+        let mut typed = json!({"logoId":"stage"});
+        merge(
+            &mut typed,
+            LogoId {
+                logo_id: "live".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
+}

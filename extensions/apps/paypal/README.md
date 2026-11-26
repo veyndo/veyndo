@@ -3,7 +3,9 @@
 The package owns its Manifest and `src/` implementation: Orders v2 wire calls,
 account/admission mapping, receipt interpretation and webhook signature verification. The payment core
 retains its shared attempt ledger, reservations, jobs, receipt policies and remote
-provider contract; it references these app-owned files without copying them.
+provider contract. The package is the `veyndo-paypal` crate: the server calls
+its adapter, receipt and webhook functions, and receipts reach the order ledger
+only through the payments `Host` port.
 
 **Execution boundary:** this legacy adapter is still host-native to preserve
 already configured PayPal attempts and the existing webhook route. Folder ownership

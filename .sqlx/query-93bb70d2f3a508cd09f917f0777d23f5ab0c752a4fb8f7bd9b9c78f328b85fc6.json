@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(jsonb_object_agg(status,n),'{}') AS \"counts!\" FROM (SELECT status,count(*) AS n FROM translation_items WHERE tenant=$1 AND job_id=$2 GROUP BY status) s",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "counts!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "93bb70d2f3a508cd09f917f0777d23f5ab0c752a4fb8f7bd9b9c78f328b85fc6"
+}

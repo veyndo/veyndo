@@ -6,7 +6,7 @@ and licenses of external dependencies and datasets, remain unchanged. Previously
 distributed MIT versions retain their original terms; see [licensing](docs/licensing.md).
 
 The quantity calculation and proportional delivery-tax allocation behavior in
-`src/pricing.rs`, context/tier/quantity selection behavior in `src/context.rs`,
+`components/pricing/src/domain/pricing.rs`, context/tier/quantity selection behavior in `components/pricing/src/domain/context.rs`,
 and numeric epsilon/null comparison semantics in `crates/automation/src/rule_comparison.rs`,
 are partial behavioral
 port of Shopware Core 6.7.14.2, reference commit
@@ -33,13 +33,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-`reference/price.php`, `reference/context.php`, `reference/delivery.php`, and `reference/rules.php`
-instantiate the original installed upstream classes;
-the repository does not vendor Shopware, a commercial B2B package, or a model.
-PHP rounding behavior was checked against the official PHP 8.5 runtime and
-https://github.com/php/php-src/blob/PHP-8.5/ext/standard/math.c . No PHP C
-source is bundled. The reference assumes default PHP `precision=14` and the
-PHP 8.4+ decimal rounding behavior. Other runtime settings require a new gate.
 
 All catalog products, accounts and vector illustrations are synthetic demo
 content authored for this prototype. No merchant/customer data is included.
@@ -65,6 +58,14 @@ required. Model-provider APIs remain optional external services.
 provides CPU limits and Linux address-space limits for its child process.
 Dependencies remain external registry packages and retain their bundled license files.
 No OCR, parser microVM, or arbitrary customer-code execution is implied.
+
+## Test-only tools
+
+`proptest` 1.x (MIT OR Apache-2.0) generates inputs for the property tests of the
+pricing, inventory, orders, payments, checkout and marketing crates. It is a
+dev-dependency only (`scripts/testing/workspace_boundaries.py` refuses it anywhere
+else) and is never part of a production build. `cargo-mutants` (MIT) is installed
+on demand into `target/tools` for the mutation run; it is not a dependency.
 
 ## Bundled geography
 

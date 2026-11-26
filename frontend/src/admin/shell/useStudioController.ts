@@ -6,7 +6,7 @@ import { type AppSurface } from "../../shared/apps/AppSurfaces";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
-import { type Environment } from "../environments/EnvironmentManager";
+import { type Environment } from "../../../../components/studio/ui/admin/environments/EnvironmentManager";
 import type { Message, Overview, Provider, StudioNotice } from "./studio-types";
 
 import { useDesignHandoff } from "./useDesignHandoff";
@@ -20,7 +20,7 @@ import { useStudioAccess } from "./useStudioAccess";
 import { useChatTurns } from "./useChatTurns";
 import { useStudioEnvironment } from "./useStudioEnvironment";
 import { useStudioTheme } from "./useStudioTheme";
-import { useCopilotDock } from "../assistant/useCopilotDock";
+import { useCopilotDock } from "../../../../components/intelligence/ui/admin/assistant/useCopilotDock";
 import { useAgentWorkspaceContext } from "./useAgentWorkspaceContext";
 
 export function useStudioController({
@@ -189,6 +189,8 @@ export function useStudioController({
       setConnectionPending(false);
       return;
     }
+    // shell-effect: the connection handshake verifies access first and only then
+    // loads the shell's own state, deciding together whether Studio is connected.
     // Refresh translated context without unmounting open editors. Auth and
     // tenant/environment changes still require a newly verified connection.
     if (connectionScope.current !== scope) setConnected(false);

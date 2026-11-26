@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [".", "crates/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime"]
+members = [".", "crates/*", "components/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime", "extensions/services/connectors", "extensions/services/connector-runtime", "extensions/apps/paypal", "extensions/apps/site-builder", "extensions/apps/site-forms", "extensions/apps/email", "extensions/apps/gmail", "extensions/apps/google-analytics", "extensions/apps/slack", "extensions/apps/algolia", "extensions/apps/contentful", "extensions/apps/hubspot", "extensions/apps/klaviyo", "extensions/apps/vercel", "extensions/apps/catalog-import"]
 
 [workspace.package]
 version = "0.5.0"
@@ -44,6 +44,7 @@ webpki-roots = "1"
 rustls-pemfile = "2"
 scraper = "0.24"
 json-patch = "4.2.0"
+proptest = { version = "1.7", default-features = false, features = ["std"] }
 
 
 [package]
@@ -65,13 +66,33 @@ path = "extensions/apps/edi/service/main.rs"
 [dependencies]
 tracing.workspace = true
 veyndo-kernel = { path = "crates/kernel" }
+veyndo-connectors = { path = "extensions/services/connectors" }
+veyndo-paypal = { path = "extensions/apps/paypal" }
+veyndo-site-builder = { path = "extensions/apps/site-builder" }
+veyndo-site-forms = { path = "extensions/apps/site-forms" }
+veyndo-core = { path = "components/core" }
+veyndo-identity = { path = "components/identity" }
 veyndo-automation = { path = "crates/automation" }
 veyndo-flow-graph = { path = "crates/flow-graph" }
 veyndo-app-model = { path = "extensions/services/app-storage/model" }
 veyndo-app-storage = { path = "extensions/services/app-storage" }
 veyndo-runtime = { path = "crates/runtime" }
-veyndo-commerce = { path = "crates/commerce" }
+veyndo-pricing = { path = "components/pricing" }
+veyndo-catalog = { path = "components/catalog" }
+veyndo-inventory = { path = "components/inventory" }
+veyndo-shipping = { path = "components/shipping" }
+veyndo-customers = { path = "components/customers" }
+veyndo-shop = { path = "components/shop" }
+veyndo-marketing = { path = "components/marketing" }
+veyndo-orders = { path = "components/orders" }
+veyndo-payments = { path = "components/payments" }
+veyndo-b2b = { path = "components/b2b" }
+veyndo-pos = { path = "components/pos" }
+veyndo-checkout = { path = "components/checkout" }
+veyndo-intelligence = { path = "components/intelligence" }
+veyndo-studio = { path = "components/studio" }
 veyndo-apps = { path = "crates/apps" }
+veyndo-app-platform = { path = "components/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"
 aes-gcm = "0.10.3"
@@ -108,6 +129,9 @@ webpki-roots = "1"
 rustls-pemfile = "2"
 scraper = "0.24"
 json-patch = "4.2.0"
+
+[dev-dependencies]
+veyndo-port-contracts = { path = "crates/port-contracts" }
 
 [profile.release]
 lto = "thin"

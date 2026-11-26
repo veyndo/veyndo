@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO ai_price_budget(tenant,day,product_id,baseline_minor,currency,task_id,actor) VALUES($1,(now() AT TIME ZONE 'UTC')::date,$2,$3,$4,$5,$6) ON CONFLICT(tenant,day,product_id) DO UPDATE SET task_id=EXCLUDED.task_id RETURNING baseline_minor",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "baseline_minor",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "ai_price_budget",
+            "name": "baseline_minor"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d9980df9e1d224075c272a6700b512cc28c9233c87b818362948fa05878e7318"
+}

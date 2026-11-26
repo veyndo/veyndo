@@ -1,0 +1,163 @@
+/** Metadata-only credentials screen; rotation sends plaintext once to the encrypted server store. */
+import type { ApiPath } from "../../../../../frontend/src/kit/api";
+import {
+  Button,
+  Field,
+  Notice,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import { useEffect, useState } from "react";
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import {
+  useRead,
+  useSetRead,
+} from "../../../../../frontend/src/admin/shell/useRead";
+import ConfirmDialog from "../../../../../frontend/src/shared/ui/ConfirmDialog";
+import { useAppAccessText } from "../../../../../frontend/src/shared/i18n/app-access-i18n";
+type Kind = "service" | "webhook" | "outbound";
+type Secrets = {
+  digest: string;
+  kinds: Kind[];
+  canManage: boolean;
+  encryptionReady: boolean;
+  secrets: {
+    kind: Kind;
+    revision: number;
+    rotatedAt: string;
+    packageDigest: string;
+  }[];
+};
+export default function AppSecrets({
+  app,
+  request,
+}: {
+  app: string;
+  request: RequestFn;
+}) {
+  const t = useAppAccessText();
+  const [kind, setKind] = useState<Kind>("service"),
+    [secret, setSecret] = useState(""),
+    [busy, setBusy] = useState(false),
+    [confirm, setConfirm] = useState(false),
+    [actionError, setError] = useState(""),
+    [notice, setNotice] = useState(false);
+  const secretsPath: ApiPath = `/api/apps/${app}/secrets`;
+  const secretsRead = useRead<Secrets>(request, secretsPath);
+  const setRead = useSetRead(request);
+  const data = secretsRead.data ?? null;
+  const error =
+    actionError || (secretsRead.error as Error | undefined)?.message || "";
+  useEffect(() => {
+    setSecret("");
+    setError("");
+    setNotice(false);
+    setConfirm(false);
+  }, [app]);
+  // The first offered kind is preselected once the app's secrets arrive.
+  const firstKind = data?.kinds[0];
+  useEffect(() => {
+    setKind(firstKind ?? "service");
+  }, [app, firstKind]);
+  const rotate = async () => {
+    if (!data) return;
+    setBusy(true);
+    setError("");
+    setNotice(false);
+    try {
+      await request(
+        `/api/apps/${app}/secrets/${kind}`,
+        {
+          approve: true,
+          digest: data.digest,
+          revision: data.secrets.find((s) => s.kind === kind)?.revision ?? 0,
+          secret,
+        },
+        "PUT",
+      );
+      setSecret("");
+      setConfirm(false);
+      setRead(secretsPath, await request(secretsPath));
+      setNotice(true);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (data && !data.kinds.length) return null;
+  return (
+    <section className="app-contract-summary">
+      <h3>{t("secretTitle")}</h3>
+      <p>{t("secretHint")}</p>
+      {data && !data.encryptionReady && (
+        <Notice tone="danger">{t("encryptedUnavailable")}</Notice>
+      )}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setConfirm(true);
+        }}
+      >
+        <fieldset
+          disabled={busy || !data?.canManage || !data?.encryptionReady}
+          className="app-access-permissions"
+        >
+          <Field label={t("secretTitle")}>
+            <Select
+              value={kind}
+              onChange={(e) => {
+                setKind(e.target.value as Kind);
+                setSecret("");
+                setNotice(false);
+              }}
+            >
+              {data?.kinds.map((k) => (
+                <option key={k} value={k}>
+                  {t(k)}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label={t("secretValue")}>
+            <TextInput
+              type="password"
+              autoComplete="new-password"
+              value={secret}
+              minLength={32}
+              maxLength={4096}
+              required
+              onChange={(e) => setSecret(e.target.value)}
+            />
+          </Field>
+          <Button tone="primary" type="submit" disabled={secret.length < 32}>
+            {t("rotate")}
+          </Button>
+        </fieldset>
+      </form>
+      {data?.secrets.map((s) => (
+        <div className="app-access-key" key={s.kind}>
+          <strong>{t(s.kind)}</strong>
+          <code>v{s.revision}</code>
+          <time dateTime={s.rotatedAt}>
+            {new Date(s.rotatedAt).toLocaleString()}
+          </time>
+          {s.packageDigest !== data.digest && <small>{t("expired")}</small>}
+        </div>
+      ))}
+      {notice && <p role="status">{t("rotated")}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
+      {confirm && (
+        <ConfirmDialog
+          title={t("rotate")}
+          confirmLabel={t("rotate")}
+          disabled={busy}
+          onCancel={() => setConfirm(false)}
+          onConfirm={() => void rotate()}
+        >
+          <p>{t("rotateHint")}</p>
+        </ConfirmDialog>
+      )}
+    </section>
+  );
+}

@@ -1,11 +1,33 @@
 //! Standard-shop page contract. App-owned content and theme validation; no HTML, CSS or script evaluation.
-use super::*;
+use axum::Router;
+use axum::extract::FromRef;
+use serde::Deserialize;
+use serde::Serialize;
+use serde_json::Value;
+use std::collections::HashMap;
+use std::sync::Arc;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 mod block_validation;
 mod context;
-pub(crate) mod design_agent;
+pub mod design_agent;
 mod elements;
+mod part_schemas;
 mod planning;
-pub(crate) fn router() -> Router<App> {
+pub mod ports;
+pub use ports::SiteHost;
+/// What the site builder routes extract from the server state: the host port of this process.
+#[derive(Clone)]
+pub struct SiteState(pub Arc<dyn SiteHost>);
+
+/// The page context and design routes; the server provides `SiteState` from its own state.
+pub fn router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    SiteState: FromRef<S>,
+{
     Router::new()
         .merge(context::router())
         .merge(design_agent::router())
@@ -38,6 +60,16 @@ pub(crate) struct Block {
     pub fields: Vec<FormField>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub extension: Option<ElementRef>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub part: Option<PartRef>,
+}
+/// A storefront-kit part placed on a page; its configuration follows `part-schemas.json`.
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct PartRef {
+    pub id: String,
+    pub version: u64,
+    pub config: Value,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -64,22 +96,33 @@ struct Theme {
     spacing: Option<u8>,
     columns: Option<u8>,
 }
-pub(crate) fn normalize(v: &Value) -> Result<Value> {
+pub fn normalize(v: &Value) -> Result<Value> {
     let mut next = v.clone();
     let content: Content =
         serde_json::from_value(next["content"].clone()).map_err(|_| bad("Invalid page blocks"))?;
     next["content"] = serde_json::to_value(content).map_err(|_| bad("Invalid page blocks"))?;
     Ok(next)
 }
-pub(crate) fn validate(entity: &str, v: &Value) -> Result<()> {
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    content: Value,
+    theme: Value,
+    #[serde(deserialize_with = "lenient")]
+    slug: Option<String>,
+}
+
+pub fn validate(entity: &str, v: &Value) -> Result<()> {
+    let input: ValidateInput = view(v);
     if entity != "pages" {
         return Err(bad("Unknown site model"));
     }
     let content: Content =
-        serde_json::from_value(v["content"].clone()).map_err(|_| bad("Invalid page blocks"))?;
+        serde_json::from_value(input.content.clone()).map_err(|_| bad("Invalid page blocks"))?;
     let theme: Theme =
-        serde_json::from_value(v["theme"].clone()).map_err(|_| bad("Invalid shop theme"))?;
-    let slug = v["slug"].as_str().unwrap_or("");
+        serde_json::from_value(input.theme.clone()).map_err(|_| bad("Invalid shop theme"))?;
+    let slug = input.slug.as_deref().unwrap_or("");
     if slug.is_empty()
         || slug.len() > 100
         || !slug
@@ -120,13 +163,28 @@ fn safe_image(s: &str) -> bool {
             u.scheme() == "https" && u.username().is_empty() && u.password().is_none()
         })
 }
-pub(crate) async fn validate_owned(
+/// The JSON fields `validate_owned` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateOwnedInput {
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    slug: Option<String>,
+    content: Value,
+}
+
+pub async fn validate_owned(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
     v: &Value,
     record_id: &str,
 ) -> Result<()> {
-    let channel = v["channel"].as_str().ok_or(bad("Page channel required"))?;
+    let input: ValidateOwnedInput = view(v);
+    let channel = input
+        .channel
+        .as_deref()
+        .ok_or(bad("Page channel required"))?;
     if channel != "*"
         && !sqlx::query_scalar::<_, bool>(
             "SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)",
@@ -149,7 +207,7 @@ pub(crate) async fn validate_owned(
     if sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM app_records WHERE tenant=$1 AND app='site_builder' AND entity='pages' AND fields->>'channel'=$2 AND fields->>'slug'=$3 AND id<>$4)")
         .bind(t)
         .bind(channel)
-        .bind(v["slug"].as_str())
+        .bind(input.slug.as_deref())
         .bind(record_id)
         .fetch_one(&mut **tx)
         .await?
@@ -160,9 +218,9 @@ pub(crate) async fn validate_owned(
         .bind(t)
         .fetch_one(&mut **tx)
         .await?;
-    let settings = commerce::decode_config(settings)?;
+    let settings = veyndo_shop::domain::defaults::decode(settings)?;
     let content: Content =
-        serde_json::from_value(v["content"].clone()).map_err(|_| bad("Invalid page"))?;
+        serde_json::from_value(input.content.clone()).map_err(|_| bad("Invalid page"))?;
     for b in content.blocks {
         if let Some(element) = &b.extension {
             elements::validate_owned(tx, t, element).await?;
@@ -191,7 +249,12 @@ pub(crate) async fn validate_owned(
             ));
         }
 
-        for id in b.products {
+        let part_products = b
+            .part
+            .as_ref()
+            .and_then(|p| part_schemas::validate(&p.id, p.version, &p.config).ok())
+            .unwrap_or_default();
+        for id in b.products.into_iter().chain(part_products) {
             if !sqlx::query_scalar::<_, bool>(
                 "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
             )
@@ -206,11 +269,12 @@ pub(crate) async fn validate_owned(
     }
     Ok(())
 }
-pub(crate) use planning::contract as planning_contract;
+pub use planning::contract as planning_contract;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
     #[test]
     fn page_rejects_scripts_unbounded_theme_and_duplicate_ids() {
         let mut v = json!({"slug":"home","content":{"blocks":[]},"theme":{}});
@@ -220,5 +284,24 @@ mod tests {
         v["theme"] = json!({});
         v["content"]["blocks"] = json!([{"id":"x","kind":"image","image":"javascript:alert(1)"}]);
         assert!(validate("pages", &v).is_err());
+    }
+    #[test]
+    fn placed_parts_follow_their_generated_contract() {
+        let part = json!({"id":"product-card","version":1,"config":{"productId":"bag"}});
+        let mut v = json!({"slug":"home","theme":{},"content":{"blocks":[
+            {"id":"spotlight","kind":"part","part":part}
+        ]}});
+        assert!(validate("pages", &v).is_ok());
+        v["content"]["blocks"][0]["kind"] = json!("text");
+        assert!(validate("pages", &v).is_err(), "part only on kind=part");
+        v["content"]["blocks"][0] = json!({"id":"spotlight","kind":"part"});
+        assert!(validate("pages", &v).is_err(), "kind=part needs a part");
+        v["content"]["blocks"][0] = json!({"id":"spotlight","kind":"part",
+            "part":{"id":"product-card","version":1,"config":{}}});
+        let error = validate("pages", &v).unwrap_err().1;
+        assert!(
+            error.contains("content.blocks[0].part.config.productId"),
+            "{error}"
+        );
     }
 }

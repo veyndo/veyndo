@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE app_schedules SET next_run=$1::text::timestamptz WHERE tenant=$2 AND app=$3 AND id=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cfb2834efde32f6887b28944fa55b760ff0b4f9b6c2cb931f064899e4c758b5a"
+}

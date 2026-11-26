@@ -7,10 +7,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import ScenarioStudio from "../../src/admin/scenarios/ScenarioStudio";
-import { scenarioLabel } from "../../src/admin/scenarios/scenario-history";
+import ScenarioStudio from "../../../components/intelligence/ui/admin/scenarios/ScenarioStudio";
+import { scenarioLabel } from "../../../components/intelligence/ui/admin/scenarios/scenario-history";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { scenarioRights } from "../../src/admin/scenarios/scenario-access";
+import { scenarioRights } from "../../../components/intelligence/ui/admin/scenarios/scenario-access";
 const studio = vi.hoisted(() => ({
   environment: "draft",
   access: [] as string[],

@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import CommerceSettings from "../../src/admin/settings/CommerceSettings";
-import AiImageStudio from "../../src/admin/catalog/AiImageStudio";
+import CommerceSettings from "../../../components/shop/ui/admin/settings/CommerceSettings";
+import AiImageStudio from "../../../components/catalog/ui/admin/catalog/AiImageStudio";
 import settings from "../../../fixtures/demo-settings.json";
 it("edits one language, prevents a dirty scope switch and saves the channel's basis revision", async () => {
   const data = structuredClone(settings),

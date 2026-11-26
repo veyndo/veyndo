@@ -4,6 +4,7 @@ import { forgetCustomerSession } from "../../src/shared/api/customer-session";
 import { afterEach, beforeEach, vi } from "vitest";
 import { publishConsent } from "../../src/shared/legal/consent-store";
 import { cleanup } from "@testing-library/react";
+import { resetFallbackQueryCache } from "../../src/kit/query";
 const testWindow = (globalThis as unknown as { jsdom: { window: Window } })
   .jsdom.window;
 Object.defineProperty(globalThis, "localStorage", {
@@ -65,6 +66,7 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
+  resetFallbackQueryCache();
   cleanup();
   vi.useRealTimers();
   vi.restoreAllMocks();

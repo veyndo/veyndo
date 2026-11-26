@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_members(tenant,unit_id,customer_id,data) VALUES($1,$2,$3,$4) ON CONFLICT(tenant,unit_id,customer_id) DO UPDATE SET data=excluded.data,revision=b2b_members.revision+1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "063e121413cdfeff8f958f793303629e5167941937e88535c796ffce5c690228"
+}

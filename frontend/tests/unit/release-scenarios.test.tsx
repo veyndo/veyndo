@@ -7,9 +7,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import ReleaseScenarios from "../../src/admin/environments/ReleaseScenarios";
-import { scenarioRights } from "../../src/admin/scenarios/scenario-access";
-import type { Report } from "../../src/admin/scenarios/scenario-types";
+import ReleaseScenarios from "../../../components/studio/ui/admin/environments/ReleaseScenarios";
+import { scenarioRights } from "../../../components/intelligence/ui/admin/scenarios/scenario-access";
+import type { Report } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const render = (ui: React.ReactNode) =>
   baseRender(ui, { wrapper: LocaleProvider });

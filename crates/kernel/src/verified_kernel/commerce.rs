@@ -5,6 +5,10 @@ pub fn discount_cap(total: u64, requested: u64) -> u64 {
 pub fn stock_admissible(stock: u64, quantity: u64) -> bool {
     quantity > 0 && quantity <= stock
 }
+/// An order holds at most what it ordered: what it already holds plus a new reservation stays within the ordered quantity.
+pub fn reservation_admissible(ordered: u64, held: u64, requested: u64) -> bool {
+    held <= ordered && requested > 0 && requested <= ordered.saturating_sub(held)
+}
 pub fn refund_admissible(captured: u64, refunded: u64, requested: u64) -> bool {
     refunded <= captured && requested > 0 && requested <= captured.saturating_sub(refunded)
 }
@@ -80,4 +84,30 @@ pub fn external_paid_total_admissible(paid: bool, calculated: u64, declared: u64
 }
 pub fn admin_payment_admissible(is_admin: bool, manual: bool, simulated: bool) -> bool {
     !is_admin || manual || simulated
+}
+/// A signed offer is honoured only before it expires and only for the same cart, revision and total.
+pub fn offer_honoured(
+    expired: bool,
+    same_cart: bool,
+    same_revision: bool,
+    same_total: bool,
+) -> bool {
+    !expired && same_cart && same_revision && same_total
+}
+/// The sum of two amounts in minor units; it never wraps around.
+pub fn amount_sum(left: u64, right: u64) -> u64 {
+    left.saturating_add(right)
+}
+/// The net part of a gross amount in minor units; it is never negative.
+pub fn net_amount(gross: u64, tax: u64) -> u64 {
+    gross.saturating_sub(tax)
+}
+/// The amount of `quantity` units at `unit` minor units each; it never wraps around.
+pub fn line_total(unit: u64, quantity: u64) -> u64 {
+    unit.saturating_mul(quantity)
+}
+/// `numerator / denominator` in whole minor units, rounded to the nearest one with halves
+/// up (away from zero for a magnitude); a zero denominator counts as one.
+pub fn rounded_quotient(numerator: u64, denominator: u64) -> u64 {
+    numerator.saturating_add(denominator.max(1) / 2) / denominator.max(1)
 }

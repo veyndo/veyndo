@@ -1,6 +1,9 @@
 """Fail-closed typed Rust-to-Lean extraction. Trusted boundary: this translator,
-Rust/Lean compilers. Nat matches u64 for literals/min/saturating_sub/comparisons;
-no overflowing arithmetic, calls, casts, branches, macros or effects accepted.
+Rust/Lean compilers. Nat matches u64 for literals/min/max/saturating_sub/comparisons;
+saturating_add and saturating_mul are the sum and product capped at the largest u64;
+`/` is accepted only with a divisor that is a positive literal or `x.max(k)` with a
+positive literal `k`, so it is never a division by zero and Nat floor division matches
+u64 division. No overflowing arithmetic, calls, casts, branches, macros or effects accepted.
 """
 from dataclasses import dataclass
 import re
@@ -23,7 +26,7 @@ def kernel_source(root):
     return '\n'.join(sources)
 
 MAX_U64 = 2**64 - 1
-TOKEN = re.compile(r'\s*(->|&&|\|\||==|!=|<=|>=|[A-Za-z_][A-Za-z_0-9]*|[0-9]+|[():{},.!<>])')
+TOKEN = re.compile(r'\s*(->|&&|\|\||==|!=|<=|>=|[A-Za-z_][A-Za-z_0-9]*|[0-9]+|[():{},.!<>/])')
 @dataclass
 class Expr:
     kind: str
@@ -34,7 +37,12 @@ class Expr:
         if self.kind == 'leaf': return self.value
         if self.kind == 'not': return f'(!{self.children[0].lean()})'
         a, b = (c.lean() for c in self.children)
-        if self.kind == 'method': return f'(min {a} {b})' if self.value == 'min' else f'({a} - {b})'
+        if self.kind == 'method':
+            if self.value == 'saturating_add': return f'(min ({a} + {b}) {MAX_U64})'
+            if self.value == 'saturating_mul': return f'(min ({a} * {b}) {MAX_U64})'
+            if self.value == 'max': return f'(max {a} {b})'
+            return f'(min {a} {b})' if self.value == 'min' else f'({a} - {b})'
+        if self.kind == 'divide': return f'({a} / {b})'
         if self.value in ('&&', '||'): return f'({a} {self.value} {b})'
         op = {'==': '=', '!=': '≠', '<=': '≤', '>=': '≥'}.get(self.value, self.value)
         return f'(decide ({a} {op} {b}))'
@@ -84,7 +92,7 @@ class Parser:
         return functions
     def expression(self, level):
         precedence = [('||',), ('&&',), ('==','!='), ('<','>','<=','>=')]
-        if level == len(precedence): return self.atom()
+        if level == len(precedence): return self.quotient()
         left = self.expression(level + 1)
         while self.peek() in precedence[level]:
             op = self.take(); right = self.expression(level + 1)
@@ -92,6 +100,14 @@ class Parser:
             if op in ('&&','||') and left.typ != 'bool': raise ValueError('Expected boolean')
             if op in ('<','>','<=','>=') and left.typ != 'u64': raise ValueError('Expected u64')
             left = Expr('binary', 'bool', op, (left, right))
+        return left
+    def quotient(self):
+        left = self.atom()
+        while self.peek() == '/':
+            self.take(); right = self.atom()
+            if left.typ != 'u64' or right.typ != 'u64': raise ValueError('Expected u64')
+            if not nonzero(right): raise ValueError('Divisor must be a positive literal or x.max(positive literal)')
+            left = Expr('divide', 'u64', '/', (left, right))
         return left
     def atom(self):
         if self.peek() == '!':
@@ -110,9 +126,14 @@ class Parser:
             else: raise ValueError(f'Unknown variable or unsupported call {t}')
         while self.peek() == '.':
             self.take(); method = self.take(); self.take('('); arg = self.expression(0); self.take(')')
-            if method not in ('min','saturating_sub') or value.typ != 'u64' or arg.typ != 'u64': raise ValueError('Unsupported method or type')
+            if method not in ('min','max','saturating_sub','saturating_add','saturating_mul') or value.typ != 'u64' or arg.typ != 'u64': raise ValueError('Unsupported method or type')
             value = Expr('method','u64',method,(value,arg))
         return value
+
+def nonzero(expr):
+    """A divisor the parser can see is positive: a positive literal, or `x.max(k)` with a positive literal `k`."""
+    if expr.kind == 'leaf' and expr.value.isdecimal(): return int(expr.value) > 0
+    return expr.kind == 'method' and expr.value == 'max' and nonzero(expr.children[1])
 
 def generated(functions):
     lines = ['-- Generated from crates/kernel/src/verified_kernel.rs; do not edit.', 'import Std', '', 'namespace CommerceKernel', '']

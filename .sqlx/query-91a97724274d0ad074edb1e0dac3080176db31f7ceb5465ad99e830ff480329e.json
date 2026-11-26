@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE shop_environments SET preview_until=now()+interval '1 hour' WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "91a97724274d0ad074edb1e0dac3080176db31f7ceb5465ad99e830ff480329e"
+}

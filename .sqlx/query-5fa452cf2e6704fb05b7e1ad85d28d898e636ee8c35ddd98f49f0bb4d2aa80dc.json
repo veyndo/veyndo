@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_catalog(tenant,unit_id,product_id) SELECT $1,$2,unnest($3::text[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5fa452cf2e6704fb05b7e1ad85d28d898e636ee8c35ddd98f49f0bb4d2aa80dc"
+}

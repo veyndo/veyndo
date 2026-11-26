@@ -5,7 +5,7 @@
   padding: 40px clamp(20px, 4vw, 48px) 64px;
   position: relative;
 }
-.order-completion .checkout-progress {
+.order-completion ol.vy-sf-steps {
   background: transparent;
   border: 0;
   max-width: 620px;
@@ -69,27 +69,7 @@
 .completion-card h2:not(:first-child) {
   margin-top: 28px;
 }
-.completion-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-.completion-item img {
-  object-fit: cover;
-  border-radius: 12px;
-  background: var(--shop-surface);
-}
-.completion-item > div {
-  display: grid;
-  gap: 8px;
-  flex: 1;
-}
-.completion-item small {
-  color: var(--muted);
-}
+
 .completion-back {
   display: flex;
   margin: 28px auto 0;
@@ -117,10 +97,10 @@
   background: var(--blue);
 }
 .order-confetti i:nth-child(3n) {
-  background: #c9a271;
+  background: var(--vy-color-amber);
 }
 .order-confetti i:nth-child(3n + 1) {
-  background: #97a6b0;
+  background: var(--vy-color-accent-border);
   border-radius: 50%;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -165,7 +145,7 @@
   .completion-card {
     padding: 24px;
   }
-  .order-completion .checkout-progress {
+  .order-completion ol.vy-sf-steps {
     padding-inline: 0;
   }
   .completion-back {

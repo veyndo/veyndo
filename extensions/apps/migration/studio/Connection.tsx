@@ -1,4 +1,5 @@
 /** Source credentials are edited in memory and saved through the existing encrypted installed-settings owner. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import ExportFields from "./ExportFields";
@@ -173,9 +174,9 @@ export default function Connection({ request }: { request: RequestFn }) {
             }
           />
         )}
-        <button className="studio-primary" type="submit">
+        <Button tone="primary" type="submit">
           {t(busy ? "busy" : "save")}
-        </button>
+        </Button>
       </fieldset>
       {saved && <p role="status">{t("saved")}</p>}
       {error && <p role="alert">{error}</p>}

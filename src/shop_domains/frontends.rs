@@ -1,6 +1,18 @@
 //! Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers.
-use crate::*;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use axum::Router;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use axum::routing::get;
 use axum::{extract::Request, middleware::Next};
+use std::env;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::shop_scope::header;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -14,47 +26,8 @@ pub(crate) fn router() -> Router<App> {
             axum::routing::delete(super::frontend_bindings::remove),
         )
 }
-pub(super) fn valid_origin(s: &str) -> bool {
-    reqwest::Url::parse(s).is_ok_and(|u| {
-        u.username().is_empty()
-            && u.password().is_none()
-            && u.query().is_none()
-            && u.fragment().is_none()
-            && u.path() == "/"
-            && (u.scheme() == "https"
-                || u.scheme() == "http" && matches!(u.host_str(), Some("127.0.0.1" | "localhost")))
-    })
-}
-pub(crate) fn public_path(path: &str) -> bool {
-    if path.starts_with("/channel-preview/")
-        || path.starts_with("/api/") && !public_api_path(path)
-        || path.starts_with("/store-api/")
-        || path.starts_with("/ucp/")
-        || path == "/mcp"
-        || path == "/health"
-        || path.starts_with("/.well-known/")
-    {
-        return false;
-    }
-    if path.starts_with("/experience-api/") {
-        return path == "/experience-api/context" || path.starts_with("/experience-api/shops/");
-    }
-    !path.starts_with("/experience-internal/")
-}
-/// Reserved public frontend API namespace; never admits encoded or ambiguous paths.
-pub(crate) fn public_api_path(path: &str) -> bool {
-    path.strip_prefix("/api/v1/").is_some_and(|suffix| {
-        !suffix.is_empty()
-            && suffix.split('/').all(|part| {
-                !part.is_empty()
-                    && part != "."
-                    && part != ".."
-                    && part
-                        .bytes()
-                        .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
-            })
-    })
-}
+pub(super) use veyndo_core::host_names::valid_origin;
+pub(crate) use veyndo_core::host_names::{public_api_path, public_path};
 /// Only an operator-bound hostname may delegate an otherwise unregistered route.
 /// Registered Core routes always keep their own permission and handler.
 pub(crate) fn delegated_api(request: &Request) -> bool {
@@ -97,7 +70,7 @@ async fn proxy(
     request: Request,
     alias: &str,
     access: &crate::performance::access_snapshot::AccessSnapshot,
-    mount: &crate::performance::access_snapshot::FrontendMount,
+    mount: &veyndo_core::access::FrontendMount,
 ) -> Result<Response> {
     let origin = &mount.origin;
     if !valid_origin(origin)
@@ -154,7 +127,7 @@ async fn proxy(
     {
         req = req.header("x-channel-preview", preview);
     }
-    if let Some(cookie) = super::frontend_transport::request_cookie(&parts.headers) {
+    if let Some(cookie) = veyndo_shop::http::frontend_transport::request_cookie(&parts.headers) {
         req = req.header("cookie", cookie);
     }
     let r = req.send().await.map_err(|_| {
@@ -163,7 +136,10 @@ async fn proxy(
             "Frontend service unavailable".into(),
         )
     })?;
-    Ok(super::frontend_transport::response(r))
+    Ok(veyndo_shop::http::frontend_transport::response(
+        r,
+        &crate::runtime_config::get().frame_ancestors,
+    ))
 }
 #[cfg(test)]
 mod tests {

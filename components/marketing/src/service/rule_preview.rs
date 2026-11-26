@@ -1,0 +1,36 @@
+//! Rule preview: a condition evaluated against the merchant's own priced cart with its rule facts; it changes nothing.
+use crate::domain::rules::Condition;
+use crate::store::facts::rule_facts;
+use crate::store::rule_snapshot::attach;
+use serde::Deserialize;
+use serde_json::{Value, json};
+use veyndo_core::document::{merge, view};
+use veyndo_core::{RequestContext, Result, State, bad};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::ports::Carts;
+
+/// The JSON fields `preview` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewInput {
+    condition: Value,
+}
+
+/// Whether the condition matches the request's cart.
+pub async fn preview(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: PreviewInput = view(v);
+    let t = merchant(h)?;
+    permit(h, "automation.read")?;
+    let c: Condition = serde_json::from_value(input.condition.clone())
+        .map_err(|_| bad("Unsupported condition"))?;
+    c.validate(0)?;
+    let cart = carts.load(h).await?;
+    if cart.tenant != t {
+        return Err(bad("Wrong cart"));
+    }
+    let mut q = carts.view(&cart).await?;
+    let mut facts = rule_facts(&mut *a.db.begin().await?, &cart, &q).await?;
+    attach(&mut *a.db.begin().await?, &t, &input.condition, &mut facts).await?;
+    merge(&mut q, json!({ "ruleFacts": facts }))?;
+    Ok(json!({"matched":c.checked_matches(&cart,&q)?,"sideEffects":false}))
+}

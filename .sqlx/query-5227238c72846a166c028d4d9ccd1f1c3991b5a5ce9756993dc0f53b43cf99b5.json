@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) SELECT $1,id,content,digest,mime,width,height FROM company_logos WHERE tenant=$2 AND id=$3 AND digest=$4 ON CONFLICT(tenant,id) DO UPDATE SET digest=company_logos.digest WHERE company_logos.digest=EXCLUDED.digest",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5227238c72846a166c028d4d9ccd1f1c3991b5a5ce9756993dc0f53b43cf99b5"
+}

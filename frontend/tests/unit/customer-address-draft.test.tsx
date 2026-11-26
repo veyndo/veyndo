@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import CustomersManager from "../../src/admin/customers/CustomersManager";
+import CustomersManager from "../../../components/customers/ui/admin/customers/CustomersManager";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 
 it("reports address changes to the outer workspace and guards linked-order navigation", async () => {

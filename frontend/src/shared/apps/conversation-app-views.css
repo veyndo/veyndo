@@ -3,7 +3,7 @@
   display: block;
   width: 100%;
   margin-block: 0.75rem;
-  border: 1px solid var(--line, #bac4d1);
+  border: 1px solid var(--line, var(--vy-color-border));
   border-radius: 0.75rem;
   color-scheme: inherit;
 }

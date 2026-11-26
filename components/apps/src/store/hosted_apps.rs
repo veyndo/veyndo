@@ -1,0 +1,60 @@
+//! Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry.
+use crate::ports::{CommerceInstall, RecordRules};
+use crate::store::package_install::install_tx;
+use serde_json::json;
+use sqlx::{Postgres, Transaction};
+use veyndo_core::{Result, bad};
+
+/// The bundled package of the hosted storefront experience.
+pub const STORYFRONT: &str = include_str!("../../../../extensions/apps/storyfront/manifest.json");
+
+/// Installs or reactivates the app a connected frontend depends on.
+pub async fn ensure(
+    rules: &dyn RecordRules,
+    commerce: &dyn CommerceInstall,
+    tx: &mut Transaction<'_, Postgres>,
+    tenant: &str,
+    id: &str,
+) -> Result<()> {
+    if id != "storyfront" {
+        return Err(bad("Unknown hosted app"));
+    }
+    crate::store::locks::advisory(tx, id, 7).await?;
+    let active: Option<bool> = sqlx::query_scalar!(
+        "SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        tenant,
+        id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+    match active {
+        None => {
+            install_tx(
+                rules,
+                commerce,
+                tx,
+                tenant,
+                serde_json::from_str(STORYFRONT).map_err(|_| bad("Invalid built-in"))?,
+            )
+            .await?;
+        }
+        Some(false) => {
+            sqlx::query!(
+                "UPDATE app_packages SET active=true,revision=revision+1 WHERE tenant=$1 AND id=$2",
+                tenant,
+                id
+            )
+            .execute(&mut **tx)
+            .await?;
+            veyndo_core::store::outbox::publish_on(
+                &mut **tx,
+                tenant,
+                "app.activated",
+                &json!({"app":id,"reason":"hosted_frontend"}),
+            )
+            .await?;
+        }
+        Some(true) => {}
+    }
+    Ok(())
+}

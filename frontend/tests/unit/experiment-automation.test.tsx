@@ -5,7 +5,7 @@ import {
   AutomationFields,
   AutomationNote,
   ExperimentSuggestion,
-} from "../../src/admin/intelligence/ExperimentAutomation";
+} from "../../../components/intelligence/ui/admin/intelligence/ExperimentAutomation";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
 it("prefills the form from the suggestion, names its basis and warns when no live payments exist", async () => {

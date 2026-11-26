@@ -9,9 +9,9 @@ import {
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import PrivacyProvider from "../../src/storefront/legal/PrivacyProvider";
-import CheckoutLegal from "../../src/storefront/legal/CheckoutLegal";
-import ConsumerRequestForm from "../../src/storefront/legal/ConsumerRequestForm";
+import PrivacyProvider from "../../../components/shop/ui/storefront/legal/PrivacyProvider";
+import CheckoutLegal from "../../../components/shop/ui/storefront/legal/CheckoutLegal";
+import ConsumerRequestForm from "../../../components/shop/ui/storefront/legal/ConsumerRequestForm";
 import ExternalVideo from "../../src/shared/legal/ExternalVideo";
 import {
   consentChoice,

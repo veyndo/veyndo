@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_units(tenant,id,company_id,parent_id,data,revision) SELECT $2,id,company_id,parent_id,data,revision FROM b2b_units WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e7017fbb25efb8eb842b3edb091c55e7eec605cc45b8bfef3ca8aa95858168b7"
+}

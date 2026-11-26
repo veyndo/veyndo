@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT proposal FROM tasks WHERE tenant=$1 AND id=$2 AND NOT applied",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "proposal",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "proposal"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7094131cfab0c6d84c5b799eb1ee100dfc166c2b6d873fa1a6fa98fd67b8464c"
+}

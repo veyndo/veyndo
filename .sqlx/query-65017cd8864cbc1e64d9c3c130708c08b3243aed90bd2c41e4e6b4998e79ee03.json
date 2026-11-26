@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE knowledge_documents SET title=$1,content=$2,content_hash=$3,product_id=$4,kind=$5,locale=$6,translations=$7,visibility='private',revision=revision+1 WHERE tenant=$8 AND id=$9 AND revision=$10 AND NOT archived",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65017cd8864cbc1e64d9c3c130708c08b3243aed90bd2c41e4e6b4998e79ee03"
+}

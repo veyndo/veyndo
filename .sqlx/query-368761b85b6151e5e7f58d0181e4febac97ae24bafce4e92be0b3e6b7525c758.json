@@ -1,0 +1,122 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT active,email,group_name,customer_number,profile,automation,company,extract(year FROM age(current_date,(profile->>'birthday')::date))::double precision AS age,abs(current_date-first_login::date)::double precision AS first_days,abs(current_date-last_login::date)::double precision AS last_days FROM customers WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "email"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "group_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "group_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "customer_number",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "customer_number"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "profile"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "automation",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "automation"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "company",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "company"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "age",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "first_days",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "last_days",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "368761b85b6151e5e7f58d0181e4febac97ae24bafce4e92be0b3e6b7525c758"
+}

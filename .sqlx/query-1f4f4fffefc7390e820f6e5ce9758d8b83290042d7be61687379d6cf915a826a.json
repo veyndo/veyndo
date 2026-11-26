@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE translation_items SET status=$1 WHERE tenant=$2 AND job_id=$3 AND product_id=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1f4f4fffefc7390e820f6e5ce9758d8b83290042d7be61687379d6cf915a826a"
+}

@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.id,u.password_hash,u.password_initialized,u.credential_revision FROM merchant_users u JOIN merchant_identities i ON i.user_id=u.id JOIN memberships m ON m.user_id=u.id WHERE i.issuer=$1 AND i.subject=$2 AND u.email=$3 AND m.tenant=$4 AND m.active FOR UPDATE OF u",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "password_hash",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "password_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "password_initialized",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "password_initialized"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "credential_revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "credential_revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d2636fed4513dec932e687895341c42415cd6c5dabd37c65e1052804c0882c5d"
+}

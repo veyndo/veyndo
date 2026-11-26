@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { expect, it, vi } from "vitest";
-import RuleHistory from "../../src/admin/automation/RuleHistory";
+import RuleHistory from "../../../components/marketing/ui/admin/automation/RuleHistory";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 function render(ui: ReactNode) {
   return rtlRender(ui, {

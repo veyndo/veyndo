@@ -1,11 +1,12 @@
 /** Debounced server paging with generation fences: old searches and revoked reads never retain stale rows. */
+import { withQuery, type ApiRoutePath } from "../../kit/api";
 import { consumePinnedView } from "./pinned-view";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 import type { GridCriteria, GridQueryState } from "./types";
 export function useGridPage(
   request: RequestFn,
-  path: string,
+  path: ApiRoutePath,
   initial: GridCriteria = {},
   controlled?: GridQueryState,
 ) {
@@ -47,7 +48,7 @@ export function useGridPage(
           ),
         });
         if (cursor) params.set("after", cursor);
-        request(`${path}?${params}`)
+        request(withQuery(path, params))
           .then((v) => {
             if (current) {
               setRows(v.elements);

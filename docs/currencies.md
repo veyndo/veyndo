@@ -55,8 +55,8 @@ Fixed prices are edited in **Products → Prices** using a single currency selec
 They are exact decimal strings, e.g. `{"KWD":{"price":"7.123"}}`, stored with the
 product's normal optimistic revision and history. List and regulation prices may
 also be set. Product variants use the same editor and pricing resolver.
-The existing advanced-price **discount tiers** apply to the resolved price; this
-is not Shopware's complete inherited per-currency advanced-price record schema.
+The existing advanced-price **discount tiers** apply to the resolved price; per-currency
+advanced-price records are not implemented.
 Destination tax adjustment still applies to fixed gross prices.
 
 Generation preserves existing fixed prices unless **Replace existing fixed prices**
@@ -89,9 +89,13 @@ is rejected rather than silently producing a stale cross-currency quote. Manual
 rates are merchant-controlled and do not expire automatically.
 
 FX conversion uses rational integer arithmetic, eight-decimal rate strings and
-one half-up rounding to the target minor unit. The ported Shopware tax/discount
-calculator still uses its original float semantics behind the explicit money
-boundary; it has not been replaced by an entirely integer calculator.
+one half-up rounding to the target minor unit. Amounts on the calculation path are
+whole minor units (`Minor`, `Money`) and exact decimals; a JSON number is read as
+the shortest decimal that names it. The tax/discount calculator computes exactly and
+rounds each amount once, half away from zero, to the currency's exponent (and gross
+prices to the cash interval); at a decimal tie the decimal decides, not binary error
+(130.4835 × 670 = 87423.945 → 87423.95). It returns minor units
+([what is proved](formal-verification.md)).
 
 Before placing an order, the browser submits its reviewed cart revision, currency
 and minor-unit total. If an exchange-rate change alters the quote, checkout returns
@@ -112,7 +116,7 @@ An existing `sw-context-token` owns its saved currency; changing the header alon
 does not mutate the cart. Catalog/detail/context/options responses expose currency
 metadata; cart `price` includes `currency` and `currencyScale`, plus `currencyContext`
 with source/base currency, exact factor, strategy and rate date. Storefront amounts
-are major-unit numbers at the legacy calculator boundary. Financial `money.minor`
+are major-unit numbers on the wire; inside they are whole minor units. Financial `money.minor`
 and payment `amountMinor` are integer minor units.
 
 | Endpoint | Input / purpose | MCP tool | Authority |
@@ -142,11 +146,12 @@ does not certify the private Shopware Payments adapter for every currency.
 
 ## Implementation and verification
 
-- `src/currencies/{model,pricing,rates,routes,jobs,capabilities}.rs`: registry,
+- `components/pricing/src/{types/currency,service/currency_change,http/currencies}.rs`, `components/shop/src/service/currency_rates.rs` and the host adapters `src/currencies/{rates,routes,jobs,capabilities}.rs`: registry,
   deterministic price resolution, bounded retrieval, public/private APIs and workers.
-- `src/commerce/`, `src/cart_price.rs`, `src/order_checkout.rs`, `src/ucp/`:
-  catalog, destination taxes, shipping, checkout and protocol consumers.
-- `src/payments/`, `src/operations/receipt_text.rs`, `src/studio/revenue.rs`:
+- `src/commerce/`, `components/checkout/src/service/cart_projection.rs`,
+  `src/order_checkout.rs`, `src/ucp/`: catalog, destination taxes, shipping,
+  checkout and protocol consumers.
+- `src/payments/`, `src/operations/receipt_text.rs`, `components/studio/src/service/reports.rs`:
   provider ledger, documents and separated invoice-currency reporting.
 - `extensions/apps/email/src/templates.rs`: order emails use the frozen exact money snapshot;
   zero- and three-decimal totals are preserved in all supplied languages.
@@ -163,7 +168,7 @@ through create/capture/refund for two-, zero- and three-decimal currencies.
 `scripts/production_foundations.py` checks job RLS with a non-owner database role.
 Frontend tests cover formatting, server-bound switching, fixed-price editing and
 minor-unit checkout review. Rust tests cover overflow, invalid rates, exact prices,
-ECB parsing and document precision. Existing Shopware differential gates remain.
+ECB parsing and document precision.
 
 The new extracted `currency_context_admissible` policy has Lean proofs and mutation
 checks for enabled/configured/fresh admission. These prove the bounded predicate,

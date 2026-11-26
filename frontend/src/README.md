@@ -1,8 +1,25 @@
 # Frontend application entry
 
-Only the application entry lives here; merchant, store and operator roots load independently.
+Only the application entry lives here; merchant, store and operator roots load independently. Shared design packages (tokens, UI components) live in [`kit/`](kit/README.md).
 
 Files and their individual responsibilities are listed in [the generated source inventory](../../docs/module-inventory.md). Each file starts with its contract summary.
+
+## Component UI folders
+
+Studio and storefront screens live with their component, beside its Rust crate:
+`components/<name>/ui/admin/<area>` and `components/<name>/ui/storefront/<area>`
+(for example [`components/orders/ui/admin/orders`](../../components/orders/ui/admin/orders/README.md)).
+This folder keeps the entry, the shells (`admin/shell`, `storefront/shell` and their
+global styles), the operator console, shared building blocks and the design `kit/`.
+`frontend/` builds, type-checks, tests and formats both roots as one tree;
+`scripts/source-roots.mjs` gives the gates the same view, where
+a file in `components/orders/ui/admin/orders/` reads as one in `admin/orders/`. A component UI
+imports `shared/` and `kit/` by relative path, and the screens of another component
+only when it depends on that component in `components.json` (otherwise that component
+contributes through a Studio slot); bare package imports resolve from this frontend (`resolve.dedupe` and
+`tsconfig.json` `paths`). `admin/apps/AppConsent.tsx` and
+`admin/channels/channel-i18n.ts` only re-export their owners for the hash-locked
+Marketplace Studio app.
 
 ## Modules
 

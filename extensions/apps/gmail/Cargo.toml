@@ -1,0 +1,14 @@
+[package]
+name = "veyndo-provider-gmail"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Gmail app: OAuth policy, label actions and the private message source import"
+
+[dependencies]
+base64.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+scraper.workspace = true
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }

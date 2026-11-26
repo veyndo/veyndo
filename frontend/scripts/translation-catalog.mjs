@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 import { checkValues } from "./localization-syntax.mjs";
+import { componentUiRoots, logicalPath } from "./source-roots.mjs";
 const languages = ["en", "de", "fr", "es"];
 const walk = (dir) =>
   fs
@@ -30,17 +31,18 @@ export function catalogue(source) {
     rows.set(id, row);
   };
   const pluginRoot = path.resolve(import.meta.dirname, "../../extensions/apps");
+  const whole = source === path.resolve(import.meta.dirname, "../src");
   const files = [
     ...walk(source),
-    ...(source === path.resolve(import.meta.dirname, "../src")
-      ? walk(pluginRoot)
+    ...(whole
+      ? [...componentUiRoots().flatMap(walk), ...walk(pluginRoot)]
       : []),
   ];
   for (const file of files.filter(
     (f) =>
       /i18n\.ts$|i18n\/(?:locales|automation-)/.test(f) && f.endsWith(".ts"),
   )) {
-    const relative = path.relative(source, file).replaceAll("\\", "/");
+    const relative = logicalPath(file, source);
     const normalized = relative.replace(/\b(en|de|fr|es)\.ts$/, "[locale].ts");
     const ast = ts.createSourceFile(
       file,

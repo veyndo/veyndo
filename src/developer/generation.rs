@@ -1,12 +1,59 @@
 //! Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools.
-use super::*;
+use super::{app_generation, builds, design_context, generation_brief, generation_edits, routes};
+use crate::foundation::App;
+use crate::localization::language_context;
+use crate::{assets, commerce, staging};
+use axum::http::StatusCode;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_cognition::inference::Choice;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::request_context::RequestContext;
+/// An App Studio generation request: the private environment, the task, the model and the current definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct GenerationRequest {
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    prompt: Option<String>,
+    inference: Value,
+    references: Value,
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    manifest: Value,
+}
+
+/// The generated app definition inside a model result.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct GeneratedBuild {
+    manifest: Value,
+}
+
+/// The repaired definition and its request context, written into the saved build.
+#[derive(Serialize)]
+struct BuildRecord<'a> {
+    manifest: Value,
+    environment: &'a str,
+    prompt: &'a str,
+}
+
+/// Generates, repairs and saves one reviewable app build from the provider's structured output.
 pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
-    let stage = v["environment"]
-        .as_str()
+    let input: GenerationRequest = view(v);
+    let stage = input
+        .environment
+        .as_deref()
         .ok_or(bad("Private environment required"))?;
     staging::owned(a, t, stage).await?;
-    let prompt = v["prompt"]
-        .as_str()
+    let prompt = input
+        .prompt
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 8000)
         .ok_or(bad("Prompt required, maximum 8000 bytes"))?;
     if v.get("manifest")
@@ -16,39 +63,34 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
             "Current app definition exceeds the model context limit",
         ));
     }
-    let choice: Choice = serde_json::from_value(v["inference"].clone())
+    let choice: Choice = serde_json::from_value(input.inference.clone())
         .map_err(|_| bad("Select an inference provider"))?;
-    let _slot = a.inference_slots.clone().try_acquire_owned().map_err(|_| {
+    let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
             "Inference capacity busy".into(),
         )
     })?;
     let locale = language_context(a, h).await?.0;
-    let existing=sqlx::query("SELECT app,version FROM developer_builds WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30").bind(t).fetch_all(&a.db).await?;
-    let versions = json!(
-        existing
-            .iter()
-            .map(|r| json!({"app":r.get::<String,_>("app"),"version":r.get::<String,_>("version")}))
-            .collect::<Vec<_>>()
-    );
+    let versions = veyndo_app_platform::store::developer_builds::recent(a, t).await?;
     let (settings, _) = commerce::config(a, t).await?;
     let editor = design_context::validate(v, &settings.locales)?;
-    let (references, images) = assets::design_references::capture(&v["references"]).await?;
+    let (references, images) = assets::design_references::capture(&input.references).await?;
     let evidence = design_context::receipt(&editor, &references);
-    let editing = v.get("manifest").is_some_and(Value::is_object) && v["mode"] != "compose";
+    let editing =
+        v.get("manifest").is_some_and(Value::is_object) && input.mode.as_deref() != Some("compose");
     if v.get("mode")
         .is_some_and(|mode| mode != "compose" && mode != "edit")
     {
         return Err(bad("Unknown generation mode"));
     }
-    let guided = !editing && generation_brief::empty(&v["manifest"]);
+    let guided = !editing && generation_brief::empty(&input.manifest);
     let app_schema = if guided {
         generation_brief::schema(&settings.locales)
     } else if editing {
         generation_edits::schema(&settings.locales)
     } else {
-        schema_for(&settings.locales)
+        app_generation::schema_for(&settings.locales)
     };
     let system = if guided {
         include_str!("../../crates/cognition/prompts/app-brief.v2.txt")
@@ -67,6 +109,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     let mut repair = String::new();
     for attempt in 0..2 {
         let out = a
+            .models
             .inference
             .structured_with_images(
                 Some(&choice),
@@ -80,17 +123,27 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
         let candidate = out.value.to_string();
         let saved = async {
             let mut result = if guided {
-                generation_brief::apply(&v["manifest"], &out.value, &versions)?
+                generation_brief::apply(&input.manifest, &out.value, &versions)?
             } else if editing {
-                generation_edits::apply(&v["manifest"], &out.value, &versions)?
+                generation_edits::apply(&input.manifest, &out.value, &versions)?
             } else {
                 out.value
             };
-            routes::actions(&mut result["manifest"])?;
-            preserve_access(&v["manifest"], &mut result["manifest"]);
-            super::generation_contract::retain(&v["manifest"], &mut result["manifest"])?;
-            result["environment"] = json!(stage);
-            result["prompt"] = json!(prompt);
+            let mut manifest = view::<GeneratedBuild>(&result).manifest;
+            routes::actions(&mut manifest)?;
+            app_generation::preserve_access(&input.manifest, &mut manifest);
+            veyndo_app_platform::domain::generation_contract::retain(
+                &input.manifest,
+                &mut manifest,
+            )?;
+            merge(
+                &mut result,
+                BuildRecord {
+                    manifest,
+                    environment: stage,
+                    prompt,
+                },
+            )?;
             builds::save(
                 a,
                 t,
@@ -121,162 +174,36 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     }
     unreachable!("bounded generation returns a validated draft or an error")
 }
-/// Restricted model generation does not silently reopen existing actions to agents or weaken team scopes.
-fn preserve_access(old: &Value, next: &mut Value) {
-    if old["id"] != next["id"] {
-        return;
-    }
-    if let Some(actions) = next["actions"].as_array_mut() {
-        for action in actions {
-            if let Some(prior) = old["actions"]
-                .as_array()
-                .and_then(|rows| rows.iter().find(|a| a["name"] == action["name"]))
-            {
-                action["mcp"] = prior.get("mcp").cloned().unwrap_or(Value::Bool(true));
-                for key in [
-                    "mcp",
-                    "permission",
-                    "requiredPermissions",
-                    "public",
-                    "flowAllowed",
-                ] {
-                    if let Some(value) = prior.get(key) {
-                        action[key] = value.clone();
-                    }
-                }
-            }
-        }
-    }
-}
-pub(super) fn schema() -> Value {
-    serde_json::from_str(include_str!("../../fixtures/app-studio-schema.json"))
-        .expect("bundled app studio schema")
-}
-
-/// Shared schema specializations use actual configured languages, including regional locales.
-pub(super) fn schema_for(locales: &[String]) -> Value {
-    fn walk(v: &mut Value, locales: &[String]) {
-        if v["type"] == "object"
-            && v["properties"].get("en").is_some()
-            && v["properties"].get("de").is_some()
-        {
-            let props = locales
-                .iter()
-                .map(|l| (l.clone(), json!({"type":"string"})))
-                .collect::<serde_json::Map<_, _>>();
-            v["properties"] = Value::Object(props);
-            v["required"] = json!(locales);
-        } else {
-            match v {
-                Value::Object(o) => {
-                    for value in o.values_mut() {
-                        walk(value, locales);
-                    }
-                }
-                Value::Array(a) => {
-                    for value in a {
-                        walk(value, locales);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-    let mut v = schema();
-    walk(&mut v, locales);
-    let lifecycle = &mut v["properties"]["manifest"]["properties"]["lifecycles"];
-    lifecycle["description"] = json!(apps::native_lifecycle::generation_context().to_string());
-    lifecycle["items"]["properties"]["transitions"]["items"]["properties"]["requiredPermissions"]
-        ["items"]["enum"] = json!(auth::SCOPES);
-    v
-}
 
 #[cfg(test)]
-mod tests {
-    use super::*;
+mod typed_tests {
+    use super::{BuildRecord, GeneratedBuild};
+    use serde_json::json;
+    use veyndo_core::document::{merge, view};
+
     #[test]
-    fn generated_handler_schema_requires_native_operations_and_record_inputs() {
-        let schema = schema_for(&["it-IT".into()]);
-        let handlers = &schema["properties"]["manifest"]["properties"]["views"]["items"]["properties"]
-            ["blocks"]["items"]["properties"]["handlers"];
-        let branches = handlers["properties"]["click"]["items"]["anyOf"]
-            .as_array()
-            .unwrap();
-        assert_eq!(branches.len(), 5);
-        for branch in branches {
-            assert!(
-                branch["required"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("op"))
-            );
-            assert_eq!(branch["additionalProperties"], false);
-        }
-        assert_eq!(
-            branches[2]["properties"]["input"]["properties"]["kind"]["enum"],
-            json!(["record"])
-        );
-        assert_eq!(
-            branches[4]["properties"]["text"]["required"],
-            json!(["it-IT"])
-        );
-        let base: Value = serde_json::from_str(include_str!(
-            "../../extensions/apps/product-advisor/manifest.json"
-        ))
-        .unwrap();
-        for instruction in [
-            json!({"op":"validate","target":"editor"}),
-            json!({"op":"refresh","target":"records"}),
-            json!({"op":"call","action":"save_entries","input":{"kind":"record","block":"editor"}}),
-            json!({"op":"navigate","view":"workspace"}),
-            json!({"op":"msgBox","text":{"it-IT":"Salvato"}}),
+    fn build_record_keeps_the_indexed_shape() {
+        for result in [
+            json!({"manifest":{"id":"app","actions":[]},"notes":"n"}),
+            json!({"notes":"n"}),
         ] {
-            let mut m = base.clone();
-            m["views"][0]["blocks"][2]["handlers"]["click"] = json!([instruction]);
-            assert!(serde_json::from_value::<apps::Manifest>(m).is_ok());
+            let mut old = result.clone();
+            old["manifest"]["checked"] = json!(true);
+            old["environment"] = json!("stage-1");
+            old["prompt"] = json!("Build a label app");
+            let mut manifest = view::<GeneratedBuild>(&result).manifest;
+            manifest["checked"] = json!(true);
+            let mut new = result;
+            merge(
+                &mut new,
+                BuildRecord {
+                    manifest,
+                    environment: "stage-1",
+                    prompt: "Build a label app",
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
         }
-        let mut malformed = base;
-        malformed["views"][0]["blocks"][2]["handlers"]["click"] =
-            json!([{"action":"save_entries"}]);
-        assert!(serde_json::from_value::<apps::Manifest>(malformed).is_err());
-    }
-    #[test]
-    fn generation_retains_access_of_existing_actions() {
-        let old = json!({"id":"same","actions":[{"name":"save","mcp":false,"permission":"orders.write","requiredPermissions":["payments.manage","customers.pii"],"public":false,"flowAllowed":false}]});
-        let mut next = json!({"id":"same","actions":[{"name":"save","mcp":true,"permission":"catalog.write","public":true,"flowAllowed":true}]});
-        preserve_access(&old, &mut next);
-        assert_eq!(next, old);
-    }
-    #[test]
-    fn schema_uses_dynamic_regional_shop_languages() {
-        let schema = schema_for(&["es-ES".into(), "it-IT".into(), "en-US".into()]);
-        let labels = &schema["properties"]["manifest"]["properties"]["views"]["items"]["properties"]
-            ["blocks"]["items"]["properties"]["title"];
-        assert_eq!(labels["required"], json!(["es-ES", "it-IT", "en-US"]));
-        assert!(labels["properties"].get("en").is_none());
-        assert_eq!(labels["additionalProperties"], false);
-        let description = &schema["properties"]["manifest"]["properties"]["presentation"]["properties"]
-            ["description"];
-        assert_eq!(description["required"], json!(["es-ES", "it-IT", "en-US"]));
-        assert!(description["properties"].get("en").is_none());
-    }
-    #[test]
-    fn workflow_generation_context_comes_from_native_validation_and_scope_owners() {
-        let schema = schema_for(&["it-IT".into()]);
-        let c = &schema["properties"]["manifest"]["properties"]["lifecycles"];
-        let context: Value = serde_json::from_str(c["description"].as_str().unwrap()).unwrap();
-        assert_eq!(context, apps::native_lifecycle::generation_context());
-        assert_eq!(context["quote"]["replaceableActions"], json!([]));
-        assert_eq!(
-            context["quote"]["allowedNativeTo"],
-            json!(["requested", "rejected"])
-        );
-        assert_eq!(context["quote"]["guards"], json!(["quote.message"]));
-        assert_eq!(
-            c["items"]["properties"]["transitions"]["items"]["properties"]["requiredPermissions"]["items"]
-                ["enum"],
-            json!(auth::SCOPES)
-        );
-        assert!(c.to_string().contains("it-IT"));
     }
 }

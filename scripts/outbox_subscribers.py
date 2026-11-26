@@ -2,7 +2,7 @@
 import json,os,socket,subprocess,time,uuid,urllib.request,urllib.error
 from testing.database import psql
 from testing.runtime import ROOT,serve,stop
-from testing.outbox_cases import migration_states,late_commit,retained_quarantine,locked_schedule
+from testing.outbox_cases import tenant_schedules,late_commit,retained_quarantine,locked_schedule
 
 def sql(text):
     return subprocess.check_output(psql(os.environ['DB_CONTAINER'],'commerce',os.environ['TEST_DATABASE'],'-XqAt','-v','ON_ERROR_STOP=1'),input="BEGIN;SELECT set_config('rac.system','on',true);"+text+";COMMIT;",text=True).strip().splitlines()[-1:][0]
@@ -15,7 +15,7 @@ with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
 base=f'http://127.0.0.1:{port}';log=(ROOT/'artifacts/outbox-subscribers.log').open('w');worker=None
 marker='subscriber-'+uuid.uuid4().hex
 try:
-    migration_states()
+    tenant_schedules()
     locked_schedule(sql)
     # A real failed audit projection. Other subscribers must advance independently.
     sql("CREATE FUNCTION fixture_fail_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.data->>'fixture'='"+marker+"' THEN RAISE EXCEPTION 'synthetic audit failure';END IF;RETURN NEW;END $$;CREATE TRIGGER fixture_fail_audit BEFORE INSERT ON projections FOR EACH ROW EXECUTE FUNCTION fixture_fail_audit()")

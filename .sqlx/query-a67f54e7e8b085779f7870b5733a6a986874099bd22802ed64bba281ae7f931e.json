@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT revision,data,secrets,updated_at::text AS \"updated!\" FROM platform_ai WHERE id=true",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "platform_ai",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform_ai",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "secrets",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform_ai",
+            "name": "secrets"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "a67f54e7e8b085779f7870b5733a6a986874099bd22802ed64bba281ae7f931e"
+}

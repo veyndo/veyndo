@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { template } from "../../src/admin/developer/app-model";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 import type { Block } from "../../src/shared/apps/native/types";
 
 function fixture(mode = "matching") {

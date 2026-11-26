@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT public.seed_shop_automation($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seed_shop_automation",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ce52af7315e7270a2abc1f5a1ff3ff9fd80f3520b05abf0eab3ab7131748f317"
+}

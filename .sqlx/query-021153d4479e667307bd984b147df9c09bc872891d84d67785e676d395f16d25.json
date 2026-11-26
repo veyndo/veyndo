@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,to_jsonb(created_at)#>>'{}' AS \"created_at!\",after_state#>>'{payment,state}' AS state,after_state#>'{payment,capturedMinor}' AS captured,after_state#>'{payment,refundedMinor}' AS refunded FROM entity_history WHERE tenant=$1 AND entity='order' AND entity_id=$2 AND finalized AND (before_state->'payment') IS DISTINCT FROM (after_state->'payment') ORDER BY id DESC LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "entity_history",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "captured",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "refunded",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "021153d4479e667307bd984b147df9c09bc872891d84d67785e676d395f16d25"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "ROLLBACK TO SAVEPOINT vault_metadata",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "b88063d531a1f64ae6b44b6d22fa06ba6dbb210c064bfd19a2b77f7eea07023d"
+}

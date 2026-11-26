@@ -20,13 +20,13 @@ class ScopeTests(unittest.TestCase):
                                    'scripts/build_site.py', 'docs/evidence/release.json']), 'docs')
 
     def test_ui_and_docs(self):
-        self.assertEqual(classify(['frontend/src/admin/intelligence/KnowledgeView.tsx',
+        self.assertEqual(classify(['components/intelligence/ui/admin/intelligence/KnowledgeView.tsx',
                                    'frontend/tests/unit/knowledge.test.tsx',
                                    'extensions/apps/site-builder/studio/ShopDesigner.tsx',
                                    'docs/testing.md']), 'frontend')
 
     def test_sensitive_and_unknown_changes(self):
-        for path in ['src/auth.rs', 'migrations/103.sql', 'Cargo.lock',
+        for path in ['src/auth.rs', 'components/core/migrations/0001-baseline.sql', 'Cargo.lock',
                      '.github/workflows/verify.yml', 'scripts/testing/ci_scope.py',
                      'frontend/package-lock.json', 'frontend/scripts/localization.mjs',
                      'frontend/tests/browser_sessions.mjs', 'prompts/merchant.md',
@@ -35,11 +35,11 @@ class ScopeTests(unittest.TestCase):
                      'extensions/apps/site-builder/renderer/Block.tsx',
                      'frontend/src/shared/api/request-json.ts',
                      'frontend/src/admin/shell/requests.ts',
-                     'frontend/src/admin/team/UsersManager.tsx',
-                     'frontend/src/admin/pos/RegisterCheckout.tsx',
-                     'frontend/src/storefront/account/AccountDownloads.tsx',
-                     'frontend/src/storefront/legal/CheckoutLegal.tsx',
-                     'frontend/src/storefront/checkout/Checkout.tsx']:
+                     'components/identity/ui/admin/team/UsersManager.tsx',
+                     'components/pos/ui/admin/pos/RegisterCheckout.tsx',
+                     'components/customers/ui/storefront/account/AccountDownloads.tsx',
+                     'components/shop/ui/storefront/legal/CheckoutLegal.tsx',
+                     'components/checkout/ui/storefront/checkout/Checkout.tsx']:
             with self.subTest(path=path):
                 self.assertEqual(classify(['docs/testing.md', path]), 'full')
         self.assertEqual(classify([]), 'full')
@@ -55,7 +55,7 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(classify_images(IMAGE_DOCS), 'docs')
         for path in ['LICENSE', 'THIRD_PARTY.md', 'frontend/README.md',
                      'src/AGENTS.md', 'extensions/apps/migration/README.md',
-                     'frontend/src/admin/intelligence/KnowledgeView.tsx',
+                     'components/intelligence/ui/admin/intelligence/KnowledgeView.tsx',
                      'frontend/package-lock.json', 'Cargo.lock', 'fixtures/licenses/image.txt',
                      'crates/cognition/prompts/planner.md', 'reference/app-manifests/app.json',
                      'scripts/try.sh', 'compose.try.yaml', 'deploy/Dockerfile',

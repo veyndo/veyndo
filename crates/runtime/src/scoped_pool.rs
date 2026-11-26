@@ -60,10 +60,7 @@ impl ScopedPool {
         let (Some(system), Some(signer)) = (&self.system, &self.signer) else {
             return Ok(());
         };
-        let role: String =
-            sqlx::query_scalar("SELECT tenant_login::text FROM public.veyndo_scope_key()")
-                .fetch_one(system)
-                .await?;
+        let role = crate::store::scope_login(system).await?;
         let refreshed = crate::database_scope::Signer::load(system, &role).await?;
         *signer
             .write()
@@ -98,10 +95,7 @@ impl ScopedPool {
             .begin_with(sqlx::AssertSqlSafe(begin_statement(scope, read_only)?))
             .await?;
         // Bound parameters keep bearer scope tickets out of pg_stat_activity query text.
-        sqlx::query("SELECT set_config('veyndo.scope_ticket',$1,true)")
-            .bind(ticket)
-            .execute(&mut *tx)
-            .await?;
+        crate::store::bind_ticket(&mut tx, ticket).await?;
         Ok(tx)
     }
 }

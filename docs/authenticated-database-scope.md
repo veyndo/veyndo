@@ -28,12 +28,12 @@ using an expired ticket or replaying a system ticket through the tenant login
 does not widen access. Scope is transaction-local, including transaction pooling,
 cancelled streams and connection reuse.
 
-Migration 099 adds a **restrictive** authenticated policy alongside existing row
+The baselines add a **restrictive** authenticated policy alongside existing row
 policies. Their conditions combine; existing domain and actor policies remain.
 Private Studio workspace rows additionally require the signed personal actor.
 An integration credential has a distinct actor classification and cannot assume
 its creator's personal workspace. The fixed app models/records/reference/index tables receive the same guard and
-scoped grants in migrations 101–102; installation no longer creates tables. The tenant login owns
+scoped grants in the apps baseline; installation creates no tables. The tenant login owns
 no app table and cannot create/drop tables or disable row security.
 It also cannot create temporary objects that shadow native table names on a reused
 backend. Configuration removes the database's default `PUBLIC` temporary-object
@@ -57,9 +57,10 @@ and [secure function guidance](https://www.postgresql.org/docs/17/sql-createfunc
 
 ## Coordinated deployment
 
-1. Apply migration 099 in the existing owner migration job. It initially stages
-   the additional guards so old running replicas keep working. It does not create
-   a public endpoint, a password or another authoritative queue.
+1. Run the owner setup job (`BOOTSTRAP_MODE=migrate`) on a new database. The core
+   foundation baseline creates the authority schema with the guards staged, not yet
+   enforced. It does not create a public endpoint, a password or another
+   authoritative queue.
 2. Prepare two distinct restricted login roles. The existing runtime login can
    remain the system login; it must not own core tables, inherit their owner or
    have superuser, RLS bypass or TRUNCATE privileges. A new tenant login must own

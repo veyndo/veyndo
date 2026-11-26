@@ -1,6 +1,7 @@
 /** Visible edit, element, agent and history modes share the same native draft and approval path. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { AppPanelHandle } from "../../../../frontend/src/admin/developer/AppPanelSizing";
+import { AppPanelHandle } from "../../../../components/apps/ui/admin/developer/AppPanelSizing";
 import { useContentLanguage } from "../../../../frontend/src/shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../../../frontend/src/shared/i18n/ContentLanguagePicker";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
@@ -140,29 +141,21 @@ export default function DesignerInspector({
             </div>
             <h2>{t("nativeHome")}</h2>
             <p>{w("choose")}</p>
-            <button
+            <Button
+              tone="primary"
               type="button"
-              className="studio-primary"
               disabled={!writable}
               onClick={() => void onPrepare()}
             >
               {w("prepare")}
-            </button>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => onMode("agent")}
-            >
+            </Button>
+            <Button type="button" onClick={() => onMode("agent")}>
               <Icon name="spark" size={16} />
               {w("agent")}
-            </button>
-            <button
-              type="button"
-              className="studio-secondary"
-              onClick={() => setShowPages(true)}
-            >
+            </Button>
+            <Button type="button" onClick={() => setShowPages(true)}>
               {w("addPage")}
-            </button>
+            </Button>
           </div>
         )}
         {!setup && mode === "edit" && d.draft && (

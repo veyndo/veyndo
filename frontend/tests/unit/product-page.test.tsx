@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { useState } from "react";
 import { useStorefrontActions } from "../../src/storefront/shell/useStorefrontActions";
-import ProductPage from "../../src/storefront/catalog/ProductPage";
+import ProductPage from "../../../components/catalog/ui/storefront/catalog/ProductPage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { cart, detail, product } from "./fixtures";
 import type { Detail } from "../../src/shared/api/shop-api";
@@ -112,7 +112,7 @@ it.each(["open", "completed"])(
       finishRefresh!();
     });
     await screen.findByText("Refreshed context price", {
-      selector: ".pdp-purchase > p:not(.shop-kicker)",
+      selector: ".vy-sf-description",
     });
     expect(screen.getByRole("textbox", { name: "Engraving" })).toHaveValue(
       "Made for you",
@@ -238,7 +238,7 @@ it("switches gallery/variants, applies normalized quantity and displays authorit
   fireEvent.change(quantity, { target: { value: "5" } });
   fireEvent.blur(quantity);
   expect(quantity).toHaveValue(4);
-  expect(document.querySelector(".pdp-price strong")).toHaveTextContent(
+  expect(document.querySelector(".vy-sf-price strong")).toHaveTextContent(
     "€40.00",
   );
   await user.click(screen.getByRole("button", { name: /Add to/i }));

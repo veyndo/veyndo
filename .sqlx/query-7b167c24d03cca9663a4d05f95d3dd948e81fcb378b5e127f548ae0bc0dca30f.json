@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(sum(views),0)::bigint AS \"views!\" FROM session_signals WHERE tenant=$1 AND session=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "views!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7b167c24d03cca9663a4d05f95d3dd948e81fcb378b5e127f548ae0bc0dca30f"
+}

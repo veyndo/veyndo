@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tenant_login::text AS \"login!\" FROM public.veyndo_scope_key()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "login!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "268258020b3da3976c46dcaf64335cd470b479231c4ab4e57e8ea6bbf093ac83"
+}

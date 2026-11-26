@@ -1,8 +1,7 @@
 //! Shared catalogue composes native capabilities and cognitive contracts without duplicating authorization.
-#[path = "core_catalog.rs"]
-mod core;
+mod core_catalog;
 pub(super) fn definitions() -> Vec<(&'static str, &'static str)> {
-    let mut all = core::CORE.to_vec();
+    let mut all = core_catalog::CORE.to_vec();
     all.push((
         "merchant.media.caption",
         "Prepare a localized image caption and alt text for explicit editor review",

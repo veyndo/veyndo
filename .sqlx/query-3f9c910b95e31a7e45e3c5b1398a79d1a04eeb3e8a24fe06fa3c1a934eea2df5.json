@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM user_sessions WHERE user_id=$1 AND digest=$2 AND expires_at>now()) AS \"trusted!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "trusted!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3f9c910b95e31a7e45e3c5b1398a79d1a04eeb3e8a24fe06fa3c1a934eea2df5"
+}

@@ -1,8 +1,9 @@
 /** Shared native storefront commands for UI, apps and WebMCP; never expose capabilities or submit a financial order. */
+import type { ApiPath } from "../../kit/api";
 import { storefrontActionText as text } from "./storefront-actions-i18n";
 import type { Cart, Product } from "../../shared/api/shop-api";
 type Request = <T>(
-  path: string,
+  path: ApiPath,
   body?: unknown,
   token?: string,
   method?: string,

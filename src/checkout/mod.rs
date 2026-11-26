@@ -1,17 +1,16 @@
 //! Expose the commerce host contract through the existing native checkout transaction.
-use crate::{App, RequestContext, Result, Value, accounts};
+use crate::accounts;
+use crate::foundation::App;
 use axum::{Router, routing::post};
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 
 pub(crate) mod buyer_identity;
-mod commit;
-mod lock;
-mod prepare;
-mod price;
 mod private_browser;
+pub(crate) mod purchase;
 mod session_order;
-pub(crate) mod session_payment;
 mod session_quote;
-mod state;
 
 pub(crate) fn router() -> Router<App> {
     use crate::auth::SecureRoutes;
@@ -40,24 +39,20 @@ pub(crate) fn router() -> Router<App> {
         )
 }
 
-enum Admission<Locked> {
-    Active(Locked),
-    Replay(Value),
-}
-
 pub(crate) async fn execute(
     a: &App,
     h: &RequestContext,
     key: &str,
     review: Option<&session_order::Review>,
 ) -> Result<Value> {
-    let prepared = prepare::run(a, h, key).await?;
-    let mut locked = match lock::run(a, h, key, prepared, review).await? {
-        Admission::Replay(order) => return Ok(order),
-        Admission::Active(locked) => locked,
-    };
-    let priced = price::run(h, &mut locked).await?;
-    let committed = commit::run(a, h, key, locked, priced, review).await?;
-    accounts::remember_payment(a, &committed.cart, &committed.method).await;
-    Ok(committed.order)
+    use veyndo_checkout::service::purchase::Outcome;
+    match veyndo_checkout::service::purchase::execute(a, &purchase::Server(a), h, key, review)
+        .await?
+    {
+        Outcome::Replay(order) => Ok(order),
+        Outcome::Placed(placed) => {
+            accounts::remember_payment(a, &placed.cart, &placed.method).await;
+            Ok(placed.order)
+        }
+    }
 }

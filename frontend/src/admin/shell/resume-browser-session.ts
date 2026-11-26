@@ -4,7 +4,7 @@ import {
   browserSessionMarker,
 } from "../../shared/api/browser-session";
 import { responseError } from "../../shared/i18n/errors-i18n";
-import type { Session } from "../team/UsersManager";
+import type { Session } from "../../../../components/identity/ui/admin/team/UsersManager";
 
 export async function resumeBrowserSession(
   user: string,

@@ -64,9 +64,9 @@ The shared representation supports the recurring requirements above without a ne
 
 ## Source and verification
 
-- `frontend/src/admin/developer/assistant-model.ts`: assistant Manifest construction; other App*.tsx modules own UI editors.
-- `src/apps/editor_contract.rs`, data.rs, surfaces.rs: owned reference, choice, scope and context enforcement.
-- `src/apps/schedules.rs`, webhooks.rs; migration 036: persistent clock ticks and signed deduplicated ingress.
+- `components/apps/ui/admin/developer/assistant-model.ts`: assistant Manifest construction; other App*.tsx modules own UI editors.
+- `components/apps/src/domain/entity_access.rs`, data.rs, surfaces.rs: owned reference, choice, scope and context enforcement.
+- `src/apps/schedules.rs`, webhooks.rs; the schema baseline: persistent clock ticks and signed deduplicated ingress.
 - `src/apps/gateway.rs`, `src/mcp.rs`: independent tool exposure and real action authorization.
 - `extensions/apps/assistant-examples/`: twelve installable contracts for nine types and additional product/customer/order placements.
 - `scripts/app_assistants.py`: actual PostgreSQL/HTTP import, stage, private data, scoped rights, public/MCP boundaries, local service call, signed webhook→rule→Flow→saved record, concurrent replay, cron and cold restart.

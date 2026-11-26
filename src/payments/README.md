@@ -6,8 +6,8 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`operations.rs`](operations.rs): Durable idempotent payment commands, customer context binding and serial refund admission.
 - [`PayPal compatibility`](../../extensions/apps/paypal/src/compatibility.rs): Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses.
 - [`provider.rs`](provider.rs): Payment provider identity, tenant account configuration and immutable wire context.
-- [`receipt_guard.rs`](receipt_guard.rs): Bind integer provider receipt amounts and status to the formally checked exact-match predicate.
-- [`return_urls.rs`](return_urls.rs): Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence.
+- [`receipt_guard.rs`](../../components/payments/src/domain/receipt_guard.rs): Bind integer provider receipt amounts and status to the formally checked exact-match predicate.
+- [`return_urls.rs`](../../components/payments/src/domain/return_urls.rs): Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence.
 - [`routes.rs`](routes.rs): Customer payment status/capture and merchant refund operations share the durable command API.
 - [`storage.rs`](storage.rs): Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants.
 - [`PayPal webhooks`](../../extensions/apps/paypal/src/webhooks.rs): PayPal verifies webhook signatures before inbox insertion; provider reconciliation confirms monetary state.

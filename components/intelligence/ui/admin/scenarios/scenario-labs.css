@@ -1,0 +1,181 @@
+/* Attack test and shop twin panels beside the customer lab. */
+/* Attack test: scripted refusals listed beside the customer lab. */
+.scenario-attacks {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 16px;
+  background: var(--panel, var(--vy-color-surface));
+}
+.scenario-attacks > header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.scenario-attacks > header > div {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.scenario-attacks h3 {
+  margin: 0 0 4px;
+}
+.scenario-attacks p {
+  margin: 0;
+  color: var(--muted, var(--vy-color-muted));
+  line-height: 1.55;
+}
+.scenario-attack-emblem {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
+}
+.scenario-attack-summary {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--vy-color-positive-soft);
+}
+.scenario-attack-summary strong {
+  color: var(--vy-color-positive);
+}
+.scenario-attack-summary.is-breached {
+  background: var(--vy-color-danger-soft);
+}
+.scenario-attack-summary.is-breached strong {
+  color: var(--vy-color-danger);
+}
+.scenario-attack-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scenario-attack-list li {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 12px;
+}
+.scenario-attack-list .scenario-state {
+  justify-self: start;
+}
+.scenario-state.is-attack-held {
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
+}
+.scenario-state.is-attack-breached {
+  background: var(--vy-color-danger-soft);
+  color: var(--vy-color-danger);
+}
+.scenario-state.is-attack-review {
+  background: var(--vy-color-warning-soft);
+  color: var(--vy-color-warning);
+}
+.scenario-attack-detail {
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 560px) {
+  .scenario-attack-list li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Shop twin: readiness steps of the private copy. */
+.scenario-twin {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 16px;
+  background: var(--panel, var(--vy-color-surface));
+}
+.scenario-twin > header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.scenario-twin > header > div {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.scenario-twin h3 {
+  margin: 0 0 4px;
+}
+.scenario-twin p {
+  margin: 0;
+  color: var(--muted, var(--vy-color-muted));
+  line-height: 1.55;
+}
+.scenario-twin-emblem {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--vy-color-hover);
+  color: var(--vy-color-accent-strong);
+}
+.scenario-twin-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scenario-twin-steps li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid var(--border, var(--vy-color-border));
+  border-radius: 12px;
+}
+.scenario-twin-steps button {
+  grid-column: 2;
+  justify-self: start;
+}
+.scenario-twin-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--vy-color-warning-soft);
+  color: var(--vy-color-warning);
+}
+.scenario-twin-steps .is-done .scenario-twin-mark {
+  background: var(--vy-color-positive-soft);
+  color: var(--vy-color-positive);
+}
+.scenario-twin-state {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vy-color-warning);
+}
+.scenario-twin-steps .is-done .scenario-twin-state {
+  color: var(--vy-color-positive);
+}
+.release-attack {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.release-attack h3,
+.release-attack p {
+  margin: 0;
+}

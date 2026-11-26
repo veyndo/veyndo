@@ -1,0 +1,382 @@
+//! RFQ lifecycle: company quote requests for the reviewed cart, merchant offers bound to a buyer, cart, currency, expiry and revision, app lifecycle transitions and acceptance.
+use crate::domain::quote_lifecycle;
+use crate::ports::QuoteLifecycle;
+use crate::store::access::{access, guard_conn, identity, require};
+use crate::store::organization;
+use crate::store::{carts as cart_rows, quotes};
+use crate::types::model::OfferLine;
+use serde::Deserialize;
+use serde_json::{Value, json};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::shop_scope::{header, tenant};
+use veyndo_core::store::history_context::{context, customer_context};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::ports::Carts;
+use veyndo_shop::types::cart::{Item, StoredCart};
+/// The quote operations of buyers (request, list, read, accept) and merchants (list, offer, transition).
+pub async fn invoke(
+    a: &State,
+    ports: (&dyn Carts, &dyn QuoteLifecycle),
+    h: &RequestContext,
+    op: &str,
+    v: &Value,
+) -> Result<Value> {
+    let (carts, lifecycle) = ports;
+    let t = tenant(h)?;
+    let admin = ["quotes.merchant", "quote.offer", "quote.transition"].contains(&op);
+    if admin {
+        merchant(h)?;
+        permit(h, "b2b.manage")?;
+        permit(h, "customers.pii")?;
+    }
+    let c = if ["quote.request", "quote.get", "quote.current"].contains(&op) {
+        Some(carts.load(h).await?)
+    } else {
+        None
+    };
+    let q = if let Some(c) = c.as_ref().filter(|_| op == "quote.request") {
+        {
+            let mut snapshot = carts.view(c).await?;
+            if let Some(v) = snapshot.as_object_mut() {
+                v.remove("token");
+            }
+            Some(snapshot)
+        }
+    } else {
+        None
+    };
+    let mut tx = a.db.begin().await?;
+    context(&mut tx, h, "b2b.procurement").await?;
+    let customer = if admin {
+        None
+    } else {
+        Some(identity(&mut tx, h).await?)
+    };
+    if let Some(customer) = &customer {
+        customer_context(&mut tx, customer).await?;
+    }
+    if op == "quotes.merchant" {
+        permit(h, "customers.pii")?;
+        let rows = quotes::latest(&mut tx, &t).await?;
+        return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
+    }
+    if op == "quotes" {
+        let unit = view::<QuoteInput>(v).unit_id.ok_or(bad("Unit required"))?;
+        let policy = access(&mut tx, &t, &unit, customer.as_ref().unwrap()).await?;
+        require(&policy, "quotes")?;
+        let buyer = customer.as_deref().unwrap_or_default();
+        let rows = quotes::of_buyer(&mut tx, &t, &unit, buyer).await?;
+        return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
+    }
+    if ["quote.get", "quote.current"].contains(&op) {
+        return cart_quotes(&mut tx, h, &t, op, v, c.as_ref().unwrap()).await;
+    }
+    if let Some(c) = &c {
+        return request(tx, lifecycle, h, &t, (v, c, q)).await;
+    }
+    let input: QuoteInput = view(v);
+    let id = input.id.as_deref().ok_or(bad("Quote required"))?;
+    if !admin {
+        let party = quotes::party(&mut tx, &t, id)
+            .await?
+            .ok_or(Error(StatusCode::NOT_FOUND, "Quote not found".into()))?;
+        let (unit, buyer) = (party.unit_id, party.buyer_id);
+        if customer.as_deref() != Some(&buyer) {
+            return Err(Error(StatusCode::NOT_FOUND, "Quote not found".into()));
+        }
+        let policy = access(&mut tx, &t, &unit, &buyer).await?;
+        require(&policy, "quotes")?;
+    }
+    let r = quotes::for_transition(&mut tx, &t, id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Quote not found".into()))?;
+    let buyer = r.buyer_id.clone();
+    let state = r.state.clone();
+    let revision = r.revision;
+    if input.revision != Some(revision) {
+        return Err(conflict("Quote changed; reload before editing"));
+    }
+    let mut data = r.data.clone();
+    let mut lifecycle = Value::Null;
+    let custom_state;
+    let next = match op {
+        "quote.transition" => {
+            (custom_state, lifecycle) = quote_lifecycle::transition(
+                h,
+                &data,
+                &state,
+                input
+                    .action
+                    .as_deref()
+                    .ok_or(bad("Transition action required"))?,
+            )?;
+            custom_state.as_str()
+        }
+        "quote.offer" => {
+            offer(&mut tx, v, &mut data, &state).await?;
+            "offered"
+        }
+        "quote.message" => {
+            if state != "offered" && !quote_lifecycle::preparation(&data, &state) {
+                return Err(conflict("Quote is closed"));
+            }
+            state.as_str()
+        }
+        "quote.reject" => {
+            if state != "offered" && !quote_lifecycle::preparation(&data, &state) {
+                return Err(conflict("Quote is closed"));
+            }
+            "rejected"
+        }
+        _ => return Err(bad("Unknown quote operation")),
+    };
+    let messages = data
+        .get_mut("messages")
+        .and_then(Value::as_array_mut)
+        .ok_or(bad("Invalid quote conversation"))?;
+    if messages.len() >= 100 {
+        return Err(bad("Quote conversation is full"));
+    }
+    messages.push(json!({"actor":if admin{header(h,"x-rac-user").unwrap_or("merchant")}else{&buyer},"merchant":admin,"message":message(v)?,"operation":op,"lifecycle":lifecycle,"from":state,"to":next,"createdAt":chrono::Utc::now().to_rfc3339()}));
+    quotes::transition(&mut tx, &t, id, next, &data).await?;
+    organization::event(
+        &mut tx,
+        &t,
+        "b2b.quote_changed",
+        json!({"quoteId":id,"state":next,"from":state,"revision":revision+1,"lifecycle":lifecycle}),
+    )
+    .await?;
+    tx.commit().await?;
+    Ok(json!({"id":id,"state":next,"revision":revision+1}))
+}
+type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
+/// The quotes of the buyer's current cart: one by ID or the latest twenty.
+async fn cart_quotes(
+    tx: &mut Tx<'_>,
+    h: &RequestContext,
+    t: &str,
+    op: &str,
+    v: &Value,
+    c: &StoredCart,
+) -> Result<Value> {
+    let policy = guard_conn(tx, h, c)
+        .await?
+        .ok_or(bad("Select a purchasing unit first"))?;
+    require(&policy, "quotes")?;
+    let context = c.data.b2b.as_ref().unwrap();
+    let id = if op == "quote.get" {
+        Some(view::<QuoteInput>(v).id.ok_or(bad("Quote required"))?)
+    } else {
+        None
+    };
+    let owner = quotes::CartOwner {
+        cart: &c.id,
+        buyer: &context.customer_id,
+        unit: &context.unit_id,
+    };
+    let rows = quotes::of_cart(tx, t, owner, id.as_deref()).await?;
+    if op == "quote.get" {
+        return rows.first().map(|r| wire(r, h, false)).ok_or(Error(
+            StatusCode::NOT_FOUND,
+            "Quote not found in this cart".into(),
+        ));
+    }
+    Ok(json!({"elements":rows.iter().map(|r| wire(r, h, false)).collect::<Vec<_>>(),"limit":20}))
+}
+/// Records a quote request for the reviewed, unchanged company cart.
+async fn request(
+    mut tx: Tx<'_>,
+    lifecycle: &dyn QuoteLifecycle,
+    h: &RequestContext,
+    t: &str,
+    input: (&Value, &StoredCart, Option<Value>),
+) -> Result<Value> {
+    let (v, c, q) = input;
+    if c.status != "open"
+        || c.data.items.is_empty()
+        || view::<QuoteInput>(v).revision != Some(c.revision)
+    {
+        return Err(conflict("Review a current nonempty company cart first"));
+    }
+    let revision = cart_rows::open_revision_shared(&mut tx, t, &c.id).await?;
+    if revision != Some(c.revision) {
+        return Err(conflict("Cart changed; request a new quote"));
+    }
+    let policy = guard_conn(&mut tx, h, c)
+        .await?
+        .ok_or(bad("Select a purchasing unit first"))?;
+    require(&policy, "quotes")?;
+    if c.data.b2b.as_ref().is_some_and(|b| b.quote_id.is_some()) {
+        return Err(conflict(
+            "Release the accepted quote before requesting another",
+        ));
+    }
+    let id = uid();
+    let context = c.data.b2b.as_ref().unwrap();
+    let accepted = lifecycle.capture(&mut tx, t).await?;
+    let owner = quotes::CartOwner {
+        cart: &c.id,
+        buyer: &context.customer_id,
+        unit: &context.unit_id,
+    };
+    let data = json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted});
+    quotes::request(&mut tx, t, &id, owner, &data).await?;
+    organization::event(
+        &mut tx,
+        t,
+        "b2b.quote_requested",
+        json!({"quoteId":id,"unitId":context.unit_id}),
+    )
+    .await?;
+    tx.commit().await?;
+    Ok(json!({"id":id,"revision":1,"state":"requested"}))
+}
+/// The input of a quote operation: unit, quote, expected revision, lifecycle action, offer and message.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteInput {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    data: OfferInput,
+    #[serde(deserialize_with = "lenient")]
+    message: Option<String>,
+}
+
+/// A merchant offer: priced lines and an expiry.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferInput {
+    lines: Value,
+    #[serde(deserialize_with = "lenient")]
+    valid_until: Option<String>,
+}
+
+/// The offer fields a merchant offer writes into the quote document.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Offer<'a> {
+    lines: &'a [OfferLine],
+    valid_until: &'a str,
+}
+
+/// Admits a merchant offer: exact requested items and quantities, bounded prices and an expiry within a year.
+async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Result<()> {
+    if !["requested", "offered"].contains(&state) {
+        return Err(conflict("This quote cannot be revised"));
+    }
+    let input: QuoteInput = view(v);
+    let lines: Vec<OfferLine> = serde_json::from_value(input.data.lines)
+        .map_err(|_| bad("Expected offer lines with grossMinor in the quote currency"))?;
+    let original: Vec<Item> = serde_json::from_value(view::<RequestedItems>(data).items)
+        .map_err(|_| bad("Invalid requested items"))?;
+    if lines.len() != original.len()
+        || lines.len() > 100
+        || lines.iter().any(|l| {
+            l.gross_minor > 1_000_000_000_000
+                || !original
+                    .iter()
+                    .any(|i| i.id == l.id && i.quantity == l.quantity)
+        })
+        || lines
+            .iter()
+            .map(|l| &l.id)
+            .collect::<std::collections::HashSet<_>>()
+            .len()
+            != lines.len()
+    {
+        return Err(bad(
+            "Offer must cover the exact requested items and quantities",
+        ));
+    }
+    let until = input.data.valid_until.ok_or(bad("Offer expiry required"))?;
+    chrono::DateTime::parse_from_rfc3339(&until)
+        .map_err(|_| bad("Offer expiry must be an RFC3339 timestamp"))?;
+    let valid = quotes::offer_window(tx, &until).await?;
+    if !valid {
+        return Err(bad("Offer expires within the next year"));
+    }
+    merge(
+        data,
+        Offer {
+            lines: &lines,
+            valid_until: &until,
+        },
+    )?;
+    Ok(())
+}
+/// The buyer's or merchant's bounded message.
+fn message(v: &Value) -> Result<String> {
+    let s = view::<QuoteInput>(v).message.unwrap_or_default();
+    if s.len() > 4000
+        || s.chars()
+            .any(|c| c.is_control() && !['\n', '\t', '\r'].contains(&c))
+    {
+        return Err(bad("Quote message is invalid or too long"));
+    }
+    Ok(s)
+}
+/// A quote row as a response; the merchant view adds the lifecycle actions.
+fn wire(r: &quotes::QuoteRow, h: &RequestContext, admin: bool) -> Value {
+    let mut data = r.data.clone();
+    let state = &r.state;
+    let workflow = quote_lifecycle::projection(&data, state, h, admin);
+    if !admin {
+        if let Some(object) = data.as_object_mut() {
+            object.remove("nativeLifecycle");
+        }
+        for message in data
+            .get_mut("messages")
+            .and_then(Value::as_array_mut)
+            .into_iter()
+            .flatten()
+        {
+            if let Some(object) = message.as_object_mut() {
+                object.remove("lifecycle");
+            }
+        }
+    }
+    json!({"id":r.id,"unitId":r.unit_id,"buyerId":r.buyer_id,"state":state,"revision":r.revision,"data":data,"workflow":workflow})
+}
+
+/// The items a quote request asked for.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RequestedItems {
+    items: Value,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Offer;
+    use crate::types::model::OfferLine;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn a_merchant_offer_writes_the_fields_indexing_wrote() {
+        let lines: Vec<OfferLine> =
+            serde_json::from_value(json!([{"id":"p","quantity":2,"grossMinor":1999}])).unwrap();
+        let data = json!({"items":[{"id":"p","quantity":2}],"messages":[],"validUntil":"old"});
+        let mut old = data.clone();
+        old["lines"] = json!(lines);
+        old["validUntil"] = json!("2027-01-01T00:00:00Z");
+        let mut new = data;
+        merge(
+            &mut new,
+            Offer {
+                lines: &lines,
+                valid_until: "2027-01-01T00:00:00Z",
+            },
+        )
+        .unwrap();
+        assert_eq!(new, old);
+    }
+}

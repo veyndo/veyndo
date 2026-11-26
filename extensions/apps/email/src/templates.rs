@@ -144,7 +144,7 @@ fn render_order(
         }
     }
     let (price, currency) = if !o["money"].is_null() {
-        let money: crate::money::Money = serde_json::from_value(o["money"].clone())
+        let money: veyndo_pricing::money::Money = serde_json::from_value(o["money"].clone())
             .map_err(|_| Error::Invalid("Invalid order money snapshot"))?;
         (money.decimal(), money.currency().code().to_owned())
     } else {

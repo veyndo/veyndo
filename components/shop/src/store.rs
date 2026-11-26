@@ -1,0 +1,21 @@
+//! SQL of the shop component.
+pub mod access_snapshot;
+pub mod app_frontends;
+pub mod app_languages;
+pub mod channel_settings;
+pub mod consent_log;
+pub mod consumer_requests;
+pub mod group_usage;
+pub mod hosted_bindings;
+pub mod languages;
+pub mod operator_control;
+pub mod operator_metrics;
+pub mod operators;
+pub mod platform_ai;
+pub mod provisioning;
+pub mod purchase_consent;
+pub mod references;
+pub mod settings;
+pub mod settings_view;
+pub mod staging;
+pub mod workspace;

@@ -46,9 +46,96 @@ async fn get(base: &str, path: &str, params: &[(&str, &str)], token: &str) -> Re
     url.query_pairs_mut().extend_pairs(params.iter().copied());
     network::request(url.as_str(), None, Some(token), false).await
 }
+/// Reads the mailbox changes since the stored cursor; a cursor the provider forgot is cleared.
+async fn changes(
+    base: &str,
+    token: &str,
+    label: &str,
+    history: &mut String,
+    (ids, deleted): (&mut BTreeSet<String>, &mut BTreeSet<String>),
+) -> Result<()> {
+    let mut page = String::new();
+    for _ in 0..10 {
+        let result = get(
+            base,
+            "history",
+            &[
+                ("startHistoryId", history.as_str()),
+                ("labelId", label),
+                ("maxResults", "100"),
+                ("pageToken", &page),
+            ],
+            token,
+        )
+        .await;
+        let value = match result {
+            Err(Error::Http(404, _)) => {
+                history.clear();
+                break;
+            }
+            v => v?,
+        };
+        for row in value["history"].as_array().into_iter().flatten() {
+            for key in [
+                "messagesAdded",
+                "labelsAdded",
+                "labelsRemoved",
+                "messagesDeleted",
+            ] {
+                for m in row[key].as_array().into_iter().flatten() {
+                    let id = text(&m["message"], "id");
+                    if key == "messagesDeleted" {
+                        deleted.insert(id);
+                    } else {
+                        ids.insert(id);
+                    }
+                }
+            }
+        }
+        page = text(&value, "nextPageToken");
+        if page.is_empty() {
+            *history = text(&value, "historyId");
+            break;
+        }
+    }
+    checked(
+        page.is_empty() || history.is_empty(),
+        "Mailbox change window too large; reset sync cursor",
+    )?;
+    Ok(())
+}
+/// Lists at most five hundred messages of the label for a full synchronisation.
+async fn list(base: &str, token: &str, label: &str, ids: &mut BTreeSet<String>) -> Result<()> {
+    let mut page = String::new();
+    for _ in 0..10 {
+        let value = get(
+            base,
+            "messages",
+            &[
+                ("labelIds", label),
+                ("maxResults", "50"),
+                ("pageToken", &page),
+            ],
+            token,
+        )
+        .await?;
+        for m in value["messages"].as_array().into_iter().flatten() {
+            ids.insert(text(m, "id"));
+        }
+        page = text(&value, "nextPageToken");
+        if page.is_empty() {
+            break;
+        }
+    }
+    checked(
+        page.is_empty(),
+        "Label has more than 500 messages; choose a dedicated support label",
+    )?;
+    Ok(())
+}
 pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
     let current = store.get(t, "gmail").await?;
-    let token = oauth::token(store, t, "gmail").await?;
+    let token = oauth::token(store, t, "gmail", &crate::actions::OAUTH).await?;
     let base = format!("{}/users/me", network::endpoint("gmail")?);
     let label = settings["labelId"].as_str().unwrap_or("INBOX");
     let mut ids = BTreeSet::new();
@@ -56,83 +143,12 @@ pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
     let mut history = text(&current, "historyId");
     let mut full = false;
     if !history.is_empty() {
-        let mut page = String::new();
-        for _ in 0..10 {
-            let result = get(
-                &base,
-                "history",
-                &[
-                    ("startHistoryId", &history),
-                    ("labelId", label),
-                    ("maxResults", "100"),
-                    ("pageToken", &page),
-                ],
-                &token,
-            )
-            .await;
-            let value = match result {
-                Err(Error::Http(404, _)) => {
-                    history.clear();
-                    break;
-                }
-                v => v?,
-            };
-            for row in value["history"].as_array().into_iter().flatten() {
-                for key in [
-                    "messagesAdded",
-                    "labelsAdded",
-                    "labelsRemoved",
-                    "messagesDeleted",
-                ] {
-                    for m in row[key].as_array().into_iter().flatten() {
-                        let id = text(&m["message"], "id");
-                        if key == "messagesDeleted" {
-                            deleted.insert(id);
-                        } else {
-                            ids.insert(id);
-                        }
-                    }
-                }
-            }
-            page = text(&value, "nextPageToken");
-            if page.is_empty() {
-                history = text(&value, "historyId");
-                break;
-            }
-        }
-        checked(
-            page.is_empty() || history.is_empty(),
-            "Mailbox change window too large; reset sync cursor",
-        )?;
+        changes(&base, &token, label, &mut history, (&mut ids, &mut deleted)).await?;
     }
     if history.is_empty() {
         full = true;
         history = text(&get(&base, "profile", &[], &token).await?, "historyId");
-        let mut page = String::new();
-        for _ in 0..10 {
-            let value = get(
-                &base,
-                "messages",
-                &[
-                    ("labelIds", label),
-                    ("maxResults", "50"),
-                    ("pageToken", &page),
-                ],
-                &token,
-            )
-            .await?;
-            for m in value["messages"].as_array().into_iter().flatten() {
-                ids.insert(text(m, "id"));
-            }
-            page = text(&value, "nextPageToken");
-            if page.is_empty() {
-                break;
-            }
-        }
-        checked(
-            page.is_empty(),
-            "Label has more than 500 messages; choose a dedicated support label",
-        )?;
+        list(&base, &token, label, &mut ids).await?;
     }
     checked(
         ids.len() <= 500 && deleted.len() <= 500 && !history.is_empty(),

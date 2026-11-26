@@ -2,17 +2,17 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { useState } from "react";
-import WorkspaceTask from "../../src/admin/workspace/WorkspaceTask";
-import WorkTemplateEditor from "../../src/admin/automation/WorkTemplateEditor";
+import WorkspaceTask from "../../../components/studio/ui/admin/workspace/WorkspaceTask";
+import WorkTemplateEditor from "../../../components/marketing/ui/admin/automation/WorkTemplateEditor";
 import {
   clearGoalFlow,
   goalTemplate,
-} from "../../src/admin/automation/goal-template";
+} from "../../../components/marketing/ui/admin/automation/goal-template";
 import {
   copyWorkTemplate,
   scalarFields,
   type WorkTemplate,
-} from "../../src/admin/automation/work-template";
+} from "../../../components/marketing/ui/admin/automation/work-template";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 
 const preview: any = {

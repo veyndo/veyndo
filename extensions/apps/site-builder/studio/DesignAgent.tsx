@@ -1,4 +1,5 @@
 /** Shop design uses the shared agent workspace and existing native proposal/approval owners. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import DesignReview from "./DesignReview";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
@@ -329,9 +330,9 @@ export default function DesignAgent({
                 >
                   {t("after")} {i + 1}
                 </button>
-                <button
+                <Button
+                  tone="primary"
                   type="button"
-                  className="studio-primary"
                   disabled={disabled || busy}
                   onClick={async () => {
                     setBusy(true);
@@ -352,7 +353,7 @@ export default function DesignAgent({
                   }}
                 >
                   {t("apply")}
-                </button>
+                </Button>
               </div>
             </article>
           ))}

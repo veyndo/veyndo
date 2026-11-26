@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT public.veyndo_configure_scope($1::name,$2::name)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "veyndo_configure_scope",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Name",
+        "Name"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2704ded7e3660498a8d85f81676c8403aec12d0d02fdcf02af9f0c158db66f8e"
+}

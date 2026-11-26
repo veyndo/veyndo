@@ -1,7 +1,7 @@
 /** Merchant controls distinguish native readiness, external approval and inward catalogue intake. */
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AgenticChannels from "../../src/admin/channels/AgenticChannels";
+import AgenticChannels from "../../../components/marketing/ui/admin/channels/AgenticChannels";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
 it("keeps external approval unverified and opens inward imports rather than foreign checkout", async () => {

@@ -1,16 +1,19 @@
-//! Merchant order read adapter.
-use crate::*;
+//! Merchant order read route; the orders component reads and projects the orders.
+use crate::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 
 pub(crate) async fn orders(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = merchant(&a, &h)?;
     auth::permit(&h, "orders.read")?;
     auth::permit(&h, "customers.pii")?;
-    let rs =
-        sqlx::query("SELECT data #- '{cart,token}' AS data FROM orders WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100")
-            .bind(t)
-            .fetch_all(&a.db)
-            .await?;
     Ok(Json(
-        json!({"data":rs.iter().map(|r|{let mut v:Value=r.get("data");commerce::order_fields(&mut v);v}).collect::<Vec<_>>()}),
+        json!({"data":veyndo_orders::store::order_reads::recent(&a, &t).await?}),
     ))
 }

@@ -5,7 +5,8 @@ Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 ## Cognitive commerce continuity
 
 Merchant planning continuation belongs to existing `tasks`, conversations and
-`src/agent_runs/`; read `docs/durable-agent-runs.md`. Keep native read tools, central
+`components/intelligence/src/service/{agent_runs,run_journal,planner}.rs` (the
+server executes runs over the agent port in `src/agent_host.rs`); read `docs/durable-agent-runs.md`. Keep native read tools, central
 inference and original proposal approval. Store private completed checkpoints,
 recheck credential/scope/evidence, fence completion by its lease and explicitly
 continue uncertain calls. Detect request-ID replays before new attempt quota
@@ -15,9 +16,11 @@ HTTP restart, revocation, source-withdrawal and duplicate-request regressions.
 
 Read [the connected cognition guide](../../docs/cognitive-commerce.md) before changing
 intelligence. It records exact implemented paths and the still-open audit scope.
-`src/cognition/` owns source review, read-agent rounds, price guardrails, controlled
-experiments and consent-bound preferences; `src/knowledge/` owns retrieval and the
-rebuildable Qdrant projection. Extend the existing settings, capability, outbox,
+`components/intelligence` owns source review, read-agent rounds
+(`service/read_rounds`), price guardrails and autonomy, controlled experiments,
+consent-bound preferences, retrieval and the rebuildable Qdrant projection
+(`knowledge`) and the consent receipts that gate personalization and analytics;
+`src/cognition/` only registers routes. Extend the existing settings, capability, outbox,
 chat, proposal and native checkout owners. Do not create another knowledge truth
 store, pricing engine, approval queue or chat backend. Stored evidence is not
 model-weight learning; exact source admission is not proof of surrounding prose.
@@ -26,8 +29,9 @@ cursors, source-trigger jobs and fenced publication share the existing index que
 
 ## Behavioral intelligence ownership
 
-`src/cognition/behavior/` owns consent-bound native visitor observations and their
-derived report/journey graph. Reuse `session_signal_events`, native carts/accounts,
+Consent-bound native visitor capture (`components/intelligence/src/http/behavior_capture.rs`),
+the consent receipts (`service/consent.rs`) and the report and journey reads
+(`service/behavior.rs`) live in the intelligence component. Reuse `session_signal_events`, native carts/accounts,
 current legal receipts, product knowledge, forced tenant RLS and composite foreign
 keys. Never introduce another analytics identity, cookie, event ledger, pricing or
 order truth. Do not record raw IP/UA, search/question text or visitor-supplied customer

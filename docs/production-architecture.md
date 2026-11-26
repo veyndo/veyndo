@@ -1,13 +1,15 @@
 # How Veyndo works: the architecture
 
-VEYNDO has one deterministic Rust commerce core. The storefront, merchant Studio,
-API clients and MCP/UCP adapters call that same core. AI helps find information,
+VEYNDO has one deterministic Rust commerce core, built from 22 components that each own
+their tables, rules and screens ([component architecture](architecture.md)). The
+storefront, merchant Studio, API clients and MCP/UCP adapters call the same component
+operations. AI helps find information,
 explain behavior and propose changes; it does not decide whether a payment is
 received, a user is authorized or stock can be sold.
 
 This guide describes the executable architecture, its current protection boundaries,
 and the next migrations. It complements the [feature tour](features.md),
-[Shopware mapping](shopware-parity.md), [module inventory](module-inventory.md)
+[feature overview](features.md), [module inventory](module-inventory.md)
 and [test coverage](testing.md). Diagram images open at full size.
 
 [![System map: experiences, admission, deterministic commerce, PostgreSQL, apps and workers](assets/architecture/system.svg)](assets/architecture/system.svg)
@@ -29,9 +31,11 @@ and [test coverage](testing.md). Diagram images open at full size.
    Interactive AI admission also reserves a durable daily quota before the handler.
 4. A task-local database scope follows the admitted request. Fresh and reused
    SQLx connections receive that scope before queries; explicit transactions use SET LOCAL. Session mode rebinds every borrow without an extra reset query; transaction-pool mode scopes direct queries as well. Unknown tasks receive an empty, denied context.
-5. The native handler validates its entity IDs, rights and expected revision.
-   Mutations use PostgreSQL transactions and write their outbox events in the same
-   commit. MCP and UCP use these operations rather than a separate payment engine.
+5. The component's HTTP handler validates its entity IDs, rights and expected revision
+   and calls a service of that component. The service runs the pure `domain/` rules and
+   the checked SQL of its `store/`, reaching other components through their stores or
+   declared ports. Mutations use PostgreSQL transactions and write their outbox events in
+   the same commit. MCP and UCP use these operations rather than a separate payment engine.
 6. Workers consume the committed events. They update read models, project knowledge,
    evaluate flows, deliver app events or execute payment commands. Slow model/provider
    calls are outside checkout locks. The browser receives the native API result.
@@ -40,17 +44,19 @@ and [test coverage](testing.md). Diagram images open at full size.
 
 | Responsibility | Actual implementation | Authority |
 |---|---|---|
-| Merchant identity and permissions | `src/auth/`, `src/accounts/`, `src/auth/middleware.rs` | Current PostgreSQL session/membership; no client principal |
-| Tenant-scoped database leases | `src/request_context.rs`, `crates/runtime/src/tenant_scope.rs`, `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security}.rs` | Server-derived scope; PostgreSQL row policies |
-| Product, category and checkout operations | `src/commerce/`, `src/order_checkout.rs`, `src/cart_*.rs` | Locked catalog/settings/cart snapshot |
-| Exact money boundary | `crates/commerce/src/money.rs` | Checked minor integers and explicit currency scale |
-| Stock allocation | `src/commerce/inventory.rs`, migration 047 | Persisted quantities linked to tenant + order + product |
-| Payments | `src/payments/{state,storage,generic_receipts,worker}.rs` | Verified receipts, immutable provider identity, fenced durable jobs |
-| Rules, flows and app events | `src/marketing/`, `src/apps/`, `src/outbox.rs` | Versioned contracts and current action permissions |
-| Read caching, admission and delivery | `src/performance/` | Immutable Arc handles; current SQL versions/access snapshots; outbox eviction; secret-free compression |
-| Shop memory and retrieval | `src/cognition/`, `src/knowledge/` | Provenance/publication filters and persisted event receipts |
-| Operator controls | `src/platform/` | Separate personal operator grant, audit and revisions |
-| Migrations / startup | `src/migrations.rs`, `src/migrations/schema.rs`, `src/bootstrap.rs` | Append-only checksums and separate migration credential |
+| Merchant identity and permissions | `components/identity/` (sessions, roles, MFA, route policy), `src/auth/middleware.rs` | Current PostgreSQL session/membership; no client principal |
+| Tenant-scoped database leases | `components/core/src/request_context.rs`, `crates/runtime/src/tenant_scope.rs`, `crates/runtime/src/scoped_pool.rs`, `components/core/src/store/{pool,row_security}.rs` | Server-derived scope; PostgreSQL row policies |
+| Catalogue, cart and checkout | `components/catalog/`, `components/checkout/src/service/purchase/{lock,price,commit}.rs` | Locked catalog/settings/cart snapshot |
+| Exact money boundary | `components/pricing/src/domain/money.rs` | Checked minor integers and explicit currency scale |
+| Stock allocation | `components/inventory/src/store/reservations.rs`, `components/inventory/migrations/0001-baseline.sql` | Persisted quantities linked to tenant + order + product |
+| Orders | `components/orders/src/domain/order_workflow.rs`, `components/orders/src/store/` | Proved order state machine, immutable amounts and snapshots |
+| Payments | `components/payments/src/{domain,store,service}/`, `src/payments/` (host port and provider routes) | Verified receipts, immutable provider identity, fenced durable jobs |
+| Rules, flows and app events | `components/marketing/`, `components/apps/`, `crates/automation/`, `src/outbox.rs` | Versioned contracts and current action permissions |
+| Read caching, admission and delivery | `components/core/src/{admission,cache}.rs`, `src/performance/` | Immutable Arc handles; current SQL versions/access snapshots; outbox eviction; secret-free compression |
+| Shop memory and retrieval | `components/intelligence/` (including `knowledge/`), `src/cognition/` | Provenance/publication filters and persisted event receipts |
+| Operator controls | `components/shop/` (operator control), `src/platform/` | Separate personal operator grant, audit and revisions |
+| Protocol adapters | `src/mcp/`, `src/ucp/`, `src/capabilities/` | Same component operations as HTTP; no own business rule |
+| Schema setup / startup | `src/migrations.rs`, `src/migrations/schema.rs`, `components/*/migrations/`, `src/bootstrap.rs` | Ordered component baselines recorded with checksums, fresh installation only, separate migration credential |
 
 The [complete module inventory](module-inventory.md) includes every source file.
 The [source map](source-map.md) maps additional behavior to its real tests.
@@ -69,8 +75,7 @@ simulated and provider-backed methods. Cancellation uses its persisted quantity,
 not an editable line-item snapshot. Setting `released_at` and restoring stock happen
 atomically in one statement; repeat cancellation cannot release stock twice.
 Deduction and allocation are batched per cart. Product locks remain in sorted ID
-order for checkout and release, including baskets supplied in opposite orders. Existing order allocations
-are backfilled by migration 047 where their referenced product still exists.
+order for checkout and release, including baskets supplied in opposite orders.
 
 Provider-backed checkout also creates a payment attempt and durable command. Its
 provider version, merchant account, environment, currency and amount are frozen.
@@ -108,20 +113,19 @@ The active checkout supports a channel-selected currency. Orders include an expl
 and three). [The multi-currency guide](currencies.md) explains automatic/fixed
 pricing, saved rates, protocol contracts and tested provider boundaries.
 
-The Shopware-ported calculators still reproduce the original PHP float behavior.
-The currency-aware checkout boundary preserves the existing calculator rounding and rejects
-non-finite, negative or out-of-range payment totals. This is a carefully defined
-boundary, not a claim that all tax and discount arithmetic is now integer-based.
-`scripts/money_boundary_differential.py` compares the actual boundary against original
-Shopware calculator results; the existing price/context/delivery/rule differential
-gates remain required. The next arithmetic migration must retain those gates and
-introduce explicit rounding rules for every intermediate operation.
+The calculation path works in whole minor units (`Minor`/`Money` in `components/pricing`)
+and exact decimals; the price calculator computes exactly and rounds each amount once,
+half away from zero, to the currency exponent, so a decimal tie is decided by the
+decimal, not by binary error. The checkout boundary rejects non-finite, negative or
+out-of-range payment totals. Rounding is stated and proved in Lean (`line_total`,
+`rounded_quotient`, the calculator's cash-interval rounding, quote totals); see
+[formal verification](formal-verification.md). Shopware compatibility is not a goal.
 
 ## Independent SaaS shops and row security
 
 [![Verified tenant identity, scoped database lease, FORCE RLS and explicit privileged exceptions](assets/architecture/security.svg)](assets/architecture/security.svg)
 
-Migration 044 installs `ENABLE` and `FORCE ROW LEVEL SECURITY` on current public
+The component baselines install `ENABLE` and `FORCE ROW LEVEL SECURITY` on public
 core tables with a tenant column. Managed app tables keep their existing forced
 app policy. New tenant tables must add equivalent policies, scoped foreign keys and
 adversarial tests. Strict startup checks coverage, the effective runtime role,
@@ -139,7 +143,7 @@ direct queries in a scoped transaction. Session mode binds every checkout, with 
 second reset query on return. Unknown tasks fail closed. Transaction pooling is
 verified through actual PgBouncer with one backend, protocol prepared statements
 and two Rust replicas. It needs a separate direct/session `DATABASE_LISTENER_URL`;
-statement pooling is unsupported. [Configuration and all eighteen review fixes](core-hardening.md).
+statement pooling is unsupported. [Security boundaries](security.md).
 
 Identity resolution, authenticated platform operations, registration/provisioning,
 staging/developer control paths and fleet workers deliberately use trusted system
@@ -151,13 +155,13 @@ injection, a compromised process, all side channels or arbitrary external servic
 
 ### Deploy safely
 
-1. Apply migrations with `DATABASE_URL` using `BOOTSTRAP_MODE=migrate`. They keep
-   their old checksums and add 044–047; migration 047 scans historical order lines,
-   so plan DDL/backfill locks for large live installations.
+1. Set up a new database with `DATABASE_URL` using `BOOTSTRAP_MODE=migrate`; it applies
+   the component baselines. A release replaces earlier installations, so there is no
+   upgrade of an existing database.
 2. Provision a dedicated runtime login through the database/secret manager.
    [runtime-role.sql](../deploy/sql/runtime-role.sql) grants only core DML/reference
    privileges and grants existing fixed Core/app tables (excluding connector credentials).
-   Shared app tables stay with the migration owner. Run it as the actual migration owner after additive migrations; rerun role provisioning for new tables. Never grant the migration owner to runtime.
+   Shared app tables stay with the migration owner. Run it as the actual migration owner after setup. Never grant the migration owner to runtime.
 3. Set `DATABASE_RUNTIME_URL`, `DB_RLS_REQUIRED=true`, `BOOTSTRAP_MODE=serve` and
    `ALLOW_BOOTSTRAP_AUTH=false` for public HTTP and worker deployments. Membership
    in `veyndo_runtime` must be inherited by the runtime login. All fixed Core/app tables stay with the migration owner. Separate signed tenant/system
@@ -264,14 +268,21 @@ the same declared capabilities; provider output cannot become an unchecked SQL c
 - `transaction_pooler` repeats the strict-runtime suite through a real one-backend PgBouncer; poison-event, retention, login-backoff and shared-limit controls also run in both modes.
 - Payment suites use local provider fixtures for restart, capture/refund, duplicate
   notifications, version/account pinning, authorization/void and uncertain receipts.
-- Original Shopware differential suites guard the ported behavior and money boundary.
-- Lean extracts 37 named policies, including currency precision, bounded quota and
-  ledger transition admission. It does **not** prove the float bridge, all Money
-  arithmetic, SQL pool hooks, migrations, external providers, browser or entire core.
+- `store_isolation` calls the store functions of 15 components and sweeps all 135 tenant
+  tables under a non-owner `NOBYPASSRLS` login: a second shop sees and changes nothing.
+- Property tests (37), mutation testing of `domain/`, generated HTTP and MCP contract cases
+  (`schema_contracts`), per-component coverage floors and browser journeys cover the
+  components; `schema_baseline` proves a fresh installation equals the reference schema.
+  [Component test suite](testing.md#component-test-suite-phase-7).
+- Lean proves 74 rules with 217 properties, including currency precision, the per-order
+  stock bound, the order state machine over request sequences, capture and refund bounds
+  and ledger transition admission ([proof coverage](proof-coverage.md)). It does **not**
+  prove the JSON number conversion, the calculator's rule mix, all Money arithmetic, SQL pool hooks, the schema, external
+  providers, the browser or the entire core.
 - The documentation build mirrors all tracked Markdown, copies local SVG assets,
   checks links/anchors/publication inventory, and publishes a searchable site after
   a merge to `main`. These diagrams are rendered assets, not unrendered fenced code.
 
 Remaining production work includes complete integer pricing/tax migration, per-tenant
-worker/provider token and spend admission, finer runtime/worker privilege separation, large-scale DDL/backfill validation, full telemetry
+worker/provider token and spend admission, finer runtime/worker privilege separation, full telemetry
 export/traces/alerts and independently reviewed public deployment hardening.

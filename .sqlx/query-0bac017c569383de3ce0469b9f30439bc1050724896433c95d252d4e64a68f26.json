@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('product_id',r.source_id,'document_id',d.id,'title',d.title,'source','merchant-document') AS \"document!\" FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id JOIN knowledge_documents d ON d.tenant=r.tenant AND d.id=r.target_id AND d.visibility='public' AND NOT d.archived WHERE r.tenant=$1 AND r.kind='HAS_DOCUMENT' ORDER BY r.source_id,d.id LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "document!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0bac017c569383de3ce0469b9f30439bc1050724896433c95d252d4e64a68f26"
+}

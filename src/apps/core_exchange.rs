@@ -1,5 +1,47 @@
 //! Generic channel/product projections and imported sales delegate to native owners with explicit app capabilities.
-use super::*;
+use super::{Manifest, approval, credentials, input_schema};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{commerce, currencies};
+use axum::http::StatusCode;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::request_context::RequestContext;
+/// The record, channel and currency a core exchange names.
+/// The stored channel fields a marketplace exchange checks, compared exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MarketplaceChannel {
+    kind: Value,
+    active: Value,
+    visibility: Value,
+    product_ids: Value,
+}
+
+/// The product content and price a channel product read adds to the channel document.
+#[derive(Serialize)]
+struct ChannelProduct {
+    product: Value,
+    money: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExchangeArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
 pub(super) async fn execute(
     a: &App,
     h: &RequestContext,
@@ -7,6 +49,7 @@ pub(super) async fn execute(
     op: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: ExchangeArgs = view(v);
     let t = merchant(a, h)?;
     let required = if op == "order_import" {
         vec![
@@ -35,30 +78,23 @@ pub(super) async fn execute(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"channelId":{"type":"string","maxLength":100},"currency":{"type":"string","maxLength":3}},"required":["channelId"],"additionalProperties":false}),
         v,
     )?;
-    let id = v["channelId"].as_str().unwrap();
-    let row = sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(id)
-        .fetch_optional(&a.db)
+    let id = input.channel_id.as_deref().unwrap();
+    let (c, channel_revision) = veyndo_marketing::store::channel_config::stored(a, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Channel unavailable".into()))?;
-    let c: Value = row.get("data");
-    if c["kind"] != "marketplace" || c["active"] != true || c["visibility"] == "private" {
+    let channel: MarketplaceChannel = view(&c);
+    if channel.kind != "marketplace" || channel.active != true || channel.visibility == "private" {
         return Err(conflict("Marketplace channel must be active and public"));
     }
     let (cfg, rev) = commerce::scoped_config(a, &t, id).await?;
-    let mut result = json!({"id":id,"revision":row.get::<i64,_>("revision"),"data":c,"mainLocale":cfg.main_locale,"currencies":cfg.currencies,"settingsRevision":rev});
+    let mut result = json!({"id":id,"revision":channel_revision,"data":c,"mainLocale":cfg.main_locale,"currencies":cfg.currencies,"settingsRevision":rev});
     if op == "channel_product" {
-        let pid = v["id"].as_str().ok_or(bad("Product ID required"))?;
-        let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(pid)
-            .fetch_optional(&a.db)
+        let pid = input.id.as_deref().ok_or(bad("Product ID required"))?;
+        let (p, visible) = veyndo_catalog::store::products::in_channel(a, &t, pid, id)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Product unavailable".into()))?;
-        let p = product(&row);
-        let visible:bool=sqlx::query_scalar("SELECT p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$3 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id)) FROM products p WHERE p.tenant=$1 AND p.id=$2").bind(&t).bind(pid).bind(id).fetch_one(&a.db).await?;
-        let selected = c["productIds"]
+        let selected = channel
+            .product_ids
             .as_array()
             .ok_or(bad("Invalid channel catalog"))?;
         if !visible
@@ -71,14 +107,35 @@ pub(super) async fn execute(
         }
         let currency = cfg
             .currencies
-            .selected(v["currency"].as_str().unwrap_or(""))?;
-        result["product"] =
+            .selected(input.currency.as_deref().unwrap_or(""))?;
+        let product =
             crate::operations::invoke(a, h, "merchant.product.content", &json!({"id":pid})).await?;
-        result["money"] = json!(currencies::amount(
+        let money = json!(currencies::exact_amount(
             currencies::product_price(&p, &cfg.currencies, currency)?,
             &currency.code,
             currency.scale
         )?);
+        merge(&mut result, ChannelProduct { product, money })?;
     }
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ChannelProduct;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn channel_product_keeps_the_indexed_shape() {
+        let result = json!({"id":"amazon","revision":3,"data":{"kind":"marketplace"},"mainLocale":"de-DE","currencies":{},"settingsRevision":9});
+        let product = json!({"id":"p-1","name":{"de-DE":"Tasse"}});
+        let money = json!({"amount":"12.50","currency":"EUR","minor":1250});
+        let mut old = result.clone();
+        old["product"] = product.clone();
+        old["money"] = money.clone();
+        let mut new = result;
+        merge(&mut new, ChannelProduct { product, money }).unwrap();
+        assert_eq!(new, old);
+    }
 }

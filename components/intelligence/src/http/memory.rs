@@ -1,0 +1,63 @@
+//! Merchant memory reads and revision-bound hypothesis decisions.
+use crate::store::observations::observations;
+use crate::store::product_reads::decide_hypothesis;
+use axum::Json;
+use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
+use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
+use veyndo_core::{RequestContext, Result, State, bad, conflict};
+use veyndo_identity::{merchant, permit};
+
+/// The shop's evidence-based memory: observed pairs and reviewable hypotheses.
+pub async fn memory(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
+    permit(&h, "knowledge.read")?;
+    Ok(Json(observations(&a, &merchant(&h)?).await?))
+}
+/// The JSON fields `decide` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DecideInput {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
+/// Dismisses, marks for experiment or publishes a hypothesis at its revision; it never starts an experiment.
+pub async fn decide(
+    Shared(a): Shared<State>,
+    h: RequestContext,
+    Path(id): Path<String>,
+    Json(v): Json<Value>,
+) -> Result<Json<Value>> {
+    let input: DecideInput = view(&v);
+    permit(&h, "catalog")?;
+    let t = merchant(&h)?;
+    let state = input
+        .state
+        .as_deref()
+        .filter(|v| ["dismissed", "experiment", "published"].contains(v))
+        .ok_or(bad("Choose dismissed, experiment or published"))?;
+    if input.approve != Some(true) {
+        return Err(bad("Explicit approve=true required"));
+    }
+    let mut tx = a.db.begin().await?;
+    let revision = input.revision.ok_or(bad("revision required"))?;
+    if !decide_hypothesis(&mut *tx, &t, &id, state, revision).await? {
+        return Err(conflict("Hypothesis revision changed"));
+    }
+    veyndo_core::store::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "intelligence.decision",
+        &json!({"hypothesisId":id,"state":state,"experimentStarted":false}),
+    )
+    .await?;
+    tx.commit().await?;
+    Ok(Json(
+        json!({"state":state,"experimentStarted":false,"nextStep":"Configure a controlled experiment; marking an idea does not run one"}),
+    ))
+}

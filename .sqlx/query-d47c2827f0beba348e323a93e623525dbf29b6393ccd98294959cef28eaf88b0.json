@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"uses!\" FROM promotion_uses WHERE tenant=$1 AND promotion=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "uses!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d47c2827f0beba348e323a93e623525dbf29b6393ccd98294959cef28eaf88b0"
+}

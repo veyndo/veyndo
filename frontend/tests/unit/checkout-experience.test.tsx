@@ -10,7 +10,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { cart } from "./fixtures";
 import type { Order } from "../../src/shared/api/shop-api";
-import OrderCompletion from "../../src/storefront/checkout/OrderCompletion";
+import OrderCompletion from "../../../components/checkout/ui/storefront/checkout/OrderCompletion";
 import GoogleAddressSearch from "../../src/shared/customer/GoogleAddressSearch";
 import {
   addressFromPlace,
@@ -26,9 +26,12 @@ vi.mock("../../src/shared/customer/google-address", async (original) => ({
   browserPlacesKey: () => google.key,
   loadPlaces: google.load,
 }));
-vi.mock("../../src/storefront/checkout/PaymentSession", () => ({
-  default: () => <p>Provider confirmation pending</p>,
-}));
+vi.mock(
+  "../../../components/checkout/ui/storefront/checkout/PaymentSession",
+  () => ({
+    default: () => <p>Provider confirmation pending</p>,
+  }),
+);
 const part = (
   type: string,
   text: string,

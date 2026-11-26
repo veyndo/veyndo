@@ -1,10 +1,14 @@
 # Shop design app
 
 `manifest.json` defines the canonical pages, theme overrides and managed actions.
-`server.rs` validates the bounded document. `design_agent.rs` prepares ordinary
-revision-bound native tasks with the centrally configured inference service.
-`references.rs` captures bounded public HTTPS evidence or supplied images; partial
-capture is explicit. No browser source executes.
+The Rust side is the `veyndo-site-builder` crate (`Cargo.toml`, library root
+`server.rs`): `server.rs` validates the bounded document, `design_agent.rs` and
+`design_agent/` prepare ordinary revision-bound native tasks with the centrally
+configured inference service. Server-owned steps (catalogue page, proposal
+application, surface registry, reference capture, coding-agent connection) are
+reached through the `SiteHost` port in `ports.rs`; reference capture takes bounded
+public HTTPS evidence or supplied images, and partial capture is explicit. No
+browser source executes.
 
 `Renderer.tsx` and `site.css` render both Studio previews and published pages.
 `studio/` owns graphical controls, Tiptap text, reference alternatives and history.
@@ -23,6 +27,16 @@ The Studio entry is preview-first: the existing native home is visible before a 
 `studio/BlockPalette.tsx` renders illustrated native/app element cards. App elements
 store references, resolve through the public app registry and use read-only preview
 grants; `elements.rs` validates their tenant, active package and public native surface.
+
+Storefront-kit parts (`kind: "part"`, currently the product card and the buy box)
+are placed from the same palette. `site-parts.tsx` lists the placeable kit
+contracts, resolves their product from the page products and renders the kit
+component; the inspector form is the kit `PartForm` generated from the part's
+configuration schema. `part-schemas.json` is generated from those contracts by
+`frontend/tests/unit/site-parts.test.tsx` (`WRITE_PART_SCHEMAS=1`), which fails on
+drift; `part_schemas.rs` validates stored configurations against it on every save,
+and product IDs it names pass the same tenant ownership check as product blocks.
+The agent planning contract embeds the same schemas.
 `proposals.rs` owns shared proposal validation and persistence; `agent_handoff.rs`
 exports credential-free tasks and validates coding-agent results through that owner.
 Shared agent controls stay in the generic host; page business behavior stays here.

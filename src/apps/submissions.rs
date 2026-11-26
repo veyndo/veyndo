@@ -1,5 +1,27 @@
 //! Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox.
-use super::*;
+use super::{Entity, Manifest, data, site_forms};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::marketing;
+use axum::http::StatusCode;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_app_platform::store::app_host_reads;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::document::view;
+use veyndo_core::hash;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
+use veyndo_kernel::verified_kernel;
+/// The JSON fields `submit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SubmitInput {
+    fields: Value,
+}
+
 pub(super) async fn submit(
     a: &App,
     h: &RequestContext,
@@ -7,8 +29,11 @@ pub(super) async fn submit(
     e: &Entity,
     v: &Value,
 ) -> Result<Value> {
+    let input: SubmitInput = view(v);
     let t = tenant(h)?;
-    let live = crate::staging::parent(a, &t).await?.is_none();
+    let live = veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_none();
     let cart = load_cart(a, h).await?;
     if !verified_kernel::app_submission_admissible(
         !e.public_read,
@@ -23,17 +48,9 @@ pub(super) async fn submit(
     let intake_key = hash(&cart.id);
     let id = format!("submission_{}", uuid::Uuid::new_v4().simple());
     let mut tx = a.db.begin().await?;
-    sqlx::query(
-        "SELECT set_config('veyndo.source','app.submit',true),set_config('veyndo.actor','',true)",
-    )
-    .execute(&mut *tx)
-    .await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,946))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    let count:i64=sqlx::query_scalar("SELECT count(*) FROM outbox WHERE tenant=$1 AND kind=$2 AND created_at>now()-interval '1 minute'").bind(&t).bind(format!("app.{}.submitted",m.id)).fetch_one(&mut *tx).await?;
-    let personal:i64=sqlx::query_scalar("SELECT count(*) FROM outbox WHERE tenant=$1 AND kind=$2 AND data->>'intakeKey'=$3 AND created_at>now()-interval '1 minute'").bind(&t).bind(format!("app.{}.submitted",m.id)).bind(&intake_key).fetch_one(&mut *tx).await?;
+    let kind = format!("app.{}.submitted", m.id);
+    let (count, personal) =
+        app_host_reads::submission_window(&mut tx, &t, &kind, &intake_key).await?;
     if count >= 60 || personal >= 5 {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -48,15 +65,16 @@ pub(super) async fn submit(
         &t,
         m,
         e,
-        &json!({"id":id,"revision":0,"fields":v["fields"]}),
+        &json!({"id":id,"revision":0,"fields":input.fields}),
     )
     .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-        .bind(&t)
-        .bind(format!("app.{}.submitted", m.id))
-        .bind(json!({"app":m.id,"entity":e.name,"id":id,"intakeKey":intake_key}))
-        .execute(&mut *tx)
-        .await?;
+    app_host_reads::submitted(
+        &mut tx,
+        &t,
+        &kind,
+        &json!({"app":m.id,"entity":e.name,"id":id,"intakeKey":intake_key}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"accepted":true}))
 }

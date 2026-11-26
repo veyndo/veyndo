@@ -1,118 +1,16 @@
-//! Customer-owned order reads and receipts share one tenant/identity predicate and a public projection.
-use super::*;
-
-// An account ID snapshot owns modern orders; matching guest email never grants access.
-async fn owned(
-    a: &App,
-    t: &str,
-    email: &str,
-    id: Option<&str>,
-    after: Option<&str>,
-) -> Result<Vec<Value>> {
-    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-        "SELECT o.data, o.created_at::text AS time FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ($3::text IS NULL OR o.id=$3) AND ",
-    );
-    query.push(ORDER_ACCOUNT_SCOPE).push(" AND ($4::text IS NULL OR (o.created_at,o.id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY o.created_at DESC,o.id DESC LIMIT 101");
-    let rows = query
-        .build()
-        .bind(t)
-        .bind(email)
-        .bind(id)
-        .bind(after)
-        .fetch_all(&a.db)
-        .await?;
-    Ok(rows
-        .iter()
-        .map(|r| project(&r.get("data"), &r.get::<String, _>("time")))
-        .collect())
-}
-pub(crate) fn project(raw: &Value, created: &str) -> Value {
-    let mut v = json!({});
-    for key in [
-        "id",
-        "orderNumber",
-        "revision",
-        "state",
-        "orderDateTime",
-        "billingAddress",
-        "shippingAddress",
-        "billingAddressId",
-        "shippingAddressId",
-        "deliveries",
-        "legal",
-    ] {
-        v[key] = raw[key].clone();
-    }
-    v["cart"] = json!({"id":raw["cart"]["id"], "price":raw["cart"]["price"], "shippingCosts":raw["cart"]["shippingCosts"], "lineItems":raw["cart"]["lineItems"]});
-    v["payment"] = json!({"state":raw["payment"]["state"], "provider":raw["payment"]["provider"], "method":raw["payment"]["method"]});
-    v["createdAt"] = json!(created);
-    commerce::order_fields(&mut v);
-    apps::native_lifecycle::project_labels(raw, &mut v);
-    v
-}
-#[derive(Default, Deserialize)]
-pub(super) struct Page {
-    after: Option<String>,
-}
-pub(super) async fn list(
-    State(a): State<App>,
-    h: RequestContext,
-    axum::extract::Query(page): axum::extract::Query<Page>,
-) -> Result<Json<Value>> {
-    let (t, email) = identity(&a, &h).await?;
-    if let Some(after) = &page.after
-        && (after.len() > 128 || owned(&a, &t, &email, Some(after), None).await?.is_empty())
-    {
-        return Err(Error(StatusCode::NOT_FOUND, "Order not found".into()));
-    }
-    let mut elements = owned(&a, &t, &email, None, page.after.as_deref()).await?;
-    let has_more = elements.len() > 100;
-    elements.truncate(100);
-    let next = if has_more {
-        elements.last().map(|v| v["id"].clone())
-    } else {
-        None
-    };
-    let (machine, _) = commerce::machine(&a.db, &t).await?;
-    let labels = json!(
-        machine
-            .states
-            .iter()
-            .map(|s| (&s.id, &s.label))
-            .collect::<HashMap<_, _>>()
-    );
-    for v in &mut elements {
-        if !v["stateLabels"].is_object() {
-            v["stateLabels"] = labels.clone();
-        }
-    }
-    Ok(Json(json!({"elements":elements,"nextCursor":next})))
-}
-pub(super) async fn detail(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    let (t, email) = identity(&a, &h).await?;
-    let mut v = owned(&a, &t, &email, Some(&id), None)
-        .await?
-        .pop()
-        .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-    let rows = sqlx::query("SELECT id,kind,number,locale,created_at::text AS created FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND customer_visible ORDER BY created_at DESC LIMIT 100")
-        .bind(&t).bind(&id).fetch_all(&a.db).await?;
-    v["receipts"] = json!(rows.iter().map(|r| json!({"id":r.get::<String,_>("id"), "kind":r.get::<String,_>("kind"), "number":r.get::<String,_>("number"), "locale":r.get::<String,_>("locale"), "createdAt":r.get::<String,_>("created"), "pdfPath":format!("/store-api/account/orders/{id}/receipts/{}/pdf", r.get::<String,_>("id"))})).collect::<Vec<_>>());
-    let (machine, _) = commerce::machine(&a.db, &t).await?;
-    if !v["stateLabels"].is_object() {
-        v["stateLabels"] = json!(
-            machine
-                .states
-                .iter()
-                .map(|s| (&s.id, &s.label))
-                .collect::<HashMap<_, _>>()
-        );
-    }
-    Ok(Json(v))
-}
+//! Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component.
+use super::identity;
+use crate::foundation::App;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::Response;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_orders::http::account_orders::owned;
+pub(crate) use veyndo_orders::http::account_orders::{detail, list, project};
+use veyndo_orders::store::account_orders;
 pub(super) async fn receipt(
     State(a): State<App>,
     h: RequestContext,
@@ -122,27 +20,6 @@ pub(super) async fn receipt(
     if owned(&a, &t, &email, Some(&order), None).await?.is_empty() {
         return Err(Error(StatusCode::NOT_FOUND, "Order not found".into()));
     }
-    let r=sqlx::query("SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND customer_visible")
-        .bind(t).bind(order).bind(id).fetch_optional(&a.db).await?
-        .ok_or(Error(StatusCode::NOT_FOUND,"Receipt not found".into()))?;
-    Ok(crate::operations::document_response(
-        &r.get("snapshot"),
-        r.get("content"),
-    ))
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn projection_does_not_leak_operational_or_session_data() {
-        let raw = json!({"id":"own", "automation":{"notes":["Internal"]}, "activity":[{"actor":"private"}], "cart":{"token":"secret", "checkout":{"customerToken":"secret"}, "price":{"totalPrice":12}}, "payment":{"state":"paid","provider":"manual","attemptId":"private"}});
-        let v = project(&raw, "2026-10-06");
-        assert_eq!(v["id"], "own");
-        assert_eq!(v["amountTotal"], 12);
-        assert!(v.get("automation").is_none());
-        assert!(v.get("activity").is_none());
-        assert!(v["cart"].get("token").is_none());
-        assert!(v["cart"].get("checkout").is_none());
-        assert!(v["payment"].get("attemptId").is_none());
-    }
+    let (snapshot, content) = account_orders::receipt(&a, &t, &order, &id).await?;
+    Ok(crate::operations::document_response(&snapshot, content))
 }

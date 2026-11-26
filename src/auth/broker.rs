@@ -1,173 +1,92 @@
 //! Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce.
 use super::{email, hash_password, provision_shop};
-use crate::{
-    App, Arc, Error, Json, Result, Row, Sha256, State, StatusCode, Value, bad, conflict, env, hash,
-    json, knowledge, prototype_products, uid, validate_tenant,
-};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
+use axum::Json;
+use axum::extract::State;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use std::sync::Arc;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::uid;
+use veyndo_core::validate_tenant;
+use veyndo_intelligence::knowledge;
 
-use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use hmac::{Hmac, Mac};
+pub(crate) use veyndo_identity::store::broker::assertion;
+use veyndo_identity::store::merchant_accounts as accounts;
 
-pub(crate) async fn assertion(a: &App, route: &str, v: &Value) -> Result<Value> {
-    let key = env::var("IDENTITY_BROKER_KEY")
-        .ok()
-        .filter(|k| k.len() >= 64)
-        .ok_or(Error(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Identity broker is not configured".into(),
-        ))?;
-    let issuer =
-        env::var("IDENTITY_BROKER_ISSUER").map_err(|_| bad("Identity issuer is not configured"))?;
-    let limit = if route == "/api/identity/inference" {
-        8_100_000
-    } else {
-        32000
-    };
-    let encoded = v["payload"]
-        .as_str()
-        .filter(|s| s.len() <= limit)
-        .ok_or(bad("Invalid identity assertion"))?;
-    let signature = URL_SAFE_NO_PAD
-        .decode(v["signature"].as_str().unwrap_or(""))
-        .map_err(|_| bad("Invalid assertion signature"))?;
-    let mut mac = Hmac::<Sha256>::new_from_slice(key.as_bytes())
-        .map_err(|_| bad("Invalid broker configuration"))?;
-    mac.update(format!("{route}\n{encoded}").as_bytes());
-    mac.verify_slice(&signature).map_err(|_| {
-        Error(
-            StatusCode::UNAUTHORIZED,
-            "Invalid identity assertion".into(),
-        )
-    })?;
-    let claims: Value = serde_json::from_slice(
-        &URL_SAFE_NO_PAD
-            .decode(encoded)
-            .map_err(|_| bad("Invalid assertion encoding"))?,
-    )
-    .map_err(|_| bad("Invalid identity payload"))?;
-    let now = chrono::Utc::now().timestamp();
-    if claims["iss"] != issuer
-        || claims["aud"] != "veyndo-identity"
-        || claims["verified"] != true
-        || !claims["exp"]
-            .as_i64()
-            .is_some_and(|e| e > now && e <= now + 60)
-        || !claims["iat"]
-            .as_i64()
-            .is_some_and(|i| i <= now + 5 && i >= now - 60)
-        || !claims["nonce"]
-            .as_str()
-            .is_some_and(|n| n.len() == 64 && n.bytes().all(|c| c.is_ascii_hexdigit()))
-    {
-        return Err(Error(
-            StatusCode::UNAUTHORIZED,
-            "Expired or invalid identity assertion".into(),
-        ));
-    }
-    email(&claims)?;
-    if route == "/api/identity/inference" {
-        let row=sqlx::query("SELECT u.id,coalesce(m.enabled,false) AS required FROM merchant_users u LEFT JOIN merchant_mfa m ON m.user_id=u.id WHERE u.email=$1").bind(email(&claims)?).fetch_optional(&a.db).await?;
-        if let Some(row) = row
-            && row.get::<bool, _>("required")
-        {
-            let mut tx = a.db.begin().await?;
-            if !super::mfa::trusted_session_tx(
-                &mut tx,
-                &row.get::<String, _>("id"),
-                claims["sessionToken"].as_str(),
-            )
-            .await?
-            {
-                return Err(Error(
-                    StatusCode::UNAUTHORIZED,
-                    "Second factor required".into(),
-                ));
-            }
-        }
-    }
-    if !claims["sub"]
-        .as_str()
-        .is_some_and(|s| !s.is_empty() && s.len() <= 200)
-    {
-        return Err(bad("Identity subject required"));
-    }
-    sqlx::query("DELETE FROM identity_nonces WHERE expires_at<now()")
-        .execute(&a.db)
-        .await?;
-    let used=sqlx::query("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING")
-        .bind(hash(&format!("{}:{}",issuer,claims["nonce"].as_str().unwrap()))).execute(&a.db).await?.rows_affected();
-    if used == 0 {
-        return Err(Error(
-            StatusCode::UNAUTHORIZED,
-            "Identity assertion already consumed".into(),
-        ));
-    }
-    Ok(claims)
+/// The signed claims an identity exchange reads.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExchangeClaims {
+    #[serde(deserialize_with = "lenient")]
+    iss: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    sub: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    workspace_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    workspace_name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    session_token: Option<String>,
+    demo_catalog: Value,
 }
 
 pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Result<Json<Value>> {
     let c = assertion(&a, "/api/identity/exchange", &v).await?;
-    let issuer = c["iss"].as_str().unwrap();
-    let subject = c["sub"].as_str().unwrap();
+    let claims: ExchangeClaims = view(&c);
+    let issuer = claims.iss.as_deref().unwrap();
+    let subject = claims.sub.as_deref().unwrap();
     let email = email(&c)?;
-    let name = c["name"]
-        .as_str()
+    let name = claims
+        .name
+        .as_deref()
         .filter(|n| !n.trim().is_empty() && n.len() <= 100)
         .ok_or(bad("Merchant name required"))?;
-    let shop = c["workspaceId"].as_str().ok_or(bad("Shop ID required"))?;
+    let shop = claims
+        .workspace_id
+        .as_deref()
+        .ok_or(bad("Shop ID required"))?;
     validate_tenant(shop)?;
-    let shop_name = c["workspaceName"]
-        .as_str()
+    let shop_name = claims
+        .workspace_name
+        .as_deref()
         .filter(|n| !n.trim().is_empty() && n.len() <= 100)
         .ok_or(bad("Shop name required"))?;
     let random_password = hash_password(format!("{}{}", uid(), uid())).await?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,42))")
-        .bind(&email)
-        .execute(&mut *tx)
-        .await?;
-    // Only the configured broker can assert verified ownership of this email; arbitrary clients cannot link accounts.
-    let user: String=sqlx::query_scalar("INSERT INTO merchant_users(id,email,name,password_hash,password_initialized,email_verified_at) VALUES($1,$2,$3,$4,false,now()) ON CONFLICT(email) DO UPDATE SET email=EXCLUDED.email,email_verified_at=COALESCE(merchant_users.email_verified_at,now()) RETURNING id")
-        .bind(uid()).bind(&email).bind(name).bind(random_password).fetch_one(&mut *tx).await?;
-    let linked: Option<String> = sqlx::query_scalar(
-        "SELECT user_id FROM merchant_identities WHERE issuer=$1 AND subject=$2",
-    )
-    .bind(issuer)
-    .bind(subject)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let (user, linked) =
+        accounts::broker_account(&mut tx, (issuer, subject), (&email, name), random_password)
+            .await?;
     if linked.as_ref().is_some_and(|u| u != &user) {
         return Err(conflict(
             "Identity email changed; explicit account recovery required",
         ));
     }
-    sqlx::query("INSERT INTO merchant_identities(issuer,subject,user_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(issuer).bind(subject).bind(&user).execute(&mut *tx).await?;
-    let first: Option<String> = sqlx::query_scalar(
-        "SELECT tenant FROM membership_grants WHERE user_id=$1 AND active ORDER BY tenant LIMIT 1",
-    )
-    .bind(&user)
-    .fetch_optional(&mut *tx)
-    .await?;
-    if !super::mfa::trusted_session_tx(&mut tx, &user, c["sessionToken"].as_str()).await?
+    accounts::link(&mut tx, (issuer, subject), &user).await?;
+    let first = accounts::first_shop(&mut *tx, &user).await?;
+    if !super::mfa::trusted_session_tx(&mut tx, &user, claims.session_token.as_deref()).await?
         && let Some(first) = first
         && let Some(challenge) = super::mfa::challenge_tx(&mut tx, &user, &first).await?
     {
         tx.commit().await?;
         return Ok(Json(challenge));
     }
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1)")
-        .bind(shop)
-        .fetch_one(&mut *tx)
-        .await?;
+    let (exists, owned) = accounts::ownership(&mut tx, shop, &user).await?;
     let mut sandbox = None;
     let mut seeded = false;
     if exists {
-        let owned:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND role='owner' AND active)").bind(shop).bind(&user).fetch_one(&mut *tx).await?;
         if !owned {
             return Err(conflict("Shop address already exists"));
         }
     } else {
-        seeded = c["demoCatalog"] == true;
+        seeded = claims.demo_catalog == true;
         sandbox = Some(
             provision_shop(
                 &mut tx,
@@ -175,7 +94,7 @@ pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Resu
                 shop,
                 shop_name,
                 String::new(),
-                c["demoCatalog"] == true,
+                claims.demo_catalog == true,
                 false,
             )
             .await?,
@@ -183,7 +102,7 @@ pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Resu
     }
     tx.commit().await?;
     if let Some(sandbox) = sandbox {
-        a.sandboxes.insert(shop.into(), Arc::new(sandbox));
+        a.apps.sandboxes.insert(shop.into(), Arc::new(sandbox));
     }
     if seeded {
         for p in prototype_products(&a, shop).await? {
@@ -192,7 +111,7 @@ pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Resu
         knowledge::seed_relations(&a.db, shop).await?;
     }
     Ok(Json(
-        super::sessions::issue_session_with_proof(&a, &user, shop, c["sessionToken"].as_str())
+        super::sessions::issue_session_with_proof(&a, &user, shop, claims.session_token.as_deref())
             .await?,
     ))
 }

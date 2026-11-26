@@ -3,7 +3,7 @@
   position: relative;
   min-width: 0;
 }
-.geo-picker > label {
+.geo-picker > :is(label, .vy-field) {
   display: block;
   margin-bottom: 8px;
   font-size: 12px;
@@ -15,13 +15,14 @@
   flex-wrap: wrap;
   gap: 6px;
   padding: 10px;
-  background: var(--panel, #fff);
-  border: 1px solid var(--border, #dbe3ed);
+  background: var(--panel, var(--vy-color-surface));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 12px;
 }
 .geo-selection:focus-within {
-  border-color: var(--accent, #1768ee);
-  box-shadow: 0 0 0 3px #1768ee15;
+  border-color: var(--accent, var(--vy-color-accent-strong));
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--vy-color-accent-strong) 8%, transparent);
 }
 .geo-selection input {
   flex: 1;
@@ -38,8 +39,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--hover, #edf4ff);
-  color: var(--text, #19304b);
+  background: var(--hover, var(--vy-color-panel));
+  color: var(--text, var(--vy-color-text));
   border-radius: 7px;
   font-size: 11px;
   padding: 6px 8px;
@@ -53,13 +54,13 @@
 .geo-count,
 .geo-status {
   font-size: 11px;
-  color: var(--muted, #62718a);
+  color: var(--muted, var(--vy-color-muted));
 }
 .geo-clear {
   border: 0;
   background: transparent;
   padding: 6px;
-  color: var(--accent, #1768ee);
+  color: var(--accent, var(--vy-color-accent-strong));
   font-size: 10px;
 }
 .geo-popover {
@@ -70,11 +71,12 @@
   width: 100%;
   min-width: min(330px, 80vw);
   padding: 10px;
-  background: var(--panel, #fff);
-  color: var(--text, #19304b);
-  border: 1px solid var(--border, #dbe3ed);
+  background: var(--panel, var(--vy-color-surface));
+  color: var(--text, var(--vy-color-text));
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 14px;
-  box-shadow: 0 16px 48px #132e4922;
+  box-shadow: 0 16px 48px
+    color-mix(in srgb, var(--vy-color-text) 13%, transparent);
 }
 .geo-popover [role="listbox"] {
   max-height: 320px;
@@ -93,7 +95,7 @@
 .geo-group button,
 .geo-more {
   background: none;
-  color: var(--accent, #1768ee);
+  color: var(--accent, var(--vy-color-accent-strong));
   border: 0;
   padding: 4px;
   font-size: 11px;
@@ -118,17 +120,17 @@
   display: block;
   margin-top: 3px;
   font-size: 10px;
-  color: var(--muted, #62718a);
+  color: var(--muted, var(--vy-color-muted));
 }
 .geo-popover [role="option"] > span:last-child {
-  color: var(--muted, #62718a);
+  color: var(--muted, var(--vy-color-muted));
   font-size: 11px;
 }
 .geo-popover [role="option"]:hover,
 .geo-popover .geo-focused {
-  background: var(--hover, #edf4ff);
+  background: var(--hover, var(--vy-color-panel));
 }
 .geo-popover [aria-selected="true"] {
-  background: var(--hover, #edf4ff);
-  color: var(--accent, #1768ee);
+  background: var(--hover, var(--vy-color-panel));
+  color: var(--accent, var(--vy-color-accent-strong));
 }

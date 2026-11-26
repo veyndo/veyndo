@@ -136,6 +136,9 @@ jobs:
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The component mirror release record names monorepo commits; a shallow clone lacks them.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -152,16 +155,12 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: curl, dom, fileinfo, gd, intl, mbstring, pdo_mysql, pdo_sqlite, sodium, zip
-          tools: composer:v2
       - name: Install verification and offline-migration dependencies
         run: |
           python3 -m pip install -r scripts/testing/requirements.txt
           sudo apt-get update && sudo apt-get install -y pgbouncer
-      - run: cargo fmt --all --check && cargo clippy --locked --workspace --all-targets -- -D warnings
+          python3 -m playwright install --with-deps chromium-headless-shell
+      - run: cargo fmt --all --check && cargo clippy --locked --workspace --all-targets -- -D warnings -W clippy::too_many_lines
       - name: Instrument the real Rust unit and HTTP paths
         run: |
           rustup component add llvm-tools-preview
@@ -206,11 +205,9 @@ jobs:
         working-directory: frontend
       - name: Generated contracts and source boundaries
         run: python3 scripts/testing/operation_contracts.py --check && python3 scripts/testing/workspace_boundaries.py
-      - run: composer install --working-dir=reference --no-interaction --prefer-dist
-      - run: python3 scripts/differential.py && python3 scripts/context_differential.py && python3 scripts/delivery_differential.py && python3 scripts/rule_differential.py && python3 scripts/automation_registry.py && python3 scripts/automation_differential.py
       - name: Real database and local provider integration (single suite registry)
         run: |
-          COVERAGE_PROCESS_START="$PWD/scripts/testing/.coveragerc" PYTHONPATH="$PWD/scripts/testing" python3 scripts/verify_integration.py --container veyndo-postgres-1 --partition ${{ matrix.partition }}
+          COVERAGE_PROCESS_START="$PWD/scripts/testing/.coveragerc" PYTHONPATH="$PWD/scripts/testing" python3 scripts/verify_integration.py --container veyndo-postgres-1 --partition ${{ matrix.partition }} --keep-going
       - name: Seal raw coverage profiles for this source and partition
         run: python3 scripts/testing/partition_coverage.py pack ${{ matrix.partition }} artifacts/profiles/${{ matrix.partition }}
       - name: Preserve partition profiles
@@ -239,6 +236,9 @@ jobs:
       artifact-id: ${{ steps.coverage.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The component mirror release record names monorepo commits; a shallow clone lacks them.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -341,3 +341,23 @@ jobs:
             echo 'Complete tests and same-source coverage passed for this workflow source.' >> "$GITHUB_STEP_SUMMARY"
           fi
       # External model/payment/OAuth checks remain opt-in; these reports do not certify live credentials.
+  nightly_report:
+    # A red scheduled run opens one issue, or adds a comment to the open one, so a failure is seen the next morning.
+    needs: verify
+    if: always() && github.event_name == 'schedule' && needs.verify.result != 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the nightly failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'in:title "Nightly verification is red"' --json number --jq '.[0].number // empty')
+          body="The scheduled verification run failed: $RUN_URL (commit $GITHUB_SHA). The integration step lists every failed suite."
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Nightly verification is red" --body "$body"
+          fi

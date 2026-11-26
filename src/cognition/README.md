@@ -2,7 +2,6 @@
 
 This folder owns the Rust modules listed below. Each source begins with its responsibility contract. The crate currently shares internal types/imports through a facade; APIs, MCP and UCP delegate to shared domain operations.
 
-- [`context.rs`](context.rs): Bounded localized catalog retrieval before inference; full catalog size never expands the prompt.
 - [`mod.rs`](mod.rs): Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context.
 - [`projection.rs`](projection.rs): Exactly-once local observation projection; associations retain order/event evidence and simulation labels.
 - [`recommendations.rs`](recommendations.rs): Merchant-approved associations are consumed by the public shop without exposing order counts or identities.

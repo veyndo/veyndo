@@ -1,11 +1,67 @@
 //! Verified merchant overview facts consumed by the chat and activity views.
-use super::*;
+use super::{auth, commerce};
+use crate::capabilities::OPERATIONS;
+use crate::catalog_page::product_page;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
+use axum::Json;
+use axum::extract::State;
+use axum::response::Response;
 use axum::{extract::Request, middleware::Next};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
+use veyndo_intelligence::knowledge;
 pub(crate) mod facts;
+
+/// The dashboard facts document as the overview reads and trims it; each part passes through unchanged.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Facts {
+    summary: Value,
+    orders: Value,
+    timeline: Value,
+    indexed_products: Value,
+    last_indexed: Value,
+    learning_timeline: Value,
+    variants: Value,
+    activity: Value,
+    channels: Value,
+}
+
+/// Plan counters hidden from members without the assistant.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PlanCounts {
+    pending_plans: u64,
+    applied_plans: u64,
+}
+
+/// The kind of one activity entry.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Entry {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+}
+
+/// The public model provider list.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Providers {
+    providers: Value,
+}
 pub(crate) mod personal;
 pub(crate) mod reports;
-mod revenue;
-mod work;
 
 pub(super) async fn track_channels(State(a): State<App>, request: Request, next: Next) -> Response {
     let start = std::time::Instant::now();
@@ -42,7 +98,7 @@ pub(super) async fn track_channels(State(a): State<App>, request: Request, next:
         }
         // Diagnostic counters are best-effort and do not delay commerce. They
         // count HTTP calls (including synthetic tests/admin reads), never people.
-        a.channel_metrics.record(
+        a.metrics.record(
             t,
             channel,
             response.status(),
@@ -59,20 +115,25 @@ pub(super) async fn merchant_overview(
     let t = merchant(&a, &h)?;
     let (locale, chain) = language_context(&a, &h).await?;
     let commerce_read = auth::allowed(&h, "overview.read") || auth::allowed(&h, "orders.read");
-    let mut facts = if commerce_read {
+    let mut facts: Facts = view(&if commerce_read {
         facts::load(&a, &t).await?
     } else {
         json!({"summary":{"orders":0,"ordersToday":0,"pendingPlans":0,"appliedPlans":0,"revenue":null,"revenueByCurrency":[]},"orders":[],"timeline":[],"activity":[],"channels":[],"learningTimeline":[],"variants":[],"indexedProducts":0,"lastIndexed":null})
-    };
+    });
     if !auth::allowed(&h, "knowledge.read") {
-        facts["learningTimeline"] = json!([]);
-        facts["variants"] = json!([]);
+        facts.learning_timeline = json!([]);
+        facts.variants = json!([]);
     }
     if !auth::allowed(&h, "assistant.use") {
-        facts["summary"]["pendingPlans"] = json!(0);
-        facts["summary"]["appliedPlans"] = json!(0);
-        if let Some(activity) = facts["activity"].as_array_mut() {
-            activity.retain(|e| e["kind"] == "order");
+        merge(
+            &mut facts.summary,
+            PlanCounts {
+                pending_plans: 0,
+                applied_plans: 0,
+            },
+        )?;
+        if let Some(activity) = facts.activity.as_array_mut() {
+            activity.retain(|e| view::<Entry>(e).kind.as_deref() == Some("order"));
         }
     }
     let (ps, pagination) = if auth::allowed(&h, "catalog.read") {
@@ -97,17 +158,18 @@ pub(super) async fn merchant_overview(
         || auth::allowed(&h, "developer.read")
         || auth::allowed(&h, "ai.manage")
     {
-        a.inference.public_providers().await.map_err(bad)?
+        a.models.inference.public_providers().await.map_err(bad)?
     } else {
         json!({"providers":[]})
     };
+    let providers: Providers = view(&providers);
     Ok(Json(json!({
         "locale":locale,"tenant":t,"productCurrency":settings.currencies.pricing_currency,"dataMode":"synthetic-demo","products":ps,"productsPagination":pagination,
-        "summary":facts["summary"],"orders":if auth::allowed(&h,"orders.read") {facts["orders"].clone()} else {json!([])},"timeline":facts["timeline"],
-        "knowledge":{"graph":graph,"indexedProducts":if auth::allowed(&h,"knowledge.read") {facts["indexedProducts"].clone()} else {json!(0)},"lastIndexed":if auth::allowed(&h,"knowledge.read") {facts["lastIndexed"].clone()} else {Value::Null},"provenance":"curated-demo","modelWeightsLearn":false},
-        "learning":{"timeline":facts["learningTimeline"],"variants":facts["variants"],"method":"epsilon-greedy with smoothed purchase rate","reward":"simulated order","causalUpliftProven":false},
-        "activity":facts["activity"],"channels":facts["channels"],
-        "connections":{"providers":providers["providers"],"chatgptAccountLinked":false,"claudeAccountLinked":false,"localMCPConfig":{"mcpServers":{"veyndo":{"command":"python3","args":[env::current_dir().unwrap().join("scripts/mcp_stdio.py").to_string_lossy()],"env":{"COMMERCE_URL":"http://127.0.0.1:8787","COMMERCE_TENANT":t}}}},"localMCP":true,"ucpCheckout":true,"remoteOAuth":false},
+        "summary":facts.summary,"orders":if auth::allowed(&h,"orders.read") {facts.orders} else {json!([])},"timeline":facts.timeline,
+        "knowledge":{"graph":graph,"indexedProducts":if auth::allowed(&h,"knowledge.read") {facts.indexed_products} else {json!(0)},"lastIndexed":if auth::allowed(&h,"knowledge.read") {facts.last_indexed} else {Value::Null},"provenance":"curated-demo","modelWeightsLearn":false},
+        "learning":{"timeline":facts.learning_timeline,"variants":facts.variants,"method":"epsilon-greedy with smoothed purchase rate","reward":"simulated order","causalUpliftProven":false},
+        "activity":facts.activity,"channels":facts.channels,
+        "connections":{"providers":providers.providers,"chatgptAccountLinked":false,"claudeAccountLinked":false,"localMCPConfig":{"mcpServers":{"veyndo":{"command":"python3","args":[env::current_dir().unwrap().join("scripts/mcp_stdio.py").to_string_lossy()],"env":{"COMMERCE_URL":"http://127.0.0.1:8787","COMMERCE_TENANT":t}}}},"localMCP":true,"ucpCheckout":true,"remoteOAuth":false},
         "capabilities":OPERATIONS.iter().map(|operation|operation.name).collect::<Vec<_>>()
     })))
 }

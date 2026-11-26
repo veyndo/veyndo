@@ -1,12 +1,16 @@
 # Native merchant reports
 
-`config.rs` validates the shared HTTP/MCP query and private report layouts.
-`period.rs` resolves calendar windows in an IANA timezone and bounds chart points.
-`source.sql` reads immutable order money, original cart channels and provider refunds;
-`sales.sql` returns bounded summaries, buckets, channel ranks and product ranks.
-`traffic.rs` reuses the behavior owner's exact eligible SQL and inherited legal
-policy resolver; `traffic.sql` counts consented cart contexts, never API requests
-or people. There is no new tracking identity, event ledger, table or worker.
+The report itself is owned by the studio component.
+`components/studio/src/domain/report_config.rs` validates the shared HTTP/MCP
+query and private report layouts; `report_period.rs` resolves calendar windows
+in an IANA timezone and bounds chart points. Under
+`components/studio/src/store/`, `reports/source.sql` reads immutable order
+money, original cart channels and provider refunds; `reports/sales.sql` returns
+bounded summaries, buckets, channel ranks and product ranks. `reports.rs` runs
+them on a read snapshot and reuses the behavior owner's exact eligible SQL and
+inherited legal policy resolver for traffic; `reports/traffic.sql` counts
+consented cart contexts, never API requests or people. There is no new tracking
+identity, event ledger, table or worker.
 
 The parent module admits current reporting rights and projects optional product,
 channel-name and visitor fields by their existing domain permissions. Operational

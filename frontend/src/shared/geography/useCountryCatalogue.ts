@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { shopApi } from "../api/shop-api";
 import { browserSessionScope } from "../api/browser-session";
 import type { CountryCatalogue } from "./geography-types";
-export type GeographyRequest = (path: string) => Promise<any>;
+import type { ApiPath } from "../../kit/api";
+export type GeographyRequest = (path: ApiPath) => Promise<any>;
 export function useCountryCatalogue(request: GeographyRequest = shopApi) {
   const [data, setData] = useState<CountryCatalogue>();
   const current = useRef(request);

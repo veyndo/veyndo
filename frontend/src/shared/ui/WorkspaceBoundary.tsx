@@ -1,4 +1,5 @@
 /** Contain a workspace render failure and let the user retry without losing the application shell. */
+import { Button } from "../../kit/ui";
 import { Component, type ReactNode } from "react";
 import { useLocale } from "../i18n/i18n";
 type Props = {
@@ -32,9 +33,9 @@ export default class WorkspaceBoundary extends Component<
       return (
         <section className="studio-empty" role="alert">
           <h2>{this.props.title}</h2>
-          <button className="studio-secondary" onClick={retry}>
+          <Button type="submit" onClick={retry}>
             {this.props.retryLabel}
-          </button>
+          </Button>
         </section>
       );
     return this.props.children;
@@ -48,9 +49,9 @@ function ModuleLoadFailure({ onReload }: { onReload: () => void }) {
     <section className="studio-empty" role="alert">
       <h2>{t("workspaceModuleUnavailable")}</h2>
       <p>{t("workspaceModuleRecovery")}</p>
-      <button className="studio-secondary" onClick={onReload}>
+      <Button type="submit" onClick={onReload}>
         {t("reloadWorkspace")}
-      </button>
+      </Button>
     </section>
   );
 }

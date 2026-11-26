@@ -3,12 +3,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import SalesChannelsWorkspace from "../../src/admin/channels/SalesChannelsWorkspace";
-import ChannelEditor from "../../src/admin/channels/ChannelEditor";
+import SalesChannelsWorkspace from "../../../components/marketing/ui/admin/channels/SalesChannelsWorkspace";
+import ChannelEditor from "../../../components/marketing/ui/admin/channels/ChannelEditor";
 import {
   freshChannel,
   channelUrl,
-} from "../../src/admin/channels/channel-model";
+} from "../../../components/marketing/ui/admin/channels/channel-model";
 it("creates a channel with translated name, searchable product assignment and real shop languages", async () => {
   const user = userEvent.setup(),
     request = vi.fn(async (path: string, body?: any, _method?: string) => {

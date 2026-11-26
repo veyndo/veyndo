@@ -3,9 +3,9 @@ import { useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import RelatedProducts from "../../src/admin/catalog/RelatedProducts";
+import RelatedProducts from "../../../components/catalog/ui/admin/catalog/RelatedProducts";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
 const record = (id: string, name: string) => {
   const d = newDraft();
   d.id = id;

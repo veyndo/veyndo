@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_companies(tenant,id,data,revision) SELECT $2,id,data,revision FROM b2b_companies WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0ec900adfbdc593116a767c713cdf01aae4e0a91b3ec56870dba91910ccc0df6"
+}

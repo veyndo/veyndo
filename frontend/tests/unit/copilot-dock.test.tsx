@@ -7,13 +7,13 @@ import {
   fireEvent,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useCopilotDock } from "../../src/admin/assistant/useCopilotDock";
-import { admitNavigation } from "../../src/admin/assistant/copilot-navigation";
-import CopilotNavigation from "../../src/admin/assistant/CopilotNavigation";
+import { useCopilotDock } from "../../../components/intelligence/ui/admin/assistant/useCopilotDock";
+import { admitNavigation } from "../../../components/intelligence/ui/admin/assistant/copilot-navigation";
+import CopilotNavigation from "../../../components/intelligence/ui/admin/assistant/CopilotNavigation";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import GeneratedWorkspace from "../../src/admin/workspace/GeneratedWorkspace";
-import { composeNativeWorkspace } from "../../src/admin/workspace/workspace-presentation";
+import GeneratedWorkspace from "../../../components/studio/ui/admin/workspace/GeneratedWorkspace";
+import { composeNativeWorkspace } from "../../../components/studio/ui/admin/workspace/workspace-presentation";
 it("retains open state across views, hides immediately across tenant/account boundaries and revocation", () => {
   const { result, rerender } = renderHook(
     ({ scope, allowed }) => useCopilotDock(scope, allowed),
@@ -151,7 +151,7 @@ it("updates selected context with native navigation and keeps the originating ap
 
 it("blocks an old proposal whose product navigation carries an order view", async () => {
   const { default: ProposalCard } =
-    await import("../../src/admin/assistant/ProposalCard");
+    await import("../../src/admin/shell/ProposalCard");
   const message = {
     id: 1,
     role: "assistant",

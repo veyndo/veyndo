@@ -1,4 +1,5 @@
 /** Current authorized source/target preview; no values enter job history and no inspection performs a write. */
+import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
@@ -186,13 +187,13 @@ export default function ProductComparison(props: ComparisonProps) {
             ))}
           </select>
         </label>
-        <button
-          className="studio-secondary"
+        <Button
+          type="submit"
           disabled={!admitted || busy || !row}
           onClick={() => void read()}
         >
           {t(busy ? "busy" : "load")}
-        </button>
+        </Button>
       </div>
       {!admitted && <p role="status">{t("prerequisite")}</p>}
       {error && <p role="alert">{error}</p>}

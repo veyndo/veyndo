@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import BehaviorAnalytics from "../../src/storefront/shell/BehaviorAnalytics";
-import BehaviorView from "../../src/admin/intelligence/behavior/BehaviorView";
+import BehaviorView from "../../../components/intelligence/ui/admin/intelligence/behavior/BehaviorView";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { Cart } from "../../src/shared/api/shop-api";
 const state = vi.hoisted(() => ({

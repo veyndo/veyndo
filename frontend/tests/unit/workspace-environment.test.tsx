@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import PersonalWorkspace from "../../src/admin/workspace/PersonalWorkspace";
+import PersonalWorkspace from "../../../components/studio/ui/admin/workspace/PersonalWorkspace";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import type { StudioController } from "../../src/admin/shell/useStudioController";
 import type { RequestFn } from "../../src/admin/shell/studio-types";

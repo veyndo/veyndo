@@ -1,0 +1,30 @@
+[package]
+name = "veyndo-connectors"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+# tests/integration_contracts.rs is a unit-test module of the library, not a separate integration test.
+autotests = false
+description = "Standard app services: shared action/event hosting, the PostgreSQL delivery queue and provider integrations"
+
+[dependencies]
+axum.workspace = true
+hmac.workspace = true
+regex.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+veyndo-connector-runtime = { path = "../connector-runtime" }
+veyndo-kernel = { path = "../../../crates/kernel" }
+veyndo-provider-email = { path = "../../apps/email" }
+veyndo-provider-gmail = { path = "../../apps/gmail" }
+veyndo-provider-google-analytics = { path = "../../apps/google-analytics" }
+veyndo-provider-slack = { path = "../../apps/slack" }
+veyndo-provider-algolia = { path = "../../apps/algolia" }
+veyndo-provider-contentful = { path = "../../apps/contentful" }
+veyndo-provider-hubspot = { path = "../../apps/hubspot" }
+veyndo-provider-klaviyo = { path = "../../apps/klaviyo" }
+veyndo-provider-vercel = { path = "../../apps/vercel" }
+veyndo-pricing = { path = "../../../components/pricing" }
+veyndo-runtime = { path = "../../../crates/runtime" }

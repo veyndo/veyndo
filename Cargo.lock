@@ -2195,6 +2195,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "proptest"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8530004ccb15eae51c7e40009fbe317f341f804db54dc033eec1c50be28cfa0"
+dependencies = [
+ "bitflags",
+ "chacha20",
+ "core_detect",
+ "num-traits",
+ "rand 0.10.3",
+ "rand_xorshift",
+ "regex-syntax",
+ "unarray",
+]
+
+[[package]]
 name = "pulley-interpreter"
 version = "49.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2346,6 +2362,15 @@ name = "rand_pcg"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
+dependencies = [
+ "rand_core 0.10.1",
+]
+
+[[package]]
+name = "rand_xorshift"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60aa6af80be32871323012e02e6e65f8a7cc7890931ae421d217ad8fe0df2ccf"
 dependencies = [
  "rand_core 0.10.1",
 ]
@@ -3345,6 +3370,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 
 [[package]]
+name = "unarray"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94"
+
+[[package]]
 name = "unicase"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3490,14 +3521,35 @@ dependencies = [
  "tracing-subscriber",
  "uuid",
  "veyndo-app-model",
+ "veyndo-app-platform",
  "veyndo-app-storage",
  "veyndo-apps",
  "veyndo-automation",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-checkout",
  "veyndo-cognition",
- "veyndo-commerce",
+ "veyndo-connectors",
+ "veyndo-core",
+ "veyndo-customers",
  "veyndo-flow-graph",
+ "veyndo-identity",
+ "veyndo-intelligence",
+ "veyndo-inventory",
  "veyndo-kernel",
+ "veyndo-marketing",
+ "veyndo-orders",
+ "veyndo-payments",
+ "veyndo-paypal",
+ "veyndo-port-contracts",
+ "veyndo-pos",
+ "veyndo-pricing",
  "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
+ "veyndo-site-builder",
+ "veyndo-site-forms",
+ "veyndo-studio",
  "wasmtime",
  "wat",
  "webpki-roots",
@@ -3531,6 +3583,46 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "url",
+]
+
+[[package]]
+name = "veyndo-app-platform"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "cron",
+ "hmac 0.12.1",
+ "json-patch",
+ "reqwest",
+ "ring",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+ "veyndo-app-model",
+ "veyndo-app-storage",
+ "veyndo-apps",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-checkout",
+ "veyndo-cognition",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-intelligence",
+ "veyndo-inventory",
+ "veyndo-kernel",
+ "veyndo-marketing",
+ "veyndo-orders",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
 ]
 
 [[package]]
@@ -3578,11 +3670,88 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-b2b"
+version = "0.5.0"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-catalog"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-pricing",
+]
+
+[[package]]
+name = "veyndo-catalog-import"
+version = "0.5.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-checkout"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "proptest",
+ "reqwest",
+ "ring",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "uuid",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-customers",
+ "veyndo-identity",
+ "veyndo-inventory",
+ "veyndo-marketing",
+ "veyndo-orders",
+ "veyndo-payments",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
+]
+
+[[package]]
 name = "veyndo-cognition"
 version = "0.5.0"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
+ "image",
  "reqwest",
  "serde",
  "serde_json",
@@ -3591,17 +3760,88 @@ dependencies = [
  "tokio",
  "tracing",
  "veyndo-app-authority",
+ "veyndo-core",
  "veyndo-kernel",
  "veyndo-runtime",
 ]
 
 [[package]]
-name = "veyndo-commerce"
+name = "veyndo-connector-runtime"
 version = "0.5.0"
 dependencies = [
+ "aes-gcm",
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "regex",
+ "reqwest",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "uuid",
+ "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-connectors"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "hmac 0.12.1",
+ "regex",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "veyndo-connector-runtime",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-provider-algolia",
+ "veyndo-provider-contentful",
+ "veyndo-provider-email",
+ "veyndo-provider-gmail",
+ "veyndo-provider-google-analytics",
+ "veyndo-provider-hubspot",
+ "veyndo-provider-klaviyo",
+ "veyndo-provider-slack",
+ "veyndo-provider-vercel",
+ "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-core"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "reqwest",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+ "veyndo-app-model",
  "veyndo-kernel",
+ "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-customers"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-marketing",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
 ]
 
 [[package]]
@@ -3609,8 +3849,105 @@ name = "veyndo-flow-graph"
 version = "0.5.0"
 
 [[package]]
+name = "veyndo-identity"
+version = "0.5.0"
+dependencies = [
+ "argon2",
+ "axum",
+ "base64 0.22.1",
+ "hmac 0.12.1",
+ "reqwest",
+ "ring",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "uuid",
+ "veyndo-app-model",
+ "veyndo-cognition",
+ "veyndo-core",
+ "veyndo-kernel",
+ "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-intelligence"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "image",
+ "libc",
+ "pdf-extract",
+ "reqwest",
+ "ring",
+ "scraper",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+ "veyndo-app-model",
+ "veyndo-catalog",
+ "veyndo-catalog-import",
+ "veyndo-checkout",
+ "veyndo-cognition",
+ "veyndo-core",
+ "veyndo-customers",
+ "veyndo-identity",
+ "veyndo-inventory",
+ "veyndo-kernel",
+ "veyndo-marketing",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-inventory"
+version = "0.5.0"
+dependencies = [
+ "proptest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-pricing",
+]
+
+[[package]]
 name = "veyndo-kernel"
 version = "0.5.0"
+
+[[package]]
+name = "veyndo-marketing"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "proptest",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-automation",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-cognition",
+ "veyndo-core",
+ "veyndo-flow-graph",
+ "veyndo-identity",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shop",
+]
 
 [[package]]
 name = "veyndo-marketplaces"
@@ -3643,8 +3980,226 @@ dependencies = [
  "sha2 0.10.9",
  "tokio",
  "uuid",
- "veyndo-commerce",
+ "veyndo-pricing",
  "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-orders"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "image",
+ "pdf-extract",
+ "proptest",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "uuid",
+ "veyndo-app-model",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-customers",
+ "veyndo-identity",
+ "veyndo-inventory",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shipping",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-payments"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "hmac 0.12.1",
+ "proptest",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-inventory",
+ "veyndo-kernel",
+ "veyndo-orders",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-paypal"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde_json",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-payments",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-port-contracts"
+version = "0.5.0"
+dependencies = [
+ "reqwest",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "veyndo-app-model",
+ "veyndo-app-platform",
+ "veyndo-core",
+ "veyndo-intelligence",
+ "veyndo-payments",
+ "veyndo-pricing",
+ "veyndo-shipping",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-pos"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-catalog",
+ "veyndo-checkout",
+ "veyndo-core",
+ "veyndo-customers",
+ "veyndo-identity",
+ "veyndo-intelligence",
+ "veyndo-marketing",
+ "veyndo-orders",
+ "veyndo-payments",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-pricing"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "proptest",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-kernel",
+]
+
+[[package]]
+name = "veyndo-provider-algolia"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-contentful"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "reqwest",
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-email"
+version = "0.5.0"
+dependencies = [
+ "base64 0.22.1",
+ "lettre",
+ "regex",
+ "rustls-pemfile",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-rustls",
+ "veyndo-connector-runtime",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "webpki-roots",
+]
+
+[[package]]
+name = "veyndo-provider-gmail"
+version = "0.5.0"
+dependencies = [
+ "base64 0.22.1",
+ "regex",
+ "reqwest",
+ "scraper",
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-google-analytics"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-hubspot"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-klaviyo"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-slack"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-vercel"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "reqwest",
+ "serde_json",
+ "veyndo-connector-runtime",
 ]
 
 [[package]]
@@ -3662,6 +4217,103 @@ dependencies = [
  "uuid",
  "veyndo-app-authority",
  "zeroize",
+]
+
+[[package]]
+name = "veyndo-shipping"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-pricing",
+]
+
+[[package]]
+name = "veyndo-shop"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "futures-util",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "veyndo-app-model",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-inventory",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-shipping",
+]
+
+[[package]]
+name = "veyndo-site-builder"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-app-platform",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-intelligence",
+ "veyndo-shop",
+ "veyndo-studio",
+]
+
+[[package]]
+name = "veyndo-site-forms"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-core",
+]
+
+[[package]]
+name = "veyndo-studio"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "chrono-tz",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "uuid",
+ "veyndo-app-model",
+ "veyndo-app-platform",
+ "veyndo-b2b",
+ "veyndo-catalog",
+ "veyndo-checkout",
+ "veyndo-cognition",
+ "veyndo-core",
+ "veyndo-customers",
+ "veyndo-identity",
+ "veyndo-intelligence",
+ "veyndo-marketing",
+ "veyndo-orders",
+ "veyndo-pos",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shop",
 ]
 
 [[package]]

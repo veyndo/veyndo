@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import ScenarioSuggestions from "../../src/admin/scenarios/ScenarioSuggestions";
+import ScenarioSuggestions from "../../../components/intelligence/ui/admin/scenarios/ScenarioSuggestions";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const config = {
   channel: "web",

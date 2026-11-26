@@ -1,6 +1,5 @@
 //! App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage.
-use super::super::*;
-use super::{OAuth, Settings};
+use super::*;
 pub const OAUTH: OAuth = OAuth {
     prefix: "SLACK",
     scope: "chat:write,channels:read,groups:read",
@@ -17,7 +16,7 @@ pub const SETTINGS: Settings = Settings {
 pub async fn action(store: &Store, t: &str, name: &str, v: &Value) -> Result<Value> {
     let a = "slack";
     match name {
-"channels" => {let data=network::request(&format!("{}/conversations.list?exclude_archived=true&limit=200&types=public_channel,private_channel",network::endpoint("slack")?),None,Some(&oauth::token(store,t,a).await?),false).await?;checked(data["ok"]==true,"Slack channel listing rejected")?;Ok(json!({"channels":data["channels"].as_array().into_iter().flatten().map(|c|json!({"id":c["id"],"name":c["name"],"member":c["is_member"]==true})).collect::<Vec<_>>()}))},
+"channels" => {let data=network::request(&format!("{}/conversations.list?exclude_archived=true&limit=200&types=public_channel,private_channel",network::endpoint("slack")?),None,Some(&oauth::token(store,t,a,&OAUTH).await?),false).await?;checked(data["ok"]==true,"Slack channel listing rejected")?;Ok(json!({"channels":data["channels"].as_array().into_iter().flatten().map(|c|json!({"id":c["id"],"name":c["name"],"member":c["is_member"]==true})).collect::<Vec<_>>()}))},
 "post_order" => store.enqueue(t,a,&text(v,"requestKey"),&json!({"operation":"post","channel":v["channel"],"template":v["template"],"event":v.get("event").cloned().unwrap_or(json!({})),"kind":v["kind"].as_str().unwrap_or("order.placed"),"deliveryKey":v["requestKey"]})).await,
  _ => Err(Error::Invalid("Unknown connector action")),
     }

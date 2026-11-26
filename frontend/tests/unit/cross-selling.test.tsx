@@ -1,7 +1,7 @@
 /** Actual recommendation tiles use native detail authority, current cart identity, merchant order and private/channel rejection. */
 import { render, screen, within, act } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import CrossSelling from "../../src/storefront/catalog/CrossSelling";
+import CrossSelling from "../../../components/catalog/ui/storefront/catalog/CrossSelling";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { cart, detail, product } from "./fixtures";
 import type { Detail } from "../../src/shared/api/shop-api";

@@ -115,8 +115,7 @@ universal hyper-personalization. Shipping and price are recalculated by the core
 **Sales channels** is a separate Studio workspace. Typed source conditions and nested AND/OR/NOT/XOR trees are editable
 in the graphical builder; exact JSON is available for inspection. The reflected
 catalog has 114 production rule classes, 108 native scope bindings and 16 Core
-action names. 432 direct PHP cases cover 74 original conditions; registration is
-not complete behavioral parity. See [the exact automation contract](automation.md).
+action names. See [the exact automation contract](automation.md).
 
 Campaigns support percentage/fixed discounts, coupons, automatic application,
 free shipping, priority/exclusivity, time windows and global usage limits.
@@ -147,8 +146,7 @@ translated specifications, cross-selling IDs and a free-shipping flag consumed
 by checkout. Existing SKU quantity prices and delivery timing remain shared
 between detail and cart. Stable SKU/product HTML routes and optional localized SEO
 slugs use `src/storefront_pages.rs` with ordinary tenant/channel visibility. They
-serve the existing SPA shell; this is not full server rendering or the entire
-Shopware SEO engine. [Current currency and price behavior](currencies.md).
+serve the existing SPA shell; this is not full server rendering. [Current currency and price behavior](currencies.md).
 
 ## Verification
 
@@ -160,15 +158,13 @@ Shopware SEO engine. [Current currency and price behavior](currencies.md).
 - `scripts/marketing_accounts.py`: additional shops, customer authority/history,
   concurrent limited coupons, tax/free shipping, order flows, channels,
   metadata/document releases and persisted personalization.
-- `scripts/rule_differential.py`: 1,976 numeric/string/array/UUID comparisons;
-  `automation_differential.py`: 432 cases across 74 original conditions.
 - `scripts/automation.py`: real branching/actions/delays, frozen rules, actor
   revocation, isolated failing flows and repeatable playground setup.
 - `frontend/tests/locales.mjs`: equal nonempty locale dictionaries and translated
   transport errors; strict frontend build covers typed component contracts.
 
 Fixtures verify protocol/authority/consumer behavior, not real-model quality.
-See [the feature matrix](shopware-parity.md), [source map](source-map.md) and
+See [feature overview](features.md), [source map](source-map.md) and
 [deployment preparation](deployment.md) for implementation and remaining work.
 
 ## Verified local-model walkthrough
@@ -193,4 +189,4 @@ Environment management never substitutes for catalog/app/B2B permissions.
 Every selected unit requires its current native domain write right; Flow actions
 add their own permissions and use the publishing actor. Channel release uses the
 native validator and POS cash/pickup setup. B2B configuration release preserves
-live employee and spending state. [Connected audit](feature-integration.md).
+live employee and spending state.

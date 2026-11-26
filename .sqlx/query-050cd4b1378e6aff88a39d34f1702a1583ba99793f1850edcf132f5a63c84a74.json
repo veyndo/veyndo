@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'attack' AND id NOT IN (SELECT id FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'attack' ORDER BY created_at DESC,id LIMIT 10)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "050cd4b1378e6aff88a39d34f1702a1583ba99793f1850edcf132f5a63c84a74"
+}

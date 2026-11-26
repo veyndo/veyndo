@@ -2,11 +2,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
-import CatalogIntake from "../../src/admin/catalog/CatalogIntake";
+import CatalogIntake from "../../../components/catalog/ui/admin/catalog/CatalogIntake";
 import StudioComposer from "../../src/admin/shell/StudioComposer";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { readCatalogFile } from "../../src/admin/catalog/catalog-intake-model";
+import { readCatalogFile } from "../../../components/catalog/ui/admin/catalog/catalog-intake-model";
 import { responseError } from "../../src/shared/i18n/errors-i18n";
 const request = vi.fn();
 vi.mock("../../src/admin/shell/requests", () => ({
@@ -238,7 +238,7 @@ it("drops a cross-scope product handoff if another shop is selected instead", as
 
 it("product editor headings inherit the actual main-language name rather than describing an existing product as new", async () => {
   const { productName, newDraft } =
-    await import("../../src/admin/catalog/catalog-model");
+    await import("../../../components/catalog/ui/admin/catalog/catalog-model");
   const draft = {
     ...newDraft(),
     mainLocale: "sv-SE",

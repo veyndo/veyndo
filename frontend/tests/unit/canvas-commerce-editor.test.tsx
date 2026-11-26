@@ -1,9 +1,9 @@
 /** Native editor handoffs preserve dirty data and retain catalogue permission boundaries. */
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import CanvasCommerceEditor from "../../src/admin/catalog/CanvasCommerceEditor";
+import CanvasCommerceEditor from "../../../components/catalog/ui/admin/catalog/CanvasCommerceEditor";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-vi.mock("../../src/admin/catalog/ProductEditor", () => ({
+vi.mock("../../../components/catalog/ui/admin/catalog/ProductEditor", () => ({
   default: ({
     canWrite,
     onDirtyChange,

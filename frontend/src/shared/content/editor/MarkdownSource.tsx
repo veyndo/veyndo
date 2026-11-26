@@ -1,4 +1,5 @@
 /** Live Markdown buffer updates the same structured product document; no raw HTML is rendered or persisted. */
+import { Button } from "../../../kit/ui";
 import { useState, useEffect } from "react";
 import type { RichNode } from "../rich-document";
 import type { Editor } from "@tiptap/core";
@@ -32,9 +33,9 @@ export default function MarkdownSource({ editor }: { editor: Editor }) {
         />
       </label>
       {pending && <p role="status">{e("pending")}</p>}
-      <button
+      <Button
+        tone="primary"
         type="button"
-        className="studio-primary"
         disabled={!pending}
         onClick={() => {
           try {
@@ -52,10 +53,9 @@ export default function MarkdownSource({ editor }: { editor: Editor }) {
         }}
       >
         {e("apply")}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={!pending}
         onClick={() => {
           setSource(editor.getMarkdown());
@@ -65,7 +65,7 @@ export default function MarkdownSource({ editor }: { editor: Editor }) {
         }}
       >
         {e("reset")}
-      </button>
+      </Button>
       {error && <p role="alert">{e("invalid")}</p>}
     </div>
   );

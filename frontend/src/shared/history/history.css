@@ -1,9 +1,9 @@
 /* Shared history deliberately stays secondary to editing and loads only when opened. */
 .entity-history {
   margin-top: 24px;
-  border: 1px solid var(--studio-border, #dce3ed);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 16px;
-  background: var(--studio-surface, #fff);
+  background: var(--studio-surface, var(--vy-color-surface));
   overflow: hidden;
 }
 .history-disclosure {
@@ -22,7 +22,7 @@
   padding: 0 22px 22px;
 }
 .history-hint {
-  color: var(--studio-muted, #66758c);
+  color: var(--studio-muted, var(--vy-color-muted));
   font-size: 13px;
   max-width: 75ch;
 }
@@ -33,7 +33,7 @@
   gap: 16px;
   text-align: left;
   border: 0;
-  border-bottom: 1px solid var(--studio-border, #dce3ed);
+  border-bottom: 1px solid var(--studio-border, var(--vy-color-border));
   padding: 16px 0;
   background: transparent;
   color: inherit;
@@ -41,12 +41,12 @@
   font: inherit;
 }
 .history-entry[aria-pressed="true"] {
-  color: var(--studio-accent, #2563eb);
+  color: var(--studio-accent, var(--vy-color-accent-strong));
 }
 .history-entry small {
   display: block;
   margin-top: 5px;
-  color: var(--studio-muted, #66758c);
+  color: var(--studio-muted, var(--vy-color-muted));
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -64,7 +64,7 @@
   text-align: left;
   vertical-align: top;
   padding: 12px;
-  border-bottom: 1px solid var(--studio-border, #dce3ed);
+  border-bottom: 1px solid var(--studio-border, var(--vy-color-border));
   overflow-wrap: anywhere;
 }
 .history-comparison pre {
@@ -84,7 +84,7 @@
   margin-top: 18px;
 }
 .entity-link {
-  color: var(--studio-accent, #2563eb);
+  color: var(--studio-accent, var(--vy-color-accent-strong));
   background: transparent;
   border: 0;
   padding: 0;

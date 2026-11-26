@@ -11,7 +11,8 @@ export function useCatalog(
   const [category, setCategory] = useState("all");
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [pageCursor, setPageCursor] = useState<string>();
-  const [catalogLoading, setCatalogLoading] = useState(false);
+  // Loading until the first page settles, so the empty state never flashes before it.
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const catalogRequest = useRef(0);
   const catalog = async (token?: string, after?: string) => {
     const request = ++catalogRequest.current;

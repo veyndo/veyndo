@@ -7,21 +7,19 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     match args.first().map(String::as_str) {
         Some("configure") if args.len()==3 => {
-            sqlx::query("SELECT public.veyndo_configure_scope($1::name,$2::name)")
-                .bind(&args[1]).bind(&args[2]).execute(&pool).await?;
+            crate::store::configure_scope(&pool, &args[1], &args[2]).await?;
             println!("Database authority roles configured; enforcement remains unchanged");
         }
         Some("activate") if args.len()==1 => {
-            sqlx::query("SELECT public.veyndo_activate_scope()").execute(&pool).await?;
+            crate::store::activate_scope(&pool).await?;
             println!("Authenticated database scope enforced");
         }
         Some("rotate") if args.len()==1 => {
-            sqlx::query("SELECT public.veyndo_rotate_scope_key()").execute(&pool).await?;
+            crate::store::rotate_scope_key(&pool).await?;
             println!("Database scope key rotated; retiring key has a ten minute verification overlap");
         }
         Some("status") if args.len()==1 => {
-            let status:serde_json::Value=sqlx::query_scalar("SELECT public.veyndo_scope_status()")
-                .fetch_one(&pool).await?;
+            let status = crate::store::scope_status(&pool).await?;
             println!("{status}");
         }
         _ => return Err("Usage: --database-authority configure SYSTEM_LOGIN TENANT_LOGIN | activate | rotate | status".into()),

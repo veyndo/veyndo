@@ -1,8 +1,8 @@
 /** Reopening autosaved work reattaches exact immutable history despite request order; changed drafts remain unsaved. */
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useAppStudio } from "../../src/admin/developer/useAppStudio";
-import { template } from "../../src/admin/developer/app-model";
+import { useAppStudio } from "../../../components/apps/ui/admin/developer/useAppStudio";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 it.each([false, true])(
   "restores saved status only for an exact snapshot (modified=%s)",
   async (modified) => {

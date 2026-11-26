@@ -1,16 +1,40 @@
 //! Trusted server-to-server inference inherits operator settings without disclosing any provider credentials.
 use super::email;
-use crate::{App, Error, Json, Result, State, StatusCode, Value, bad, json};
+use crate::foundation::App;
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+
+/// The signed prompt parts of a trusted inference request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InferenceClaims {
+    #[serde(deserialize_with = "lenient")]
+    system: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    input: Option<String>,
+    schema: Value,
+}
 
 pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Result<Json<Value>> {
     let c = super::broker::assertion(&a, "/api/identity/inference", &v).await?;
     let email = email(&c)?;
-    let system = c["system"]
-        .as_str()
+    let claims: InferenceClaims = view(&c);
+    let system = claims
+        .system
+        .as_deref()
         .filter(|s| s.len() <= 24000)
         .ok_or(bad("Invalid system prompt"))?;
-    let user = c["input"]
-        .as_str()
+    let user = claims
+        .input
+        .as_deref()
         .filter(|s| s.len() <= 24000)
         .ok_or(bad("Invalid model input"))?;
     let images: Vec<String> = serde_json::from_value(c.get("images").cloned().unwrap_or(json!([])))
@@ -29,15 +53,16 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
     {
         return Err(bad("At most four bounded PNG/JPEG/WebP images"));
     }
-    if !schema_valid(&c["schema"], 0) {
+    if !schema_valid(&claims.schema, 0) {
         return Err(bad("Invalid bounded JSON schema"));
     }
     let _permit = a
-        .inference_slots
+        .models
+        .slots
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error(StatusCode::TOO_MANY_REQUESTS, "Model capacity busy".into()))?;
-    let count:i32=sqlx::query_scalar("INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls").bind(email).fetch_one(&a.db).await?;
+    let count = veyndo_identity::store::merchant_accounts::count_inference(&a, &email).await?;
     if count > 50 {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -47,8 +72,9 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
     let _cluster =
         crate::performance::cluster_lease::Lease::acquire(&a, "__identity", "model", 4).await?;
     let output = a
+        .models
         .inference
-        .structured_with_images(None, system, user, &c["schema"], &images)
+        .structured_with_images(None, system, user, &claims.schema, &images)
         .await
         .map_err(|_| {
             Error(
@@ -60,15 +86,27 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
         json!({"value":output.value,"model":output.model,"provider":output.provider,"usage":output.usage}),
     ))
 }
+/// The JSON fields `schema_valid` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SchemaValidInput {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    properties: Value,
+    items: Value,
+}
+
 fn schema_valid(v: &Value, depth: usize) -> bool {
+    let input: SchemaValidInput = view(v);
     if depth > 12 || !v.is_object() || v.get("$ref").is_some() {
         return false;
     }
-    match v["type"].as_str() {
-        Some("object") => v["properties"]
+    match input.r#type.as_deref() {
+        Some("object") => input
+            .properties
             .as_object()
             .is_some_and(|p| p.len() <= 40 && p.values().all(|s| schema_valid(s, depth + 1))),
-        Some("array") => schema_valid(&v["items"], depth + 1),
+        Some("array") => schema_valid(&input.items, depth + 1),
         Some("string" | "number" | "integer" | "boolean" | "null") => true,
         _ => false,
     }

@@ -45,7 +45,7 @@ checks the source text and job revision/lease before writing. Provider failures
 have bounded retries and classified diagnostics; admission saturation does not
 consume the provider retry budget. A manual reindex resets failed intake jobs.
 
-Migration 076 adds per-tenant model-generation cursors. A configured model change
+The schema baseline has per-tenant model-generation cursors. A configured model change
 re-enqueues existing sources in 256-record keyset batches without a request-sized
 catalog scan. Cursor progress and queue intake commit together and survive a
 restart. Source triggers cover concurrent inserts/edits. Configure **one consistent
@@ -86,14 +86,13 @@ retrieval instead of creating an unbounded inference queue. Interactive chat (in
 actions consume the same atomic UTC-day tenant attempt quota. Staging shares its
 live tenant budget; failed provider attempts count. This is not token/spend accounting.
 
-Migration 078 maintains per-error-code counters in the source-job transaction.
+The schema baseline maintains per-error-code counters in the source-job transaction.
 Status reads inspect this small per-tenant projection, not every failed job. Error
-changes, reset/retry and deletion remove old contributions before adding new ones;
-the migration backfills the projection once. This does not change retry admission.
+changes, reset/retry and deletion remove old contributions before adding new ones. This does not change retry admission.
 
 ## Lexical candidates under forced row security
 
-Migration 079 adds two rebuildable word projections, `knowledge_product_lexemes`
+The schema baseline has two rebuildable word projections, `knowledge_product_lexemes`
 and `knowledge_chunk_lexemes`. Source text is tokenized once in its native write
 transaction. The tables store only tenant, source identity and distinct `simple`
 lexemes, with composite source foreign keys and forced tenant RLS. Source deletion
@@ -111,9 +110,7 @@ current source admission before returning results. A forged/stale candidate is
 not sufficient to admit a product or quote. No extra service or truth ledger is
 introduced; the historic document GIN index is retained, not duplicated.
 
-The migration takes a source-write lock for one backfill and trigger installation.
-Provision a maintenance window and storage headroom for large existing catalogs:
-this is **not an online zero-downtime index build**. Storage grows with distinct
+Storage grows with distinct
 source words, and writes maintain two B-tree indexes per projection. Large/common
 term posting lists still require candidate ranking. This is lexical filtering,
 not BM25, language stemming, semantic quality or a universal sub-millisecond API.
@@ -251,7 +248,7 @@ The ordinary Store API/MCP category listing selects current confirmed public
 claims, checks their document hash/revision, product scope and validity window,
 then applies current channel visibility, active products and cursor pagination.
 Archiving or making a source private withdraws only its graph-based membership.
-Migration 077 adds partial type/confidence and text-trigram indexes. Browsing runs
+The schema baseline has partial type/confidence and text-trigram indexes. Browsing runs
 no model and stores no duplicated category-product projection. This is a bounded
 one-hop typed fact predicate with literal substring matching, **not arbitrary
 Cypher, inferred semantic entailment or a full intent-planning language**.
@@ -318,15 +315,15 @@ after validation or an authenticated cross-device memory implementation.
 
 | Owner | Responsibility |
 | --- | --- |
-| `src/cognition/indexing.rs`, `generations.rs`; migrations 071/074/076 | Source-trigger intake, model-change cursors, leased embeddings and status counters (including migration 078 diagnostic deltas) |
-| `src/knowledge/{search,vectors,vector_cache,rerank,embeddings}.rs`, `src/documents/search.sql`; migration 079 | Retrieval, current native hydration, forced-RLS word candidates, index transport/geometry and provider validation |
+| `src/cognition/indexing.rs`, `components/intelligence/src/store/embedding_generations.rs`; intelligence baseline | Source-trigger intake, model-change cursors, leased embeddings and status counters (including diagnostic deltas) |
+| `components/intelligence/src/knowledge/{search,vectors,vector_cache,rerank,embeddings}.rs`, `components/intelligence/src/store/source_search.sql`; the schema baseline | Retrieval, current native hydration, forced-RLS word candidates, index transport/geometry and provider validation |
 | `src/cognition/{context,tools,stream}.rs`; `crates/cognition/src/inference/protocol.rs` | Bounded context, authorized read rounds, existing-chat SSE and model protocols |
-| `src/cognition/{evidence,extraction,claim_batches,contracts,signed}.rs`; migration 072 | Source-bound evidence lifecycle and current public statement/signature adapters |
-| `src/cognition/{guardrails,autonomy}.rs`; migration 073 | Native policy, current revisions, daily price budget and transactional consumer |
-| `src/cognition/experiments/`; migration 075 | Native assignment, preregistration and actual payment-ledger readout |
+| `src/cognition/{evidence,extraction,claim_batches,contracts,signed}.rs`; the schema baseline | Source-bound evidence lifecycle and current public statement/signature adapters |
+| `components/shop/src/types/guardrails.rs`, `components/intelligence/src/{service,store}/autonomy.rs`; intelligence baseline | Native policy, current revisions, daily price budget and transactional consumer |
+| `src/cognition/experiments/`; the schema baseline | Native assignment, preregistration and actual payment-ledger readout |
 | `src/cognition/preferences.rs`; existing privacy owner | Private graph, current consent, advice admission and erasure |
-| `src/categories/{admin,graph_query}.rs`, `listing.sql`; migration 077 | Native saved fact-category predicates, source admission and existing catalog consumer |
-| `frontend/src/admin/intelligence/`, storefront account and shared i18n/API | Multilingual editors and native request transport |
+| `components/catalog/src/{domain/graph_query,store/categories}.rs`, `store/category_listing.sql`; the schema baseline | Native saved fact-category predicates, source admission and existing catalog consumer |
+| `components/intelligence/ui/admin/intelligence/`, storefront account and shared i18n/API | Multilingual editors and native request transport |
 
 Registered verification includes `users`, `providers`, `knowledge_workspace`,
 `cognitive_experiments`, `managed_search` and `tenant_isolation`. Providers use local

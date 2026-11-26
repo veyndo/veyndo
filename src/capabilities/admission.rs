@@ -1,5 +1,11 @@
 //! MCP discovery applies current merchant permissions through the same capability owners as invocation.
-use crate::*;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{
+    agent, agent_runs, assets, auth, b2b, commerce, currencies, history, legal, marketing,
+    operations, studio,
+};
+use veyndo_core::request_context::RequestContext;
 pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
     let n = &name;
     if name == "merchant.reports.read" {
@@ -12,7 +18,7 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
         return merchant(a, h).is_ok() && auth::allowed(h, "apps.read");
     }
     if name.starts_with("merchant.agents.") {
-        return agent_runs::controls::visible(a, h);
+        return agent_runs::controls::visible(h);
     }
     if name.starts_with("merchant.catalog.") {
         return merchant(a, h).is_ok() && commerce::catalog_intake::visible(h, name);

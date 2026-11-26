@@ -2,7 +2,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
-import RolesManager from "../../src/admin/team/RolesManager";
+import RolesManager from "../../../components/identity/ui/admin/team/RolesManager";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 vi.mock("../../src/shared/history/EntityHistory", () => ({
   default: () => null,

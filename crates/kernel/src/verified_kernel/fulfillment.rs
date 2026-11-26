@@ -2,6 +2,14 @@
 pub fn order_edit_admissible(terminal: bool) -> bool {
     !terminal
 }
+/// An order moves only along a listed edge of its machine into a listed state, never out of a terminal state.
+pub fn order_transition_admissible(
+    edge_listed: bool,
+    target_listed: bool,
+    source_terminal: bool,
+) -> bool {
+    edge_listed && target_listed && !source_terminal
+}
 pub fn completion_admissible(terminal: bool, payment_ready: bool, deliveries_ready: bool) -> bool {
     !terminal && payment_ready && deliveries_ready
 }

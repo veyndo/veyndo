@@ -22,8 +22,7 @@ is labeled as an integration contract with its official connector still required
 ## Automatically managed Experience apps
 
 Experience onboarding connects its frontend and installs **Storyfront** through the
-normal app registry in one transaction. Existing Experience mounts are backfilled
-by migration 055; ordinary shops still choose which apps to install. The installed
+normal app registry in one transaction; ordinary shops still choose which apps to install. The installed
 card and detail page show the actual connection, domain, sales channel and **Edit
 experience** link. Apps, Storyfronts and channel management use one mount registry
 and the same existing editor, with native/retained selection owned by that deployment.
@@ -81,13 +80,13 @@ does not mutate installed source code in place.
 
 | Path | Responsibility |
 |---|---|
-| `frontend/src/admin/apps/AppLibrary.tsx` | Search, filters, installed/discover cards |
-| `frontend/src/admin/apps/library-model.ts` | Catalog, categories and content fallback |
-| `frontend/src/admin/apps/AppArtwork.tsx` | Supplied images and generated fallbacks |
-| `frontend/src/admin/apps/AppDetails.tsx` | Detail tabs and confirmation-based activation |
-| `frontend/src/admin/apps/AppInterfaces.tsx` | Registered native/external admin surfaces |
+| `components/apps/ui/admin/apps/AppLibrary.tsx` | Search, filters, installed/discover cards |
+| `components/apps/ui/admin/apps/library-model.ts` | Catalog, categories and content fallback |
+| `components/apps/ui/admin/apps/AppArtwork.tsx` | Supplied images and generated fallbacks |
+| `components/apps/ui/admin/apps/AppDetails.tsx` | Detail tabs and confirmation-based activation |
+| `components/apps/ui/admin/apps/AppInterfaces.tsx` | Registered native/external admin surfaces |
 | `frontend/src/shared/i18n/app-library-i18n.ts` | English/German/French/Spanish UI and summaries |
-| `src/apps/presentation.rs` | Passive metadata bounds and safe asset validation |
+| `components/apps/src/domain/presentation.rs` | Passive metadata bounds and safe asset validation |
 | `fixtures/app-studio-schema.json` | Shared optional package-generation schema |
 
 Styles are divided between app catalog, artwork and detail modules. The generated

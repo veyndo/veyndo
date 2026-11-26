@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH RECURSIVE ancestors AS (SELECT id,parent_id FROM categories WHERE tenant=$1 AND id=$2 UNION ALL SELECT c.id,c.parent_id FROM categories c JOIN ancestors x ON c.id=x.parent_id WHERE c.tenant=$1) SELECT EXISTS(SELECT 1 FROM ancestors) AND NOT EXISTS(SELECT 1 FROM ancestors WHERE id=$3) AS \"admissible!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "admissible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "06d80dbdec4fa632be0e98c08cea75c2f89ad002460d98b208df6acc7130e410"
+}

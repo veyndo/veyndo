@@ -1,5 +1,21 @@
 //! Optimistic cart mutations and quantity normalization.
-use crate::*;
+use crate::cart_price::Quotes;
+use crate::cart_price::cart_json;
+use crate::foundation::App;
+use crate::{agent_runs, apps, legal};
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::sync::Mutex;
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_checkout::store::cart_edit::{self, Edit};
+use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 
 pub(crate) async fn set_items(
     a: &App,
@@ -26,7 +42,13 @@ pub(crate) async fn set_configured_cart(
     buyer: Option<Option<Value>>,
     selections: Option<&[apps::ConfigurationSelection]>,
 ) -> Result<StoredCart> {
-    set_cart_transaction(a, h, items, expected, buyer, selections, None, None, None).await
+    let edit = Edit {
+        items,
+        expected,
+        buyer,
+        ..Edit::default()
+    };
+    commit(a, h, edit, Edits::new(a, selections, None)).await
 }
 
 pub(crate) async fn reviewed_cart(
@@ -36,18 +58,49 @@ pub(crate) async fn reviewed_cart(
     revision: i64,
     review: &str,
 ) -> Result<StoredCart> {
-    set_cart_transaction(
-        a,
-        h,
+    let edit = Edit {
         items,
-        Some(revision),
-        None,
-        None,
-        None,
-        None,
-        Some(review),
-    )
-    .await
+        expected: Some(revision),
+        review: Some(review),
+        ..Edit::default()
+    };
+    commit(a, h, edit, Edits::new(a, None, None)).await
+}
+
+/// The quote parts an item preview reports, each exactly as quoted.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewQuote {
+    line_items: Value,
+    price: Value,
+    #[serde(deserialize_with = "lenient")]
+    checkout: PreviewCheckout,
+    shipping_costs: Value,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Vec<Value>,
+}
+
+/// The destination of a quoted cart.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewCheckout {
+    country: Value,
+}
+
+/// The first quoted delivery: its date and method name.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewDelivery {
+    delivery_date: Value,
+    #[serde(deserialize_with = "lenient")]
+    shipping_method: PreviewMethod,
+}
+
+/// The name of a quoted shipping method.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewMethod {
+    name: Value,
 }
 
 pub(crate) async fn preview_items(
@@ -56,35 +109,23 @@ pub(crate) async fn preview_items(
     items: Vec<Item>,
     revision: i64,
 ) -> Result<Value> {
-    let c = cart_candidate(a, h, items, Some(revision)).await?;
+    let c = cart_edit::candidate(a, &Quotes(a), h, items, Some(revision)).await?;
     let q = cart_json(a, &c).await?;
-    Ok(json!({"revision":c.revision,"review":review_digest(&c,&q),
-        "lineItems":q["lineItems"],"price":q["price"],"country":q["checkout"]["country"],
-        "shippingCosts":q["shippingCosts"],
-        "delivery":q["deliveries"][0]["deliveryDate"],
-        "shippingMethod":q["deliveries"][0]["shippingMethod"]["name"]}))
-}
-
-fn review_digest(c: &StoredCart, quote: &Value) -> String {
-    use sha2::{Digest, Sha256};
-    // The browser may opt into conditional edits. This fingerprint is a
-    // precondition, never a credential or a source of prices.
-    format!(
-        "{:x}",
-        Sha256::digest(
-            json!([
-                c.id,
-                c.revision,
-                quote["lineItems"],
-                quote["price"],
-                quote["checkout"],
-                quote["shippingCosts"],
-                quote["deliveries"]
-            ])
-            .to_string()
-        )
+    let quote: PreviewQuote = view(&q);
+    let first = quote
+        .deliveries
+        .first()
+        .map(view::<PreviewDelivery>)
+        .unwrap_or_default();
+    Ok(
+        json!({"revision":c.revision,"review":cart_edit::review_digest(&c,&q),
+        "lineItems":quote.line_items,"price":quote.price,"country":quote.checkout.country,
+        "shippingCosts":quote.shipping_costs,
+        "delivery":first.delivery_date,
+        "shippingMethod":first.shipping_method.name}),
     )
 }
+
 /// Protocol consent and cart contents commit together through the native owners.
 pub(crate) async fn set_consented_cart(
     a: &App,
@@ -95,123 +136,102 @@ pub(crate) async fn set_consented_cart(
     consent: Option<(String, HashMap<String, bool>)>,
     currency: Option<&str>,
 ) -> Result<StoredCart> {
-    set_cart_transaction(
-        a,
-        h,
+    let edit = Edit {
         items,
-        Some(expected),
-        Some(buyer),
-        None,
-        consent,
+        expected: Some(expected),
+        buyer: Some(buyer),
         currency,
-        None,
-    )
-    .await
-}
-async fn cart_candidate(
-    a: &App,
-    h: &RequestContext,
-    items: Vec<Item>,
-    expected: Option<i64>,
-) -> Result<StoredCart> {
-    validate_items(&items)?;
-    for i in &items {
-        marketing::admit_product(a, h, &i.id).await?;
-    }
-    // Validate the candidate before taking a cart lock. These helpers use the
-    // pool: holding one connection per edit while requesting another can exhaust
-    // the pool and deadlock concurrent edits. The revision is checked again below.
-    let mut c = load_cart(a, h).await?;
-    if c.status != "open" {
-        return Err(conflict("Cart is terminal"));
-    }
-    if expected.is_some_and(|v| v != c.revision) {
-        return Err(conflict("Cart revision changed; reload before editing"));
-    }
-    let (_, chain) = language_context(a, h).await?;
-    let ps = commerce::cart_products(a, &c.tenant, &chain, &items).await?;
-    c.data.items = items
-        .into_iter()
-        .map(|mut item| {
-            let p = ps
-                .iter()
-                .find(|p| p.id == item.id)
-                .ok_or(bad("Unknown product"))?;
-            item.quantity = normalized_quantity(p, item.quantity)?;
-            Ok(item)
-        })
-        .collect::<Result<Vec<_>>>()?;
-    c.data.locale = language_context(a, h).await?.0;
-    Ok(c)
+        review: None,
+    };
+    commit(a, h, edit, Edits::new(a, None, consent)).await
 }
 
-#[allow(clippy::too_many_arguments)]
-async fn set_cart_transaction(
+async fn commit(
     a: &App,
     h: &RequestContext,
-    items: Vec<Item>,
-    expected: Option<i64>,
-    buyer: Option<Option<Value>>,
-    selections: Option<&[apps::ConfigurationSelection]>,
-    consent: Option<(String, HashMap<String, bool>)>,
-    currency: Option<&str>,
-    review: Option<&str>,
+    edit: Edit<'_>,
+    edits: Edits<'_>,
 ) -> Result<StoredCart> {
-    let mut c = cart_candidate(a, h, items, expected).await?;
-    if let Some(currency) = currency {
-        let (settings, _) = commerce::scoped_config(a, &c.tenant, &c.data.sales_channel).await?;
-        c.data.currency = settings.currencies.selected(currency)?.code.clone();
+    cart_edit::commit(a, &Quotes(a), &edits, h, edit).await
+}
+
+type Modules = HashMap<String, Arc<Sandbox>>;
+type Consent = (String, HashMap<String, bool>);
+
+/// The server side of one cart edit: the app selections it carries, its consent, and what it prepared on the way.
+pub(crate) struct Edits<'a> {
+    app: &'a App,
+    selections: Option<&'a [apps::ConfigurationSelection]>,
+    consent: Mutex<Option<Consent>>,
+    before: Mutex<Option<HashMap<String, veyndo_shop::types::cart::AppConfiguration>>>,
+    modules: Mutex<Option<Modules>>,
+}
+impl<'a> Edits<'a> {
+    pub(crate) fn new(
+        app: &'a App,
+        selections: Option<&'a [apps::ConfigurationSelection]>,
+        consent: Option<Consent>,
+    ) -> Self {
+        Edits {
+            app,
+            selections,
+            consent: Mutex::new(consent),
+            before: Mutex::new(None),
+            modules: Mutex::new(None),
+        }
     }
-    let before = selections.map(|_| c.data.app_configurations.clone());
-    if let Some(b) = buyer {
-        c.data.buyer = b;
+}
+fn take<T>(slot: &Mutex<Option<T>>) -> Option<T> {
+    slot.lock().unwrap_or_else(|e| e.into_inner()).take()
+}
+fn put<T>(slot: &Mutex<Option<T>>, value: T) {
+    *slot.lock().unwrap_or_else(|e| e.into_inner()) = Some(value);
+}
+impl veyndo_checkout::ports::CartEdits for Edits<'_> {
+    fn view<'a>(&'a self, cart: &'a StoredCart) -> veyndo_core::PortFuture<'a, Value> {
+        Box::pin(cart_json(self.app, cart))
     }
-    if let Some(selections) = selections {
-        c.data.app_configurations = apps::resolve_selections(a, &c, selections).await?;
-        apps::configuration_budget(&c.data.app_configurations)?;
+    fn configure<'a>(&'a self, cart: &'a mut StoredCart) -> veyndo_core::PortFuture<'a, ()> {
+        Box::pin(async move {
+            let Some(selections) = self.selections else {
+                return Ok(());
+            };
+            put(&self.before, cart.data.app_configurations.clone());
+            cart.data.app_configurations =
+                apps::resolve_selections(self.app, cart, selections).await?;
+            apps::configuration_budget(&cart.data.app_configurations)?;
+            put(
+                &self.modules,
+                apps::prepare_configurations(self.app, cart).await?,
+            );
+            Ok(())
+        })
     }
-    let modules = if selections.is_some() {
-        Some(apps::prepare_configurations(a, &c).await?)
-    } else {
-        None
-    };
-    let quote = cart_json(a, &c).await?;
-    if review.is_some_and(|value| value != review_digest(&c, &quote)) {
-        return Err(conflict(
-            "Cart quote changed; review price and delivery again",
-        ));
+    fn locked<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        cart: &'a StoredCart,
+    ) -> veyndo_core::PortFuture<'a, ()> {
+        Box::pin(async move {
+            if let Some(modules) = take(&self.modules) {
+                apps::validate_configurations(tx, cart, &modules).await?;
+            }
+            Ok(())
+        })
     }
-    let mut tx = a.db.begin().await?;
-    let locked =
-        sqlx::query("SELECT revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-            .bind(&c.tenant)
-            .bind(&c.token)
-            .fetch_one(&mut *tx)
-            .await?;
-    if locked.get::<String, _>("status") != "open" {
-        return Err(conflict("Cart is terminal"));
+    fn committed<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        cart: &'a StoredCart,
+    ) -> veyndo_core::PortFuture<'a, ()> {
+        Box::pin(async move {
+            if let Some(before) = take(&self.before) {
+                apps::configuration_events(tx, cart, &before).await?;
+            }
+            if let Some((policy, choices)) = take(&self.consent) {
+                legal::consent_locked(tx, cart, &policy, choices, true).await?;
+            }
+            agent_runs::checkpoint::fence_commit(self.app, tx).await
+        })
     }
-    if locked.get::<i64, _>("revision") != c.revision {
-        return Err(conflict("Cart revision changed; reload before editing"));
-    }
-    b2b::guard_conn(&mut tx, h, &c).await?;
-    if let Some(modules) = &modules {
-        apps::validate_configurations(&mut tx, &c, modules).await?;
-    }
-    c.revision += 1;
-    sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE id=$3")
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
-    if let Some(before) = &before {
-        apps::configuration_events(&mut tx, &c, before).await?;
-    }
-    if let Some((policy, choices)) = consent {
-        legal::consent_locked(&mut tx, &c, &policy, choices, true).await?;
-    }
-    agent_runs::checkpoint::fence_commit(a, &mut tx).await?;
-    tx.commit().await?;
-    Ok(c)
 }

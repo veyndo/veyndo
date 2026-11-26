@@ -6,17 +6,22 @@ import { defaultTheme, fonts, explicitTheme } from "./model";
 import { contentText } from "../../../frontend/src/shared/i18n/content-language";
 import RichDescription from "../../../frontend/src/shared/content/RichDescription";
 import type { RequestFn } from "../../../frontend/src/shared/api/types";
+import type { Product } from "../../../frontend/src/shared/api/shop-api";
 import PublicFormBlock from "../../../frontend/src/shared/apps/PublicFormBlock";
 import { AppSurfaceSlot } from "../../../frontend/src/shared/apps/AppSurfaces";
 import { useEditorText } from "./studio/editor-i18n";
 import AppElement from "./AppElement";
 import { layoutKind } from "./commerce-layout";
+import { SitePart } from "./site-parts";
 import "./site.css";
 export type SiteProduct = {
   id: string;
   name: string;
   price: number;
   currency?: string;
+  description?: string;
+  stock?: number;
+  extra?: Product["extra"];
   media: { id: string; url: string; view: string }[];
 };
 export function themeStyle(theme: Theme): CSSProperties {
@@ -70,7 +75,7 @@ export default function SiteRenderer({
   onSelect?: (id: string) => void;
   onInline?: (id: string, text: string) => void;
   onProduct?: (id: string) => void;
-  onAdd?: (id: string) => void;
+  onAdd?: (id: string, quantity?: number) => void;
   decorate?: (block: Block, index: number, section: ReactElement) => ReactNode;
   trailing?: ReactNode;
   nativeSections?: Record<string, ReactNode>;
@@ -272,6 +277,14 @@ export default function SiteRenderer({
                   </article>
                 ))}
               </div>
+            )}
+            {b.kind === "part" && (
+              <SitePart
+                block={b}
+                products={products}
+                language={language}
+                onAdd={onAdd}
+              />
             )}
             {b.kind === "app" && b.extension && (
               <AppElement

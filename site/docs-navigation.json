@@ -24,6 +24,8 @@
         "docs/one-shop-components.md",
         "docs/quickstart.md",
         "docs/status.md",
+        "docs/current-release.md",
+        "docs/README.md",
         "docs/platform-overview.md",
         "docs/features.md",
         "docs/shop-setup.md",
@@ -86,8 +88,7 @@
         "docs/agentic-migration.md",
         "docs/cognitive-commerce.md",
         "docs/behavior-intelligence.md",
-        "docs/agentic-grids.md",
-        "docs/connected-workbench.md"
+        "docs/agentic-grids.md"
       ]
     },
     {
@@ -113,7 +114,6 @@
         "docs/knowledge-component.md",
         "docs/automation-component.md",
         "docs/connector-component.md",
-        "docs/app-system-status.md",
         "docs/business-capabilities.md",
         "docs/furniture-configurator.md",
         "docs/app-studio-workspace.md",
@@ -154,16 +154,12 @@
         "docs/product-management.md",
         "docs/merchant-operations.md",
         "docs/shipping-workflows.md",
-        "docs/payment-transaction-details.md",
-        "docs/payment-invoice-checkout.md",
-        "docs/payment-saved-methods.md",
-        "docs/payment-capture-management.md",
+        "docs/payments.md",
         "docs/email-delivery.md",
         "docs/currencies.md",
         "docs/international-commerce.md",
         "docs/localization.md",
         "docs/company-settings.md",
-        "docs/channel-setup.md",
         "docs/channel-management.md",
         "docs/pos.md",
         "docs/trade-network.md",
@@ -211,22 +207,23 @@
         "es": "Por qué puedes confiar"
       },
       "description": {
-        "en": "Architecture, tests, Lean proofs, measurements and the current limits.",
-        "de": "Architektur, Tests, Lean-Beweise, Messungen und die aktuellen Grenzen.",
-        "fr": "Architecture, tests, preuves Lean, mesures et limites actuelles.",
-        "es": "Arquitectura, pruebas, demostraciones en Lean, mediciones y límites actuales."
+        "en": "Component architecture, tests, Lean proofs, measurements and the current limits.",
+        "de": "Komponentenarchitektur, Tests, Lean-Beweise, Messungen und die aktuellen Grenzen.",
+        "fr": "Architecture en composants, tests, preuves Lean, mesures et limites actuelles.",
+        "es": "Arquitectura de componentes, pruebas, demostraciones en Lean, mediciones y límites actuales."
       },
       "sources": [
+        "docs/architecture.md",
         "docs/production-architecture.md",
+        "docs/source-map.md",
+        "docs/component-dependencies.md",
+        "docs/component-mirrors.md",
+        "docs/rust-services.md",
+        "docs/testing.md",
         "docs/formal-verification.md",
         "docs/proof-coverage.md",
+        "docs/formal-coverage.md",
         "docs/benchmarks.md",
-        "docs/testing.md",
-        "docs/architecture.md",
-        "docs/source-map.md",
-        "docs/rust-services.md",
-        "docs/shopware-parity.md",
-        "docs/system-consistency-audit.md",
         "docs/licensing.md",
         "docs/documentation-site.md"
       ]

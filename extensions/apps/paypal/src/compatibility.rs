@@ -1,8 +1,20 @@
 //! Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses.
-use super::{Attempt, account, base, environment, format_amount, parse_amount};
-use crate::{App, Error, Result, StatusCode, Value, bad, conflict, hash, http_limits, json};
+use crate::adapter::{account, base, environment};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::State;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::hash;
+use veyndo_core::http_limits;
+use veyndo_payments::domain::amounts::{format_amount, parse_amount};
+use veyndo_payments::domain::attempt::Attempt;
+use veyndo_payments::domain::return_urls::urls;
 
-async fn access(a: &App, t: &str) -> Result<String> {
+async fn access(a: &State, t: &str) -> Result<String> {
     let c = account(t)?;
     let r = a
         .http
@@ -28,8 +40,9 @@ async fn access(a: &App, t: &str) -> Result<String> {
         "PayPal credentials rejected".into(),
     ))
 }
-pub(crate) async fn wire(
-    a: &App,
+/// One attributed, idempotent PayPal API call with a fresh access token.
+pub async fn wire(
+    a: &State,
     t: &str,
     method: reqwest::Method,
     path: &str,
@@ -70,13 +83,8 @@ pub(crate) async fn wire(
     }
     http_limits::json_body(r).await
 }
-pub(crate) async fn execute(
-    a: &App,
-    p: &Attempt,
-    op: &str,
-    key: &str,
-    input: &Value,
-) -> Result<Value> {
+/// Executes a payment operation on the PayPal Orders API and returns its evidence.
+pub async fn execute(a: &State, p: &Attempt, op: &str, key: &str, input: &Value) -> Result<Value> {
     match op {
         "create" => {
             let channel: Option<String> = sqlx::query_scalar(
@@ -86,7 +94,7 @@ pub(crate) async fn execute(
             .bind(&p.order)
             .fetch_one(&a.db)
             .await?;
-            let (return_url, cancel_url) = super::return_urls::urls(
+            let (return_url, cancel_url) = urls(
                 &p.tenant,
                 channel.as_deref().unwrap_or("default"),
                 &p.id,
@@ -168,7 +176,8 @@ pub(crate) async fn execute(
         _ => Err(bad("Unsupported provider operation")),
     }
 }
-pub(crate) fn validate_order(p: &Attempt, v: &Value) -> Result<()> {
+/// Checks that PayPal order evidence belongs to the attempt and permits its state.
+pub fn validate_order(p: &Attempt, v: &Value) -> Result<()> {
     let units = v["purchase_units"]
         .as_array()
         .filter(|v| v.len() == 1)

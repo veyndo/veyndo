@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ($1::text IS NULL OR now()>=$1::timestamptz) AND ($2::text IS NULL OR now()<=$2::timestamptz) AS \"valid!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valid!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e6035e5d4fc138b3428d4a770974e6b79f48dea022464cdddfe83626bc9782fa"
+}

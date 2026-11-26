@@ -45,7 +45,7 @@
   height: 18px;
   accent-color: #0877e8;
 }
-.designer-inspector button:not(.studio-primary) {
+.designer-inspector button:not([data-tone="primary"]) {
   padding: 9px 12px;
   border: 1px solid #cfdeee;
   border-radius: 9px;

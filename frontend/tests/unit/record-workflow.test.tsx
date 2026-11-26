@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
-import { appRecipe } from "../../src/admin/developer/app-recipes";
+import { appRecipe } from "../../../components/apps/ui/admin/developer/app-recipes";
 import NativeRecordForm from "../../src/shared/apps/native/NativeRecordForm";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import {

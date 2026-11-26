@@ -4,7 +4,15 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 export default defineConfig({
   plugins: [react()],
-  resolve: { dedupe: ["react", "react-dom"] },
+  resolve: {
+    dedupe: [
+      "react",
+      "react-dom",
+      "zod",
+      "@veyndo/sdk",
+      "@openuidev/react-lang",
+    ],
+  },
   test: {
     environment: "jsdom",
     environmentOptions: {
@@ -21,6 +29,10 @@ export default defineConfig({
       ],
       include: [
         "src/**/*.{ts,tsx}",
+        fileURLToPath(new URL("../components/", import.meta.url)).replaceAll(
+          "\\",
+          "/",
+        ) + "*/ui/**/*.{ts,tsx}",
         fileURLToPath(
           new URL("../extensions/apps/", import.meta.url),
         ).replaceAll("\\", "/") + "**/*.{ts,tsx}",

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import ProductPurchase, {
   type ProductPurchaseProps,
-} from "../../src/storefront/catalog/ProductPurchase";
+} from "../../../components/catalog/ui/storefront/catalog/ProductPurchase";
 function purchase(size: string) {
   const noop = vi.fn();
   const product = {

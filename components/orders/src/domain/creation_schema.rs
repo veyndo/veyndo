@@ -1,0 +1,112 @@
+//! Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders.
+use serde_json::{Value, json};
+pub const CAPABILITIES: &[(&str, &str)] = &[
+    (
+        "merchant.import.inspect",
+        "Read current mapped target fields and report missing/changed imports without writing",
+    ),
+    (
+        "merchant.import.record",
+        "Explicitly import a source record through current domain permissions; historical orders have no purchase effects",
+    ),
+    (
+        "merchant.customer.creation",
+        "Read safe customer-creation groups and countries without granting settings access",
+    ),
+    (
+        "merchant.customer.create",
+        "Create a tenant customer profile and default addresses without issuing login credentials",
+    ),
+    (
+        "merchant.order.context",
+        "Read configured manual order context",
+    ),
+    (
+        "merchant.order.review",
+        "Prepare an actor-private authoritative native order quote",
+    ),
+    (
+        "merchant.order.complete",
+        "Explicit idempotent admin order checkout bound to reviewed revision and exact total",
+    ),
+];
+pub fn schema(name: &str) -> Option<Value> {
+    let (props, required) = match name {
+        "merchant.customer.creation" => (json!({}), vec![]),
+        "merchant.customer.create" => (
+            json!({"email":{"type":"string"},"profile":{"type":"object"},"customerGroup":{"type":"string"},"billingAddress":{"type":"object"},"shippingAddress":{"type":["object","null"]},"additionalAddresses":{"type":"array","maxItems":50,"items":{"type":"object"}},"requestKey":{"type":"string","minLength":8,"maxLength":128}}),
+            vec![
+                "email",
+                "profile",
+                "customerGroup",
+                "billingAddress",
+                "requestKey",
+            ],
+        ),
+        "merchant.order.context" => (
+            json!({"channelId":{"type":"string"},"locale":{"type":"string"}}),
+            vec!["channelId"],
+        ),
+        "merchant.order.review" => (
+            json!({"channelId":{"type":"string"},"customerId":{"type":"string"},"locale":{"type":"string"},"currency":{"type":"string"},"items":{"type":"array","maxItems":100,"items":{"type":"object","properties":{"id":{"type":"string"},"quantity":{"type":"integer","minimum":1,"maximum":10000}},"required":["id","quantity"],"additionalProperties":false}},"checkout":{"type":"object"},"codes":{"type":"array","items":{"type":"string"}}}),
+            vec![
+                "channelId",
+                "locale",
+                "currency",
+                "customerId",
+                "items",
+                "checkout",
+            ],
+        ),
+        "merchant.order.complete" => (
+            json!({"channelId":{"type":"string"},"locale":{"type":"string"},"cartToken":{"type":"string"},"revision":{"type":"integer"},"totalMinor":{"type":"string","pattern":"^[0-9]+$"},"approve":{"type":"boolean"},"customerAcknowledgement":{"type":"boolean"},"policyVersion":{"type":"string"},"terms":{"type":"boolean"},"digitalImmediate":{"type":"boolean"},"requestKey":{"type":"string","minLength":8,"maxLength":128}}),
+            vec![
+                "channelId",
+                "locale",
+                "cartToken",
+                "revision",
+                "totalMinor",
+                "approve",
+                "customerAcknowledgement",
+                "policyVersion",
+                "terms",
+                "digitalImmediate",
+                "requestKey",
+            ],
+        ),
+        _ => return None,
+    };
+    Some(
+        json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::schema;
+
+    #[test]
+    fn creation_tools_have_closed_schemas_and_unknown_tools_none() {
+        for (name, required) in [
+            ("merchant.customer.creation", 0),
+            ("merchant.customer.create", 5),
+            ("merchant.order.context", 1),
+            ("merchant.order.review", 6),
+            ("merchant.order.complete", 11),
+        ] {
+            let s = schema(name).unwrap();
+            assert_eq!(s["type"], "object", "{name}");
+            assert_eq!(s["additionalProperties"], false, "{name}");
+            let names = s["required"].as_array().unwrap();
+            assert_eq!(names.len(), required, "{name}");
+            for key in names {
+                assert!(
+                    s["properties"][key.as_str().unwrap()].is_object(),
+                    "{name} {key}"
+                );
+            }
+        }
+        assert!(schema("merchant.import.record").is_none());
+        assert!(schema("merchant.order.delete").is_none());
+    }
+}

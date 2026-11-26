@@ -17,3 +17,5 @@ veyndo-runtime = { path = "../runtime" }
 sqlx.workspace = true
 tracing.workspace = true
 veyndo-kernel = { path = "../kernel" }
+veyndo-core = { path = "../../components/core" }
+image.workspace = true

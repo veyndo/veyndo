@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM embedding_jobs WHERE tenant=$1 AND kind=$2 AND object_id=$3 AND revision=$4 AND lease=$5 AND lease_until>now() FOR UPDATE) AS \"current!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "current!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "78a5f5b427d68b4133fedbbeabf036897c737d2b99e5299188607f775a4b01d4"
+}

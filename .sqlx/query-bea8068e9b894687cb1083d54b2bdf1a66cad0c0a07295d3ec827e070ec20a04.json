@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE intelligence_experiments SET final_report=final_report||$3 WHERE tenant=$1 AND id=$2 AND final_report IS NOT NULL AND NOT final_report ? 'decision'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bea8068e9b894687cb1083d54b2bdf1a66cad0c0a07295d3ec827e070ec20a04"
+}

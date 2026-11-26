@@ -46,7 +46,7 @@ The exact proof boundary and extension procedure are documented in
 - Verified-purchase reviews require original cart or immutable account purchase
   proof. Review identity and customer rule facts use the canonical cart/account
   namespaces; guest contact email cannot reserve another actor's review or count
-  as that actor's submission. Migrations must not guess old author identities.
+  as that actor's submission.
 - Run the registered `tenant_isolation` suite. Do not describe foreign keys,
   app-only RLS or selected Lean policies as complete core/SaaS isolation.
 
@@ -67,8 +67,7 @@ explicit tenant grants; strict startup rejects missing coverage. App model insta
 use fixed forced-RLS tables and transactionally maintained projections. Read
 `docs/app-data-storage.md` before changing these paths. Never reintroduce per-shop,
 per-app, per-model or per-version tables/indexes. Tenant SQL must never own those tables or create public schema
-objects. Preserve historical pre-099 migration replay without a normal serving
-bypass. Test through actual separate database logins, HTTP/MCP, private actors,
+objects. Test through actual separate database logins, HTTP/MCP, private actors,
 pool reuse, restart and signing-key rotation. `SET ROLE` on a migration connection
 does not prove this boundary. Staged rollout and enforced production are distinct;
 do not claim deployment from local tests. Connector storage has its own service
@@ -83,13 +82,13 @@ Use the existing `sales_channels` and `hosted_frontends` owners; see `docs/chann
 Experience onboarding must include `appId: "storyfront"` in the existing hosted-frontend mount.
 `apps/hosted.rs` installs through the existing immutable package registry inside that transaction;
 `hosted_frontends.app_id` is the tenant-aware dependency. Never synthesize an "installed" app
-in the UI, install it from GET, or create another connection/editor registry. Migration 055
-repairs historical mounts once. Preserve deactivation dependency checks and shared connection
+in the UI, install it from GET, or create another connection/editor registry. Preserve deactivation dependency checks and shared connection
 cards in Apps/Storyfronts; original Storyfront code stays in its private repository.
 
 ## Cross-feature integration continuity
 
-Read `docs/feature-integration.md` before extending POS, B2B/EDI, marketplaces or
+Read `docs/pos.md`, `docs/b2b-commerce.md`, `docs/marketplaces.md` and
+`docs/behavior-intelligence.md` before extending POS, B2B/EDI, marketplaces or
 visitor observations. Every release selection needs its own current domain right;
 `team.manage`/environment access never delegates catalog, app or B2B authority.
 Use `marketing/channel_config.rs` for native/released channel validation and
@@ -142,3 +141,35 @@ remain fenced across restarts; recovery retrieves only a known original document
 Native app save callbacks require explicit stable IDs and revisions.
 See `docs/shipping-workflows.md` and `extensions/apps/assistant-examples/shipping.json`.
 
+## Components
+
+Keep the code of one responsibility together instead of splitting it to meet a
+number; a single function stays below the clippy limit in `clippy.toml`.
+
+[`components.json`](../components.json) assigns every Rust source and every table to
+exactly one component and lists, per component, the other components it uses and
+the foreign tables it still touches. `scripts/components.py` (part of the structure
+check) refuses a new dependency or a new foreign table access; when you remove one,
+delete it from the map in the same change. New code goes into a component crate
+under `components/<name>/` with the layout in
+[the architecture plan](../docs/plans/2026-11-19-component-architecture.md): `types/`,
+`domain/` without I/O, `store/` as the only place with SQL, `service/`, and thin
+`http/` and `mcp/` adapters. `python3 scripts/sql_prepare.py` prepares every static
+SQL statement against the migrated schema; a statement that the database refuses
+fails the suite. See [component dependencies](../docs/component-dependencies.md) for
+the current state.
+
+`components/pricing` is the worked example. Follow it:
+
+- What a component reads from another component is a trait in its `ports.rs`.
+  The server implements the trait next to the owning module (see
+  `src/currencies/ports.rs`); a component never calls another component's
+  functions through the root crate. Tests implement the ports themselves and use
+  `veyndo_core::State::detached()`.
+- Handlers extract `veyndo_core::State` or the component's own state (core state
+  plus ports). `veyndo_identity::{permit, merchant}` answer who the request acts
+  for; routes are registered with `veyndo_identity::route_policy::SecureRoutes`.
+- A row that leaves `store/` is a type in `types/`, not a JSON value.
+- The crate feature `service` (default) holds everything that needs `core`;
+  without it the crate is the pure `domain/`.
+- Test files name their imports.

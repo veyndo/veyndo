@@ -1,0 +1,42 @@
+[package]
+name = "veyndo-app-platform"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Apps: package approval and distribution, schema adapters, event projection and service transport policy"
+
+[dependencies]
+axum.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+base64.workspace = true
+ring.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+veyndo-app-storage = { path = "../../extensions/services/app-storage" }
+veyndo-apps = { path = "../../crates/apps" }
+veyndo-runtime = { path = "../../crates/runtime" }
+veyndo-identity = { path = "../identity" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-orders = { path = "../orders" }
+veyndo-checkout = { path = "../checkout" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-shipping = { path = "../shipping" }
+veyndo-shop = { path = "../shop" }
+veyndo-b2b = { path = "../b2b" }
+veyndo-marketing = { path = "../marketing" }
+veyndo-intelligence = { path = "../intelligence" }
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+cron.workspace = true
+semver.workspace = true
+json-patch.workspace = true
+veyndo-cognition = { path = "../../crates/cognition" }

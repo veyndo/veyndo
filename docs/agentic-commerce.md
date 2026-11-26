@@ -252,8 +252,7 @@ experimental API. All five tools were also discovered and called in the in-app b
 local native Rust/PostgreSQL shop: search, add, quantity change, cart read and
 checkout review. Negative quantities and unknown products were rejected. See the
 [actual browser evidence](evidence/connected-commerce-2026-10-30.md#browser-agent-cart-entry).
-Public deployment remains tracked in the
-[connected-commerce checklist](plans/2026-10-30-connected-commerce.md#6-webmcp-completion).
+Public deployment is recorded on the [status page](status.md).
 
 ## Agent proposals and app diagnostics
 

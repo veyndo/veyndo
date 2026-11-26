@@ -1,0 +1,278 @@
+//! Bounded personal layouts contain references, never delegated rights or executable agent instructions.
+use super::report_config::Layout;
+use super::view_components;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use veyndo_app_model::declarations::identifier;
+use veyndo_core::{Result, bad};
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Workspace {
+    areas: Vec<Area>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    today_reports: Option<Layout>,
+    active: String,
+    goals: Vec<Goal>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    setup: Option<Setup>,
+}
+// Presentation progress only: never a publication, payment or permissions gate.
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Setup {
+    version: u8,
+    state: String,
+    step: String,
+    reviewed: Vec<String>,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Area {
+    id: String,
+    name: String,
+    cards: Vec<String>,
+    pins: Vec<Pin>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    reports: Option<Layout>,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Pin {
+    title: String,
+    tab: String,
+    query: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    components: Option<Vec<String>>,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct Goal {
+    id: String,
+    title: String,
+    status: String,
+    task_id: Option<String>,
+}
+/// The workspace of a person who has not arranged anything yet.
+pub fn empty() -> Value {
+    json!({"areas":[],"active":"","goals":[]})
+}
+/// Admits a workspace within its bounds and returns it in canonical form.
+pub fn validate(v: &Value) -> Result<Value> {
+    let w: Workspace =
+        serde_json::from_value(v.clone()).map_err(|_| bad("Invalid personal workspace"))?;
+    if let Some(layout) = &w.today_reports {
+        layout.validate()?;
+    }
+    for a in &w.areas {
+        if let Some(layout) = &a.reports {
+            layout.validate()?;
+        }
+    }
+    let text = |s: &str, n| !s.trim().is_empty() && s.len() <= n;
+    let mut ids = std::collections::HashSet::new();
+    if let Some(s) = &w.setup {
+        let steps = ["basics", "products", "design", "checkout", "legal", "test"];
+        if s.version != 1
+            || !["active", "dismissed", "complete"].contains(&s.state.as_str())
+            || !steps.contains(&s.step.as_str())
+            || s.reviewed.len() > steps.len()
+            || s.reviewed.iter().any(|v| !steps.contains(&v.as_str()))
+            || s.reviewed
+                .iter()
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                != s.reviewed.len()
+            || (s.state == "complete" && s.reviewed.len() != steps.len())
+        {
+            return Err(bad("Invalid personal setup progress"));
+        }
+    }
+    if v.to_string().len() > 24000 || w.areas.len() > 8 || w.goals.len() > 30 || w.active.len() > 32
+    {
+        return Err(bad("Workspace exceeds personal storage limits"));
+    }
+    for a in &w.areas {
+        if !identifier(&a.id)
+            || !ids.insert(&a.id)
+            || !text(&a.name, 100)
+            || a.cards.len() > 16
+            || a.pins.len() > 20
+            || a.cards.iter().any(|s| !identifier(&s.to_lowercase()))
+            || a.cards
+                .iter()
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                != a.cards.len()
+            || a.pins.iter().any(|p| {
+                !text(&p.title, 100)
+                    || !identifier(&p.tab.to_lowercase())
+                    || !safe_pin(&p.query)
+                    || p.components.as_ref().is_some_and(|components| {
+                        let entity = match p.tab.as_str() {
+                            "productData" => "products",
+                            "orders" => "orders",
+                            "customers" => "customers",
+                            _ => return true,
+                        };
+                        view_components::validate(entity, components).is_err()
+                    })
+            })
+        {
+            return Err(bad("Invalid workspace area, card or pinned view"));
+        }
+    }
+    if !w.active.is_empty() && !w.areas.iter().any(|a| a.id == w.active) {
+        return Err(bad("Active area does not exist"));
+    }
+    let mut goals = std::collections::HashSet::new();
+    if w.goals.iter().any(|g| {
+        !identifier(&g.id)
+            || !goals.insert(&g.id)
+            || !text(&g.title, 1000)
+            || !["planned", "working", "review", "done", "stopped"].contains(&g.status.as_str())
+            || g.task_id.as_ref().is_some_and(|s| !text(s, 100))
+    }) {
+        return Err(bad("Invalid personal goal"));
+    }
+    Ok(json!(w))
+}
+fn safe_pin(query: &str) -> bool {
+    if query.is_empty() {
+        return true;
+    }
+    if query.len() > 1000 {
+        return false;
+    }
+    serde_json::from_str::<Value>(query)
+        .ok()
+        .and_then(|v| v.as_object().cloned())
+        .is_some_and(|v| {
+            v.iter().all(|(k, v)| {
+                [
+                    "sort",
+                    "direction",
+                    "state",
+                    "paymentState",
+                    "deliveryState",
+                    "channelId",
+                    "from",
+                    "to",
+                    "group",
+                    "categoryId",
+                    "active",
+                    "guest",
+                    "lowStock",
+                ]
+                .contains(&k.as_str())
+                    && (v.is_boolean()
+                        || v.as_str().is_some_and(|s| {
+                            !s.is_empty()
+                                && s.len() <= 100
+                                && s.bytes()
+                                    .all(|b| b.is_ascii_alphanumeric() || b"_.:-".contains(&b))
+                        }))
+            })
+        })
+}
+pub fn schema(n: &str) -> Option<Value> {
+    let properties = match n {
+        "studio.workspace.read" | "studio.workspace.work.read" => json!({}),
+        "studio.workspace.save" => {
+            json!({"revision":{"type":"integer","minimum":0},"data":{"type":"object"}})
+        }
+        _ => return None,
+    };
+    Some(
+        json!({"type":"object","additionalProperties":false,"properties":properties,
+        "required":if n.ends_with("save"){vec!["revision","data"]}else{vec![]}}),
+    )
+}
+#[cfg(test)]
+mod tests {
+    use super::{empty, safe_pin, schema, validate};
+    use serde_json::json;
+    #[test]
+    fn setup_progress_is_bounded_optional_and_never_authority() {
+        let mut v = empty();
+        assert_eq!(validate(&v).unwrap(), v);
+        v["setup"] = json!({"version":1,"state":"active","step":"products","reviewed":["basics"]});
+        assert_eq!(validate(&v).unwrap(), v);
+        for patch in [
+            json!({"reviewed":["basics","basics"]}),
+            json!({"state":"complete"}),
+            json!({"step":"admin"}),
+            json!({"version":2}),
+            json!({"permissions":["owner"]}),
+        ] {
+            let mut invalid = v.clone();
+            for (k, value) in patch.as_object().unwrap() {
+                invalid["setup"][k] = value.clone();
+            }
+            assert!(validate(&invalid).is_err());
+        }
+    }
+    #[test]
+    fn composed_pins_preserve_layout_but_never_authority_or_personal_search() {
+        let original = json!({"areas":[{"id":"service","name":"Service","cards":[],"pins":[
+            {"title":"Products","tab":"productData","query":"{}","components":["records","details","intake"]}
+        ]}],"active":"service","goals":[]});
+        assert_eq!(validate(&original).unwrap(), original);
+        for components in [
+            json!([]),
+            json!(["details"]),
+            json!(["records", "records"]),
+            json!(["records", "html"]),
+        ] {
+            let mut v = original.clone();
+            v["areas"][0]["pins"][0]["components"] = components;
+            assert!(validate(&v).is_err());
+        }
+        for tab in ["orders", "customers", "settings"] {
+            let mut v = original.clone();
+            v["areas"][0]["pins"][0]["tab"] = json!(tab);
+            assert!(validate(&v).is_err());
+        }
+        for key in ["tenant", "rows", "permissions", "code"] {
+            let mut v = original.clone();
+            v["areas"][0]["pins"][0][key] = json!("forged");
+            assert!(validate(&v).is_err());
+        }
+        let mut v = original.clone();
+        v["areas"][0]["pins"][0]["query"] = json!(r#"{"customer":"buyer@example.test"}"#);
+        assert!(validate(&v).is_err());
+        let mut legacy = original;
+        legacy["areas"][0]["pins"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("components");
+        assert_eq!(validate(&legacy).unwrap(), legacy);
+    }
+    #[test]
+    fn actor_preferences_are_bounded_and_not_authority() {
+        assert!(validate(&empty()).is_ok());
+        assert!(!safe_pin(r#"{"query":"buyer@example.test"}"#));
+        assert!(!safe_pin(r#"{"customer":"Alice"}"#));
+        assert!(safe_pin(r#"{"state":"open","active":true}"#));
+        let mut v = empty();
+        v["permissions"] = json!(["owner"]);
+        assert!(validate(&v).is_err());
+        let mut v = empty();
+        v["active"] = json!("missing");
+        assert!(validate(&v).is_err());
+    }
+    #[test]
+    fn workspace_tools_have_closed_schemas_and_only_saving_requires_input() {
+        for name in ["studio.workspace.read", "studio.workspace.work.read"] {
+            assert_eq!(
+                schema(name),
+                Some(
+                    json!({"type":"object","additionalProperties":false,"properties":{},"required":[]})
+                )
+            );
+        }
+        let save = schema("studio.workspace.save").unwrap();
+        assert_eq!(save["required"], json!(["revision", "data"]));
+        assert_eq!(save["properties"]["revision"]["minimum"], 0);
+        assert!(schema("studio.workspace.delete").is_none());
+    }
+}

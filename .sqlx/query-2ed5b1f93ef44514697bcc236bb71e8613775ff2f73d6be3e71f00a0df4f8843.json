@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- One bounded overview snapshot. Arrays retain the original limits and ordering; currencies remain separate.\nWITH stats AS (\n SELECT count(*) AS orders,count(*) FILTER(WHERE created_at>=current_date) AS today\n FROM orders WHERE tenant=$1\n), revenue AS (\n SELECT coalesce(data->'cart'->'price'->>'currency','EUR') AS currency,\n sum((data->'cart'->'price'->>'totalPrice')::numeric)::text AS amount\n FROM orders WHERE tenant=$1 GROUP BY 1 ORDER BY 1\n), recent AS (\n SELECT data,created_at::text AS time FROM orders WHERE tenant=$1 ORDER BY created_at DESC LIMIT 8\n), timeline AS (\n SELECT d::date::text AS day,count(o.id) AS orders,\n count(DISTINCT coalesce(o.data->'cart'->'price'->>'currency','EUR')) FILTER(WHERE o.id IS NOT NULL) AS currency_count,\n min(coalesce(o.data->'cart'->'price'->>'currency','EUR')) FILTER(WHERE o.id IS NOT NULL) AS currency,\n coalesce(sum((o.data->'cart'->'price'->>'totalPrice')::numeric),0)::text AS revenue\n FROM generate_series(current_date-6,current_date,interval '1 day') d\n LEFT JOIN orders o ON o.tenant=$1 AND o.created_at>=d AND o.created_at<d+interval '1 day' GROUP BY d ORDER BY d\n), learning AS (\n SELECT d::date::text AS day,count(e.session) AS views,count(e.session) FILTER(WHERE e.rewarded) AS rewarded\n FROM generate_series(current_date-6,current_date,interval '1 day') d\n LEFT JOIN exposures e ON e.tenant=$1 AND e.created_at>=d AND e.created_at<d+interval '1 day' GROUP BY d ORDER BY d\n), variants AS (\n SELECT variant,views,purchases FROM policy WHERE tenant=$1 ORDER BY variant\n), indexed AS (\n SELECT count(*) AS count,max(updated_at)::text AS updated FROM semantic_products WHERE tenant=$1\n), plans AS (\n SELECT count(*) FILTER(WHERE NOT applied AND (jsonb_array_length(proposal->'proposal'->'changes')>0\n OR proposal->'proposal'->'experience' IS NOT NULL AND proposal->'proposal'->'experience'<>'null'::jsonb)) AS pending,\n count(*) FILTER(WHERE applied) AS applied FROM tasks WHERE tenant=$1\n), activity AS (\n SELECT kind,time::text AS time,id FROM (\n SELECT 'order' AS kind,created_at AS time,id FROM orders WHERE tenant=$1 UNION ALL\n SELECT CASE WHEN applied AND applied_at IS NOT NULL THEN 'approved' ELSE 'proposal' END AS kind,\n coalesce(applied_at,created_at) AS time,id FROM tasks WHERE tenant=$1\n ) a ORDER BY time DESC LIMIT 10\n), channels AS (\n SELECT channel,calls,failures,last_seen::text AS last_seen FROM channel_metrics WHERE tenant=$1 ORDER BY channel\n)\nSELECT jsonb_build_object(\n 'summary',jsonb_build_object('orders',stats.orders,'ordersToday',stats.today,'pendingPlans',plans.pending,'appliedPlans',plans.applied),\n 'revenue',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM revenue r),'[]'::jsonb),\n 'orders',coalesce((SELECT jsonb_agg(jsonb_build_object('id',data->'id','number',data->'orderNumber',\n 'total',data->'cart'->'price'->'totalPrice','currency',coalesce(data->'cart'->'price'->>'currency','EUR'),\n 'channel',coalesce(data->'channel','\"unknown\"'::jsonb),'time',time,'payment','simulated')) FROM recent),'[]'::jsonb),\n 'timeline',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM timeline r),'[]'::jsonb),\n 'learningTimeline',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM learning r),'[]'::jsonb),\n 'variants',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM variants r),'[]'::jsonb),\n 'indexedProducts',indexed.count,'lastIndexed',indexed.updated,\n 'activity',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM activity r),'[]'::jsonb),\n 'channels',coalesce((SELECT jsonb_agg(jsonb_build_object('channel',channel,'calls',calls,'httpFailures',failures,'lastSeen',last_seen)) FROM channels),'[]'::jsonb)\n) AS \"facts!\" FROM stats CROSS JOIN plans CROSS JOIN indexed;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "facts!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2ed5b1f93ef44514697bcc236bb71e8613775ff2f73d6be3e71f00a0df4f8843"
+}

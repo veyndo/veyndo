@@ -5,7 +5,7 @@
   "additionalSyntheticProducts": 200000,
   "additionalSyntheticTranslations": 200000,
   "source": "4b37a102d4e9cc0e2c8a44eb28409aee7a5e23c4",
-  "querySource": "src/commerce/external_order_labels.sql",
+  "querySource": "components/apps/src/service/external_orders/labels.sql",
   "querySha256": "3f131887429e16594a5d0354e0194d49191ee4bf857d732780da5324c53e6d7a",
   "scope": "Local query-plan diagnostic using disposable synthetic records, existing product and translation indexes and active triggers. Not full checkout throughput or signed-role latency.",
   "plan": {

@@ -1,7 +1,7 @@
 /** Supplier links are edited in the settings revision; a proposal shows signed offers and only an offer within the ceiling can be approved. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import SupplyReorder from "../../src/admin/channels/SupplyReorder";
+import SupplyReorder from "../../../components/marketing/ui/admin/channels/SupplyReorder";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
 const settings = {

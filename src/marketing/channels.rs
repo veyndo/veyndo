@@ -1,157 +1,24 @@
-//! Sales channels share a merchant tenant but bind independent catalog visibility, locale and cart identity.
-use super::*;
-use std::collections::HashSet;
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Channel {
-    pub name: HashMap<String, String>,
-    pub kind: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pos: Option<crate::pos::Config>,
-    pub active: bool,
-    #[serde(default = "public_visibility")]
-    pub visibility: String,
-    pub locales: Vec<String>,
-    pub product_ids: Vec<String>,
-    #[serde(default)]
-    pub navigation_category_id: Option<String>,
-}
-fn public_visibility() -> String {
-    "public".into()
-}
-/// Native channel metadata keeps type and activation admission independent of Studio's interface language.
-pub(crate) async fn channel_configuration(
-    a: &App,
-    h: &RequestContext,
-    id: &str,
-) -> Result<Channel> {
-    let t = tenant(h)?;
-    let data: Value =
-        sqlx::query_scalar("SELECT data FROM sales_channels WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(
-                StatusCode::NOT_FOUND,
-                "Sales channel unavailable".into(),
-            ))?;
-    let mut c: Channel = serde_json::from_value(data).map_err(|_| bad("Invalid channel"))?;
-    if c.kind == "marketplace" {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Marketplace channels require connector access".into(),
-        ));
-    }
-    if c.kind == "pos" && h.pos.is_none() {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "POS requires authenticated cashier admission".into(),
-        ));
-    }
-    // The main channel inherits shop languages; additional channels select a subset.
-    if id == "default" {
-        c.locales = commerce::config(a, &t).await?.0.locales.clone();
-    }
-    if !c.active && header(h, "x-rac-channel-preview") != Some(id) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Sales channel or language unavailable".into(),
-        ));
-    }
-    Ok(c)
-}
+//! Sales channel admission lives in the marketing component; these entries keep the server-side signatures.
+use crate::foundation::App;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_marketing::service::channels as owner;
+pub(crate) use veyndo_marketing::types::channel::Channel;
 pub(crate) async fn channel(
     a: &App,
     h: &RequestContext,
     id: &str,
     locale: &str,
 ) -> Result<Option<Channel>> {
-    let c = channel_configuration(a, h, id).await?;
-    let allowed = c.locales.contains(&locale.to_string())
-        || (id == "default"
-            && c.locales
-                .iter()
-                .any(|enabled| enabled.split('-').next() == locale.split('-').next()));
-    if !allowed {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Sales channel or language unavailable".into(),
-        ));
-    }
-    Ok(Some(c))
+    owner::channel(&a.core, h, id, locale).await
 }
-pub(crate) fn channel_id(h: &RequestContext) -> &str {
-    header(h, "sw-sales-channel-id").unwrap_or("default")
-}
+pub(crate) use veyndo_core::shop_scope::channel as channel_id;
 pub(crate) async fn admit_product(a: &App, h: &RequestContext, id: &str) -> Result<()> {
-    admit_products(a, h, &[id.to_owned()]).await
+    owner::admit_product(&a.core, h, id).await
 }
-/// Batched admission shares the same parent, visibility and channel-list rules as single-product reads.
 pub(crate) async fn admit_products(a: &App, h: &RequestContext, ids: &[String]) -> Result<()> {
-    if ids.is_empty() || ids.len() > 24 {
-        return Err(bad("Product admission batch must contain 1..24 IDs"));
-    }
-    b2b::admit_catalog(a, h, ids).await?;
-    let rows=sqlx::query("SELECT p.id,p.parent_id FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$2 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id))").bind(tenant(h)?).bind(channel_id(h)).bind(ids).fetch_all(&a.db).await?;
-    let selected = channel(a, h, channel_id(h), &language_context(a, h).await?.0)
-        .await?
-        .map(|c| c.product_ids)
-        .unwrap_or_default();
-    let denied = ids.iter().any(|id| {
-        !rows.iter().any(|r| {
-            r.get::<String, _>("id") == *id
-                && (selected.is_empty()
-                    || selected.contains(id)
-                    || r.get::<Option<String>, _>("parent_id")
-                        .is_some_and(|p| selected.contains(&p)))
-        })
-    });
-    if denied {
-        return Err(Error(
-            StatusCode::NOT_FOUND,
-            "Product unavailable in sales channel".into(),
-        ));
-    }
-    Ok(())
+    owner::admit_products(&a.core, h, ids).await
 }
-pub(crate) async fn filter_channel(
-    a: &App,
-    h: &RequestContext,
-    ps: Vec<Product>,
-) -> Result<Vec<Product>> {
-    let config = channel(a, h, channel_id(h), &language_context(a, h).await?.0).await?;
-    let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let admitted: Vec<String> = sqlx::query_scalar("SELECT p.id FROM products p WHERE p.tenant=$1 AND p.id=ANY($2) AND p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$3 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id))")
-        .bind(tenant(h)?).bind(ids).bind(channel_id(h)).fetch_all(&a.db).await?;
-    let unit = b2b::catalog_scope(a, h).await?;
-    let admitted = if let Some(unit) = unit {
-        sqlx::query_scalar("SELECT p.id FROM products p WHERE p.tenant=$1 AND p.id=ANY($2) AND EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$3 AND (b.product_id=p.id OR b.product_id=p.parent_id OR (p.parent_id IS NULL AND EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id))))")
-            .bind(tenant(h)?).bind(admitted).bind(unit).fetch_all(&a.db).await?
-    } else {
-        admitted
-    };
-    let admitted = admitted.into_iter().collect::<HashSet<_>>();
-    Ok(ps
-        .into_iter()
-        .filter(|p| admitted.contains(&p.id))
-        .filter(|p| {
-            config.as_ref().is_none_or(|c| {
-                c.product_ids.is_empty()
-                    || c.product_ids.contains(&p.id)
-                    || p.parent_id
-                        .as_ref()
-                        .is_some_and(|id| c.product_ids.contains(id))
-            })
-        })
-        .collect())
-}
-
-/// Internal scope is never taken from caller-supplied catalog criteria.
 pub(crate) async fn catalog_scope(a: &App, h: &RequestContext) -> Result<Option<Vec<String>>> {
-    Ok(
-        channel(a, h, channel_id(h), &language_context(a, h).await?.0)
-            .await?
-            .and_then(|c| (!c.product_ids.is_empty()).then_some(c.product_ids)),
-    )
+    owner::catalog_scope(&a.core, h).await
 }

@@ -25,7 +25,7 @@ Good first contributions include setup documentation, locale corrections,
 reproducible commerce bugs and small behavior ports. Do not advertise an
 unimplemented protocol or production capability in documentation.
 
-For new payment rails, read [the provider contribution requirements](docs/payment-provider-contributions.md).
+For new payment rails, read [the provider contribution requirements](docs/payment-provider-api.md#proposing-another-payment-provider).
 App installation alone does not register a settlement provider; contributions
 must integrate invoice-bound verification, reconciliation and the core ledger.
 
@@ -46,8 +46,7 @@ localization for the affected files. For Rust changes, run `cargo fmt --check`,
 changed modules. Full tests and coverage run daily through the existing workflow;
 ordinary commits do not wait for that full run.
 Run the relevant application suites from [the testing guide](docs/testing.md#repeatable-checks)
-against your own instance. Original Shopware ports require original-source
-comparisons described in [the migration workflow](docs/migration.md).
+against your own instance.
 
 ## Formal contracts and source review
 

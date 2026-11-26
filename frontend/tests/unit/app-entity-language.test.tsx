@@ -2,7 +2,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import AppEntity, { type Entity } from "../../src/admin/apps/AppEntity";
+import AppEntity, {
+  type Entity,
+} from "../../../components/apps/ui/admin/apps/AppEntity";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const entity: Entity = {

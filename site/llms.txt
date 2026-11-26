@@ -1,20 +1,19 @@
 # Veyndo
 
 > A source-available Rust ecommerce prototype under the Veyndo Sustainable Use License for merchant-approved AI operations,
-> local LLMs, partial MCP/UCP adapters and selected original Shopware behavior ports.
+> local LLMs and partial MCP/UCP adapters.
 
 ## Start
 - [Overview](https://www.veyndo.ai/)
 - [Measured local performance](https://www.veyndo.ai/docs/benchmarks.html)
 - [Local quickstart](https://www.veyndo.ai/docs/quickstart.html)
 - [Local MCP bridge](https://www.veyndo.ai/docs/mcp.html)
-- [Shopware behavior ports](https://www.veyndo.ai/docs/shopware-parity.html)
 
 - [Connected playground](https://www.veyndo.ai/docs/playground.html)
 
 ## Current release
-- [Shared order and inventory inputs](https://www.veyndo.ai/docs/status.html#shared-order-and-inventory-inputs): Native purchase, shared stock, empty cart and exact hosted component verification.
-- [Product Guide actions](https://www.veyndo.ai/docs/status.html#product-guide-actions-in-the-hosted-shop): Cart review in the storefront and a reviewed product proposal in Studio.
+- [Shared order and inventory inputs](https://www.veyndo.ai/docs/status.html#hosted-pilot-earlier-release): Native purchase, shared stock, empty cart and exact hosted component verification.
+- [Product Guide actions](https://www.veyndo.ai/docs/evidence/product-guide-hosted-2026-11-11.html): Cart review in the storefront and a reviewed product proposal in Studio.
 - [German overview](https://www.veyndo.ai/docs/platform-overview.html): Architecture, apps and agents in German.
 - [Component versions in JSON](https://www.veyndo.ai/docs/components.json): Public release tags and the exact hosted pilot composition.
 - [Current status and recorded public journeys](https://www.veyndo.ai/docs/status.html): Canonical current deployment, observed acceptance and remaining work.
@@ -24,14 +23,13 @@
 - [Visual shopper selection](https://www.veyndo.ai/docs/ui-experience.html#standard-storefront-and-customer-account): Catalogue-grounded intent produces editable native product cards; variants, app configuration, basket and checkout keep their existing owners.
 - [Private customer scenarios](https://www.veyndo.ai/docs/customer-scenarios.html): One to six fictional shopping agents, exact budgets, native simulated orders and saved before/after observations. This is native API testing, not visual usability or a real-customer conversion forecast.
 - [Catalogue preparation](https://www.veyndo.ai/docs/product-management.html): Paged product language coverage, durable image-job progress and native repair links.
-- [Core hardening](https://www.veyndo.ai/docs/core-hardening.html): Eighteen review findings, trusted request identity, explicit API permissions, non-owner forced RLS, transaction-local scoping, real PgBouncer tests, shared resource leases and durable outbox recovery. Deployment cutover and proof boundaries are explicit.
 - [Historical release record](https://www.veyndo.ai/docs/current-release.html): Older dated deployment observations; use the canonical current status above for the running release.
 - [Sales channels and domains](https://www.veyndo.ai/docs/channel-management.html)
 - [Currencies and pricing](https://www.veyndo.ai/docs/currencies.html)
 - [Rust app services](https://www.veyndo.ai/docs/rust-services.html)
 
 ## App-system implementation status
-- [Delivered, partial and open app capabilities](https://www.veyndo.ai/docs/app-system-status.html): Current source owners, dated hosted evidence and outstanding acceptance gates.
+- [App platform](https://www.veyndo.ai/docs/app-platform.html): The app contract, its owners and what remains open.
 - [Fixed shared app storage](https://www.veyndo.ai/docs/app-data-storage.html): Four physical tables; no table/index per installation.
 - [Saved agent work](https://www.veyndo.ai/docs/durable-agent-runs.html): Bounded merchant planning, private checkpoints, current rights and explicit uncertain-call continuation.
 - [Business-capability direction](https://www.veyndo.ai/docs/business-capabilities.html): Intent, frozen decision examples and the connected material/dimensions B2B purchase/reorder are implemented. Complete historical repricing, arbitrary-source builds/runtimes and fleet compatibility retain separate gates.
@@ -47,8 +45,7 @@
 
 ## Original documentation
 - [Repository](https://github.com/veyndo/veyndo)
-- [Feature matrix](https://www.veyndo.ai/docs/shopware-parity.html)
-- [Recorded verification](https://github.com/veyndo/veyndo/blob/main/docs/verification.json)
+- [Feature overview](https://www.veyndo.ai/docs/features.html)
 - [Security and SaaS boundaries](https://www.veyndo.ai/docs/security.html)
 
 - [Rules and durable flows](https://www.veyndo.ai/docs/automation.html)

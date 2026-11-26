@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH scoped AS (SELECT * FROM channel_metrics m WHERE ($1::text IS NULL OR m.tenant=$1) AND (NOT $2 OR NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=m.tenant))), statuses AS (SELECT channel,key,sum(value::bigint) AS n FROM scoped CROSS JOIN LATERAL jsonb_each_text(response_counts) GROUP BY channel,key), codes AS (SELECT channel,jsonb_object_agg(key,n) AS responses FROM statuses GROUP BY channel) SELECT s.channel AS \"channel!\",sum(calls)::bigint AS \"calls!\",sum(failures)::bigint AS \"failures!\",sum(total_ms)::bigint AS \"total_ms!\",max(max_ms) AS \"max_ms!\",sum(timed_calls)::bigint AS \"timed_calls!\",max(last_seen)::text AS \"seen!\",coalesce(c.responses,'{}'::jsonb) AS \"responses!\" FROM scoped s LEFT JOIN codes c USING(channel) GROUP BY s.channel,c.responses ORDER BY s.channel",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "channel!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_metrics",
+            "name": "channel"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "calls!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "failures!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_ms!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_ms!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "timed_calls!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "seen!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "responses!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "46fe500467a0a268d5e6b3ab01c6a7340cda3474a0aae08a6f63433ec7e55c1a"
+}

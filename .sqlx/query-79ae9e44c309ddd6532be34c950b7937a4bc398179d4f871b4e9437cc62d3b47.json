@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT current_setting('rac.system',true) AS \"setting!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "setting!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "79ae9e44c309ddd6532be34c950b7937a4bc398179d4f871b4e9437cc62d3b47"
+}

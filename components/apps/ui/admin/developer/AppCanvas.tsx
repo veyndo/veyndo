@@ -1,0 +1,317 @@
+/** Accessible click-to-add canvas with selectable blocks and keyboard-accessible ordering controls. */
+import { forApps } from "../../../../../frontend/src/shared/api/types";
+import { useState } from "react";
+import AppElementActions from "./AppElementActions";
+import { useCanvasText } from "../../../../../frontend/src/shared/canvas/canvas-i18n";
+import AppControlThumbnail from "./AppControlThumbnail";
+import AppLogicEditor from "./AppLogicEditor";
+import { accepts } from "./control-model";
+import {
+  controlKinds,
+  isDataBlock,
+} from "../../../../../frontend/src/shared/apps/native/types";
+import AppDesignPreview from "./AppDesignPreview";
+import AppGridCanvas from "./AppGridCanvas";
+import Icon from "../../../../../frontend/src/shared/ui/Icon";
+import { useAppStudioText } from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import type {
+  Block,
+  Manifest,
+  NativeView,
+} from "../../../../../frontend/src/shared/apps/native/types";
+import NativeAppView from "../../../../../frontend/src/shared/apps/native/NativeAppView";
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import { AppPanelHandle } from "./AppPanelSizing";
+import { snap } from "../../../../../frontend/src/shared/apps/native/geometry";
+import { newBlock } from "./app-model";
+export default function AppCanvas({
+  manifest,
+  view,
+  selected,
+  onSelect,
+  onChange,
+  mainLocale,
+  preview,
+  previewRequest,
+  paletteWidth = 180,
+  onResizePalette,
+  onEditFields,
+  onCode,
+  onProperties,
+  toolsVisible = true,
+}: {
+  toolsVisible?: boolean;
+  onCode?: (id: string) => void;
+  onProperties?: () => void;
+  paletteWidth?: number;
+  onResizePalette?: (n: number) => void;
+  onEditFields?: () => void;
+  manifest: Manifest;
+  view: NativeView;
+  selected: string;
+  onSelect: (id: string) => void;
+  onChange: (m: Manifest) => void;
+  mainLocale: string;
+  preview: boolean;
+  previewRequest: RequestFn;
+}) {
+  const [code, setCode] = useState("");
+  const [dropAt, setDropAt] = useState<number | null>(null);
+  const cv = useCanvasText();
+  const openCode = (id: string) => (onCode ? onCode(id) : setCode(id));
+  const { a } = useAppStudioText();
+  const w = useAppWorkspaceText();
+  const update = (blocks: Block[]) =>
+    onChange({
+      ...manifest,
+      views: manifest.views?.map((v) =>
+        v.id === view.id ? { ...v, blocks } : v,
+      ),
+    });
+  const add = (kind: Block["kind"]) => {
+    const e =
+      manifest.entities.find((e) =>
+        e.fields.some((f) => !f.coreReference && accepts(kind, f)),
+      ) ?? manifest.entities[0];
+    const b = newBlock(kind, view, e?.name);
+    if (
+      controlKinds.includes(kind as (typeof controlKinds)[number]) &&
+      isDataBlock(kind)
+    )
+      b.dataField = e?.fields.find(
+        (f) => !f.coreReference && accepts(kind, f),
+      )?.name;
+    return b;
+  };
+  const drop = (e: React.DragEvent, index = view.blocks.length) => {
+    if (view.layout === "form") return;
+    e.preventDefault();
+    e.stopPropagation();
+    const kind = e.dataTransfer.getData(
+      "application/vnd.veyndo.kind",
+    ) as Block["kind"];
+    const id = e.dataTransfer.getData("application/vnd.veyndo.block");
+    if (id) {
+      const existing = view.blocks.find((b) => b.id === id);
+      if (!existing) return;
+      const next = view.blocks.filter((b) => b.id !== id);
+      next.splice(
+        Math.min(
+          index - (view.blocks.findIndex((b) => b.id === id) < index ? 1 : 0),
+          next.length,
+        ),
+        0,
+        existing,
+      );
+      update(next);
+      onSelect(id);
+    } else if (
+      ["text", "table", "cards", "form", ...controlKinds].includes(kind) &&
+      view.blocks.length < 32 &&
+      (!isDataBlock(kind) || manifest.entities.length)
+    ) {
+      const b = add(kind),
+        next = [...view.blocks];
+      next.splice(index, 0, b);
+      update(next);
+      onSelect(b.id);
+    }
+  };
+  return (
+    <div className={`app-designer ${toolsVisible ? "" : "palette-collapsed"}`}>
+      {code && (
+        <AppLogicEditor
+          block={view.blocks.find((b) => b.id === code)!}
+          manifest={manifest}
+          view={view}
+          onClose={() => setCode("")}
+          onChange={(b) =>
+            update(view.blocks.map((old) => (old.id === b.id ? b : old)))
+          }
+        />
+      )}
+      <aside className="app-palette" hidden={!toolsVisible}>
+        <span className="app-panel-label">{a("palette")}</span>
+        {(["text", "table", "cards", "form", ...controlKinds] as const).map(
+          (kind) => (
+            <button
+              key={kind}
+              title={a(kind)}
+              draggable
+              onDragStart={(e) => {
+                if (
+                  view.blocks.length >= 32 ||
+                  (isDataBlock(kind) && !manifest.entities.length)
+                )
+                  e.preventDefault();
+                else
+                  e.dataTransfer.setData("application/vnd.veyndo.kind", kind);
+              }}
+              disabled={
+                view.blocks.length >= 32 ||
+                (isDataBlock(kind) && !manifest.entities.length)
+              }
+              onClick={() => {
+                const b = add(kind);
+                update([...view.blocks, b]);
+                onSelect(b.id);
+              }}
+            >
+              <AppControlThumbnail kind={kind} />
+              <span>{a(kind)}</span>
+              <Icon name="plus" size={14} />
+            </button>
+          ),
+        )}
+        <div className="app-palette-note">
+          <Icon name="lock" size={16} />
+          <p>{a("privateHint")}</p>
+        </div>
+      </aside>
+      {toolsVisible && onResizePalette && (
+        <AppPanelHandle
+          side="palette"
+          value={paletteWidth}
+          onChange={onResizePalette}
+        />
+      )}
+      <div
+        className="app-canvas"
+        aria-label={a("canvas")}
+        onDragOver={(e) => {
+          if (view.layout !== "form") e.preventDefault();
+        }}
+        onDrop={(e) => {
+          drop(e, dropAt ?? view.blocks.length);
+          setDropAt(null);
+        }}
+      >
+        <div className="app-canvas-label">
+          <span>{a(preview ? "realPreview" : "sample")}</span>
+          <span>{view.blocks.length} / 32</span>
+        </div>
+        {preview ? (
+          <NativeAppView
+            app={manifest.id}
+            native={{ view, entities: manifest.entities }}
+            request={forApps(previewRequest)}
+            allowedActions={
+              manifest.surfaces?.find((s) => s.uiPath === `native/${view.id}`)
+                ?.actions ?? []
+            }
+          />
+        ) : view.layout === "form" ? (
+          <AppGridCanvas
+            view={view}
+            entities={manifest.entities}
+            onCode={openCode}
+            onProperties={onProperties}
+            selected={selected}
+            onSelect={onSelect}
+            onChange={update}
+            mainLocale={mainLocale}
+            onAdd={(kind, p) => {
+              if (isDataBlock(kind) && !manifest.entities.length) return;
+              const b = add(kind);
+              b.geometry = snap({ ...p, w: 6, h: 6 });
+              update([...view.blocks, b]);
+              onSelect(b.id);
+            }}
+          />
+        ) : (
+          <div className={`app-design-blocks app-design-${view.layout}`}>
+            {dropAt !== null && (
+              <p className="app-drop-status" role="status">
+                {cv("drop")} · {dropAt + 1}
+              </p>
+            )}
+            {view.blocks.map((b, index) => (
+              <article
+                className={`app-design-block ${selected === b.id ? "selected" : ""} ${dropAt === index ? "drop-before" : ""} ${dropAt === index + 1 && index === view.blocks.length - 1 ? "drop-after" : ""}`}
+                key={b.id}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData("application/vnd.veyndo.block", b.id);
+                  e.dataTransfer.effectAllowed = "move";
+                }}
+                onDragOver={(e) => {
+                  if (
+                    !e.dataTransfer.types.some((type) =>
+                      [
+                        "application/vnd.veyndo.kind",
+                        "application/vnd.veyndo.block",
+                      ].includes(type),
+                    )
+                  )
+                    return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const box = e.currentTarget.getBoundingClientRect();
+                  setDropAt(
+                    index + (e.clientY > box.top + box.height / 2 ? 1 : 0),
+                  );
+                }}
+                onDragEnd={() => setDropAt(null)}
+                onDrop={(e) => {
+                  drop(e, dropAt ?? index);
+                  setDropAt(null);
+                }}
+                onDoubleClick={() => {
+                  onSelect(b.id);
+                  if (
+                    [
+                      "button",
+                      "textbox",
+                      "combobox",
+                      "checkbox",
+                      "datepicker",
+                    ].includes(b.kind)
+                  )
+                    openCode(b.id);
+                }}
+              >
+                <button
+                  className="app-block-select"
+                  aria-pressed={selected === b.id}
+                  onClick={() => onSelect(b.id)}
+                >
+                  <AppDesignPreview
+                    block={b}
+                    entities={manifest.entities}
+                    mainLocale={mainLocale}
+                  />
+                </button>
+                {b.kind === "form" && selected === b.id && (
+                  <button
+                    type="button"
+                    className="app-edit-fields"
+                    onClick={onEditFields}
+                  >
+                    {w("editFields")}
+                  </button>
+                )}
+                {selected === b.id && (
+                  <AppElementActions
+                    block={b}
+                    blocks={view.blocks}
+                    onChange={update}
+                    onSelect={onSelect}
+                    onCode={openCode}
+                    onProperties={onProperties}
+                  />
+                )}
+              </article>
+            ))}
+            {!view.blocks.length && (
+              <div className="app-canvas-empty">
+                <Icon name="layers" size={40} />
+                <p>{a("select")}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

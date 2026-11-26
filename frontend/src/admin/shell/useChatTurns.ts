@@ -71,6 +71,8 @@ export function useChatTurns(options: Options) {
     latest.current.scope === scope && latest.current.id === id;
   const pollVersion = pollGeneration.current;
   useEffect(() => {
+    // shell-effect: follows the chat's running agent run and, once it settles,
+    // pulls the conversation into the transcript, fenced by chat generations.
     if (!runId || !options.id || !options.connected) return;
     const { scope, id, request } = options;
     const generation = pollVersion;

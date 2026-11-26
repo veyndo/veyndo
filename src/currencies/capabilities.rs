@@ -1,5 +1,16 @@
 //! Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions.
-use super::*;
+use super::routes;
+use crate::foundation::App;
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde::Deserialize;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
 pub(crate) fn permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.currencies.refresh" => Some("settings.write"),
@@ -28,20 +39,42 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
     )
 }
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let input: InvokeInput = view(v);
     let state = State(a.clone());
     let h = h.clone();
     let Json(result) = match name {
-        "currency.list" => routes::discover(state, h).await?,
+        "currency.list" => {
+            use axum::extract::FromRef;
+            veyndo_pricing::http::currencies::discover(State(FromRef::from_ref(a)), h).await?
+        }
         "currency.select" => routes::select(state, h, Json(v.clone())).await?,
         "merchant.currencies.refresh" => routes::refresh(state, h, Json(v.clone())).await?,
-        "merchant.currencies.generate" => jobs::create(state, h, Json(v.clone())).await?,
-        "merchant.currencies.jobs" => jobs::list(state, h).await?,
-        "merchant.currencies.job" => {
-            jobs::detail(
-                state,
+        "merchant.currencies.generate" => {
+            use axum::extract::FromRef;
+            veyndo_pricing::http::price_jobs::create(
+                State(FromRef::from_ref(a)),
                 h,
-                Path(v["id"].as_str().ok_or(bad("Job ID required"))?.into()),
+                Json(v.clone()),
+            )
+            .await?
+        }
+        "merchant.currencies.jobs" => {
+            veyndo_pricing::http::price_jobs::list(State(a.core.clone()), h).await?
+        }
+        "merchant.currencies.job" => {
+            veyndo_pricing::http::price_jobs::detail(
+                State(a.core.clone()),
+                h,
+                Path(input.id.as_deref().ok_or(bad("Job ID required"))?.into()),
             )
             .await?
         }

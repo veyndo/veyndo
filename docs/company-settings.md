@@ -122,12 +122,12 @@ IDs, so subsequent releases continue to compare against actual live state.
 | --- | --- |
 | `src/operations/company_model.rs` | Field whitelist, locale/country validation, sparse inheritance, address projection |
 | `src/operations/master_data.rs` | Shared/channel persistence, revision/transaction boundaries and issuer resolution |
-| `src/operations/company_logo.rs` | Decoder limits, immutable storage, authenticated preview and linked public bytes |
+| `components/orders/src/http/company_logo.rs` | Decoder limits, immutable storage, authenticated preview and linked public bytes |
 | `src/operations/company_public.rs` | Deliberate public projection without private banking/tax fields |
-| `src/staging/company.rs` | Selective company/override/logo release and canonical baseline |
-| `frontend/src/admin/settings/Company*.tsx` | Modular factual fields, logo, content-language editor |
+| `components/orders/src/store/company_release.rs` | Selective company/override/logo release and canonical baseline |
+| `components/shop/ui/admin/settings/Company*.tsx` | Modular factual fields, logo, content-language editor |
 | `frontend/src/storefront/shell/CompanyLegalPage.tsx` | Public channel legal view |
-| `migrations/030-company-settings.sql` | Tenant/channel foreign keys, revisioned overrides and logo storage |
+| `components/shop/migrations/0001-baseline.sql` | Tenant/channel foreign keys, revisioned overrides and logo storage |
 
 ## Verification boundary
 
@@ -150,4 +150,4 @@ green tests and reviewed hashes do not certify legal compliance or the whole cor
 
 ## Channel settings and media workspaces (2026-10-05)
 
-See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish additional full Shopware API/DAL parity, current tax law, paid-provider quality or whole-system formal certification.
+See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish current tax law, paid-provider quality or whole-system formal certification.

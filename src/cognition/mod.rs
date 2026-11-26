@@ -1,27 +1,19 @@
 //! Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context.
-use crate::*;
-pub(crate) mod advisor;
-pub(crate) mod autonomy;
-pub(crate) mod autonomy_revert;
+pub(crate) use veyndo_intelligence::service::{autonomy, autonomy_revert};
 pub(crate) mod behavior;
 mod claim_batches;
-mod context;
 pub(crate) mod contracts;
 pub(crate) mod evidence;
 pub(crate) mod experiments;
 pub(crate) mod extraction;
-mod generations;
-pub(crate) mod guardrails;
 pub(crate) mod indexing;
 pub(crate) mod preferences;
 mod recommendations;
 pub(crate) mod signed;
 pub(crate) mod signed_offer;
 mod stream;
-pub(crate) mod tools;
 pub(crate) use recommendations::*;
 mod projection;
 mod routes;
-pub(crate) use context::*;
 pub(crate) use projection::*;
 pub(crate) use routes::*;

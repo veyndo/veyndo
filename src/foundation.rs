@@ -1,128 +1,41 @@
 //! Application dependencies, error responses and request context helpers.
-use crate::*;
+use crate::performance;
+use std::sync::Arc;
+use veyndo_core::request_context::RequestContext;
 
+/// The server's state: only the composition of component-owned state plus the process connection budget.
 #[derive(Clone)]
 pub(crate) struct App {
-    pub(crate) db: PgPool,
+    /// Database pool, HTTP client, admission and channel metrics; component crates take only this part.
+    pub(crate) core: veyndo_core::State,
+    /// Inference providers, slots and the default model name (intelligence).
+    pub(crate) models: veyndo_intelligence::service::models::Inferencing,
+    /// Policy compilation cache and service limits (app platform).
+    pub(crate) apps: veyndo_app_platform::service::runtime_state::AppRuntime,
+    /// The bootstrap credential (identity).
+    pub(crate) identity: veyndo_identity::service::bootstrap::IdentityState,
+    /// Held for the process lifetime: this replica's share of the cluster connection budget.
     pub(crate) _connection_budget: Arc<performance::cluster_lease::Lease>,
-    pub(crate) inference_slots: Arc<tokio::sync::Semaphore>,
-    pub(crate) token: Arc<String>,
-    pub(crate) http: reqwest::Client,
-    pub(crate) inference: Inference,
-    pub(crate) model: Arc<String>,
-    pub(crate) sandboxes: Arc<sandbox_cache::Cache>,
-    pub(crate) channel_metrics: Arc<channel_metrics::ChannelMetrics>,
-    pub(crate) app_limits: Arc<apps::ServiceLimits>,
-    pub(crate) admission: Arc<performance::Admission>,
-    pub(crate) reads: Arc<performance::Reads>,
 }
-#[path = "failure.rs"]
-mod failure;
-pub(crate) use failure::Error;
-impl From<veyndo_commerce::ValidationError> for Error {
-    fn from(error: veyndo_commerce::ValidationError) -> Self {
-        bad(error.to_string())
+impl App {
+    /// The model context intelligence operations borrow: state, providers and inference slots.
+    pub(crate) fn models(&self) -> veyndo_intelligence::service::models::Models<'_> {
+        self.models.models(&self.core)
     }
 }
-impl From<sqlx::Error> for Error {
-    fn from(e: sqlx::Error) -> Self {
-        if matches!(e, sqlx::Error::PoolTimedOut) {
-            return Error(
-                StatusCode::SERVICE_UNAVAILABLE,
-                "Database capacity busy; retry later".into(),
-            );
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.constraint()
-                .is_some_and(|c| c.starts_with("app_storage_usage_") && c.ends_with("_check"))
-        {
-            return Error(StatusCode::PAYLOAD_TOO_LARGE,"App storage quota exceeded (100,000 records or 64 MiB); remove data or contact the operator".into());
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.code().as_deref() == Some("23505")
-            && d.constraint()
-                .is_some_and(|c| c.starts_with("idx_") || c == "app_record_unique")
-        {
-            return conflict("App field value must be unique; another record already uses it");
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.code().as_deref() == Some("23503")
-            && d.table().is_some_and(|t| t.starts_with("app_"))
-        {
-            return conflict(
-                "App relationship is missing or still used by another record; check the selected records before retrying",
-            );
-        }
-        eprintln!("database: {e}");
-        Error(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Database operation failed".into(),
-        )
+impl std::ops::Deref for App {
+    type Target = veyndo_core::State;
+    fn deref(&self) -> &Self::Target {
+        &self.core
     }
 }
-pub(crate) type Result<T> = std::result::Result<T, Error>;
-pub(crate) fn bad(s: impl Into<String>) -> Error {
-    Error(StatusCode::BAD_REQUEST, s.into())
-}
-pub(crate) fn conflict(s: &str) -> Error {
-    Error(StatusCode::CONFLICT, s.into())
-}
-pub(crate) fn uid() -> String {
-    Uuid::new_v4().simple().to_string()
-}
-pub(crate) fn header<'a>(h: &'a impl request_context::HeaderReader, k: &str) -> Option<&'a str> {
-    h.value(k)
-}
-pub(crate) fn validate_tenant(t: &str) -> Result<()> {
-    if !(2..=48).contains(&t.len())
-        || !t
-            .bytes()
-            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
-        || t.starts_with('-')
-        || t.ends_with('-')
-    {
-        return Err(bad(
-            "Workspace ID must be 2..48 lowercase letters, numbers or hyphens",
-        ));
+/// Component routers take only the core part of the server state.
+impl axum::extract::FromRef<App> for veyndo_core::State {
+    fn from_ref(app: &App) -> Self {
+        app.core.clone()
     }
-    Ok(())
 }
-pub(crate) fn tenant(h: &impl request_context::HeaderReader) -> Result<String> {
-    let t = header(h, "x-tenant")
-        .or(runtime_config::get().default_tenant.as_deref())
-        .ok_or(bad(
-            "Shop scope required; use its domain or x-tenant header",
-        ))?;
-    validate_tenant(t)?;
-    Ok(t.into())
-}
+pub(crate) use veyndo_core::Result;
 pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {
-    auth::permit(h, "read")?;
-    let t = header(h, "x-rac-tenant").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Merchant credential required".into(),
-    ))?;
-    if t != tenant(h)? {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Workspace does not match authenticated context".into(),
-        ));
-    }
-    Ok(t.into())
-}
-pub(crate) fn token(h: &RequestContext) -> Result<&str> {
-    header(h, "sw-context-token").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Customer context required".into(),
-    ))
-}
-pub(crate) fn hash(s: &str) -> String {
-    format!("{:x}", Sha256::digest(s.as_bytes()))
-}
-
-// Provider transport and deterministic admission retain distinct native problem codes.
-impl From<veyndo::inference::InferenceError> for Error {
-    fn from(error: veyndo::inference::InferenceError) -> Self {
-        Error::inference(error)
-    }
+    veyndo_identity::merchant(h)
 }

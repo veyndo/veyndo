@@ -1,11 +1,14 @@
 /** Exact tender parsing and real register command recovery regression controls. */
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
-import { inputMinor, decimalMinor } from "../../src/admin/pos/pos-model";
-import { useRegister } from "../../src/admin/pos/useRegister";
-import type { Channel } from "../../src/admin/channels/channel-model";
+import {
+  inputMinor,
+  decimalMinor,
+} from "../../../components/pos/ui/admin/pos/pos-model";
+import { useRegister } from "../../../components/pos/ui/admin/pos/useRegister";
+import type { Channel } from "../../../components/marketing/ui/admin/channels/channel-model";
 import { createStudioRequest } from "../../src/admin/shell/requests";
-vi.mock("../../src/admin/pos/pos-i18n", () => ({
+vi.mock("../../../components/pos/ui/admin/pos/pos-i18n", () => ({
   usePosText: () => (key: string) => key,
 }));
 const channel: Channel = {

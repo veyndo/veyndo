@@ -7,12 +7,12 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 ## Modules
 
 - [`Brand.tsx`](Brand.tsx): Shared Veyndo identity; product branding is independent of tenant-owned company logos and session keys.
-- [`ConfirmDialog.tsx`](ConfirmDialog.tsx): Shared modal confirmation with focus containment, Escape, focus restoration and an explicit destructive action.
+- [`ConfirmDialog.tsx`](ConfirmDialog.tsx): Shared confirmation on the `kit/ui` dialog with localized cancel and confirm actions.
 - [`Icon.tsx`](Icon.tsx): Icon: Presentational icons and catalogue artwork with explicit inputs..
 - [`ProductArt.tsx`](ProductArt.tsx): Product Art: Presentational icons and catalogue artwork with explicit inputs..
 - [`WorkspaceBoundary.tsx`](WorkspaceBoundary.tsx): Contain a workspace render failure and let the user retry without losing the application shell.
 - [`brand.css`](brand.css): Shared vector brand sizing and typography for Studio and the operator console.
-- [`confirm-dialog.css`](confirm-dialog.css): Modal surface shared by settings, media and future destructive actions.
+- [`confirm-dialog.css`](confirm-dialog.css): Summary lists inside confirmations; the surface comes from `kit/ui`.
 
 ## Verification
 

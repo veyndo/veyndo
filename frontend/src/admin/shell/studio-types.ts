@@ -110,7 +110,8 @@ export type Preview = {
   catalogBefore: Product[];
   proposal: {
     navigation?:
-      import("../assistant/copilot-navigation").CopilotNavigation | null;
+      | import("../../../../components/intelligence/ui/admin/assistant/copilot-navigation").CopilotNavigation
+      | null;
     view?: {
       entity: "orders" | "customers" | "products";
       criteria: Record<string, string | boolean>;
@@ -147,7 +148,8 @@ export type Provider = {
   model: string;
   configured: boolean;
 };
-export type { RequestFn } from "../../shared/api/types";
+/** Studio's request function: only catalogued paths compile (`ApiRequestFn`). */
+export type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 
 export type StudioNotice = {
   key:

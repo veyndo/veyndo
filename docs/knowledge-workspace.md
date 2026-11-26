@@ -279,8 +279,8 @@ The shop persists sources and order evidence, retrieves them for the actual mode
 prompt and recommends merchant-approved associations. Its existing layout policy
 also records views/rewards; this workspace does not confuse layout learning with
 product-variant learning. Model weights remain fixed. No causal uplift, automatic
-fact truth, full customer-question log, agent-designed experiments or full Shopware parity
-is implied. Authoritative price/tax/order decisions continue in the deterministic core.
+fact truth, full customer-question log, or agent-designed experiments
+are implied. Authoritative price/tax/order decisions continue in the deterministic core.
 
 Customer questions remain read-only and are not silently logged. Gmail/app content
 is untrusted quoted evidence and remains merchant-private. Publication is a deliberate
@@ -288,18 +288,18 @@ content-review decision, not a mechanism for sharing an entire mailbox.
 
 ## Source ownership and verification
 
-- `src/documents/workspace.rs`, `product_knowledge.rs`: census, cursor source list,
+- `components/intelligence/src/http/workspace.rs`, `product_knowledge.rs`: census, cursor source list,
   activity and canonical/product-specific evidence read models.
 - `content.rs`, `ingestion.rs`, `lifecycle.rs`: bounded enabled-language admission,
   source hashes/chunks, optimistic edits and recoverable publication lifecycle.
 - `retrieval.rs`, `preview.rs`, `questions.rs`: shared source/language/archive scope,
   deterministic evidence preview and cited real product answers.
 - `tools.rs`, `capabilities/catalog.rs`, `mcp.rs`: HTTP/MCP parity and permission filtering.
-- `src/knowledge.rs`: transactional SQL document reassignment and public graph filtering.
+- `components/intelligence/src/knowledge.rs`: transactional SQL document reassignment and public graph filtering.
 - `src/marketing/flows.rs`, `catalog.rs`: shared native trigger registry, non-order source event admission and durable execution.
 - `src/planner.rs`: document passages actually feed and persist with merchant proposals.
-- `src/staging/documents.rs`: clone/diff/release metadata and chunks as one unit.
-- `frontend/src/admin/intelligence/`: small workspace, source editor/library, product
+- `components/studio/src/store/staging_documents.rs`: clone/diff/release metadata and chunks as one unit.
+- `components/intelligence/ui/admin/intelligence/`: small workspace, source editor/library, product
   explorer/facts, observations and preview modules; UI vocabulary in shared i18n.
 
 `scripts/knowledge_workspace.py` checks real PostgreSQL/Qdrant APIs: privacy, hashes,

@@ -410,7 +410,7 @@ contracts. This run shared the provider project network with production.
 The independent Checkout run used the demo payment. The capture, refund
 and mail run used the native purchase route with the separate Payments
 simulator. The strict Core profile reserves the separate Checkout provider
-route for the actual PayPal Sandbox. The [public Lumen pilot](../status.md#private-checkout-live-in-the-lumen-test-shop)
+route for the actual PayPal Sandbox. The [public Lumen pilot](../status.md#hosted-pilot-earlier-release)
 records the native and Storyfront journeys through that provider. This
 private rehearsal used no external payment account or inbox. All six
 temporary services, including PostgreSQL, were paused after the test.

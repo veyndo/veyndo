@@ -1,6 +1,6 @@
 /** Shared read-only grid contracts; domains own rows, permissions and server query semantics. */
 import type { ReactNode } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 export type GridCriteria = Record<string, string | boolean>;
 export type GridQueryState = {
   criteria: GridCriteria;

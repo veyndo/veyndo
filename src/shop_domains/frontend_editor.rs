@@ -1,5 +1,5 @@
 //! Operator-owned editor navigation for hosted frontends; no private editor or identity implementation.
-use crate::*;
+use veyndo_core::validate_tenant;
 /// Navigation only: the external editor still authenticates ownership. A mount is not publication evidence.
 pub(crate) fn url(alias: &str, template: Option<&str>) -> Option<String> {
     validate_tenant(alias).ok()?;

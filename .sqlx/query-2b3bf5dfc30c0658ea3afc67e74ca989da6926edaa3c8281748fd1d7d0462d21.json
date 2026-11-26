@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO knowledge_chunks SELECT (jsonb_populate_record(NULL::knowledge_chunks,to_jsonb(c)||jsonb_build_object('tenant',$3::text))).* FROM knowledge_chunks c WHERE tenant=$1 AND document_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2b3bf5dfc30c0658ea3afc67e74ca989da6926edaa3c8281748fd1d7d0462d21"
+}

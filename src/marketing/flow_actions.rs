@@ -1,124 +1,84 @@
 //! Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions.
-use super::*;
-use veyndo_flow_graph::catalog::PIPELINE_ACTIONS;
-pub(crate) fn permission(action: &str) -> &'static str {
-    if action.contains("customer") {
-        "customers.write"
-    } else {
-        match action {
-            "action.generate.document" => "documents.create",
-            "action.mail.send" | "app_action" => "apps.manage",
-            "ai_proposal" | "work_proposal" => "catalog.write",
-            "knowledge.extract" => "knowledge.write",
-            "note" | "action.stop.flow" => "automation.manage",
-            _ => "orders.write",
-        }
-    }
+use super::{execute_app_flow, flows};
+use crate::foundation::App;
+use crate::planner::plan_with;
+use crate::{auth, commerce, operations};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, merge, view};
+pub(crate) use veyndo_marketing::domain::flow_actions::{normalize, permission, validate};
+/// The saved flow job an action runs from: its event, order and event context.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowDefinition {
+    event: Value,
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    event_context: EventDocument,
 }
-pub(crate) fn normalize(action: &str, config: &Value) -> Value {
-    let mut c = config.clone();
-    for (source, native) in [
-        ("tagIds", "tags"),
-        ("customerGroupId", "groupId"),
-        ("documentType", "kind"),
-    ] {
-        if c.get(native).is_none() && c.get(source).is_some() {
-            c[native] = c[source].clone();
-        }
-    }
-    if action == "action.grant.download.access" && c.get("value").is_none() {
-        c["value"] = json!(true);
-    }
-    c
+
+/// The document an event names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EventDocument {
+    #[serde(deserialize_with = "lenient")]
+    document_id: Option<String>,
 }
-pub(crate) fn validate(action: &str, config: &Value) -> Result<()> {
-    let normalized = normalize(action, config);
-    let config = &normalized;
-    if !PIPELINE_ACTIONS.contains(&action) || !config.is_object() || config.to_string().len() > 8000
-    {
-        return Err(bad("Unknown flow action or invalid configuration"));
-    }
-    if matches!(action, "note" | "ai_proposal") {
-        super::flow_text::shape(&config["instruction"])?;
-    }
-    if action == "knowledge.extract"
-        && config.as_object().unwrap().iter().any(|(key, v)| {
-            !["sourceId", "productId"].contains(&key.as_str())
-                || v.as_str().is_none_or(|s| s.len() > 254)
-        })
-    {
-        return Err(bad(
-            "Extraction accepts optional sourceId/productId strings only",
-        ));
-    }
-    let require = |key: &str| {
-        config[key]
-            .as_str()
-            .filter(|s| !s.is_empty() && s.len() <= 254)
-            .ok_or(bad(format!("Flow action requires {key}")))
-    };
-    if action.ends_with(".tag")
-        && config["tags"].as_array().is_none_or(|a| {
-            a.is_empty()
-                || a.len() > 50
-                || a.iter()
-                    .any(|v| v.as_str().is_none_or(|s| s.is_empty() || s.len() > 100))
-        })
-    {
-        return Err(bad("Flow tags required"));
-    }
-    if action.contains("custom.field") {
-        require("field")?;
-        if config["field"]
-            .as_str()
-            .unwrap()
-            .contains(['.', '/', '[', ']'])
-            || config.get("value").is_none()
-        {
-            return Err(bad("Custom field key and value required"));
-        }
-    }
-    if action == "action.change.customer.group" {
-        require("groupId")?;
-        if !apps::identifier(config["groupId"].as_str().unwrap()) {
-            return Err(bad("Unknown native customer group"));
-        }
-    }
-    if action == "action.change.customer.status" && !config["active"].is_boolean() {
-        return Err(bad("Customer active flag required"));
-    }
-    if action == "action.grant.download.access" && !config["value"].is_boolean() {
-        return Err(bad("Download access boolean required"));
-    }
-    if action == "action.set.order.state" {
-        require("kind")?;
-        require("state")?;
-    }
-    if action == "action.generate.document" {
-        require("kind")?;
-        if !["invoice", "delivery_note"].contains(&config["kind"].as_str().unwrap()) {
-            return Err(bad("Unsupported automatic document kind"));
-        }
-    }
-    if action == "app_action" {
-        require("app")?;
-        require("action")?;
-        if !config["arguments"].is_object() {
-            return Err(bad("App arguments object required"));
-        }
-    }
-    if action == "action.mail.send" {
-        require("templateId")?;
-        if config["templateId"] != "order_confirmation" {
-            return Err(bad("Unknown installed email template"));
-        }
-    }
-    if action.ends_with("affiliate.and.campaign.code") {
-        require("affiliateCode")?;
-        require("campaignCode")?;
-    }
-    Ok(())
+
+/// The saved configuration of one flow action.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ActionConfig {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    app: Value,
+    arguments: Value,
+    instruction: Value,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    source_id: Value,
 }
+
+/// The arguments of a knowledge extraction a flow starts; the inference choice is sent only when the step has one.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExtractArgs<'a, C: Serialize> {
+    source_id: &'a str,
+    product_id: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    inference: Option<&'a C>,
+}
+
+/// The order fields a flow adds to the configured transition or receipt arguments.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OrderActionArgs<'a> {
+    id: &'a str,
+    revision: Value,
+    request_key: &'a str,
+    locale: &'a str,
+}
+
+/// A document's revision, passed on exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Revisioned {
+    revision: Value,
+}
+
+/// The result fields a flow reports after an order transition or receipt.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ActionResult {
+    revision: Value,
+    state: Value,
+    id: Value,
+}
+
 pub(crate) async fn execute(
     a: &App,
     t: &str,
@@ -128,21 +88,28 @@ pub(crate) async fn execute(
     config: &Value,
     definition: &Value,
 ) -> Result<Value> {
+    let action_config: ActionConfig = view(config);
+    let flow_job: FlowDefinition = view(definition);
     let normalized = normalize(action, config);
     let config = &normalized;
     validate(action, config)?;
     let h = super::flow_access::headers(a, t, f.actor.as_deref()).await?;
     auth::permit(&h, permission(action))?;
     if action == "knowledge.extract" {
-        let source = config["sourceId"]
+        let source = action_config
+            .source_id
             .as_str()
             .filter(|s| !s.is_empty())
-            .or_else(|| definition["eventContext"]["documentId"].as_str())
+            .or(flow_job.event_context.document_id.as_deref())
             .ok_or(bad("Extraction requires a document event or sourceId"))?;
-        let mut args = json!({"sourceId":source,"productId":config["productId"].as_str().filter(|s| !s.is_empty())});
-        if let Some(choice) = &f.inference {
-            args["inference"] = json!(choice);
-        }
+        let args = json!(ExtractArgs {
+            source_id: source,
+            product_id: action_config
+                .product_id
+                .as_deref()
+                .filter(|s| !s.is_empty()),
+            inference: f.inference.as_ref(),
+        });
         return crate::cognition::extraction::extract(a, &h, &args).await;
     }
     if action == "ai_proposal" {
@@ -154,14 +121,17 @@ pub(crate) async fn execute(
         let h = super::flow_access::proposal_headers(a, t, f.actor.as_deref(), job).await?;
         crate::performance::reserve_ai_attempt(a, t).await?;
         let (settings, _) = commerce::config(a, t).await?;
-        let instruction =
-            super::flow_text::effective(&config["instruction"], &f.locale, &settings.main_locale);
+        let instruction = super::flow_text::effective(
+            &action_config.instruction,
+            &f.locale,
+            &settings.main_locale,
+        );
         return plan_with(
             a,
             t,
             &format!(
                 "Flow event {}. {}. Create a reviewable proposal only.",
-                definition["event"], instruction
+                flow_job.event, instruction
             ),
             f.inference.as_ref(),
             "",
@@ -174,7 +144,8 @@ pub(crate) async fn execute(
         let mut step = f.clone();
         step.action = "app_action".into();
         step.app_action = Some(flows::AppFlowAction {
-            app: config["app"]
+            app: action_config
+                .app
                 .as_str()
                 .unwrap_or(if action == "action.mail.send" {
                     "email"
@@ -182,30 +153,36 @@ pub(crate) async fn execute(
                     ""
                 })
                 .into(),
-            action: config["action"].as_str().unwrap_or("send_order").into(),
+            action: action_config
+                .action
+                .as_deref()
+                .unwrap_or("send_order")
+                .into(),
             arguments: if action == "action.mail.send" {
                 json!({"locale":&f.locale[..2],"dryRun":false})
             } else {
-                config["arguments"].clone()
+                action_config.arguments.clone()
             },
         });
         return execute_app_flow(a, t, &step, key, "", definition).await;
     }
-    let id = definition["orderId"]
-        .as_str()
+    let id = flow_job
+        .order_id
+        .as_deref()
         .filter(|s| !s.is_empty())
         .ok_or(bad("Action requires an order event"))?;
     if action == "action.set.order.state" || action == "action.generate.document" {
-        let o: Value = sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_one(&a.db)
-            .await?;
+        let o: Revisioned = view(&veyndo_orders::store::order_reads::data(a, t, id).await?);
         let mut args = config.clone();
-        args["id"] = json!(id);
-        args["revision"] = o["revision"].clone();
-        args["requestKey"] = json!(key);
-        args["locale"] = json!(&f.locale[..2]);
+        merge(
+            &mut args,
+            OrderActionArgs {
+                id,
+                revision: o.revision,
+                request_key: key,
+                locale: &f.locale[..2],
+            },
+        )?;
         let value = operations::invoke(
             a,
             &h,
@@ -217,9 +194,59 @@ pub(crate) async fn execute(
             &args,
         )
         .await?;
+        let value: ActionResult = view(&value);
         return Ok(
-            json!({"orderId":id,"revision":value["revision"],"state":value["state"],"documentId":if action=="action.generate.document" {value["id"].clone()} else {Value::Null}}),
+            json!({"orderId":id,"revision":value.revision,"state":value.state,"documentId":if action=="action.generate.document" {value.id} else {Value::Null}}),
         );
     }
     super::flow_mutations::execute(a, t, f, key, action, config, id).await
+}
+
+#[cfg(test)]
+mod typed_tests {
+    use super::{ExtractArgs, OrderActionArgs};
+    use serde_json::{Value, json};
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn extraction_arguments_keep_the_indexed_shape() {
+        let choice = json!({"provider":"local","model":"m"});
+        let mut old = json!({"sourceId":"doc-1","productId":Option::<&str>::None});
+        old["inference"] = json!(&choice);
+        let new = json!(ExtractArgs {
+            source_id: "doc-1",
+            product_id: None,
+            inference: Some(&choice),
+        });
+        assert_eq!(new, old);
+        let old = json!({"sourceId":"doc-1","productId":"p-1"});
+        let new = json!(ExtractArgs::<Value> {
+            source_id: "doc-1",
+            product_id: Some("p-1"),
+            inference: None,
+        });
+        assert_eq!(new, old);
+    }
+
+    #[test]
+    fn order_action_arguments_keep_the_indexed_shape() {
+        let config = json!({"state":"shipped","id":"ignored","note":null});
+        let mut old = config.clone();
+        old["id"] = json!("o-1");
+        old["revision"] = json!(4);
+        old["requestKey"] = json!("flow:1:2");
+        old["locale"] = json!("de");
+        let mut new = config;
+        merge(
+            &mut new,
+            OrderActionArgs {
+                id: "o-1",
+                revision: json!(4),
+                request_key: "flow:1:2",
+                locale: "de",
+            },
+        )
+        .unwrap();
+        assert_eq!(new, old);
+    }
 }

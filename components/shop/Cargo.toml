@@ -1,0 +1,24 @@
+[package]
+name = "veyndo-shop"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "The settings of a shop: languages, countries, taxes, delivery and payment methods, legal texts and feature switches"
+
+[dependencies]
+chrono.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-core = { path = "../core" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-shipping = { path = "../shipping" }
+veyndo-identity = { path = "../identity" }
+axum.workspace = true
+tokio.workspace = true
+futures-util.workspace = true
+veyndo-kernel = { path = "../../crates/kernel" }

@@ -1,0 +1,806 @@
+{
+  "version": 1,
+  "components": {
+    "core": {
+      "title": "Shared foundation: errors, request context, database scope, outbox, admission and the verified kernel",
+      "sources": [
+        "crates/kernel",
+        "crates/runtime",
+        "components/core"
+      ],
+      "tables": [
+        "channel_metrics",
+        "outbox",
+        "outbox_checkpoints",
+        "outbox_subscriber_failures",
+        "outbox_tenant_dispatch",
+        "projections",
+        "read_context_versions",
+        "resource_leases",
+        "shop_environments",
+        "tenant_ai_usage",
+        "tenant_resource_limits",
+        "tenants",
+        "veyndo_authority"
+      ],
+      "uses": [],
+      "foreign_tables": {
+        "app_deliveries": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference; unsettled deliveries also keep a payload (retention.rs, retention.sql)",
+        "app_schedule_runs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "app_webhook_receipts": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "flow_jobs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference; unsettled flow jobs also keep a payload (retention.rs, retention.sql)",
+        "knowledge_receipts": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "observed_pairs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "pair_evidence": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 2
+    },
+    "identity": {
+      "title": "Merchant accounts, memberships, sessions, roles and route policy",
+      "sources": [
+        "components/identity"
+      ],
+      "tables": [
+        "auth_attempt_buckets",
+        "identity_inference_daily",
+        "identity_nonces",
+        "integration_keys",
+        "memberships",
+        "merchant_handoffs",
+        "merchant_identities",
+        "merchant_mfa",
+        "merchant_mfa_challenges",
+        "merchant_users",
+        "user_invites",
+        "user_sessions",
+        "workspace_roles"
+      ],
+      "uses": [
+        "core",
+        "inference"
+      ],
+      "foreign_tables": {
+        "app_packages": "read: stays: identity.sql admits an app integration key only while its package is active with the same digest, inside the one authoritative credential snapshot (identity.sql)",
+        "sales_channels": "read: stays: identity.sql reads the request channel document inside the one authoritative credential snapshot (identity.sql)",
+        "shop_environments": "read: stays: identity.sql scopes the selected stage or preview to its live shop inside the one authoritative credential snapshot; agent authority and MFA resolve the live shop the same way (agent_authority.rs, identity.sql, mfa.rs)",
+        "tenants": "read: stays: identity.sql reads the live shop status inside the one authoritative credential snapshot; workspace lists and agent authority join shop status and names to memberships (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "shop": {
+      "title": "Shop configuration, domains, legal texts and the operator control plane",
+      "sources": [
+        "components/shop"
+      ],
+      "tables": [
+        "commerce_overrides",
+        "commerce_settings",
+        "consumer_request_reviews",
+        "consumer_requests",
+        "hosted_frontends",
+        "languages",
+        "legal_acceptances",
+        "platform_ai",
+        "platform_audit",
+        "platform_operators",
+        "privacy_consent_log",
+        "privacy_consents"
+      ],
+      "uses": [
+        "catalog",
+        "core",
+        "identity",
+        "inventory",
+        "pricing",
+        "shipping"
+      ],
+      "foreign_tables": {
+        "company_logos": "write: stays: the sandbox copy and release copy company logos with the settings they belong to inside the staging transaction (staging.rs)",
+        "company_overrides": "write: stays: the sandbox copy and release copy per-channel company data with the channel settings inside the staging transaction; channel deletion counts them under the same lock (staging.rs, channel_settings.rs)",
+        "sales_channels": "read: stays: access_snapshot.sql and settings_snapshot.sql admit the request channel inside one statement with the shop status and settings; the operator list counts active channels with each shop page (access_snapshot.sql, operator_control.rs, operator_metrics.rs, settings.rs, settings_snapshot.sql)",
+        "shop_environments": "read: stays: access_snapshot.sql scopes a stage or preview to its live shop inside the request snapshot; operator views exclude sandboxes from live shops (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)",
+        "tenants": "write: stays: the access snapshot reads the live shop status in one statement; operator lifecycle locks and changes the status and status revision of a live shop next to the sandbox check (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "catalog": {
+      "title": "Products, categories, media, reviews, translations and catalogue reads",
+      "sources": [
+        "components/catalog"
+      ],
+      "tables": [
+        "categories",
+        "media_jobs",
+        "order_downloads",
+        "product_assets",
+        "product_categories",
+        "product_channel_visibility",
+        "product_reviews",
+        "product_translations",
+        "products",
+        "translation_items",
+        "translation_jobs"
+      ],
+      "uses": [
+        "core",
+        "identity",
+        "pricing"
+      ],
+      "foreign_tables": {
+        "b2b_catalog": "read: stays: the private unit catalogue scope filters inside the paginated catalogue, search and category queries so cursors and limits stay correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
+        "knowledge_documents": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
+        "knowledge_relations": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
+        "languages": "read: stays: product translation reads join the global language registry to map locales inside the paginated or locked catalogue statement (app_references.rs, translation_runs.rs, workspace.rs, imported_lines/labels.sql)",
+        "shop_environments": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)",
+        "tenants": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 1
+    },
+    "inventory": {
+      "title": "Stock, reservations and supply",
+      "sources": [
+        "components/inventory"
+      ],
+      "tables": [
+        "inventory_reservations",
+        "order_inventory_reservations"
+      ],
+      "uses": [
+        "catalog",
+        "core",
+        "pricing"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "pricing": {
+      "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
+      "sources": [
+        "components/pricing"
+      ],
+      "tables": [
+        "commerce_customer_groups",
+        "currency_price_jobs"
+      ],
+      "uses": [
+        "core",
+        "identity"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "shipping": {
+      "title": "Delivery methods, destinations, delivery splits and carrier booking",
+      "sources": [
+        "components/shipping"
+      ],
+      "tables": [],
+      "uses": [
+        "core",
+        "identity",
+        "pricing"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "checkout": {
+      "title": "Cart, quote, checkout transaction and order placement",
+      "sources": [
+        "components/checkout"
+      ],
+      "tables": [
+        "carts",
+        "checkout_handoffs",
+        "exposures"
+      ],
+      "uses": [
+        "b2b",
+        "catalog",
+        "core",
+        "customers",
+        "identity",
+        "inventory",
+        "marketing",
+        "orders",
+        "payments",
+        "pricing",
+        "shipping",
+        "shop"
+      ],
+      "foreign_tables": {
+        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (buyer_identity.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (admin_order.rs, buyer_identity.rs, cart_create.rs, customer_snapshot.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (buyer_identity.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "customers": {
+      "title": "Customer accounts, sessions, addresses and the merchant customer directory",
+      "sources": [
+        "components/customers"
+      ],
+      "tables": [
+        "customer_addresses",
+        "customer_sessions",
+        "customers"
+      ],
+      "uses": [
+        "core",
+        "identity",
+        "marketing",
+        "pricing",
+        "shipping",
+        "shop"
+      ],
+      "foreign_tables": {
+        "carts": "read: stays: the customer's recent orders join their carts in one statement to match guest orders by the cart email (manual_orders.rs)",
+        "orders": "read: stays: the CRM detail and manual-order drafts read the customer's recent orders with the customer row in one statement (manual_orders.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "orders": {
+      "title": "Order state, fulfilment, receipts, documents and merchant order work",
+      "sources": [
+        "components/orders"
+      ],
+      "tables": [
+        "company_logos",
+        "company_overrides",
+        "order_activity",
+        "order_receipts",
+        "order_state_machines",
+        "order_transition_requests",
+        "orders",
+        "receipt_counters",
+        "receipt_settings"
+      ],
+      "uses": [
+        "b2b",
+        "catalog",
+        "core",
+        "customers",
+        "identity",
+        "inventory",
+        "pricing",
+        "shipping",
+        "shop"
+      ],
+      "foreign_tables": {
+        "carts": "write: order mutations and notes mirror the order into the cart order snapshot the buyer reads (account_orders.rs, downloads.rs, order_list.rs, order_mutation.rs)",
+        "order_downloads": "read: reads download grants to project an order for the buyer (downloads.rs)",
+        "product_assets": "read: reads product asset metadata in the same statement as product rows (downloads.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "payments": {
+      "title": "Provider-independent payment ledger, captures, refunds and provider workers",
+      "sources": [
+        "components/payments"
+      ],
+      "tables": [
+        "payment_attempts",
+        "payment_inbox",
+        "payment_instruments",
+        "payment_jobs",
+        "payment_provider_accounts",
+        "payment_receipt_claims",
+        "payment_refunds"
+      ],
+      "uses": [
+        "core",
+        "identity",
+        "inventory",
+        "orders",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (capture_configuration.rs, provider_registry.rs, providers.rs, saved_instruments.rs)",
+        "carts": "write: payment commands and the ledger update the cart payment state under its lock (commands.rs, order_ledger.rs)",
+        "orders": "write: the payment ledger updates the order payment state (commands.rs, instructions.rs, order_ledger.rs, remote.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "marketing": {
+      "title": "Rules, coupons, promotions, flows and sales channels",
+      "sources": [
+        "components/marketing"
+      ],
+      "tables": [
+        "channel_previews",
+        "commerce_flows",
+        "commerce_promotions",
+        "commerce_rules",
+        "flow_jobs",
+        "flow_steps",
+        "promotion_uses",
+        "sales_channels"
+      ],
+      "uses": [
+        "automation",
+        "b2b",
+        "catalog",
+        "core",
+        "identity",
+        "inference",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {
+        "app_packages": "read: stays: the configuration digest covers every installed app revision in one statement with rules, flows and promotions (configuration_digest.rs)",
+        "commerce_overrides": "read: stays: merchant reports read channel settings overrides inside the report snapshot transaction (report_channels.rs)",
+        "tasks": "read: stays: flow-template proposals check the task their flow job created, in one statement with the job lease (flow_proposal_reads.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 4,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "b2b": {
+      "title": "Company procurement: organisations, budgets, approvals and quotes",
+      "sources": [
+        "components/b2b"
+      ],
+      "tables": [
+        "b2b_approvals",
+        "b2b_budget_allocations",
+        "b2b_catalog",
+        "b2b_companies",
+        "b2b_lists",
+        "b2b_members",
+        "b2b_quotes",
+        "b2b_units"
+      ],
+      "uses": [
+        "core",
+        "identity",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "pos": {
+      "title": "Point-of-sale register adapters",
+      "sources": [
+        "components/pos"
+      ],
+      "tables": [],
+      "uses": [
+        "catalog",
+        "checkout",
+        "core",
+        "customers",
+        "identity",
+        "intelligence",
+        "marketing",
+        "orders",
+        "payments",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "apps": {
+      "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
+      "sources": [
+        "components/apps",
+        "crates/apps"
+      ],
+      "tables": [
+        "app_action_log",
+        "app_deliveries",
+        "app_evidence",
+        "app_export_cursors",
+        "app_jobs",
+        "app_models",
+        "app_packages",
+        "app_record_indexes",
+        "app_record_references",
+        "app_record_versions",
+        "app_records",
+        "app_schedule_runs",
+        "app_schedules",
+        "app_schema_history",
+        "app_service_secrets",
+        "app_storage_usage",
+        "app_surface_grants",
+        "app_versions",
+        "app_webhook_receipts",
+        "developer_builds",
+        "developer_drafts",
+        "extensions"
+      ],
+      "uses": [
+        "b2b",
+        "catalog",
+        "checkout",
+        "core",
+        "identity",
+        "inference",
+        "intelligence",
+        "inventory",
+        "marketing",
+        "orders",
+        "pricing",
+        "shipping",
+        "shop"
+      ],
+      "foreign_tables": {
+        "shop_environments": "read: the delivery and schedule claims exclude staging environments and resolve the live shop inside their single SKIP LOCKED claim statement (event_deliveries.rs, schedules.rs); other environment reads go through veyndo_core::store::previews, the preview expiry through the Directory port",
+        "tenants": "read: the delivery claim locks the owning shop row (FOR UPDATE OF d,owner SKIP LOCKED) and the schedule claim checks the live shop status inside the same claim statement (event_deliveries.rs, schedules.rs); other shop reads go through veyndo_core::store::tenants"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 2
+    },
+    "automation": {
+      "title": "Deterministic rule evaluation and flow graphs",
+      "sources": [
+        "crates/automation",
+        "crates/flow-graph"
+      ],
+      "tables": [],
+      "uses": [
+        "core"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 8,
+      "untyped_access": 97,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "inference": {
+      "title": "Model provider adapters, inference budgets, prompt provenance and image generation; no commerce write capability",
+      "sources": [
+        "crates/cognition"
+      ],
+      "uses": [
+        "core"
+      ],
+      "tables": [],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "intelligence": {
+      "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
+      "sources": [
+        "components/intelligence"
+      ],
+      "tables": [
+        "ai_price_budget",
+        "chat_messages",
+        "conversations",
+        "embedding_generations",
+        "embedding_jobs",
+        "experiences",
+        "intelligence_assignments",
+        "intelligence_experiments",
+        "knowledge_chunk_lexemes",
+        "knowledge_chunks",
+        "knowledge_documents",
+        "knowledge_hypotheses",
+        "knowledge_index_status",
+        "knowledge_nodes",
+        "knowledge_product_lexemes",
+        "knowledge_receipts",
+        "knowledge_relation_history",
+        "knowledge_relations",
+        "observed_pairs",
+        "pair_evidence",
+        "policy",
+        "private_preferences",
+        "semantic_products",
+        "session_signal_events",
+        "session_signals",
+        "tasks",
+        "vector_index_queue"
+      ],
+      "uses": [
+        "catalog",
+        "checkout",
+        "core",
+        "customers",
+        "identity",
+        "inference",
+        "inventory",
+        "marketing",
+        "pricing",
+        "shipping",
+        "shop"
+      ],
+      "foreign_tables": {
+        "app_evidence": "read: the knowledge inventory counts merchant-private app evidence next to its own sources in one statement; the apps component owns ingestion and purge (documents.rs)",
+        "app_packages": "read: the knowledge inventory counts the active packages that contribute evidence in the same statement (documents.rs)",
+        "channel_metrics": "read: the shop overview and the planner facts read channel traffic counters next to learning state in one statement (overview.sql, personalization.rs)",
+        "commerce_settings": "read: hybrid search reads the shop's search weights inside the ranked retrieval statement (search.sql)",
+        "customers": "read: behaviour journeys join the identified customer in the consent-bound composed statement; entity checks of model evidence read customer existence (behavior.rs, product_reads.rs)",
+        "exposures": "write: storefront personalization records and reads experiment exposures; the shop overview counts them in its learning timeline (overview.sql, personalization.rs)",
+        "orders": "read: behaviour, experiment and overview statements aggregate orders next to their own observations; evidence checks read order existence (behavior.rs, experiments_report.sql, observations.rs, overview.sql, product_reads.rs)",
+        "payment_attempts": "read: experiment reports and price suggestions join payment attempts of the experiment's orders in one statement (experiments.rs, experiments_report.sql)",
+        "privacy_consents": "write: consent receipts are written and the shared consent filter joins them with behaviour events (behavior_eligible.sql, consent.rs)",
+        "product_reviews": "read: product facts and the knowledge inventory count published reviews in the same statement as their own records (documents.rs)",
+        "products": "write: retrieval, embeddings, relations and evidence join products inside their own statements; autonomy revert restores a price at the product revision (autonomy.rs, documents.rs, embedding_jobs.rs, relations.rs, search.sql, staging.rs and others)",
+        "shop_environments": "read: sandbox and preview requests resolve their live shop inside admission, claim and work statements; studio owns the table and depends on this component (agent_controls.rs, embedding_job_claim.sql, embedding_jobs.rs, product_reads.rs, scenario_reports.rs, vector_claim.sql, work_tasks.rs)",
+        "tenants": "read: embedding and vector claims join the shop row to skip inactive shops inside the claim statement (embedding_generations.rs, embedding_job_claim.sql, vector_claim.sql)",
+        "translation_jobs": "write: agent runs cancel the translation jobs they started and wake work tasks once their jobs stopped (agent_runs.rs, work_tasks.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 16
+    },
+    "studio": {
+      "title": "Merchant overview, reports, private staging shops and history",
+      "sources": [
+        "components/studio"
+      ],
+      "tables": [
+        "entity_history",
+        "shop_releases",
+        "studio_workspace_versions",
+        "studio_workspaces"
+      ],
+      "uses": [
+        "apps",
+        "b2b",
+        "catalog",
+        "checkout",
+        "core",
+        "customers",
+        "identity",
+        "inference",
+        "intelligence",
+        "marketing",
+        "orders",
+        "pos",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {
+        "carts": "read: the merchant report source joins each order's cart for its channel attribution in one read-snapshot statement (reports/source.sql)",
+        "customers": "read: the CRM directory page merges registered customers with guest order contacts in one keyset statement with optional filters and app extension predicates (customer_directory.sql, customer_directory_default.sql)",
+        "merchant_users": "read: history listings join the acting merchant's name to each recorded version in the same statement (history.rs)",
+        "orders": "read: the CRM directory page derives guest contacts from orders and the report source aggregates orders, each in one statement (customer_directory.sql, customer_directory_default.sql, reports/source.sql)",
+        "payment_attempts": "read: the report source joins refund and simulation state of each order's payment attempt in the same read-snapshot statement (reports/source.sql)",
+        "sales_channels": "read: the report source joins the channel kind of each order in the same read-snapshot statement (reports/source.sql)",
+        "shop_environments": "read: reads stages and previews of a live shop (list, count, baseline lock, preview checks, task and translation scopes); writes go through veyndo_core::store::environments_write (reports.rs, staging_clone.rs, staging_release.rs, tasks.rs, translation_runs.rs, workspaces.rs)"
+      },
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 3
+    },
+    "protocols": {
+      "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
+      "sources": [
+        "src/mcp.rs",
+        "src/mcp",
+        "src/ucp",
+        "src/capabilities.rs",
+        "src/capabilities"
+      ],
+      "tables": [],
+      "uses": [
+        "catalog",
+        "checkout",
+        "core",
+        "host",
+        "inference",
+        "intelligence",
+        "pricing",
+        "shop"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "host": {
+      "title": "Process entry, route registry, worker roles, migrations and command-line tools",
+      "sources": [
+        "crates/port-contracts",
+        "src/accounts",
+        "src/agent.rs",
+        "src/agent_host.rs",
+        "src/agent_runs",
+        "src/agent_runs.rs",
+        "src/apps",
+        "src/assets",
+        "src/auth",
+        "src/b2b",
+        "src/bin",
+        "src/bootstrap.rs",
+        "src/brand_redirect.rs",
+        "src/cart_mutation.rs",
+        "src/cart_price.rs",
+        "src/cart_routes.rs",
+        "src/cart_storage.rs",
+        "src/catalog_model.rs",
+        "src/catalog_page.rs",
+        "src/catalog_routes.rs",
+        "src/categories",
+        "src/checkout",
+        "src/checkout_handoff.rs",
+        "src/checkout_page.rs",
+        "src/cognition",
+        "src/commerce/catalog.rs",
+        "src/commerce/catalog_intake",
+        "src/commerce/catalog_ports.rs",
+        "src/commerce/configuration.rs",
+        "src/commerce/content_text.rs",
+        "src/commerce/context_routes.rs",
+        "src/commerce/customer_groups.rs",
+        "src/commerce/delivery.rs",
+        "src/commerce/delivery_split.rs",
+        "src/commerce/detail.rs",
+        "src/commerce/external_orders.rs",
+        "src/commerce/fulfillment.rs",
+        "src/commerce/geography.rs",
+        "src/commerce/international_capabilities.rs",
+        "src/commerce/inventory_ports.rs",
+        "src/commerce/method_usage.rs",
+        "src/commerce/mod.rs",
+        "src/commerce/order_machine.rs",
+        "src/commerce/product_admin.rs",
+        "src/commerce/selection.rs",
+        "src/commerce/settings_guards.rs",
+        "src/commerce/settings_patch.rs",
+        "src/commerce/settings_scope.rs",
+        "src/commerce/supply_proposal.rs",
+        "src/commerce/tax.rs",
+        "src/commerce/tax_context.rs",
+        "src/commerce/test_stock.rs",
+        "src/commerce/types.rs",
+        "src/concierge.rs",
+        "src/currencies",
+        "src/currencies/rates.rs",
+        "src/customer.rs",
+        "src/demo_catalog.rs",
+        "src/developer",
+        "src/documents",
+        "src/experience.rs",
+        "src/extensions.rs",
+        "src/foundation.rs",
+        "src/history",
+        "src/legal",
+        "src/lib.rs",
+        "src/localization.rs",
+        "src/main.rs",
+        "src/marketing",
+        "src/migrations",
+        "src/migrations.rs",
+        "src/operations",
+        "src/operations/addresses.rs",
+        "src/operations/customer_create.rs",
+        "src/operations/customer_lookup.rs",
+        "src/operations/delivery_booking.rs",
+        "src/order_checkout.rs",
+        "src/order_routes.rs",
+        "src/outbox",
+        "src/outbox.rs",
+        "src/payments",
+        "src/performance",
+        "src/performance/delivery.rs",
+        "src/planner.rs",
+        "src/platform",
+        "src/port_contracts_tests.rs",
+        "src/ports",
+        "src/ports.rs",
+        "src/pos",
+        "src/proposal_apply.rs",
+        "src/proposal_routes.rs",
+        "src/routes",
+        "src/routes.rs",
+        "src/runtime_config.rs",
+        "src/sandbox_cache.rs",
+        "src/security_headers.rs",
+        "src/seed.rs",
+        "src/shop_domains",
+        "src/shop_domains.rs",
+        "src/staging",
+        "src/store",
+        "src/store.rs",
+        "src/storefront_islands.rs",
+        "src/storefront_pages.rs",
+        "src/studio",
+        "src/studio.rs",
+        "src/translations",
+        "src/workers",
+        "src/workers.rs"
+      ],
+      "tables": [
+        "seed_versions"
+      ],
+      "uses": [
+        "apps",
+        "b2b",
+        "catalog",
+        "checkout",
+        "core",
+        "customers",
+        "identity",
+        "inference",
+        "intelligence",
+        "inventory",
+        "marketing",
+        "orders",
+        "payments",
+        "pricing",
+        "shipping",
+        "shop",
+        "studio"
+      ],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    },
+    "connectors": {
+      "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",
+      "sources": [],
+      "tables": [
+        "connector_changes",
+        "connector_config",
+        "connector_jobs",
+        "connector_limits",
+        "connector_oauth",
+        "connector_sources"
+      ],
+      "uses": [],
+      "foreign_tables": {},
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
+    }
+  }
+}

@@ -1,9 +1,10 @@
 /** StudioConversation: focused Studio view; state and commands come from the session-scoped controller. */
+import { forApps } from "../../shared/api/types";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
-import { useScenarioNavigation } from "../scenarios/useScenarioNavigation";
-import { canTestCustomers } from "../scenarios/scenario-access";
+import { useScenarioNavigation } from "./useScenarioNavigation";
+import { canTestCustomers } from "../../../../components/intelligence/ui/admin/scenarios/scenario-access";
 import { lazy, Suspense, useEffect, useState } from "react";
-import CopilotNavigation from "../assistant/CopilotNavigation";
+import CopilotNavigation from "../../../../components/intelligence/ui/admin/assistant/CopilotNavigation";
 import StudioComposer from "./StudioComposer";
 import AgentRunCard from "./AgentRunCard";
 import { useAgentRunText } from "../../shared/i18n/agent-runs-i18n";
@@ -17,14 +18,17 @@ import { conversationAppText } from "../../shared/i18n/conversation-app-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import AssistantMarkdown from "../../shared/content/AssistantMarkdown";
 import { openReviewedView } from "../../shared/grid/pinned-view";
-import ProposalCard from "../assistant/ProposalCard";
+import ProposalCard from "./ProposalCard";
 import "../styles/operations.css";
 import "../styles/studio.css";
 import "../styles/assistant-layout.css";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 
 import { useStudio } from "./StudioContext";
-const AgentWorkSurface = lazy(() => import("../workspace/AgentWorkSurface"));
+const AgentWorkSurface = lazy(
+  () =>
+    import("../../../../components/studio/ui/admin/workspace/AgentWorkSurface"),
+);
 import type { WorkspaceView } from "../../shared/grid/workspace-view";
 import type { RequestFn } from "./studio-types";
 
@@ -225,7 +229,7 @@ export default function StudioConversation({
                   <ConversationAppViews
                     views={m.id === -1 ? activeViews : m.data.preview?.appViews}
                     readCurrent
-                    request={request}
+                    request={forApps(request)}
                     onUseFilter={(filter, previous) => {
                       const next = draftWithAppFilter(
                         draft,

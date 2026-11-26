@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Run extraction, Lean proofs/axiom audit, compiled conformance and complete source-inventory checks.
 
+--check verifies without writing anything (the default mode, stated explicitly for CI);
+it also fails when a commerce `domain/` function is neither bound to a proved rule nor
+listed as unproved with a reason (`proof/domain-inventory.json`).
+
 No automatic review/hash refresh in CI. --record-review is a deliberate human
 review record, never a claim that unproved adapters became proved.
 """
@@ -12,6 +16,7 @@ from registry import check,record
 from conformance import compare
 from axioms import source_check,dependency_check
 from layout import check_layout
+import domain_inventory
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 
 def run(args,cwd=ROOT):
@@ -25,7 +30,7 @@ def artifacts(functions):
     rust=subprocess.run(['rustfmt','--edition','2024'],input=rust,capture_output=True,text=True,check=True).stdout
     dispatch=subprocess.run(['rustfmt','--edition','2024'],input=rust_dispatch(functions),capture_output=True,text=True,check=True).stdout
     domains={name:subprocess.run(['rustfmt','--edition','2024'],input=content,capture_output=True,text=True,check=True).stdout for name,content in rust_domains(functions).items()}
-    return {'src/bin/verified_kernel/dispatch.rs':dispatch,'proof/Commerce/Generated.lean':lean,'proof/Main.lean':main,'src/bin/verified_kernel.rs':rust,**domains}
+    return {'src/bin/verified_kernel/dispatch.rs':dispatch,'proof/Commerce/Generated.lean':lean,'proof/Main.lean':main,'src/bin/verified_kernel/main.rs':rust,**domains}
 
 def audit(manifest):
     root=ROOT/'proof'
@@ -41,8 +46,9 @@ def audit(manifest):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--generate',action='store_true');parser.add_argument('--record-review',metavar='REASON')
+    parser.add_argument('--generate',action='store_true');parser.add_argument('--check',action='store_true',help='Verify only; never write generated files');parser.add_argument('--record-review',metavar='REASON')
     parser.add_argument('--report',default='artifacts/formal-verification.json');args=parser.parse_args()
+    if args.check and (args.generate or args.record_review):parser.error('--check never writes; drop --generate/--record-review')
     manifest=json.loads((ROOT/'proof/manifest.json').read_text())
     functions=Parser(kernel_source(ROOT)).parse()
     if {f.name for f in functions}!=set(manifest['policies']):raise ValueError('Policy inventory incomplete')
@@ -55,6 +61,7 @@ def main():
         elif not path.exists()or path.read_text()!=content:raise ValueError('Generated artifact drift: '+name)
     if args.record_review:record(ROOT,manifest,args.record_review)
     inventory=check(ROOT,manifest)
+    domain=domain_inventory.check(ROOT,set(manifest['policies']))
     run(['lake','build'],ROOT/'proof')
     run(['lake','env','leanchecker','Commerce'],ROOT/'proof')
     axioms=audit(manifest)
@@ -62,7 +69,7 @@ def main():
     report={'status':'passed','scope':'Extracted production policies; NOT full Rust/server correctness',
         'sourceCommit':run(['git','rev-parse','HEAD']).strip(),'workingTreeChanged':bool(run(['git','status','--porcelain']).strip()),
         'leanToolchain':(ROOT/'proof/lean-toolchain').read_text().strip(),'policies':len(functions),
-        'axiomAudit':axioms,'compiledEnvironmentRechecked':True,'conformance':conformance,'inventory':inventory,
+        'axiomAudit':axioms,'compiledEnvironmentRechecked':True,'conformance':conformance,'inventory':inventory,'domainInventory':domain,
         'proofLayout':check_layout(ROOT,manifest),
         'trustedBoundary':['Rust-to-Lean subset translator','Rust/Lean compilation and u64-to-Nat correspondence','Reviewed Rust adapters and input facts','PostgreSQL transactions/constraints','Operating system and provider protocols']}
     path=ROOT/args.report;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(report,indent=2)+'\n')

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM vector_index_queue WHERE tenant=$1 AND kind=$2 AND object_id=$3 AND revision=$4 AND lease=$5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0b7da227c803d6dbb7e8c74d00c3ae60fadd99ed14966b94558f2b37a78177f5"
+}

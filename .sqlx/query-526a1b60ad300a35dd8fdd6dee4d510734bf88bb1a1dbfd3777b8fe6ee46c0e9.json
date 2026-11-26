@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('app',app,'sourceId',source_id,'title',title,'kind',kind) AS \"source!\" FROM app_evidence WHERE tenant=$1 AND app=ANY($2) ORDER BY app,source_id LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "526a1b60ad300a35dd8fdd6dee4d510734bf88bb1a1dbfd3777b8fe6ee46c0e9"
+}

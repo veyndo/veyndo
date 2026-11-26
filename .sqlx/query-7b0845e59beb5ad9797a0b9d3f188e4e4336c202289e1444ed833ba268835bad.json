@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tasks SET run_after=now() WHERE tenant=$1 AND id=$2 AND run_state='queued' AND EXISTS(SELECT 1 FROM translation_jobs j WHERE j.tenant=$1 AND j.run_task=$2 AND j.status IN ('ready','failed','cancelled'))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7b0845e59beb5ad9797a0b9d3f188e4e4336c202289e1444ed833ba268835bad"
+}

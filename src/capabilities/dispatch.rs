@@ -1,5 +1,24 @@
 //! Closed native domain routing selected once by the operation registry; inactive futures stay boxed.
-use super::*;
+use super::{CapabilityFuture, invoke_native};
+use crate::foundation::App;
+use crate::{
+    agent_runs, apps, assets, auth, b2b, cognition, commerce, currencies, developer, documents,
+    history, legal, marketing, operations, payments, pos, studio,
+};
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
+/// The record a directly routed operation names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DirectTarget {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+}
 #[derive(Clone, Copy)]
 pub(super) enum Owner {
     PaymentMethods,
@@ -91,17 +110,24 @@ impl Owner {
     ) -> CapabilityFuture<'a> {
         match self {
             Self::PaymentMethods => Box::pin(payments::instruments::invoke(a, h, name, v)),
-            Self::PaymentInstructions => Box::pin(payments::customer_instructions(
-                a,
-                h,
-                v["id"].as_str().unwrap_or(""),
-            )),
+            Self::PaymentInstructions => Box::pin(async move {
+                let target: DirectTarget = view(v);
+                payments::customer_instructions(a, h, target.id.as_deref().unwrap_or("")).await
+            }),
             Self::Reports => Box::pin(studio::reports::invoke(a, h, v)),
             Self::AppDiscovery => Box::pin(apps::discovery::invoke(a, h, name, v)),
             Self::CatalogIntake => Box::pin(commerce::catalog_intake::invoke(a, h, name, v)),
             Self::Runs => Box::pin(agent_runs::invoke(a, h, name, v)),
             Self::Personal => Box::pin(studio::personal::invoke(a, h, name, v)),
-            Self::Site => Box::pin(apps::site_builder::design_agent::invoke(a, h, name, v)),
+            Self::Site => Box::pin(async move {
+                apps::site_builder::design_agent::invoke(
+                    &apps::site_host::Site(a.clone()),
+                    h,
+                    name,
+                    v,
+                )
+                .await
+            }),
             Self::AppHistory => Box::pin(apps::record_history::invoke(a, h, name, v)),
             Self::Roles => Box::pin(auth::roles::invoke(a, h, name, v)),
             Self::B2b => Box::pin(b2b::invoke(a, h, name, v)),
@@ -110,7 +136,10 @@ impl Owner {
                 cognition::signed::facts(
                     a,
                     h,
-                    v["productId"].as_str().ok_or(bad("Product required"))?,
+                    view::<DirectTarget>(v)
+                        .product_id
+                        .as_deref()
+                        .ok_or(bad("Product required"))?,
                 )
                 .await
             }),
@@ -125,6 +154,25 @@ impl Owner {
             Self::Developer => Box::pin(developer::invoke(a, h, name, v)),
             Self::Knowledge => Box::pin(documents::knowledge_invoke(a, h, name, v)),
             Self::Native => Box::pin(invoke_native(a, h, name, v)),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn targets_read_like_indexing() {
+        for v in [
+            json!({}),
+            json!({"id":"a","productId":"p"}),
+            json!({"id":1,"productId":null}),
+            json!("x"),
+        ] {
+            let target: DirectTarget = view(&v);
+            assert_eq!(target.id.as_deref(), v["id"].as_str());
+            assert_eq!(target.product_id.as_deref(), v["productId"].as_str());
         }
     }
 }

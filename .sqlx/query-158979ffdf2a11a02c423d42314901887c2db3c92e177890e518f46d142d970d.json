@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT package_digest,actions,context FROM app_surface_grants WHERE tenant=$1 AND token_hash=$2 AND app=$3 AND surface=$4 AND actor_hash=$5 AND expires_at>now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "package_digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_surface_grants",
+            "name": "package_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "actions",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_surface_grants",
+            "name": "actions"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "context",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_surface_grants",
+            "name": "context"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "158979ffdf2a11a02c423d42314901887c2db3c92e177890e518f46d142d970d"
+}

@@ -1,4 +1,5 @@
 /** Explicit coding-agent task download/copy and domain-validated result import; no tokens or background execution. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../ui/Icon";
 import { useAgentText } from "./agent-i18n";
@@ -68,9 +69,8 @@ export default function AgentTaskTransfer({
           onChange={(event) => setJson(event.target.value)}
         />
       </label>
-      <button
+      <Button
         type="button"
-        className="studio-secondary"
         disabled={disabled || busy || !json.trim()}
         onClick={async () => {
           setError("");
@@ -82,7 +82,7 @@ export default function AgentTaskTransfer({
         }}
       >
         {t("review")}
-      </button>
+      </Button>
       {error && <p role="alert">{error}</p>}
     </section>
   );

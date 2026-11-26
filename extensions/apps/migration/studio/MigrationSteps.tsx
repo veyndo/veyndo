@@ -1,5 +1,6 @@
 /** Compact migration step navigation keeps source, reviewed domains and the native design handoff together. */
-import ScenarioLaunch from "../../../../frontend/src/admin/scenarios/ScenarioLaunch";
+import { Button } from "../../../../frontend/src/kit/ui";
+import ScenarioLaunch from "../../../../components/intelligence/ui/admin/scenarios/ScenarioLaunch";
 import { isPrivate, type Kind } from "./model";
 import { useMigrationText } from "./i18n";
 export default function MigrationSteps({
@@ -24,9 +25,9 @@ export default function MigrationSteps({
     <aside className="migration-steps">
       <strong>{t("connection")}</strong>
       <p>{t("noSecrets")}</p>
-      <button className="studio-secondary" onClick={onSettings}>
+      <Button type="submit" onClick={onSettings}>
         {t("settings")}
-      </button>
+      </Button>
       <strong>{t("review")}</strong>
       <div className="migration-domain-picker">
         {(
@@ -72,13 +73,13 @@ export default function MigrationSteps({
       <p>{t("private")}</p>
       {onDesign && rights.includes("channels.manage") && (
         <>
-          <button
-            className="studio-secondary"
+          <Button
+            type="submit"
             disabled={busy || !rights.includes("environments.manage")}
             onClick={onDesign}
           >
             {t("designer")}
-          </button>
+          </Button>
           <small>{t("designHint")}</small>
         </>
       )}

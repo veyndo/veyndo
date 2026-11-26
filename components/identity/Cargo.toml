@@ -1,0 +1,25 @@
+[package]
+name = "veyndo-identity"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Merchant identity: who a request acts for and which permissions it holds"
+
+[dependencies]
+argon2.workspace = true
+hmac.workspace = true
+ring.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+axum.workspace = true
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-kernel = { path = "../../crates/kernel" }
+sqlx.workspace = true
+serde.workspace = true
+reqwest.workspace = true
+veyndo-cognition = { path = "../../crates/cognition" }
+veyndo-runtime = { path = "../../crates/runtime" }
+base64.workspace = true

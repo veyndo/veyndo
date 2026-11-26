@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT substring(content for 1048596) AS \"prefix!\" FROM product_assets WHERE tenant=$1 AND id=$2 AND public AND kind='attachment' AND mime='model/gltf-binary' AND (product_id=$3 OR product_id=(SELECT parent_id FROM products WHERE tenant=$1 AND id=$3)) FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "prefix!",
+        "type_info": "Bytea",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bf6efa6963be316be2b13bbeb3b254fa3bb94902a24f61adf47cfb016252bbac"
+}

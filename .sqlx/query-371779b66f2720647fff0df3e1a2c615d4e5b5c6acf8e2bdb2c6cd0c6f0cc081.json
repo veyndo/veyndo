@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tenants SET status=$2,status_revision=status_revision+1,status_updated_at=now() WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "371779b66f2720647fff0df3e1a2c615d4e5b5c6acf8e2bdb2c6cd0c6f0cc081"
+}

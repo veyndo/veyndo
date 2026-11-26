@@ -12,10 +12,10 @@ import { describe, it, expect, vi } from "vitest";
 import { cart as base } from "./fixtures";
 import type { Cart, Order } from "../../src/shared/api/shop-api";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import CheckoutPanel from "../../src/storefront/checkout/CheckoutPanel";
-import PaymentSession from "../../src/storefront/checkout/PaymentSession";
-import { placeCheckoutOrder } from "../../src/storefront/checkout/checkout-order";
-vi.mock("../../src/storefront/legal/PrivacyProvider", () => ({
+import CheckoutPanel from "../../../components/checkout/ui/storefront/checkout/CheckoutPanel";
+import PaymentSession from "../../../components/checkout/ui/storefront/checkout/PaymentSession";
+import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
+vi.mock("../../src/shared/legal/legal-policy", () => ({
   useLegalPolicy: () => ({
     policyVersion: "fixture",
     data: { strictCheckout: false },

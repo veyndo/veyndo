@@ -1,5 +1,19 @@
 //! Startup, additive migrations, persisted extensions and outbox worker.
-use crate::*;
+use crate::foundation::App;
+use crate::routes::router;
+use crate::{
+    apps, currencies, demo_catalog, marketing, migrations, performance, platform, runtime_config,
+    workers,
+};
+use crate::{capabilities, documents};
+use sqlx::postgres::PgPoolOptions;
+use std::env;
+use std::sync::Arc;
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_cognition::inference::Inference;
+use veyndo_core::channel_metrics;
+use veyndo_intelligence::knowledge;
+use veyndo_runtime::scoped_pool::ScopedPool as PgPool;
 
 pub(crate) async fn bootstrap() -> App {
     tracing_subscriber::fmt()
@@ -7,6 +21,7 @@ pub(crate) async fn bootstrap() -> App {
         .with_env_filter(env::var("RUST_LOG").unwrap_or("info".into()))
         .init();
     let _configuration = runtime_config::get();
+    crate::ports::install();
     let mode = env::var("BOOTSTRAP_MODE").unwrap_or("auto".into());
     assert!(
         ["auto", "serve", "migrate"].contains(&mode.as_str()),
@@ -54,24 +69,30 @@ pub(crate) async fn bootstrap() -> App {
         .expect("Cluster database connection budget exhausted");
     let a = App {
         _connection_budget: Arc::new(connection_budget),
-        db: db.clone(),
-        inference_slots: Arc::new(tokio::sync::Semaphore::new(
-            env::var("INFERENCE_CONCURRENCY")
-                .ok()
-                .and_then(|s| s.parse::<usize>().ok())
-                .filter(|n| (1..=256).contains(n))
-                .unwrap_or(4),
-        )),
-        token: Arc::new(auth),
-        inference: Inference::from_env(http.clone()).with_database(db.clone()),
-        http,
-        model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
-        sandboxes: Arc::new(sandbox_cache::Cache::default()),
-        channel_metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
-        app_limits: Arc::new(apps::ServiceLimits::default()),
-        reads: Arc::new(performance::Reads::default()),
-        admission: Arc::new(performance::Admission::default()),
+        models: veyndo_intelligence::service::models::Inferencing {
+            inference: Inference::from_env(http.clone()).with_database(db.clone()),
+            slots: Arc::new(tokio::sync::Semaphore::new(
+                env::var("INFERENCE_CONCURRENCY")
+                    .ok()
+                    .and_then(|s| s.parse::<usize>().ok())
+                    .filter(|n| (1..=256).contains(n))
+                    .unwrap_or(4),
+            )),
+            model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
+        },
+        identity: veyndo_identity::service::bootstrap::IdentityState {
+            bootstrap_token: Arc::new(auth),
+        },
+        core: veyndo_core::State {
+            db: db.clone(),
+            http,
+            admission: Arc::new(performance::Admission::default()),
+            metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
+        },
+        apps: veyndo_app_platform::service::runtime_state::AppRuntime::default(),
     };
+    veyndo_shop::service::read_cache::register_conditions(marketing::validate_condition);
+    crate::ports::register(&a);
     if let Some(setup) = setup {
         if env::var("SEED_DEMO").as_deref() != Ok("false") {
             migrations::seed_demo(&a, &setup).await;
@@ -81,12 +102,9 @@ pub(crate) async fn bootstrap() -> App {
         }
         setup.close().await;
     }
-    let seeded: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM public.commerce_migrations WHERE version='demo-v1')",
-    )
-    .fetch_one(&a.db)
-    .await
-    .expect("completed setup");
+    let seeded = crate::store::migrations::demo_seeded(&a.db)
+        .await
+        .expect("completed setup");
     assert!(
         seeded || env::var("SEED_DEMO").as_deref() == Ok("false"),
         "Setup is incomplete: run BOOTSTRAP_MODE=migrate"
@@ -94,14 +112,11 @@ pub(crate) async fn bootstrap() -> App {
     // Only the two built-in demo policies are eager. Other tenant policies are
     // validated lazily against their persisted source in the existing checkout path.
     for t in ["atelier", "workshop"] {
-        if let Some(wat) =
-            sqlx::query_scalar::<_, String>("SELECT wat FROM extensions WHERE tenant=$1")
-                .bind(t)
-                .fetch_optional(&a.db)
-                .await
-                .expect("persisted extension")
+        if let Some(wat) = crate::store::shops::extension(&a.db, t)
+            .await
+            .expect("persisted extension")
         {
-            a.sandboxes.insert(
+            a.apps.sandboxes.insert(
                 t.into(),
                 Arc::new(Sandbox::new(&wat).expect("saved extension")),
             );
@@ -112,6 +127,10 @@ pub(crate) async fn bootstrap() -> App {
 
 pub(crate) async fn run() {
     if env::var("BOOTSTRAP_MODE").is_ok_and(|s| s == "migrate") {
+        // Migrations install hosted app packages through component code that reads the
+        // validated process configuration, so it is installed before the first migration.
+        let _configuration = runtime_config::get();
+        crate::ports::install();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL required");
         let db = PgPoolOptions::new()
             .max_connections(1)
@@ -133,7 +152,7 @@ pub(crate) async fn run() {
     let a = bootstrap().await;
     let app_workers = workers::start(&a, &role, app_enabled);
     currencies::worker(&a);
-    performance::start_invalidations(&a);
+    performance::start_invalidations();
     if matches!(role.as_str(), "all" | "memory-worker") {
         knowledge::vectors::start(a.db.clone());
     }
@@ -166,7 +185,7 @@ pub(crate) async fn run() {
     if let Some(worker) = app_workers {
         worker.drain().await;
     }
-    a.channel_metrics.flush(&a.db).await;
+    a.metrics.flush(&a.db).await;
     a._connection_budget.release().await;
     a.db.close().await;
 }

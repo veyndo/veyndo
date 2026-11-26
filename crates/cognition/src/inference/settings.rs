@@ -1,5 +1,6 @@
 //! Shared operator settings; AES-GCM secrets are never part of merchant/operator read responses.
-use super::*;
+use super::{Inference, Value, env, json};
+use veyndo_core::document::{lenient, view};
 
 pub fn encryption_ready() -> bool {
     encryption_key().is_ok()
@@ -52,6 +53,45 @@ fn safe_endpoint(value: &str) -> String {
     url.set_fragment(None);
     url.to_string().trim_end_matches('/').to_string()
 }
+/// The operator's platform AI document, typed as the runtime reads it.
+#[derive(serde::Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PlatformAi {
+    #[serde(deserialize_with = "lenient")]
+    default_provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+    sovereign: Value,
+}
+
+/// The provider entries of the stored platform AI document, rewritten when keys are opened.
+#[derive(serde::Deserialize, serde::Serialize, Default)]
+#[serde(default)]
+struct StoredProviders {
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+}
+
+/// A provider key opened from its sealed secret.
+#[derive(serde::Serialize)]
+struct OpenedKey {
+    key: String,
+}
+
+/// One provider entry of the platform AI document.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct ProviderRow {
+    #[serde(deserialize_with = "lenient")]
+    endpoint: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    model: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    key: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    enabled: Option<bool>,
+}
+
 impl Inference {
     pub fn with_database(mut self, db: crate::scoped_pool::ScopedPool) -> Self {
         self.budget_db = Some(db.clone());
@@ -70,32 +110,37 @@ impl Inference {
             .as_ref()
             .is_none_or(|(at, _)| at.elapsed().as_secs() >= 5)
         {
-            let row = crate::tenant_scope::scoped(
-                crate::tenant_scope::Scope::System,
-                sqlx::query_as::<_, (Value, Value)>(
-                    "SELECT data,secrets FROM platform_ai WHERE id=true",
-                )
-                .fetch_one(db),
-            )
+            let row = crate::tenant_scope::scoped(crate::tenant_scope::Scope::System, async {
+                let host = crate::ports::host().ok_or("Platform AI configuration unavailable")?;
+                host.platform_ai(db).await.map_err(|e| e.1)
+            })
             .await
             .map_err(|_| "Platform AI configuration unavailable")?;
-            let mut data = row.0;
+            let mut data = row.data;
             for id in ["ollama", "openai", "anthropic"] {
-                if let Some(secret) = row.1[id].as_str() {
-                    data["providers"][id]["key"] = json!(open(id, secret)?);
+                if let Some(secret) = row.secrets.get(id).and_then(Value::as_str) {
+                    // The opened key joins the provider entry; other provider members stay as stored.
+                    let mut stored: StoredProviders = view(&data);
+                    let mut entry = stored.providers.remove(id).unwrap_or(Value::Null);
+                    let key = OpenedKey {
+                        key: open(id, secret)?,
+                    };
+                    veyndo_core::document::merge(&mut entry, key).map_err(|e| e.1)?;
+                    stored.providers.insert(id.into(), entry);
+                    veyndo_core::document::merge(&mut data, stored).map_err(|e| e.1)?;
                 }
             }
             *cache = Some((std::time::Instant::now(), data));
         }
-        let data = &cache.as_ref().unwrap().1;
+        let data: PlatformAi = view(&cache.as_ref().unwrap().1);
         let mut runtime = self.clone();
         runtime.db = None;
-        if let Some(provider) = data["defaultProvider"].as_str() {
+        if let Some(provider) = data.default_provider.as_deref() {
             runtime.default_provider = serde_json::from_value(json!(provider))
                 .map_err(|_| "Invalid default AI provider")?;
         }
         for id in ["ollama", "openai", "anthropic"] {
-            let row = &data["providers"][id];
+            let row: ProviderRow = data.providers.get(id).map(view).unwrap_or_default();
             let (endpoint, model, key) = match id {
                 "ollama" => (
                     &mut runtime.ollama,
@@ -113,20 +158,20 @@ impl Inference {
                     &mut runtime.anthropic_key,
                 ),
             };
-            if let Some(value) = row["endpoint"].as_str() {
-                *endpoint = value.into();
+            if let Some(value) = row.endpoint {
+                *endpoint = value;
             }
-            if let Some(value) = row["model"].as_str() {
-                *model = value.into();
+            if let Some(value) = row.model {
+                *model = value;
             }
-            if let Some(value) = row["key"].as_str() {
-                *key = Some(value.into());
+            if let Some(value) = row.key {
+                *key = Some(value);
             }
-            if row["enabled"].as_bool() == Some(false) {
+            if row.enabled == Some(false) {
                 runtime.disabled.push(id.to_string());
             }
         }
-        runtime.apply_sovereign(data["sovereign"] == true);
+        runtime.apply_sovereign(data.sovereign == true);
         Ok(runtime)
     }
     pub async fn public_providers(&self) -> Result<Value, String> {

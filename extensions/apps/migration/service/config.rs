@@ -125,7 +125,7 @@ impl Config {
                     timezone: c.timezone.clone(),
                 }
                 .validate()?;
-                veyndo_commerce::money::Currency::new(&c.currency, c.scale)
+                veyndo_pricing::money::Currency::new(&c.currency, c.scale)
                     .map_err(str::to_owned)?;
             }
         }

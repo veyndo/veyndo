@@ -1,0 +1,22 @@
+[package]
+name = "veyndo-port-contracts"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Contract test sets for component ports and in-memory test adapters; the server and mirror repositories run the same sets against their implementations"
+
+[dependencies]
+serde_json.workspace = true
+reqwest.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../../components/core" }
+veyndo-shop = { path = "../../components/shop" }
+veyndo-pricing = { path = "../../components/pricing" }
+veyndo-shipping = { path = "../../components/shipping" }
+veyndo-payments = { path = "../../components/payments" }
+veyndo-intelligence = { path = "../../components/intelligence" }
+veyndo-app-platform = { path = "../../components/apps" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+
+[dev-dependencies]
+tokio.workspace = true

@@ -1,0 +1,34 @@
+[package]
+name = "veyndo-studio"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Studio: reports, personal views and the copy rules of staging shops"
+
+[dependencies]
+serde.workspace = true
+axum.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+chrono-tz.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
+sqlx.workspace = true
+veyndo-identity = { path = "../identity" }
+veyndo-app-platform = { path = "../apps" }
+veyndo-orders = { path = "../orders" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-checkout = { path = "../checkout" }
+veyndo-shop = { path = "../shop" }
+veyndo-marketing = { path = "../marketing" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-intelligence = { path = "../intelligence" }
+reqwest.workspace = true
+veyndo-customers = { path = "../customers" }
+veyndo-cognition = { path = "../../crates/cognition" }
+uuid.workspace = true
+veyndo-runtime = { path = "../../crates/runtime" }
+veyndo-b2b = { path = "../b2b" }
+veyndo-pos = { path = "../pos" }
+base64.workspace = true
+sha2.workspace = true

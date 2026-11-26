@@ -1,7 +1,7 @@
 /** Current-shop rights cannot inherit a late privileged workspace response. */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useAutomationAccess } from "../../src/admin/automation/useAutomationAccess";
+import { useAutomationAccess } from "../../../components/marketing/ui/admin/automation/useAutomationAccess";
 const permissions = [
   "automation.manage",
   "automation.read",

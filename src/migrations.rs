@@ -1,77 +1,53 @@
-//! Versioned setup is separate from serving; no catalog-wide startup repair.
-use crate::*;
+//! Fresh-installation setup, separate from serving: applies the component schema baselines in their
+//! global order and records each one in the ledger. There is no upgrade path from a database that an
+//! earlier release set up with incremental migrations; such a database is refused.
+use crate::foundation::App;
+use crate::seed::seed;
+use crate::store::migrations as store;
+use crate::store::shops;
+use serde_json::Value;
+use serde_json::json;
 use sqlx::PgPool;
+use veyndo_core::hash;
+use veyndo_intelligence::knowledge;
 
-mod identity_checksums;
-mod recent_schema;
 mod schema;
-fn sources() -> impl Iterator<Item = &'static (&'static str, &'static str)> {
-    schema::SCHEMA.iter().chain(recent_schema::SCHEMA.iter())
-}
+
+/// The first migration every database of an earlier release recorded.
+const EARLIER_RELEASE: &str = "001";
 
 pub(crate) async fn apply(pool: &PgPool) {
-    sqlx::query("SELECT set_config('rac.system','on',false)")
-        .execute(pool)
+    store::enter_trusted(pool)
         .await
         .expect("trusted migration context");
     // The dedicated setup pool has exactly one connection, retaining this
     // session lock through schema setup and the bounded demo seed.
-    sqlx::query("SELECT pg_advisory_lock(7193511)")
-        .execute(pool)
+    store::lock(pool).await.expect("migration lock");
+    store::ensure_ledger(pool).await.expect("migration ledger");
+    let earlier = store::applied_checksum(pool, EARLIER_RELEASE)
         .await
-        .expect("migration lock");
-    sqlx::query("CREATE TABLE IF NOT EXISTS public.commerce_migrations(version text PRIMARY KEY,checksum text NOT NULL,applied_at timestamptz NOT NULL DEFAULT now())").execute(pool).await.expect("migration ledger");
-    // Historical AGE databases keep their original checksum contract; fresh installs use managed variants.
-    for (version, source) in [
-        ("002", include_str!("../migrations/002.sql")),
-        (
-            "011-documents",
-            include_str!("../migrations/011-documents.sql"),
-        ),
-    ] {
-        let applied: Option<String> =
-            sqlx::query_scalar("SELECT checksum FROM public.commerce_migrations WHERE version=$1")
-                .bind(version)
-                .fetch_optional(pool)
-                .await
-                .expect("legacy migration ledger");
-        if let Some(applied) = applied {
-            assert_eq!(applied, hash(source), "Legacy migration drift: {version}");
-        }
-    }
-    for (version, source) in sources() {
+        .expect("migration status");
+    assert!(
+        earlier.is_none(),
+        "This database was set up by an earlier release; there is no upgrade path. Set up a new database"
+    );
+    for (version, source) in schema::BASELINES {
         let checksum = hash(source);
-        let applied: Option<String> =
-            sqlx::query_scalar("SELECT checksum FROM public.commerce_migrations WHERE version=$1")
-                .bind(version)
-                .fetch_optional(pool)
-                .await
-                .expect("migration status");
+        let applied = store::applied_checksum(pool, version)
+            .await
+            .expect("migration status");
         if let Some(applied) = applied {
-            assert!(
-                identity_checksums::matches(version, source, &applied),
-                "Applied migration changed: {version}"
+            assert_eq!(
+                applied, checksum,
+                "Baseline {version} changed after this database was set up; set up a new database"
             );
             continue;
         }
         let mut tx = pool.begin().await.expect("migration transaction");
-        sqlx::query("SET LOCAL search_path=public")
-            .execute(&mut *tx)
+        store::run_script(&mut tx, source)
             .await
-            .expect("explicit migration schema");
-        sqlx::raw_sql(*source)
-            .execute(&mut *tx)
-            .await
-            .unwrap_or_else(|e| panic!("Migration {version}: {e}"));
-        if *version == "102-consolidate-app-tables" {
-            apps::hosted::backfill(&mut tx)
-                .await
-                .expect("hosted app migration");
-        }
-        sqlx::query("INSERT INTO public.commerce_migrations(version,checksum) VALUES($1,$2)")
-            .bind(version)
-            .bind(checksum)
-            .execute(&mut *tx)
+            .unwrap_or_else(|e| panic!("Migration {version}: {}", e.1));
+        store::record(&mut tx, version, &checksum)
             .await
             .expect("record migration");
         tx.commit().await.expect("commit migration");
@@ -79,66 +55,44 @@ pub(crate) async fn apply(pool: &PgPool) {
 }
 
 pub(crate) async fn seed_demo(a: &App, setup: &PgPool) {
-    let ready: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM public.commerce_migrations WHERE version='demo-v1')",
-    )
-    .fetch_one(setup)
-    .await
-    .expect("demo seed status");
+    let ready = store::demo_seeded(setup).await.expect("demo seed status");
     if ready {
         return;
     }
     for t in ["atelier", "workshop"] {
-        sqlx::query(
-            "INSERT INTO commerce_settings(tenant,data) VALUES($1,$2) ON CONFLICT DO NOTHING",
-        )
-        .bind(t)
-        .bind(
+        shops::ensure_settings(
+            &a.db,
+            t,
             serde_json::from_str::<Value>(include_str!("../fixtures/demo-settings.json")).unwrap(),
         )
-        .execute(&a.db)
         .await
         .expect("demo settings basis");
-        sqlx::query("SELECT public.seed_shop_automation($1)")
-            .bind(t)
-            .execute(&a.db)
+        shops::seed_automation(&a.db, t)
             .await
             .expect("demo channel before customer creation");
     }
     seed(a).await.expect("demo seed");
     for source in [
-        include_str!("../migrations/003-seed.sql"),
-        include_str!("../migrations/005-context-seed.sql"),
-        include_str!("../migrations/007-commerce-seed.sql"),
-        include_str!("../migrations/009-variant-properties.sql"),
+        include_str!("../fixtures/demo/01-merchandising.sql"),
+        include_str!("../fixtures/demo/02-context.sql"),
+        include_str!("../fixtures/demo/03-commerce.sql"),
+        include_str!("../fixtures/demo/04-variant-properties.sql"),
     ] {
-        sqlx::raw_sql(source)
-            .execute(&a.db)
+        store::run_fixture(&a.db, source)
             .await
             .expect("demo metadata");
     }
-    let ids = ["chair", "desk", "lamp", "mug", "notebook", "shelf"];
+    let ids = ["chair", "desk", "lamp", "mug", "notebook", "shelf"].map(String::from);
     for t in ["atelier", "workshop"] {
         let default = include_str!("../extensions/company-limit.wat");
-        sqlx::query(
-            "INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3) ON CONFLICT DO NOTHING",
-        )
-        .bind(t)
-        .bind(default)
-        .bind(hash(default))
-        .execute(&a.db)
-        .await
-        .expect("default extension");
-        let rows = sqlx::query(
-            "SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NULL",
-        )
-        .bind(t)
-        .bind(ids.as_slice())
-        .fetch_all(&a.db)
-        .await
-        .expect("bounded demo products");
-        for row in rows {
-            knowledge::sync_product_scoped(&a.db, t, &json!(product(&row)))
+        shops::insert_extension(&a.db, t, default, &hash(default), true)
+            .await
+            .expect("default extension");
+        let products = veyndo_catalog::store::products::main_by_ids(&a.core, t, &ids)
+            .await
+            .expect("bounded demo products");
+        for p in products {
+            knowledge::sync_product_scoped(&a.db, t, &json!(p))
                 .await
                 .expect("demo graph product");
         }
@@ -146,23 +100,19 @@ pub(crate) async fn seed_demo(a: &App, setup: &PgPool) {
             .await
             .expect("demo graph relations");
     }
-    sqlx::query("INSERT INTO public.commerce_migrations(version,checksum) VALUES('demo-v1','bounded-built-in-fixtures')")
-        .execute(setup).await.expect("record completed seed");
+    store::record_demo_seed(setup)
+        .await
+        .expect("record completed seed");
 }
 
-/// Every required schema must match, including domain schemas introduced after bounded reads.
+/// Every baseline must be recorded with the checksum of the shipped file.
 pub(crate) async fn ready(db: &veyndo::scoped_pool::ScopedPool) {
-    for (version, source) in sources() {
-        let current: Option<String> =
-            sqlx::query_scalar("SELECT checksum FROM public.commerce_migrations WHERE version=$1")
-                .bind(version)
-                .fetch_optional(db)
-                .await
-                .expect("Run BOOTSTRAP_MODE=migrate before serving");
+    for (version, source) in schema::BASELINES {
+        let current = store::applied_checksum(db, version)
+            .await
+            .expect("Run BOOTSTRAP_MODE=migrate before serving");
         assert!(
-            current
-                .as_deref()
-                .is_some_and(|applied| identity_checksums::matches(version, source, applied)),
+            current.as_deref() == Some(hash(source).as_str()),
             "Schema not ready: {version}; run BOOTSTRAP_MODE=migrate"
         );
     }

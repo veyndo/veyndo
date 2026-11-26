@@ -3,10 +3,10 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { it, expect, vi } from "vitest";
 import Connection from "../../../extensions/apps/migration/studio/Connection";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ServiceIntegrationPanel from "../../src/admin/apps/ServiceIntegrationPanel";
+import ServiceIntegrationPanel from "../../../components/apps/ui/admin/apps/ServiceIntegrationPanel";
 import IntegrationDirectory, {
   integrationRoutes,
-} from "../../src/admin/apps/IntegrationDirectory";
+} from "../../../components/apps/ui/admin/apps/IntegrationDirectory";
 import { createVeyndoStorefront } from "../../../extensions/apps/vercel/frontend/client";
 const wrapper = LocaleProvider;
 it("does not read integration status without app-management rights", () => {

@@ -1,26 +1,34 @@
 //! Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL.
-use crate::*;
-mod download;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::request_context::RequestContext;
 mod import;
 pub(crate) use import::image as import_image;
-mod caption_source;
 mod captions;
+pub(crate) use captions::Egress;
 pub(crate) mod design_references;
 mod image_jobs;
-mod image_provider;
 pub(crate) use captions::schema as caption_schema;
-mod rich;
 mod rich_document;
 pub(crate) use rich_document::safe_url;
 pub(crate) mod ingestion;
 mod model_format;
-pub(crate) mod model_media;
 mod upload;
 pub(crate) use upload::persist as persist_app_upload;
 mod app_files;
 pub(crate) use app_files::callback as app_file_callback;
 pub(crate) use image_jobs::image_once;
-pub(crate) use rich::validate_rich;
 pub(crate) use upload::{list, publish};
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -52,60 +60,34 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/products/{id}/assets",
             &[("GET", "catalog.read"), ("POST", "catalog.write")],
-            get(upload::list).post(upload::upload),
+            get(veyndo_catalog::http::assets::list).post(veyndo_catalog::http::assets::upload),
         )
         .secure_route(
             "/api/merchant/assets/{id}",
             &[("GET", "catalog.read"), ("PUT", "catalog.write")],
-            get(download::preview).put(upload::publish),
+            get(veyndo_catalog::http::downloads::preview)
+                .put(veyndo_catalog::http::assets::publish),
         )
         .route(
             "/store-api/product/{id}/attachments",
-            get(download::attachments),
+            get(veyndo_catalog::http::downloads::attachments),
         )
-        .route("/store-api/assets/{id}", get(download::attachment))
-        .route("/store-api/account/downloads", get(download::owned))
+        .route(
+            "/store-api/assets/{id}",
+            get(veyndo_catalog::http::downloads::attachment),
+        )
+        .route(
+            "/store-api/account/downloads",
+            get(veyndo_orders::http::downloads::owned),
+        )
         .route(
             "/store-api/orders/{order}/downloads/{asset}",
-            get(download::file),
+            get(veyndo_orders::http::downloads::file),
         )
         .layer(axum::extract::DefaultBodyLimit::max(
             model_format::MODEL_LIMIT + 65536,
         ))
 }
-pub(crate) async fn snapshot(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    c: &StoredCart,
-    order: &str,
-) -> Result<()> {
-    for item in &c.data.items {
-        let r = sqlx::query("SELECT id,parent_id,extra FROM products WHERE tenant=$1 AND id=$2")
-            .bind(&c.tenant)
-            .bind(&item.id)
-            .fetch_one(&mut **tx)
-            .await?;
-        let extra: Value = r.get("extra");
-        let parent: Option<String> = r.get("parent_id");
-        let parent_extra: Value = if let Some(parent) = &parent {
-            sqlx::query_scalar("SELECT extra FROM products WHERE tenant=$1 AND id=$2")
-                .bind(&c.tenant)
-                .bind(parent)
-                .fetch_one(&mut **tx)
-                .await?
-        } else {
-            json!({})
-        };
-        let digital = extra.get("digital").unwrap_or(&parent_extra["digital"]) == true;
-        if digital {
-            let n=sqlx::query("INSERT INTO order_downloads(tenant,order_id,asset_id) SELECT tenant,$1,id FROM product_assets WHERE tenant=$2 AND product_id=ANY($3) AND kind='download' AND public ON CONFLICT DO NOTHING").bind(order).bind(&c.tenant).bind(vec![item.id.clone(),parent.unwrap_or_default()]).execute(&mut **tx).await?.rows_affected();
-            if n == 0 {
-                return Err(bad("Digital product has no published download"));
-            }
-        }
-    }
-    Ok(())
-}
-
 pub(crate) fn media_permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.media.caption" => Some("assistant.use"),
@@ -116,17 +98,29 @@ pub(crate) fn media_permission(name: &str) -> Option<&'static str> {
         _ => None,
     }
 }
+/// The product and image a media capability names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MediaArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+}
+
 pub(crate) async fn media_invoke(
     a: &App,
     h: &RequestContext,
     name: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: MediaArgs = view(v);
     let state = State(a.clone());
     let headers = h.clone();
     let id = || {
-        v["id"]
-            .as_str()
+        input
+            .id
+            .as_deref()
             .map(String::from)
             .ok_or(bad("Image ID required"))
     };
@@ -138,8 +132,9 @@ pub(crate) async fn media_invoke(
                 state,
                 headers,
                 Path(
-                    v["productId"]
-                        .as_str()
+                    input
+                        .product_id
+                        .as_deref()
                         .ok_or(bad("Product ID required"))?
                         .into(),
                 ),
@@ -152,8 +147,9 @@ pub(crate) async fn media_invoke(
                 state,
                 headers,
                 Path(
-                    v["productId"]
-                        .as_str()
+                    input
+                        .product_id
+                        .as_deref()
                         .ok_or(bad("Product ID required"))?
                         .into(),
                 ),

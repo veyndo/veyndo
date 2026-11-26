@@ -6,11 +6,9 @@ reviewable and maintainable through the existing SaaS release path.
 
 This is the implementation direction adopted on 15 October 2026. It does not claim
 that managed build/microVM hosting, tenant-wide compatibility replay or automatic
-canary rollback is already available. The [platform hardening programme](platform-hardening.md)
-records the connected prerequisites and their actual implementation state.
+canary rollback is already available.
 
-[Current app-system status](app-system-status.md) maps the proposal to delivered,
-partial and open behavior, with source owners and dated acceptance. Existing app
+The [app platform](app-platform.md) describes the delivered app contract. Existing app
 record lifecycles are distinct from extensible native order/offer state machines.
 
 ## Executable first slice
@@ -107,6 +105,93 @@ Keep the compact canvas and separate contextual assistant introduced in the
 a goal and its proposed changes; the visual designer, data model and code remain
 available for precise editing rather than being replaced by an oversized chat form.
 
+## The operation registry underneath
+
+Every capability below is reached through one native operation registry in
+[`src/capabilities/`](../src/capabilities/) (the `protocols` component). HTTP, MCP,
+Studio discovery and agents use the same contract, admission and errors.
+
+### One operation, several callers
+
+Native operations have one immutable registry in `src/capabilities/registry.rs`.
+Each record binds its name, description, selected domain, input contract, conservative
+safety hints and internal read-agent exposure. MCP, native dispatch, Studio discovery
+and agent reads consume it. Domain admission remains authoritative and is applied
+before dispatch as well as during discovery. Domain handlers retain their own
+object, ownership, revision and business checks.
+
+The transport no longer owns a separate schema or visibility implementation. The
+selected domain future remains boxed before polling; this preserves the coverage
+worker stack repair. Registration rejects duplicate names.
+
+Core tools and installed app actions share `ToolContract`. Unclassified operations
+retain conservative mutating/destructive hints; these hints confer no rights.
+App actions may declare `outputSchema`, using the bounded supported schema subset.
+Their results are validated by the existing action gateway across HTTP, MCP and
+native consumers. Omitted output contracts do not alter old immutable package
+serialization. An invalid result is a non-retryable contract error: a remote write
+may already have happened and is not rolled back or automatically repeated.
+
+The compiled registry generates request OpenAPI, TypeScript and WIT
+contracts, with drift checks in CI. These describe the bounded published input
+schema; broad managed-field objects and complete response DTOs still require
+domain typing. Generation is not evidence that every response is already typed.
+
+### Actionable failures
+
+HTTP, MCP and agent streams share a typed safe problem description. Existing HTTP
+`errors[].code` and `detail` remain compatible. Added fields include `kind`,
+`status`, `retryable` and, where explicitly available, `scope`, JSON Pointer
+`pointer`, or `currentRevision`. Never parse prose to infer metadata or include
+SQL/provider payloads in errors. Ordinary app-record CAS conflicts report their
+locked current revision. Other revision owners still need the same explicit context.
+
+MCP distinguishes an invalid request (`-32600`), unknown protocol method (`-32601`),
+unknown/unavailable tool or malformed call envelope (`-32602`) and server discovery
+failure (`-32603`). Business and input-validation failures remain tool results
+with `isError: true`, actionable structured errors and compatible text.
+Native calls validate the same published input schema before executing. Nullable
+types are actually checked; required/unknown fields report escaped JSON Pointers.
+Native rich-document inputs use a separate bounded depth/node profile inside that
+same validator; the 64 KiB envelope cap and domain validation remain in force.
+App actions retain their narrower original budgets. The validator is a restricted
+schema implementation, not an
+unrestricted JSON Schema engine. Raw malformed JSON still uses the HTTP extractor.
+
+### SQL and event reliability
+
+App storage uses fixed SQL tables and bound record values. Manifest admission
+restricts logical model/field identifiers; installation and schema changes do not
+interpolate app-defined tables or issue DDL. Declared equality lookups use
+the fixed projection indexes. This defense does not make arbitrary caller-supplied
+SQL an allowed API. See [the shared storage contract](app-data-storage.md).
+
+The outbox leases one ready tenant per batch using persistent
+least-recently-served sequence metadata. Other replicas skip its scheduling lock.
+Each tenant receives at most 50 events before it rejoins the tail. A quiet shop can
+advance while another still has an older backlog. The scheduler locks its own
+metadata rather than the tenant root, avoiding conflicts with ordinary foreign-key
+inserts. Sequence ordering survives restart and wall-clock changes.
+
+Events, poison-event savepoints, per-event retries, quarantine, projections and
+Flow/app consumers remain in the original outbox transaction. Dispatch metadata has forced tenant RLS and is operational, never a
+configuration release unit. Cognition, apps, flows and audit have independent schedules. Each
+subscriber acknowledges the original event using its own bit; sequence high
+watermarks are diagnostic because IDs are not commit order. Schedules are created with the tenant, so checkout never waits on the scheduling
+row while a consumer waits on product locks. Retry and quarantine
+are scoped to the event and subscriber, allowing later healthy events and other
+subscribers to progress. Authorized retry resets only the original quarantined
+delivery. SQL tests cover late commits, failed consumers, restart, two replicas and
+actual signed tenant/system logins.
+
+
+The source-level regression set includes native schema/nullable/pointer tests,
+unique operation registration, conservative read-agent exposure and safe error
+metadata. `protocols` exercises actual JSON-RPC/native validation. `app_surfaces`
+checks current-revision errors and declared result rejection without leaking
+configured secrets. `production_foundations` includes a slowed noisy tenant and
+requires a quiet tenant to finish while noisy events remain pending.
+
 ## Decisions with a controlled execution boundary
 
 Pure extension functions consume bounded, revision-bound snapshots and return typed
@@ -185,10 +270,9 @@ and Payments product boundaries remain intact.
 | Complete B2B capability | The configurator works across shop, account, administration, approval, reorder, revisioned change and native release, with trace-based explanation. |
 | Operated individual software | A supported source build, guarded service runtime and core compatibility check work through their actual production consumer. |
 
-Original Shopware app/script execution and PHP-plugin translation are parked on
-[`experiment/shopware-compatibility`](https://github.com/sthamann/veyndo/tree/experiment/shopware-compatibility).
-They are separate from these main-platform gates. Inward shop-data migration and
-native original-PHP calculation comparisons remain available. Third-party hosting
+Shopware compatibility is not a goal: no Shopware app, script or PHP plugin runs on
+Veyndo. Importing data from an existing shop remains available
+([bring an existing shop](agentic-migration.md)). Third-party hosting
 claims still need their own runtime acceptance. The product is a publicly developed
 experiment platform under the [Sustainable Use License](../LICENSE), not an
 assertion of production completeness or guaranteed maintenance for every extension.

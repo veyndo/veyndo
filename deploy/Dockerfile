@@ -7,14 +7,18 @@ RUN npm ci
 COPY frontend/ ./
 COPY extensions/sdk/ /build/extensions/sdk/
 COPY extensions/apps/ /build/extensions/apps/
+COPY components/ /build/components/
 COPY fixtures/ /build/fixtures/
 RUN npm run build
 FROM rust:1.96-bookworm AS rust
 WORKDIR /build
 COPY Cargo.toml Cargo.lock LICENSE ./
+# Checked query macros compile from the committed query cache, offline.
+COPY .cargo/ .cargo/
+COPY .sqlx/ .sqlx/
 COPY src/ src/
 COPY crates/ crates/
-COPY migrations/ migrations/
+COPY components/ components/
 COPY extensions/ extensions/
 COPY fixtures/ fixtures/
 COPY reference/app-manifests/ reference/app-manifests/

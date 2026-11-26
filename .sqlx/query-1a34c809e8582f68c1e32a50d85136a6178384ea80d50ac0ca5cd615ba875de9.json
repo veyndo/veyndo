@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT alias,session_digest FROM channel_previews WHERE digest=$1 AND tenant=$2 AND channel=$3 AND channel_revision=$4 AND redeemed AND expires_at>now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "alias",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_previews",
+            "name": "alias"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "session_digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_previews",
+            "name": "session_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "1a34c809e8582f68c1e32a50d85136a6178384ea80d50ac0ca5cd615ba875de9"
+}

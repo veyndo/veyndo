@@ -1,6 +1,5 @@
 //! App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage.
-use super::super::*;
-use super::{OAuth, Settings};
+use super::*;
 pub const OAUTH: OAuth = OAuth {
     prefix: "GOOGLE",
     scope: "https://www.googleapis.com/auth/gmail.readonly",
@@ -21,7 +20,7 @@ pub async fn action(store: &Store, t: &str, name: &str, v: &Value) -> Result<Val
             network::request(
                 &format!("{}/users/me/labels", network::endpoint("gmail")?),
                 None,
-                Some(&oauth::token(store, t, a).await?),
+                Some(&oauth::token(store, t, a, &OAUTH).await?),
                 false,
             )
             .await

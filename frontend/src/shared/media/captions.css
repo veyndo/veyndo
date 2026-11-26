@@ -6,7 +6,7 @@
   padding-block: 12px;
 }
 .media-caption-editor small {
-  color: var(--muted, #52677d);
+  color: var(--muted, var(--vy-color-muted));
   font-size: 12px;
   line-height: 1.55;
   overflow-wrap: anywhere;
@@ -21,7 +21,7 @@
   display: grid;
   gap: 10px;
   padding: 12px;
-  background: var(--surface-soft, #eef5fc);
+  background: var(--surface-soft, var(--vy-color-panel));
   border-radius: 12px;
 }
 .media-caption-proposal label {

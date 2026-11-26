@@ -2,7 +2,7 @@
 
 <!-- veyndo-language: de -->
 
-Stand 12. November 2026.
+Stand 26. November 2026 (Komponentenarchitektur, Release-Kandidat).
 Die [Statusseite](status.md) ordnet Implementierung, öffentliche Auslieferung und
 tatsächlich durchgespielte Abläufe ein.
 
@@ -67,12 +67,18 @@ Storyfront- und Payments-Dienste haben eigene Implementierungen. Externe Apps
 kommunizieren über die Erweiterungsverträge und können andere Sprachen verwenden.
 Python dient im Hauptprojekt der Entwicklung und Prüfung.
 
-Der Cargo-Workspace enthält die Bibliotheken `kernel`, `runtime`, `commerce`,
-`apps` und `cognition`. Deren Abhängigkeiten werden geprüft. Die übrigen
-Anwendungsabläufe sind weiterhin in Modulen des Hauptpakets organisiert; die
-vollständige Extraktion aller Handler ist noch offen.
+Der Kern besteht aus 22 Komponenten, die `components.json` mit Quellen, Tabellen und
+erlaubten Abhängigkeiten festlegt; 19 davon haben eine eigene Crate (unter
+`components/` und `crates/`). Der Server setzt sie zusammen und hält die HTTP-, MCP-
+und UCP-Adapter. Keine zwei Komponenten hängen gegenseitig voneinander ab; wo eine
+Komponente eine andere braucht, spricht sie über einen Port. SQL steht nur in
+`store/`-Modulen und wird beim Kompilieren gegen das Schema geprüft. Jede Komponente
+besitzt genau ein Basisschema; eine Installation ist immer neu, einen Upgrade-Pfad
+von früheren Releases gibt es nicht. Geld läuft in ganzen kleinsten
+Währungseinheiten; 74 Geschäftsregeln sind in Lean bewiesen und an die Rust-Funktionen
+gebunden. Jede Komponente mit Crate hat einen eigenständig geprüften Mirror.
 
-Quellen: [Produktionsarchitektur](production-architecture.md),
+Quellen: [Komponentenarchitektur](architecture.md), [Produktionsarchitektur](production-architecture.md),
 [Rust Dienste](rust-services.md), [Modulverantwortung](source-map.md).
 
 ## 2. Shop, Verkaufskanal und Sandbox
@@ -186,7 +192,7 @@ App-Dienst besitzt wiederum seinen eigenen Prozess und begrenzte Rückrufe in de
 Kern. Das Manifest-Build kompiliert noch keinen beliebigen Rust- oder
 TypeScript-Quellcode in einer vom Betreiber bereitgestellten isolierten Buildfarm.
 
-[App Sicherheit](app-security.md), [Tatsächlicher Umsetzungsstand](app-system-status.md).
+[App Sicherheit](app-security.md), [Tatsächlicher Umsetzungsstand](app-platform.md).
 
 ## 6. Wie die KI eingebunden ist
 
@@ -259,9 +265,8 @@ Migration übernimmt unterstützte Daten aus bestehenden Shops nach Veyndo.
 
 HTTP, MCP und unterstützte UCP-Verträge verwenden dieselben nativen Operationen.
 Die Operation-Registry liefert Eingabeverträge; die vollständige Generierung aller
-Antworttypen und Domänenmodelle ist noch offen. Exakte Geldprimitive und der
-Vergleich mit dem ursprünglichen PHP-Verhalten existieren. Verbleibende
-Kompatibilitätsberechnungen enthalten weiterhin `f64`.
+Antworttypen ist noch offen. Geld läuft in ganzen kleinsten Währungseinheiten; der
+Preisrechner rechnet mit exakten Dezimalzahlen und rundet jeden Betrag einmal.
 
 Mandantenprüfungen, getrennte eingeschränkte Datenbankrollen, signierter
 Datenbankkontext und erzwungene Zeilenregeln schützen den Zugriff. Worker und
@@ -275,13 +280,11 @@ automatisch bereitgestellte Enterprise-Umgebungen. Echte Anbieterzahlungen,
 Mailzustellung, Wiederherstellung und einzelne externe Integrationen benötigen
 ihre eigenen Abnahmen. Öffentliche Kaufbelege verwenden simulierte Zahlungen.
 
-Shopware-Laufzeitkompatibilität und der native Plugin-Übersetzer sind ausgelagert:
-[`experiment/shopware-compatibility`](https://github.com/sthamann/veyndo/tree/experiment/shopware-compatibility).
-Shopware als Datenquelle für eine Migration und die PHP-Vergleichstests bleiben
-Teil des Hauptprojekts. OpenUI bleibt ein gesonderter lokaler Versuch für
+Shopware-Kompatibilität ist kein Ziel; Shopware bleibt nur als Datenquelle für den
+Import bestehender Shops unterstützt. OpenUI bleibt ein gesonderter lokaler Versuch für
 agentisch zusammengestellte Arbeitsansichten.
 
-[Status und Abnahmen](status.md), [Architekturentwicklung](platform-hardening.md),
+[Status und Abnahmen](status.md), [Architekturentwicklung](business-capabilities.md#the-operation-registry-underneath),
 [Lastmessungen](benchmarks.md), [Verifikation](formal-verification.md).
 
 ## 10. Beobachtungen aus Tests und Betrieb
@@ -313,7 +316,7 @@ einen neuen Pflegesatz vor. Nach Freigabe erschien der Satz in der Sandbox.
 
 ![Freigegebener Vorschlag im privaten Studio](assets/apps/product-guide-sandbox-applied-20261111.jpg)
 
-Die [englische Abnahme](status.md#product-guide-actions-in-the-hosted-shop)
+Die [englische Abnahme](status.md#hosted-pilot-earlier-release)
 zeigt beide Abläufe. [Interaktive Ansichten und Dienstgrenzen](agentic-component-ui.md#one-capability-two-ways-to-present-it).
 
 Ein Entwickler kann den Checkout auch mit einer eigenen Shopoberfläche

@@ -2,10 +2,12 @@
 FROM rust:1.96-bookworm AS build
 WORKDIR /build
 COPY Cargo.toml Cargo.lock LICENSE ./
+COPY .cargo/ .cargo/
+COPY .sqlx/ .sqlx/
 COPY src ./src
 COPY crates/ crates/
+COPY components/ components/
 COPY extensions ./extensions
-COPY migrations ./migrations
 COPY fixtures ./fixtures
 COPY reference/app-manifests ./reference/app-manifests
 RUN cargo build --locked --release --bin erp-handoff

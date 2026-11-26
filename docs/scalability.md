@@ -85,7 +85,7 @@ commerce locks, durable login throttles and commit-notification worker wakes.
 Real transaction-mode PgBouncer is covered by the strict-runtime suite. Per-event
 savepoints and quarantine isolate poison outbox messages; bounded retirement
 prevents indefinite duplicate payload growth while keeping referenced evidence.
-[Exact review findings and configuration](core-hardening.md).
+[Security and database configuration](security.md).
 
 **Remaining:** complete token/spend quotas, cell placement, sustained competing
 load measurements, online large-schema upgrades and independently isolated
@@ -170,10 +170,10 @@ bounded database batches and a versioned publication step. Rebuild only changed
 documents and model versions; avoid redundant embeddings for identical variant
 descriptions within their authorized scope.
 
-[Semantic retrieval](../src/knowledge.rs) now uses private Qdrant with
+[Semantic retrieval](../components/intelligence/src/knowledge.rs) now uses private Qdrant with
 tenant/model filtering and authoritative PostgreSQL hydration. Source vectors
 and durable synchronization remain in PostgreSQL. [Managed hosting](managed-hosting.md)
-describes this delivered boundary and the legacy pgvector conversion. At scale,
+describes this delivered boundary. At scale,
 measure ANN recall, tenant interference, index freshness and failure recovery;
 the current integration tests do not establish million-product semantic capacity. Validate retrieved
 products and current commercial data against the tenant's authoritative records.
@@ -194,7 +194,7 @@ Derive a trusted tenant context from verified membership or domain routing.
 Enforce it in queries, caches, search, jobs and storage. Core FORCE RLS and
 connection-bound scope are now implemented, with non-owner two-replica regression
 and strict startup checks. Direct/session pooling is required; transaction poolers
-need a different transaction-local integration. Migration 038 adds 22 composite
+need a different transaction-local integration. The schema baseline has 22 composite
 tenant foreign keys and adversarial tests. Deployment must actually use the separate
 restricted login; policy installation alone does not establish containment. See
 [tenant isolation](tenant-isolation.md) and the [current production architecture](production-architecture.md).

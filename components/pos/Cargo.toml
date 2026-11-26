@@ -1,0 +1,23 @@
+[package]
+name = "veyndo-pos"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Point of sale: the cashier contract on top of the ordinary checkout"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-shop = { path = "../shop" }
+veyndo-marketing = { path = "../marketing" }
+veyndo-pricing = { path = "../pricing" }
+sqlx.workspace = true
+veyndo-checkout = { path = "../checkout" }
+veyndo-customers = { path = "../customers" }
+veyndo-identity = { path = "../identity" }
+veyndo-payments = { path = "../payments" }
+veyndo-intelligence = { path = "../intelligence" }
+veyndo-orders = { path = "../orders" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }

@@ -1,28 +1,15 @@
 //! Provider-specific read imports and notification mapping stay outside the commerce kernel.
 use super::*;
-#[path = "../../../apps/google-analytics/src/provider.rs"]
-mod analytics;
-#[path = "../../../apps/gmail/src/provider.rs"]
-mod gmail;
 pub use analytics::analytics;
 pub use gmail::gmail;
-#[path = "../../../apps/slack/src/provider.rs"]
-mod slack;
 pub use slack::slack;
+use veyndo_provider_gmail::actions as gmail_actions;
+use veyndo_provider_gmail::provider as gmail;
+use veyndo_provider_google_analytics::actions as analytics_actions;
+use veyndo_provider_google_analytics::provider as analytics;
+use veyndo_provider_slack::actions as slack_actions;
+use veyndo_provider_slack::provider as slack;
 
-pub struct OAuth {
-    pub prefix: &'static str,
-    pub scope: &'static str,
-    pub slack: bool,
-    pub authorize: &'static str,
-    pub token: &'static str,
-}
-#[path = "../../../apps/google-analytics/src/actions.rs"]
-mod analytics_actions;
-#[path = "../../../apps/gmail/src/actions.rs"]
-mod gmail_actions;
-#[path = "../../../apps/slack/src/actions.rs"]
-mod slack_actions;
 pub fn oauth(a: &str) -> Result<&'static OAuth> {
     match a {
         "google_analytics" => Ok(&analytics_actions::OAUTH),
@@ -53,11 +40,4 @@ pub async fn event(store: &Store, t: &str, a: &str, event: &Value) -> Result<Val
         "slack" => slack_actions::event(store, t, event).await,
         _ => Ok(json!({"ignored":true})),
     }
-}
-
-pub struct Settings {
-    pub keys: &'static [&'static str],
-    pub booleans: &'static [&'static str],
-    pub identifiers: &'static [(&'static str, &'static str)],
-    pub cursor_field: Option<&'static str>,
 }

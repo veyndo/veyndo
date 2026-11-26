@@ -14,7 +14,7 @@
   gap: 8px;
   align-items: center;
 }
-.designer-toolbar > .studio-primary {
+.designer-toolbar > [data-tone="primary"] {
   background: #0869bd;
   color: white;
 }

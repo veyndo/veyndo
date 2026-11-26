@@ -1,0 +1,34 @@
+[package]
+name = "veyndo-checkout"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Checkout: cart quote, tax lines, selection and the order placement transaction"
+
+[dependencies]
+sqlx.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-shop = { path = "../shop" }
+veyndo-shipping = { path = "../shipping" }
+uuid.workspace = true
+veyndo-catalog = { path = "../catalog" }
+axum.workspace = true
+base64.workspace = true
+reqwest.workspace = true
+ring.workspace = true
+sha2.workspace = true
+veyndo-b2b = { path = "../b2b" }
+veyndo-marketing = { path = "../marketing" }
+veyndo-identity = { path = "../identity" }
+veyndo-customers = { path = "../customers" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-orders = { path = "../orders" }
+veyndo-payments = { path = "../payments" }
+veyndo-runtime = { path = "../../crates/runtime" }
+
+[dev-dependencies]
+proptest.workspace = true

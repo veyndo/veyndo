@@ -25,7 +25,7 @@ flowchart LR
 | `extensions/apps/google-analytics/storefront/` | Consent-bound GA4 tracking bridge |
 | `extensions/apps/storyfront/studio/` | Public connection-management bridge; original generation/editor implementation remains private |
 | `extensions/services/connectors/src/` | Shared connector authentication, OAuth, encrypted store, queue, workers and transport |
-| `extensions/apps/paypal/src/` | Legacy host-native PayPal compatibility adapter; **not sandboxed** |
+| `extensions/apps/paypal/` (`veyndo-paypal` crate) | Legacy host-native PayPal compatibility adapter over the payments ledger and its `Host` port; **not sandboxed** |
 | `src/apps/`, shared frontend renderer/SDK | Generic package admission, runtime, storage, references, capabilities and rendering |
 
 Only the connector binary compiles the connector host. The commerce library has

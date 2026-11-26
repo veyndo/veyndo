@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "calls",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "identity_inference_daily",
+            "name": "calls"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "876688c15cf93361859df27c96f5d9af5903a79d6931f30d5a3f7f8ac792c5cc"
+}

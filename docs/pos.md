@@ -31,7 +31,6 @@ Selective publication of a new staged POS channel validates the final live confi
 and creates its native cash/collection override when none was explicitly selected.
 Current settings rights, revision/conflict checks and history still apply; publishing
 a product or app alongside it additionally requires that domain's current write rights.
-[Cross-feature integration and verification](feature-integration.md).
 POS channels do not expose a public storefront or public Store API/UCP checkout.
 
 ![Current focused register with one synthetic product and cash tender controls](assets/product-tour-20261102/pos-focus.jpg)

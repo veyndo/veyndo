@@ -1,6 +1,16 @@
 //! Sovereign mode: one switch that admits only the self-operated model route and reports where each model call goes.
-use super::*;
+use super::{Inference, Provider, Value, env, json};
 use std::net::IpAddr;
+
+/// The fields of a reported model route that decide whether data leaves the deployment.
+#[derive(serde::Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Route {
+    #[serde(rename = "use")]
+    purpose: Value,
+    configured: Value,
+    self_hosted: Value,
+}
 
 const REFUSED: &str = "Sovereign AI mode admits only self-hosted models";
 
@@ -62,7 +72,11 @@ impl Inference {
     }
     /// Checked immediately before any model request leaves the process.
     pub(super) fn admit(&self, provider: &str, endpoint: &str) -> Result<(), String> {
-        if self.sovereign && (provider != "ollama" || !self_hosted(endpoint)) {
+        if !veyndo_kernel::verified_kernel::sovereign_request_admissible(
+            self.sovereign,
+            provider == "ollama",
+            self_hosted(endpoint),
+        ) {
             return Err(REFUSED.into());
         }
         Ok(())
@@ -72,6 +86,11 @@ impl Inference {
         self.resolved().await?.admit("ollama", endpoint)
     }
     fn routes(&self) -> Vec<Value> {
+        /// The admission flag of a route a sovereign platform withholds.
+        #[derive(serde::Serialize)]
+        struct Admission {
+            admitted: bool,
+        }
         let embedding = env::var("EMBEDDING_BASE_URL")
             .ok()
             .or(Some(self.ollama.clone()));
@@ -80,7 +99,8 @@ impl Inference {
         .then(|| self.openai_url.clone());
         let mut image = route("images", images, self.sovereign);
         if self.sovereign {
-            image["admitted"] = json!(false);
+            veyndo_core::document::merge(&mut image, Admission { admitted: false })
+                .expect("a route is an object");
         }
         vec![
             route("text", Some(self.ollama.clone()), self.sovereign),
@@ -94,7 +114,8 @@ impl Inference {
         let routes = self.routes();
         let leaking = routes
             .iter()
-            .any(|r| r["use"] != "images" && r["configured"] == true && r["selfHosted"] != true);
+            .map(veyndo_core::document::view::<Route>)
+            .any(|r| r.purpose != "images" && r.configured == true && r.self_hosted != true);
         json!({"enabled":self.sovereign,"lockedByDeployment":locked(),
             "refusedProviders":if self.sovereign { json!(["openai","anthropic"]) } else { json!([]) },
             "routes":routes,"holds":self.sovereign && !leaking,

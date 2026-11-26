@@ -1,6 +1,6 @@
 /** Three-panel standard-shop editor inside the native shell; Storyfront retains its separate original editor. */
 import { useEffect, useRef, useState } from "react";
-import { useAppPanelSizing } from "../../../../frontend/src/admin/developer/AppPanelSizing";
+import { useAppPanelSizing } from "../../../../components/apps/ui/admin/developer/AppPanelSizing";
 import { useContentLanguage } from "../../../../frontend/src/shared/i18n/ContentLanguage";
 import ConfirmDialog from "../../../../frontend/src/shared/ui/ConfirmDialog";
 import type { PreviewCategory } from "./NativeCategoryPreview";

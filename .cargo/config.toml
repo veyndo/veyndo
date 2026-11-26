@@ -1,0 +1,5 @@
+# Query macros (`sqlx::query_as!`) compile from the checked-in `.sqlx` cache, never from whatever
+# database a local `.env` or CI step happens to point at. `scripts/sqlx_cache.py` regenerates the
+# cache against a freshly migrated database (it overrides this with SQLX_OFFLINE=false).
+[env]
+SQLX_OFFLINE = "true"

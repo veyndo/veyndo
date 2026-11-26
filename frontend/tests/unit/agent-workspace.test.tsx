@@ -15,7 +15,7 @@ import {
 } from "../../src/shared/grid/pinned-view";
 import { useGridPage } from "../../src/shared/grid/useGridPage";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import ProposalCard from "../../src/admin/assistant/ProposalCard";
+import ProposalCard from "../../src/admin/shell/ProposalCard";
 it("opens agent filters in the real server grid, allows manual editing and never persists personal criteria", async () => {
   history.replaceState(null, "", "?studio=orders");
   openReviewedView("orders", { customer: "Synthetic Alex", state: "open" });
@@ -73,7 +73,7 @@ it("requires a click to open the reviewed list and offers no commerce approval f
   expect(approve).not.toHaveBeenCalled();
 });
 
-import SourceEditor from "../../src/admin/intelligence/SourceEditor";
+import SourceEditor from "../../../components/intelligence/ui/admin/intelligence/SourceEditor";
 it("creates guidance directly in the active enabled language without requiring an empty inherited main-language value", async () => {
   const request = vi.fn(async () => ({})),
     saved = vi.fn();
@@ -180,7 +180,7 @@ it("opens linked drafts through the existing scoped Studio rather than a documen
   expect(screen.queryByText("Freigegebener Auftrag erledigt")).toBeNull();
 });
 
-import TranslationJobs from "../../src/admin/settings/TranslationJobs";
+import TranslationJobs from "../../../components/shop/ui/admin/settings/TranslationJobs";
 it("keeps linked translation lifecycle controls in the original task while retaining draft review", async () => {
   history.replaceState(null, "", "?translationJob=linked-job");
   const request = vi.fn(async (path: string) => {

@@ -1,8 +1,9 @@
 /** Storefront composition root: cart context, routes, customer account and checkout. */
+import { forApps } from "../../shared/api/types";
 import {
   checkoutParent,
   returnFromCheckout,
-} from "../checkout/embedded-checkout";
+} from "../../../../components/checkout/ui/storefront/checkout/embedded-checkout";
 import { CurrencyContext } from "../../shared/i18n/i18n";
 import { shopApi, type Cart } from "../../shared/api/shop-api";
 import {
@@ -13,18 +14,18 @@ import {
 import "../../shared/styles/apps.css";
 import "../../shared/styles/workbench.css";
 import Icon from "../../shared/ui/Icon";
-import CustomerAccount from "../account/CustomerAccount";
-import PrivacyProvider from "../legal/PrivacyProvider";
-import LegalDocument from "../legal/LegalDocument";
-import ConsumerRequestForm from "../legal/ConsumerRequestForm";
+import CustomerAccount from "../../../../components/customers/ui/storefront/account/CustomerAccount";
+import PrivacyProvider from "../../../../components/shop/ui/storefront/legal/PrivacyProvider";
+import LegalDocument from "../../../../components/shop/ui/storefront/legal/LegalDocument";
+import ConsumerRequestForm from "../../../../components/shop/ui/storefront/legal/ConsumerRequestForm";
 import BehaviorAnalytics from "./BehaviorAnalytics";
 import ShopAnalytics from "../../../../extensions/apps/google-analytics/storefront/ShopAnalytics";
-import ProductPage from "../catalog/ProductPage";
-import { returnToCollection } from "../catalog/product-url";
-import OrderCompletion from "../checkout/OrderCompletion";
-import CheckoutPanel from "../checkout/CheckoutPanel";
-import PaymentSession from "../checkout/PaymentSession";
-import { paymentReturnAttempt } from "../checkout/payment-return";
+import ProductPage from "../../../../components/catalog/ui/storefront/catalog/ProductPage";
+import { returnToCollection } from "../../../../components/catalog/ui/storefront/catalog/product-url";
+import OrderCompletion from "../../../../components/checkout/ui/storefront/checkout/OrderCompletion";
+import CheckoutPanel from "../../../../components/checkout/ui/storefront/checkout/CheckoutPanel";
+import PaymentSession from "../../../../components/checkout/ui/storefront/checkout/PaymentSession";
+import { paymentReturnAttempt } from "../../../../components/checkout/ui/storefront/checkout/payment-return";
 import "../styles/shop.css";
 
 import { StorefrontContext } from "./StorefrontContext";
@@ -72,7 +73,7 @@ export default function Storefront(props: { onMerchant: () => void }) {
         <PrivacyProvider token={cart?.token}>
           <AppSurfaceProvider
             public
-            request={(path, body) => shopApi(path, body, cart?.token)}
+            request={forApps((path, body) => shopApi(path, body, cart?.token))}
             scopeKey={`${shopTenant}:${salesChannel}`}
           >
             <PublishedSite>

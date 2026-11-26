@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import CustomerCreate from "../../src/admin/customers/CustomerCreate";
-import OrderCreate from "../../src/admin/orders/OrderCreate";
+import CustomerCreate from "../../../components/customers/ui/admin/customers/CustomerCreate";
+import OrderCreate from "../../../components/orders/ui/admin/orders/OrderCreate";
 const address = {
   name: "Test Buyer",
   firstName: "Test",
@@ -203,7 +203,8 @@ it("customer creation inside an order is a separate form and returning preserves
   await user.click(screen.getByRole("button", { name: "Add customer" }));
   expect(container.querySelectorAll("form")).toHaveLength(1);
   await user.click(screen.getByRole("button", { name: "Back to overview" }));
+  // The selected line survives; the picker may also list the product again.
   expect(
-    await screen.findByText("Test tee", { selector: "strong" }),
+    await screen.findByText("Test tee", { selector: ".orders-line strong" }),
   ).toBeVisible();
 });

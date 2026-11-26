@@ -86,7 +86,8 @@ def missing_package(dockerfile, context, entry, assets=()):
 def missing_inputs(dockerfile):
     inputs = build_inputs(dockerfile)
     missing = []
-    for source in [*(ROOT / 'src').rglob('*.rs'), *(ROOT / 'crates').rglob('*.rs'), *(ROOT / 'extensions').rglob('*.rs')]:
+    for source in [*(ROOT / 'src').rglob('*.rs'), *(ROOT / 'crates').rglob('*.rs'), *(ROOT / 'components').rglob('*.rs'),
+                   *(ROOT / 'extensions').rglob('*.rs')]:
         for value in re.findall(r'include_(?:str|bytes)!\s*\(\s*"([^"\n]+)"', source.read_text()):
             target = (source.parent / value).resolve()
             if not target.is_file() or not copied(target, inputs):

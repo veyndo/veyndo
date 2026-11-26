@@ -1,25 +1,113 @@
 //! Resolve sessions from PostgreSQL on every request: role changes/revocation work across replicas.
 //! Remove all client-supplied principal headers before adding server-derived identities.
-use crate::{
-    App, Error, RequestContext, Response, Result, State, StatusCode, apps, bad, header, tenant,
-};
+use crate::apps;
+use crate::foundation::App;
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::response::IntoResponse;
+use axum::response::Response;
 use axum::{extract::Request, middleware::Next};
+use veyndo_core::Error;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 fn forbidden(s: &str) -> Error {
     Error(StatusCode::FORBIDDEN, s.into())
 }
-pub(crate) fn permit(h: &RequestContext, kind: &str) -> Result<()> {
-    header(h, "x-rac-role").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Personal login or instance administrator credential required".into(),
-    ))?;
-    let allowed = super::permissions::allowed(h, kind);
-    if allowed {
-        Ok(())
-    } else {
-        Err(Error::permission(kind))
+/// The Checkout page names its shop in the query; it may not contradict a selected shop.
+fn checkout_shop(request: &Request, h: &mut RequestContext, path: &str) -> Result<(), Error> {
+    if path == "/checkout"
+        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
+        && let Some((_, shop)) = url.query_pairs().find(|(k, _)| k == "shop")
+    {
+        if veyndo_core::validate_tenant(&shop).is_err()
+            || header(h, "x-tenant").is_some_and(|selected| selected != shop)
+        {
+            return Err(bad("Checkout shop scope is inconsistent"));
+        }
+        match shop.parse() {
+            Ok(value) => {
+                h.insert("x-tenant", value);
+            }
+            Err(_) => return Err(bad("Invalid checkout shop scope")),
+        }
     }
+    Ok(())
 }
+/// Image and preview subrequests carry their shop and channel in the query instead of headers.
+fn asset_scope(request: &Request, h: &mut RequestContext, path: &str) -> Result<(), Error> {
+    // Public image subrequests cannot carry frontend custom headers. Resolve only the scoped asset URL
+    // before sandbox/session admission; private shops still require the same merchant credential.
+    if (path.starts_with("/store-api/assets/")
+        || path.starts_with("/api/merchant/assets/")
+        || path.starts_with("/store-api/company-logo/")
+        || path.starts_with("/products/")
+        || path.starts_with("/channel-preview/"))
+        && header(h, "x-tenant").is_none()
+        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
+        && let Some((_, shop)) = url.query_pairs().find(|(k, _)| k == "shop")
+    {
+        match shop.parse() {
+            Ok(value) => {
+                h.insert("x-tenant", value);
+            }
+            Err(_) => return Err(bad("Invalid asset shop scope")),
+        }
+    }
+    if (path.starts_with("/channel-preview/") || path.starts_with("/store-api/assets/"))
+        && request
+            .extensions()
+            .get::<crate::shop_domains::HostShop>()
+            .is_none()
+        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
+        && let Some((_, channel)) = url.query_pairs().find(|(k, _)| k == "channel")
+    {
+        if !apps::identifier(&channel) {
+            return Err(bad("Invalid preview channel"));
+        }
+        h.insert("sw-sales-channel-id", channel.parse().unwrap());
+    }
+    Ok(())
+}
+/// The database scope of the admitted request: system for identity and provisioning, otherwise the shop and its actor.
+fn request_scope(
+    h: &RequestContext,
+    path: &str,
+    public: bool,
+) -> Result<veyndo::tenant_scope::Scope, Error> {
+    Ok(
+        if path.starts_with("/api/auth/")
+            || path.starts_with("/api/identity/")
+            || path == "/api/workspaces"
+            || path.starts_with("/api/developer")
+            || path.starts_with("/api/environments")
+            || path.starts_with("/api/workspace/")
+        {
+            // Provisioning, identity and staging require cross-workspace reads, after their existing grants.
+            veyndo::tenant_scope::Scope::System
+        } else {
+            match tenant(h) {
+                Ok(t) => match h.principal.user.as_ref() {
+                    Some(actor) if h.principal.personal_session => {
+                        veyndo::tenant_scope::Scope::Personal {
+                            tenant: t,
+                            actor: actor.clone(),
+                        }
+                    }
+                    Some(actor) => veyndo::tenant_scope::Scope::Actor {
+                        tenant: t,
+                        actor: actor.clone(),
+                    },
+                    None => veyndo::tenant_scope::Scope::Tenant(t),
+                },
+                Err(_) if public => veyndo::tenant_scope::Scope::Denied,
+                Err(e) => return Err(e),
+            }
+        },
+    )
+}
+pub(crate) use veyndo_identity::permit;
 pub(crate) async fn authenticate(state: State<App>, request: Request, next: Next) -> Response {
     // Identity lookup is trusted; the admitted business request gets a narrower context below.
     veyndo::tenant_scope::scoped(
@@ -43,28 +131,15 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
     let mut h = RequestContext::from_request(&request);
     let path = request.uri().path().to_string();
     let method = request.method().to_string();
-    if path == "/checkout"
-        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
-        && let Some((_, shop)) = url.query_pairs().find(|(k, _)| k == "shop")
-    {
-        if crate::validate_tenant(&shop).is_err()
-            || header(&h, "x-tenant").is_some_and(|selected| selected != shop)
-        {
-            return bad("Checkout shop scope is inconsistent").into_response();
-        }
-        match shop.parse() {
-            Ok(value) => {
-                h.insert("x-tenant", value);
-            }
-            Err(_) => return bad("Invalid checkout shop scope").into_response(),
-        }
+    if let Err(e) = checkout_shop(&request, &mut h, &path) {
+        return e.into_response();
     }
     if let Err(e) = apps::bind_webhook_scope(&path, &mut h) {
         return e.into_response();
     }
     // Only the public native shell/assets bypass identity. Hosted shop assets still
     // require current tenant/channel admission and authorized private previews.
-    if crate::verified_kernel::native_asset_bypass(
+    if veyndo_kernel::verified_kernel::native_asset_bypass(
         crate::performance::delivery::native_static(&path),
         request
             .extensions()
@@ -74,36 +149,8 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
         request.extensions_mut().insert(h);
         return next.run(request).await;
     }
-    // Public image subrequests cannot carry frontend custom headers. Resolve only the scoped asset URL
-    // before sandbox/session admission; private shops still require the same merchant credential.
-    if (path.starts_with("/store-api/assets/")
-        || path.starts_with("/api/merchant/assets/")
-        || path.starts_with("/store-api/company-logo/")
-        || path.starts_with("/products/")
-        || path.starts_with("/channel-preview/"))
-        && header(&h, "x-tenant").is_none()
-        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
-        && let Some((_, shop)) = url.query_pairs().find(|(k, _)| k == "shop")
-    {
-        match shop.parse() {
-            Ok(value) => {
-                h.insert("x-tenant", value);
-            }
-            Err(_) => return bad("Invalid asset shop scope").into_response(),
-        }
-    }
-    if (path.starts_with("/channel-preview/") || path.starts_with("/store-api/assets/"))
-        && request
-            .extensions()
-            .get::<crate::shop_domains::HostShop>()
-            .is_none()
-        && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
-        && let Some((_, channel)) = url.query_pairs().find(|(k, _)| k == "channel")
-    {
-        if !apps::identifier(&channel) {
-            return bad("Invalid preview channel").into_response();
-        }
-        h.insert("sw-sales-channel-id", channel.parse().unwrap());
+    if let Err(e) = asset_scope(&request, &mut h, &path) {
+        return e.into_response();
     }
     if path.starts_with("/api/platform/")
         && request
@@ -198,40 +245,16 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
             .extensions()
             .get::<crate::shop_domains::HostShop>()
             .is_some();
-    let scope = if path.starts_with("/api/auth/")
-        || path.starts_with("/api/identity/")
-        || path == "/api/workspaces"
-        || path.starts_with("/api/developer")
-        || path.starts_with("/api/environments")
-        || path.starts_with("/api/workspace/")
-    {
-        // Provisioning, identity and staging require cross-workspace reads, after their existing grants.
-        veyndo::tenant_scope::Scope::System
-    } else {
-        match tenant(&h) {
-            Ok(t) => match h.principal.user.as_ref() {
-                Some(actor) if h.principal.personal_session => {
-                    veyndo::tenant_scope::Scope::Personal {
-                        tenant: t,
-                        actor: actor.clone(),
-                    }
-                }
-                Some(actor) => veyndo::tenant_scope::Scope::Actor {
-                    tenant: t,
-                    actor: actor.clone(),
-                },
-                None => veyndo::tenant_scope::Scope::Tenant(t),
-            },
-            Err(_) if public => veyndo::tenant_scope::Scope::Denied,
-            Err(e) => return e.into_response(),
-        }
+    let scope = match request_scope(&h, &path, public) {
+        Ok(scope) => scope,
+        Err(e) => return e.into_response(),
     };
     *request.headers_mut() = h.transport().clone();
-    let agent_authority = crate::agent_runs::controls::model_authority(&a, &h).await;
+    let agent_authority = crate::agent_runs::controls::model_authority(&h);
     request.extensions_mut().insert(h);
     let mut response = veyndo::inference::budget::scoped(
         agent_authority,
-        veyndo::tenant_scope::scoped(scope, super::abuse::run(&a, request, next)),
+        veyndo::tenant_scope::scoped(scope, veyndo_identity::http::abuse::run(&a, request, next)),
     )
     .await;
     if private_response {
@@ -240,24 +263,4 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
             .insert("cache-control", "private, no-store".parse().unwrap());
     }
     response
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn role_matrix() {
-        for role in ["owner", "admin", "editor", "viewer"] {
-            let mut h = RequestContext::new();
-            h.insert("x-rac-role", role.parse().unwrap());
-            assert!(permit(&h, "read").is_ok());
-            assert_eq!(permit(&h, "catalog").is_ok(), role != "viewer");
-            assert_eq!(
-                permit(&h, "users").is_ok(),
-                role == "owner" || role == "admin"
-            );
-            assert!(permit(&h, "unknown").is_err());
-        }
-        assert!(permit(&RequestContext::new(), "read").is_err());
-    }
 }

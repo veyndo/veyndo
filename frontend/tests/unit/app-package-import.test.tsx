@@ -1,8 +1,8 @@
 /** Custom packages retain server review, exact consent and revision isolation. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AppPackageImport from "../../src/admin/apps/AppPackageImport";
-import AppConsent from "../../src/admin/apps/AppConsent";
+import AppPackageImport from "../../../components/apps/ui/admin/apps/AppPackageImport";
+import AppConsent from "../../../components/apps/ui/admin/apps/AppConsent";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const review = {
   app: "private-app",

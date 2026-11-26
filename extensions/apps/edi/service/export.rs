@@ -209,93 +209,158 @@ fn render(fmt: &str, kind: &str, p: &Value, s: &Value) -> Result<String> {
         ));
     }
     let po = o["b2b"]["purchaseOrder"].as_str().unwrap_or("");
-    if fmt == "edifact" {
-        let (msg, bgm) = match kind {
-            "invoice" => ("INVOIC", "380"),
-            "delivery_note" => ("DESADV", "351"),
-            _ => ("ORDRSP", "231"),
-        };
-        let reference = hash(&format!("{number}:{msg}"))[..16].to_string();
-        let mut seg = vec![
-            format!("UNH+{reference}+{msg}:D:96A:UN"),
-            format!("BGM+{bgm}+{}+9", edi(number)),
-            format!("DTM+137:{}:102", date.replace('-', "")),
-            format!("RFF+ON:{}", edi(po)),
-            format!("NAD+SU+{}::92", edi(sender)),
-            format!("NAD+BY+{}::92", edi(receiver)),
-            format!("CUX+2:{code}:4"),
-        ];
-        for (n, (sku, q, line, unit, _)) in lines.iter().enumerate() {
-            seg.push(format!("LIN+{}++{}:SA", n + 1, edi(sku)));
-            seg.push(format!(
-                "QTY+{}:{q}:PCE",
-                if kind == "delivery_note" { "12" } else { "21" }
-            ));
-            if kind == "invoice" {
-                seg.push(format!("MOA+203:{}", line.decimal()));
-                seg.push(format!("PRI+AAA:{}", unit.decimal()));
-            }
-        }
-        seg.push("UNS+S".into());
-        if kind == "invoice" {
-            seg.push(format!("MOA+79:{}", net.decimal()));
-            seg.push(format!("MOA+124:{}", tax.decimal()));
-            seg.push(format!("MOA+39:{}", total.decimal()));
-            seg.push(format!("TAX+7+VAT+++:::{}+S", rate.unwrap()));
-        }
-        seg.push(format!("UNT+{}+{reference}", seg.len() + 1));
-        Ok(format!(
-            "UNB+UNOC:3+{}+{}+{}:0000+{reference}'{}'UNZ+1+{reference}'",
-            edi(sender),
-            edi(receiver),
-            date.replace('-', "").get(2..).unwrap_or(""),
-            seg.join("'")
-        ))
+    let document = Document {
+        kind,
+        number,
+        date,
+        code,
+        sender,
+        receiver,
+        po,
+        net,
+        tax,
+        total,
+        rate,
+        lines,
+    };
+    Ok(if fmt == "edifact" {
+        edifact(document)
     } else {
-        let root = match kind {
-            "invoice" => "Invoice",
-            "delivery_note" => "DespatchAdvice",
-            _ => "OrderResponse",
-        };
-        let mut x = format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><{root} xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:{root}-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"><cbc:UBLVersionID>2.1</cbc:UBLVersionID><cbc:ID>{}</cbc:ID><cbc:IssueDate>{}</cbc:IssueDate>",
-            xml(number),
-            xml(date)
-        );
-        if kind == "invoice" {
-            x.push_str(&format!("<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode><cbc:DocumentCurrencyCode>{code}</cbc:DocumentCurrencyCode>"));
-        }
-        if kind == "order_response" {
-            x.push_str("<cbc:OrderResponseCode>29</cbc:OrderResponseCode>");
-        }
-        x.push_str(&format!(
-            "<cac:OrderReference><cbc:ID>{}</cbc:ID></cac:OrderReference>",
-            xml(po)
+        ubl(document)
+    })
+}
+/// One validated outbound document, ready to be written in either format.
+struct Document<'a> {
+    kind: &'a str,
+    number: &'a str,
+    date: &'a str,
+    code: &'a str,
+    sender: &'a str,
+    receiver: &'a str,
+    po: &'a str,
+    net: Money,
+    tax: Money,
+    total: Money,
+    rate: Option<f64>,
+    lines: Vec<(&'a str, u64, Money, Money, &'a str)>,
+}
+/// The document as an EDIFACT D.96A interchange.
+fn edifact(d: Document<'_>) -> String {
+    let Document {
+        kind,
+        number,
+        date,
+        code,
+        sender,
+        receiver,
+        po,
+        net,
+        tax,
+        total,
+        rate,
+        lines,
+    } = d;
+    let (msg, bgm) = match kind {
+        "invoice" => ("INVOIC", "380"),
+        "delivery_note" => ("DESADV", "351"),
+        _ => ("ORDRSP", "231"),
+    };
+    let reference = hash(&format!("{number}:{msg}"))[..16].to_string();
+    let mut seg = vec![
+        format!("UNH+{reference}+{msg}:D:96A:UN"),
+        format!("BGM+{bgm}+{}+9", edi(number)),
+        format!("DTM+137:{}:102", date.replace('-', "")),
+        format!("RFF+ON:{}", edi(po)),
+        format!("NAD+SU+{}::92", edi(sender)),
+        format!("NAD+BY+{}::92", edi(receiver)),
+        format!("CUX+2:{code}:4"),
+    ];
+    for (n, (sku, q, line, unit, _)) in lines.iter().enumerate() {
+        seg.push(format!("LIN+{}++{}:SA", n + 1, edi(sku)));
+        seg.push(format!(
+            "QTY+{}:{q}:PCE",
+            if kind == "delivery_note" { "12" } else { "21" }
         ));
-        let (sup, buy) = match kind {
-            "invoice" => ("AccountingSupplierParty", "AccountingCustomerParty"),
-            "delivery_note" => ("DespatchSupplierParty", "DeliveryCustomerParty"),
-            _ => ("SellerSupplierParty", "BuyerCustomerParty"),
-        };
-        for (tag, id) in [(sup, sender), (buy, receiver)] {
-            x.push_str(&format!("<cac:{tag}><cac:Party><cac:PartyIdentification><cbc:ID>{}</cbc:ID></cac:PartyIdentification></cac:Party></cac:{tag}>",xml(id)));
-        }
         if kind == "invoice" {
-            let r = rate.unwrap();
-            x.push_str(&format!("<cac:TaxTotal><cbc:TaxAmount currencyID=\"{code}\">{}</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID=\"{code}\">{}</cbc:TaxableAmount><cbc:TaxAmount currencyID=\"{code}\">{}</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>{r}</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal><cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID=\"{code}\">{}</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID=\"{code}\">{}</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID=\"{code}\">{}</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID=\"{code}\">{}</cbc:PayableAmount></cac:LegalMonetaryTotal>",tax.decimal(),net.decimal(),tax.decimal(),net.decimal(),net.decimal(),total.decimal(),total.decimal()));
+            seg.push(format!("MOA+203:{}", line.decimal()));
+            seg.push(format!("PRI+AAA:{}", unit.decimal()));
         }
-        for (n, (sku, q, line, unit, label)) in lines.iter().enumerate() {
-            if kind == "invoice" {
-                x.push_str(&format!("<cac:InvoiceLine><cbc:ID>{}</cbc:ID><cbc:InvoicedQuantity unitCode=\"C62\">{q}</cbc:InvoicedQuantity><cbc:LineExtensionAmount currencyID=\"{code}\">{}</cbc:LineExtensionAmount><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>{}</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item><cac:Price><cbc:PriceAmount currencyID=\"{code}\">{}</cbc:PriceAmount></cac:Price></cac:InvoiceLine>",n+1,line.decimal(),xml(label),xml(sku),rate.unwrap(),unit.decimal()));
-            } else if kind == "delivery_note" {
-                x.push_str(&format!("<cac:DespatchLine><cbc:ID>{}</cbc:ID><cbc:DeliveredQuantity unitCode=\"C62\">{q}</cbc:DeliveredQuantity><cac:OrderLineReference><cbc:LineID>{}</cbc:LineID></cac:OrderLineReference><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification></cac:Item></cac:DespatchLine>",n+1,n+1,xml(label),xml(sku)));
-            } else {
-                x.push_str(&format!("<cac:OrderLine><cbc:LineStatusCode>5</cbc:LineStatusCode><cac:LineItem><cbc:ID>{}</cbc:ID><cbc:Quantity unitCode=\"C62\">{q}</cbc:Quantity><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification></cac:Item></cac:LineItem></cac:OrderLine>",n+1,xml(label),xml(sku)));
-            }
-        }
-        x.push_str(&format!("</{root}>"));
-        Ok(x)
     }
+    seg.push("UNS+S".into());
+    if kind == "invoice" {
+        seg.push(format!("MOA+79:{}", net.decimal()));
+        seg.push(format!("MOA+124:{}", tax.decimal()));
+        seg.push(format!("MOA+39:{}", total.decimal()));
+        seg.push(format!("TAX+7+VAT+++:::{}+S", rate.unwrap()));
+    }
+    seg.push(format!("UNT+{}+{reference}", seg.len() + 1));
+    format!(
+        "UNB+UNOC:3+{}+{}+{}:0000+{reference}'{}'UNZ+1+{reference}'",
+        edi(sender),
+        edi(receiver),
+        date.replace('-', "").get(2..).unwrap_or(""),
+        seg.join("'")
+    )
+}
+/// The document as UBL 2 XML.
+fn ubl(d: Document<'_>) -> String {
+    let Document {
+        kind,
+        number,
+        date,
+        code,
+        sender,
+        receiver,
+        po,
+        net,
+        tax,
+        total,
+        rate,
+        lines,
+    } = d;
+    let root = match kind {
+        "invoice" => "Invoice",
+        "delivery_note" => "DespatchAdvice",
+        _ => "OrderResponse",
+    };
+    let mut x = format!(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><{root} xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:{root}-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"><cbc:UBLVersionID>2.1</cbc:UBLVersionID><cbc:ID>{}</cbc:ID><cbc:IssueDate>{}</cbc:IssueDate>",
+        xml(number),
+        xml(date)
+    );
+    if kind == "invoice" {
+        x.push_str(&format!("<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode><cbc:DocumentCurrencyCode>{code}</cbc:DocumentCurrencyCode>"));
+    }
+    if kind == "order_response" {
+        x.push_str("<cbc:OrderResponseCode>29</cbc:OrderResponseCode>");
+    }
+    x.push_str(&format!(
+        "<cac:OrderReference><cbc:ID>{}</cbc:ID></cac:OrderReference>",
+        xml(po)
+    ));
+    let (sup, buy) = match kind {
+        "invoice" => ("AccountingSupplierParty", "AccountingCustomerParty"),
+        "delivery_note" => ("DespatchSupplierParty", "DeliveryCustomerParty"),
+        _ => ("SellerSupplierParty", "BuyerCustomerParty"),
+    };
+    for (tag, id) in [(sup, sender), (buy, receiver)] {
+        x.push_str(&format!("<cac:{tag}><cac:Party><cac:PartyIdentification><cbc:ID>{}</cbc:ID></cac:PartyIdentification></cac:Party></cac:{tag}>",xml(id)));
+    }
+    if kind == "invoice" {
+        let r = rate.unwrap();
+        x.push_str(&format!("<cac:TaxTotal><cbc:TaxAmount currencyID=\"{code}\">{}</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID=\"{code}\">{}</cbc:TaxableAmount><cbc:TaxAmount currencyID=\"{code}\">{}</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>{r}</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal><cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID=\"{code}\">{}</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID=\"{code}\">{}</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID=\"{code}\">{}</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID=\"{code}\">{}</cbc:PayableAmount></cac:LegalMonetaryTotal>",tax.decimal(),net.decimal(),tax.decimal(),net.decimal(),net.decimal(),total.decimal(),total.decimal()));
+    }
+    for (n, (sku, q, line, unit, label)) in lines.iter().enumerate() {
+        if kind == "invoice" {
+            x.push_str(&format!("<cac:InvoiceLine><cbc:ID>{}</cbc:ID><cbc:InvoicedQuantity unitCode=\"C62\">{q}</cbc:InvoicedQuantity><cbc:LineExtensionAmount currencyID=\"{code}\">{}</cbc:LineExtensionAmount><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>{}</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item><cac:Price><cbc:PriceAmount currencyID=\"{code}\">{}</cbc:PriceAmount></cac:Price></cac:InvoiceLine>",n+1,line.decimal(),xml(label),xml(sku),rate.unwrap(),unit.decimal()));
+        } else if kind == "delivery_note" {
+            x.push_str(&format!("<cac:DespatchLine><cbc:ID>{}</cbc:ID><cbc:DeliveredQuantity unitCode=\"C62\">{q}</cbc:DeliveredQuantity><cac:OrderLineReference><cbc:LineID>{}</cbc:LineID></cac:OrderLineReference><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification></cac:Item></cac:DespatchLine>",n+1,n+1,xml(label),xml(sku)));
+        } else {
+            x.push_str(&format!("<cac:OrderLine><cbc:LineStatusCode>5</cbc:LineStatusCode><cac:LineItem><cbc:ID>{}</cbc:ID><cbc:Quantity unitCode=\"C62\">{q}</cbc:Quantity><cac:Item><cbc:Name>{}</cbc:Name><cac:SellersItemIdentification><cbc:ID>{}</cbc:ID></cac:SellersItemIdentification></cac:Item></cac:LineItem></cac:OrderLine>",n+1,xml(label),xml(sku)));
+        }
+    }
+    x.push_str(&format!("</{root}>"));
+    x
 }
 pub async fn handle(
     State(a): State<App>,
@@ -312,5 +377,4 @@ pub async fn handle(
     Ok(Json(execute(&a, &t, v).await?))
 }
 #[cfg(test)]
-#[path = "export_tests.rs"]
 mod tests;

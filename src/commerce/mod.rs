@@ -1,10 +1,7 @@
 //! Native catalogue and checkout domains; pricing ports remain in the library.
-use crate::*;
-use veyndo::pricing::{TaxRule, proportional_tax_rules};
 mod types;
 pub(crate) use types::*;
 mod customer_groups;
-mod group_usage;
 pub(crate) use customer_groups::*;
 mod configuration;
 pub(crate) use configuration::*;
@@ -12,77 +9,36 @@ mod tax;
 pub(crate) use tax::*;
 mod catalog;
 pub(crate) use catalog::*;
-mod app_adjustments;
 mod delivery;
-pub(crate) use app_adjustments::apply as app_adjustment;
 pub(crate) use delivery::*;
 mod context_routes;
 pub(crate) use context_routes::*;
 mod detail;
 pub(crate) use detail::*;
-mod reviews;
-pub(crate) use reviews::*;
-mod review_import;
-pub(crate) use review_import::import_review;
-mod settings_routes;
-pub(crate) use settings_routes::*;
-mod settings_validation;
-pub(crate) use settings_validation::*;
-mod settings_mutation;
-pub(crate) use settings_mutation::*;
-mod review_moderation;
-pub(crate) use review_moderation::*;
+mod catalog_ports;
+mod inventory_ports;
+mod settings_guards;
+pub(crate) use settings_guards::*;
 mod fulfillment;
 pub(crate) use fulfillment::*;
 mod delivery_split;
-pub(crate) mod order_mutation;
 pub(crate) use delivery_split::split_delivery;
 
 mod selection;
 pub(crate) use selection::*;
 
 pub(crate) mod catalog_intake;
-mod product_create;
-mod product_edit;
-mod product_input;
-mod product_metadata;
-pub(crate) use product_create::create_product;
-pub(crate) use product_edit::*;
-pub(crate) use product_input::{admit_product_write, product_write_guidance};
 
 mod order_machine;
 pub(crate) use order_machine::*;
-mod order_workflow;
-pub(crate) use order_workflow::*;
-
-mod product_fields;
-pub(crate) use product_fields::*;
-
-mod order_fields;
-pub(crate) use order_fields::*;
 
 mod product_admin;
-mod product_preparation;
 pub(crate) use product_admin::*;
 
-mod product_channels;
-pub(crate) use product_channels::*;
-
 mod geography;
-pub(crate) use geography::Country;
-pub(crate) use geography::catalogue as company_countries;
-pub(crate) use geography::{country_catalogue, validate_address_geography};
-mod method_text;
+pub(crate) use geography::country_catalogue;
 mod tax_context;
-mod tax_rules;
 pub(crate) use tax_context::*;
-
-mod settings_defaults;
-
-mod product_languages;
-pub(crate) use product_languages::allowed as company_locale_allowed;
-pub(crate) use product_languages::key as product_language_key;
-pub(crate) use product_languages::valid_locale_key;
 
 mod content_text;
 pub(crate) use content_text::translated_string;
@@ -92,21 +48,17 @@ mod international_capabilities;
 pub(crate) use international_capabilities::*;
 
 mod settings_patch;
-pub(crate) use settings_patch::difference as settings_difference;
 mod settings_scope;
 pub(crate) use settings_scope::*;
 mod method_usage;
 pub(crate) use method_usage::method_dependencies;
 
-mod settings_release;
-pub(crate) use settings_release::*;
-
 pub(crate) use settings_patch::resolve as restore_checkout_data;
-pub(crate) mod inventory;
-pub(crate) mod supply;
 pub(crate) mod supply_proposal;
 pub(crate) mod test_stock;
 
-mod external_order_input;
 mod external_orders;
 pub(crate) use external_orders::import_external;
+pub(crate) use veyndo_studio::http::product_editor::{
+    create_product, edit_product, product_editor,
+};

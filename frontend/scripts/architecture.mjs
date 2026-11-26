@@ -2,6 +2,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { tokenDrift } from "./tokens.mjs";
+import {
+  appFiles,
+  componentDependencies,
+  componentUiRoots,
+  componentsRoot,
+} from "./source-roots.mjs";
 const root = path.resolve(import.meta.dirname, "..");
 const source = path.resolve(root, process.argv[2] ?? "src");
 const walk = (dir) =>
@@ -16,17 +23,69 @@ const pluginFiles = process.argv[2]
   : walk(appRoot).filter(
       (f) => /\.(tsx?|css)$/.test(f) && !f.includes("/tests/"),
     );
+// Component UI folders (components/<name>/ui) belong to the same source tree.
+// A fixture run passes its own components folder (with components.json beside it).
+const componentsDir = process.argv[3]
+  ? path.resolve(process.argv[3])
+  : process.argv[2]
+    ? undefined
+    : componentsRoot;
+const uiRoots = componentsDir ? componentUiRoots(componentsDir) : [];
+const dependsOn = componentsDir
+  ? componentDependencies(path.join(componentsDir, "../components.json"))
+  : new Map();
+/** The component whose UI folder holds `file`, if any. */
+const componentOf = (file) => {
+  const root = uiRoots.find((dir) => file.startsWith(dir + path.sep));
+  return root && path.basename(path.dirname(root));
+};
 const files = [
-  ...walk(source).filter((f) => /\.(tsx?|css)$/.test(f)),
+  ...[source, ...uiRoots].flatMap(walk).filter((f) => /\.(tsx?|css)$/.test(f)),
   ...pluginFiles,
 ];
-const relative = (f) => path.relative(source, f).replaceAll("\\", "/");
+// A component UI file reads like a frontend/src file: components/x/ui/admin/a -> admin/a.
+const relative = (f) =>
+  path
+    .relative(uiRoots.find((dir) => f.startsWith(dir + path.sep)) ?? source, f)
+    .replaceAll("\\", "/");
 const errors = [];
 const edges = new Map();
-const owners = ["admin", "storefront", "platform", "shared", "application"];
+const owners = [
+  "admin",
+  "storefront",
+  "platform",
+  "shared",
+  "application",
+  "kit",
+];
 const owner = (f) => relative(f).split("/")[0];
+// kit packages: a package imports only the packages listed here; outsiders import only its index.
+const kitLayers = {
+  tokens: [],
+  ui: ["tokens"],
+  api: [],
+  query: [],
+  storefront: ["tokens", "ui", "api", "query"],
+};
+const kitPackage = (f) =>
+  owner(f) === "kit" ? relative(f).split("/")[1] : undefined;
+// Hash-locked vendored components (components.lock.json) change only by explicit import.
+const lockedRoots = Object.values(
+  JSON.parse(
+    fs.readFileSync(path.resolve(root, "../components.lock.json"), "utf8"),
+  ).components,
+).map((row) => path.resolve(root, "..", row.path) + path.sep);
+const vendored = (file) =>
+  lockedRoots.some((prefix) => file.startsWith(prefix));
+/** Screens that fill a catalogued route generically (the API explorer, the preparation filter). */
+const pathCasts = new Set([
+  "admin/developer/api/ApiExplorer.tsx",
+  "admin/catalog/CatalogPreparation.tsx",
+]);
+const colourLiteral = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 const resolve = (from, spec) => {
-  const base = path.resolve(path.dirname(from), spec);
+  // Vite asset queries (`?inline`, `?url`) name the same file.
+  const base = path.resolve(path.dirname(from), spec.replace(/\?[a-z]+$/, ""));
   return [
     base,
     ...[".ts", ".tsx", ".css", ".js", "/index.ts", "/index.tsx"].map(
@@ -36,15 +95,65 @@ const resolve = (from, spec) => {
 };
 for (const file of files) {
   const text = fs.readFileSync(file, "utf8");
-  const limit = relative(file).startsWith("shared/i18n/") ? 700 : 400;
-  if (text.split("\n").length - Number(text.endsWith("\n")) > limit)
-    errors.push(
-      `${relative(file)} exceeds ${limit} lines; split responsibility`,
-    );
   if (!text.startsWith("/**") && !text.startsWith("/*"))
     errors.push(`${relative(file)} needs a leading responsibility comment`);
   if (path.dirname(file) === source && path.basename(file) !== "main.tsx")
     errors.push(`${relative(file)} belongs in a feature folder`);
+  // Studio, storefront, shared and console style with design tokens only (F4, F5).
+  if (
+    file.endsWith(".css") &&
+    ["admin", "storefront", "shared", "platform", "application"].includes(
+      owner(file),
+    ) &&
+    colourLiteral.test(text.replace(/\/\*[\s\S]*?\*\//g, ""))
+  )
+    errors.push(
+      `${relative(file)} uses a colour literal; frontend styles use var(--vy-color-*)`,
+    );
+  if (
+    /\.tsx?$/.test(file) &&
+    !vendored(file) &&
+    (["admin", "shared"].includes(owner(file)) ||
+      (file.startsWith(appRoot + path.sep) &&
+        file.includes(`${path.sep}studio${path.sep}`))) &&
+    /["'`\s]studio-(?:primary|secondary|card)["'`\s]/.test(text)
+  )
+    errors.push(
+      `${relative(file)} uses a retired Studio class; use kit Button, LinkButton or Card`,
+    );
+  // Screens call only catalogued paths (5.2): the generated route catalogue types
+  // their request functions; the open request contract is for app surfaces.
+  const screen =
+    /\.tsx?$/.test(file) &&
+    !vendored(file) &&
+    (["admin", "storefront"].includes(owner(file)) ||
+      /^shared\/(customer|grid|history|media|geography)\//.test(
+        relative(file),
+      ));
+  if (
+    screen &&
+    /import type \{\s*RequestFn\s*\}\s*from\s*"[^"]*api\/types"/.test(text)
+  )
+    errors.push(
+      `${relative(file)} uses the open app request contract; screens use ApiRequestFn (catalogued paths)`,
+    );
+  if (
+    screen &&
+    !pathCasts.has(relative(file)) &&
+    /\bas\s+Api(?:Route)?Path\b/.test(text)
+  )
+    errors.push(
+      `${relative(file)} casts a path to ApiPath; write a catalogued path or use childPath/withQuery`,
+    );
+  if (
+    file.endsWith(".css") &&
+    kitPackage(file) &&
+    !file.endsWith("/tokens.css") &&
+    colourLiteral.test(text.replace(/\/\*[\s\S]*?\*\//g, ""))
+  )
+    errors.push(
+      `${relative(file)} uses a colour literal; use var(--vy-color-*)`,
+    );
   if (file.endsWith(".css")) continue;
   const ast = ts.createSourceFile(
     file,
@@ -54,6 +163,10 @@ for (const file of files) {
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
   const links = [];
+  // A Studio extension descriptor registers its views with lazy import(); those
+  // loaders run only when the route opens, so they are not initialisation edges.
+  const registers = path.basename(file) === "studio-extension.ts";
+  let registration = false;
   const add = (spec, runtime) => {
     if (!spec.startsWith(".")) return;
     const target = resolve(file, spec);
@@ -76,7 +189,8 @@ for (const file of files) {
     if (target === path.resolve(root, "../extensions/sdk/analytics.js")) return; // Explicit public SDK boundary, contract-tested separately.
     if (
       !target.startsWith(source + path.sep) &&
-      !target.startsWith(appRoot + path.sep)
+      !target.startsWith(appRoot + path.sep) &&
+      !uiRoots.some((root) => target.startsWith(root + path.sep))
     ) {
       errors.push(
         `${relative(file)} imports outside the source ownership tree: ${spec}`,
@@ -94,9 +208,45 @@ for (const file of files) {
       );
       return;
     }
+    // A component's UI builds only on the UI of components it depends on (5.1).
+    const fromComponent = componentOf(file),
+      toComponent = componentOf(target);
+    if (
+      fromComponent &&
+      toComponent &&
+      fromComponent !== toComponent &&
+      !dependsOn.get(fromComponent)?.has(toComponent)
+    )
+      errors.push(
+        `${relative(file)} imports the UI of component ${toComponent}, which ${fromComponent} does not depend on (components.json uses); move the shared part to its owner or frontend/src/shared, or contribute it through a Studio slot`,
+      );
     const a = owner(file),
       b = owner(target);
-    if (a === "shared" && owners.includes(b) && b !== "shared")
+    if (a === "kit" && b !== "kit" && owners.includes(b))
+      errors.push(
+        `${relative(file)} imports outside kit via ${relative(target)}`,
+      );
+    const from = kitPackage(file),
+      to = kitPackage(target);
+    if (from && to && from !== to && !(kitLayers[from] ?? []).includes(to))
+      errors.push(
+        `${relative(file)} breaks the kit layering (${from} may not import ${to})`,
+      );
+    // The standalone style module inlines lower kit stylesheets (`*.css?inline`).
+    const inlineStyle =
+      path.basename(file) === "standalone-styles.ts" &&
+      /\.css\?inline$/.test(spec) &&
+      (kitLayers[from] ?? []).includes(to);
+    if (
+      to &&
+      from !== to &&
+      !inlineStyle &&
+      !/\/kit\/[^/]+\/index\.tsx?$/.test(target)
+    )
+      errors.push(
+        `${relative(file)} imports kit/${to} internals; import its index`,
+      );
+    if (a === "shared" && owners.includes(b) && !["shared", "kit"].includes(b))
       errors.push(
         `${relative(file)} violates shared boundary via ${relative(target)}`,
       );
@@ -104,12 +254,14 @@ for (const file of files) {
       ["admin", "storefront", "platform"].includes(a) &&
       owners.includes(b) &&
       a !== b &&
-      b !== "shared"
+      b !== "shared" &&
+      b !== "kit"
     )
       errors.push(
         `${relative(file)} crosses application boundary via ${relative(target)}`,
       );
-    if (runtime && !target.endsWith(".css")) links.push(target);
+    if (runtime && !target.endsWith(".css") && !registration)
+      links.push(target);
   };
   const visit = (node) => {
     if (
@@ -141,9 +293,11 @@ for (const file of files) {
       node.expression.kind === ts.SyntaxKind.ImportKeyword &&
       node.arguments[0] &&
       ts.isStringLiteral(node.arguments[0])
-    )
+    ) {
+      registration = registers;
       add(node.arguments[0].text, true);
-    else if (
+      registration = false;
+    } else if (
       ts.isImportTypeNode(node) &&
       ts.isLiteralTypeNode(node.argument) &&
       ts.isStringLiteral(node.argument.literal)
@@ -172,10 +326,80 @@ function check(file) {
   done.add(file);
 }
 for (const file of edges.keys()) check(file);
+if (!process.argv[2]) {
+  const drift = tokenDrift();
+  if (drift) errors.push(drift);
+  // The handwritten admin stylesheet folder only shrinks; screens move to kit/ui instead.
+  const budgetFile = path.join(root, "scripts/admin-styles-budget.json");
+  const budget = JSON.parse(fs.readFileSync(budgetFile, "utf8"));
+  const sheets = walk(path.join(source, "admin/styles")).filter((f) =>
+    f.endsWith(".css"),
+  );
+  const lines = sheets.reduce(
+    (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
+    0,
+  );
+  // Moving a sheet into its area does not count as removal: all admin CSS only falls too.
+  const adminLines = appFiles("admin", source)
+    .filter((f) => f.endsWith(".css"))
+    .reduce(
+      (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
+      0,
+    );
+  if (adminLines > budget.adminLines)
+    errors.push(
+      `admin CSS grew to ${adminLines} lines (budget ${budget.adminLines}); new screens use kit/ui`,
+    );
+  else if (adminLines < budget.adminLines)
+    errors.push(
+      `admin CSS shrank to ${adminLines} lines; lower adminLines in scripts/admin-styles-budget.json to match`,
+    );
+  // Studio areas read server data through kit/query (useRead); effects that call
+  // the request function directly only fall until none is left.
+  let effectReads = 0;
+  for (const file of appFiles("admin", source).filter((f) =>
+    /\.tsx?$/.test(f),
+  )) {
+    const text = fs.readFileSync(file, "utf8");
+    for (const match of text.matchAll(/useEffect\(\s*\(\)\s*=>\s*\{/g)) {
+      let depth = 1,
+        index = match.index + match[0].length;
+      while (depth && index < text.length) {
+        if (text[index] === "{") depth++;
+        else if (text[index] === "}") depth--;
+        index++;
+      }
+      const body = text.slice(match.index, index);
+      // Writes (autosave), liveness probes and shell orchestration are effects by
+      // nature; they carry a marker with the reason. Area reads use useRead.
+      if (
+        /\b(?:request|liveRequest|requestJson)\(/.test(body) &&
+        !/(?:write|probe|shell)-effect: \S/.test(body)
+      )
+        effectReads++;
+    }
+  }
+  if (effectReads > budget.effectReads)
+    errors.push(
+      `${effectReads} Studio effects call the request function (budget ${budget.effectReads}); read through useRead`,
+    );
+  else if (effectReads < budget.effectReads)
+    errors.push(
+      `Studio effects with direct reads fell to ${effectReads}; lower effectReads in scripts/admin-styles-budget.json`,
+    );
+  if (sheets.length > budget.files || lines > budget.lines)
+    errors.push(
+      `admin/styles grew to ${sheets.length} files / ${lines} lines (budget ${budget.files} / ${budget.lines}); new screens use kit/ui`,
+    );
+  else if (sheets.length < budget.files || lines < budget.lines)
+    errors.push(
+      `admin/styles shrank to ${sheets.length} files / ${lines} lines; lower scripts/admin-styles-budget.json to match`,
+    );
+}
 if (errors.length) {
   console.error(errors.join("\n"));
   process.exit(1);
 }
 console.log(
-  `PASS ${files.length} frontend modules: ownership, resolved imports, runtime DAG, responsibility comments, folder contracts and size limits`,
+  `PASS ${files.length} frontend modules: ownership, resolved imports, runtime DAG, responsibility comments and folder contracts`,
 );

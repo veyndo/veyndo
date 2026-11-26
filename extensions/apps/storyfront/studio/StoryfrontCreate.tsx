@@ -1,10 +1,11 @@
 /** Self-service entry retains the current tenant and an eligible native storefront channel; no installation on a read. */
+import { Card, LinkButton } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
-import type { Channel } from "../../../../frontend/src/admin/channels/channel-model";
+import type { Channel } from "../../../../components/marketing/ui/admin/channels/channel-model";
 import { useStoryfrontText } from "./storyfront-i18n";
 import { storyfrontCreateURL } from "./storyfront-create";
 export default function StoryfrontCreate({
@@ -61,7 +62,7 @@ export default function StoryfrontCreate({
   }, [request, workspace, allowed, locale]);
   const url = storyfrontCreateURL(workspace, channel, locale);
   return (
-    <section className="studio-card storyfront-create">
+    <Card className="storyfront-create">
       <div className="storyfront-create-icon">
         <Icon name="spark" size={30} />
       </div>
@@ -88,14 +89,14 @@ export default function StoryfrontCreate({
               </select>
             </label>
             {channel && (
-              <a className="studio-primary" href={url}>
+              <LinkButton tone="primary" href={url}>
                 {t("create")} <Icon name="arrow" size={18} />
-              </a>
+              </LinkButton>
             )}
           </>
         )}
         {error && <p role="alert">{error}</p>}
       </div>
-    </section>
+    </Card>
   );
 }

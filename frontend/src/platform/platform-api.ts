@@ -1,4 +1,5 @@
 /** Tenant-independent operator API using the same HttpOnly browser boundary as Studio. */
+import type { ApiPath } from "../kit/api";
 import { browserRequest } from "../shared/api/browser-session";
 export type Amount = {
   currency: string;
@@ -71,7 +72,7 @@ export class PlatformError extends Error {
 }
 export async function platformRequest<T>(
   token: string,
-  path: string,
+  path: ApiPath,
   body?: unknown,
   method?: string,
 ): Promise<T> {

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM commerce_rules WHERE tenant=$1 AND id=$2 AND revision=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1e876bca759707429ad9e44761c9713bc3805ad239de2608f546eaecdbaafcd"
+}

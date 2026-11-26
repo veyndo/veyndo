@@ -10,12 +10,13 @@
   bottom: 24px;
   left: 24px;
   width: min(560px, calc(100vw - 48px));
-  background: #fff;
-  color: #172c3b;
-  border: 1px solid #c9d2d8;
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+  border: 1px solid var(--vy-color-border);
   border-radius: 22px;
   padding: 26px;
-  box-shadow: 0 14px 65px #10222f29;
+  box-shadow: 0 14px 65px
+    color-mix(in srgb, var(--vy-color-text) 16%, transparent);
   max-height: calc(100dvh - 48px);
   overflow: auto;
 }
@@ -34,7 +35,7 @@
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
-  color: #546470;
+  color: var(--vy-color-muted);
 }
 .privacy-banner p {
   line-height: 1.6;
@@ -43,7 +44,7 @@
 .privacy-banner small {
   display: block;
   line-height: 1.6;
-  color: #495660;
+  color: var(--vy-color-muted);
 }
 .privacy-actions {
   display: flex;
@@ -54,9 +55,9 @@
 .privacy-actions button {
   flex: 1;
   min-height: 44px;
-  background: #eef2f4;
-  color: #172c3b;
-  border: 1px solid #b6c2cb;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-text);
+  border: 1px solid var(--vy-color-border);
   border-radius: 10px;
   padding: 10px 14px;
   font-weight: 600;
@@ -64,7 +65,7 @@
 }
 .privacy-actions button:focus-visible,
 .privacy-banner a:focus-visible {
-  outline: 3px solid #22567c;
+  outline: 3px solid var(--vy-color-accent);
   outline-offset: 3px;
 }
 .privacy-banner a {
@@ -88,7 +89,7 @@
   width: 20px;
   min-width: 20px;
   height: 20px;
-  accent-color: #22567c;
+  accent-color: var(--vy-color-accent);
 }
 .privacy-purposes small {
   margin: 6px 0 0 30px;
@@ -119,10 +120,10 @@
 .legal-request-form textarea {
   min-height: 48px;
   padding: 12px;
-  border: 1px solid #c2cad0;
+  border: 1px solid var(--vy-color-border);
   border-radius: 10px;
   font: inherit;
-  background: #fff;
+  background: var(--vy-color-surface);
 }
 .checkout-legal {
   display: grid;
@@ -152,7 +153,7 @@
   cursor: pointer;
 }
 .product-compliance {
-  border-top: 1px solid #ced5da;
+  border-top: 1px solid var(--vy-color-border);
   margin: 30px 0;
   padding-top: 22px;
 }
@@ -193,6 +194,6 @@
 }
 
 .privacy-banner::backdrop {
-  background: #10222f33;
+  background: color-mix(in srgb, var(--vy-color-text) 20%, transparent);
   backdrop-filter: blur(3px);
 }

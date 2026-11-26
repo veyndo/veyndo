@@ -2,12 +2,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import SandboxContextPicker from "../../src/admin/developer/SandboxContextPicker";
-import AppAssistant from "../../src/admin/developer/AppAssistant";
+import SandboxContextPicker from "../../../components/apps/ui/admin/developer/SandboxContextPicker";
+import AppAssistant from "../../../components/apps/ui/admin/developer/AppAssistant";
 import { readFileSync } from "node:fs";
 import AppActionAccess, {
   appScopes,
-} from "../../src/admin/developer/AppActionAccess";
+} from "../../../components/apps/ui/admin/developer/AppActionAccess";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
@@ -15,8 +15,8 @@ import {
   appKinds,
   assistedManifest,
   type AppKind,
-} from "../../src/admin/developer/assistant-model";
-import { compile } from "../../src/admin/developer/app-model";
+} from "../../../components/apps/ui/admin/developer/assistant-model";
+import { compile } from "../../../components/apps/ui/admin/developer/app-model";
 const draft = (kind: AppKind = "admin", location = "admin.product.tab") =>
   assistedManifest({
     kind,
@@ -292,7 +292,10 @@ it("renders localized choice labels in public product cards without exposing the
 });
 
 it("keeps app action and editor rights aligned with the native registry including B2B and POS", async () => {
-  const native = readFileSync("../src/auth/permissions.rs", "utf8");
+  const native = readFileSync(
+    "../components/identity/src/domain/permissions.rs",
+    "utf8",
+  );
   const registry = native.match(/const SCOPES:[\s\S]*?= &\[([\s\S]*?)\];/)![1];
   const scopes = [...registry.matchAll(/"([a-z0-9.]+)"/g)].map((x) => x[1]);
   expect([...appScopes].sort()).toEqual(scopes.sort());

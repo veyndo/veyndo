@@ -1,5 +1,17 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
-use super::*;
+use super::{master_data, receipt_pdf, receipt_text};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, payments};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_orders::store::receipts;
 pub(super) async fn settings(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     merchant(&a, &h)?;
     auth::permit(&h, "documents.read")?;
@@ -33,10 +45,7 @@ pub(super) async fn list(
     let t = merchant(&a, &h)?;
     auth::permit(&h, "documents.read")?;
     auth::permit(&h, "customers.pii")?;
-    let rows=sqlx::query("SELECT id,kind,number,locale,created_at::text AS created FROM order_receipts WHERE tenant=$1 AND order_id=$2 ORDER BY created_at DESC LIMIT 100").bind(t).bind(id).fetch_all(&a.db).await?;
-    Ok(Json(
-        json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"number":r.get::<String,_>("number"),"locale":r.get::<String,_>("locale"),"createdAt":r.get::<String,_>("created"),"pdfPath":format!("/api/merchant/receipts/{}/pdf",r.get::<String,_>("id"))})).collect::<Vec<_>>() }),
-    ))
+    Ok(Json(receipts::list(&a, &t, &id).await?))
 }
 pub(super) async fn create(
     State(a): State<App>,
@@ -47,144 +56,21 @@ pub(super) async fn create(
     let t = merchant(&a, &h)?;
     auth::permit(&h, "documents.create")?;
     auth::permit(&h, "customers.pii")?;
-    let key = v["requestKey"]
-        .as_str()
-        .or_else(|| header(&h, "idempotency-key"))
-        .filter(|s| (8..=128).contains(&s.len()))
-        .ok_or(bad("requestKey must contain 8..128 characters"))?;
-    let kind = v["kind"]
-        .as_str()
-        .filter(|s| ["invoice", "delivery_note", "cancellation"].contains(s))
-        .ok_or(bad("Invalid receipt kind"))?;
-    let locale = v["locale"].as_str().unwrap_or("en");
-    if !["en", "de", "fr", "es"].contains(&locale) {
-        return Err(bad("Unsupported receipt locale"));
-    }
-    // Preserve existing whole-order retry identities across deployment. Package
-    // selection is additive and must never alias a historical whole-order note.
-    let reference = if v.get("deliveryIndex").is_some() {
-        json!({"reference":v["referenceId"],"deliveryIndex":v["deliveryIndex"]})
-    } else {
-        v["referenceId"].clone()
-    };
-    let fingerprint = hash(&format!(
-        "{id}:{kind}:{locale}:{}:{}",
-        v["revision"], reference
-    ));
-    let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(format!("receipt:{t}:{key}"))
-        .execute(&mut *tx)
-        .await?;
-    if let Some(r) = sqlx::query(
-        "SELECT id,number,fingerprint FROM order_receipts WHERE tenant=$1 AND request_key=$2",
-    )
-    .bind(&t)
-    .bind(key)
-    .fetch_optional(&mut *tx)
-    .await?
-    {
-        if r.get::<String, _>("fingerprint") != fingerprint {
-            return Err(conflict("Receipt request key reused"));
-        }
-        return Ok(Json(
-            json!({"id":r.get::<String,_>("id"),"number":r.get::<String,_>("number")}),
-        ));
-    }
-    let r=sqlx::query("SELECT data #- '{cart,token}' AS data,created_at::text AS created FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(&t).bind(&id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Order not found".into()))?;
-    let order: Value = r.get("data");
-    if !order["historicalImport"].is_null() {
-        return Err(conflict(
-            "Historical invoices must be imported as original documents; no new invoice may be issued",
-        ));
-    }
-    if order["revision"] != v["revision"] {
-        return Err(conflict("Order revision changed"));
-    }
-    let package = if let Some(index) = v.get("deliveryIndex") {
-        if kind != "delivery_note" {
-            return Err(bad("Only delivery notes select a package"));
-        }
-        let index = index
-            .as_u64()
-            .and_then(|n| usize::try_from(n).ok())
-            .ok_or(bad("Invalid delivery note package"))?;
-        Some(
-            order["deliveries"]
-                .as_array()
-                .and_then(|v| v.get(index))
-                .ok_or(bad("Delivery note package unavailable"))?
-                .clone(),
-        )
-    } else {
-        None
-    };
-    let seller = master_data::seller(
-        &mut tx,
-        &t,
-        order["salesChannelId"].as_str().unwrap_or("default"),
-    )
-    .await?;
-    let reference = if kind == "cancellation" {
-        let ref_id = v["referenceId"]
-            .as_str()
-            .ok_or(bad("Original invoice reference required"))?;
-        let original:Value=sqlx::query_scalar("SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND kind='invoice'").bind(&t).bind(&id).bind(ref_id).fetch_optional(&mut *tx).await?.ok_or(bad("Original invoice unavailable"))?;
-        let exists:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND snapshot->>'referenceId'=$2 AND kind='cancellation')").bind(&t).bind(ref_id).fetch_one(&mut *tx).await?;
-        if exists {
-            return Err(conflict("Invoice already cancelled"));
-        }
-        Some(original)
-    } else {
-        None
-    };
-    // A single original invoice per order; cancellation does not initiate a provider refund.
-    if kind == "invoice" {
-        let exists:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND kind='invoice')").bind(&t).bind(&id).fetch_one(&mut *tx).await?;
-        if exists {
-            return Err(conflict("Invoice already exists"));
-        }
-    }
-    let payment_instructions = if kind == "invoice" {
-        payments::document_instructions(&mut tx, &t, &order).await?
-    } else {
-        None
-    };
-    let number:i64=sqlx::query_scalar("INSERT INTO receipt_counters(tenant,kind,next_number) VALUES($1,$2,2) ON CONFLICT(tenant,kind) DO UPDATE SET next_number=receipt_counters.next_number+1 RETURNING next_number-1").bind(&t).bind(kind).fetch_one(&mut *tx).await?;
-    let prefix = match kind {
-        "invoice" => "INV",
-        "delivery_note" => "DEL",
-        _ => "CAN",
-    };
-    let number = format!("{prefix}-{number:08}");
-    let receipt = uid();
-    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar::<_,String>("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":v["referenceId"],"referenceNumber":reference.map(|s|s["number"].clone())});
-    if let Some(instructions) = payment_instructions {
-        snapshot["paymentInstructions"] = instructions;
-    }
-    if let Some(package) = package {
-        snapshot["deliveryIndex"] = v["deliveryIndex"].clone();
-        snapshot["delivery"] = package;
-    }
-    sqlx::query("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)").bind(&receipt).bind(&t).bind(&id).bind(kind).bind(&number).bind(locale).bind(snapshot).bind(key).bind(fingerprint).execute(&mut *tx).await?;
-    sqlx::query(
-        "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'receipt',$4)",
-    )
-    .bind(&t)
-    .bind(&id)
-    .bind(header(&h, "x-rac-user").unwrap())
-    .bind(json!({"id":receipt,"number":number,"kind":kind}))
-    .execute(&mut *tx)
-    .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'document.created',$2)")
-        .bind(&t)
-        .bind(json!({"orderId":id,"documentId":receipt,"kind":kind}))
-        .execute(&mut *tx)
-        .await?;
-    tx.commit().await?;
     Ok(Json(
-        json!({"id":receipt,"number":number,"pdfPath":format!("/api/merchant/receipts/{receipt}/pdf")}),
+        receipts::create(&PaymentInstructions, &a, &h, &t, &id, &v).await?,
     ))
+}
+/// Invoices print the transfer instructions the payments owner holds for the order.
+struct PaymentInstructions;
+impl veyndo_orders::ports::Payments for PaymentInstructions {
+    fn document_instructions<'a>(
+        &'a self,
+        tx: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+        order: &'a Value,
+    ) -> veyndo_core::PortFuture<'a, Option<Value>> {
+        Box::pin(payments::document_instructions(tx, tenant, order))
+    }
 }
 pub(super) async fn pdf(
     State(a): State<App>,
@@ -194,16 +80,8 @@ pub(super) async fn pdf(
     let t = merchant(&a, &h)?;
     auth::permit(&h, "documents.read")?;
     auth::permit(&h, "customers.pii")?;
-    let r = sqlx::query("SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&a.db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))?;
-    Ok(super::document_response(
-        &r.get("snapshot"),
-        r.get("content"),
-    ))
+    let (snapshot, content) = receipts::stored(&a, &t, &id).await?;
+    Ok(super::document_response(&snapshot, content))
 }
 pub(crate) fn receipt_response(v: &Value) -> Response {
     (
@@ -228,20 +106,5 @@ pub(crate) async fn receipt_snapshot(
     auth::permit(h, "documents.read")?;
     auth::permit(h, "orders.read")?;
     auth::permit(h, "customers.pii")?;
-    let mut v: Value = sqlx::query_scalar(
-        "SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3",
-    )
-    .bind(t)
-    .bind(order)
-    .bind(id)
-    .fetch_optional(&a.db)
-    .await?
-    .ok_or(Error(
-        StatusCode::NOT_FOUND,
-        "Issued receipt not found for this order".into(),
-    ))?;
-    if let Some(cart) = v["order"]["cart"].as_object_mut() {
-        cart.remove("token");
-    }
-    Ok(v)
+    receipts::snapshot(a, &t, order, id).await
 }

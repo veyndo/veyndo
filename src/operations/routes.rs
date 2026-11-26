@@ -1,5 +1,14 @@
 //! HTTP/MCP rights for merchant CRM, fulfillment and company settings.
-use super::*;
+use super::{
+    addresses, company_public, customer_create, customer_lookup, customers, grid_plan, imports,
+    manual_orders, orders, receipts, workflow,
+};
+use crate::auth::SecureRoutes;
+use crate::commerce;
+use crate::foundation::App;
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -30,25 +39,29 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/settings/master-data",
             &[("GET", "settings.read"), ("PUT", "settings.write")],
-            get(master_data::get).put(master_data::put),
+            get(veyndo_orders::http::company::get).put(veyndo_orders::http::company::put),
         )
         .secure_route(
             "/api/settings/master-data/channels/{id}",
             &[("GET", "settings.read"), ("PUT", "settings.write")],
-            get(master_data::get_channel).put(master_data::put_channel),
+            get(veyndo_orders::http::company::get_channel)
+                .put(veyndo_orders::http::company::put_channel),
         )
         .secure_route(
             "/api/settings/company-logo",
             &[("POST", "settings.write")],
-            post(company_logo::upload),
+            post(veyndo_orders::http::company_logo::upload),
         )
         .secure_route(
             "/api/settings/company-logo/{id}",
             &[("GET", "settings.read")],
-            get(company_logo::preview),
+            get(veyndo_orders::http::company_logo::preview),
         )
         .route("/store-api/company", get(company_public::get))
-        .route("/store-api/company-logo/{id}", get(company_logo::public))
+        .route(
+            "/store-api/company-logo/{id}",
+            get(veyndo_orders::http::company_logo::public),
+        )
         .secure_route(
             "/api/merchant/order-state-machine",
             &[("GET", "orders.read"), ("PUT", "settings.write")],

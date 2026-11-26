@@ -1,4 +1,5 @@
 /** Shared agent entry: domain adapters retain all API, model, permission and approval behavior. */
+import { Button } from "../../kit/ui";
 import type { ReactNode } from "react";
 import Icon from "../ui/Icon";
 import { useAgentText } from "./agent-i18n";
@@ -74,14 +75,15 @@ export default function AgentComposer({
         />
       </label>
       {children}
-      <button
+      <Button
+        tone="primary"
         type="submit"
-        className="studio-primary agent-submit"
+        className="agent-submit"
         disabled={disabled || busy || !prompt.trim()}
       >
         <Icon name={engine === "platform" ? "spark" : "code"} size={17} />
         {t(busy ? "working" : engine === "platform" ? "generate" : "export")}
-      </button>
+      </Button>
       <small className="agent-composer-note">
         {t(engine === "platform" ? "internal" : "handoff")}
       </small>

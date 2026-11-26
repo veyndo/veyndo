@@ -20,7 +20,6 @@ export default function CollectionView() {
     catalogLoading,
     list,
     setViewed,
-    money,
     cart,
     pageCursor,
     busy,
@@ -77,7 +76,7 @@ export default function CollectionView() {
                   <ProductTile
                     key={p.id}
                     product={p}
-                    money={money}
+                    currency={cart?.price.currency ?? "EUR"}
                     business={cart?.customerGroup === "business"}
                     onViewed={() =>
                       setViewed((v) => ({
@@ -90,6 +89,16 @@ export default function CollectionView() {
               </div>
               <div className="shop-filters">
                 {catalogLoading && <p role="status">{s("loading")}</p>}
+                {!catalogLoading && !list.length && (
+                  <p role="status" className="shop-no-matches">
+                    {s("noMatches")}{" "}
+                    {query && (
+                      <button onClick={() => setQuery("")}>
+                        {s("clearSearch")}
+                      </button>
+                    )}
+                  </p>
+                )}
                 {pageCursor && (
                   <button
                     disabled={catalogLoading || busy}

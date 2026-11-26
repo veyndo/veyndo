@@ -1,4 +1,5 @@
 /** A saved plan walks reviewed pages in dependency order; truncated history never proves completion. */
+import { Button, Card } from "../../../../frontend/src/kit/ui";
 import type { RunPlan } from "./run-model";
 import { nextPage, type Batch } from "./run-pages";
 import { useMigrationText } from "./i18n";
@@ -27,7 +28,7 @@ export default function RunProgress({
     label = useMigrationText(),
     next = nextPage(plan, pages);
   return (
-    <section className="studio-card migration-run-progress">
+    <Card className="migration-run-progress">
       <h2>{t("title")}</h2>
       <p>{t("notice")}</p>
       <progress value={next.completed} max={plan.domains.length} />
@@ -43,8 +44,9 @@ export default function RunProgress({
       ) : next.kind ? (
         <div className="migration-run-next">
           <strong>{label(next.kind)}</strong>
-          <button
-            className="studio-primary"
+          <Button
+            tone="primary"
+            type="submit"
             disabled={busy}
             onClick={() =>
               next.page &&
@@ -64,7 +66,7 @@ export default function RunProgress({
                   : "compare"
                 : "next",
             )}
-          </button>
+          </Button>
           {next.page && (
             <button
               disabled={busy}
@@ -117,6 +119,6 @@ export default function RunProgress({
           ))}
         </details>
       )}
-    </section>
+    </Card>
   );
 }

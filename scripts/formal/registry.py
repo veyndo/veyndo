@@ -5,11 +5,11 @@ from layout import check_layout
 STATUSES={'unproved','extracted-policy','reviewed-binding','conformance-driver'}
 
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
-def current_sources(root):return {str(p.relative_to(root)):p for p in sorted([*(root/'src').rglob('*.rs'),*(root/'crates').rglob('*.rs'),*(root/'extensions').rglob('*.rs')])}
+def current_sources(root):return {str(p.relative_to(root)):p for p in sorted([*(root/'src').rglob('*.rs'),*(root/'crates').rglob('*.rs'),*(root/'components').rglob('*.rs'),*(root/'extensions').rglob('*.rs')])}
 def inputs(root):
-    files=[*(root/'reference').glob('automation-*.json'),root/'Cargo.toml',root/'components.lock.json',root/'extensions/apps/marketplaces/Cargo.toml',root/'extensions/apps/marketplaces/Cargo.lock',root/'extensions/apps/marketplaces/Dockerfile',root/'extensions/services/app-storage/Cargo.toml',root/'extensions/services/app-storage/model/Cargo.toml',root/'extensions/services/app-storage/Cargo.lock',root/'extensions/services/app-storage/tests/schema.sql',*(root/'crates').glob('*/Cargo.toml'),root/'Cargo.lock',*(root/'src').rglob('*.sql'),*(root/'src/ucp').glob('*.json'),*(root/'migrations').glob('*.sql'),*(root/'fixtures').glob('*.json'),
+    files=[*(root/'reference').glob('automation-*.json'),root/'Cargo.toml',root/'components.lock.json',root/'extensions/apps/marketplaces/Cargo.toml',root/'extensions/apps/marketplaces/Cargo.lock',root/'extensions/apps/marketplaces/Dockerfile',root/'extensions/services/app-storage/Cargo.toml',root/'extensions/services/app-storage/model/Cargo.toml',root/'extensions/services/app-storage/Cargo.lock',root/'extensions/services/app-storage/tests/schema.sql',*(root/'crates').glob('*/Cargo.toml'),root/'Cargo.lock',*(root/'src').rglob('*.sql'),*(root/'src/ucp').glob('*.json'),*(root/'components').glob('*/migrations/*.sql'),*(root/'extensions/services/connectors/migrations').glob('*.sql'),*(root/'fixtures').glob('*.json'),
            root/'extensions/sdk/host-exchange-v1.json',root/'extensions/sdk/native-asset-actions.json',root/'frontend/package.json',root/'frontend/package-lock.json',root/'frontend/scripts/precompress.mjs',root/'deploy/Dockerfile',
-           root/'proof/Commerce/Claims.lean',*(root/'proof/Commerce/Claims').glob('*.lean'),root/'proof/lakefile.toml',root/'proof/lean-toolchain',
+           root/'proof/Commerce/Claims.lean',root/'proof/domain-inventory.json',*(root/'proof/Commerce/Claims').glob('*.lean'),root/'proof/lakefile.toml',root/'proof/lean-toolchain',
            root/'scripts/formal.py',*(root/'scripts/formal').glob('*.py'),root/'.github/workflows/verify.yml',
            *(root/'crates/cognition/prompts').glob('*'),*(root/'crates/cognition/evals').glob('*.json'),root/'scripts/testing/prompt_governance.py']
     files.append(root/'crates/automation/reference/automation-registry.json')
@@ -46,7 +46,7 @@ def record(root,manifest,reason):
     binding_files={b for row in manifest['policies'].values()for b in row['bindings']}
     old=manifest.get('sources',{});rows={}
     for name,path in current_sources(root).items():
-        status='extracted-policy'if name in KERNEL_FILES else'reviewed-binding'if name in binding_files else'conformance-driver'if name=='src/bin/verified_kernel.rs' or name.startswith('src/bin/verified_kernel/')else'unproved'
+        status='extracted-policy'if name in KERNEL_FILES else'reviewed-binding'if name in binding_files else'conformance-driver'if name=='src/bin/verified_kernel/main.rs' or name.startswith('src/bin/verified_kernel/')else'unproved'
         rows[name]={'status':status,'sha256':digest(path),'review':reason if old.get(name,{}).get('sha256')!=digest(path) else old[name]['review']}
     manifest['sources']=rows
     prior=manifest.get('inputs',{})

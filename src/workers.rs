@@ -1,5 +1,9 @@
 //! Independently deployable worker roles; leases and durable receipts coordinate replicas.
-use crate::*;
+use crate::foundation::App;
+use crate::{agent_runs, assets, cognition, outbox, payments, runtime_config, translations};
+use std::env;
+use std::sync::Arc;
+use veyndo_core::work_signal;
 mod app_lane;
 pub(crate) use app_lane::AppWorkers;
 
@@ -93,7 +97,7 @@ pub(crate) fn start(a: &App, role: &str, app_enabled: bool) -> Option<AppWorkers
             let mut ticks = tokio::time::interval(std::time::Duration::from_secs(1));
             loop {
                 ticks.tick().await;
-                worker.channel_metrics.flush(&worker.db).await;
+                worker.metrics.flush(&worker.db).await;
             }
         });
     }

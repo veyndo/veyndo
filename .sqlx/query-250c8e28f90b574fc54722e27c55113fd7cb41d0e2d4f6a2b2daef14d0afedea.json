@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE b2b_budget_allocations SET released=true WHERE tenant=$1 AND order_id=$2 AND NOT released",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "250c8e28f90b574fc54722e27c55113fd7cb41d0e2d4f6a2b2daef14d0afedea"
+}

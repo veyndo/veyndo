@@ -11,19 +11,22 @@ import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { responseError } from "../../src/shared/i18n/errors-i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
-import { compile, template } from "../../src/admin/developer/app-model";
-import AppAssistant from "../../src/admin/developer/AppAssistant";
-import AppAgentDrawer from "../../src/admin/developer/AppAgentDrawer";
-import AppCanvas from "../../src/admin/developer/AppCanvas";
-import AppFormFields from "../../src/admin/developer/AppFormFields";
+import {
+  compile,
+  template,
+} from "../../../components/apps/ui/admin/developer/app-model";
+import AppAssistant from "../../../components/apps/ui/admin/developer/AppAssistant";
+import AppAgentDrawer from "../../../components/apps/ui/admin/developer/AppAgentDrawer";
+import AppCanvas from "../../../components/apps/ui/admin/developer/AppCanvas";
+import AppFormFields from "../../../components/apps/ui/admin/developer/AppFormFields";
 import {
   AppPanelHandle,
   useAppPanelSizing,
-} from "../../src/admin/developer/AppPanelSizing";
-import { logicTopology } from "../../src/admin/developer/AppLogicTopology";
-import AppSettings from "../../src/admin/apps/AppSettings";
-import AppSettingsEditor from "../../src/admin/developer/AppSettingsEditor";
-import IntegrationKeys from "../../src/admin/developer/api/IntegrationKeys";
+} from "../../../components/apps/ui/admin/developer/AppPanelSizing";
+import { logicTopology } from "../../../components/apps/ui/admin/developer/AppLogicTopology";
+import AppSettings from "../../../components/apps/ui/admin/apps/AppSettings";
+import AppSettingsEditor from "../../../components/apps/ui/admin/developer/AppSettingsEditor";
+import IntegrationKeys from "../../../components/identity/ui/admin/team/IntegrationKeys";
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <LocaleProvider>
     <ContentLanguage locales={["en-GB", "sv-SE"]} mainLocale="en-GB">

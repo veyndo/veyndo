@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform_audit(actor,action,tenant,data) VALUES($1,'shop.created',$2,$3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68ac8ea95e9a79ef8b9510a4d10400ba07264234846209dd29fcbf72f61d21fb"
+}

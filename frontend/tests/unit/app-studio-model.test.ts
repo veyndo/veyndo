@@ -11,7 +11,7 @@ import {
   renameEntity,
   template,
   textMap,
-} from "../../src/admin/developer/app-model";
+} from "../../../components/apps/ui/admin/developer/app-model";
 import example from "../../../extensions/apps/care-studio/manifest.json";
 import furniture from "../../../extensions/apps/furniture-configurator/manifest.json";
 import type { Manifest } from "../../src/shared/apps/native/types";
