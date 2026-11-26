@@ -62,7 +62,7 @@ those capabilities merely by exporting a function with that name.
 
 The WAT examples above remain supported. The broader app API adds independently
 installed packages with their own data, actions and UI. See
-[full implementation and limits](../docs/intelligence-apps-payments.md).
+the [app platform](../docs/app-platform.md).
 
 | Package | Executable features | Example files |
 |---|---|---|

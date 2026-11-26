@@ -118,4 +118,4 @@ purchases above are separate successes. The earlier successful original embedded
 purchase retains its separate [17 October receipt](native-app-fields-hosted-2026-10-17.md).
 
 ![Controlled repeat: explicit retry message after the browser-held document response.](../assets/native-lifecycles-20261017/controlled-storyfront-timeout.png)
-See [current status](../status.md) and [the app-system matrix](../app-system-status.md).
+See [current status](../status.md) and [the app-system matrix](../app-platform.md).

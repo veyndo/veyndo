@@ -167,7 +167,7 @@ jobs, allocations and receipts cannot be staged or selectively released.
   consent and API declaration consumed by the App Studio assistant.
 - `components/apps/src/service/carrier_booking.rs`: package-scoped current app admission and
   reserve/release audit; unknown effects block allocation, dispatch and other carriers.
-- `operations/order_documents.rs`, migration 092 and `apps/core_documents.rs`: generic
+- `operations/order_documents.rs`, the schema baseline and `apps/core_documents.rs`: generic
   immutable receipt/PDF admission; `apps/package_fence.rs` shares the existing package
   write fence with native record writes.
 - `scripts/shipping_contract.py`: test-only local service driving native jobs, PDFs,

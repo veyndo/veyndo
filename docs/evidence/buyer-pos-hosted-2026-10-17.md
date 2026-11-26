@@ -120,4 +120,4 @@ with `payment.ready` and `delivery.delivered` completion guards.
 - Real provider settlement/mail/refund, hosted signed-buyer RFQs, Apple callback
   repair, arbitrary isolated source builds and historical business replay are not
   newly accepted by this release. See the [current status](../status.md) and
-  [app implementation map](../app-system-status.md).
+  [app implementation map](../app-platform.md).

@@ -133,7 +133,7 @@ object as server-owned `_appSettings`. Caller input cannot override it. Native
 browser views and public actions receive no settings secrets. This release does
 not add secret lookup expressions to native UI code.
 
-Migration `096-app-settings.sql` extends the existing secret-kind constraint; it
+The apps baseline (`components/apps/migrations/0001-baseline.sql`) holds the secret-kind constraint; it
 creates no second configuration table. Strict production serve mode requires the
 normal privileged provisioning/migration path before rollout.
 

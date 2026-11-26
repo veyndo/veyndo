@@ -151,7 +151,7 @@ accepted purchase/return path. [One selected product's missing German text](../e
 was also prepared, reviewed and applied without changing its price or stock.
 Independent hosted B2B approval and saved
 selection/reorder acceptance remain open.
-See [the ordered follow-ups](../connected-merchant-followups.md) and the
+See the
 [saved-work contract](../durable-agent-runs.md).
 
 ## 21 October: original Storyfront purchase scene
@@ -362,7 +362,7 @@ Earlier deliveries retain their source and acceptance boundaries:
 
 ## Evidence and reference guides
 
-- [Hardening design and owners](../platform-hardening.md): architecture detail, not another release status.
-- [Historical delivery audit](../delivery-audit-2026-10-15.md) and [release record](../current-release.md): dated evidence.
+- [Hardening design and owners](../business-capabilities.md#the-operation-registry-underneath): architecture detail, not another release status.
+- [Release record](../current-release.md): dated evidence.
 - [Testing](../testing.md), [formal scope](../formal-verification.md), [capacity measurements](../benchmarks.md).
 - [Changelog](../../CHANGELOG.md): implementation notes belong here, not in the README.

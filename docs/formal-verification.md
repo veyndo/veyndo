@@ -9,9 +9,6 @@ only. This is **not a certificate that the entire commerce core is correct or
 bug-free**. Binding review is not proof of the surrounding modules.
 The [manifest](../proof/manifest.json) and per-revision CI artifact are authoritative.
 The operational-record exclusion remains part of the generic app release policy.
-The original compatibility experiment and its dated evidence are retained on the
-[separate branch](https://github.com/sthamann/veyndo/blob/experiment/shopware-compatibility/docs/evidence/shopware-compatibility-2026-10-25.md);
-its original PHP runtime is outside this proof scope.
 The earlier published CI evidence below retains its own date and counts.
 The 23 October local and Linux CI verification compare **156,741 compiled Rust/Lean cases
 without mismatches** and reject 183 deliberately broken policy variants.
@@ -156,7 +153,7 @@ nothing, release returns exactly what is held) and proves for every sequence:
 held never exceeds ordered, stock plus held is conserved, releasing twice equals
 releasing once, and a final release restores the stock. Production reserves once,
 when the order is created (`InventoryLines::new` with nothing held, used by checkout
-and external orders); release is the idempotent `release.sql`. The sequence
+and external orders); release is the idempotent `release` in `components/inventory/src/store/reservations.rs`. The sequence
 theorems therefore also cover any later re-reservation path, provided it passes
 the persisted held quantity to the same rule. The SQL lock order and the
 `released_at` fence are reviewed adapters.
@@ -184,8 +181,8 @@ or checkout review is refused after any later writes. The replay rule stays
 single-step: at most one order per idempotency key comes from the key lookup in
 SQL, not from the rule.
 
-**Comparison driver.** The registered tooling suite `formal_differential` runs all
-72 rules, compiled Rust from the fresh build against the executable built from the
+**Comparison driver.** The registered tooling suite `formal_differential` runs the
+extracted rules (72 when the suite was registered), compiled Rust from the fresh build against the executable built from the
 extracted Lean model, on 228,195 generated inputs (all Boolean assignments crossed
 with numeric edges up to `u64::MAX`, plus seeded random cases). Its negative
 control alters five rules in a temporary Lean model and must catch each.
@@ -267,7 +264,7 @@ The existing **Verify prototype / verify** job now also:
    proof/module-layout bypasses. The Cargo boundary check additionally rejects
    17 dependency/owner bypasses, including aliases, optional dependencies, build
    scripts and targets placed in another domain's directory.
-7. Runs existing Rust, PHP-reference and real PostgreSQL HTTP regressions.
+7. Runs the Rust tests and the real PostgreSQL HTTP regressions.
 
 CI never regenerates the policy model or refreshes review hashes automatically.
 It uploads `formal-verification-<commit>` JSON evidence, including explicit

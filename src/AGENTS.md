@@ -87,7 +87,8 @@ cards in Apps/Storyfronts; original Storyfront code stays in its private reposit
 
 ## Cross-feature integration continuity
 
-Read `docs/feature-integration.md` before extending POS, B2B/EDI, marketplaces or
+Read `docs/pos.md`, `docs/b2b-commerce.md`, `docs/marketplaces.md` and
+`docs/behavior-intelligence.md` before extending POS, B2B/EDI, marketplaces or
 visitor observations. Every release selection needs its own current domain right;
 `team.manage`/environment access never delegates catalog, app or B2B authority.
 Use `marketing/channel_config.rs` for native/released channel validation and

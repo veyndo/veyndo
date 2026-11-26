@@ -25,6 +25,7 @@
         "docs/quickstart.md",
         "docs/status.md",
         "docs/current-release.md",
+        "docs/README.md",
         "docs/platform-overview.md",
         "docs/features.md",
         "docs/shop-setup.md",
@@ -87,8 +88,7 @@
         "docs/agentic-migration.md",
         "docs/cognitive-commerce.md",
         "docs/behavior-intelligence.md",
-        "docs/agentic-grids.md",
-        "docs/connected-workbench.md"
+        "docs/agentic-grids.md"
       ]
     },
     {
@@ -114,7 +114,6 @@
         "docs/knowledge-component.md",
         "docs/automation-component.md",
         "docs/connector-component.md",
-        "docs/app-system-status.md",
         "docs/business-capabilities.md",
         "docs/furniture-configurator.md",
         "docs/app-studio-workspace.md",
@@ -155,16 +154,12 @@
         "docs/product-management.md",
         "docs/merchant-operations.md",
         "docs/shipping-workflows.md",
-        "docs/payment-transaction-details.md",
-        "docs/payment-invoice-checkout.md",
-        "docs/payment-saved-methods.md",
-        "docs/payment-capture-management.md",
+        "docs/payments.md",
         "docs/email-delivery.md",
         "docs/currencies.md",
         "docs/international-commerce.md",
         "docs/localization.md",
         "docs/company-settings.md",
-        "docs/channel-setup.md",
         "docs/channel-management.md",
         "docs/pos.md",
         "docs/trade-network.md",
@@ -229,7 +224,6 @@
         "docs/proof-coverage.md",
         "docs/formal-coverage.md",
         "docs/benchmarks.md",
-        "docs/system-consistency-audit.md",
         "docs/licensing.md",
         "docs/documentation-site.md"
       ]

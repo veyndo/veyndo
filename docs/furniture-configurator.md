@@ -22,7 +22,7 @@ The [earlier hosted app workflow](evidence/platform-hardening-hosted-2026-10-16.
 covers pattern creation, private material writes, immutable version, reviewed
 sandbox install and selected publication. All these purchasing tests use synthetic
 customers and simulated payment. Real settlement and the wider
-[business-capability programme](app-system-status.md) remain separate.
+[business-capability programme](app-platform.md) remain separate.
 
 ## Build and try it
 
@@ -165,6 +165,5 @@ These additional checks are local until new hosted evidence is recorded.
 
 The full concept additionally requires general core-object extensions, native
 order/offer lifecycle extensions, historical whole-business replay, source build
-hosting, Crater compatibility operations, a demonstrated Shopware extension port
-and operated Enterprise cells. This app is a connected implementation case, not
+hosting, Crater compatibility operations and operated Enterprise cells. This app is a connected implementation case, not
 acceptance of those separate capabilities.

@@ -27,7 +27,7 @@
     }
   },
   "hosted_guides": {
-    "core": "docs/architecture.html#one-transactional-core-independently-deployable-workers",
+    "core": "docs/architecture.html#how-the-parts-connect",
     "app-worker": "docs/automation-component.html#move-the-app-worker-out-of-core",
     "checkout": "docs/checkout-component.html#hosted-lumen-pilot-10-november-2026",
     "knowledge": "docs/knowledge-component.html",

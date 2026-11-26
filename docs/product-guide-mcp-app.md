@@ -43,7 +43,7 @@ variants with different prices. Review one, switch to the other and check that
 the cart button is replaced by a fresh review. Confirm the new offer and verify
 that the cart names the selected variant. With one variant out of stock, only
 the available variant appeared in the hosted picker.
-[Hosted variant acceptance](status.md#product-guide-variant-selection).
+[Hosted variant acceptance](status.md#hosted-pilot-earlier-release).
 
 In Studio, switch to a private sandbox before asking for an executable product
 proposal. The app can be present there without its private live records. Add a
@@ -51,13 +51,13 @@ synthetic private note in the sandbox and ask the assistant to read it and
 prepare a care description change. Review the actual proposal beside the App
 table. Choose **Approve changes** to apply the draft in that sandbox, and check
 the result in its product editor. The App table can only read; Studio owns
-approval and publication. [Hosted action verification](status.md#product-guide-actions-in-the-hosted-shop).
+approval and publication. [Hosted action verification](status.md#hosted-pilot-earlier-release).
 
 ## Reuse the tool and view in another host
 
 The hosted Lumen check exercised both filters with the real model and verified
 that a public request could not open private merchandising notes.
-[Live result and screenshots](status.md#product-guide-in-both-live-conversations).
+[Live result and screenshots](status.md#hosted-pilot-earlier-release).
 
 When an initial tool call already selects a priority, the view keeps that
 restriction. Ask for all priorities first to use the selector yourself. The

@@ -82,9 +82,8 @@ use Veyndo's connected PayPal Sandbox seller. The
 [provider acceptance matrix](shopware-payments-acceptance.md) distinguishes
 those tests from production credentials and provider method coverage.
 
-Already released migration 016 and public Git history cannot become private
-retroactively. Additive migration 039 removes the SQL attribution default;
-existing attempt snapshots remain intact for reconciliation/refunds.
+The payments baseline has no SQL attribution default; each attempt snapshot keeps
+its original attribution for reconciliation and refunds.
 
 ## Verification
 
@@ -139,7 +138,7 @@ browser checks are development evidence, not a conversion-rate claim or live pay
 
 ## Additional payment methods
 
-See [payment provider contributions](payment-provider-contributions.md) for the
+See [payment provider contributions](payment-provider-api.md#proposing-another-payment-provider) for the
 current native adapter boundary, invoice/receipt requirements and the deferred
 Nano/XNO proposal. Declaring an app payment method alone cannot mark orders paid.
 

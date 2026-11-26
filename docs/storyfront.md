@@ -133,7 +133,7 @@ For the shared quote, purchase and refund path, see
    Core order and payment ledger and reconcile pending attempts before rolling
    back Core.
 
-The [current status](status.md#embedded-checkout-recovery-8-november-2026)
+The [current status](status.md#hosted-pilot-earlier-release)
 distinguishes the deployed public browser check, local contract tests and
 provider evidence.
 
@@ -212,8 +212,7 @@ Core sends an exact-origin shopper receipt; Storyfront verifies the completed ca
 order ID and purchased SKU quantities against Core before subtracting those quantities
 from its original bag. Receipt IDs prevent duplicate subtraction; an unverified receipt
 is retained for retry, and abandoning checkout retains the bag. Cross-origin customer
-account SSO and provider-specific external redirect/3DS return flows are not yet verified. This is not full Shopware/Storyfront
-feature equivalence or a production SaaS scaling claim.
+account SSO and provider-specific external redirect/3DS return flows are not yet verified. This is not a production SaaS scaling claim.
 
 ## Verification
 
@@ -225,9 +224,8 @@ idempotent replay. CI runs it with the other database suites.
 The companion connector tests compile an imported manifest, retain variant facts
 and SKU mappings, reject foreign media/duplicates, and exercise destination
 validation, bounded responses and authoritative cart transfers. Browser verification
-covers Storyfront bag to the existing Rust checkout. See
-[checkout-handoff-verification.json](checkout-handoff-verification.json) for the
-sanitized local database checks.
+covers Storyfront bag to the existing Rust checkout; the `checkout_handoff`
+suite runs the database checks.
 
 ## Local end-to-end evidence
 

@@ -11,12 +11,13 @@ Markdown as its source.
 | Your goal | Start here |
 | --- | --- |
 | Understand what Veyndo does | [Start here](start-here.md), then [let an agent buy](agent-purchase.md) |
-| See what is online and actually tested | [Current status](status.md): one entry point for the deployed version, observed journeys and remaining work |
+| See what is online and actually tested | [Current status](status.md): the release state, what was verified and what is open |
+| Find the page that owns a topic | [Handbook index](README.md) |
 | Try a complete working round | [First tour](first-tour.md) |
 | Give an agent a bounded job | [Agent workshop](agent-workshop.md) |
 | Create an extension | [Visual App Studio](app-studio.md) and [five illustrated workshops](app-tutorials/README.md) |
 | Design a connected shop | [Experience integration](experience-integration.md), [Storyfront](storyfront.md) and [checkout](checkout.md) |
-| Deploy or assess the boundaries | [Architecture](production-architecture.md), [hosting](managed-hosting.md) and [security](security.md) |
+| Deploy or assess the boundaries | [Component architecture](architecture.md), [production architecture](production-architecture.md), [deployment](deployment.md) and [security](security.md) |
 
 Every rendered article provides its original source, chapter navigation and an
 article outline. Previous/next links follow the chapter sequence. Wide tables and
@@ -50,24 +51,25 @@ their own existing routes. GitHub Pages remains an independently readable mirror
 
 ## Historical links and film downloads
 
-On 11 November 2026, the compatibility page was updated to route the five
-old GitHub Pages prefixes (`veyndo`, `vendune`, `rust-ai-commerce`, `sellm`,
-and `sellama`) to the organization Pages mirror. Browser checks preserved the
-full article path, language query and section anchor. Requests to the old
-Vendune root, www, Team, start, Experience and Lumen shop hosts preserved their
-paths and queries in HTTPS redirects to the current hosts.
+Old GitHub Pages prefixes (`veyndo`, `vendune`, `rust-ai-commerce`, `sellm`,
+`sellama`) route to the organization Pages mirror, keeping the article path,
+language query and section anchor. For direct media requests and clients without
+JavaScript, use the current [Veyndo handbook](https://www.veyndo.ai/docs/) or its
+[Pages mirror](https://veyndo.github.io/veyndo/docs/). The site package contains
+the current SRT downloads next to the WebVTT captions ([film guide](video-tours.md)).
 
-The old personal GitHub Pages site uses a browser redirect from its 404 page.
-For direct media requests and clients without JavaScript, use the current
-[Veyndo handbook](https://www.veyndo.ai/docs/) or its
-[Pages mirror](https://veyndo.github.io/veyndo/docs/).
+## Diagrams
 
-The site package now contains the four current SRT downloads alongside the
-WebVTT captions. After publication, 154 media responses matched the source
-bytes or, for videos and archives, a 1 KiB range and the original total size.
-The four current MP4 files also matched their full SHA-256 hashes on both
-hosts. The handbook browser played all four and opened the first SRT download
-from its visible link. [Film guide](video-tours.md).
+The public handbook renders Markdown Mermaid fences through the shared
+`site/docs-diagrams.js` module. The unmodified Mermaid 11.15.0 browser distribution
+and its MIT notice are stored in `site/vendor/`; its package integrity and bundle
+SHA-256 are recorded in `mermaid.json`. Build and site checks reject a missing or
+changed bundle or a disconnected loader. No CDN or network package installation is
+needed to build or read diagrams, and pages without diagrams do not load Mermaid.
+Strict rendering disables diagram-defined click actions and sanitizes SVG. Readers
+can fit wide diagrams to the article, scroll at full size and inspect the original
+source. Without JavaScript, or when one diagram fails, its source remains readable.
+Diagram controls follow the handbook's EN/DE/FR/ES language selection.
 
 ## Language and evidence
 
@@ -78,9 +80,7 @@ labels each article's source language in navigation and search. Set
 `<!-- veyndo-language: de -->` on a German article so that its metadata and
 browser language reflect the text.
 
-The homepage and README use [hosted browser captures](status.md) for the Product
-Guide and checkout. [The film index](video-tours.md) lists the dated tours and their
-scope. Older recordings remain available with their original evidence dates.
+[The film index](video-tours.md) lists the dated tours and their scope.
 
 
 ## Build and validate
@@ -108,65 +108,25 @@ check. Untracked, non-ignored Markdown is included for local previews before its
 first commit; only committed files reach CI. Do not put private notes in the
 public repository.
 
-## Publication and current facts
+## Keeping the handbook current
 
-Start with [Status](status.md), [the component map](commerce-components.md) and
-[the feature guide](features.md) for the current product. The dated entries below
-describe earlier documentation releases.
+Each topic has one owner page; the [handbook index](README.md) lists them. When a change
+alters behaviour, update the owner page in the same change and link to it from other
+pages instead of repeating it. Dated acceptance records belong in [`evidence/`](evidence/)
+and release entries in the [changelog](../CHANGELOG.md), not in guides.
 
-The 21 October update consolidates current release and acceptance information in
-[Status](status.md). Dated deployment notes move to the linked history; app and
-configurator guides link the specific public purchasing evidence. Read the current
-status first, then a dated receipt when its exact test scope matters. Build checks
-also cover all archived Markdown, screenshots and links.
+Several pages are generated and must not be edited by hand:
 
-The 16 October app review reconciles shared storage, saved agent work and enforced
-database/browser authority across README, app guides, architecture notes and the
-release tracker. [App-system status](app-system-status.md) is the reader's entry
-to delivered/partial/open behavior. The app chapter now links that map, the
-business-capability direction and the exact storage guide before deeper tutorials.
-Dated receipts remain unchanged; later results explicitly supersede earlier
-observations only for the later source tree.
+| Page | Generator |
+| --- | --- |
+| [Component dependencies](component-dependencies.md) | `python3 scripts/components.py --write` |
+| [Proof coverage](proof-coverage.md) | `python3 scripts/formal/coverage_page.py` |
+| [Domain proof inventory](formal-coverage.md) | `python3 scripts/formal/domain_inventory.py --write` |
+| [Roadmap](roadmap.md) | `python3 scripts/roadmap.py` from `docs/roadmap.json` |
+| [Source inventory](module-inventory.md) | `python3 scripts/testing/source_inventory.py --write` |
 
-
-The 12 October update adds [five illustrated App Studio workshops](app-tutorials/README.md)
-and twelve fresh English browser captures. It reconciles the README/app references
-with package ownership, native controls, the 280-route catalogue and 424 Rust
-modules. Historical captures, measurements and public rollout observations retain
-their dates; the tutorials distinguish sample design, private preview, staging
-installation and actual clock/provider delivery.
-
-The existing GitHub Pages workflow builds on every pull request and `main` push,
-and publishes only `main` or an explicit manual run. There is no path filter:
-new Markdown and code-derived module notes cannot silently miss a publication.
-GitHub's required `verify` check still protects merges. No authentication or
-production commerce setting changes are needed for documentation publication.
-
-The October 6, 2026 review checked the repository's Markdown inventory, current
-module ownership, source links and rendered anchors. It corrected PostgreSQL/Qdrant
-versus legacy AGE/pgvector descriptions, enabled content languages, channel
-settings/lifecycle, worker roles, personal credentials, payment scope, source
-inventories and verification counts. Dated benchmarks, captures and test results
-retain their original measurement scope; a documentation review does not rerun
-every historical experiment or verify live provider accounts.
-
-The 8 October review reconciled README, the full feature tour, app/Experience/channel
-guides, the homepage and `llms.txt` with `706102f`. It corrected obsolete main-channel
-pause restrictions, EUR-only wording, the API/formal inventories and manually installed
-Storyfront claims. Three unretouched public demo captures complement the retained
-6 October recordings. [Historical release record](current-release.md) and
-[capture provenance](assets/showcase/README.md) distinguish deployed behavior,
-isolated tests and remaining native/provider activation work.
-
-For future changes, read the actual owning code/configuration and update its guide
-in the same change. Regenerate `module-inventory.md` with
-`python3 scripts/testing/source_inventory.py --write` when source modules change.
-Review local module README lists too. Passing link/build checks does not prove
-every prose claim; observed behavior, implementation scope and proposed work
-must stay distinct. Use [the testing guide](testing.md) and
-[formal scope](formal-verification.md) for exact evidence boundaries.
-
-The subsequent 8 October core review is documented in [core hardening](core-hardening.md),
-with a rendered request/event diagram, all eighteen findings, deployment settings,
-regressions and remaining proof/operational boundaries. Older latency and screenshot
-measurements retain their original scope; they are not relabelled as hardening results.
+The GitHub Pages workflow builds on every pull request and `main` push and publishes
+only `main` or an explicit manual run. Passing link and build checks does not prove
+every prose claim; observed behaviour, implementation scope and proposed work stay
+distinct. Use [the testing guide](testing.md) and [formal scope](formal-verification.md)
+for exact evidence boundaries.

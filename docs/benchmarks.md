@@ -274,8 +274,7 @@ persisted orders including 32 warm-ups. The higher offered rate achieved roughly
 
 The current report covers one powerful Apple M3 Ultra workstation, PostgreSQL 17
 in Docker, warm caches and these bounded fixtures. It does not measure production
-operations, WAN latency, cold database/machine starts, a many-shop fleet, real-money payments,
-LLM generation or comparative Shopware performance. Repeat it on your deployment
+operations, WAN latency, cold database/machine starts, a many-shop fleet, real-money payments or LLM generation. Repeat it on your deployment
 hardware and realistic workloads before making a capacity promise.
 
 Stop only the benchmark server you started, then stop the isolated database:

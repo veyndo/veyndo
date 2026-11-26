@@ -1,7 +1,5 @@
 # The app platform
 
-**Implementation status:** [Delivered foundations and remaining business-capability gates](app-system-status.md).
-
 **Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
 
 An app is an immutable, reviewed Manifest. Studio, coding agents, API, MCP, Flow
@@ -351,8 +349,7 @@ pooling, fuel, epoch deadlines, 1 MiB memory and 10,000 table-element limits. Ei
 active hook apps/tenant are admitted; record snapshots are bounded to four/app and
 host reads to 128/instance. Declared record revisions are included in quote outcomes.
 The [snapshot-pricing example](../extensions/apps/snapshot-pricing/manifest.json)
-and typed WAT component run through real quote and order paths. General Rust/PHP
-source builds and arbitrary asynchronous hooks are external deployment concerns.
+and typed WAT component run through real quote and order paths. General source builds and arbitrary asynchronous hooks are external deployment concerns.
 
 ## Publisher distribution
 
@@ -380,8 +377,7 @@ still allowed outside registered namespaces and has tenant-specific storage.
 Registered HTTP suites cover tenant collisions, resource attacks, consent, private
 F5 records, callback PII/revocation, migration rollback, file boundaries, jobs,
 publisher dependencies, payment/staging compatibility and slow-receiver isolation.
-These are concrete prototype regressions, not production-scale measurements or a
-claim of complete Shopware parity. [Test registry](testing.md), [source owners](source-map.md).
+These are concrete prototype regressions, not production-scale measurements. [Test registry](testing.md), [source owners](source-map.md).
 
 ## Graph-native app views
 
@@ -440,7 +436,7 @@ and `extensions/apps/ontology-care/manifest.json`.
 An app can declare up to 16 typed `settings` fields (localized label, key, kind and
 required flag). Values are managed under Apps → installed app → App settings through
 `GET/PUT /api/apps/{app}/settings`. The host reuses `apps/settings.rs`, the encrypted
-`apps/secrets.rs` owner and migration 096; it does not create a second settings store.
+`apps/secrets.rs` owner and the schema baseline; it does not create a second settings store.
 Current personal `team.manage`, active digest, explicit approval and optimistic
 revision are required for writes. Configuration values are live-only operational
 state, excluded from native preview/release records, agent exports and public views.

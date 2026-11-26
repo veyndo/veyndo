@@ -54,8 +54,7 @@ shows references from orders, open carts, channel overrides and rules/flows. Use
 methods offer deactivation instead. The API repeats its guard under the same settings
 lock used by checkout, including selective releases, so skipping the dialog cannot
 remove a referenced method. Unused entries are removed on aggregate save. References
-are conservative: any exact ID value in rule/flow JSON blocks removal. This is a native
-protection policy, not a claim of complete Shopware DAL dependency equivalence.
+are conservative: any exact ID value in rule/flow JSON blocks removal.
 
 Tax classes/rules and gallery removal use the same modal. Product-assigned tax classes
 are protected by the native aggregate API; the tax modal does not display a dependency
@@ -128,13 +127,13 @@ same handlers; no bypass implementation exists.
 
 - `commerce/settings_patch.rs`: sparse transport differences, ID alignment, explicit nulls.
 - `commerce/settings_scope.rs`: scoped reads/writes and basis serialization.
-- `commerce/settings_release.rs`: clone/snapshot/selective publication validation.
+- `components/studio/src/service/staging/{clone,snapshot,release}.rs`: clone/snapshot/selective publication validation.
 - `commerce/method_usage.rs`: dependency reads and authoritative delete guards.
-- `assets/image_jobs.rs` / `image_provider.rs`: durable private review state / bounded provider wire adapter.
+- `components/catalog/src/service/image_jobs.rs` / `crates/cognition/src/images.rs`: durable private review state / bounded provider wire adapter.
 - `admin/settings/CommerceSettings.tsx` / `MethodRemoval.tsx`: scope and single content-language workspace / preflight.
 - `admin/catalog/{ProductMediaWorkspace,MediaDropzone,AiImageStudio}.tsx`: gallery / uploads / reviewed image jobs.
 - `shared/ui/ConfirmDialog.tsx`: one focus-contained modal; `workspace-i18n.ts`: complete UI vocabulary.
-- Migrations 031/032: channel patches / durable image jobs; no commercial database dependency.
+- The schema baseline: channel patches / durable image jobs; no commercial database dependency.
 
 `settings_scopes.py` exercises real channel prices, immutable orders, method references,
 explicit media fallback, selective publication and MCP/tenant denial. `image_jobs.py`

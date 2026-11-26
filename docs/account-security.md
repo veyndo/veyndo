@@ -89,7 +89,7 @@ authenticator secret and recovery codes must never enter audit history or logs.
 
 ## Source owners and verification
 
-`src/auth/{totp,mfa,sessions,handoff,broker_recovery,broker_session,broker_credentials}.rs`
+`components/identity/src/{domain/totp,store/mfa,store/sessions,store/handoffs}.rs` and `src/auth/{mfa,handoff,broker_recovery,broker_session,broker_credentials}.rs`
 share the existing native account and middleware owners. `frontend/src/shared/auth/`
 is the common merchant/operator client. Private forms, continuations, email-code
 entry and current-cookie admission live in the private Experience repository.

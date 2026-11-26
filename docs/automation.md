@@ -1,6 +1,6 @@
 # Rules and flows
 
-This is an executable migration increment against **shopware/core 6.7.14.2**, not a claim that every Shopware plugin, commercial extension or DAL/API is compatible. The pinned MIT PHP classes remain an independent behavioral reference.
+Rules and Flows are Veyndo's own automation, evaluated by the vendored `crates/automation` crate and orchestrated by the `marketing` component. The catalogue of condition types was originally derived from shopware/core 6.7.14.2; Shopware compatibility is not a goal, and no PHP code runs or is compared.
 
 ## What is connected
 
@@ -66,7 +66,7 @@ lists and failures that remain visible. These checks are not whole-core coverage
 
 ## Source inventory and limits
 
-The vendored catalogue was reflected from **114 concrete production Rule subclasses and 16 Core FlowAction names** of the original source. Its PHP reflection and comparison scripts were removed on 26 November: Shopware compatibility is no longer a goal.
+The vendored catalogue was reflected from **114 concrete production Rule subclasses and 16 Core FlowAction names** of the original source. The reflection and comparison scripts are gone; the catalogue is now maintained as Veyndo's own.
 
 `reference/automation-native.json` explicitly binds **108 of the 114** classes to native scope implementations. `crates/automation/reference/automation-registry.json` combines those bindings with the original configuration metadata. Registered scope support is not complete behavioral equivalence: every catalog row keeps `behavioralParity:false`, and the complete-catalog flag stays false.
 
@@ -77,7 +77,7 @@ These six source names remain disabled, with a visible explanation in the editor
 | `cartLineItemInGroup` | Original package builders, product provider, sorters and promotion group allocation |
 | `promotionCodeOfType` | Original promotion line scopes and individual/global/fixed code processing |
 | `promotionLineItem` | Original promotion line entities and their scope selection |
-| `scriptRule` | A compatible bounded Shopware script runtime; arbitrary PHP/Twig is not evaluated in the core |
+| `scriptRule` | A bounded script runtime; arbitrary PHP/Twig is never evaluated |
 | `simple` | Internal source helper, not an end-user Rule Builder feature |
 | `unknown_condition` | Unknown source conditions are rejected instead of silently granted |
 
@@ -158,7 +158,7 @@ deletes and condition import require `automation.manage`. Channel reads/writes u
 recheck the actual kind in native handlers. Legacy settings grants still imply
 these rights. Each Flow action checks its specific domain permissions. Preview
 uses the ordinary cart context. HTTP/MCP discovery and invocation are covered by
-[narrow-grant regressions](system-consistency-audit.md).
+narrow-grant regressions in the [test suites](testing.md).
 
 Example native graph (`data.pipeline`, together with a translated flow name, instruction, locale, trigger and top-level condition):
 
@@ -179,8 +179,8 @@ Graphs are acyclic, contain 1..100 reachable nodes and allow delays up to thirty
 ## Files and verification
 
 - `crates/automation/src/rules/`: pure source comparison, field, calendar and container evaluation.
-- `src/marketing/{facts,line_facts,customer_facts,rule_snapshot}.rs`: authoritative tenant context and frozen references.
-- `src/marketing/{pipeline,pipeline_runtime,flow_actions,flow_mutations,flow_access}.rs`: graph admission, receipts/delays, action dispatch, transactions and current rights.
+- `components/marketing/src/{store/facts,domain/line_facts,store/customer_facts,store/rule_snapshot}.rs`: authoritative tenant context and frozen references.
+- `components/marketing/src/{domain/pipeline,service/pipeline_runtime,domain/flow_actions,store/flow_mutations,store/flow_access}.rs`: graph admission, receipts/delays, action dispatch, transactions and current rights.
 - `components/marketing/ui/admin/automation/`: localized rule/action editors, graph overview and typed graph helpers.
 - The customers and marketing baselines (`components/{customers,marketing}/migrations/`): customer metadata, customer groups, delayed jobs and per-node receipts.
 

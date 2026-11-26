@@ -92,7 +92,7 @@ increase them. Original financial approvals and domain invariants remain authori
 
 | Owner | Responsibility |
 | --- | --- |
-| `integration_keys`, migration 104 | Existing identity and digest store, exact model policy and durable counters; no new table per agent/app. |
+| `integration_keys`, the schema baseline | Existing identity and digest store, exact model policy and durable counters; no new table per agent/app. |
 | `src/agent_runs/controls.rs` | Personal revision-bound status/control, planning-only credential admission and per-agent conversation identity. |
 | `crates/cognition/src/inference/budget.rs` | Task-local trusted authority and transactional allocations at actual central model egress. |
 | Native task/checkpoint/worker owners | Current credential/scope checks and lease-fenced continuation and final persistence. |

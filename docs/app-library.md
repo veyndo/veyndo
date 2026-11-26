@@ -22,8 +22,7 @@ is labeled as an integration contract with its official connector still required
 ## Automatically managed Experience apps
 
 Experience onboarding connects its frontend and installs **Storyfront** through the
-normal app registry in one transaction. Existing Experience mounts are backfilled
-by migration 055; ordinary shops still choose which apps to install. The installed
+normal app registry in one transaction; ordinary shops still choose which apps to install. The installed
 card and detail page show the actual connection, domain, sales channel and **Edit
 experience** link. Apps, Storyfronts and channel management use one mount registry
 and the same existing editor, with native/retained selection owned by that deployment.

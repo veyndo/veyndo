@@ -36,7 +36,7 @@ native runtime admission remains connected.
 The canonical Manifest still defines types, required fields, translation, choices,
 validation, relationships and actions. Rust validates the same fields for Studio,
 API, MCP, Flows, callbacks, AI proposals and selected sandbox releases. Apps cannot
-send SQL or create PostgreSQL objects. `apps/records.rs` is the shared internal
+send SQL or create PostgreSQL objects. `components/apps/src/store/records.rs` is the shared internal
 storage adapter; app-specific behavior remains under its package directory.
 
 The low-level record and job SQL now belongs to the independent
@@ -162,18 +162,12 @@ isolation, concurrent unique writes, protected projections and exact F5 cleanup.
 
 Existing app/schema/relations/components/preview/Studio/staging/page/form suites
 exercise the shared consumers. Signed-runtime and transaction-pool tests remain
-required for deployment. Local verification is not evidence of production cutover.
+required for deployment.
 The [dated local evidence](evidence/shared-app-storage-2026-10-15.json) records actual
 results, source hashes, the resolved local oracle prerequisite and deployment limits.
 
 The [15 October hosted acceptance](evidence/shared-app-storage-hosted-2026-10-15.json)
-separately records the completed backup, drained-Core migration and public browser
-flows. All eight declared legacy tables were retired. After new shop creation,
-native app installations, a private page edit and selected publication, the database
-still had four physical app tables and no legacy app tables, with 27 packages and
-12 logical models. Existing and newly generated Storyfront shops and a new AI-seeded
-standard shop completed simulated purchases; the evidence retains untested provider,
-invoice, authentication, restore and localization boundaries explicitly.
+records the earlier release's public journeys with four physical app tables.
 
 [App platform](app-platform.md) · [Authenticated SQL authority](authenticated-database-scope.md) · [Testing](testing.md)
 

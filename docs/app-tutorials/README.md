@@ -121,4 +121,4 @@ signed webhooks, flows, cron and restart. The individual guides map to existing
 regressions. These checks do not certify an actual merchant ERP or paid provider.
 
 [Visual editor reference](../app-studio.md) · [App platform](../app-platform.md) ·
-[Connected workbench](../connected-workbench.md) · [Testing](../testing.md)
+[Testing](../testing.md)

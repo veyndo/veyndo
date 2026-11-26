@@ -101,8 +101,8 @@ transactions, not one all-or-nothing family transaction. The server serializes
 writes per shop and rejects duplicate combinations on create and edit, including
 concurrent requests. Each child opens its full editor and can return to the parent;
 its options are editable there. Families above 10,000 rows use the product API in
-bounded batches rather than this UI's family lookup. Full Shopware inheritance
-masks and native property-group entities remain upstream gaps.
+bounded batches rather than this UI's family lookup. Inheritance masks and
+property-group entities are not implemented.
 
 ## Sales channels
 

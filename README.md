@@ -19,7 +19,7 @@
 
 [Architecture & components](docs/one-shop-components.md) · [JavaScript SDK](https://github.com/veyndo/sdk) · [Status](docs/status.md#platform-at-a-glance) · [Benchmarks](docs/benchmarks.md) · [Deutsch](docs/platform-overview.md)
 
-[![The hosted Product Guide lets a shopper review price and delivery before adding an item](docs/assets/apps/product-guide-cart-review-20261111.jpg)](docs/status.md#product-guide-actions-in-the-hosted-shop)
+[![The hosted Product Guide lets a shopper review price and delivery before adding an item](docs/assets/apps/product-guide-cart-review-20261111.jpg)](docs/product-guide-mcp-app.md)
 
 The hosted Product Guide connects chat to a reviewed cart. [See the tested workflows](docs/status.md#platform-at-a-glance).
 
@@ -62,8 +62,8 @@ visual editor and Product Advisor app. Download captions as VTT or SRT.
 
 **Hosted:** [create a standard shop](https://start.veyndo.ai/start) or
 [create a Storyfront Experience](https://experience.veyndo.ai/).
-[Live acceptance](docs/status.md#public-acceptance) ·
-[Five-service rehearsal](docs/status.md#five-original-images-together-on-northflank).
+[Live acceptance](docs/status.md#hosted-pilot-earlier-release) ·
+[Five-service rehearsal](docs/status.md#hosted-pilot-earlier-release).
 
 **Container tour:** Git, Docker Compose and OpenSSL; no local Rust/Node build.
 
@@ -87,7 +87,7 @@ for verification tooling. Run `./scripts/dev.sh` and open
 | Area | Start here |
 | --- | --- |
 | AI shopping channels and inward shop imports | [Cart transfer, consent and shop imports](docs/agentic-commerce.md) |
-| Catalogue, orders and payments | [Setup](docs/shop-setup.md) · [Payments](docs/shopware-payments-acceptance.md) · [Saved methods](docs/payment-saved-methods.md) · [Invoices](docs/payment-invoice-checkout.md) · [Administration](docs/admin-workflows.md) |
+| Catalogue, orders and payments | [Setup](docs/shop-setup.md) · [Payments](docs/payments.md) · [Provider acceptance](docs/shopware-payments-acceptance.md) · [Administration](docs/admin-workflows.md) |
 | Countries, languages, currency and taxes | [International commerce](docs/international-commerce.md) · [Currencies](docs/currencies.md) |
 | POS, B2B, EDI and marketplaces | [POS](docs/pos.md) · [B2B](docs/b2b-commerce.md) · [EDI](docs/edi.md) · [Marketplaces](docs/marketplaces.md) |
 | Apps, settings, storage and private releases | [App platform](docs/app-platform.md) · [Build five apps](docs/app-tutorials/README.md) · [Storage and runtime](docs/app-data-storage.md) |

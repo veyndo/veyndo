@@ -1,8 +1,7 @@
 # Customer accounts, orders and merchant operations
 
 The storefront, merchant HTTP API and MCP use the same persisted operations.
-All examples use synthetic data. This is a bounded native implementation, **not**
-a declaration of complete Shopware Admin/Store API interchangeability.
+All examples use synthetic data.
 
 ## Registration through checkout
 
@@ -28,8 +27,7 @@ are merchant-owned. Standard read fields are exposed in the customer detail;
 Addresses include recipient, first/last name, company/department, VAT ID,
 street/house number, postal code (`zipcode` accepted as input alias), city,
 ISO country, region/state, two additional lines, title/salutation and telephone.
-The prototype uses ISO country codes and native method/channel identifiers;
-it does not map every original Shopware UUID or DAL association.
+Addresses use ISO country codes and native method/channel identifiers.
 
 | Store API | Behavior |
 |---|---|
@@ -60,8 +58,7 @@ payment handoff; logout invalidates open carts, not existing provider operations
 Review identity follows the same principle: a purchase badge needs the original
 cart or recorded account ID, never typed contact email. Cart/account review
 namespaces stay separate; customer review-count rules consume actual account
-submissions. Migration 093 removes old email-derived badges without rewriting
-approved text/ratings or fabricating historical identities.
+submissions; no badge is derived from an email address.
 
 The storefront collects email and billing address for every checkout, with a
 separate delivery address when wanted. Financial/manual methods require those
@@ -266,8 +263,7 @@ fields, editable operational state, tracking per delivery, append-only notes,
 flow effects and generated documents. The prototype has one native payment
 transaction and currency-scaled immutable quotes; [multiple currencies](currencies.md)
 are selected by shop/channel context and retained by orders, payments and invoices.
-Multiple partial transactions and the complete Shopware conversion/DAL model remain
-unported.
+Multiple partial transactions on one order are not implemented.
 
 Order detail returns `workflow.actions` with translated labels, eligibility and
 reasons. The UI executes an eligible action once and updates directly from the
@@ -349,9 +345,8 @@ antivirus or production object-storage pipeline.
 The PayPal wallet Orders v2 adapter supports configured Sandbox or Live
 create/approval/capture/reconcile/refund, webhook verification, durable pending
 refund lookup and amount/tenant/idempotency checks. Provider attribution must be explicitly configured per shop as server-only `bnCode`.
-The public adapter contains no active vendor-code fallback; released migration
-016 remains historical, while additive migration 039 removes its SQL default.
-Existing attempt snapshots retain their original attribution for reconciliation.
+The public adapter contains no vendor-code fallback and the schema has no SQL
+default for it. Attempt snapshots keep their original attribution for reconciliation.
 Local fixtures use synthetic attribution and verify it on wire requests; they do
 not prove partner attribution or a real-money transaction. Live mode requires a
 public HTTPS commerce origin and private credentials. The separate Shopware Payments service lives in the private
@@ -433,8 +428,8 @@ Checkout does not silently enroll buyers or issue credentials. Contactless synth
 orders cannot supply an identifiable directory contact and remain in order management.
 
 The shared MCP operations `merchant.customers` / `merchant.customer` use these same
-permission-aware handlers. `operations/customer_directory.sql` owns the paged projection;
-`operations/guest_customers.rs` owns guest detail hydration. Migration 054 indexes guest
+permission-aware handlers. `components/studio/src/store/customer_directory.sql` owns the paged projection;
+`components/studio/src/store/customer_directory.rs` owns guest contact filtering. The schema baseline indexes guest
 email/latest-order lookup. Account ownership stays in `accounts/` and is unchanged.
 The `customer_accounts` real PostgreSQL suite checks search, pagination, deduplication,
 existing guest purchases, account enrollment after purchase and foreign-tenant denial.

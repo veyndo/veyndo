@@ -21,7 +21,7 @@ separate lock and runtime.
 The 10 November local comparison exercised the Core-linked evaluator and the
 standalone build of that preview revision. All 440 HTTP cases and three MCP
 calls agreed, including large integers, floating-point boundaries and missing
-facts. The independent PHP comparison also passed 432 original rule cases.
+facts.
 These results cover the tested inputs and both resolved dependency builds.
 
 Future updates go through `scripts/component_sources.py --import-source
@@ -55,7 +55,7 @@ each request.
 
 ## Shared release check
 
-Core's differential test and the Automation image workflow use the
+Core's release-case test and the Automation image workflow use the
 [same synthetic cases](https://github.com/veyndo/veyndo/blob/main/scripts/testing/automation-release-cases.json).
 They cover passing and failing thresholds, the existing numeric tolerance,
 large inputs, XOR and a missing fact inside NOT. Core runs the cases through
@@ -358,6 +358,6 @@ purchase and queue diagnostics were checked after cutover. Reading the
 saved trace of a hosted test order requires current merchant access.
 Independent Flow authoring, event delivery and scheduler extraction remain
 open under AUTO-02/03.
-[Live cutover](status.md#live-flow-draft-check-and-separate-app-worker-9-november-2026).
+[Live cutover](status.md#hosted-pilot-earlier-release).
 [Current task list](commerce-components.md#automation-and-connectors),
 [acceptance evidence](evidence/automation-component-2026-11-06.md).

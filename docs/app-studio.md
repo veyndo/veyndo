@@ -23,7 +23,7 @@ See the [connected AI workspace](agentic-workspace.md) for the 20 October contex
 reviewed private execution, complete app composition, real preview, editable list
 handoff and remembered merchant-guidance workflow. [Current status](status.md).
 
-**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. [How to use it, ownership and verification boundaries](connected-workbench.md).
+**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. How to use it, ownership and verification boundaries.
 
 App Studio and coding agents edit one Manifest. The same renderer, action gateway,
 permissions and model schema power private previews and published apps. Open Studio
@@ -178,7 +178,7 @@ Use **Test this version privately** to try the proposed immutable build in the
 actor-private native runtime before adoption. The [connected workspace guide](agentic-workspace.md#3-generate-and-test-a-complete-native-app)
 records the configured-model care-note example, real multilingual record writes,
 selected package-only publication and central settings after reload. Existing
-[workbench test boundaries](connected-workbench.md) retain their dated scope.
+workbench test boundaries retain their dated scope.
 The assistant can add a missing native order/quote review workflow; proposal
 review displays its steps, conditions and additional rights. Existing workflows
 remain protected from AI patches. See [native app workflows](app-native-lifecycles.md)
@@ -273,7 +273,7 @@ and network/certification limits](edi.md).
 
 ## Current concept and implementation status
 
-The [app-system status](app-system-status.md) distinguishes the working visual/agent
+The [app-system status](app-platform.md) distinguishes the working visual/agent
 builder from the complete business-capability programme. Immutable development
 "builds" validate and store a Manifest; they do not compile arbitrary Rust/TypeScript
 source in an isolated build service. Frozen decision examples are synthetic cases,
