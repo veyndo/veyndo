@@ -6,6 +6,8 @@ import { useWorkbenchText } from "../../../../../frontend/src/shared/i18n/workbe
 import { useCheckoutText } from "../../../../../frontend/src/shared/i18n/checkout-i18n";
 import { useState } from "react";
 import { cartSummary } from "../../../../../frontend/src/kit/storefront";
+import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
+import { getContentLocale } from "../../../../../frontend/src/shared/api/shop-api";
 const Summary = cartSummary.Component;
 import ConfigurationSummary from "../../../../../frontend/src/shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../../../../frontend/src/shared/api/configuration-types";
@@ -92,10 +94,16 @@ export default function CheckoutSummary({
           purchaseSteps: item.purchaseSteps,
           maxPurchase: item.maxPurchase ?? undefined,
         }))}
-        subtotal={cart.price.positionPrice}
+        // Line totals and positionPrice already include the discounts; the
+        // subtotal is shown before them so subtotal − discounts adds up.
+        subtotal={beforeDiscounts(cart)}
         discounts={(cart.discounts ?? []).map((d) => ({
           id: d.id,
-          label: d.name[locale.slice(0, 2)] ?? d.id,
+          // A title missing in this language inherits the stored main-language one.
+          label:
+            contentText(d.name, getContentLocale(), getContentLocale()) ||
+            Object.values(d.name)[0] ||
+            d.id,
           amount: d.amount,
         }))}
         shipping={cart.shippingCosts.totalPrice}
@@ -122,5 +130,14 @@ export default function CheckoutSummary({
       )?.mode === "simulated" && <p className="shop-disclosure">{x("test")}</p>}
       {error && <p role="alert">{error}</p>}
     </aside>
+  );
+}
+/** Goods value before discounts, rounded to the currency's minor unit (no float drift). */
+function beforeDiscounts(cart: Cart) {
+  const unit = 10 ** (cart.price.currencyScale ?? 2);
+  return (
+    Math.round(
+      cart.price.positionPrice * unit + (cart.discountTotal ?? 0) * unit,
+    ) / unit
   );
 }
