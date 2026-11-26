@@ -13,7 +13,7 @@ Build the binary from the private [Connector repository](https://github.com/veyn
 with `cargo build --locked --bin connectors`, or build its root Dockerfile.
 For a build from this repository, use the existing Compose connected-apps
 profile. Keep the existing provider configuration and encryption key when
-switching images. See [Rust services](rust-services.md#deployment-and-existing-data)
+switching images. See [Rust services](rust-services.md#deployment)
 for database roles, configuration and recovery.
 
 On 10 November 2026, Northflank switched the existing service to the

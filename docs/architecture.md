@@ -1,423 +1,272 @@
-See [v0.5 connected intelligence, app and payment paths](intelligence-apps-payments.md)
+# Component architecture
 
-**Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
-for the current implementation and performance limits.
+Veyndo is one Rust commerce server built from 22 components. Each component owns
+its data, its rules, its schema and its screens; the server binary composes them,
+and the frontend, the HTTP API, MCP and UCP are clients of the same component
+operations. This page describes the layout as it exists in the component-architecture
+release candidate. The [release notes](current-release.md) list what changed, the
+[runtime guide](production-architecture.md) follows one request through it and the
+[source map](source-map.md) names the owner of every area.
 
-# Architecture decisions and next boundaries
+`components.json` is the checked version of everything below. `scripts/components.py`
+(part of the required structure check) refuses a source file or table without an owner,
+a dependency that is not declared, a dependency cycle and a growing ratchet. The
+generated [dependency report](component-dependencies.md) and
+[module inventory](module-inventory.md) hold the current numbers.
 
-The product can run as one shop or use independently deployable components.
-The in-process commerce port and the independently hosted checkout adapter
-use the same native quote and purchase owners. Keep the atomic order, stock
-and event transaction with Commerce. The component boundary changes how a
-caller reaches the operation. Its authority and business decisions stay with
-the same owner. [Component map and measured composition](one-shop-components.md).
+## How the parts connect
 
-The transport-free Commerce crate now also owns customer-editable Contact and
-Address inputs and their original syntax validation. Account identity, PII
-projection, geography/payment eligibility and immutable order ownership stay
-in the native host. Other Rust components can use the same wire contract
-without importing that host. [Contract and runnable example](source-map.md#shared-customer-input-contract).
+```mermaid
+flowchart TB
+  subgraph Clients["Clients"]
+    ST["Studio and storefront<br/>frontend shells and component UI"]
+    AG["Agents and MCP clients"]
+    EXT["External storefronts and SDK"]
+  end
+  subgraph Server["Commerce server (one Rust binary)"]
+    HTTP["HTTP routes<br/>component http modules"]
+    PROTO["Protocol adapters<br/>MCP · UCP · capability dispatch"]
+    HOST["Host: route registry, workers,<br/>port implementations"]
+    subgraph Comp["Components"]
+      SVC["service/ use cases"]
+      DOM["domain/ pure rules<br/>(Lean-proved where bound)"]
+      STO["store/ checked SQL"]
+      PORTS["ports.rs<br/>what a component needs"]
+    end
+  end
+  subgraph Data["PostgreSQL"]
+    TABLES[("Component tables<br/>forced row security")]
+    OUTBOX[("Outbox")]
+  end
+  subgraph Services["Separate processes"]
+    FLOW["Flow Builder and app worker"]
+    GATE["Permission-aware app gateway"]
+    CONN["Connector service<br/>(Rust, own queue tables)"]
+    APPS["Apps: Wasm, hosted services,<br/>provider crates"]
+  end
+  PROV["Providers: mail, payments,<br/>carriers, models"]
+  ST --> HTTP
+  EXT --> HTTP
+  AG --> PROTO
+  HTTP --> SVC
+  PROTO --> SVC
+  HOST -. "implements" .-> PORTS
+  SVC --> DOM
+  SVC --> STO
+  SVC --> PORTS
+  STO --> TABLES
+  STO -->|"same transaction"| OUTBOX
+  OUTBOX --> FLOW
+  FLOW --> GATE
+  GATE --> CONN
+  GATE --> APPS
+  CONN --> PROV
+  APPS --> PROV
+```
 
-Core exposes three host operations for an independent Checkout client. Quotes
-are read-only. Confirmation rechecks the quote and commits through the native
-order transaction. Receipt recovery uses the original indexed purchase key.
-The normal storefront and Storyfront both call Core. For a configured test
-shop, Core relays the browser's two session operations to private Checkout,
-with separate request capacity for the relay and its Commerce callbacks.
-A short bounded wait absorbs bursts before requests reach Checkout. The
-cluster still caps simultaneous purchases per shop, and Commerce owns the
-order, stock and event transaction. The public Lumen pilot verifies this composition in the original Storyfront
-iframe with demo payment.
-[Commerce host ports](checkout-component.md#commerce-host-ports-in-core) ·
-[Hosted Lumen pilot](checkout-component.md#hosted-lumen-pilot-10-november-2026) ·
-[Matched Northflank relay measurement](evidence/composed-release-rehearsal-2026-11-10.md#hosted-relay-admission-comparison).
+A purchase runs inside one component transaction: checkout prices the cart through
+pricing, reserves stock through inventory and writes the order and its `order.placed`
+event to the outbox in the same commit. Everything that talks to the outside world
+starts from a committed event: the Flow Builder picks it up, the app gateway admits
+the call with the app's declared permissions and the connector service or an app
+delivers it. Order email follows exactly that path (checkout → outbox → Flow Builder →
+app gateway → connector → PostgreSQL delivery queue → provider). No component sends
+mail, calls a payment provider or a model from inside a checkout lock.
 
-The separate Checkout service can also call a reference commerce host. The
-host has its own database and runs the same purchase orchestrator with its own
-cart, pricing and transaction adapters. This demonstrates the boundary with
-real persistence and simulated payment. An external storefront uses the
-JavaScript SDK on its server and recovers the same receipt after a browser
-reload. The sample runs separately from the native request path.
-[Browser example](checkout-component.md#external-reference-storefront).
+## The 22 components
 
-External storefronts can also read localized products and variant families
-from the public Store API through the typed catalog SDK. The client passes
-the sales context and cursors to Commerce. Commerce applies catalog
-visibility and resolves pricing and currency.
-[Catalog client](one-shop-components.md#read-the-catalog-from-javascript).
-The runnable browser example places a small Node host between the browser
-and the Store API. It configures the shop at startup and forwards catalog
-reads through the SDK. [Browser host](one-shop-components.md#run-the-browser-example).
+| Component | Owns | Source |
+| --- | --- | --- |
+| core | Errors, request context, database scope and row security, outbox, admission, caches, the verified kernel | `components/core`, `crates/kernel`, `crates/runtime` |
+| identity | Merchant accounts, memberships, sessions, MFA, roles, integration keys, route policy | `components/identity` |
+| shop | Shop configuration, domains, legal texts, settings writes, the operator control plane | `components/shop` |
+| catalog | Products, categories, media, reviews, translations, catalogue reads, product files | `components/catalog` |
+| inventory | Stock, reservations and their release, supply and supplier links | `components/inventory` |
+| pricing | Money, price calculation, discounts, currencies, taxes, customer groups, price jobs | `components/pricing` |
+| shipping | Delivery methods, destinations, delivery splits, carrier booking | `components/shipping` |
+| checkout | Cart, quote, checkout transaction and order placement | `components/checkout` |
+| customers | Customer accounts, sessions, addresses, the merchant customer directory | `components/customers` |
+| orders | Order state machine, fulfilment, receipts, documents, merchant order work | `components/orders` |
+| payments | Provider-independent payment ledger, captures, refunds, provider workers | `components/payments` |
+| marketing | Rules, coupons, promotions, flows, sales channels | `components/marketing` |
+| b2b | Companies, budgets, approvals, quotes, procurement | `components/b2b` |
+| pos | Point-of-sale register adapters | `components/pos` |
+| apps | App packages, managed data, UI surfaces, Wasm extensions, the app builder | `components/apps`, `crates/apps` |
+| automation | Deterministic rule evaluation and flow graphs | `crates/automation` (vendored), `crates/flow-graph` |
+| inference | Model provider adapters, inference budgets, prompt provenance, image generation; no commerce write capability | `crates/cognition` |
+| intelligence | Shop memory, knowledge retrieval, agents, proposals, catalogue intake | `components/intelligence` |
+| studio | Merchant overview, reports, private staging shops, history, manual orders | `components/studio` |
+| protocols | MCP, UCP and the shared capability dispatch: adapters without business rules | `src/mcp`, `src/ucp`, `src/capabilities` |
+| host | Process entry, route registry, worker roles, schema setup, port implementations, command-line tools | `src/` (the rest), `crates/port-contracts` |
+| connectors | Standard provider services and their delivery queue in a separate binary | `extensions/services/connectors`, `extensions/services/connector-runtime`, `extensions/apps/<app>` |
 
-An external host can use the typed Checkout SDK through the Core relay.
-The SDK uses the reviewed cart and the current buyer context. If the
-response is lost, it can read the original order by session, cart and
-buyer through Core. [Checkout SDK](checkout-component.md#use-the-checkout-relay-from-the-sdk).
+The 151 tables each belong to exactly one component. `connectors` owns six tables and
+runs as its own process; `shipping`, `pos`, `automation`, `inference` and `protocols`
+own no table.
 
-The same client can read and prepare a basket before confirmation.
-Core calculates the cart preview and checks its fingerprint and revision
-when applying it. [Cart preview and apply](checkout-component.md#review-a-cart-change-from-the-sdk).
-Checkout choices use the same cart revision. Core validates the country,
-shipping and payment combination and returns the resulting quote before
-purchase confirmation. [Checkout selection](checkout-component.md#choose-shipping-and-payment-from-the-sdk).
-The Connected Shop host uses the catalog and Checkout clients for its variant review and
-purchase. It keeps the buyer and cart context on the server while the
-browser renders the guide and the current offer.
-[Connected Shop](agentic-component-ui.md#run-a-guide-and-checkout-in-an-external-host).
-The account SDK reads orders from Core after purchase. Core matches the
-current buyer to the customer ID recorded in the order snapshot and
-returns the customer-facing projection.
-[Browser buyer session, cart rotation and password changes](merchant-operations.md#use-the-signed-in-browser-with-the-sdk) ·
-[Buyer profile and address book](merchant-operations.md#edit-the-buyer-profile-with-the-sdk) ·
-[Order history and PDF downloads](merchant-operations.md#read-order-history-with-the-sdk) ·
-[Purchased files](merchant-operations.md#download-purchased-files-with-the-sdk).
+## Inside a component
 
-Storyfront can recover a purchase after its browser notification is lost. Core
-deploys the recovery route and migration first. The Experience uses the
-verified Core receipt to decide when to clear its original cart.
-[Native and embedded compatibility](checkout-component.md#how-native-and-embedded-checkout-share-one-order).
-[Hosted acceptance](storyfront.md#accept-a-hosted-release).
-Checkout delegates company approval and budget checks to the native transaction.
-A current identity is also required to read the stored order result.
-[Authority tests](checkout-component.md#current-buyer-channel-and-company-authority).
-Independent Checkout admission can be paused at its confirmation boundary.
-Core continues to serve its own storefront and hosted handoff. Its provider
-workers reconcile existing payments against the original order. The same
-session and purchase identity carry across a Checkout restart.
-[Rollback rehearsal](checkout-component.md#pause-and-resume-checkout-confirmation).
+```text
+components/<name>/
+  Cargo.toml          the crate veyndo-<name>
+  src/
+    lib.rs            the public interface, nothing else
+    types/            ids, DTOs and enums (serde)
+    domain/           pure rules without I/O; the part the Lean proofs bind
+    store/            the only place with SQL (checked query macros)
+    service/          use cases: transaction, rules, events
+    http/             thin route handlers over the services
+    ports.rs          traits for what the component needs from others
+  migrations/         0001-baseline.sql: this component's tables only
+  tests/              properties, domain mutants, port test adapters
+  ui/admin/<area>/    Studio screens of this component
+  ui/storefront/<area>/ storefront screens of this component
+```
 
-Knowledge projects private source and catalog content into a separate database.
-The installed app receives product events through the existing delivery queue.
-Projection reads the current Core product, and the local test verifies a
-purchase while Knowledge is down and source delivery after restart.
-For a single configured shop, Core can check current app and integration keys
-for the catalog projection. A scoped callback reads the snapshot. A distinct
-read scope serves the resulting evidence. The buyer transaction has no
-dependency on Knowledge or its identity endpoint. External applications can
-import their own sources and verify localized evidence through the typed SDK
-against the service without Core.
-The standalone database recovery keeps source records and localized chunks.
-It rebuilds the search index under fresh runtime credentials.
-[Recovery procedure](knowledge-component.md#restore-knowledge-into-a-fresh-database).
-[External SDK example](knowledge-component.md#import-your-own-catalog-and-documents-with-the-sdk) ·
-[Knowledge service boundary](knowledge-component.md#keep-the-shop-running-during-a-knowledge-outage).
+Not every component needs every folder: `core` has no `domain/` yet, `shipping` owns no
+table and therefore no baseline, `orders` has no separate `service/` and `inventory` has no
+UI. A component crate has no `use super::*` or `use crate::*` imports, and its files have no
+length limit; Clippy limits function length instead (`clippy.toml`).
 
-Core links the pinned Automation rule library into native pricing and Flow
-execution. The separate service uses the same source for SDK and MCP previews of
-caller-supplied facts. Those previews run separately from the checkout transaction.
-In the local outage test, native coupon pricing, purchase and the
-invoice Flow completed while the preview process was stopped.
-[Automation service boundary](automation-component.md#keep-checkout-independent-of-the-preview-service).
-The optional Core identity profile uses dedicated integration keys with
-`automation.read`. The preview checks the current grant at Core, while native
-pricing and checkout call the library in-process.
-[Access and deployment](automation-component.md#connect-the-service-to-veyndo-core).
-Flow authoring and native workers share a dependency-free graph validator.
-The worker looks up steps by stable node ID. Core owns event persistence,
-permissions and execution.
-[Flow graph contract](automation-component.md#flow-graph-contract).
-Studio and external clients can check a Flow draft through the same Core
-admission rules. The read uses one tenant snapshot. Publishing rechecks current
-dependencies and the expected revision in the write transaction.
-[Draft check](automation-component.md#check-a-flow-draft-before-saving).
-Core uses the same versioned built-in Flow catalog for authoring,
-event admission, HTTP and MCP discovery. Installed app capabilities and
-actor rights are resolved per shop. [Flow catalog](automation-component.md#built-in-flow-catalog).
-The Flow runner uses one PostgreSQL adapter for claims and checkpoints.
-A deferred job releases its claim, and each progress or completion write
-must match the shop, job and execution attempt. Checkout commits the
-event and the worker consumes it asynchronously.
-[Flow job storage](automation-component.md#durable-flow-job-storage).
-Northflank runs app work in a separate private process. Core keeps the public
-checkout and writes the order event. Both processes use the existing restricted
-runtime connections, and the app worker samples due queue ages.
-[Hosted cutover](status.md#live-flow-draft-check-and-separate-app-worker-9-november-2026).
-Connectors own provider credentials, delivery leases and receipts. The app
-worker calls the existing app gateway after checkout has committed. The
-Connector can use a separate PostgreSQL database and still consume the same
-order Flow. The local composition test verifies one delivery after an exact
-checkout replay. [Connector boundary](connector-component.md#verify-the-complete-shop).
-The validated graph also supplies typed directives for branching, effects,
-delays and stops. Core evaluates rules from the saved job, checks current
-rights and dispatches through the existing action owners. An app worker can
-run in a separate process and consume the same durable jobs. Core can
-disable just its app lane, which covers Flow execution, app scheduling and
-deliveries. Checkout still commits orders and events in Core. Shutdown
-gives app tasks a bounded window to persist progress before the process
-releases its database connections.
-[Flow directives](automation-component.md#portable-flow-directives) ·
-[Worker rollout](automation-component.md#move-the-app-worker-out-of-core).
-Worker queue freshness is sampled through the existing PostgreSQL pool
-and reported in process logs. Checkout stays independent of this read.
-[Queue signals](automation-component.md#read-the-worker-queue-logs).
+## The dependency rule and ports
 
-See the [SaaS scalability roadmap](scalability.md) for code-specific bottlenecks,
-cell architecture, delivery order and proposed capacity/economics tests.
+A component depends on `core` and on the public interface of the components it lists in
+`uses`. Cargo refuses a crate cycle, and `scripts/components.py` refuses a mutual pair,
+including pairs that would only appear through server files; there are none left.
 
-The app executor is also independently usable as `veyndo-app-runtime` in
-[veyndo/apps](https://github.com/veyndo/apps/tree/main/runtime). Core consumes the
-same pinned source with its native verified resource policy; admitted snapshots,
-current rights and commerce writes retain their original owners.
-[Execution boundary and tests](evidence/app-wasm-runtime-component-2026-11-05.md).
+When a component needs something from a component above it, or from the server, it
+declares a trait in its `ports.rs` and the host implements it. Examples:
+`veyndo_pricing::ports::ShopSettings` (settings and revision for a shop and channel),
+`veyndo_shop::ports::SettingsGuards`, `veyndo_payments::ports::Gateway`,
+`veyndo_customers::ports::Purchases`, `veyndo_intelligence::ports::PublicEgress` and
+`veyndo_studio::ports::ReleaseHost`. Sixteen components declare 47 port traits.
 
-## One transactional core, independently deployable workers
+A component reaches another component's table only through that component's store
+functions or a port. The 61 accesses that remain are listed in `foreign_tables` of
+`components.json`, each with a written reason (for example: core's retention job selects
+unreferenced outbox events in the same locked statement that deletes them). The check
+refuses an access without a reason.
 
-The Commerce crate now owns the Product snapshot and price-tier DTO
-consumed by the native catalog and transaction paths. Database hydration,
-permissions and storage ownership stay attached to Core's existing
-operations. The shared contract can be imported by other Rust components.
-[Product ownership](source-map.md#shared-product-contract).
+Four counters in `components.json` only fall: glob imports, untyped JSON field accesses,
+SQL outside a `store/` folder and runtime SQL. Outside the vendored `crates/automation`
+they stand at zero glob imports, four untyped accesses (marketing) and no SQL outside a
+store.
 
-The same crate also owns the persisted cart data contract. Core binds its
-typed extension contexts and retains session authority, row locks and the
-order transaction. [Cart ownership](source-map.md#shared-cart-contract).
+## Server and protocol adapters
 
-Release tooling keeps the accepted service composition separate from a newly
-built candidate. The candidate replaces one exact Core artifact and retains
-the seven peer artifacts and reviewed schema inputs. This avoids a lock that
-must contain its own future commit. Automatic pipeline admission remains
-tracked separately. [Release candidates](cloud-releases.md#prepare-a-core-release-candidate).
-The same candidate path now covers every build-backed component and retains
-its seven peers, source owner and reviewed schema inputs. The imported
-Automation image retains its separate immutable import contract.
+The server binary (`src/main.rs`, component `host`) declares modules and `main`. It builds
+the router from the component routes, starts the worker roles, sets up the schema and
+implements the ports. `App` only composes component-owned state (`veyndo_core::State`,
+inference, the app runtime and identity state). MCP, UCP and the capability dispatch
+(component `protocols`) translate protocol inputs to the same component operations the
+HTTP routes call; they do not own a price, stock or order rule.
 
-Fresh installations use Rust/Axum, ordinary PostgreSQL 17 and private Qdrant
-v1.16.3. PostgreSQL owns commerce records, knowledge relations, source vectors
-and the durable synchronization queue; Qdrant supplies rebuildable vector search.
-Candidates are hydrated and checked against current PostgreSQL state. AGE and
-pgvector are retained for legacy conversion, not required for a fresh install.
-See [managed hosting](managed-hosting.md) for migration and index-consistency boundaries.
-The runtime can separately deploy HTTP, memory/outbox, payment, app-event,
-translation and media roles. HTTP-only deployments need workers for queued work.
-SQL leases and receipts coordinate their work. Inference still uses an
-external Ollama/provider service and process-local admission. Prices,
-reservations and order placement share a database transaction initially.
+Moving the last composition code out of `src/` is still open: the server keeps provisioning,
+identity resolution in the middleware and the host side of the app platform (plan item 5.1).
 
-Catalog operations use a pool of 20 connections. Checkout locks the cart and
-its product rows in deterministic ID order; an advisory lock serializes one
-tenant/idempotency key across concurrent requests. Disjoint product orders can
-progress independently. There is no unbounded model call in this transaction.
-All writes originate from deterministic operations, not model-generated SQL.
+## Frontend
 
-An embedded checkout can recover an order after the browser misses its return
-message. Commerce resolves the original cart and order through a scoped recovery
-key. Status reads use the last committed state while an order is in progress.
-Only reopening an open cart takes the purchase lock and invalidates the old
-frame. [Storyfront recovery contract](storyfront.md#responsibilities-and-contracts).
+`frontend/` builds one tree. `frontend/src/` holds the entry, the Studio and storefront
+shells, the operator console, shared building blocks and `kit/` (design tokens, UI parts,
+the generated API client and the query layer). Every screen lives with its component in
+`components/<name>/ui/{admin,storefront}/<area>`; thirteen components have screens.
 
-The hosted Lumen profile pins the builds, interface dependencies and schema
-inputs of its services. Deployment verification compares the active artifacts
-with the recorded set before testing checkout and background work.
-[Composition release lock](cloud-releases.md#verify-the-hosted-lumen-composition).
+- Every request path is typed `ApiPath`, derived from the generated route catalogue, so a
+  path the server does not mount does not compile.
+- The architecture check refuses a component UI import against the `components.json`
+  dependency direction. The order page shows payment commands through the first-party
+  slot `admin.order.payment` instead of importing payment code.
+- Stylesheets use design tokens only; the check refuses colour literals.
 
-The [illustrated production architecture](production-architecture.md) explains
-implemented money, database security, inventory, payment, cache, admission and
-observability foundations. Orders/provider boundaries now use explicit minor
-integers and currency scale; the ported calculators deliberately retain Shopware
-float behavior and remain behind the original-source differential gates. Core
-FORCE RLS requires a separate non-owner runtime login and strict startup; direct
-or session pooling is supported. All payment methods have persisted allocations,
-provider money states have central admission, committed outbox events evict
-settings caches, and replicas share daily interactive HTTP AI quotas.
+See [frontend/README.md](../frontend/README.md) and the [kit](../frontend/src/kit/README.md).
 
-Remaining production steps include integer pricing/tax intermediate rounding,
-distributed concurrent/spend/job quotas, telemetry export, independently operated
-cells and measured recovery/failover. The guide gives exact configuration, tests,
-privileged exceptions and limits rather than treating the foundation as complete
-production certification.
+## Data, queries and the schema
 
-## Intelligence is connected to state
+PostgreSQL holds all commerce state, connector configuration and queues. Every tenant
+table forces row security; the runtime login is a non-owner, `NOBYPASSRLS` role
+([tenant isolation](tenant-isolation.md)). Qdrant holds knowledge vectors only.
 
-The model reads tenant-scoped product snapshots and experience state. Its
-output is parsed into typed changes. The server binds actual revisions to the
-snapshot, persists the proposal, and the merchant approves exactly that stored
-proposal. Applying it is atomic and rejects stale revisions. Browser, MCP and
-merchant endpoints call the same operations; agent output has no separate
-privileged execution path. The proposal summary is model text, not a guarantee
-that it matches the changes: the UI displays the actual fields for review.
+- **Checked queries.** Store functions use `sqlx::query!`/`query_as!`. The 1,267 queries are
+  checked at compile time against the committed `.sqlx` cache (`SQLX_OFFLINE`);
+  `scripts/sqlx_cache.py --write` regenerates it from the baselines and the `sql_prepare`
+  suite fails on drift. 24 dynamic queries remain (`QueryBuilder` in intelligence, studio,
+  apps, core and catalog); every other static statement is also prepared against the
+  schema by `scripts/sql_prepare.py`.
+- **Typed JSON.** Stored documents and request bodies are read through typed views
+  (`veyndo_core::document::{view, lenient, Raw, merge}`); `scripts/testing/typed_inputs.py`
+  refuses a new untyped reader.
+- **One baseline per component.** `components/core/migrations/0000-foundation.sql` holds the
+  extensions, the `veyndo_authority` schema and the shared functions; each component's
+  `migrations/0001-baseline.sql` creates only its own tables. `src/migrations/schema.rs` lists
+  the files in one global order: core first, then by `uses`.
+- **Fresh installation only.** The release replaces earlier installations. There is no
+  upgrade path, rolling upgrade or legacy import, and data of a deployed earlier release is
+  not carried over: setup refuses a database that an earlier release created. Demo data
+  lives in `fixtures/demo/`.
 
-Customer advice selects catalog IDs and one registered layout. Local behavior
-updates ordering immediately while keeping keyed product/cart/form components
-stable. A small policy stores which variant was exposed, its selection
-probability and a reward generated by a simulated order. Model weights remain
-fixed. Production experiments need randomized control, delayed outcome,
-refund corrections, trust/consent and contribution-margin objectives.
+The `schema_baseline` suite proves that a fresh installation equals the normalized schema
+and starting rows of the last release with incremental migrations
+(`fixtures/schema/reference.sql`). Details: [Rust services](rust-services.md).
 
-## Extension isolation
+## Connector service and apps
 
-The guest signature is `approve(total_minor: i64, limit_minor: i64) -> i32`.
-Only merchant-authorized modules are activated. The engine compiles at
-activation; instances get 10,000 fuel units, 1 MiB memory, a 256 KiB Wasm stack
-and no host imports. Source is limited to 32 KiB. Infinite loops and oversized
-memory are tested. Source/digest survive restart; boot recompiles saved modules.
+The connector binary (`src/bin/connectors.rs`) is process entry only. The service crate
+`extensions/services/connectors` composes the shared runtime
+(`extensions/services/connector-runtime`: encrypted store, queue, leases, pinned egress,
+OAuth) and one `veyndo-provider-<app>` crate per bundled provider in `extensions/apps/<app>/`.
+It is reached only through the app gateway, keeps its own tables in its own baseline and
+contains no Python. Apps run as bounded Wasm extensions, hosted services or provider crates
+behind declared permissions. Payments and Storyfront implementations stay in their own
+repositories. See [connectors](connector-component.md) and [app platform](app-platform.md).
 
-This is a genuine small sandbox, not a general PHP JIT. More powerful hooks
-need versioned typed host capabilities and a separate quota/sandbox worker.
-Activation caches are process-local and refresh from the persisted policy inside
-checkout; the two-instance extension regression verifies this boundary. Compilation also
-needs stronger process-level time/memory limits for untrusted SaaS authors.
+## Tests
 
-## Standards are adapters
+| Test set | What it shows |
+| --- | --- |
+| Domain unit tests | Each of the 216 public `domain/` functions is exercised in its own file |
+| Property tests | 37 `proptest` properties for money, stock, discounts and state machines in pricing, inventory, orders, payments, checkout and marketing |
+| Store isolation | `store_isolation`: store functions of 15 components and every one of 135 tenant tables under a non-owner `NOBYPASSRLS` login; a second shop sees and changes nothing |
+| Port contracts | `crates/port-contracts`: one contract set per port, run against the test adapter and the server's real implementation (four ports so far) |
+| HTTP and MCP contracts | `schema_contracts`: a valid and an invalid case for 350 routes and 212 MCP tools, generated from the route catalogue and the operation contracts |
+| Mutation testing | `scripts/testing/mutation_domain.py` on `domain/` of five components: 1,137 mutants, survivors listed with reasons |
+| Coverage floors | A line floor per component for Rust and component UI, which only rises |
+| Browser journeys | `browser_journeys`: purchase, refund, product edit while orders arrive, app installation, a Spanish main language with a fifth content language |
+| Schema | `schema_baseline`: a fresh installation equals the reference schema |
 
-The capability registry describes operations and typed MCP inputs. UCP checkout
-calls the same cart and checkout implementation. Protocol versions and the
-unimplemented portions are documented rather than claiming all agentic
-standards are one interchangeable interface.
+The [testing guide](testing.md#component-test-suite-phase-7) explains each set and how to run it.
 
-Studio maps validated workspace definitions onto registered OpenUI panels.
-The Orders panel uses the normal order and fulfillment views. The policy
-panel retrieves current, scoped Shop Knowledge passages separately. The
-independent SDK host can bind those reads to separate service endpoints.
-The storefront uses its native product and cart controls for buying.
-[Composition walkthrough](agentic-component-ui.md#orders-shipments-and-shipping-policy).
+## Proofs
 
-Installed apps can add interactive cards to either conversation. Studio uses
-its durable run status to announce a completed read. The storefront uses its
-chat stream. Both host app interactions through the same revision-bound MCP
-gateway. Commerce changes remain on the native review and confirmation paths.
-[Studio conversation flow](agentic-component-ui.md#show-the-merchants-app-view-during-the-answer).
+Lean proves the pure rules in `domain/` and the verified kernel: 72 proved rules with 197
+properties, among them the per-order stock bound, the order state machine over any
+sequence of requests, capture and refund bounds, the reviewed checkout revision and total,
+shop-scoped credentials and signed offers. Every `domain/` function of core, pricing,
+inventory, checkout, payments and orders is either bound to a proved rule or listed as
+unproved with a reason (144 functions, 15 bound; [domain coverage](formal-coverage.md)).
+The `formal_differential` suite compares the compiled Rust rules with the Lean versions on
+228,195 generated cases. Proofs do not cover SQL, HTTP or providers; those stay with the
+tests above. [What the proofs cover](formal-verification.md) ·
+[What is proved, per file](proof-coverage.md).
 
-Primary protocol sources checked during implementation:
+## Component mirrors
 
-- https://ucp.dev/specification/shopping/checkout/rest/
-- https://ucp.dev/2026-08-25/schemas/shopping/checkout.json
-- https://modelcontextprotocol.io/specification/2026-07-28/server/tools
-- https://modelcontextprotocol.io/specification/2025-11-25/basic/transports
+The monorepo is the source of truth. `scripts/component_mirrors.py` generates a standalone
+workspace for each of the 19 components that have a crate (`target/mirrors/<component>/`),
+with test adapters for the ports only the server implements. `--check` shows that each one
+builds and tests alone, offline; `components.release.json` records the commit the mirrors
+were generated from. Publishing to the component repositories is not done yet.
+[Component mirrors](component-mirrors.md).
 
-## Historical v0.2: one data engine, three representations
+## What is still open
 
-This section records the original AGE/pgvector implementation. The current
-PostgreSQL/Qdrant replacement is described above; the extension requirements
-and exact-vector search details below apply to the earlier version.
+The [component plan](plans/2026-11-19-component-architecture.md) is the checklist. Open at
+this release candidate:
 
-PostgreSQL owns orders, stock, revision checks, outbox, conversations and
-proposals. Apache AGE owns explicit Product/Need nodes and SERVES/PAIRS_WITH
-relationships. pgvector stores real 1,024-dimensional Qwen embeddings with
-model and document hashes. All three are in the same open database, backed by
-the existing volume. Startup migrations and initial graph construction are
-serialized with a database advisory lock.
-
-Graph queries are fixed code templates with bound agtype parameters. Product
-metadata updates join merchant approval's transaction. The seeded relations
-have curated-demo provenance; neither their presence nor embeddings imply
-learned causal knowledge. Search filters by tenant and model before exact
-ranking, then joins current price/stock/revision from the ledger. Unchanged
-documents reuse embeddings. No ANN index, graph sharding or million-product
-performance is claimed. A production system needs bounded graph neighborhoods,
-tenant partitioning and retrieval before model context construction; the
-six-product demo still passes the full bounded catalog to the planner.
-
-## Historical v0.2: persisted conversations and provider boundaries
-
-The transaction-held inference described here was later replaced with short
-conversation leases and network calls outside database transactions; see
-[the current inference path](intelligence-apps-payments.md#process-scaling-and-measured-boundaries).
-
-The merchant chat reads current catalog, graph, experience state, recent
-conversation and verified simulated-order aggregates. Ollama (explicitly disabling optional thinking for bounded structured operations), OpenAI Responses
-and Anthropic Messages produce the same typed proposal. Optional cloud keys
-remain on the server; provider errors create explicit chat messages without
-executable proposals. There is no silent fallback.
-
-Conversation turns use a per-conversation advisory try-lock and retain the
-last 16 messages as model context. Inference holds a conversation transaction,
-not stock/product locks. It is an asynchronous HTTP request inside one process,
-not a durable worker; long-running jobs should move to a worker with bounded
-queues and cancellation before scaling. Approvals remain a separate short
-transaction. History reads join the actual task's applied flag so reloading
-cannot offer an already-applied change as pending.
-
-The MCP stdio bridge forwards to Rust's shared capabilities. Remote ChatGPT or
-Claude account registration, HTTPS deployment and OAuth remain deployment work;
-the prototype does not imply local endpoints are reachable from hosted clients.
-Cold restart checks include graph relations, exact stored vector digests,
-conversations and approval state, alongside the earlier ledger/policy checks.
-
-## Historical v0.3: merchant visibility and language context
-
-VEYNDO Studio reads one tenant-scoped overview containing actual order
-aggregates, seven-day counts, inventory, AGE relations, vector-index metadata,
-recorded policy counters, activity and provider/connector boundaries. Every
-product selection shares the same preview state. Preview quote construction
-is in-memory and executes the real deterministic pricing operation without
-writing a cart, order or inventory. Mobile users open the same preview in a
-native dialog. Locale/theme preferences persist; the merchant token does not.
-
-The planner now receives recorded policy views/rewards and diagnostic channel
-counts as verified facts. Its stored evidence preserves those input facts with
-the chosen response locale. Graph facts are explicitly curated and the policy
-learns an observed reward association, not causal uplift or new model weights.
-The history groups exposures by initial session time and displays their current
-reward state; it does not invent historical estimates. New approvals record
-an actual applied timestamp; old proposals retain only their creation history.
-
-HTTP call counters are best-effort asynchronous diagnostics for Store API,
-MCP and UCP. They count requests, including tests; no external platform or
-customer attribution is inferred. A cart's initial adapter is stored with its
-order; this identifies the entry path, not the identity of a hosted agent.
-
-The original Shopware language-chain slice feeds native translated field
-hydration. English, German, French and Spanish products are seeded once;
-Swiss German demonstrates parent fallback. Currency stays EUR. Original rule
-priority and calculated-tier selection replace the earlier hardcoded quantity
-branch, and normalized quantities are persisted in real carts. This remains a
-bounded context/product-cart port with its own original-PHP differential gate.
-
-## Current native automation and hands-on setup
-
-`automation_rules/` evaluates reviewed source-named conditions. The marketing
-context builders supply private server-owned facts; referenced rules are fetched
-by tenant/ID and frozen per matching event. `marketing/pipeline_runtime.rs`
-executes an admitted graph using durable node receipts, cursors and scheduled
-continuations. A current membership check precedes each action. Internal product
-metadata is excluded from public serialization. Apps share the existing typed
-action gateway; AI proposals retain merchant review.
-
-This is an executable native subset, not a certified translation of the full
-Shopware interpreter, DAL, trigger set or FlowSequence protocol. See
-[automation.md](automation.md) for source/configuration boundaries. The
-[playground](playground.md) creates a separate shop through personal-owner APIs
-and seeds repeatable provider-free configurations; it does not bypass production
-handlers or add a second business-logic implementation.
-
-The standard synthetic catalog lives in `src/demo_catalog.rs` and `fixtures/fashion-catalog.json`. New shops receive the Nord Atelier fashion template when demo catalog seeding is requested; `scripts/fashion_demo.py` tests the actual signup, variants, translations, images, isolated checkout and process restart. See [Fashion demo](fashion-demo.md).
-
-## Modular B2B and EDI — 12 October 2026
-
-Native company units, current employee rights, private catalogs, currency-bound
-budgets, separate approval, RFQ negotiation, quick order and repeat lists reuse
-the existing checkout, inventory, order, document and Flow owners. The Studio and
-customer account use the same API/MCP contracts. [Setup, source owners and precise
-B2B comparison](b2b-commerce.md). The independent `extensions/apps/edi/` package owns
-bounded EDIFACT/UBL/cXML parsing, mapped private requisition import and immutable
-native document export; no Core codec or second ledger. [EDI profiles, deployment
-and network/certification limits](edi.md).
-
-## Shared publication and observation owners
-
-`marketing/channel_config.rs` owns transactional channel admission for native
-writes and releases; `marketing/flow_policy.rs` checks current action rights.
-`staging/access.rs` checks each selected domain and `final_config.rs` validates the
-final aggregate/POS defaults. `b2b/staging.rs` clones only configuration/catalogs
-and delegates publication to the same organization/catalog transactional writers.
-`legal/model.rs` owns inherited visitor settings; behavior capture/report/journey
-and consent disclosure consume that same policy. Shared history exposes B2B
-configuration over HTTP/MCP without financial rewind. No second settings, audit
-or analytics ledger is introduced. [Integration map and limits](feature-integration.md).
-
-
-### App results inside assistant conversations
-
-A versioned App Manifest declares the view and the associated read tool.
-Core checks the installed package and current actor, executes the tool, then
-attaches the result to the conversation. The browser hosts the view in the
-existing isolated App document boundary. Pagination and a declared filter call
-that view's pinned read tool within the original query. Other MCP hosts discover
-the same resource through the tool metadata. OpenUI is the optional renderer for
-model-generated layouts. The same service operations supply data and validate
-actions in either presentation.
-Generic native App list tools obtain their indexed filter fields, scalar types
-and choices from the independent Apps model contract. The same metadata reaches
-MCP discovery, the JavaScript SDK and the agent. Query and identity admission
-remain with their existing owners; discovery never creates a database index.
-[App views in conversations](agentic-component-ui.md#app-owned-views-in-the-conversation).
+- The server as composition only (5.1) and one contract source for request and response
+  bodies (5.2).
+- Publishing the mirrors (5.4), acceptance of the whole system with the two-replica
+  regression and the hot-path benchmark (5.5), and the production image check (5.6).
+- Port contract tests for the transaction-bound port methods; the concurrency suite for
+  repeated delivery, lease loss and uncertain sends.
+- Money in whole minor units end to end and the price-calculation proofs that depend on it;
+  this is in progress separately.

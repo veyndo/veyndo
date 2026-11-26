@@ -1,5 +1,38 @@
 # Changelog
 
+## Component architecture (release candidate)
+
+- Split the commerce server into 22 components declared in `components.json`, each
+  with its tables, `types/`, `domain/`, `store/`, `service/`, `http/` and `ports.rs`;
+  the server composes them and keeps the MCP, UCP and capability adapters.
+- Refuse dependency cycles and mutual component pairs; replace most direct accesses to
+  another component's tables with owner store functions and 47 port traits (61
+  remaining accesses, each with a written reason).
+- Keep SQL in `store/` modules only; check 1,267 queries at compile time from the
+  committed `.sqlx` cache.
+- Read stored JSON and request bodies through typed views and DTOs instead of untyped
+  field access.
+- Replace the 110 incremental migrations by one schema baseline per component plus a
+  shared foundation; prove a fresh installation equals the last incremental release.
+- Move every Studio and storefront screen into its component's `ui/` folder; type every
+  request path from the route catalogue; enforce the component dependency direction in
+  the UI.
+- Add property tests, store isolation under forced row security, port contract tests,
+  generated HTTP and MCP contract cases, mutation testing of `domain/`, coverage floors
+  per component and browser journeys.
+- Prove the per-order stock bound and the order and payment state machines over request
+  sequences (72 proved rules, 197 properties); list every commerce `domain/` function as
+  bound to a proved rule or unproved with a reason; compare Rust and Lean on 228,195 cases.
+- Generate standalone mirrors of the 19 components with a crate and check that each builds
+  and tests alone.
+- Remove the upgrade path: legacy migrations and checksum compatibility, the hosted-app
+  backfill, the connector `--import-legacy` flag and `scripts/migrate_connector_state.py`.
+  Setup refuses a database created by an earlier release; data of a deployed earlier
+  release is not carried over.
+- Open before acceptance: one complete suite run on the merged build, the two-replica
+  regression, the benchmark comparison and the production image check.
+  [Release notes](docs/current-release.md#component-architecture--release-candidate).
+
 ## Sovereign AI mode
 
 - Add one operator switch, and the deployment variable `SOVEREIGN_AI=true`,
