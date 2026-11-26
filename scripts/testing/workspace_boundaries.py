@@ -46,7 +46,7 @@ OWNERS.update({'veyndo': ROOT, 'veyndo-port-contracts': ROOT / 'crates/port-cont
                'veyndo-provider-klaviyo': ROOT / 'extensions/apps/klaviyo',
                'veyndo-provider-vercel': ROOT / 'extensions/apps/vercel'})
 ALLOWED = {
-    'veyndo-port-contracts': {'veyndo-core', 'veyndo-shop', 'veyndo-payments', 'veyndo-intelligence', 'veyndo-app-platform', 'veyndo-app-model'},
+    'veyndo-port-contracts': {'veyndo-core', 'veyndo-shop', 'veyndo-pricing', 'veyndo-shipping', 'veyndo-payments', 'veyndo-intelligence', 'veyndo-app-platform', 'veyndo-app-model'},
     'veyndo-app-model': set(),
     'veyndo-app-runtime': {'veyndo-app-model'},
     'veyndo-app-storage': {'veyndo-app-model'},
