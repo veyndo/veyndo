@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
-use veyndo_pricing::pricing::{
-    CalculatedTax, PriceInput, calculate, math_round, proportional_tax_rules,
-};
+use veyndo_pricing::binary::Binary;
+use veyndo_pricing::money::Minor;
+use veyndo_pricing::pricing::{PriceInput, calculate, math_round, proportional_tax_rules};
 use veyndo_pricing::quote::{LinePriceUpdate, QuoteTotals};
 use veyndo_pricing::service::conversion as currencies;
 /// The quote facts an app adjustment reads, each as leniently as the adjustment always read it.
@@ -19,7 +19,7 @@ struct AdjustedQuote {
     #[serde(deserialize_with = "lenient")]
     shipping_costs: ShippingCosts,
     #[serde(deserialize_with = "lenient")]
-    discount_total: Option<f64>,
+    discount_total: Option<Binary>,
     line_items: Value,
 }
 
@@ -38,7 +38,7 @@ struct QuotePrice {
 #[serde(default, rename_all = "camelCase")]
 struct ShippingCosts {
     #[serde(deserialize_with = "lenient")]
-    total_price: Option<f64>,
+    total_price: Option<Binary>,
 }
 
 #[derive(Deserialize, Default)]
@@ -54,7 +54,7 @@ struct AdjustedLine {
 #[serde(default, rename_all = "camelCase")]
 struct AdjustedLinePrice {
     #[serde(deserialize_with = "lenient")]
-    total_price: Option<f64>,
+    total_price: Option<Binary>,
     calculated_taxes: Value,
 }
 
@@ -62,11 +62,11 @@ struct AdjustedLinePrice {
 #[serde(default, rename_all = "camelCase")]
 struct LenientTax {
     #[serde(deserialize_with = "lenient")]
-    tax_rate: Option<f64>,
+    tax_rate: Option<Binary>,
     #[serde(deserialize_with = "lenient")]
-    price: Option<f64>,
+    price: Option<Binary>,
     #[serde(deserialize_with = "lenient")]
-    tax: Option<f64>,
+    tax: Option<Binary>,
 }
 
 /// The adjusted lines summed into the quote totals; these values are required.
@@ -84,13 +84,13 @@ struct SummedLine {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SummedPrice {
-    total_price: f64,
+    total_price: Binary,
     calculated_taxes: Vec<SummedTax>,
 }
 
 #[derive(Deserialize)]
 struct SummedTax {
-    tax: f64,
+    tax: Binary,
 }
 
 /// The app adjustments recorded on the quote itself.
@@ -100,7 +100,12 @@ struct Recorded {
     #[serde(skip_serializing_if = "Option::is_none")]
     app_shipping_adjustment_minor: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    discount_total: Option<f64>,
+    discount_total: Option<Minor>,
+}
+
+/// A quote number as the exact binary64 value of a decimal amount in minor units of `scale`.
+fn binary(minor: i64, scale: u8) -> Result<Binary> {
+    Binary::from_decimal(Minor::new(minor, scale).decimal()).map_err(bad)
 }
 
 /// The new line prices of a price or discount adjustment, in line order.
@@ -108,9 +113,8 @@ fn adjusted_lines(
     quote: &AdjustedQuote,
     kind: &str,
     minor: i64,
-    scale: i32,
+    scale: u8,
 ) -> Result<Vec<LinePriceUpdate>> {
-    let factor = 10_f64.powi(scale);
     if minor < 0 {
         return Err(bad(
             "Price/discount hooks return a nonnegative adjustment; the hook determines its direction",
@@ -127,8 +131,13 @@ fn adjusted_lines(
     let totals: Vec<i64> = lines
         .iter()
         .map(|l| {
-            currencies::amount(l.price.total_price.unwrap_or(0.), currency, scale as u8)
-                .map(|m| m.minor())
+            let total = l
+                .price
+                .total_price
+                .unwrap_or(Binary::ZERO)
+                .shortest()
+                .map_err(bad)?;
+            currencies::exact_amount(total, currency, scale).map(|m| m.minor())
         })
         .collect::<Result<_>>()?;
     let sum = totals
@@ -158,40 +167,43 @@ fn adjusted_lines(
         })
         .collect::<Result<Vec<_>>>()?;
     let b2b = quote.price.tax_status.as_deref() == Some("net");
+    let interval = binary(1, scale)?;
     lines
         .iter()
         .enumerate()
         .map(|(i, line)| {
-            let taxes: Vec<CalculatedTax> = line
+            let shares: Vec<(Binary, Binary)> = line
                 .price
                 .calculated_taxes
                 .as_array()
                 .ok_or(bad("Quote taxes missing"))?
                 .iter()
                 .map(view::<LenientTax>)
-                .map(|r| CalculatedTax {
-                    tax_rate: r.tax_rate.unwrap_or(0.),
-                    price: r.price.unwrap_or(0.),
-                    tax: r.tax.unwrap_or(0.),
+                .map(|r| {
+                    (
+                        r.tax_rate.unwrap_or(Binary::ZERO),
+                        r.price.unwrap_or(Binary::ZERO),
+                    )
                 })
                 .collect();
-            let tax_rules = proportional_tax_rules(&taxes, totals[i] as f64 / factor);
+            let tax_rules =
+                proportional_tax_rules(&shares, binary(totals[i], scale)?).map_err(bad)?;
             let calc = calculate(&PriceInput {
-                price: targets[i] as f64 / factor,
+                price: binary(targets[i], scale)?,
                 quantity: 1,
-                decimals: scale,
-                interval: 1. / factor,
+                decimals: scale.into(),
+                interval,
                 tax_rules: Some(tax_rules),
                 gross: !b2b,
                 ..PriceInput::default()
-            });
-            let quantity = line.quantity.unwrap_or(1).max(1) as f64;
-            Ok(LinePriceUpdate::new(
+            })
+            .map_err(bad)?;
+            LinePriceUpdate::new(
                 calc.total_price,
-                quantity,
-                scale,
+                line.quantity.unwrap_or(1).max(1),
                 &calc.calculated_taxes,
-            ))
+            )
+            .map_err(bad)
         })
         .collect()
 }
@@ -199,11 +211,13 @@ fn adjusted_lines(
 /// Applies an admitted integer app adjustment to a priced quote through native pricing and tax calculation.
 pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
     let quote: AdjustedQuote = view(q);
-    let scale = quote
-        .price
-        .currency_scale
-        .ok_or(bad("Quote scale missing"))? as i32;
-    let factor = 10_f64.powi(scale);
+    let scale = u8::try_from(
+        quote
+            .price
+            .currency_scale
+            .ok_or(bad("Quote scale missing"))?,
+    )
+    .map_err(|_| bad("Quote scale missing"))?;
     if kind == "validation" {
         if minor != 0 {
             return Err(bad("Validation hook cannot change money"));
@@ -221,7 +235,13 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
             .checked_add(minor)
             .filter(|n| n.unsigned_abs() <= 100_000_000)
             .ok_or(bad("Shipping hook adjustment overflow"))?;
-        if quote.shipping_costs.total_price.unwrap_or(0.) + minor as f64 / factor < 0. {
+        let shipped = quote
+            .shipping_costs
+            .total_price
+            .unwrap_or(Binary::ZERO)
+            .checked_add(binary(minor, scale)?)
+            .map_err(bad)?;
+        if shipped < Binary::ZERO {
             return Err(bad("Shipping hook cannot make delivery cost negative"));
         }
         recorded.app_shipping_adjustment_minor = Some(combined);
@@ -237,10 +257,12 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
             }
         }
         if kind == "discount" {
-            recorded.discount_total = Some(math_round(
-                quote.discount_total.unwrap_or(0.) + minor as f64 / factor,
-                scale,
-            ));
+            let total = quote
+                .discount_total
+                .unwrap_or(Binary::ZERO)
+                .checked_add(binary(minor, scale)?)
+                .map_err(bad)?;
+            recorded.discount_total = Some(math_round(total, scale).map_err(bad)?);
         }
     }
     // Strip the previous delivery components; the shared delivery owner recalculates them exactly once next.
@@ -250,34 +272,103 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
             "Priced quote is incomplete".into(),
         )
     })?;
-    let positions = math_round(
-        summed.line_items.iter().map(|l| l.price.total_price).sum(),
-        scale,
-    );
-    let tax = math_round(
+    // The stored sums as the quote rounds them: binary sums of the stored numbers, then `round`.
+    let rounded_sum = |values: Vec<Binary>| -> Result<Minor> {
+        let total = values
+            .into_iter()
+            .try_fold(Binary::ZERO, Binary::checked_add)
+            .map_err(bad)?;
+        math_round(total, scale).map_err(bad)
+    };
+    let positions = rounded_sum(
+        summed
+            .line_items
+            .iter()
+            .map(|l| l.price.total_price)
+            .collect(),
+    )?;
+    let tax = rounded_sum(
         summed
             .line_items
             .iter()
             .flat_map(|l| &l.price.calculated_taxes)
             .map(|t| t.tax)
-            .sum(),
-        scale,
-    );
+            .collect(),
+    )?;
     let net = quote.price.tax_status.as_deref() == Some("net");
     merge(q, recorded)?;
     let price = q
         .as_object_mut()
         .map(|o| o.entry("price").or_insert(Value::Null))
         .ok_or(bad("Quote scale missing"))?;
-    merge(price, QuoteTotals::new(positions, tax, scale, net))
+    merge(price, QuoteTotals::new(positions, tax, net).map_err(bad)?)
 }
 #[cfg(test)]
 mod tests {
     use super::apply;
     use serde_json::{Value, json};
     use veyndo_core::{Result, StatusCode, bad};
-    use veyndo_pricing::pricing::{PriceInput, calculate, math_round, proportional_tax_rules};
+    use veyndo_pricing::binary::Binary;
+    use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate};
     use veyndo_pricing::service::conversion as currencies;
+
+    /// The previous floating-point `math_round`, part of the oracle below.
+    fn math_round(value: f64, decimals: i32) -> f64 {
+        let scale = 10f64.powi(decimals);
+        let mut whole = (value.abs() * scale).floor();
+        if (whole + 1.0) / scale == value.abs() {
+            whole += 1.0;
+        }
+        if value.abs() >= (whole + 0.5) / scale {
+            whole += 1.0;
+        }
+        (whole / scale).copysign(value)
+    }
+
+    /// The previous floating-point proportional rules: (rate, percentage) per (rate, price).
+    fn proportional(taxes: &[(f64, f64)], total: f64) -> Vec<(f64, f64)> {
+        taxes
+            .iter()
+            .map(|(rate, price)| {
+                let share = if total == 0. {
+                    100. / taxes.len() as f64
+                } else {
+                    price / total * 100.
+                };
+                (*rate, share)
+            })
+            .collect()
+    }
+
+    /// The calculator through its wire boundary, as the oracle saw it: numbers in, numbers out.
+    fn calculated(
+        price: f64,
+        decimals: i32,
+        interval: f64,
+        rules: &[(f64, f64)],
+        gross: bool,
+    ) -> Value {
+        let wire = |v: f64| Binary::from_wire(v).unwrap();
+        let price = calculate(&PriceInput {
+            price: wire(price),
+            quantity: 1,
+            decimals,
+            interval: wire(interval),
+            tax_rules: Some(
+                rules
+                    .iter()
+                    .map(|(rate, share)| TaxRule {
+                        tax_rate: wire(*rate),
+                        percentage: wire(*share),
+                    })
+                    .collect(),
+            ),
+            gross,
+            ..PriceInput::default()
+        })
+        .unwrap();
+        serde_json::to_value(price).unwrap()
+    }
 
     // The previous untyped implementation, kept as the oracle of the typed one.
     fn legacy(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
@@ -359,31 +450,27 @@ mod tests {
                 let rules = line["price"]["calculatedTaxes"]
                     .as_array()
                     .ok_or(bad("Quote taxes missing"))?;
-                let taxes: Vec<veyndo_pricing::pricing::CalculatedTax> = rules
+                let taxes: Vec<(f64, f64)> = rules
                     .iter()
-                    .map(|r| veyndo_pricing::pricing::CalculatedTax {
-                        tax_rate: r["taxRate"].as_f64().unwrap_or(0.),
-                        price: r["price"].as_f64().unwrap_or(0.),
-                        tax: r["tax"].as_f64().unwrap_or(0.),
+                    .map(|r| {
+                        (
+                            r["taxRate"].as_f64().unwrap_or(0.),
+                            r["price"].as_f64().unwrap_or(0.),
+                        )
                     })
                     .collect();
-                let tax_rules = proportional_tax_rules(&taxes, totals[i] as f64 / factor);
-                let calc = calculate(&PriceInput {
-                    price: target as f64 / factor,
-                    quantity: 1,
-                    decimals: scale,
-                    interval: 1. / factor,
-                    tax_rules: Some(tax_rules),
-                    gross: !b2b,
-                    ..PriceInput::default()
-                });
+                let tax_rules = proportional(&taxes, totals[i] as f64 / factor);
+                let calc = calculated(target as f64 / factor, scale, 1. / factor, &tax_rules, !b2b);
+                let total = calc["total_price"].as_f64().unwrap();
                 let qty = line["quantity"].as_u64().unwrap_or(1).max(1) as f64;
-                line["price"]["totalPrice"] = json!(calc.total_price);
-                line["price"]["unitPrice"] = json!(math_round(calc.total_price / qty, scale));
+                line["price"]["totalPrice"] = json!(total);
+                line["price"]["unitPrice"] = json!(math_round(total / qty, scale));
                 line["price"]["calculatedTaxes"] = json!(
-                    calc.calculated_taxes
+                    calc["calculated_taxes"]
+                        .as_array()
+                        .unwrap()
                         .iter()
-                        .map(|t| json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price}))
+                        .map(|t| json!({"tax":t["tax"],"taxRate":t["tax_rate"],"price":t["price"]}))
                         .collect::<Vec<_>>()
                 );
             }

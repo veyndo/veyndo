@@ -1,4 +1,5 @@
 //! Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice.
+use crate::decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -7,11 +8,11 @@ use std::collections::HashMap;
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct TaxConfig {
     pub id: String,
-    pub rates: HashMap<String, f64>,
+    pub rates: HashMap<String, Decimal>,
     #[serde(default)]
     pub translations: HashMap<String, veyndo_core::localized::Text>,
     #[serde(default)]
-    pub default_rate: Option<f64>,
+    pub default_rate: Option<Decimal>,
     #[serde(default)]
     pub rules: Vec<DestinationRule>,
 }
@@ -20,7 +21,7 @@ pub struct TaxConfig {
 pub struct DestinationRule {
     pub id: String,
     pub country: String,
-    pub rate: f64,
+    pub rate: Decimal,
     #[serde(default)]
     pub priority: i32,
     #[serde(default)]

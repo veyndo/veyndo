@@ -1,4 +1,5 @@
-//! Shared product snapshot and tier contracts, without database or transport authority.
+//! Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and
+//! tier discounts keep the database's binary64 columns; pricing reads them through the wire conversion.
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

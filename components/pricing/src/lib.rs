@@ -2,7 +2,9 @@
 pub use veyndo_kernel::verified_kernel;
 pub mod domain;
 pub use domain::validation::ValidationError;
-pub use domain::{cart, catalog, customer, discount, external_order, money, pricing, quote};
+pub use domain::{
+    binary, cart, catalog, customer, decimal, discount, external_order, money, pricing, quote,
+};
 #[cfg(feature = "service")]
 mod conversions;
 #[cfg(feature = "service")]

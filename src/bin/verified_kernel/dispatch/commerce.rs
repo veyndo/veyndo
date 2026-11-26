@@ -97,6 +97,8 @@ pub(super) fn eval(request: &Request) -> Result<Value, String> {
         ))),
         Some("amount_sum") => Ok(json!(amount_sum(n("left")?, n("right")?))),
         Some("net_amount") => Ok(json!(net_amount(n("gross")?, n("tax")?))),
+        Some("line_total") => Ok(json!(line_total(n("unit")?, n("quantity")?))),
+        Some("rounded_quotient") => Ok(json!(rounded_quotient(n("numerator")?, n("denominator")?))),
         _ => Err("Unknown policy".into()),
     }
 }

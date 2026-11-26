@@ -4,8 +4,10 @@ use serde_json::json;
 use std::collections::HashMap;
 use veyndo_core::document_slot::field;
 use veyndo_core::{Result, bad};
+use veyndo_pricing::binary::Binary;
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::service::conversion::amount;
+use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::service::conversion::exact_amount;
 use veyndo_shop::domain::tax_rules::destination_rate;
 use veyndo_shop::types::settings::{CheckoutSelection, Settings};
 
@@ -39,28 +41,43 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
                 rates.insert(tax.id.clone(), rate);
                 rate
             };
-            let factor = (1. + rate / 100.) / (1. + p.tax_rate / 100.);
-            if factor != 1.
+            // The net-preserving factor `(1 + rate / 100) / (1 + product rate / 100)`, applied with
+            // the original binary arithmetic so every stored price changes exactly as before.
+            let one = Binary::integer(1);
+            let hundred = Binary::integer(100);
+            let gross_of =
+                |rate: Binary| rate.checked_div(hundred).and_then(|r| one.checked_add(r));
+            let rate_binary = Binary::from_decimal(rate).map_err(bad)?;
+            let product_rate = Binary::from_wire(p.tax_rate).map_err(bad)?;
+            let factor = gross_of(rate_binary)
+                .and_then(|g| g.checked_div(gross_of(product_rate)?))
+                .map_err(bad)?;
+            let scaled = |value: Binary| value.checked_mul(factor).map_err(bad);
+            if factor != one
                 && let Some(prices) = field(&mut p.extra, "currencyPrices")?.as_object_mut()
             {
                 for (code, entry) in prices {
                     if let Some(d) = s.currencies.definitions.iter().find(|d| d.code == *code) {
                         for key in ["price", "listPrice", "regulationPrice"] {
                             if let Some(text) = entry[key].as_str() {
-                                let value = text
-                                    .parse::<f64>()
+                                let value = Decimal::parse(text)
+                                    .and_then(Binary::from_decimal)
                                     .map_err(|_| bad("Invalid fixed currency price"))?;
+                                let converted = scaled(value)?.shortest().map_err(bad)?;
                                 entry[key] =
-                                    json!(amount(value * factor, code, d.scale)?.decimal());
+                                    json!(exact_amount(converted, code, d.scale)?.decimal());
                             }
                         }
                     }
                 }
             }
-            p.price *= factor;
-            p.list_price = p.list_price.map(|v| v * factor);
-            p.regulation_price = p.regulation_price.map(|v| v * factor);
-            p.tax_rate = rate;
+            let stored = |value| -> Result<_> {
+                Ok(scaled(Binary::from_wire(value).map_err(bad)?)?.to_wire())
+            };
+            p.price = stored(p.price)?;
+            p.list_price = p.list_price.map(stored).transpose()?;
+            p.regulation_price = p.regulation_price.map(stored).transpose()?;
+            p.tax_rate = rate_binary.to_wire();
             Ok(p)
         })
         .collect()

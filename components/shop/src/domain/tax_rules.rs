@@ -3,16 +3,14 @@ use crate::domain::validation::Conditions;
 use crate::types::settings::{Settings, TaxConfig};
 use veyndo_app_model::declarations::identifier;
 use veyndo_core::{Result, bad};
+use veyndo_pricing::decimal::Decimal;
 use veyndo_shipping::domain::geography::catalogue;
 
 /// Bounds of one tax class's destination rules; `conditions` checks an attached rule condition.
 pub fn validate(t: &TaxConfig, s: &Settings, conditions: Conditions<'_>) -> Result<()> {
     let world = catalogue(&s.country_definitions);
     let mut ids = std::collections::HashSet::new();
-    if t.rules.len() > 500
-        || t.default_rate
-            .is_some_and(|x| !x.is_finite() || !(0. ..=100.).contains(&x))
-    {
+    if t.rules.len() > 500 || t.default_rate.is_some_and(|x| !percentage(x)) {
         return Err(bad("Invalid default tax rate or rule limit"));
     }
     for r in &t.rules {
@@ -22,8 +20,7 @@ pub fn validate(t: &TaxConfig, s: &Settings, conditions: Conditions<'_>) -> Resu
             .ok_or(bad("Unknown tax rule country"))?;
         if !ids.insert(&r.id)
             || !identifier(&r.id)
-            || !r.rate.is_finite()
-            || !(0. ..=100.).contains(&r.rate)
+            || !percentage(r.rate)
             || r.states
                 .iter()
                 .any(|st| !country.states.iter().any(|x| x.code == *st))
@@ -64,12 +61,17 @@ pub fn validate(t: &TaxConfig, s: &Settings, conditions: Conditions<'_>) -> Resu
     Ok(())
 }
 
+/// A tax rate in percent within 0..=100 (exact decimals are always finite).
+pub fn percentage(rate: Decimal) -> bool {
+    (Decimal::ZERO..=Decimal::integer(100)).contains(&rate)
+}
+
 /// The destination a checkout selection names, resolved against the priority rules of one tax class.
 pub fn destination_rate(
     t: &TaxConfig,
     c: &crate::types::settings::CheckoutSelection,
     today: &str,
-) -> Result<f64> {
+) -> Result<Decimal> {
     let address = c.address.as_ref();
     veyndo_pricing::service::tax::destination_rate(
         t,
@@ -84,7 +86,7 @@ pub fn destination_rate(
 
 #[cfg(test)]
 mod tests {
-    use super::{destination_rate, validate};
+    use super::{Decimal, destination_rate, validate};
     use crate::types::settings::{CheckoutSelection, Settings};
     use serde_json::{Value, json};
     use veyndo_core::bad;
@@ -140,9 +142,9 @@ mod tests {
     fn rule_counts_default_rates_duplicates_and_conditions_are_checked() {
         let s = settings();
         let mut t = s.taxes[0].clone();
-        t.default_rate = Some(120.0);
+        t.default_rate = Some(Decimal::integer(120));
         assert!(validate(&t, &s, &|_| Ok(())).is_err());
-        t.default_rate = Some(5.0);
+        t.default_rate = Some(Decimal::integer(5));
         assert!(validate(&t, &s, &|_| Ok(())).is_ok());
         t.rules = vec![
             serde_json::from_value(rule()).unwrap(),
@@ -163,14 +165,20 @@ mod tests {
         t.rules = vec![serde_json::from_value(rule()).unwrap()];
         let mut c = CheckoutSelection::defaults();
         c.country = "DE".into();
-        assert_eq!(destination_rate(&t, &c, "2026-01-01").ok(), Some(19.0));
+        assert_eq!(
+            destination_rate(&t, &c, "2026-01-01").ok(),
+            Some(Decimal::integer(19))
+        );
         c.address = Some(
             serde_json::from_value(
                 json!({"street":"Weg 1","postalCode":"10115","city":"Berlin","country":"DE"}),
             )
             .unwrap(),
         );
-        assert_eq!(destination_rate(&t, &c, "2026-01-01").ok(), Some(7.0));
+        assert_eq!(
+            destination_rate(&t, &c, "2026-01-01").ok(),
+            Some(Decimal::integer(7))
+        );
         c.country = "IT".into();
         assert!(destination_rate(&t, &c, "2026-01-01").is_err());
     }

@@ -1,9 +1,9 @@
 //! Property tests for applying promotions to a priced quote: every discount stays within its base, no total or line goes negative, exclusive promotions stop the chain.
 use super::apply;
+use super::tests::math_round;
 use crate::types::promotion::Promotion;
 use proptest::prelude::*;
 use serde_json::{Value, json};
-use veyndo_pricing::pricing::math_round;
 
 /// A promotion as generated: kind, amount and whether it is exclusive.
 type Spec = (&'static str, f64, bool);

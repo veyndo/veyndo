@@ -144,7 +144,7 @@ async fn reviews(a: &State, t: &str, family: &str) -> Result<Value> {
 /// The context price of a product in the requested currency.
 #[derive(Serialize)]
 struct ContextPrice<'a> {
-    price: f64,
+    price: veyndo_pricing::decimal::Decimal,
     currency: &'a str,
 }
 
