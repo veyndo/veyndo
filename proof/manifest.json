@@ -3947,8 +3947,8 @@
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "a49f31e02742e24853df11b9826bf46926003d644d4dbc0bbc7695d66b8bae0a",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "59aa309d92abed36169499a71eebb58caf814dcdaa45b2cbb7f267bbef4b3e7e",
+      "review": "Exclusive promotion ends the chain even when the basket is already fully discounted (property test counterexample)"
     },
     "components/marketing/src/store/queue_health.rs": {
       "status": "unproved",

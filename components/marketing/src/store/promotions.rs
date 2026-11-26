@@ -262,6 +262,10 @@ fn apply(q: &mut Value, applicable: Vec<(String, Promotion)>, coupons: &[String]
         } else {
             let total = current.position_price;
             if total.minor() <= 0 {
+                // Nothing left to discount; an exclusive promotion still ends the chain.
+                if p.exclusive {
+                    break;
+                }
                 continue;
             }
             let base = total.ratio();
