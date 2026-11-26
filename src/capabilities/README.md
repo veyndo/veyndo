@@ -7,7 +7,7 @@ still own object, PII, CAS and business checks. Metadata never grants access.
 
 `schema.rs` owns native input descriptions; `contract.rs` describes native and app
 tools consistently. `dispatch.rs` selects the existing domain owner; it does not
-implement another business service. See [platform hardening](../../docs/platform-hardening.md)
+implement another business service. See [the operation registry](../../docs/business-capabilities.md#the-operation-registry-underneath)
 for the implemented boundary and remaining typed-contract work.
 
 Domain selection returns a boxed future synchronously before polling the child.

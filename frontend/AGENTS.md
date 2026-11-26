@@ -60,7 +60,7 @@ Experience self-service entry with public identifiers only. The private service
 owns current Core admission, its durable creation job and original Storyfront import;
 never build a public renderer, second catalogue or new identity broker for this link.
 The ordinary SaaS/channel path must not install Storyfront until explicitly connected.
-See `docs/channel-setup.md` for ownership, setup and evidence boundaries.
+See `docs/channel-management.md` for ownership, setup and evidence boundaries.
 
 ## Personal workspace and standard storefront design ownership
 

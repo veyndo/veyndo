@@ -279,4 +279,4 @@ payment, order and customer-data rights. Existing 1.2.0 packages retain their
 original permissions. A Flow can use `send_payment_instructions` instead of the
 automatic subscription. Do not configure both for the same intended notification.
 The Flow reloads the original order's recipient at execution rather than storing
-bank data in its job definition. [Invoice integration and local acceptance](payment-invoice-checkout.md).
+bank data in its job definition. [Invoice integration and local acceptance](payments.md#invoice-payment-and-recipient-details).

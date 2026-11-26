@@ -362,7 +362,7 @@ Earlier deliveries retain their source and acceptance boundaries:
 
 ## Evidence and reference guides
 
-- [Hardening design and owners](../platform-hardening.md): architecture detail, not another release status.
+- [Hardening design and owners](../business-capabilities.md#the-operation-registry-underneath): architecture detail, not another release status.
 - [Release record](../current-release.md): dated evidence.
 - [Testing](../testing.md), [formal scope](../formal-verification.md), [capacity measurements](../benchmarks.md).
 - [Changelog](../../CHANGELOG.md): implementation notes belong here, not in the README.

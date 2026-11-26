@@ -25,7 +25,7 @@ Good first contributions include setup documentation, locale corrections,
 reproducible commerce bugs and small behavior ports. Do not advertise an
 unimplemented protocol or production capability in documentation.
 
-For new payment rails, read [the provider contribution requirements](docs/payment-provider-contributions.md).
+For new payment rails, read [the provider contribution requirements](docs/payment-provider-api.md#proposing-another-payment-provider).
 App installation alone does not register a settlement provider; contributions
 must integrate invoice-bound verification, reconciliation and the core ledger.
 

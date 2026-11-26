@@ -96,7 +96,7 @@ Real HTTP/PostgreSQL tests cover the neutral provider, existing native PayPal be
 
 Installed payment apps expose the same account setup in Apps → app details. The account controls are shared with App Studio, including channel/environment selection, status refresh and confirmed disconnect. Only the visual editor changes a provider draft.
 
-## Shared Shopware Payments service, version 1.2.0
+## Shared Shopware Payments service
 
 The bundled `shopware_payments` package now contains the public, language-neutral
 provider contract for PayPal, Apple Pay, Google Pay, Venmo, Pay Later, invoice,
@@ -110,8 +110,7 @@ Operators can configure `simulation` alongside `sandbox` and `live` in the exist
 `PAYMENT_SERVICES` version map. Set `defaultEnvironment` to a configured entry;
 startup rejects an unconfigured default. Hosted simulation requires HTTPS and a
 private RPC credential, just like hosted provider modes. HTTP remains limited to
-loopback `contract-fixture` tests. Migration 109 extends the existing account
-constraint without rewriting historical accounts, receipts or attempts.
+loopback `contract-fixture` tests.
 
 `GET /api/payment-providers` exposes configured environment names, their default,
 owned channel IDs and existing account status under `payments.read`. It never
@@ -186,7 +185,7 @@ Voiding a partially captured authorization returns its confirmed capture snapsho
 with `captureClosed: true`. It must not report whole-order cancellation or release
 sold stock. Public customer commands cannot override amount/finalCapture/captureId;
 for an authorization intent, customer approval requests authorization rather than
-merchant capture. [Merchant workflow](payment-capture-management.md).
+merchant capture. [Merchant workflow](payments.md#capture-and-refund).
 
 ## Read-only transaction inspection
 
@@ -198,7 +197,7 @@ Each entry has ID, status, exact minor amount, currency/scale, optional timestam
 `finalCapture`, exact `fees` (`provider` or `platform`) and optional fee/net amounts.
 Unknown fields and customer/card/bank data are rejected. This is an observation,
 never a native settlement transition. No customer/order payload is sent for inspection.
-See [transaction details](payment-transaction-details.md).
+See [transaction details](payments.md#transaction-details-and-history).
 
 ## Customer-owned saved instruments
 
@@ -217,7 +216,7 @@ returns the immutable receipt identity plus `vaultRevoked: true` and the matchin
 `vaultReference`; it cannot change the financial state.
 
 HTTP/MCP/account controls, rollout and token ownership are described in
-[saved payment methods](payment-saved-methods.md).
+[saved payment methods](payments.md#saved-payment-methods).
 
 ## Embedded payment loading
 
@@ -251,3 +250,42 @@ actions retain their separate rights. Studio translates the code into the cause
 and recovery step in English, German, French and Spanish. The operational hint
 never changes captured money, order state, ownership or idempotency identity.
 A provider timeout remains uncertain until the original request is reconciled.
+
+## Proposing another payment provider
+
+Payment proposals are welcome, but adding a method name does not implement a
+payment provider: a method name or an arbitrary service action cannot register
+settlement or write payment state. A provider implements and verifies the contract
+above. [Multi-currency](currencies.md) is resolved before payment preparation;
+adapters receive minor units and explicit precision.
+
+Before enabling a payment method, a contribution must define and exercise:
+
+1. **An immutable invoice:** tenant, order, attempt, provider/version, environment,
+   recipient, exact amount/unit and any exchange quote/expiry. Currency conversion
+   must use exact integer units and an explicit merchant-approved policy.
+2. **Server verification:** a trusted, operator-configured provider or node checks
+   confirmation, recipient and amount. Browser input, redirects, model output and
+   aggregate account balances cannot mark an order paid. Customer-supplied RPC
+   URLs must not trigger arbitrary server requests.
+3. **Exclusive attribution:** evidence must be assigned to one invoice, with
+   atomic duplicate/replay rejection across orders and tenants. A public receipt
+   proves a transfer; it does not by itself prove which order paid for it.
+   Reconciliation must recover safely after a lost reply or worker restart.
+4. **A defined lifecycle:** pending, confirmed, expired, cancelled, underpaid,
+   overpaid, late payment, uncertain verification and refund handling. Inventory,
+   order events and flows must consume the actual ledger transition exactly once
+   locally. Refund destinations require their own verified policy.
+5. **Bounded execution and privacy:** isolated provider credentials, timeout and
+   retry limits, tenant authorization and safe customer-visible receipts. Public
+   ledger data must not cause private order/customer information to be published.
+6. **Tests on the real path:** local provider fixtures plus HTTP/PostgreSQL tests
+   for confirmation, wrong recipient/amount, forged receipts, replay, foreign
+   tenants, races, outages, restart and late payment. An authorized provider-side
+   test is required before advertising live support. Pure critical decisions
+   follow the [formal contract procedure](formal-verification.md).
+
+A first-party Nano (XNO) method was proposed and deferred: account-level node
+state does not identify an invoice payment, so an adapter would first have to bind
+confirmed per-block evidence to one immutable invoice as required above. No such
+adapter, wallet custody, node or exchange-rate service exists.

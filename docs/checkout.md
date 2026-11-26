@@ -139,7 +139,7 @@ browser checks are development evidence, not a conversion-rate claim or live pay
 
 ## Additional payment methods
 
-See [payment provider contributions](payment-provider-contributions.md) for the
+See [payment provider contributions](payment-provider-api.md#proposing-another-payment-provider) for the
 current native adapter boundary, invoice/receipt requirements and the deferred
 Nano/XNO proposal. Declaring an app payment method alone cannot mark orders paid.
 

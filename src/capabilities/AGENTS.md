@@ -4,7 +4,7 @@ Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 
 ## Operation registry and business-capability continuity
 
-Read `docs/platform-hardening.md` and `docs/business-capabilities.md` before expanding
+Read `docs/business-capabilities.md` (operation registry) before expanding
 agent execution or app architecture. `capabilities/registry.rs` binds native schemas,
 boxed domain routing, discovery and safe read-agent exposure; transports do not own
 second name/schema/visibility lists. `ToolContract` describes native and app tools;

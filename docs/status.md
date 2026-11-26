@@ -2115,7 +2115,7 @@ restart without duplicate capture. Running the hosted-mode simulation transport
 locally also passes PayPal/card save, repeat purchase, revoke and refund with no
 external calls. The Core and private service changes are merged into main.
 Core migration 110 has completed publicly. Private migrations 003/004, its encryption key, versioned service configuration and the private runtime upgrade completed on 4 November. Actual provider saved-method testing remains separate.
-[Workflow, storage and rollout](payment-saved-methods.md).
+[Workflow, storage and rollout](payments.md#saved-payment-methods).
 
 ## Deferred invoice checkout, 3 November 2026
 
@@ -2126,7 +2126,7 @@ The recipient display supports four languages and narrow embedded checkouts.
 Native invoice PDFs and the opt-in Email Delivery 1.3.0 template now share the
 validated immutable recipient evidence. Automatic and Flow-triggered messages
 passed the actual local encrypted Rust queue test, with no external mail.
-Hosted migrations and rollout completed on 4 November; actual provider invoice testing remains separate. [Customer flow, rights and recovery](payment-invoice-checkout.md).
+Hosted migrations and rollout completed on 4 November; actual provider invoice testing remains separate. [Customer flow, rights and recovery](payments.md#invoice-payment-and-recipient-details).
 
 ## Payment transaction details, 3 November 2026
 
@@ -2135,14 +2135,14 @@ and a payment-only projection of durable native history. Orders and payment
 management share the same disclosure, HTTP/MCP operation and current read rights.
 Actual local Rust/Core/PostgreSQL checks pass, including no ledger mutation and
 no exposed customer/card/bank fields. Actual PayPal Sandbox capture, fee and completed-refund details were observed on 4 November.
-[Usage and validation](payment-transaction-details.md).
+[Usage and validation](payments.md#transaction-details-and-history).
 
 ## Payment capture expansion, 3 November 2026, local acceptance
 
 Core and private Rust service support partial/multiple capture, per-capture
 refunds, remainder void, exact balance displays and versioned capture timing.
 Native local-service and independent hostile-receipt checks pass. Hosted configuration and deployment completed on 4 November. Actual provider immediate capture and partial/full refunds passed for the two wallet orders; multi-capture, authorization and void still need their own provider acceptance.
-[Merchant guide](payment-capture-management.md) · [Provider acceptance](shopware-payments-acceptance.md).
+[Merchant guide](payments.md#capture-and-refund) · [Provider acceptance](shopware-payments-acceptance.md).
 
 ## Public release of 4 November 2026
 
@@ -2633,7 +2633,7 @@ are included in the combined public artifact; [implementation and browser eviden
 | Agents and model tools | Durable checkpoints, leases, cancellation, reviewed native writes, distinct revocable identities, model allocation limits, emergency stop and OpenAI/Claude/Ollama tool protocols. | Real provider quality and invoiced cost are separate from fixtures and conservative allocations. [Controls](agent-authority-controls.md), [durable work](durable-agent-runs.md) |
 | Authorization and database isolation | Current tenant/actor rights, separate restricted SQL roles, strict startup and native API/MCP operation checks. | Every new operation must retain those controls; an earlier audit is not whole-system certification. [Hosted database enforcement](evidence/database-enforcement-2026-10-15.json) |
 | Events and workers | Separate cognition/apps/flows/audit checkpoints, durable traces, bounded workers, fenced retries and per-tenant admission. | Fleet throughput, failover and large-catalogue limits require representative measurement. [Rust service ownership](rust-services.md) |
-| Contracts, boundaries and money | Generated operation input contracts, five real workspace libraries, exact money primitives and original PHP differential checks. | Response/domain DTOs and root-handler extraction remain incomplete; compatibility calculation paths still contain `f64`. [Hardening owners](platform-hardening.md) |
+| Contracts, boundaries and money | Generated operation input contracts, five real workspace libraries, exact money primitives and original PHP differential checks. | Response/domain DTOs and root-handler extraction remain incomplete; compatibility calculation paths still contain `f64`. [Hardening owners](business-capabilities.md#the-operation-registry-underneath) |
 | Prompts and evidence | Versioned prompt files with IDs/digests; actual provider/admission and injection cases in the registered tests. | Passing admission checks does not establish semantic model quality for every merchant task. [Testing](testing.md) |
 
 ## Proposed next improvements

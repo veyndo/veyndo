@@ -281,7 +281,7 @@ Shopware als Datenquelle für eine Migration und die PHP-Vergleichstests bleiben
 Teil des Hauptprojekts. OpenUI bleibt ein gesonderter lokaler Versuch für
 agentisch zusammengestellte Arbeitsansichten.
 
-[Status und Abnahmen](status.md), [Architekturentwicklung](platform-hardening.md),
+[Status und Abnahmen](status.md), [Architekturentwicklung](business-capabilities.md#the-operation-registry-underneath),
 [Lastmessungen](benchmarks.md), [Verifikation](formal-verification.md).
 
 ## 10. Beobachtungen aus Tests und Betrieb
