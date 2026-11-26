@@ -1,10 +1,9 @@
 //! Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models.
 use proptest::prelude::*;
-use veyndo_pricing::binary::Binary;
 use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::discount::allocate;
 use veyndo_pricing::money::{Currency, Minor, Money, unsigned_sum};
-use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
+use veyndo_pricing::pricing::{PriceInput, calculate};
 use veyndo_pricing::quote::QuoteTotals;
 use veyndo_pricing::verified_kernel::{
     amount_sum, discount_cap, line_total, net_amount, rounded_quotient,
@@ -113,32 +112,15 @@ proptest! {
         prop_assert!(left.checked_add(&other).is_err());
     }
 
-    /// The wire boundary: a JSON number reads as its exact bits and as the shortest decimal
-    /// naming it (the digits Rust and JSON print), and both write back to the same number.
+    /// The wire boundary: a JSON number reads as the shortest decimal naming it (the digits
+    /// Rust and JSON print), and that decimal writes back to the same number.
     #[test]
     fn wire_numbers_convert_losslessly(negative in any::<bool>(), exponent in 957_u64..1089, fraction in 0_u64..(1 << 52)) {
         // Every binary64 number between about 1e-20 and 1e20, of either sign.
         let value = f64::from_bits(u64::from(negative) << 63 | exponent << 52 | fraction);
-        let binary = Binary::from_wire(value).unwrap();
-        prop_assert_eq!(binary.to_wire().to_bits(), (value + 0.).to_bits());
         let decimal = Decimal::from_wire(value).unwrap();
         prop_assert_eq!(decimal.text(), format!("{}", value + 0.));
         prop_assert_eq!(decimal.to_wire().unwrap().to_bits(), (value + 0.).to_bits());
-    }
-
-    /// Binary arithmetic is the hardware's: sums, differences, products, quotients and floors
-    /// of binary64 values agree bit for bit with `f64` (the reference the emulation replaces).
-    #[test]
-    fn binary_arithmetic_matches_binary64(a in -1.0e9_f64..1.0e9, b in -1.0e9_f64..1.0e9, scale in 0_i32..8) {
-        let a = (a * 10_f64.powi(scale)).round() / 10_f64.powi(scale);
-        let (x, y) = (Binary::from_wire(a).unwrap(), Binary::from_wire(b).unwrap());
-        let same = |emulated: Binary, hardware: f64| emulated.to_wire().to_bits() == (hardware + 0.).to_bits();
-        prop_assert!(same(x.checked_add(y).unwrap(), a + b));
-        prop_assert!(same(x.checked_sub(y).unwrap(), a - b));
-        prop_assert!(same(x.checked_mul(y).unwrap(), a * b));
-        prop_assume!(b != 0.);
-        prop_assert!(same(x.checked_div(y).unwrap(), a / b));
-        prop_assert!(same(x.floor().unwrap(), a.floor()));
     }
 
     /// Minor amounts: addition and subtraction are exact or refused, never wrapped, and never
@@ -270,15 +252,6 @@ proptest! {
         }
     }
 
-    /// The original's `round` reads a binary64 value as the decimal it was written as: on the
-    /// nearest binary value of a decimal it rounds that decimal half away from zero.
-    #[test]
-    fn math_rounding_reads_the_written_decimal(units in -100_000_000_000_i64..100_000_000_000, digits in 0_u32..=6, decimals in 0_u8..=4) {
-        let written = Decimal::new(units.into(), digits).unwrap();
-        let rounded = math_round(Binary::from_decimal(written).unwrap(), decimals).unwrap();
-        prop_assert_eq!(rounded, written.ratio().rounded(decimals).unwrap());
-    }
-
     /// Quote totals: a net quote's payable total is position plus tax; a gross quote's net
     /// part plus its tax is the position (Lean `net_quote_total`, `gross_quote_total`).
     #[test]
@@ -306,9 +279,9 @@ proptest! {
         gross in any::<bool>(),
     ) {
         let input = PriceInput {
-            price: Binary::from_decimal(Decimal::new(cents.into(), 2).unwrap()).unwrap(),
+            price: Decimal::new(cents.into(), 2).unwrap().ratio(),
             quantity,
-            tax_rate: Binary::from_decimal(Decimal::parse(rate).unwrap()).unwrap(),
+            tax_rate: Decimal::parse(rate).unwrap(),
             gross,
             ..PriceInput::default()
         };

@@ -1,22 +1,28 @@
-//! Behavioral port of Shopware 6.7.14.2 quantity calculators with whole minor-unit results.
-//! Original: Copyright (c) 2019 shopware AG, MIT; see THIRD_PARTY.md.
+//! The quantity price calculation in exact decimal arithmetic with whole minor-unit results.
 //!
-//! The original computes in binary64 and keeps intermediate values at fourteen significant
-//! digits (`FloatComparator::cast`). Its results at decimal ties depend on that binary
-//! arithmetic, so this port performs the same steps on [`Binary`], an exact integer
-//! emulation of binary64 (no floating-point type). Every result leaves the calculation as
-//! a [`Minor`] amount in whole minor units: the decimal the original writes, exactly. The
-//! line total is the proved `line_total` of the unit price and the quantity.
-use crate::binary::Binary;
-use crate::decimal::{Decimal, MoneyError};
+//! Its structure follows Shopware's quantity calculators (6.7.14.2; Copyright (c) 2019
+//! shopware AG, MIT; see THIRD_PARTY.md): unit price, per-rule taxes, list, regulation and
+//! reference prices. The arithmetic is exact: inputs are decimals or rationals, every
+//! intermediate value is an exact [`Ratio`], and each amount is rounded once, half away
+//! from zero, to the precision through the proved `rounded_quotient` ([`Ratio::rounded`]).
+//! Gross prices and prices with `round_for_net` are then rounded to the cash interval in
+//! whole minor units: `rounded_quotient` of the amount by the interval, times the interval
+//! by `line_total`. The line total is the proved `line_total` of the rounded unit price and
+//! the quantity ([`Minor::times`]). Since
+//! 26 November the calculation no longer reproduces the original's binary64 steps, so at a
+//! decimal tie the decimal decides: 130.4835 × 670 = 87423.945 rounds to 87423.95.
+use crate::decimal::{Decimal, MoneyError, Ratio};
 use crate::money::Minor;
+use crate::verified_kernel;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+/// The inputs of one quantity price. Amounts are exact: JSON numbers read as the decimals
+/// they carry ([`Decimal::from_wire`]); callers may pass rationals such as a net price.
+#[derive(Clone, Debug, Deserialize)]
 pub struct PriceInput {
-    pub price: Binary,
+    pub price: Ratio,
     pub quantity: u32,
-    pub tax_rate: Binary,
+    pub tax_rate: Decimal,
     #[serde(default = "yes")]
     pub gross: bool,
     #[serde(default = "yes")]
@@ -24,24 +30,24 @@ pub struct PriceInput {
     #[serde(default = "decimals")]
     pub decimals: i32,
     #[serde(default = "interval")]
-    pub interval: Binary,
+    pub interval: Decimal,
     #[serde(default)]
     pub round_for_net: bool,
     #[serde(default)]
     pub tax_rules: Option<Vec<TaxRule>>,
     #[serde(default)]
-    pub list_price: Option<Binary>,
+    pub list_price: Option<Ratio>,
     #[serde(default)]
-    pub regulation_price: Option<Binary>,
+    pub regulation_price: Option<Ratio>,
     #[serde(default)]
     pub reference: Option<ReferenceDefinition>,
 }
 impl Default for PriceInput {
     fn default() -> Self {
         Self {
-            price: Binary::ZERO,
+            price: Ratio::ZERO,
             quantity: 1,
-            tax_rate: Binary::integer(19),
+            tax_rate: Decimal::integer(19),
             gross: true,
             calculated: true,
             decimals: 2,
@@ -54,15 +60,16 @@ impl Default for PriceInput {
         }
     }
 }
-#[derive(Clone, Debug, Deserialize, Serialize)]
+/// A tax rate and the percentage of the price it applies to (exact, e.g. a proportional share).
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct TaxRule {
-    pub tax_rate: Binary,
-    pub percentage: Binary,
+    pub tax_rate: Decimal,
+    pub percentage: Ratio,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ReferenceDefinition {
-    pub purchase_unit: Binary,
-    pub reference_unit: Binary,
+    pub purchase_unit: Decimal,
+    pub reference_unit: Decimal,
     pub unit_name: String,
 }
 #[derive(Clone, Debug, Serialize, PartialEq)]
@@ -90,9 +97,9 @@ fn yes() -> bool {
 fn decimals() -> i32 {
     2
 }
-/// 0.01 as the original's literal reads it.
-fn interval() -> Binary {
-    Binary::from_decimal(Decimal::new(1, 2).unwrap_or(Decimal::ZERO)).unwrap_or(Binary::ZERO)
+/// The default cash interval: one cent.
+fn interval() -> Decimal {
+    Decimal::new(1, 2).unwrap_or(Decimal::ZERO)
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq)]
@@ -107,35 +114,20 @@ pub struct Price {
     pub reference_price: Option<ReferencePrice>,
 }
 
-/// The original `round(value, decimals)` as an amount in minor units of `decimals`.
-pub fn math_round(value: Binary, decimals: u8) -> Result<Minor, MoneyError> {
-    value.round(decimals)?.minor(decimals)
+fn hundred() -> Ratio {
+    Ratio::integer(100)
 }
-
-/// `value / 100` as the original divides.
-fn percent(value: Binary) -> Result<Binary, MoneyError> {
-    value.checked_div(Binary::integer(100))
-}
-/// The sum of the original's tax amounts: one precision step, and zero below 1e-8.
-fn sum(values: impl IntoIterator<Item = Binary>) -> Result<Binary, MoneyError> {
-    let total = values
-        .into_iter()
-        .try_fold(Binary::ZERO, Binary::checked_add)?
-        .cast()?;
-    let threshold = Binary::from_decimal(Decimal::new(1, 8)?)?;
-    Ok(if total.abs() < threshold {
-        Binary::ZERO
-    } else {
-        total
-    })
+/// `value / 100`.
+fn percent(value: Ratio) -> Result<Ratio, MoneyError> {
+    value.checked_div(hundred())
 }
 
 /// The calculation's settings: precision, interval and gross/net mode.
 struct Rounding {
     decimals: u8,
     scale: u8,
-    interval: Binary,
-    cash: bool,
+    /// The cash interval in minor units of `scale`, when prices are cash rounded.
+    step: Option<u64>,
 }
 impl Rounding {
     fn new(i: &PriceInput) -> Result<Self, MoneyError> {
@@ -143,155 +135,165 @@ impl Rounding {
             .ok()
             .filter(|d| *d <= 18)
             .ok_or("Unsupported price precision")?;
-        if i.interval <= Binary::ZERO {
+        if i.interval <= Decimal::ZERO {
             return Err("Rounding interval must be positive");
         }
         // Amounts carry the precision's scale, or the interval's when it is finer.
         let interval_scale =
-            u8::try_from(i.interval.shortest()?.scale()).map_err(|_| "Amount overflow")?;
+            u8::try_from(i.interval.normalized().scale()).map_err(|_| "Amount overflow")?;
         let scale = if decimals <= 2 {
             decimals.max(interval_scale)
         } else {
             decimals
         };
+        // The scale covers the interval's decimals, so the interval is a whole number of units.
+        let step = if (i.gross || i.round_for_net) && decimals <= 2 {
+            let units = i.interval.ratio().rounded(scale)?.minor();
+            Some(u64::try_from(units).map_err(|_| "Amount overflow")?)
+        } else {
+            None
+        };
         Ok(Self {
             decimals,
             scale,
-            interval: i.interval,
-            cash: i.gross || i.round_for_net,
+            step,
         })
     }
-    /// The original `round` closure: cash rounding for gross prices or when asked, else plain.
-    fn round(&self, value: Binary) -> Result<Binary, MoneyError> {
-        if self.cash {
-            value.cash_round(self.decimals, self.interval)
-        } else {
-            value.round(self.decimals)
-        }
+    /// The value rounded once to the precision, half away from zero, at the amount scale.
+    fn plain(&self, value: Ratio) -> Result<Minor, MoneyError> {
+        value.rounded(self.decimals)?.at_scale(self.scale)
     }
-    /// What the original writes for a value: its fourteen-digit decimal, in minor units.
-    fn minor(&self, value: Binary) -> Result<Minor, MoneyError> {
-        value.minor(self.scale)
+    /// A price: plain rounding, then for gross prices (or when asked) and precisions of up
+    /// to two decimals the nearest multiple of the cash interval, half away from zero: the
+    /// proved `rounded_quotient` of the minor units by the interval's, times the interval
+    /// through the proved `line_total`. Operands outside the rules' range are refused.
+    fn price(&self, value: Ratio) -> Result<Minor, MoneyError> {
+        let plain = self.plain(value)?;
+        let Some(step) = self.step else {
+            return Ok(plain);
+        };
+        let magnitude = plain.minor().unsigned_abs();
+        magnitude.checked_add(step / 2).ok_or("Amount overflow")?;
+        let steps = verified_kernel::rounded_quotient(magnitude, step);
+        steps.checked_mul(step).ok_or("Amount overflow")?;
+        let rounded = i64::try_from(verified_kernel::line_total(steps, step))
+            .map_err(|_| "Amount overflow")?;
+        Ok(Minor::new(
+            if plain.minor() < 0 { -rounded } else { rounded },
+            self.scale,
+        ))
     }
 }
 
 /// The rules of a calculation: duplicate rates replace the earlier rule in its original slot.
-fn merged_rules(i: &PriceInput) -> Result<Vec<(Binary, Binary)>, MoneyError> {
-    let mut rules: Vec<(Binary, Binary)> = vec![];
+fn merged_rules(i: &PriceInput) -> Vec<(Decimal, Ratio)> {
+    let mut rules: Vec<(Decimal, Ratio)> = vec![];
     let single = [TaxRule {
         tax_rate: i.tax_rate,
-        percentage: Binary::integer(100),
+        percentage: hundred(),
     }];
     for r in i.tax_rules.as_deref().unwrap_or(&single) {
-        let rule = (r.tax_rate.cast()?, r.percentage.cast()?);
-        if let Some(old) = rules.iter_mut().find(|old| old.0 == rule.0) {
-            *old = rule;
+        if let Some(old) = rules.iter_mut().find(|old| old.0 == r.tax_rate) {
+            *old = (r.tax_rate, r.percentage);
         } else {
-            rules.push(rule);
+            rules.push((r.tax_rate, r.percentage));
         }
     }
-    Ok(rules)
+    rules
 }
 
+/// The price of `quantity` units: the rounded unit price, its proved line total, one tax per
+/// rule rounded once from the exact line amount, and the list, regulation and reference prices.
 pub fn calculate(i: &PriceInput) -> Result<Price, MoneyError> {
-    let rules = merged_rules(i)?;
+    let rules = merged_rules(i);
     let rounding = Rounding::new(i)?;
-    let quantity = Binary::integer(i.quantity.into());
-    let hundred = Binary::integer(100);
-    let net_tax = |price: Binary, (rate, share): &(Binary, Binary)| {
-        percent(price)?
-            .checked_mul(*share)?
-            .checked_mul(percent(*rate)?)?
-            .cast()
-    };
-    let gross = |price: Binary| -> Result<Binary, MoneyError> {
-        price.checked_add(sum(rules
-            .iter()
-            .map(|r| net_tax(price, r))
-            .collect::<Result<Vec<_>, _>>()?)?)
+    // A net price as gross: the price plus each rule's tax on its share.
+    let gross = |price: Ratio| -> Result<Ratio, MoneyError> {
+        rules.iter().try_fold(price, |total, (rate, share)| {
+            total.checked_add(
+                percent(price)?
+                    .checked_mul(*share)?
+                    .checked_mul(percent(rate.ratio())?)?,
+            )
+        })
     };
     let uncalculated = i.gross && !i.calculated;
-    let input = i.price.cast()?;
-    let unit = rounding.round(if uncalculated { gross(input)? } else { input })?;
-    let mut tax_amounts = vec![];
+    let input = |price: Ratio| {
+        if uncalculated {
+            gross(price)
+        } else {
+            Ok(price)
+        }
+    };
+    let unit = rounding.price(input(i.price)?)?;
+    let total_price = unit.times(i.quantity.into())?;
+    let line = total_price.ratio();
+    let mut tax = Minor::zero(rounding.scale);
     let calculated_taxes = rules
         .iter()
         .map(|(rate, share)| {
-            let allocated = percent(unit)?.checked_mul(*share)?;
-            let tax = if i.gross {
-                allocated
-                    .checked_div(percent(hundred.checked_add(*rate)?)?)?
-                    .checked_mul(percent(*rate)?)?
+            // The rule's share of the line, and the tax it contains (gross) or adds (net).
+            let allocated = percent(line)?.checked_mul(*share)?;
+            let rate_part = if i.gross {
+                rate.ratio()
+                    .checked_div(hundred().checked_add(rate.ratio())?)?
             } else {
-                allocated.checked_mul(percent(*rate)?)?
-            }
-            .cast()?;
-            let line_tax = tax
-                .checked_mul(quantity)?
-                .round(rounding.decimals)?
-                .cast()?;
-            tax_amounts.push(line_tax);
+                percent(rate.ratio())?
+            };
+            let line_tax = rounding.plain(allocated.checked_mul(rate_part)?)?;
+            tax = tax.checked_add(line_tax)?;
             Ok(CalculatedTax {
-                tax: rounding.minor(line_tax)?,
-                tax_rate: rate.decimal()?,
-                price: rounding.minor(
-                    allocated
-                        .cast()?
-                        .checked_mul(quantity)?
-                        .round(rounding.decimals)?,
-                )?,
+                tax: line_tax,
+                tax_rate: *rate,
+                price: rounding.plain(allocated)?,
             })
         })
         .collect::<Result<Vec<_>, MoneyError>>()?;
-    let ancillary = |value: Option<Binary>| -> Result<Option<Binary>, MoneyError> {
+    let ancillary = |value: Option<Ratio>| -> Result<Option<Minor>, MoneyError> {
         value
             .filter(|p| !p.is_zero())
-            .map(|p| {
-                let p = p.cast()?;
-                rounding.round(if uncalculated { gross(p)? } else { p })
-            })
+            .map(|p| rounding.price(input(p)?))
             .transpose()
     };
     let list_price = ancillary(i.list_price)?
-        .filter(|p| *p > Binary::ZERO)
+        .filter(|p| p.minor() > 0)
         .map(|p| -> Result<ListPrice, MoneyError> {
             Ok(ListPrice {
-                price: rounding.minor(p)?,
-                discount: rounding.minor(p.checked_sub(unit)?.negated())?,
-                percentage: hundred
-                    .checked_sub(unit.checked_div(p)?.checked_mul(hundred)?)?
-                    .round(2)?
-                    .decimal()?,
+                price: p,
+                discount: unit.checked_sub(p)?,
+                percentage: hundred()
+                    .checked_sub(
+                        unit.ratio()
+                            .checked_div(p.ratio())?
+                            .checked_mul(hundred())?,
+                    )?
+                    .rounded(2)?
+                    .decimal(),
             })
         })
         .transpose()?;
-    let regulation_price = ancillary(i.regulation_price)?
-        .map(|p| rounding.minor(p))
-        .transpose()?;
+    let regulation_price = ancillary(i.regulation_price)?;
     let reference_price = i
         .reference
         .as_ref()
-        .filter(|r| r.purchase_unit > Binary::ZERO && r.reference_unit > Binary::ZERO)
+        .filter(|r| r.purchase_unit > Decimal::ZERO && r.reference_unit > Decimal::ZERO)
         .map(|r| -> Result<ReferencePrice, MoneyError> {
-            let purchase = r.purchase_unit.cast()?;
-            let reference = r.reference_unit.cast()?;
             Ok(ReferencePrice {
-                price: rounding.minor(
-                    unit.checked_div(purchase)?
-                        .checked_mul(reference)?
-                        .round(rounding.decimals)?,
+                price: rounding.plain(
+                    unit.ratio()
+                        .checked_div(r.purchase_unit.ratio())?
+                        .checked_mul(r.reference_unit.ratio())?,
                 )?,
-                purchase_unit: purchase.decimal()?,
-                reference_unit: reference.decimal()?,
+                purchase_unit: r.purchase_unit,
+                reference_unit: r.reference_unit,
                 unit_name: r.unit_name.clone(),
             })
         })
         .transpose()?;
-    let unit_price = rounding.minor(unit)?;
     Ok(Price {
-        unit_price,
-        total_price: line_total(unit_price, i.quantity)?,
-        tax: rounding.minor(sum(tax_amounts)?)?,
+        unit_price: unit,
+        total_price,
+        tax,
         quantity: i.quantity,
         calculated_taxes,
         list_price,
@@ -300,38 +302,21 @@ pub fn calculate(i: &PriceInput) -> Result<Price, MoneyError> {
     })
 }
 
-/// The largest line total whose binary64 product the original rounds back onto the minor
-/// unit grid: below 2^53 minor units a product of a grid amount and a whole quantity is
-/// within a fraction of a unit of the grid, so `round(unit * quantity)` is the exact product.
-const EXACT_PRODUCT: u64 = 1 << 53;
-
-/// The line total: the proved product of the unit price (already on the rounding interval's
-/// grid) and the quantity, written as the original writes it (its binary value's fourteen
-/// significant digits; they differ from the exact product only beyond fourteen digits).
-fn line_total(unit: Minor, quantity: u32) -> Result<Minor, MoneyError> {
-    let total = unit.times(quantity.into())?;
-    if total.minor().unsigned_abs() >= EXACT_PRODUCT {
-        return Err("Amount overflow");
-    }
-    Binary::from_decimal(total.decimal())?.minor(total.scale())
-}
-
-/// Port of PercentageTaxRuleBuilder::buildCollectionRules (6.7.14.2): each rate's share of
-/// `total` in percent, or an even split for a zero total. `taxes` are (rate, price) pairs of a
-/// collection already merged by tax rate, as in CalculatedTaxCollection.
+/// Each rate's share of `total` in percent, or an even split for a zero total (the rules
+/// of PercentageTaxRuleBuilder::buildCollectionRules, exact). `taxes` are (rate, price)
+/// pairs of a collection already merged by tax rate.
 pub fn proportional_tax_rules(
-    taxes: &[(Binary, Binary)],
-    total: Binary,
+    taxes: &[(Decimal, Ratio)],
+    total: Ratio,
 ) -> Result<Vec<TaxRule>, MoneyError> {
-    let count = i64::try_from(taxes.len()).map_err(|_| "Amount overflow")?;
-    let hundred = Binary::integer(100);
+    let count = i128::try_from(taxes.len()).map_err(|_| "Amount overflow")?;
     taxes
         .iter()
         .map(|(tax_rate, price)| {
             let percentage = if total.is_zero() {
-                hundred.checked_div(Binary::integer(count))?
+                hundred().checked_div(Ratio::integer(count))?
             } else {
-                price.checked_div(total)?.checked_mul(hundred)?
+                price.checked_div(total)?.checked_mul(hundred())?
             };
             Ok(TaxRule {
                 tax_rate: *tax_rate,
@@ -348,11 +333,14 @@ mod tests {
     fn d(text: &str) -> Decimal {
         Decimal::parse(text).unwrap()
     }
-    fn b(text: &str) -> Binary {
-        Binary::from_decimal(d(text)).unwrap()
+    fn r(text: &str) -> Ratio {
+        d(text).ratio()
     }
     fn m(text: &str, scale: u8) -> Minor {
         Minor::from_decimal(d(text), scale).unwrap()
+    }
+    fn price(input: PriceInput) -> Price {
+        calculate(&input).unwrap()
     }
 
     #[test]
@@ -360,77 +348,102 @@ mod tests {
         for (value, decimals, interval, expected) in [
             ("1.02", 2, "0.05", "1"),
             ("1.03", 2, "0.05", "1.05"),
+            ("1.025", 2, "0.05", "1.05"),
             ("-1.03", 2, "0.05", "-1.05"),
             ("1.005", 2, "0.01", "1.01"),
             ("1.2346", 3, "0.05", "1.235"),
             ("7.4", 0, "1", "7"),
+            ("7.5", 0, "1", "8"),
         ] {
-            assert_eq!(
-                b(value)
-                    .cash_round(decimals, b(interval))
-                    .unwrap()
-                    .decimal()
-                    .unwrap(),
-                d(expected)
-            );
+            let p = price(PriceInput {
+                price: r(value),
+                decimals,
+                interval: d(interval),
+                ..PriceInput::default()
+            });
+            assert_eq!(p.unit_price.decimal(), d(expected), "{value}");
         }
     }
     #[test]
     fn proportional_rules_split_by_price_or_evenly_for_a_zero_total() {
-        assert!(proportional_tax_rules(&[], b("100")).unwrap().is_empty());
-        let taxes = [(b("19"), b("75")), (b("7"), b("25"))];
-        let rules = proportional_tax_rules(&taxes, b("100")).unwrap();
+        assert!(proportional_tax_rules(&[], r("100")).unwrap().is_empty());
+        let taxes = [(d("19"), r("75")), (d("7"), r("25"))];
+        let rules = proportional_tax_rules(&taxes, r("100")).unwrap();
         assert_eq!(
             rules
                 .iter()
-                .map(|r| (r.tax_rate, r.percentage))
+                .map(|t| (t.tax_rate, t.percentage))
                 .collect::<Vec<_>>(),
-            [(b("19"), b("75")), (b("7"), b("25"))]
+            [(d("19"), r("75")), (d("7"), r("25"))]
         );
-        let even = proportional_tax_rules(&taxes, Binary::ZERO).unwrap();
+        let even = proportional_tax_rules(&taxes, Ratio::ZERO).unwrap();
         assert_eq!(
-            even.iter().map(|r| r.percentage).collect::<Vec<_>>(),
-            [b("50"), b("50")]
+            even.iter().map(|t| t.percentage).collect::<Vec<_>>(),
+            [r("50"), r("50")]
         );
+        // A third stays a third: no binary or fourteen-digit share.
+        let thirds =
+            proportional_tax_rules(&[(d("19"), r("1")), (d("7"), r("2"))], r("3")).unwrap();
+        assert_eq!(thirds[0].percentage, Ratio::new(100, 3).unwrap());
     }
+    /// The ties that changed on 26 November: the binary64 steps had decided them by binary error.
     #[test]
-    fn decimal_ties() {
-        assert_eq!(math_round(b("1.005"), 2).unwrap().minor(), 101);
-        assert_eq!(math_round(b("-1.005"), 2).unwrap().minor(), -101);
-        assert_eq!(math_round(b("1.004999"), 2).unwrap().minor(), 100);
-        // The binary product decides a decimal tie, as in the original.
-        assert_eq!(
-            math_round(b("130.4835").checked_mul(Binary::integer(670)).unwrap(), 2)
-                .unwrap()
-                .minor(),
-            8_742_394
-        );
+    fn decimal_ties_round_half_away_from_zero() {
+        // 130.4835 × 670 = 87423.945 exactly (binary64: 87423.94499999999 → 87423.94).
+        let product = r("130.4835").checked_mul(Ratio::integer(670)).unwrap();
+        assert_eq!(product.rounded(2).unwrap(), Minor::new(8_742_395, 2));
+        // A net tax at a tie: 651 × 73 × 5 % = 2376.15 → 2376.2 (binary64: 2376.1).
+        let p = price(PriceInput {
+            price: r("651"),
+            quantity: 73,
+            tax_rate: d("5"),
+            gross: false,
+            decimals: 1,
+            interval: d("0.5"),
+            round_for_net: true,
+            ..PriceInput::default()
+        });
+        assert_eq!(p.tax, m("2376.2", 1));
+        // A gross unit price at a tie: 100.205 × 1.07 = 107.21935 → 107.2194 (binary64: 107.2193).
+        let p = price(PriceInput {
+            price: r("100.205"),
+            quantity: 6,
+            tax_rate: d("7"),
+            calculated: false,
+            decimals: 4,
+            ..PriceInput::default()
+        });
+        assert_eq!(p.unit_price, m("107.2194", 4));
+        assert_eq!(p.total_price, m("643.3164", 4));
+        assert_eq!(r("1.005").rounded(2).unwrap().minor(), 101);
+        assert_eq!(r("-1.005").rounded(2).unwrap().minor(), -101);
+        assert_eq!(r("1.004999").rounded(2).unwrap().minor(), 100);
     }
+    /// Negative prices round half away from zero, symmetrically. -725.879 × 69 at 20 % gross
+    /// contains -8347.6085 tax exactly: -8347.609 (binary64 had -8347.608).
     #[test]
-    fn shopware_negative_tax_cast_regression() {
-        for (price, quantity, tax) in [
+    fn negative_prices_round_symmetrically() {
+        for (unit, quantity, tax) in [
             ("-853.999", 93, "-13236.985"),
-            ("-725.879", 69, "-8347.608"),
+            ("-725.879", 69, "-8347.609"),
         ] {
-            let p = calculate(&PriceInput {
-                price: b(price),
+            let p = price(PriceInput {
+                price: r(unit),
                 quantity,
-                tax_rate: b("20"),
+                tax_rate: d("20"),
                 decimals: 3,
                 ..PriceInput::default()
-            })
-            .unwrap();
+            });
             assert_eq!(p.tax.decimal(), d(tax));
         }
     }
     #[test]
     fn gross_unit_before_total() {
-        let p = calculate(&PriceInput {
-            price: b("19.995"),
+        let p = price(PriceInput {
+            price: r("19.995"),
             quantity: 3,
             ..PriceInput::default()
-        })
-        .unwrap();
+        });
         assert_eq!(p.total_price, m("60", 2));
         assert_eq!(p.tax, m("9.58", 2));
         assert_eq!(
@@ -444,11 +457,21 @@ mod tests {
             assert!(
                 calculate(&PriceInput {
                     decimals,
-                    interval: b(interval),
+                    interval: d(interval),
                     ..PriceInput::default()
                 })
                 .is_err()
             );
         }
+    }
+    #[test]
+    fn wire_inputs_read_as_their_decimals() {
+        let input: PriceInput = serde_json::from_value(serde_json::json!({
+            "price": 130.4835, "quantity": 670, "tax_rate": 0, "gross": false, "decimals": 4,
+            "tax_rules": [{"tax_rate": 0, "percentage": 100}]
+        }))
+        .unwrap();
+        assert_eq!(input.price, r("130.4835"));
+        assert_eq!(price(input).total_price, m("87423.945", 4));
     }
 }

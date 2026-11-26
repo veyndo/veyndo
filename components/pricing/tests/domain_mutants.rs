@@ -150,7 +150,7 @@ mod calculation {
             serde_json::from_value(json!({"price":1.0,"quantity":1,"tax_rate":19.0})).unwrap();
         assert!(i.gross && i.calculated && !i.round_for_net);
         assert_eq!(
-            (i.decimals, i.interval.decimal().unwrap()),
+            (i.decimals, i.interval),
             (2, Decimal::parse("0.01").unwrap())
         );
     }
@@ -187,14 +187,14 @@ mod calculation {
             ),
             113.0
         );
-        // A rule tax at the 1e-8 zero threshold still counts; one below it is noise.
+        // Exact sums carry no binary noise, so no tax is zeroed: the former 1e-8 threshold is gone.
         let tiny = |price: f64| {
             calc(json!({"price": price, "calculated": false, "tax_rate": 100.0, "decimals": 10}))
                 ["unit_price"]
                 .clone()
         };
         assert_eq!(tiny(1e-8), 2e-8);
-        assert_eq!(tiny(1e-9), 1e-9);
+        assert_eq!(tiny(1e-9), 2e-9);
     }
 
     #[test]

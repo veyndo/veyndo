@@ -3,7 +3,7 @@ pub use veyndo_kernel::verified_kernel;
 pub mod domain;
 pub use domain::validation::ValidationError;
 pub use domain::{
-    binary, cart, catalog, customer, decimal, discount, external_order, money, pricing, quote,
+    cart, catalog, customer, decimal, discount, external_order, money, pricing, quote,
 };
 #[cfg(feature = "service")]
 mod conversions;
