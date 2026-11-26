@@ -15,6 +15,7 @@ import {
   productCard,
   productSummary,
   registerPartElements,
+  day,
 } from "../../src/kit/storefront";
 
 const product = {
@@ -274,8 +275,14 @@ describe("part components", () => {
     expect(screen.getByText("Discount")).toBeInTheDocument();
     expect(screen.getByText("VAT")).toBeInTheDocument();
     expect(
-      screen.getByText("Delivery: 2026-12-01 — 2026-12-03"),
+      screen.getByText("Delivery: 1 Dec 2026 — 3 Dec 2026"),
     ).toBeInTheDocument();
+  });
+
+  it("formats the delivery window as local calendar days", () => {
+    expect(day("de-DE", "2026-11-29")).toBe("29. Nov. 2026");
+    expect(day("es-ES", "2026-11-30")).toBe("30 nov 2026");
+    expect(day("de-DE", "soon")).toBe("soon");
   });
 
   it("marks the current checkout step", () => {

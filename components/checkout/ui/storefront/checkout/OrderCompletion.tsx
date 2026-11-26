@@ -13,7 +13,7 @@ import CheckoutProgress from "./CheckoutProgress";
 import OrderConfetti from "./OrderConfetti";
 import ConfigurationSummary from "../../../../../frontend/src/shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../../../../frontend/src/shared/api/configuration-types";
-import { cartSummary } from "../../../../../frontend/src/kit/storefront";
+import { cartSummary, day } from "../../../../../frontend/src/kit/storefront";
 const Summary = cartSummary.Component;
 export default function OrderCompletion({
   order,
@@ -113,8 +113,9 @@ export default function OrderCompletion({
           )}
           {order.deliveries?.[0] && (
             <p className="delivery-estimate">
-              {s("delivery")}: {order.deliveries[0].deliveryDate.earliest} —{" "}
-              {order.deliveries[0].deliveryDate.latest}
+              {s("delivery")}:{" "}
+              {day(locale, order.deliveries[0].deliveryDate.earliest)} —{" "}
+              {day(locale, order.deliveries[0].deliveryDate.latest)}
             </p>
           )}
         </section>

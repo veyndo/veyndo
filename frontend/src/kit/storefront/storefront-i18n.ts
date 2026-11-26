@@ -199,3 +199,17 @@ export function storefrontText(locale: string) {
 /** Money in the shop's currency, formatted for `locale`. */
 export const money = (locale: string, currency: string, amount: number) =>
   new Intl.NumberFormat(locale, { style: "currency", currency }).format(amount);
+/** A calendar day such as `2026-11-29`, formatted for `locale`; other values are shown unchanged. */
+export const day = (locale: string, value: string) => {
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T00:00:00Z`)
+    : undefined;
+  return parsed && !Number.isNaN(parsed.getTime())
+    ? new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(parsed)
+    : value;
+};
