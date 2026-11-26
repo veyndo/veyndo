@@ -9388,8 +9388,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "b93dfb19dde6749691deaf075a8f196629aae0a68bb37e3cea0413ddbe2afc87",
-      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
+      "sha256": "adb8bc586d895318ddd9a7d24b415fced4e57ed5b75f2dbc6b1415a77438457b",
+      "review": "CI checks out full history in native jobs for the mirror release record; docs consolidation"
     },
     "Cargo.lock": {
       "sha256": "b2799cdb165d9eacf0c0f54205c71a922a5b4f232f5114f05288c5ef2e6d64e5",
