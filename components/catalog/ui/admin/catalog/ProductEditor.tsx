@@ -162,6 +162,15 @@ export default function ProductEditor({
       setError(seoText("invalid"));
       return;
     }
+    // The server requires the main-language name; say so instead of a generic 400.
+    const mainKey =
+      languageKeys[enabledLocales.indexOf(draft.mainLocale ?? "en-GB")] ??
+      languageKeys[0];
+    if (!draft.translations[mainKey]?.name?.trim()) {
+      setLang(mainKey);
+      setError(e("mainNameRequired"));
+      return;
+    }
     setBusy(true);
     setError("");
     try {
