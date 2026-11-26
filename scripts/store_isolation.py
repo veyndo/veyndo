@@ -123,7 +123,11 @@ def sweep():
                 failures.append((component, table, result['move']))
         if tables:
             report[component] = dict(counts)
-    unowned = present - covered
+    # Independently hosted extension services (for example the ERP handoff example) create their own
+    # tables in the database they are pointed at; they are not commerce components.
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from sql_prepare import separate_schemas
+    unowned = present - covered - separate_schemas()
     assert not unowned, ('tenant tables no component declares', sorted(unowned))
     return report, failures
 
