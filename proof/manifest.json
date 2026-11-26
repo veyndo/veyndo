@@ -736,7 +736,8 @@
     },
     "line_total": {
       "bindings": [
-        "components/pricing/src/domain/money.rs"
+        "components/pricing/src/domain/money.rs",
+        "components/pricing/src/domain/pricing.rs"
       ],
       "theorems": [
         "line_total_exact",
@@ -749,7 +750,8 @@
     },
     "rounded_quotient": {
       "bindings": [
-        "components/pricing/src/domain/decimal.rs"
+        "components/pricing/src/domain/decimal.rs",
+        "components/pricing/src/domain/pricing.rs"
       ],
       "theorems": [
         "rounded_quotient_eq",
@@ -757,7 +759,8 @@
         "rounded_quotient_half_up",
         "scaled_round_trip",
         "rounded_quotient_monotone",
-        "included_tax_within_gross"
+        "included_tax_within_gross",
+        "cash_round_nearest_multiple"
       ]
     }
   },
@@ -2074,8 +2077,8 @@
     },
     "components/catalog/src/types/product_fields.rs": {
       "status": "unproved",
-      "sha256": "7551a8c2a2a785bf36f2c00f01c52bdc7723021301e6c84376d9c5be34351c30",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "2f28c2040ecf04dd3a308d18ea6b53a8c633b20b73a4ec4cc4b2718db8b56627",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/catalog/src/types/product_list.rs": {
       "status": "unproved",
@@ -2109,8 +2112,8 @@
     },
     "components/checkout/src/domain/cart_quote.rs": {
       "status": "reviewed-binding",
-      "sha256": "9d00dedaac70d10804e325fa3c59fa5b343f8d9e79d7110f0465d1991e258d33",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "ae89f30db2d3c39df04a3e5a3493f9d451f354c7a66764d953b558a970f60527",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/checkout/src/domain/quote_view.rs": {
       "status": "unproved",
@@ -2134,8 +2137,8 @@
     },
     "components/checkout/src/domain/tax_lines.rs": {
       "status": "unproved",
-      "sha256": "2306201a3d18399e3b378ce9c6c1e3d51ed025dda056d4a6535331ad46bacbed",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "13e5c34ad6b0ef5040042b14280e1ed08c492bffbd5fc77df82945399d99b602",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
@@ -2179,8 +2182,8 @@
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
-      "sha256": "aaff0f2c4637c3eab50fc3d08305d6c895979866057dca21569ee223319c7cc5",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "2f620f070352efedba23eee537376d1cb75758142c55937cea4824f588dc12df",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/checkout/src/service/cart_projection.rs": {
       "status": "unproved",
@@ -2194,8 +2197,8 @@
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "reviewed-binding",
-      "sha256": "c9c4072e4b1e9357cc90db270d6a0a576cd8a7292e9efba66964bd59c5178c2a",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "aca9454da83fda6b14c79d138e1705b9884cd2637a30dfa9147964612a3abde9",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/checkout/src/service/language.rs": {
       "status": "unproved",
@@ -3944,8 +3947,8 @@
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "cc02f3cfefaad39fd7ae146deab0f5217b266b903c07bfda787e9ccfb71e689f",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "a49f31e02742e24853df11b9826bf46926003d644d4dbc0bbc7695d66b8bae0a",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/marketing/src/store/queue_health.rs": {
       "status": "unproved",
@@ -4632,11 +4635,6 @@
       "sha256": "65746d1573a582e7a603cbeb613e0b9c8d5bb4c1afd46412081d90c64ed95632",
       "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
-    "components/pricing/src/domain/binary.rs": {
-      "status": "unproved",
-      "sha256": "93add95bd03cd665b4dc7c5a8583aa08005f24c5167e78fed254875010b789ad",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
-    },
     "components/pricing/src/domain/cart.rs": {
       "status": "unproved",
       "sha256": "967754486c3b3e6c8254581d9f3851e7e42d231b5e8d4dc04d699ba6299c2795",
@@ -4674,8 +4672,8 @@
     },
     "components/pricing/src/domain/decimal.rs": {
       "status": "reviewed-binding",
-      "sha256": "07d2f1dcb779e9d8e803541cd94ee7ae39ee9d2113a2ca6207a54479cc6e773b",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "ca622234c776c2440840b34b8db24d14abfbcc113f8937476540abac8b557d0e",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/src/domain/discount/boundaries.rs": {
       "status": "unproved",
@@ -4698,14 +4696,14 @@
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
     "components/pricing/src/domain/pricing.rs": {
-      "status": "unproved",
-      "sha256": "e26c797554cb933748fb55f90ea76e3e8195f4cfe3c6f8de773049ff8d24d7da",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "status": "reviewed-binding",
+      "sha256": "e1011fa5fc15d7f3eafd3fb68e908024b159d1b70c26d5db42260903da492a14",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/src/domain/quote.rs": {
       "status": "reviewed-binding",
-      "sha256": "adc34b2ba3cbd7cf011f2b744eb7076f70bdaef306c573e59bf27252cb9e58a4",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "5b4de261e83056b276bd6ae42d1eb8ab2945f6f50d3e0b6b536b00c51e540b5a",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/src/domain/validation.rs": {
       "status": "unproved",
@@ -4714,8 +4712,8 @@
     },
     "components/pricing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "e2b7164cb8fe4c8d6caac4abfb8fe5f62251239e2322541f945cf758cd596327",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "0d0689aad772ae184da50f7387089c590b4907ab44361f740888e6dab65f458f",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
@@ -4734,8 +4732,8 @@
     },
     "components/pricing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "1888b3599f67b573e138f74087aedfedb5a1b488758ecc8aadb046e0964f7212",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "af08bcd27ed505ea07b8461bb9add03189ccfa9d6c2723d193659fb770f3787f",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/src/ports.rs": {
       "status": "unproved",
@@ -4832,25 +4830,20 @@
       "sha256": "eca9a7b7b9aa719669cc96f108ed4a378170fe898ccee76dfde60245c70fd9e3",
       "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
     },
-    "components/pricing/tests/calculator_reference.rs": {
+    "components/pricing/tests/decimal_ties.rs": {
       "status": "unproved",
-      "sha256": "e5ef1bfea42fe071ab8b13f765d5a100acdb83724c83d41fd7ed0b15a3634bfe",
-      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
+      "sha256": "1417374dd7b49857119bd76e14ba364582a1f46fad219f4103f4d3dbdc3f81cc",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/tests/domain_mutants.rs": {
       "status": "unproved",
-      "sha256": "53c6b2bb2d7a25adaa9c4413fac96d5f94fb90c44e37c0bc850efb54e1dd7d1e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "36661af825c32765008b9aa0be886ea4bf06a6f4d949b8c93ea8e903489fafa1",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/pricing/tests/properties.rs": {
       "status": "unproved",
-      "sha256": "db1ca28b4dee5dfbfe5d5c26aebd00144f3003e16e210ba4ba18cc258bed5fa9",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
-    },
-    "components/pricing/tests/support/float_reference.rs": {
-      "status": "unproved",
-      "sha256": "ccdca80e5083e875342b37149de9ef5120fde32af33b0f382cb24270bc35304a",
-      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
+      "sha256": "4c8512432563ca315e5dfe35541e240b1318527f3f333c83fe5eb46d8f77624d",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/shipping/src/domain/booking.rs": {
       "status": "reviewed-binding",
@@ -5394,8 +5387,8 @@
     },
     "components/studio/src/service/imports/products.rs": {
       "status": "unproved",
-      "sha256": "11115de3cb6bcf0007a906329eb9a2e57b7add2b981aeef52d78b5427fccb172",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "25cee27c488a52f283cbf97b6bc527fdadf5d32f7aae7d9e3cc2b0aa55028faa",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "components/studio/src/service/imports/relations.rs": {
       "status": "unproved",
@@ -9711,8 +9704,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/Commerce/Claims/Commerce.lean": {
-      "sha256": "92808566678873d1c0c2eebd6fbfbf9bf9f3aff1b759d46d506f105f5fc27e49",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "3c0defd33aacc81f5f8172d49e2db3b9e33a1540eb4a4d01e1b72ab0610d4aca",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "proof/Commerce/Claims/Fulfillment.lean": {
       "sha256": "99a1c293bffdfbb25df84ce04a355456ddea448f6c83984904038d810846353b",
@@ -9727,8 +9720,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/domain-inventory.json": {
-      "sha256": "9aeb7c08eb2d5033faedbf877a1f093348abc8c5cc8b51f622915cba8f4f4944",
-      "review": "Money refactor (2026-11-26): rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient); extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery and QuoteTotals; calculator on whole minor units with an integer binary64 emulation; domain inventory drift from the round-2 merge recorded."
+      "sha256": "3fa16fc862ce7c911ee72225ee83b8f3bde47ffc339fd6ba913ff2f7d90ad6ca",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "proof/lakefile.toml": {
       "sha256": "1cda05bac02223024b93388cf858edad4719c46f8d37a826a73a6a6e15d79432",
@@ -9759,8 +9752,8 @@
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
     "scripts/formal/domain_inventory.py": {
-      "sha256": "b2c46587beafba38dbc7914e87a431fa69f69828faeb7fc46623e6960f65950f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "83b4e0ff6958bfa3ae9227804dfdb05c489df1bb5922c15a72c19bb05a1afee6",
+      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
     },
     "scripts/formal/extract.py": {
       "sha256": "68ed273c974a1e7246ac2e7bd02e90a960755ed49be6c2cdef2ee804dec0773c",

@@ -23,11 +23,9 @@ STATUSES = ('binds-proved-rule', 'unproved')
 REASONS = {
     'money-representation': 'Money representation and exact arithmetic outside the bool/u64 subset: '
                             'minor-unit types, decimal parsing and text, exact rationals in i128, the '
-                            'wire conversion of JSON numbers. Rounding, products and sums inside it are '
-                            'the proved rules; the rest is unit and property tested.',
-    'binary-emulation': 'Reproduces the original calculators\' binary64 arithmetic with integers (no '
-                        'floating-point type), because their results at decimal ties depend on it; '
-                        'checked bit for bit against the previous port and the original PHP, not extracted.',
+                            'exact calculator\'s rule mix, the wire conversion of JSON numbers. Rounding, '
+                            'products and sums inside it are the proved rules; the rest is unit and '
+                            'property tested.',
     'document-shape': 'Reads, writes or projects JSON/serde documents; data mapping, not a decision rule.',
     'text-and-locale': 'Text, labels, locale or formatting; no commerce invariant to prove.',
     'rendering': 'Renders documents (receipt text or PDF); output layout, not a decision rule.',

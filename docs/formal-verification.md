@@ -192,16 +192,17 @@ control alters five rules in a temporary Lean model and must catch each.
 
 **Domain inventory.** Every function in `domain/` of core, pricing, inventory,
 checkout, payments and orders is either bound to proved rules or listed as
-unproved with one of ten reasons in `proof/domain-inventory.json`: 144 functions,
-15 bound, 129 unproved; `core` has no `domain/` module yet. `scripts/formal.py
+unproved with one of nine reasons in `proof/domain-inventory.json`: 206 functions,
+20 bound, 186 unproved (26 Nov); `core` has no `domain/` module yet. `scripts/formal.py
 --check` fails on any third state; the generated page is
 [formal-coverage.md](formal-coverage.md). "Bound" means the decision is a proved
 rule; the input mapping around it stays reviewed Rust.
 
 **Money in whole minor units (26 Nov).** The calculation path carries amounts as
 `Minor` (whole minor units with the currency's exponent) and exact `Decimal`/`Ratio`
-values; JSON numbers cross one boundary conversion in
-`components/pricing/src/domain/binary.rs`. Two rules were added: `line_total` (unit
+values; JSON numbers cross one boundary conversion, `Decimal::from_wire` (the
+shortest decimal that reads back as the number) and `Decimal::to_wire` (the nearest
+number) in `components/pricing/src/domain/decimal.rs`. Two rules were added: `line_total` (unit
 price times quantity, bound in `Minor::times`, which the calculator's line totals
 use) and `rounded_quotient` (a quotient rounded to the nearest minor unit, halves
 up, bound in `Ratio::rounded`, through which every exact amount is rounded into minor
@@ -214,12 +215,23 @@ order (`net_quote_total`, `gross_quote_total`, `lines_total_order_free`). The ca
 quote, the delivery totals and the quote totals compute exactly these sums with
 `amount_sum` and `net_amount`.
 
-The Shopware price calculator itself is not extracted. Its results at decimal ties
-depend on its binary64 arithmetic (130.4835 × 670 rounds to 87423.94 because the
-binary product is 87423.94499…), so the port performs the same binary steps on
-`Binary`, an integer emulation without a floating-point type, and returns minor
-units. It equals the previous port bit for bit on the differential population and
-on 240,000 further generated inputs (`components/pricing/tests/calculator_reference.rs`); Its line total is the proved `line_total`.
+**Exact calculator (26 Nov).** Shopware compatibility is no longer a goal, so the
+quantity calculator no longer reproduces Shopware's binary64 steps (the integer
+emulation `Binary` and its float-reference oracle are deleted). It computes on exact
+`Ratio` values and rounds each amount once, half away from zero, per currency
+exponent: plain rounding goes through `Ratio::rounded` (proved `rounded_quotient`),
+the cash interval of gross prices is `rounded_quotient` of the minor units by the
+interval's, times the interval by `line_total` (bound directly in
+`Rounding::price`; theorem `cash_round_nearest_multiple`: an exact multiple within
+half an interval), and the line total is the proved `line_total`. The rule mix
+(shares, gross/net, list, regulation and reference prices) is not extracted; property
+tests check it against an independent integer model (`components/pricing/tests/properties.rs`).
+Results differ from the binary64 port only at decimal ties, by one minor unit:
+130.4835 × 670 = 87423.945 now rounds to 87423.95 (binary64: 87423.94). Of 40,344
+generated inputs of the former differential population 481 outputs changed, 280 on
+clean inputs, each an exact decimal tie, and 201 on inputs carrying binary noise
+(such as `price * 1.3`) that the original's fourteen-digit step had snapped onto a
+tie; `components/pricing/tests/decimal_ties.rs` pins representative cases.
 
 ## Consent and legal checkout additions
 

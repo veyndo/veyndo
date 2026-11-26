@@ -55,6 +55,7 @@ import Commerce.Claims
 #print axioms CommerceKernel.capture_zero_denied
 #print axioms CommerceKernel.carrier_booking_exact
 #print axioms CommerceKernel.carrier_booking_occupied_denied
+#print axioms CommerceKernel.cash_round_nearest_multiple
 #print axioms CommerceKernel.channel_access_exact
 #print axioms CommerceKernel.channel_paused_requires_preview
 #print axioms CommerceKernel.channel_preview_no_mutation

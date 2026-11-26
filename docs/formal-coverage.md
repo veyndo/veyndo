@@ -7,17 +7,17 @@ Generated from `proof/domain-inventory.json` by `scripts/formal/domain_inventory
 
 `components/core` has no `domain/` module; its functions are infrastructure (store, cache, HTTP limits) and are not counted here. A `domain/` module added to it is checked like the others.
 
-Money runs on whole minor units (`Minor`, `Money`) and exact decimals and rationals (`Decimal`, `Ratio`). The calculator reproduces the original's binary64 rounding on `Binary` (integer emulation, no floating-point type), because the original's results at decimal ties depend on it. Proved and bound: line totals (`line_total`), rounding of a quotient to the minor unit (`rounded_quotient`), sums (`amount_sum`), net = gross - tax (`net_amount`), discount within its base (`discount_cap`), and the quote-total theorems over any list of lines.
+Money runs on whole minor units (`Minor`, `Money`) and exact decimals and rationals (`Decimal`, `Ratio`); since 26 November the calculator no longer reproduces Shopware's binary64 steps: it computes exactly and rounds each amount once, half away from zero, per currency exponent. JSON numbers cross one boundary conversion (`Decimal::from_wire`/`to_wire`). Proved and bound: line totals (`line_total`), rounding of a quotient to the minor unit (`rounded_quotient`, also the calculator's cash-interval rounding in `Rounding::price`), sums (`amount_sum`), net = gross - tax (`net_amount`), discount within its base (`discount_cap`), and the quote-total theorems over any list of lines.
 
 | Component | Functions | Binds a proved rule | Unproved |
 | --- | ---: | ---: | ---: |
 | core | 0 | 0 | 0 |
-| pricing | 132 | 8 | 124 |
+| pricing | 105 | 9 | 96 |
 | inventory | 6 | 1 | 5 |
 | checkout | 23 | 3 | 20 |
 | payments | 37 | 3 | 34 |
 | orders | 35 | 4 | 31 |
-| **all** | **233** | **19** | **214** |
+| **all** | **206** | **20** | **186** |
 
 ## Functions that bind proved rules
 
@@ -41,31 +41,24 @@ Money runs on whole minor units (`Minor`, `Money`) and exact decimals and ration
 | `components/pricing/src/domain/money.rs::Currency::new` | `currency_scale_admissible` |
 | `components/pricing/src/domain/money.rs::Minor::times` | `line_total` |
 | `components/pricing/src/domain/money.rs::unsigned_sum` | `amount_sum` |
+| `components/pricing/src/domain/pricing.rs::Rounding::price` | `line_total`, `rounded_quotient` |
 | `components/pricing/src/domain/quote.rs::QuoteTotals::new` | `net_amount` |
 
 ## Unproved functions by reason
 
-### money-representation (53)
+### money-representation (58)
 
-Money representation and exact arithmetic outside the bool/u64 subset: minor-unit types, decimal parsing and text, exact rationals in i128, the wire conversion of JSON numbers. Rounding, products and sums inside it are the proved rules; the rest is unit and property tested.
+Money representation and exact arithmetic outside the bool/u64 subset: minor-unit types, decimal parsing and text, exact rationals in i128, the exact calculator's rule mix, the wire conversion of JSON numbers. Rounding, products and sums inside it are the proved rules; the rest is unit and property tested.
 
 - `components/checkout/src/domain/cart_quote.rs`: `configuration_price`
+- `components/checkout/src/domain/tax_lines.rs`: `tax_products`
 - `components/payments/src/domain/amounts.rs`: `format_amount`, `parse_amount`
 - `components/payments/src/domain/refunds.rs`: `used`
 - `components/payments/src/domain/settlements.rs`: `captured`
-- `components/pricing/src/domain/binary.rs`: `Binary::deserialize`, `Binary::from_wire`, `Binary::minor`, `Binary::serialize`, `Binary::shortest`, `Binary::to_wire`, `Decimal::from_wire`, `Decimal::to_wire`
-- `components/pricing/src/domain/decimal.rs`: `Decimal::cmp`, `Decimal::deserialize`, `Decimal::eq`, `Decimal::parse`, `Decimal::partial_cmp`, `Decimal::serialize`, `Decimal::text`, `Ratio::abs`, `Ratio::checked_add`, `Ratio::checked_div`, `Ratio::checked_mul`, `Ratio::checked_sub`, `Ratio::cmp`, `Ratio::negated`, `Ratio::new`, `Ratio::partial_cmp`, `Ratio::reduced`, `Ratio::rounded`, `Ratio::significant`, `Ratio::significant_away`, `Ratio::significant_with`, `gcd`, `power`, `wide`
+- `components/pricing/src/domain/decimal.rs`: `Decimal::checked_add`, `Decimal::cmp`, `Decimal::deserialize`, `Decimal::eq`, `Decimal::from_wire`, `Decimal::normalized`, `Decimal::parse`, `Decimal::partial_cmp`, `Decimal::serialize`, `Decimal::text`, `Decimal::to_wire`, `Ratio::abs`, `Ratio::checked_add`, `Ratio::checked_div`, `Ratio::checked_mul`, `Ratio::checked_sub`, `Ratio::cmp`, `Ratio::deserialize`, `Ratio::negated`, `Ratio::new`, `Ratio::partial_cmp`, `Ratio::reduced`, `Ratio::rounded`, `Ratio::significant`, `Ratio::significant_away`, `Ratio::significant_with`, `gcd`, `power`, `wide`
 - `components/pricing/src/domain/money.rs`: `Currency::factor`, `Minor::decimal`, `Minor::from_decimal`, `Minor::from_unsigned`, `Minor::ratio`, `Minor::serialize`, `Minor::significant`, `Minor::unsigned`, `Money::checked_add`, `Money::decimal`, `Money::from_decimal`, `Money::new`, `Money::parse`, `Money::rounded`
-- `components/pricing/src/domain/quote.rs`: `QuoteTax::at_scale`, `QuoteTotals::of_lines`
-
-### binary-emulation (30)
-
-Reproduces the original calculators' binary64 arithmetic with integers (no floating-point type), because their results at decimal ties depend on it; checked bit for bit against the previous port and the original PHP, not extracted.
-
-- `components/checkout/src/domain/tax_lines.rs`: `tax_products`
-- `components/pricing/src/domain/binary.rs`: `Binary::cash_round`, `Binary::cast`, `Binary::checked_add`, `Binary::checked_div`, `Binary::checked_mul`, `Binary::checked_sub`, `Binary::cmp`, `Binary::decimal`, `Binary::floor`, `Binary::from_decimal`, `Binary::from_ratio`, `Binary::integer`, `Binary::partial_cmp`, `Binary::power`, `Binary::ratio`, `Binary::round`, `Binary::rounded`, `bit_length`
-- `components/pricing/src/domain/pricing.rs`: `Rounding::minor`, `Rounding::new`, `Rounding::round`, `calculate`, `line_total`, `math_round`, `merged_rules`, `percent`, `proportional_tax_rules`, `sum`
-- `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`
+- `components/pricing/src/domain/pricing.rs`: `Rounding::new`, `Rounding::plain`, `calculate`, `merged_rules`, `percent`, `proportional_tax_rules`
+- `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`, `QuoteTax::at_scale`, `QuoteTotals::of_lines`
 
 ### document-shape (22)
 
@@ -139,18 +132,17 @@ A pure decision over strings, enums or collections that the bool/u64 extractor c
 - `components/payments/src/domain/settlements.rs`: `closed`, `multi`
 - `components/pricing/src/domain/context.rs`: `language_chain`, `select_tier`
 
-### constructor-or-accessor (37)
+### constructor-or-accessor (34)
 
 Builds or reads a value without a decision of its own.
 
 - `components/checkout/src/domain/session_review.rs`: `Review::session`
 - `components/inventory/src/domain/lines.rs`: `InventoryLines::ids`, `InventoryLines::quantities`
-- `components/pricing/src/domain/binary.rs`: `Binary::abs`, `Binary::is_negative`, `Binary::is_zero`, `Binary::negated`
 - `components/pricing/src/domain/cart.rs`: `default_channel`
 - `components/pricing/src/domain/customer/mod.rs`: `country_default`
 - `components/pricing/src/domain/decimal.rs`: `Decimal::integer`, `Decimal::is_zero`, `Decimal::new`, `Decimal::ratio`, `Decimal::scale`, `Decimal::units`, `Ratio::denominator`, `Ratio::integer`, `Ratio::is_negative`, `Ratio::is_zero`, `Ratio::numerator`
 - `components/pricing/src/domain/money.rs`: `Currency::code`, `Currency::eur`, `Currency::scale`, `Currency::try_from`, `Minor::minor`, `Minor::new`, `Minor::same_scale`, `Minor::scale`, `Minor::zero`, `Money::amount`, `Money::currency`, `Money::minor`
-- `components/pricing/src/domain/pricing.rs`: `PriceInput::default`, `decimals`, `interval`, `yes`
+- `components/pricing/src/domain/pricing.rs`: `PriceInput::default`, `decimals`, `hundred`, `interval`, `yes`
 - `components/pricing/src/domain/validation.rs`: `ValidationError::new`
 
 ### catalogue-data (3)
@@ -172,15 +164,18 @@ Signed (i64) quantity or amount arithmetic outside the u64 subset; unit tested.
 ## Notes on single functions
 
 - `components/checkout/src/domain/cart_quote.rs::quote`: Line totals are the calculator's proved line_total in whole minor units; the quote adds them with amount_sum and splits net and tax with net_amount. The Lean quote-total theorems state these sums for any list of lines.
-- `components/checkout/src/domain/tax_lines.rs::tax_products`: The net-preserving rate factor is applied with the original binary arithmetic so stored product prices change exactly as before.
+- `components/checkout/src/domain/tax_lines.rs::tax_products`: The net-preserving rate factor (100 + rate) / (100 + product rate) is exact; a converted snapshot price is kept at fifteen significant digits so its binary64 number reads back as that decimal.
 - `components/inventory/src/domain/lines.rs::InventoryLines::new`: The new order holds nothing yet (held = 0); the reservation run theorems cover any later reserve/release sequence gated by the same rule.
 - `components/orders/src/domain/order_machine.rs::OrderMachine::validate`: Graph validation of a configured machine (identifiers, labels, no edge out of a terminal state, reachability). The order run theorems do not rely on it: admitted_edge rechecks the listed target and the terminal source.
 - `components/orders/src/domain/order_transitions.rs::delivery`: Delivery state strings; terminal orders are refused before it runs by guard (order_edit_admissible).
 - `components/orders/src/domain/order_workflow.rs::terminal`: String membership; its result is the terminal input of the proved order_edit_admissible and order_transition_admissible.
+- `components/pricing/src/domain/decimal.rs::Decimal::from_wire`: The one boundary conversion from a JSON number: the shortest decimal that reads back as the number (Rust f64 display digits); unit and property tested.
 - `components/pricing/src/domain/decimal.rs::quotient`: Refuses operands outside the rule's range instead of letting it saturate; Ratio::rounded rounds every exact amount into minor units through it.
 - `components/pricing/src/domain/discount.rs::allocate`: The cap is proved; the proportional integer allocation loop and its rounding are unit tested, not proved.
 - `components/pricing/src/domain/money.rs::Minor::times`: Sign and overflow refusal around the proved product; the calculator's line totals and every quantity multiplication of a minor amount use it.
 - `components/pricing/src/domain/money.rs::unsigned_sum`: Refuses an overflowing sum instead of letting the proved sum saturate.
-- `components/pricing/src/domain/pricing.rs::calculate`: The Shopware calculator's binary64 steps on Binary (integer emulation), bit for bit equal to the previous port (tests/calculator_reference.rs) and, in CI, to the original PHP (differential.py); its line total is the proved line_total.
-- `components/pricing/src/domain/pricing.rs::line_total`: The product itself is the proved line_total (through Minor::times); this function writes it as the original does (fourteen digits of its binary value).
+- `components/pricing/src/domain/pricing.rs::Rounding::plain`: One rounding to the precision through Ratio::rounded, i.e. the proved rounded_quotient (bound in decimal.rs::quotient).
+- `components/pricing/src/domain/pricing.rs::Rounding::price`: Cash rounding in whole minor units: rounded_quotient of the amount by the interval, times the interval by line_total (Lean cash_round_nearest_multiple); operands outside the rules' range are refused. The plain rounding before it is Rounding::plain.
+- `components/pricing/src/domain/pricing.rs::calculate`: Exact Ratio arithmetic over decimals and rationals; every amount is rounded once, half away from zero, through Rounding::plain (proved rounded_quotient) and Rounding::price (proved rounded_quotient and line_total), the line total is the proved line_total (Minor::times). The rule mix and gross/net mapping are property tested (tests/properties.rs, tests/decimal_ties.rs), not extracted.
+- `components/pricing/src/domain/quote.rs::LinePriceUpdate::new`: The unit price is total / quantity rounded once through Ratio::rounded (proved rounded_quotient).
 - `components/pricing/src/domain/quote.rs::QuoteTotals::new`: Net quotes add the tax with the proved sum (through unsigned_sum), gross quotes take the proved net; negative amounts are refused.

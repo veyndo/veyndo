@@ -204,13 +204,14 @@ Done when the server builds on both crates without glob imports from them.
       `Decimal`/`Ratio` values: calculator outputs, line totals (proved `line_total`),
       discounts, app adjustments, shipping, taxes, net/gross and quote totals (proved
       `amount_sum`/`net_amount`); payment ledger amounts were already `i64` minor units
-      with `Money`. JSON numbers cross one conversion (`domain/binary.rs`: exact bits,
-      shortest decimal). The Shopware calculator reproduces the original's binary64
-      rounding on `Binary` (integer emulation, no float type), because the original's
-      results at decimal ties depend on it (130.4835 × 670 → 87423.94); bit for bit
-      equal to the previous port on the differential population plus 240,000
-      generated inputs, the PHP comparison runs in CI. Open: the column is 2 for
-      `pricing/src/domain` (`binary.rs` is the wire boundary; `catalog.rs` keeps the
+      with `Money`. JSON numbers cross one conversion (`Decimal::from_wire`/`to_wire`
+      in `domain/decimal.rs`: shortest decimal, nearest number). Since 26 Nov
+      (r3-decimal) the calculator is exact: the binary64 emulation `Binary` is deleted,
+      each amount is rounded once, half away from zero, per currency exponent, so ties
+      follow the decimal (130.4835 × 670 → 87423.95); 481 of 40,344 surveyed outputs
+      changed by one minor unit, all at decimal ties or on binary-noise inputs
+      (`pricing/tests/decimal_ties.rs`). Open: the column is 2 for
+      `pricing/src/domain` (`decimal.rs` is the wire boundary; `catalog.rs` keeps the
       product snapshot's `double precision` columns as `f64` fields, read through the
       boundary). Changing the product columns and settings fields to exact types is a
       separate schema step.
@@ -1175,7 +1176,9 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       to the minor unit (`rounded_quotient`, half up on magnitudes, i.e. half away from
       zero: nearest, halves up, monotone, scaling up and rounding back is the identity,
       and the tax contained in a gross amount never exceeds it, so net plus tax is
-      the gross). Bound in `Minor::times` and `Ratio::rounded`; the Rust callers refuse
+      the gross). Bound in `Minor::times`, `Ratio::rounded` and, since the exact
+      calculator, the cash-interval rounding `Rounding::price` (theorem
+      `cash_round_nearest_multiple`); the Rust callers refuse
       operands that would make a rule saturate. Totals are `u64` minor units, never
       negative (`quote_total_not_below_lines`).
 - [x] Price calculation: the order total equals the sum of its lines, shipping and
@@ -1186,9 +1189,9 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       and `quote_total_deterministic` (equal lines in any order give equal totals);
       the cart quote, the delivery totals and `QuoteTotals` compute exactly these
       sums with `amount_sum` and `net_amount`. The calculator is a pure function
-      (property test: the same input gives the same price); its rounding steps are
-      the binary64 emulation, which is checked against the previous port and the
-      original PHP rather than proved.
+      (property test: the same input gives the same price); since 26 Nov it is exact
+      and its rounding steps are the proved `rounded_quotient` and `line_total`; the
+      rule mix around them is property tested against an integer model, not extracted.
 - [x] Stock: a reservation never takes stock below zero; reserve followed by
       release restores the quantity; an order holds at most what it ordered.
       Proved: the first two, also for two reservations in sequence
@@ -1240,7 +1243,7 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       that alters seven rules in the Lean model and must catch each.
 - [ ] No `f64` on the money path. 26 Nov: no floating-point arithmetic is left on
       the calculation path; `f64` remains only as a wire or storage type: the boundary
-      conversion (`pricing/domain/binary.rs`), the stored product snapshot fields
+      conversion (`pricing/domain/decimal.rs`), the stored product snapshot fields
       (`pricing/domain/catalog.rs`, `double precision` columns), the entry points that
       take a stored or wire number (`service/conversion.rs`: `amount`, `stored`,
       `ancillary`; a closure over stored fields in `cart_quote.rs` and

@@ -91,9 +91,10 @@ rates are merchant-controlled and do not expire automatically.
 FX conversion uses rational integer arithmetic, eight-decimal rate strings and
 one half-up rounding to the target minor unit. Amounts on the calculation path are
 whole minor units (`Minor`, `Money`) and exact decimals; a JSON number is read as
-the shortest decimal that names it. The ported Shopware tax/discount calculator
-reproduces the original's binary64 rounding with integer arithmetic, because the
-original's results at decimal ties depend on it, and returns minor units
+the shortest decimal that names it. The tax/discount calculator computes exactly and
+rounds each amount once, half away from zero, to the currency's exponent (and gross
+prices to the cash interval); at a decimal tie the decimal decides, not binary error
+(130.4835 × 670 = 87423.945 → 87423.95). It returns minor units
 ([what is proved](formal-verification.md)).
 
 Before placing an order, the browser submits its reviewed cart revision, currency
