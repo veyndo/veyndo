@@ -3827,8 +3827,8 @@
     },
     "components/marketing/src/store/carts.rs": {
       "status": "unproved",
-      "sha256": "8706cce244a41ffab2d73e561ce0ecb49877b3e37ce36181409d24de640199eb",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "00bfce9d7e68e4c00cc4685fbf3f67252d818fdb53883dd398fc47e42939222a",
+      "review": "UX acceptance (2026-11-26): marketing cart lock maps a missing cart token to 404 Cart not found instead of a RowNotFound database error; no domain rule changed."
     },
     "components/marketing/src/store/catalog.rs": {
       "status": "unproved",
@@ -8462,8 +8462,8 @@
     },
     "src/demo_catalog.rs": {
       "status": "unproved",
-      "sha256": "3bf831b286f75be3e1233187be38d7dbaa80bdee06b2e3be6fa8e8545fe59fe3",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "454d61c289c20bbbe09b14d9b557ca4222613ce5268e73b3d4e5a79991638f29",
+      "review": "UX acceptance (2026-11-26): marketing cart lock maps a missing cart token to 404 Cart not found instead of a RowNotFound database error; no domain rule changed."
     },
     "src/developer/agent_connection.rs": {
       "status": "unproved",
@@ -9668,8 +9668,8 @@
       "review": "Reviewed tenant-scoped fashion fixture provisioning, opt-in idempotent demo seeding and curated catalog-specific links; Rust lint and units pass, actual signup/locale/variant/image/isolated checkout/fresh-process HTTP regressions pass. No business-policy or proof-boundary changes."
     },
     "fixtures/fashion-catalog.json": {
-      "sha256": "0472891f8bcf7dbc55f79575f53d33c046baba10899fa768512d24e197c6569d",
-      "review": "Reviewed tenant-scoped fashion fixture provisioning, opt-in idempotent demo seeding and curated catalog-specific links; Rust lint and units pass, actual signup/locale/variant/image/isolated checkout/fresh-process HTTP regressions pass. No business-policy or proof-boundary changes."
+      "sha256": "a3889751ea183ec585289b3ba5bbc15e6addc9aba00a65589255551a043cb54a",
+      "review": "UX acceptance (2026-11-26): marketing cart lock maps a missing cart token to 404 Cart not found instead of a RowNotFound database error; no domain rule changed."
     },
     "fixtures/geography.json": {
       "sha256": "8b882d4e9ff3e8ce14f091d7d9a824d692754b8a9771949c9ae60873f3aacd85",
