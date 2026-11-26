@@ -46,8 +46,7 @@ localization for the affected files. For Rust changes, run `cargo fmt --check`,
 changed modules. Full tests and coverage run daily through the existing workflow;
 ordinary commits do not wait for that full run.
 Run the relevant application suites from [the testing guide](docs/testing.md#repeatable-checks)
-against your own instance. Original Shopware ports require original-source
-comparisons described in [feature overview](docs/features.md).
+against your own instance.
 
 ## Formal contracts and source review
 

@@ -279,8 +279,8 @@ The shop persists sources and order evidence, retrieves them for the actual mode
 prompt and recommends merchant-approved associations. Its existing layout policy
 also records views/rewards; this workspace does not confuse layout learning with
 product-variant learning. Model weights remain fixed. No causal uplift, automatic
-fact truth, full customer-question log, agent-designed experiments or full Shopware parity
-is implied. Authoritative price/tax/order decisions continue in the deterministic core.
+fact truth, full customer-question log, or agent-designed experiments
+are implied. Authoritative price/tax/order decisions continue in the deterministic core.
 
 Customer questions remain read-only and are not silently logged. Gmail/app content
 is untrusted quoted evidence and remains merchant-private. Publication is a deliberate

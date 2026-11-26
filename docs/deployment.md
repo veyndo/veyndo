@@ -26,9 +26,7 @@ provider/app endpoints there. Transfer this private file securely to the selecte
 host; do not commit it or paste resolved Compose configuration into logs.
 
 Public Compose enforces `SEED_DEMO=false`, `ALLOW_PUBLIC_SIGNUP=false` and
-`ALLOW_BOOTSTRAP_AUTH=false`. It creates no known demo customer accounts. Existing
-demo data is not deleted during an upgrade: never reuse an old publicly seeded
-demo database for a new public deployment without reviewing its accounts.
+`ALLOW_BOOTSTRAP_AUTH=false`. It creates no known demo customer accounts.
 
 ## Start the backend and your operator account
 
@@ -49,14 +47,14 @@ Caddy terminates HTTPS and proxies to the internal Rust service.
 [Caddy automatic HTTPS](https://caddyserver.com/docs/automatic-https) requires a
 reachable configured domain. Persistent volumes retain PostgreSQL, uploaded
 binary product assets (stored in PostgreSQL), connector state and certificates.
-Back up PostgreSQL before upgrades; automatic backup/restore/failover is not yet
-implemented.
+Automatic backup/restore/failover is not implemented.
 
-Setup records immutable checksummed migrations. `BOOTSTRAP_MODE=migrate` performs
-setup without workers; `serve` requires all migrations to be ready. On upgrades,
-run the controlled migration-only job and then the post-migration runtime-role provisioning job before restarting `serve` replicas; do not
-roll mixed schema versions blindly. The initial `auto` mode supports one admitted
-experimental deployment, not rolling-upgrade orchestration.
+Setup applies the checksummed component baselines ([schema baselines](rust-services.md#schema-baselines)).
+`BOOTSTRAP_MODE=migrate` performs setup without workers; `serve` requires every
+baseline to be ready. Run the migration-only job, then the runtime-role provisioning
+job, then start `serve` replicas. This release is a fresh installation only: setup
+refuses a database created by an earlier release, and there is no upgrade path or
+data import ([release notes](current-release.md#what-operators-must-know)).
 
 Ollama is an operator-controlled private service. Compose does not download a
 model or reserve a GPU. Optional OpenAI/Anthropic credentials stay in Rust.
@@ -167,24 +165,20 @@ redirect history are not implemented by this change.
 
 The production Compose template separates migration owner, commerce runtime and
 connector credentials. Migrations finish before role provisioning; commerce starts
-in `serve` with strict RLS, no bootstrap auth and no demo fallback. Run provisioning
-after additive upgrades. Existing hosts must migrate and change their own runtime
-credentials explicitly; changing this template alone does not reconfigure them.
+in `serve` with strict RLS, no bootstrap auth and no demo fallback.
 
 `DB_CLUSTER_CONNECTION_BUDGET` is shared by all HTTP/worker processes. Each reserves
 `DB_POOL_MAX + 2`; set `DB_MAX_PROCESSES` and the same budget on every replica.
 Transaction pooling requires PgBouncer 1.21+, protocol prepared-statement support
 and a **direct/session** `DATABASE_LISTENER_URL` under the non-owner login. Set
-`DB_POOLER_MODE=transaction`; statement pooling is unsupported. [Complete settings,
-upgrade sequence, worker retention and tested boundaries](security.md).
+`DB_POOLER_MODE=transaction`; statement pooling is unsupported. [Security boundaries](security.md).
 
 ## Production image compile-time dependencies
 
 Run `python3 scripts/testing/image_context.py` before building `deploy/Dockerfile`.
 This CI gate reads literal Rust `include_str!`/`include_bytes!` dependencies and
 checks them against the Rust stage COPY set. Its negative control removes the
-historical app-manifest COPY and must find the missing inputs. These eight files
-are used by app approval/upgrade compatibility; tests against a full checkout
+historical app-manifest COPY and must find the missing inputs. These files are used by app approval and package compatibility checks; tests against a full checkout
 alone cannot detect their absence from a container build. The final image still
 contains no Python interpreter. A green dependency check does not replace an
-actual image build or the managed backup/migration/runtime-role rollout.
+actual image build.

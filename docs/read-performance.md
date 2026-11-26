@@ -62,7 +62,7 @@ and validated without an error.
 The after build was measured from the recorded working tree; its source-tree
 digest is retained. SQL tracing was enabled for separate statement counts and
 disabled during timing. These figures measure the shared backend path, not
-browser rendering, AI latency or relative Shopware performance.
+browser rendering or AI latency.
 
 ## Local matched hotpath result, 8 October 2026
 
@@ -104,7 +104,7 @@ message is involved.
 [Raw samples, binary/source hashes and delivery checks](assets/read-performance-2026-10-08.json).
 The changed build was measured from a working tree with its source-tree digest
 retained. These figures do not measure browser rendering, slow AI requests, cold
-database behavior, large shops, production capacity or a Shopware speed ratio.
+database behavior, large shops or production capacity.
 
 ## Configuration and reproduction
 

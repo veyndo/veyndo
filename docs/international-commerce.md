@@ -1,8 +1,8 @@
 # International commerce: countries, destination taxes and translations
 
 These are native Rust prototype features, shared by Studio, Store API and MCP.
-They implement a documented subset of Shopware's country/tax/translation concepts;
-they do not establish full upstream schema/API compatibility or current tax law.
+They are Veyndo's own model of countries, destination taxes and translations; they
+do not establish current tax law.
 
 ## Configure a shop in VEYNDO Studio
 
@@ -61,8 +61,8 @@ codes from another country are rejected in registration, address book and checko
 The bundled dataset contains geography, **not a worldwide tax-rate service**.
 Merchant-entered rates, thresholds, exemptions and Rule Builder choices need the
 appropriate real business configuration. Compound US local/county/district taxes,
-external tax services, currency-specific rounding and full Shopware tax-state
-resolution remain outside this implementation.
+external tax services and currency-specific rounding remain outside this
+implementation.
 
 ## Content languages and inheritance
 
@@ -83,9 +83,8 @@ shop-main-language fallback. The translation badge distinguishes inherited text
 from an explicit override. `null`/missing means inherit; an empty description is
 an intentional blank. Displaying a fallback does not save a fabricated translation.
 SEO fields inherit individually; specification groups and rich documents can be
-adopted and reset to inheritance. Existing system-language/variant fallback keeps
-its bounded original Shopware comparison; the tenant main-language behavior is a
-native extension, tested separately.
+adopted and reset to inheritance. System-language and variant fallback and the tenant
+main-language behaviour are tested by the `international_commerce` suite.
 
 ### Translate the whole product catalogue with AI
 
@@ -164,4 +163,4 @@ quality and the surrounding server remain outside that proof boundary.
 
 ## Channel settings and media workspaces (2026-10-05)
 
-See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish additional full Shopware API/DAL parity, current tax law, paid-provider quality or whole-system formal certification.
+See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish current tax law, paid-provider quality or whole-system formal certification.

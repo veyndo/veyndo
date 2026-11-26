@@ -24,7 +24,7 @@ A direct visit works without first opening Customers.
 - `admin/settings/SettingsSaveBar.tsx` renders state, progress and read-only access.
 - `shared/i18n/studio-ui-i18n.ts` contains the four-language navigation and settings
   vocabulary; countries use the existing translated customer dictionary.
-- `admin/styles/app-catalog.css` is imported directly by AppsManager, without a
+- `components/apps/ui/admin/apps/app-catalog.css` is imported directly by AppsManager, without a
   dependency on loading the customer module.
 
 ## Storage repair
@@ -64,7 +64,7 @@ the native API/MCP contract and remaining tax/language limits.
 
 ## Channel settings and media workspaces (2026-10-05)
 
-See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish additional full Shopware API/DAL parity, current tax law, paid-provider quality or whole-system formal certification.
+See [the settings/media guide](settings-media.md) for the current single-language editor, field-level checkout overrides, dependency-safe method removal, gallery and optional private image jobs. These are native prototype extensions; they do not establish current tax law, paid-provider quality or whole-system formal certification.
 
 ## App management (2026-10-05)
 

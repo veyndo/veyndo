@@ -20,8 +20,8 @@ of a table, look in `tables`. `python3 scripts/components.py` checks both.
 | shop | `components/shop` (`veyndo-shop`) | Shop settings and their revisions, domains, languages, legal texts, operator control | international commerce, settings and channel suites |
 | catalog | `components/catalog` (`veyndo-catalog`) | Products, categories, media, reviews, translations, product files, catalogue reads | catalog, product management and translation suites |
 | inventory | `components/inventory` (`veyndo-inventory`) | Stock reservations and supplier links; `InventoryLines` | `production_foundations`, property and mutation tests |
-| pricing | `components/pricing` (`veyndo-pricing`) | Money (`components/pricing/src/domain/money.rs`), price calculation, discounts, currencies, taxes, customer groups, price jobs | Shopware differential suites, property and mutation tests |
-| shipping | `components/shipping` (`veyndo-shipping`) | Delivery methods, destinations (`components/shipping/src/domain/geography.rs`), delivery splits, carrier booking | delivery differential, shipping suites |
+| pricing | `components/pricing` (`veyndo-pricing`) | Money (`components/pricing/src/domain/money.rs`), price calculation, discounts, currencies, taxes, customer groups, price jobs | `currencies`, `international_commerce` and `formal_differential` suites, property and mutation tests |
+| shipping | `components/shipping` (`veyndo-shipping`) | Delivery methods, destinations (`components/shipping/src/domain/geography.rs`), delivery splits, carrier booking | `shipping_contract`, `shipment_workflows` suites |
 | checkout | `components/checkout` (`veyndo-checkout`) | Carts, quotes and the purchase transaction (`components/checkout/src/service/purchase/{lock,price,commit}.rs`) | checkout and handoff suites, property and mutation tests |
 | customers | `components/customers` (`veyndo-customers`) | Customer accounts, sessions, addresses, the merchant directory | account and CRM suites |
 | orders | `components/orders` (`veyndo-orders`) | Orders, the order state machine (`components/orders/src/domain/order_workflow.rs`), receipts, documents, downloads, company order data | order workflow suites, property and mutation tests |
@@ -30,7 +30,7 @@ of a table, look in `tables`. `python3 scripts/components.py` checks both.
 | b2b | `components/b2b` (`veyndo-b2b`) | Companies, units, budgets, approvals, quotes, shopping lists | B2B and UCP B2B suites |
 | pos | `components/pos` (`veyndo-pos`) | Register adapters over checkout, orders and payments; no tables | POS suite |
 | apps | `components/apps` (`veyndo-app-platform`), `crates/apps` | App packages, managed records, settings, jobs, deliveries, webhooks, surfaces, Wasm extensions | app platform and app storage suites |
-| automation | `crates/automation` (vendored, hash-locked), `crates/flow-graph` | Rule evaluation and flow graphs; no tables | automation differential suites |
+| automation | `crates/automation` (vendored, hash-locked), `crates/flow-graph` | Rule evaluation and flow graphs; no tables | `automation`, `automation_lifecycle` suites |
 | inference | `crates/cognition` | Model provider adapters, budgets, prompt provenance, image generation; no commerce writes | inference unit tests |
 | intelligence | `components/intelligence` (`veyndo-intelligence`) | Knowledge, shop memory, agents and runs, proposals, consent, personalization, catalogue intake | knowledge, agent and behaviour suites |
 | studio | `components/studio` (`veyndo-studio`) | Overview, reports, staging shops, history, manual orders, flow work templates, catalogue translation worker | staging, report and history suites |
@@ -117,7 +117,7 @@ responsibility.
 | `src/cognition/`, `src/documents/`, `src/agent_runs/`, `src/translations/` | Server execution of runs, ingestion and translation over the intelligence and catalog components |
 | `src/platform/`, `src/staging/`, `src/history/`, `src/studio/` | Operator control plane; route registration for staging shops and history owned by studio |
 | `src/performance/`, `src/outbox.rs`, `src/outbox/` | Read-context caching with authoritative versions; outbox projection and retention workers |
-| `src/bin/` | `connectors` entry, the verified kernel driver and the Shopware comparison binaries |
+| `src/bin/` | `connectors` entry and the verified kernel driver (`verified_kernel/`) |
 
 ## Protocol adapters
 
@@ -177,7 +177,6 @@ Details: [Rust services](rust-services.md), [connectors](connector-component.md)
 | Schema | `schema_baseline`, `sql_prepare` |
 | Domain rules | `cargo test` per component (unit, `properties`, `domain_mutants`), `scripts/testing/mutation_domain.py`, `formal_differential` |
 | Interfaces | `schema_contracts`, port contracts in `crates/port-contracts`, `testing/component_mirrors_check` |
-| Original behaviour | Shopware differential suites for price, context, delivery and rules |
 | User journeys | `browser_journeys` |
 | Coverage | `scripts/testing/coverage_report.py` with per-component floors |
 

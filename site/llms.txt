@@ -12,8 +12,8 @@
 - [Connected playground](https://www.veyndo.ai/docs/playground.html)
 
 ## Current release
-- [Shared order and inventory inputs](https://www.veyndo.ai/docs/status.html#shared-order-and-inventory-inputs): Native purchase, shared stock, empty cart and exact hosted component verification.
-- [Product Guide actions](https://www.veyndo.ai/docs/status.html#product-guide-actions-in-the-hosted-shop): Cart review in the storefront and a reviewed product proposal in Studio.
+- [Shared order and inventory inputs](https://www.veyndo.ai/docs/status.html#hosted-pilot-earlier-release): Native purchase, shared stock, empty cart and exact hosted component verification.
+- [Product Guide actions](https://www.veyndo.ai/docs/evidence/product-guide-hosted-2026-11-11.html): Cart review in the storefront and a reviewed product proposal in Studio.
 - [German overview](https://www.veyndo.ai/docs/platform-overview.html): Architecture, apps and agents in German.
 - [Component versions in JSON](https://www.veyndo.ai/docs/components.json): Public release tags and the exact hosted pilot composition.
 - [Current status and recorded public journeys](https://www.veyndo.ai/docs/status.html): Canonical current deployment, observed acceptance and remaining work.

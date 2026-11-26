@@ -374,7 +374,7 @@ as proof of original public availability. Public target stock still starts at ze
 
 Veyndo's stored base price is gross. The source amount remains exact in its declared
 currency, with original amount and basis retained as provenance. For a declared
-net source, the reviewed native import invokes the existing PHP-compatible tax
+net source, the reviewed native import invokes the existing native tax
 calculator (`gross=true`, `calculated=false`) at the configured currency precision;
 it does not introduce an adapter-side tax engine or a model-generated conversion.
 For example, 12.50 EUR net at reviewed 19% becomes 14.88 EUR gross. Existing native

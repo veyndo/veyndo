@@ -24,14 +24,13 @@ images are unedited captures of the actual prototype.
 
 The Rust crate and HTTP binary are `veyndo`; Rust imports use `veyndo::`.
 The frontend package is `veyndo-experience`. The application image uses `veyndo`; fresh local database/search containers use
-standard PostgreSQL and Qdrant images. The legacy `veyndo-db` image is retained
-for existing AGE/pgvector conversions. Fresh local installations use Compose project `veyndo` and
-container `veyndo-postgres-1`. Start and worker commands, differential runners,
+standard PostgreSQL and Qdrant images. Fresh local installations use Compose project `veyndo` and
+container `veyndo-postgres-1`. Start and worker commands,
 MCP examples, deployment files and CI use these names consistently.
 
-Existing checkouts can stay in their original folder. `scripts/dev.sh` detects
-an existing legacy Compose project and reuses its data volume. An explicit
-`COMPOSE_PROJECT_NAME` takes precedence. Integration verification propagates its
+`scripts/dev.sh` detects an older `rust-ai-commerce` Compose project and reuses it;
+an explicit `COMPOSE_PROJECT_NAME` takes precedence. A database created by an earlier
+release is refused at setup, so start a new project for this release. Integration verification propagates its
 selected container to every child suite, so both new and existing instances can
 be checked. To stop an older installation use its actual Compose project name;
 never delete its database volume to perform a rename.

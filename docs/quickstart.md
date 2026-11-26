@@ -163,14 +163,12 @@ engraving app and active branching invoice flow. The script prints its Studio
 and storefront links. Repeating setup preserves your edits. Setup makes no AI
 or provider calls and places no orders. [Ten-minute playground walkthrough](playground.md).
 
-### Upgrade a pre-VEYNDO checkout
+### An older local checkout
 
-The repository and binaries are now named **VEYNDO**. An old checkout directory
-can stay in place. `scripts/dev.sh` reuses a detected legacy Compose database
-project; an explicit `COMPOSE_PROJECT_NAME` overrides detection. Use that actual
-project name when stopping it. Never remove the old data volume to rename the
-app. Rebuild frontend and Rust before starting the new `target/debug/veyndo`
-binary. Existing shop IDs and browser sessions remain valid. See
-[branding and compatibility](branding.md).
+A database created by an earlier release is refused at setup: this release is a
+fresh installation only. `scripts/dev.sh` still detects an older `rust-ai-commerce`
+Compose project and would reuse its database; set `COMPOSE_PROJECT_NAME=veyndo` (or
+another new name) to start with a new database instead. Rebuild frontend and Rust
+before starting `target/debug/veyndo`.
 
 [Project overview](../README.md) · [Feature guide](features.md) · [Security scope](security.md)

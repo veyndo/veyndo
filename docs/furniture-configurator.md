@@ -165,6 +165,5 @@ These additional checks are local until new hosted evidence is recorded.
 
 The full concept additionally requires general core-object extensions, native
 order/offer lifecycle extensions, historical whole-business replay, source build
-hosting, Crater compatibility operations, a demonstrated Shopware extension port
-and operated Enterprise cells. This app is a connected implementation case, not
+hosting, Crater compatibility operations and operated Enterprise cells. This app is a connected implementation case, not
 acceptance of those separate capabilities.

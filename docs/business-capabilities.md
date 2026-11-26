@@ -270,10 +270,9 @@ and Payments product boundaries remain intact.
 | Complete B2B capability | The configurator works across shop, account, administration, approval, reorder, revisioned change and native release, with trace-based explanation. |
 | Operated individual software | A supported source build, guarded service runtime and core compatibility check work through their actual production consumer. |
 
-Original Shopware app/script execution and PHP-plugin translation are parked on
-[`experiment/shopware-compatibility`](https://github.com/sthamann/veyndo/tree/experiment/shopware-compatibility).
-They are separate from these main-platform gates. Inward shop-data migration and
-native original-PHP calculation comparisons remain available. Third-party hosting
+Shopware compatibility is not a goal: no Shopware app, script or PHP plugin runs on
+Veyndo. Importing data from an existing shop remains available
+([bring an existing shop](agentic-migration.md)). Third-party hosting
 claims still need their own runtime acceptance. The product is a publicly developed
 experiment platform under the [Sustainable Use License](../LICENSE), not an
 assertion of production completeness or guaranteed maintenance for every extension.

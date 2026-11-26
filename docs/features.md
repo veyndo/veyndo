@@ -27,12 +27,12 @@ Public provider acceptance and dated deployment evidence remain in
 On 11 November, the shopper reviewed price and delivery before confirming one
 cart addition. A merchant used a separate private App view to prepare and
 approve a product description change inside a sandbox.
-[Both hosted journeys](status.md#product-guide-actions-in-the-hosted-shop).
+[Both hosted journeys](status.md#hosted-pilot-earlier-release).
 
 The native shop and original Storyfront share stock, pricing and orders.
 The latest hosted simulated purchases verify the cart reset and shared
 inventory. Actual PayPal Sandbox capture and refund evidence is recorded
-separately. [Checkout and stock](status.md#shared-order-and-inventory-inputs) ·
+separately. [Checkout and stock](status.md#hosted-pilot-earlier-release) ·
 [PayPal Sandbox acceptance](shopware-payments-acceptance.md).
 
 ## Find your feature
@@ -201,7 +201,7 @@ Add PNG/JPEG/WebP files or an allowed image URL, preview a cover, reorder, set a
 
 ### Categories, specifications, SEO and digital assets
 
-Categories form a translated parent/child tree. Page, folder and HTTPS link types have separate active/navigation-visible controls; inclusion of descendant products is explicit. A channel chooses its navigation root. Product pages remain cursor-paginated; category navigation is bounded to 2,000 nodes. This does not supply full Shopware CMS layouts, dynamic product groups, manufacturer entities or original DAL schemas.
+Categories form a translated parent/child tree. Page, folder and HTTPS link types have separate active/navigation-visible controls; inclusion of descendant products is explicit. A channel chooses its navigation root. Product pages remain cursor-paginated; category navigation is bounded to 2,000 nodes. CMS layouts, dynamic product groups and manufacturer entities are not implemented.
 
 Specifications expose localized merchant properties and dimensions; SEO stores translated title/description/slug information. Attachments use immutable bytes and deliberate publication. Product digital access and review moderation have their own tabs and rights. [Categories and product scope](product-management.md) · [Asset/purchase ownership](merchant-operations.md).
 
@@ -263,7 +263,7 @@ The workflow definition can contain translated custom states/edges under validat
 
 Payment receipts remain distinct from order status and recorded order value. Manual confirmation and configured provider capture/refund use their own permissions. Durable workers reconcile provider jobs; an uncertain external result is visible. Invoice, delivery-note and cancellation PDFs have immutable numbered snapshots and stable request-key behavior. Company/channel issuer and order data are frozen when issued; later customer/company edits do not rewrite a PDF. Cancellation documents do not themselves refund a payment.
 
-Issuer details must be configured before generation. Templates support the four interface languages within the renderer's font limitations. Legal/e-invoice compliance, arbitrary original Shopware document templates, carrier services and full upstream partial/multicurrency payment behavior are outside this native slice. [Document and payment scope](merchant-operations.md).
+Issuer details must be configured before generation. Templates support the four interface languages within the renderer's font limitations. Legal/e-invoice compliance, arbitrary document templates, carrier services and multiple partial transactions per order are not implemented. [Document and payment scope](merchant-operations.md).
 
 ### Version history and validated restore
 
@@ -341,9 +341,9 @@ Media generation/edit jobs similarly produce private review drafts. Both paths r
 
 ### Saved rules and starter processes
 
-New shops have a main channel, three starter rules and two order/payment note flows. They do not automatically activate marketing discounts or external messages. Rules expose native conditions and reviewed source-named Shopware conditions with typed configuration, nested AND/OR/NOT/XOR and saved-rule references. Event projection freezes relevant definitions/facts for the admitted execution. A Boolean preview evaluates the actual cart without effects.
+New shops have a main channel, three starter rules and two order/payment note flows. They do not automatically activate marketing discounts or external messages. Rules expose typed conditions with typed configuration, nested AND/OR/NOT/XOR and saved-rule references. Event projection freezes relevant definitions/facts for the admitted execution. A Boolean preview evaluates the actual cart without effects.
 
-The registry binds 108 of 114 reviewed source-named condition types; six unsupported runtime types remain visibly disabled. This is a native subset with bounded comparison evidence, not full upstream Rule Builder parity or unrestricted PHP execution. [Condition inventory and lifecycle](automation.md).
+The registry binds 108 of 114 catalogued condition types; six unsupported types remain visibly disabled. [Condition inventory and lifecycle](automation.md).
 
 ![Current saved-rule editor with native conditions and revision history](assets/product-tour-20261102/rules.jpg)
 
@@ -409,11 +409,11 @@ The creation assistant has **Basics → Catalog & languages → Review & create*
 
 ### Managed Storyfront experiences
 
-Experience onboarding installs the public Storyfront integration in the same transaction as its owned frontend binding. Migration 055 repairs older Experience shops without repeated package revisions. Apps, Storyfronts and the channel connection list show the same domain/channel and open the existing deployment-selected editor. App deactivation is blocked while its frontend dependencies remain. Installation neither copies private code nor publishes a draft.
+Experience onboarding installs the public Storyfront integration in the same transaction as its owned frontend binding. Apps, Storyfronts and the channel connection list show the same domain/channel and open the existing deployment-selected editor. App deactivation is blocked while its frontend dependencies remain. Installation neither copies private code nor publishes a draft.
 
 [Archived capture from the preceding release: Automatically installed Storyfront app with its domain, sales channel and editor](https://github.com/sthamann/veyndo/blob/ced4a3887086e8c6a943d774a78bc8cca5deb5dd/docs/assets/showcase/storyfront-managed.png)
 
-Original Storyfront runs as a separate service connected to Veyndo's catalogue and native checkout. The current public acceptance includes an embedded purchase, return to the original Experience and an empty original bag after reload. Deployment-specific editor and renderer details retain their own release evidence. [Current public status](status.md#public-acceptance) · [Generic connection contract](experience-integration.md).
+Original Storyfront runs as a separate service connected to Veyndo's catalogue and native checkout. The current public acceptance includes an embedded purchase, return to the original Experience and an empty original bag after reload. Deployment-specific editor and renderer details retain their own release evidence. [Current public status](status.md#hosted-pilot-earlier-release) · [Generic connection contract](experience-integration.md).
 
 ### Optional companion catalog publication and checkout transfer
 
@@ -616,9 +616,9 @@ Atomic stock/order/idempotency/outbox transactions avoid partial commerce writes
 
 ### What the verification establishes
 
-CI checks source ownership, frontend build/localization, Rust formatting/lint/tests, original Shopware PHP comparisons, real isolated PostgreSQL/HTTP regressions and selected extracted Lean policies. Existing price/context/tax/comparison/rule suites contain **7,000 bounded original-PHP comparisons**. Formal claims name exact production policies and exclude SQL/provider/browser/whole-system correctness.
+The required check on every change covers source and table ownership, component dependencies, the schema order and localization. The daily run adds Rust formatting/lint/tests, property and port-contract tests, store isolation under forced row security, generated HTTP/MCP contract cases, real isolated PostgreSQL/HTTP suites, browser journeys and the Lean proofs with their Rust/Lean differential suite. Formal claims name exact production rules and exclude SQL/provider/browser/whole-system correctness.
 
-Million-product commerce measurements are dated workload-specific observations; they do not establish semantic recall, production capacity or a Shopware speed ratio. This remains an extensible working prototype with explicit gaps in full Shopware DAL/CMS/plugin parity, real PSP certification, full production identity/provider acceptance, core-wide RLS, distributed quotas, automatic relocation/failover and legal compliance. [Testing](testing.md) · [Formal boundary](formal-verification.md) · [Performance](benchmarks.md) · [feature overview](features.md).
+Million-product commerce measurements are dated workload-specific observations; they do not establish semantic recall or production capacity. This remains an extensible working prototype with explicit gaps in real PSP certification, full production identity/provider acceptance, core-wide RLS, distributed quotas, automatic relocation/failover and legal compliance. [Testing](testing.md) · [Formal boundary](formal-verification.md) · [Performance](benchmarks.md) · [feature overview](features.md).
 
 ## Keep the guide current
 

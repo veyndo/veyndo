@@ -92,7 +92,7 @@ does not consume an attempt; admitted provider failures still do.
   source still stops the run; omitted prompt-budget records disclose no source text.
   If withdrawal prevents checkpointing an already called provider, retain explicit
   uncertainty and no executable proposal; never automatically repeat that call.
-- Migration 100 extends existing tasks/conversations under forced RLS and signed
+- Runs use the intelligence tables `tasks` and `conversations` under forced RLS and signed
   SQL policies. Runs are operational, never configuration releases.
 - `PROCESS_ROLE=agent-worker` starts a separate Rust worker; `all` includes these
   loops. Two loops per process, one running task per tenant, twenty active/uncertain

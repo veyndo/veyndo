@@ -19,7 +19,7 @@
 
 [Architecture & components](docs/one-shop-components.md) · [JavaScript SDK](https://github.com/veyndo/sdk) · [Status](docs/status.md#platform-at-a-glance) · [Benchmarks](docs/benchmarks.md) · [Deutsch](docs/platform-overview.md)
 
-[![The hosted Product Guide lets a shopper review price and delivery before adding an item](docs/assets/apps/product-guide-cart-review-20261111.jpg)](docs/status.md#product-guide-actions-in-the-hosted-shop)
+[![The hosted Product Guide lets a shopper review price and delivery before adding an item](docs/assets/apps/product-guide-cart-review-20261111.jpg)](docs/product-guide-mcp-app.md)
 
 The hosted Product Guide connects chat to a reviewed cart. [See the tested workflows](docs/status.md#platform-at-a-glance).
 
@@ -62,8 +62,8 @@ visual editor and Product Advisor app. Download captions as VTT or SRT.
 
 **Hosted:** [create a standard shop](https://start.veyndo.ai/start) or
 [create a Storyfront Experience](https://experience.veyndo.ai/).
-[Live acceptance](docs/status.md#public-acceptance) ·
-[Five-service rehearsal](docs/status.md#five-original-images-together-on-northflank).
+[Live acceptance](docs/status.md#hosted-pilot-earlier-release) ·
+[Five-service rehearsal](docs/status.md#hosted-pilot-earlier-release).
 
 **Container tour:** Git, Docker Compose and OpenSSL; no local Rust/Node build.
 

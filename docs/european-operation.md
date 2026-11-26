@@ -90,7 +90,7 @@ sales channel, nonempty browser session and immutable customer identity. For a
 company purchase, the original cart also requires the currently authenticated
 buyer and current purchasing grant. POS/operator carts do not participate.
 
-Migration 108 adds a scoped reference on the existing receipt table. Successive
+The schema baseline has a scoped reference on the existing receipt table. Successive
 carts resolve the same original receipt in one hop; they do not copy grants or
 extend the deadline. Withdrawing through any linked cart changes the shared
 receipt and removes their private preferences, observations and experiment

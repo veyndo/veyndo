@@ -153,7 +153,7 @@ hosting by this change.
 
 ## Owners and verification
 
-- `src/cognition/behavior/{input,capture,geography,report,journey,mod}.rs` owns native admission, minimal observations, reports, private drilldown and retention.
+- `components/intelligence/src/{domain/behavior_input,http/behavior_capture,service/behavior,store/behavior,store/behavior_policies}.rs` and the host adapter `src/cognition/behavior/` own native admission, minimal observations, reports, private drilldown and retention.
 - `components/intelligence/migrations/0001-baseline.sql` extends the existing ledger and indexes without a parallel analytics database.
 - `frontend/src/storefront/shell/BehaviorAnalytics.tsx` owns consent-aware capture; `ProductQuestion.tsx` emits only a successful product ID observation.
 - `components/intelligence/ui/admin/intelligence/behavior/` owns the charts, semantic graph and linked private timeline; `behavior-i18n.ts` provides EN/DE/FR/ES vocabulary.

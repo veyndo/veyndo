@@ -195,7 +195,7 @@ infrastructure view now share an exact response-code breakdown:
   code was stored. They cannot be retrospectively assigned to one of these groups.
 
 `responses` in the existing operator overview/dossier/infrastructure APIs maps
-HTTP codes to cumulative counts. Migration 056 adds this bounded histogram to
+HTTP codes to cumulative counts. This bounded histogram lives in
 `channel_metrics`; the existing interval buffer and bulk database flush remain
 its owner. No payload, token, address, query string or raw object URL is stored.
 For new 4xx/5xx responses, service logs contain the router template, method,

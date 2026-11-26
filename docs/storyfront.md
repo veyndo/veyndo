@@ -133,7 +133,7 @@ For the shared quote, purchase and refund path, see
    Core order and payment ledger and reconcile pending attempts before rolling
    back Core.
 
-The [current status](status.md#embedded-checkout-recovery-8-november-2026)
+The [current status](status.md#hosted-pilot-earlier-release)
 distinguishes the deployed public browser check, local contract tests and
 provider evidence.
 
@@ -212,8 +212,7 @@ Core sends an exact-origin shopper receipt; Storyfront verifies the completed ca
 order ID and purchased SKU quantities against Core before subtracting those quantities
 from its original bag. Receipt IDs prevent duplicate subtraction; an unverified receipt
 is retained for retry, and abandoning checkout retains the bag. Cross-origin customer
-account SSO and provider-specific external redirect/3DS return flows are not yet verified. This is not full Shopware/Storyfront
-feature equivalence or a production SaaS scaling claim.
+account SSO and provider-specific external redirect/3DS return flows are not yet verified. This is not a production SaaS scaling claim.
 
 ## Verification
 

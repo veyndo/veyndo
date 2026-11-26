@@ -1,4 +1,4 @@
-# Managed PostgreSQL, private Qdrant and shop migration
+# Managed PostgreSQL, private Qdrant and shop relocation
 
 ## Current implementation and test boundary
 
@@ -6,7 +6,7 @@ The Core now installs on ordinary PostgreSQL 17. `pg_trgm` remains a standard Po
 
 A collection is isolated by object kind and embedding model hash; points use deterministic tenant/kind/object UUIDs. A payload index identifies tenants. One SQL query hydrates the bounded product candidate set. Public document retrieval additionally checks publication status, product scope and source digest. Synthetic embeddings test these boundaries, not semantic quality.
 
-`002-managed` and `011-documents-managed` are new install variants. Historical migration source files/checksums remain unchanged. `033-managed-knowledge` converts legacy vectors to real arrays, copies curated/observed/document relations and queues existing embeddings. Old AGE tables remain intact. Tests on the legacy image preserve product counts, relationships, all 1024 vector values, model/digest and original ledger rows; checksum drift still stops startup. Run the legacy conversion on the existing AGE-capable source server before moving its public schema/data to a fresh standard server. Do not mount an old AGE database volume under an image lacking its extension libraries. The development launcher keeps existing database containers intact with `--no-recreate`. This database upgrade is distinct from a complete external Shopware-shop importer.
+Fresh installations need neither AGE nor pgvector; there is no conversion of an earlier AGE/pgvector database, because this release replaces earlier installations ([release notes](current-release.md#what-operators-must-know)).
 
 ## Northflank test topology
 
@@ -14,7 +14,7 @@ Frankfurt: one Managed PostgreSQL addon, one Rust Core replica and one private Q
 
 `SHOP_DOMAIN_SUFFIX=veyndo.ai` binds shop hostnames to tenant scope. Unknown shops and conflicting tenant headers are rejected. `admin.veyndo.ai` opens the service directory (merchant/platform login and docs), `admin.veyndo.ai/#platform` opens the operator console; `SHOP.veyndo.ai` opens that shop, and `/?shop=SHOP#merchant` opens its Studio on the operator origin. Before DNS is ready the same paths work on the default Northflank HTTPS origin. Creating a shop is a database transaction, not a new container, database or certificate.
 
-Recorded test-topology estimate (October 2026; not a live pricing quotation): Core $12, PostgreSQL $12, Qdrant $12, PostgreSQL 6 GB $0.90, Qdrant 6 GB $0.90, retained inactive legacy 20 GB volume $3 = $40.80. Example 10 GB egress adds $0.60. Jobs/builds, backup storage, AI APIs and taxes are additional. This single-instance test topology has no HA guarantee. Qdrant's attached single-writer volume requires recreate deployment and cannot be scaled by simply increasing replicas.
+Recorded test-topology estimate (October 2026; not a live pricing quotation): Core $12, PostgreSQL $12, Qdrant $12, PostgreSQL 6 GB $0.90, Qdrant 6 GB $0.90 = $37.80 (the recorded estimate also carried a since-retired 20 GB volume at $3). Example 10 GB egress adds $0.60. Jobs/builds, backup storage, AI APIs and taxes are additional. This single-instance test topology has no HA guarantee. Qdrant's attached single-writer volume requires recreate deployment and cannot be scaled by simply increasing replicas.
 
 ## Restricted hosted runtime
 
@@ -82,11 +82,16 @@ Each island contains an independently sized Managed PostgreSQL and a bounded Cor
 
 For a first real relocation, a short per-shop write pause is the smallest reliable approach. A later online copy adds snapshot + WAL change capture, catch-up and the same fenced cutover. CDC alone does not implement multi-writer conflict resolution or move the complete tenant: shared app records, projections, assets, jobs and current identities must follow the same ownership fence.
 
-## External Shopware imports
+## Importing an existing shop
 
-Keep this separate from island relocation. The existing core parity work is partial; it is not a complete importer for arbitrary Shopware plugins. First select one actual source shop and version. Use a read-only source API/export and a versioned import manifest preserving source UUID-to-target mappings. Import dependencies in order: currencies/taxes/languages, sales channels/customer groups/rules, categories/media, variant products/translations/prices, customers/addresses, orders/payments/documents, then settings/app data. Unknown plugin entities and unsupported rules must be surfaced as blocking mappings, not silently discarded.
-
-Import into a new unpublished shop and compare real catalog/search/cart totals, historical order totals and permissions with the source. Password compatibility and PSP subscriptions require an explicit provider-specific strategy; raw passwords and active payment tokens are not portable by default. Initial cutover freezes source mutations, imports the final delta and verifies new orders/webhooks before changing the shop domain. Keep the source read-only for rollback and historical reference. The [Migration Assistant](agentic-migration.md) now implements guided source inspection, explicitly reviewed private intake, current-target comparison and resumable plans with local synthetic acceptance. Its separate hosted service remains an operator setup/acceptance step. Complete arbitrary Shopware plugin conversion, final delta and production cutover still require implementation and actual-shop acceptance.
+Keep this separate from island relocation. Importing products, customers and content
+from another platform (Shopware 6, Shopify, WooCommerce, PrestaShop, Magento or CSV) is
+the job of the [Migration Assistant](agentic-migration.md): guided source inspection,
+reviewed private intake, current-target comparison and resumable plans. Import into a
+new unpublished shop and compare catalogue, cart totals and permissions with the
+source before switching a domain. Raw passwords and active payment tokens are not
+portable. Final delta import, source freeze and automated domain switch are not
+implemented.
 
 ## AI execution
 

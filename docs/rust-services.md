@@ -1,7 +1,5 @@
 # Rust standard services and language boundaries
 
-**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. How to use it, ownership and verification boundaries.
-
 VEYNDO's commerce server and bundled Email Delivery / Google Analytics / Gmail / Slack
 service run in Rust. The connector is a separate process (`cargo build --locked --bin
 connectors`), not provider logic embedded in checkout handlers. Both services use
@@ -134,7 +132,7 @@ app's `configure` action.
 | Python scope | Decision |
 |---|---|
 | Former bundled connector | Ported completely to Rust; archived in `reference/connectors-python/` for differential fixtures, never copied into its runtime image |
-| Verification, original-PHP comparisons, source/coverage checks, documentation generation | Keep as development/CI tools; no request processing or provider delivery |
+| Verification, source/coverage checks, documentation generation | Keep as development/CI tools; no request processing or provider delivery |
 | `scripts/connectors.py` | Local lifecycle tool; it launches the compiled Rust service |
 | `scripts/mcp_stdio.py` | Optional client-side JSON-RPC bridge; hosted `/mcp` runs in Rust |
 | Product Lab / service-example | Explicit independent third-party-style app examples demonstrating language-independent extensions; not a commerce runtime dependency |
@@ -206,7 +204,7 @@ owning component's baseline; the numbered files no longer exist.
   provider fixtures: raced idempotency, quotas, leases, ambiguity, OAuth callbacks,
   Gmail/GA4/Slack, knowledge/MCP ingestion, bounded source exports and non-owner/non-bypass
   service instances, plus strict unsafe-role rejection and noisy-neighbor admission.
-- `scripts/email_tests.py` preserves the old reference comparisons and uses the actual
+- `scripts/email_tests.py` compares against the archived Python implementation and uses the actual
   Rust checkout → outbox → Flow Builder → Rust service → SMTP path, including consumer receipts.
 - SMTP STARTTLS/TLS, HTTP wire formats and stale configuration are tested against synthetic fixtures. No real account, payment or external message is used.
 - Lean covers the exact notification retry predicate only; SQL, TLS and provider protocols
@@ -215,7 +213,7 @@ owning component's baseline; the numbered files no longer exist.
 No bounce/delivery webhooks, attachments, campaign/suppression system, rotating Slack
 bot tokens, unrestricted mailbox backfill or measured provider throughput are claimed.
 
-## Core hardening owners
+## Runtime hardening owners
 
 - `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/identity.rs`, `components/identity/src/http/abuse.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
 - `crates/runtime/src/scoped_pool.rs`, `components/core/src/store/{pool,row_security,lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
@@ -225,76 +223,12 @@ bot tokens, unrestricted mailbox backfill or measured provider throughput are cl
 
 [Security boundaries](security.md).
 
-## Modular B2B and EDI — 12 October 2026
+## Related services
 
-Native company units, current employee rights, private catalogs, currency-bound
-budgets, separate approval, RFQ negotiation, quick order and repeat lists reuse
-the existing checkout, inventory, order, document and Flow owners. The Studio and
-customer account use the same API/MCP contracts. [Setup, source owners and precise
-B2B comparison](b2b-commerce.md). The independent `extensions/apps/edi/` package owns
-bounded EDIFACT/UBL/cXML parsing, mapped private requisition import and immutable
-native document export; no Core codec or second ledger. [EDI profiles, deployment
-and network/certification limits](edi.md).
-
-## Marketplace service
-
-`marketplace-gateway` is a separate Rust binary packaged in
-`extensions/apps/marketplaces/Dockerfile`. Provider logic and UI remain app-owned.
-It uses existing commerce callbacks, revisioned app records, native PostgreSQL job
-leases and outbox; it has no direct database credential or second order queue.
-[Setup, seller authorization and review boundaries](marketplaces.md).
-
-## UCP B2B protocol boundary
-
-`src/ucp/` adapts checkout and the versioned VEYNDO negotiation extension to existing `src/b2b/` owners. Platform-profile fetching reuses the bounded public HTTPS egress client; identity never comes from a profile. RFQs, prices, approvals, budgets, events and orders share native storage and transactions. [Contract, sequence and executable flow](b2b-ucp-negotiation.md).
-
-## Service integrations
-
-Five additional provider packages reuse the Rust connector host: `vercel`,
-`klaviyo`, `hubspot`, `contentful`, `algolia`. Generic key-configuration/dispatch
-is in `extensions/services/connectors/src/integrations/`; protocol code stays
-in each app package. There are no new per-app tables. Contentful feeds the
-existing private knowledge export consumer. See [integration contracts and limits](service-integrations.md).
-
-## Independent App Data reads
-
-The [App Data reader](app-data-service.md) supplies standalone HTTP/OpenAPI/MCP
-and JavaScript access to installed private App list actions with current rights,
-a restricted read-only database and signed shop isolation. Native pages share the
-same query/projection and scope protocol. Complete write/lifecycle hosting and
-cross-service generated UI remain separate tasks.
-
-## Managed portable App records
-
-The [optional App Data write profile](app-data-writes.md) adds approved
-package-bound record changes, original state/history rules and atomic events via
-HTTP/MCP/SDK. Default reader permissions remain separate; native field/reference/
-language/commerce policies retain their owners. Full native-resource,
-settings/jobs and publication hosting remain tracked in the component plan.
-
-## Independent App job supervision
-
-The [optional job supervisor](app-job-supervision-service.md) exposes existing
-job history/detail and approved cancel/retry/resolve/archive through HTTP, MCP
-and SDK. Shared projection/event ownership preserves current rights, package
-binding and original control/lease/CAS semantics in Veyndo. The schema-5 serving
-login cannot create jobs or change worker input/results; execution retains its
-actual producer/consumer owner. [Acceptance](evidence/app-job-supervision-component-2026-11-06.md).
-
-## Independent portable package installation
-
-The [explicit App installation profile](app-package-installation-service.md) uses
-Apps 0.28.0 / Data service 0.4.0 for package review/install through HTTP, MCP and
-the unchanged SDK. The full compiler and original installer/model sequence retain
-exact approval, immutable versions, current personal/live authority and fixed-table
-row/byte budgets. Native model installation supplies its actual compatibility
-policy to the same owner. [Independent and native acceptance](evidence/app-package-installer-component-2026-11-06.md).
-
-## Independent installation settings
-
-The [optional App settings profile](app-settings-service.md) provides HTTP, MCP
-and JavaScript access to declared configuration. It shares native encrypted
-partial updates, package/revision fences and secret-safe projection, with explicit
-personal live administrator admission. The serving role cannot install packages
-or create schema objects. Reader/write profiles retain their separate grants.
-The original vault envelope is shared; existing native ciphertext stays readable.
+| Service | Guide |
+| --- | --- |
+| EDI parsing and export (`extensions/apps/edi/`) | [EDI](edi.md), [B2B commerce](b2b-commerce.md) |
+| Marketplace gateway (`marketplace-gateway`, `extensions/apps/marketplaces/`) | [Marketplace channels](marketplaces.md) |
+| UCP B2B negotiation (`src/ucp/`) | [B2B negotiations through UCP](b2b-ucp-negotiation.md) |
+| Vercel, Klaviyo, HubSpot, Contentful and Algolia packages on the connector host (`extensions/services/connectors/src/integrations/`) | [Service integrations](service-integrations.md) |
+| App Data reader, writes, job supervision, package installation and settings (`extensions/services/app-storage/`) | [Reads](app-data-service.md), [writes](app-data-writes.md), [jobs](app-job-supervision-service.md), [installation](app-package-installation-service.md), [settings](app-settings-service.md) |

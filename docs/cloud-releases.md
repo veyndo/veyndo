@@ -156,12 +156,12 @@ For Core `efe8928f`, the actual successful build `makeshift-shade-6829` was
 prepared against the previous eight live artifacts before migration. The
 same candidate file passed the eight-service and source/schema comparison
 after rollout. The public embedded demo purchase and return also passed.
-[Hosted Cart acceptance](status.md#shared-cart-contract-on-northflank).
+[Hosted Cart acceptance](status.md#hosted-pilot-earlier-release).
 
 For Experience `643010e5`, `--prepare-component` checked build
 `honest-holiday-8885` against the previous eight hosted artifacts and the
 unchanged storage schema before rollout. Its candidate retains Core `efe8928f`
-and all other peers. [Original stock refresh](status.md#current-stock-in-original-storyfront).
+and all other peers. [Original stock refresh](status.md#hosted-pilot-earlier-release).
 
 After a repository transfer, check the workflow trigger and the build service
 separately. If the trigger still points to the previous owner, update its
@@ -237,45 +237,3 @@ Set both `COMMERCE_PUBLIC_ORIGIN` and `PUBLIC_BASE_URL` on the runtime service t
 no database credential belongs in the builder. The origin guard intentionally
 ignores Host/forwarded headers and accepts only the configured Studio origin.
 Do not weaken it to repair a 403. No-Origin clients still use ordinary auth checks.
-
-On 6 October 2026 the deployed `fa09350` release (including API-explorer autofill
-correction) was verified in Northflank. Updating the old internal code.run origin
-restored public browser MCP: allowed origin 200, foreign origin 403. An authenticated
-merchant created fresh synthetic shops; on the current loaded Studio the new shop
-retained its session immediately. Products, eight discoverable standard apps and
-MCP tools/list worked. Reload tabs opened before the release to load its new bundle.
-The subsequent `75bd24a` checkout release completed its backup, migration and
-readiness workflow. Its public one-page checkout saved synthetic order
-`RAC-7cdc9432` with structured address, standard shipping and explicitly simulated
-payment (EUR 79.80). No real payment was made.
-This check does not certify actual payments or production SaaS security.
-
-## VEYNDO domain cutover — 13 October 2026
-
-Core `ced4a38` and Experience `a6d3472` are running on Northflank. Core's release run `2eebf99a-d4cf-4fe5-ae35-3c984fa5cf49` built the new image, saved the PostgreSQL snapshot and ran migration job `be34855e-c9fa-467d-97be-4f7893d40874` successfully. Old workers were paused for the identity migration and resumed with the new image. Experience automatic deployment was restored after coordinated cutover.
-
-Runtime origins are `https://app.veyndo.ai` and `https://experience.veyndo.ai`; the shop suffix is `veyndo.ai`. The existing Experience identity state is copied through the configured migration adapter without changing tenant identity or replacing collisions. Migration 090 is additive; released migration files and checksums remain authoritative.
-
-[The reviewed frontend-origin transaction](operations/update-hosted-frontend-origins.sql) updates only the three configured, owned previous Experience origins. Run it as an authorized operator with the existing runtime database link, never a build credential. The operator transaction must set the established RLS system context to `on`; `true` does not satisfy that policy. Production execution updated 11 mounts and invalidated 10 tenants, committed and exited successfully. Repeating the transaction makes no additional changes.
-
-Cloudflare manages DNS; United Domains retains registration. The apex redirects to HTTPS `www.veyndo.ai` with path and query preserved. Northflank serves www, team, start, Experience, Studio and wildcard shops. Its certificate was issued after the temporary Universal SSL verification conflict was cleared; Universal SSL is enabled again. Automatic renewal through the overlapping DCV configuration has not yet been demonstrated. Old root/team DNS remains a separate operational follow-up. The existing Apple Service ID now retains old callbacks and includes both current start/experience Veyndo domains and callbacks, saved on 29 October after explicit approval. Both public entries pass redirect admission; authenticated Apple sign-in is not inferred.
-
-The Google callback on `start.veyndo.ai` returned successfully to the existing merchant workspace. [The native-shop URL transaction](operations/update-native-shop-urls.sql) corrected eight stored links whose HTTPS host exactly matched their own tenant under an earlier configured domain. Custom domains, foreign-tenant URLs, Experience renderer bindings and owner identity remain unchanged. Its isolated PostgreSQL check covered those exclusions and idempotence. Run this transaction through the Experience service's existing database connection: its registry lives in a separate database from Core. No provider key is printed or copied. The first Core-database attempt failed before updating any row; the correct Experience transaction committed successfully and a browser reload confirmed the new links.
-
-### Public double-check after the VEYNDO cutover
-
-The final registry pass corrected 11 additional Experience URLs using the [owned shop URL transaction](operations/update-all-owned-shop-urls.sql), including an editor alias sharing a native tenant. It preserves each existing hostname prefix and updates only exact owned legacy URLs. Renderer bindings, channels and custom or foreign domains are retained. Its isolated PostgreSQL check covered shared-tenant aliases, exclusions and idempotence.
-
-Two existing native shops still returned 404 because the original renderer's separate `merchant_hostnames` registry did not yet contain their new hostnames. The [native hostname transaction](operations/add-native-hostnames.sql) added eight aliases through the existing native database connection. It retains legacy aliases, merchant identity and hostname kind, and aborts on ownership collisions. The isolated PostgreSQL check covered successful insertion, rerun idempotence and collision rollback. Run it against the native renderer database, not the Experience registry or Core database.
-
-After those corrections, all 20 inventoried shop addresses returned HTTP 200 on `veyndo.ai`, with no previous product name found in their returned HTML. This is a hostname and response check, not a complete acceptance test of every shop's features. The existing Cobalt native shop additionally passed product collection, add-to-bag and embedded checkout handoff to `app.veyndo.ai`; both temporary carts were emptied afterwards. No order or model call was made in that native test.
-
-A new public migration test shop was created through the authenticated start workspace with example products. Its merchant handoff opened the existing Core administration with 12 products. A synthetic guest checkout saved demo order `RAC-51aa18c2` for EUR 169.00; the order remained present in merchant Orders after reload, and the storefront cart was cleared. Payment was explicitly simulated. The welcome-mail provider accepted the message; inbox receipt was not checked.
-
-![New migration test shop: actual saved demo order](assets/showcase/new-shop-order-current.png)
-
-![Existing native shop: embedded checkout on the new domain](assets/showcase/native-checkout-current.png)
-
-Current screenshots and motion captures are inspected separately from source literals. Old branded stills and unused original recordings are removed from the current tree; dated acceptance evidence remains linked at a verified immutable preceding Git revision. The marketing gallery uses fresh actual captures. OCR is an additional check, not proof that every pixel or every video frame was recognized. Previous names remain deliberately in legacy-domain migration statements and immutable Northflank resource identifiers; Git history is preserved.
-
-The inbox check also identified an old sender in the actual initial welcome mail despite its current subject and body. The domain `veyndo.ai` was authenticated in the existing Brevo account using the provider verification TXT, two DNS-only DKIM CNAMEs and DMARC. The verified sender is `VEYNDO <hello@veyndo.ai>`. A persistent runtime `MAIL_FROM` override was saved and the Experience service restarted; Bun environment precedence was checked locally against an isolated env-file fixture. A subsequent sign-in email arrived in the owned inbox with the new sender and canonical Experience address. Existing SMTP credentials and old sender registrations were preserved; no password or provider permission changed.

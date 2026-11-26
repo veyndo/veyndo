@@ -1,13 +1,8 @@
 # src/bin
 
-This folder owns the Rust modules listed below. Each source begins with its responsibility contract. The crate currently shares internal types/imports through a facade; APIs, MCP and UCP delegate to shared domain operations.
+This folder owns the binary entry points of the root package. Each source begins with its responsibility contract.
 
-- [`connectors.rs`](connectors.rs): Independent Rust standard-app process; PostgreSQL-backed E-mail, Gmail, Analytics and Slack.
-- [`automation_rules.rs`](automation_rules.rs): JSON batch transport for comparisons with original Shopware rule classes; not a production authority endpoint.
-- [`context.rs`](context.rs): Bounded ports of original language-chain, rule priority and quantity selection.
-- [`delivery.rs`](delivery.rs): Batch proportional-tax fixture transport for the original-PHP comparator.
-- [`price.rs`](price.rs): Batch price fixture transport for the original-PHP differential comparator.
-- [`rules.rs`](rules.rs): Batch original-PHP numeric-rule comparison transport.
-- [`verified_kernel.rs`](../../crates/kernel/src/verified_kernel.rs): Generated conformance driver; invokes the same production policy functions as the commerce server.
+- [`connectors.rs`](connectors.rs): Independent Rust standard-app process; calls the `veyndo-connectors` service crate for E-mail, Gmail, Analytics and Slack.
+- [`verified_kernel/`](verified_kernel/README.md): Generated conformance driver of the `formal_differential` suite; invokes the same production rule functions as the commerce server.
 
-The [source inventory](../../docs/module-inventory.md) is checked in CI. [The behavioral map](../../docs/source-map.md) identifies integration suites, and [testing](../../docs/testing.md) describes actual coverage and limits. Every file is limited to 320 lines; `main.rs` to 120.
+The [source inventory](../../docs/module-inventory.md) is checked in CI. [The source map](../../docs/source-map.md) identifies integration suites, and [testing](../../docs/testing.md) describes actual coverage and limits.

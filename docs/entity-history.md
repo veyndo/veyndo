@@ -22,7 +22,7 @@ revoke customer sessions and open privileged cart contexts. Removal is rejected
 while customers, product quantity prices or saved rules/flows reference a group.
 Consumer and business basis groups are required. Group definitions are shared
 across sales channels; channel-specific checkout configuration still inherits its
-own independent settings. This is native behavior, not Shopware DAL/API parity.
+own independent settings.
 
 ## Recorded entities
 
@@ -33,7 +33,7 @@ histories. Entries show timestamp, current known author, request origin and
 reason; exact before/after differences are loaded only on demand. Historical
 values are displayed as text, never executed as HTML.
 
-Migrations 034/035 capture the first prior aggregate and one final aggregate per
+History triggers in the schema baseline capture the first prior aggregate and one final aggregate per
 committed PostgreSQL transaction, including product translations/associations and
 customer addresses. Failed transactions leave no committed history. Deferred
 finalization avoids a full snapshot for every translated row. Cursor pages are

@@ -59,7 +59,7 @@ membership before resuming; failed writes are never replayed.
 Native object handlers bind tenant scope in HTTP, graph/vector and MCP paths.
 The adversarial [tenant isolation suite](tenant-isolation.md) tests ID/header
 swaps and unchanged victim state; it is not an exhaustive endpoint audit.
-Migration 038 additionally scopes 22 critical foreign-key relationships by
+The schema baseline additionally scopes 22 critical foreign-key relationships by
 tenant, preventing wrong-shop order/payment/event/staging associations. Migration
 044 adds core FORCE RLS, connection-bound tenant context and strict runtime role
 checks. Managed app tables retain their forced policy. Enable the separate
@@ -187,7 +187,7 @@ sandboxed shop configuration and cannot be restored through content history.
 
 ## Authenticated database authority
 
-See [the signed-scope contract and deployment sequence](authenticated-database-scope.md) for separate tenant/system logins, private actor binding, atomic app-table protection and key rotation. Existing `rac.*` values alone are not this boundary. Production activation is explicit and follows verified replica cutover.
+See [the signed-scope contract and deployment sequence](authenticated-database-scope.md) for separate tenant/system logins, private actor binding, atomic app-table protection and key rotation. Existing `rac.*` values alone are not this boundary.
 
 ## Independent App Data reader boundary
 

@@ -62,7 +62,7 @@ own database and uses HTTP for the three Commerce operations. Core requires
 no new schema or synchronous dependency on that process. If a response goes
 missing, recover the receipt or retry the exact reviewed purchase with the
 same session. A new session can represent a different purchase.
-See the [Northflank rollout and public purchase results](status.md#commerce-host-ports-for-independent-checkout-9-november-2026).
+See the [Northflank rollout and public purchase results](status.md#hosted-pilot-earlier-release).
 
 ## How native and embedded checkout share one order
 
@@ -85,7 +85,7 @@ changed total in both paths and verifies matching quote options, localized line
 snapshots and simulated payment state. Each confirmed purchase produces one
 order, the expected stock decrement and one `order.placed` event, including
 after a replay. The same suite checks lost messages and concurrent recovery.
-See the [public browser results](status.md#native-and-embedded-checkout-compatibility-9-november-2026)
+See the [public browser results](status.md#hosted-pilot-earlier-release)
 and the separate [configured provider acceptance](storyfront.md#accept-a-hosted-release).
 
 ## A purchase with a separate commerce host
@@ -163,7 +163,7 @@ product. Each reduced stock once. On mobile the Core response was discarded
 after successful confirmation. The host recovered the same receipt, and
 reload preserved it. A forged product from the iframe and a confirmation
 from an unrelated browser origin were rejected.
-[Browser verification with SDK 0.4.6](status.md#connected-shop-with-the-typed-sdk).
+[Browser verification with SDK 0.4.6](status.md#hosted-pilot-earlier-release).
 
 ## UI and agent integration
 
@@ -727,5 +727,5 @@ and the browser message still produced one order and one stock decrement.
 The hosted Lumen pilot then completed both the native and original Storyfront
 browser purchases with PayPal Sandbox, including return, empty carts after
 reload and refunds. The hosted paid-order path through invoice and external mail
-delivery remains open. [Hosted evidence](status.md#private-checkout-live-in-the-lumen-test-shop) ·
+delivery remains open. [Hosted evidence](status.md#hosted-pilot-earlier-release) ·
 [Acceptance order](commerce-components.md#release-acceptance-order).

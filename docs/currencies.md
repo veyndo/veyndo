@@ -55,8 +55,8 @@ Fixed prices are edited in **Products → Prices** using a single currency selec
 They are exact decimal strings, e.g. `{"KWD":{"price":"7.123"}}`, stored with the
 product's normal optimistic revision and history. List and regulation prices may
 also be set. Product variants use the same editor and pricing resolver.
-The existing advanced-price **discount tiers** apply to the resolved price; this
-is not Shopware's complete inherited per-currency advanced-price record schema.
+The existing advanced-price **discount tiers** apply to the resolved price; per-currency
+advanced-price records are not implemented.
 Destination tax adjustment still applies to fixed gross prices.
 
 Generation preserves existing fixed prices unless **Replace existing fixed prices**
@@ -146,7 +146,7 @@ does not certify the private Shopware Payments adapter for every currency.
 
 ## Implementation and verification
 
-- `src/currencies/{model,pricing,rates,routes,jobs,capabilities}.rs`: registry,
+- `components/pricing/src/{types/currency,service/currency_change,http/currencies}.rs`, `components/shop/src/service/currency_rates.rs` and the host adapters `src/currencies/{rates,routes,jobs,capabilities}.rs`: registry,
   deterministic price resolution, bounded retrieval, public/private APIs and workers.
 - `src/commerce/`, `components/checkout/src/service/cart_projection.rs`,
   `src/order_checkout.rs`, `src/ucp/`: catalog, destination taxes, shipping,
@@ -168,7 +168,7 @@ through create/capture/refund for two-, zero- and three-decimal currencies.
 `scripts/production_foundations.py` checks job RLS with a non-owner database role.
 Frontend tests cover formatting, server-bound switching, fixed-price editing and
 minor-unit checkout review. Rust tests cover overflow, invalid rates, exact prices,
-ECB parsing and document precision. Existing Shopware differential gates remain.
+ECB parsing and document precision.
 
 The new extracted `currency_context_admissible` policy has Lean proofs and mutation
 checks for enabled/configured/fresh admission. These prove the bounded predicate,

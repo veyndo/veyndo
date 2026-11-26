@@ -5,7 +5,7 @@ registry and current-service read composition. The native workspace consumes
 that registry after server-side permission checks. The hosted Product Guide
 shows an app result in both native conversations and presents a cart proposal
 for shopper confirmation. [Try both views](product-guide-mcp-app.md) and see
-the [hosted acceptance](status.md#product-guide-actions-in-the-hosted-shop).
+the [hosted acceptance](status.md#hosted-pilot-earlier-release).
 
 The [component plan](commerce-components.md#cross-component-agentic-ui) tracks
 the remaining cross-service renderer and protocol adapters. Independent Checkout
@@ -195,7 +195,7 @@ integration tracked under UI-06.
 
 [Install SDK 0.4.15](https://github.com/veyndo/sdk/releases/tag/v0.4.15) ·
 [Adapter example](https://github.com/veyndo/sdk/blob/v0.4.15/docs/composition.md#render-an-admitted-workspace-with-a2ui) ·
-[Acceptance](status.md#a2ui-workspace-adapter-in-sdk-0415).
+[Acceptance](status.md#hosted-pilot-earlier-release).
 
 ### Open an A2UI working view in Studio
 
@@ -405,7 +405,7 @@ variant. Switching the selection clears the displayed offer. Each fresh review
 binds the confirmation to the selected variant, total and Core cart revision.
 The Node host uses the typed cart preview and apply calls to prepare that
 review, and the typed receipt lookup to recover the order after a lost reply.
-[Desktop and mobile acceptance](status.md#connected-shop-with-the-typed-sdk).
+[Desktop and mobile acceptance](status.md#hosted-pilot-earlier-release).
 
 ### Compare OpenUI and A2UI
 
@@ -418,7 +418,7 @@ scope, and Core prices and confirms the selected variant through independent
 Checkout in either layout.
 
 [Run the SDK example](https://github.com/veyndo/sdk/tree/main/examples/connected-shop#compare-openui-and-a2ui) ·
-[Browser acceptance](status.md#connected-shop-with-openui-and-a2ui) ·
+[Browser acceptance](status.md#hosted-pilot-earlier-release) ·
 [A2UI v1.0 specification](https://a2ui.org/specification/v1.0-a2ui/).
 
 ### Show the merchant's app view during the answer
