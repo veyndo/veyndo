@@ -86,6 +86,8 @@ export const fr: Record<Key, string> = {
   lighting: "Éclairage",
   objects: "Objets du quotidien",
   search: "Rechercher un produit",
+  noMatches: "Aucun produit ne correspond à cette sélection.",
+  clearSearch: "Effacer la recherche",
   details: "Voir le produit",
   add: "Ajouter au panier",
   back: "Retour à la collection",
