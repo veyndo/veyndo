@@ -6,7 +6,6 @@ COPY src ./src
 COPY crates/ crates/
 COPY components/ components/
 COPY extensions ./extensions
-COPY migrations ./migrations
 COPY fixtures ./fixtures
 COPY reference/app-manifests ./reference/app-manifests
 RUN cargo build --locked --release --bin edi-gateway

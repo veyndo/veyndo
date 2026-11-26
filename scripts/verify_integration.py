@@ -29,7 +29,6 @@ parser.add_argument("--keep-going", action="store_true", help="Run the remaining
 parser.add_argument("--partition", choices=PARTITIONS, help="Complete disjoint CI partition, each with its own services and database")
 parser.add_argument("--parallel-pooler", metavar="QDRANT_URL", help="Run signed_pooler concurrently with its own database, logs and a separate disposable Qdrant instance")
 args = parser.parse_args()
-require_fresh_binary()
 started = time.monotonic()
 env = dict(os.environ)
 if args.partition and (args.only or args.existing_database or args.parallel_pooler):
@@ -44,6 +43,8 @@ if args.parallel_pooler:
             or secondary.username or secondary.password or secondary.query or secondary.fragment
             or secondary.path not in ('', '/')):
         parser.error('--parallel-pooler requires a different local disposable Qdrant endpoint')
+# Argument errors come first: they need no build.
+require_fresh_binary()
 if not env.get("DATABASE_URL"):
     for line in (ROOT / ".env").read_text().splitlines():
         if line.startswith("DATABASE_URL="):
