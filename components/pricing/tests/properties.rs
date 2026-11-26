@@ -1,12 +1,14 @@
 //! Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models.
 use proptest::prelude::*;
 use veyndo_pricing::binary::Binary;
-use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::discount::allocate;
-use veyndo_pricing::money::{Currency, Minor, Money};
+use veyndo_pricing::money::{Currency, Minor, Money, unsigned_sum};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_pricing::quote::QuoteTotals;
-use veyndo_pricing::verified_kernel::{amount_sum, discount_cap, net_amount};
+use veyndo_pricing::verified_kernel::{
+    amount_sum, discount_cap, line_total, net_amount, rounded_quotient,
+};
 
 fn currency(scale: u8) -> Currency {
     Currency::new("XTS", scale).unwrap()
@@ -30,7 +32,7 @@ fn text(minor: i128, scale: u32) -> String {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(512))]
+    #![proptest_config(ProptestConfig::with_cases(4096))]
 
     /// Every supported scale is admitted, every larger one refused (Lean: `currency_scale_admissible`).
     #[test]
@@ -109,6 +111,97 @@ proptest! {
         prop_assert_eq!(left.checked_add(&right).ok(), right.checked_add(&left).ok());
         let other = Money::new(b, Currency::new("XTS", (scale + 1) % 7).unwrap());
         prop_assert!(left.checked_add(&other).is_err());
+    }
+
+    /// The wire boundary: a JSON number reads as its exact bits and as the shortest decimal
+    /// naming it (the digits Rust and JSON print), and both write back to the same number.
+    #[test]
+    fn wire_numbers_convert_losslessly(negative in any::<bool>(), exponent in 957_u64..1089, fraction in 0_u64..(1 << 52)) {
+        // Every binary64 number between about 1e-20 and 1e20, of either sign.
+        let value = f64::from_bits(u64::from(negative) << 63 | exponent << 52 | fraction);
+        let binary = Binary::from_wire(value).unwrap();
+        prop_assert_eq!(binary.to_wire().to_bits(), (value + 0.).to_bits());
+        let decimal = Decimal::from_wire(value).unwrap();
+        prop_assert_eq!(decimal.text(), format!("{}", value + 0.));
+        prop_assert_eq!(decimal.to_wire().unwrap().to_bits(), (value + 0.).to_bits());
+    }
+
+    /// Binary arithmetic is the hardware's: sums, differences, products, quotients and floors
+    /// of binary64 values agree bit for bit with `f64` (the reference the emulation replaces).
+    #[test]
+    fn binary_arithmetic_matches_binary64(a in -1.0e9_f64..1.0e9, b in -1.0e9_f64..1.0e9, scale in 0_i32..8) {
+        let a = (a * 10_f64.powi(scale)).round() / 10_f64.powi(scale);
+        let (x, y) = (Binary::from_wire(a).unwrap(), Binary::from_wire(b).unwrap());
+        let same = |emulated: Binary, hardware: f64| emulated.to_wire().to_bits() == (hardware + 0.).to_bits();
+        prop_assert!(same(x.checked_add(y).unwrap(), a + b));
+        prop_assert!(same(x.checked_sub(y).unwrap(), a - b));
+        prop_assert!(same(x.checked_mul(y).unwrap(), a * b));
+        prop_assume!(b != 0.);
+        prop_assert!(same(x.checked_div(y).unwrap(), a / b));
+        prop_assert!(same(x.floor().unwrap(), a.floor()));
+    }
+
+    /// Minor amounts: addition and subtraction are exact or refused, never wrapped, and never
+    /// across scales; a line total is the exact product or refused.
+    #[test]
+    fn minor_arithmetic_is_exact_or_refused(a in any::<i64>(), b in any::<i64>(), q in any::<u32>(), scale in 0_u8..=6) {
+        let (x, y) = (Minor::new(a, scale), Minor::new(b, scale));
+        prop_assert_eq!(x.checked_add(y).ok().map(|m| m.minor()), a.checked_add(b));
+        prop_assert_eq!(x.checked_sub(y).ok().map(|m| m.minor()), a.checked_sub(b));
+        prop_assert!(x.checked_add(Minor::new(b, (scale + 1) % 7)).is_err());
+        let product = i128::from(a) * i128::from(q);
+        match x.times(q.into()) {
+            Ok(total) => prop_assert_eq!(i128::from(total.minor()), product),
+            Err(_) => prop_assert!(i64::try_from(product).is_err() || a == i64::MIN),
+        }
+    }
+
+    /// Scaling up is exact and rounding back recovers the amount (Lean `scaled_round_trip`).
+    #[test]
+    fn scaling_and_rounding_back_is_the_identity(minor in -1_000_000_000_000_i64..1_000_000_000_000, from in 0_u8..=3, up in 0_u8..=3) {
+        let amount = Minor::new(minor, from);
+        let scaled = amount.at_scale(from + up).unwrap();
+        prop_assert_eq!(scaled.ratio(), amount.ratio());
+        prop_assert_eq!(Minor::from_decimal(scaled.decimal(), from).unwrap(), amount);
+        let factor = 10_u64.pow(up.into());
+        let magnitude = minor.unsigned_abs();
+        prop_assert_eq!(rounded_quotient(line_total(magnitude, factor), factor), magnitude);
+    }
+
+    /// The proved quotient rule rounds to the nearest whole unit, halves up (Lean
+    /// `rounded_quotient_nearest`, `rounded_quotient_half_up`), and exact decimal rounding is
+    /// half away from zero for either sign.
+    #[test]
+    fn quotient_rounding_is_nearest_with_halves_up(n in 0_u64..(1 << 62), d in 1_u64..(1 << 40), k in 0_u64..1_000_000, h in 1_u64..1_000_000) {
+        let r = u128::from(rounded_quotient(n, d));
+        let (n, d) = (u128::from(n), u128::from(d));
+        prop_assert!(2 * r * d <= 2 * n + d && 2 * n <= 2 * r * d + d);
+        prop_assert_eq!(rounded_quotient(k * 2 * h + h, 2 * h), k + 1);
+        let value = Ratio::new(n as i128, d as i128).unwrap();
+        prop_assert_eq!(value.rounded(0).unwrap().minor() as u128, r);
+        prop_assert_eq!(value.negated().unwrap().rounded(0).unwrap().minor(), -(r as i64));
+    }
+
+    /// The proved sum of unsigned amounts is the exact sum or refused (Lean `lines_total_exact`).
+    #[test]
+    fn line_sums_are_exact_or_refused(lines in prop::collection::vec(any::<u64>(), 0..8)) {
+        let exact: u128 = lines.iter().map(|v| u128::from(*v)).sum();
+        match unsigned_sum(lines.iter().copied()) {
+            Ok(sum) => prop_assert_eq!(u128::from(sum), exact),
+            Err(_) => prop_assert!(exact > u128::from(u64::MAX)),
+        }
+        let mut reversed = lines.clone();
+        reversed.reverse();
+        prop_assert_eq!(unsigned_sum(lines).ok(), unsigned_sum(reversed).ok());
+    }
+
+    /// Exact decimal rounding into minor units agrees with the string rounding of `Money::rounded`.
+    #[test]
+    fn decimal_rounding_agrees_with_money_rounding(major in 0_u64..1_000_000_000, fraction in "[0-9]{0,9}", negative in any::<bool>(), scale in 0_u8..=6) {
+        let text = format!("{}{major}{}", if negative { "-" } else { "" },
+            if fraction.is_empty() { String::new() } else { format!(".{fraction}") });
+        let exact = Money::from_decimal(Decimal::parse(&text).unwrap(), currency(scale)).unwrap();
+        prop_assert_eq!(exact, Money::rounded(&text, currency(scale)).unwrap());
     }
 
     /// Lean `discount_bounded`, `discount_requested`, `discount_idempotent`, `discount_monotone_requested`.
