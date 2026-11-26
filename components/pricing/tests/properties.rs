@@ -1,10 +1,9 @@
 //! Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models.
 use proptest::prelude::*;
-use veyndo_pricing::binary::Binary;
 use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::discount::allocate;
 use veyndo_pricing::money::{Currency, Minor, Money, unsigned_sum};
-use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
+use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate};
 use veyndo_pricing::quote::QuoteTotals;
 use veyndo_pricing::verified_kernel::{
     amount_sum, discount_cap, line_total, net_amount, rounded_quotient,
@@ -113,32 +112,25 @@ proptest! {
         prop_assert!(left.checked_add(&other).is_err());
     }
 
-    /// The wire boundary: a JSON number reads as its exact bits and as the shortest decimal
-    /// naming it (the digits Rust and JSON print), and both write back to the same number.
+    /// The wire boundary: a JSON number reads as the shortest decimal naming it (the digits
+    /// Rust and JSON print), and that decimal writes back to the same number.
     #[test]
     fn wire_numbers_convert_losslessly(negative in any::<bool>(), exponent in 957_u64..1089, fraction in 0_u64..(1 << 52)) {
         // Every binary64 number between about 1e-20 and 1e20, of either sign.
         let value = f64::from_bits(u64::from(negative) << 63 | exponent << 52 | fraction);
-        let binary = Binary::from_wire(value).unwrap();
-        prop_assert_eq!(binary.to_wire().to_bits(), (value + 0.).to_bits());
         let decimal = Decimal::from_wire(value).unwrap();
         prop_assert_eq!(decimal.text(), format!("{}", value + 0.));
         prop_assert_eq!(decimal.to_wire().unwrap().to_bits(), (value + 0.).to_bits());
     }
 
-    /// Binary arithmetic is the hardware's: sums, differences, products, quotients and floors
-    /// of binary64 values agree bit for bit with `f64` (the reference the emulation replaces).
+    /// A decimal of up to fifteen significant digits survives the wire unchanged, so its
+    /// rounding is the decimal's rounding, half away from zero.
     #[test]
-    fn binary_arithmetic_matches_binary64(a in -1.0e9_f64..1.0e9, b in -1.0e9_f64..1.0e9, scale in 0_i32..8) {
-        let a = (a * 10_f64.powi(scale)).round() / 10_f64.powi(scale);
-        let (x, y) = (Binary::from_wire(a).unwrap(), Binary::from_wire(b).unwrap());
-        let same = |emulated: Binary, hardware: f64| emulated.to_wire().to_bits() == (hardware + 0.).to_bits();
-        prop_assert!(same(x.checked_add(y).unwrap(), a + b));
-        prop_assert!(same(x.checked_sub(y).unwrap(), a - b));
-        prop_assert!(same(x.checked_mul(y).unwrap(), a * b));
-        prop_assume!(b != 0.);
-        prop_assert!(same(x.checked_div(y).unwrap(), a / b));
-        prop_assert!(same(x.floor().unwrap(), a.floor()));
+    fn written_decimals_read_back_exactly(units in -100_000_000_000_000_i64..100_000_000_000_000, digits in 0_u32..=6, decimals in 0_u8..=4) {
+        let written = Decimal::new(units.into(), digits).unwrap();
+        let read = Decimal::from_wire(written.to_wire().unwrap()).unwrap();
+        prop_assert_eq!(read, written);
+        prop_assert_eq!(read.ratio().rounded(decimals).unwrap(), written.ratio().rounded(decimals).unwrap());
     }
 
     /// Minor amounts: addition and subtraction are exact or refused, never wrapped, and never
@@ -270,15 +262,6 @@ proptest! {
         }
     }
 
-    /// The original's `round` reads a binary64 value as the decimal it was written as: on the
-    /// nearest binary value of a decimal it rounds that decimal half away from zero.
-    #[test]
-    fn math_rounding_reads_the_written_decimal(units in -100_000_000_000_i64..100_000_000_000, digits in 0_u32..=6, decimals in 0_u8..=4) {
-        let written = Decimal::new(units.into(), digits).unwrap();
-        let rounded = math_round(Binary::from_decimal(written).unwrap(), decimals).unwrap();
-        prop_assert_eq!(rounded, written.ratio().rounded(decimals).unwrap());
-    }
-
     /// Quote totals: a net quote's payable total is position plus tax; a gross quote's net
     /// part plus its tax is the position (Lean `net_quote_total`, `gross_quote_total`).
     #[test]
@@ -296,28 +279,112 @@ proptest! {
         }
     }
 
-    /// A line price: the total is the unit times the quantity, the tax is never negative and
-    /// never above the gross total, and the same input always gives the same price.
+    /// A line price: the unit price is the input rounded once to the cent, the total is the
+    /// proved product of unit and quantity, the tax is rounded once from the exact line tax
+    /// (an independent integer model), net plus tax is the gross, and the same input always
+    /// gives the same price.
     #[test]
-    fn a_line_price_is_unit_times_quantity(
-        cents in 0_i64..10_000_000,
-        quantity in 1_u32..500,
-        rate in prop::sample::select(vec!["0", "7", "10", "19", "20", "21", "7.7"]),
+    fn a_line_price_is_unit_times_quantity_with_one_rounded_tax(
+        units in 0_i64..1_000_000_000,
+        digits in 0_u32..=4,
+        quantity in 0_u32..1000,
+        tenths in prop::sample::select(vec![0_i64, 50, 70, 77, 100, 190, 200, 210, 255]),
         gross in any::<bool>(),
     ) {
         let input = PriceInput {
-            price: Binary::from_decimal(Decimal::new(cents.into(), 2).unwrap()).unwrap(),
+            price: Decimal::new(units.into(), digits).unwrap().ratio(),
             quantity,
-            tax_rate: Binary::from_decimal(Decimal::parse(rate).unwrap()).unwrap(),
+            tax_rate: Decimal::new(tenths.into(), 1).unwrap(),
             gross,
             ..PriceInput::default()
         };
         let price = calculate(&input).unwrap();
+        // The unit price: half away from zero at two decimals (independent integer model).
+        let scale = 10_i128.pow(digits);
+        let cents = (i128::from(units) * 100 * 2 + scale) / (2 * scale);
+        prop_assert_eq!(i128::from(price.unit_price.minor()), cents);
         prop_assert_eq!(price.total_price, price.unit_price.times(quantity.into()).unwrap());
-        prop_assert!(price.tax.minor() >= 0);
-        if gross {
-            prop_assert!(price.tax.minor() <= price.total_price.minor());
-        }
+        // The tax of the line total T at rate R/10 %: T·R/(1000+R) contained, or T·R/1000 added.
+        let total = i128::from(price.total_price.minor());
+        let rate = i128::from(tenths);
+        let denominator = if gross { 1000 + rate } else { 1000 };
+        let tax = (2 * total * rate + denominator) / (2 * denominator);
+        prop_assert_eq!(i128::from(price.tax.minor()), tax);
+        prop_assert_eq!(price.calculated_taxes.len(), 1);
+        prop_assert_eq!(price.calculated_taxes[0].tax, price.tax);
+        prop_assert_eq!(price.calculated_taxes[0].price, price.total_price);
+        // Net plus tax is the gross: within half a cent of the exact net amount.
+        let (net, payable) = if gross {
+            (total - tax, total)
+        } else {
+            (total, total + tax)
+        };
+        prop_assert_eq!(net + tax, payable);
+        let exact_net_twice = 2 * payable * 1000;
+        prop_assert!((2 * net * (1000 + rate) - exact_net_twice).abs() <= 1000 + rate);
         prop_assert_eq!(calculate(&input).unwrap(), price);
+    }
+
+    /// Ties round half away from zero, for either sign: a net line of 10k + 5 cents at 10 %
+    /// adds exactly k + ½ cents of tax.
+    #[test]
+    fn ties_round_half_away_from_zero(k in 0_i64..10_000_000, negative in any::<bool>(), quantity in 1_u32..4) {
+        let cents = (10 * k + 5) * if negative { -1 } else { 1 };
+        let p = calculate(&PriceInput {
+            price: Ratio::new(cents.into(), 100).unwrap(),
+            quantity: 1,
+            tax_rate: Decimal::integer(10),
+            gross: false,
+            ..PriceInput::default()
+        }).unwrap();
+        prop_assert_eq!(p.tax.minor(), (k + 1) * if negative { -1 } else { 1 });
+        // A tie at the quantity price: 0.5 cent per unit, an odd quantity of units.
+        let odd = 2 * quantity - 1;
+        let p = calculate(&PriceInput {
+            price: Ratio::new(5, 100).unwrap(),
+            quantity: odd,
+            tax_rate: Decimal::integer(10),
+            gross: false,
+            ..PriceInput::default()
+        }).unwrap();
+        prop_assert_eq!(p.tax.minor(), i64::from(odd / 2 + 1));
+    }
+
+    /// Several rules: each tax is rounded once from its share of the exact line, the total
+    /// tax is their sum, and the calculation is deterministic through its wire input.
+    #[test]
+    fn split_rates_round_each_share_once(
+        cents in 0_i64..100_000_000,
+        quantity in 1_u32..100,
+        share in 0_i64..=100,
+        gross in any::<bool>(),
+    ) {
+        let rules = vec![
+            TaxRule { tax_rate: Decimal::integer(19), percentage: Ratio::integer(share.into()) },
+            TaxRule { tax_rate: Decimal::integer(7), percentage: Ratio::integer((100 - share).into()) },
+        ];
+        let input = PriceInput {
+            price: Ratio::new(cents.into(), 100).unwrap(),
+            quantity,
+            tax_rules: Some(rules),
+            gross,
+            ..PriceInput::default()
+        };
+        let p = calculate(&input).unwrap();
+        let total = i128::from(p.total_price.minor());
+        let mut sum = 0;
+        for (t, (rate, part)) in p.calculated_taxes.iter().zip([(19, share), (7, 100 - share)]) {
+            let allocated = total * i128::from(part);
+            prop_assert_eq!(i128::from(t.price.minor()), (2 * allocated + 100) / 200);
+            let denominator = 100 * if gross { 100 + rate } else { 100 };
+            prop_assert_eq!(i128::from(t.tax.minor()), (2 * allocated * rate + denominator) / (2 * denominator));
+            sum += i128::from(t.tax.minor());
+        }
+        prop_assert_eq!(i128::from(p.tax.minor()), sum);
+        let wire: PriceInput = serde_json::from_value(serde_json::json!({
+            "price": Decimal::new(cents.into(), 2).unwrap(), "quantity": quantity, "tax_rate": 19, "gross": gross,
+            "tax_rules": [{"tax_rate": 19, "percentage": share}, {"tax_rate": 7, "percentage": 100 - share}]
+        })).unwrap();
+        prop_assert_eq!(calculate(&wire).unwrap(), p);
     }
 }

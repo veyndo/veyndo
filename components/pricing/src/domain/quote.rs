@@ -1,8 +1,7 @@
 //! The priced quote as checkout, promotions and app adjustments rewrite it: line taxes in quote field names, a line's recalculated price and the quote totals.
-use crate::binary::Binary;
-use crate::decimal::{Decimal, MoneyError};
+use crate::decimal::{Decimal, MoneyError, Ratio};
 use crate::money::{Minor, unsigned_sum};
-use crate::pricing::{CalculatedTax, math_round};
+use crate::pricing::CalculatedTax;
 use crate::verified_kernel;
 use serde::{Deserialize, Serialize};
 
@@ -47,20 +46,19 @@ pub struct LinePriceUpdate {
 
 impl LinePriceUpdate {
     /// The line price for a recalculated total over `quantity` units (at least one); the unit
-    /// price is the original's binary `round(total / quantity)`.
+    /// price is `total / quantity` rounded once, half away from zero.
     pub fn new(
         total_price: Minor,
         quantity: u64,
         taxes: &[CalculatedTax],
     ) -> Result<Self, MoneyError> {
-        let units = Binary::integer(i64::try_from(quantity.max(1)).map_err(|_| "Amount overflow")?);
-        let scale = total_price.scale();
+        let units = Ratio::integer(quantity.max(1).into());
         Ok(Self {
             total_price,
-            unit_price: math_round(
-                Binary::from_decimal(total_price.decimal())?.checked_div(units)?,
-                scale,
-            )?,
+            unit_price: total_price
+                .ratio()
+                .checked_div(units)?
+                .rounded(total_price.scale())?,
             calculated_taxes: taxes.iter().map(QuoteTax::from).collect(),
         })
     }

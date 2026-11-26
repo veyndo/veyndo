@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use veyndo_core::{Result, bad};
-use veyndo_pricing::binary::Binary;
 use veyndo_pricing::catalog::Tier;
+use veyndo_pricing::decimal::Decimal;
 use veyndo_pricing::pricing::ReferenceDefinition;
 
 #[derive(Deserialize, Serialize)]
@@ -62,9 +62,9 @@ impl ProductFields {
             .regulation_price
             .is_some_and(|n| !n.is_finite() || !(0.0..=1_000_000.0).contains(&n))
             || self.reference_price.as_ref().is_some_and(|p| {
-                // Reference units are exact binary64 values: always finite once read.
-                p.purchase_unit <= Binary::ZERO
-                    || p.reference_unit <= Binary::ZERO
+                // Reference units are exact decimals: always finite once read.
+                p.purchase_unit <= Decimal::ZERO
+                    || p.reference_unit <= Decimal::ZERO
                     || p.unit_name.is_empty()
                     || p.unit_name.len() > 80
             })

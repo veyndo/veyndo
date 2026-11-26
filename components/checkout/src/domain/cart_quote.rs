@@ -4,12 +4,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad};
-use veyndo_pricing::binary::Binary;
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::domain::context;
 use veyndo_pricing::money::Minor;
-use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
+use veyndo_pricing::pricing::{PriceInput, calculate};
 use veyndo_pricing::service::conversion::{
     ancillary, context as currency_context, convert, convert_from, product_price,
 };
@@ -39,14 +38,13 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
     let cfg = &settings.currencies;
     let currency = cfg.selected(&c.data.currency)?;
     let decimals = currency.scale;
-    let interval =
-        Binary::from_decimal(Decimal::new(1, decimals.into()).map_err(bad)?).map_err(bad)?;
+    let interval = Decimal::new(1, decimals.into()).map_err(bad)?;
     let mut lines = vec![];
     // Totals are added as whole minor units by the proved sum rule; the calculators deliver rounded amounts.
     let mut total = 0_u64;
     let mut taxes = 0_u64;
-    let one = Binary::integer(1);
-    let hundred = Binary::integer(100);
+    let one = Ratio::integer(1);
+    let hundred = Ratio::integer(100);
     for i in &c.data.items {
         let p = ps
             .iter()
@@ -65,18 +63,18 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
         });
         let tier = context::select_tier(&p.advanced_prices, &rule_ids, i.quantity);
         let tier_discount = tier
-            .map(|t| Binary::from_wire(t.discount))
+            .map(|t| Decimal::from_wire(t.discount))
             .transpose()
             .map_err(bad)?
-            .unwrap_or(Binary::ZERO);
-        let discount = one.checked_sub(tier_discount).map_err(bad)?;
-        let tax_rate = Binary::from_wire(p.tax_rate).map_err(bad)?;
-        // A B2B line is priced from the gross amount without its tax: `gross / (1 + rate / 100)`.
-        let net_of = |gross: Binary| -> Result<Binary> {
+            .unwrap_or(Decimal::ZERO);
+        let discount = one.checked_sub(tier_discount.ratio()).map_err(bad)?;
+        let tax_rate = Decimal::from_wire(p.tax_rate).map_err(bad)?;
+        // A B2B line is priced from the gross amount without its tax: `gross / (1 + rate / 100)`, exact.
+        let net_of = |gross: Ratio| -> Result<Ratio> {
             if b2b {
                 gross
                     .checked_div(
-                        one.checked_add(tax_rate.checked_div(hundred).map_err(bad)?)
+                        one.checked_add(tax_rate.ratio().checked_div(hundred).map_err(bad)?)
                             .map_err(bad)?,
                     )
                     .map_err(bad)
@@ -84,10 +82,10 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
                 Ok(gross)
             }
         };
-        let gross = Binary::from_decimal(product_price(p, cfg, currency)?).map_err(bad)?;
-        let ancillary_price = |field: &str, value: Option<f64>| -> Result<Option<Binary>> {
+        let gross = product_price(p, cfg, currency)?.ratio();
+        let ancillary_price = |field: &str, value: Option<f64>| -> Result<Option<Ratio>> {
             ancillary(p, field, value, cfg, currency)?
-                .map(|v| net_of(Binary::from_decimal(v).map_err(bad)?))
+                .map(|v| net_of(v.ratio()))
                 .transpose()
         };
         let mut calc = calculate(&PriceInput {
@@ -111,8 +109,7 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             .values()
             .filter(|v| v.product_id == i.id)
         {
-            let fee_gross =
-                Binary::from_decimal(configuration_price(config, cfg, currency)?).map_err(bad)?;
+            let fee_gross = configuration_price(config, cfg, currency)?.ratio();
             let fee = calculate(&PriceInput {
                 price: net_of(fee_gross)?,
                 quantity: i.quantity,
@@ -140,7 +137,7 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
         let discount_percent = one
             .checked_sub(discount)
             .and_then(|d| d.checked_mul(hundred))
-            .and_then(|d| math_round(d, 0))
+            .and_then(|d| d.rounded(0))
             .map_err(bad)?;
         lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":format!("{}{}",p.name,p.options.as_object().filter(|o|!o.is_empty()).map(|o|format!(" · {}",o.values().filter_map(|v|v.as_str()).collect::<Vec<_>>().join(" / "))).unwrap_or_default()),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":discount_percent,"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
     }

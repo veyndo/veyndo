@@ -124,17 +124,17 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
     if currency.scale != scale {
         return Err(bad("Source currency scale differs from native currency"));
     }
-    let mut price = veyndo_pricing::money::Money::new(
+    // Native prices stay within 2^53 minor units, where the stored binary64 number is exact.
+    const EXACT_MINOR: u64 = 9_007_199_254_740_991;
+    let money = veyndo_pricing::money::Money::new(
         minor,
         veyndo_pricing::money::Currency::new(code, scale)
             .map_err(|_| bad("Invalid source currency"))?,
-    )
-    .decimal()
-    .parse::<f64>()
-    .map_err(|_| bad("Price is outside native compatibility range"))?;
-    if !price.is_finite() || price * 10_f64.powi(scale.into()) > 9_007_199_254_740_991.0 {
+    );
+    if money.minor().unsigned_abs() > EXACT_MINOR {
         return Err(bad("Source price exceeds exact native compatibility range"));
     }
+    let mut amount = money.amount();
     let basis = input.source_price_basis.as_str().unwrap_or("gross");
     if let Some(source) = r.data.get("priceBasis").filter(|value| !value.is_null())
         && (!source
@@ -145,31 +145,28 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
         return Err(bad("Explicitly confirm the declared source price basis"));
     }
     if basis == "net" {
-        use veyndo_pricing::binary::Binary;
-        let wire = |value| Binary::from_wire(value).map_err(bad);
-        price = veyndo_pricing::pricing::calculate(&veyndo_pricing::pricing::PriceInput {
-            price: wire(price)?,
-            tax_rate: wire(tax)?,
+        use veyndo_pricing::decimal::Decimal;
+        amount = veyndo_pricing::pricing::calculate(&veyndo_pricing::pricing::PriceInput {
+            price: amount.ratio(),
+            tax_rate: Decimal::from_wire(tax).map_err(bad)?,
             gross: true,
             calculated: false,
             decimals: scale.into(),
-            interval: Binary::from_decimal(
-                veyndo_pricing::decimal::Decimal::new(1, scale.into()).map_err(bad)?,
-            )
-            .map_err(bad)?,
+            interval: Decimal::new(1, scale.into()).map_err(bad)?,
             ..Default::default()
         })
         .map_err(bad)?
-        .unit_price
-        .decimal()
-        .to_wire()
-        .map_err(bad)?;
-        if !price.is_finite() || price * 10_f64.powi(scale.into()) > 9_007_199_254_740_991.0 {
+        .unit_price;
+        if amount.minor().unsigned_abs() > EXACT_MINOR {
             return Err(bad(
                 "Converted source price exceeds exact native compatibility range",
             ));
         }
     }
+    let price = amount
+        .decimal()
+        .to_wire()
+        .map_err(|_| bad("Price is outside native compatibility range"))?;
     let names = source
         .name
         .as_ref()

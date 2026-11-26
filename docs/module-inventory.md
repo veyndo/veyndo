@@ -1746,7 +1746,6 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/migrations/0001-baseline.sql](../components/pricing/migrations/0001-baseline.sql) | Baseline schema of the pricing component (Money, price calculation, discounts, currencies, taxes and customer groups): its tables, sequences, functions, |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
-| [components/pricing/src/domain/binary.rs](../components/pricing/src/domain/binary.rs) | The original calculators' binary arithmetic, reproduced exactly with integers. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
 | [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and |
 | [components/pricing/src/domain/context.rs](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
@@ -1759,7 +1758,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/domain/discount.rs](../components/pricing/src/domain/discount.rs) | Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount. |
 | [components/pricing/src/domain/external_order.rs](../components/pricing/src/domain/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
 | [components/pricing/src/domain/money.rs](../components/pricing/src/domain/money.rs) | Exact signed minor-unit amounts with explicit currency scale: `Money` with its currency code, `Minor` on the calculation path. |
-| [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators with whole minor-unit results. |
+| [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | The quantity price calculation in exact decimal arithmetic with whole minor-unit results. |
 | [components/pricing/src/domain/quote.rs](../components/pricing/src/domain/quote.rs) | The priced quote as checkout, promotions and app adjustments rewrite it: line taxes in quote field names, a line's recalculated price and the quote totals. |
 | [components/pricing/src/domain/validation.rs](../components/pricing/src/domain/validation.rs) | Shared static validation errors carry no private values or transport authority. |
 | [components/pricing/src/domain.rs](../components/pricing/src/domain.rs) | Pure rules and data contracts: no database, no transport. This is the part that is proved. |
@@ -1786,10 +1785,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/types/product_currency.rs](../components/pricing/src/types/product_currency.rs) | The currency fields of a product's `extra` document: the currency its base prices are stated in and the fixed prices per currency as exact decimal strings. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
-| [components/pricing/tests/calculator_reference.rs](../components/pricing/tests/calculator_reference.rs) | The exact calculator against the previous floating-point port on the differential suite's input population. |
+| [components/pricing/tests/decimal_ties.rs](../components/pricing/tests/decimal_ties.rs) | Known differences at decimal ties: where the exact calculator departs from the earlier binary64 port. |
 | [components/pricing/tests/domain_mutants.rs](../components/pricing/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in pricing `domain/`: each pins one boundary or clause. |
 | [components/pricing/tests/properties.rs](../components/pricing/tests/properties.rs) | Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models. |
-| [components/pricing/tests/support/float_reference.rs](../components/pricing/tests/support/float_reference.rs) | Test oracle only: the previous floating-point port of the Shopware 6.7.14.2 quantity calculators, kept verbatim |
 | [components/shipping/src/domain/booking.rs](../components/shipping/src/domain/booking.rs) | A carrier booking occupies one open package; only the intent that reserved it can release it. |
 | [components/shipping/src/domain/geography.rs](../components/shipping/src/domain/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
 | [components/shipping/src/domain/split.rs](../components/shipping/src/domain/split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |

@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
-use veyndo_pricing::binary::Binary;
+use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::money::Minor;
-use veyndo_pricing::pricing::{PriceInput, calculate, math_round, proportional_tax_rules};
+use veyndo_pricing::pricing::{PriceInput, calculate, proportional_tax_rules};
 use veyndo_pricing::quote::{LinePriceUpdate, QuoteTotals};
 use veyndo_pricing::service::conversion as currencies;
 /// The quote facts an app adjustment reads, each as leniently as the adjustment always read it.
@@ -19,7 +19,7 @@ struct AdjustedQuote {
     #[serde(deserialize_with = "lenient")]
     shipping_costs: ShippingCosts,
     #[serde(deserialize_with = "lenient")]
-    discount_total: Option<Binary>,
+    discount_total: Option<Decimal>,
     line_items: Value,
 }
 
@@ -38,7 +38,7 @@ struct QuotePrice {
 #[serde(default, rename_all = "camelCase")]
 struct ShippingCosts {
     #[serde(deserialize_with = "lenient")]
-    total_price: Option<Binary>,
+    total_price: Option<Decimal>,
 }
 
 #[derive(Deserialize, Default)]
@@ -54,7 +54,7 @@ struct AdjustedLine {
 #[serde(default, rename_all = "camelCase")]
 struct AdjustedLinePrice {
     #[serde(deserialize_with = "lenient")]
-    total_price: Option<Binary>,
+    total_price: Option<Decimal>,
     calculated_taxes: Value,
 }
 
@@ -62,11 +62,11 @@ struct AdjustedLinePrice {
 #[serde(default, rename_all = "camelCase")]
 struct LenientTax {
     #[serde(deserialize_with = "lenient")]
-    tax_rate: Option<Binary>,
+    tax_rate: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
-    price: Option<Binary>,
+    price: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
-    tax: Option<Binary>,
+    tax: Option<Decimal>,
 }
 
 /// The adjusted lines summed into the quote totals; these values are required.
@@ -84,13 +84,13 @@ struct SummedLine {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SummedPrice {
-    total_price: Binary,
+    total_price: Decimal,
     calculated_taxes: Vec<SummedTax>,
 }
 
 #[derive(Deserialize)]
 struct SummedTax {
-    tax: Binary,
+    tax: Decimal,
 }
 
 /// The app adjustments recorded on the quote itself.
@@ -103,9 +103,9 @@ struct Recorded {
     discount_total: Option<Minor>,
 }
 
-/// A quote number as the exact binary64 value of a decimal amount in minor units of `scale`.
-fn binary(minor: i64, scale: u8) -> Result<Binary> {
-    Binary::from_decimal(Minor::new(minor, scale).decimal()).map_err(bad)
+/// An amount in minor units of `scale` as an exact value.
+fn exact(minor: i64, scale: u8) -> Ratio {
+    Minor::new(minor, scale).ratio()
 }
 
 /// The new line prices of a price or discount adjustment, in line order.
@@ -131,12 +131,7 @@ fn adjusted_lines(
     let totals: Vec<i64> = lines
         .iter()
         .map(|l| {
-            let total = l
-                .price
-                .total_price
-                .unwrap_or(Binary::ZERO)
-                .shortest()
-                .map_err(bad)?;
+            let total = l.price.total_price.unwrap_or(Decimal::ZERO);
             currencies::exact_amount(total, currency, scale).map(|m| m.minor())
         })
         .collect::<Result<_>>()?;
@@ -167,12 +162,12 @@ fn adjusted_lines(
         })
         .collect::<Result<Vec<_>>>()?;
     let b2b = quote.price.tax_status.as_deref() == Some("net");
-    let interval = binary(1, scale)?;
+    let interval = Decimal::new(1, scale.into()).map_err(bad)?;
     lines
         .iter()
         .enumerate()
         .map(|(i, line)| {
-            let shares: Vec<(Binary, Binary)> = line
+            let shares: Vec<(Decimal, Ratio)> = line
                 .price
                 .calculated_taxes
                 .as_array()
@@ -181,15 +176,15 @@ fn adjusted_lines(
                 .map(view::<LenientTax>)
                 .map(|r| {
                     (
-                        r.tax_rate.unwrap_or(Binary::ZERO),
-                        r.price.unwrap_or(Binary::ZERO),
+                        r.tax_rate.unwrap_or(Decimal::ZERO),
+                        r.price.unwrap_or(Decimal::ZERO).ratio(),
                     )
                 })
                 .collect();
             let tax_rules =
-                proportional_tax_rules(&shares, binary(totals[i], scale)?).map_err(bad)?;
+                proportional_tax_rules(&shares, exact(totals[i], scale)).map_err(bad)?;
             let calc = calculate(&PriceInput {
-                price: binary(targets[i], scale)?,
+                price: exact(targets[i], scale),
                 quantity: 1,
                 decimals: scale.into(),
                 interval,
@@ -238,10 +233,11 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
         let shipped = quote
             .shipping_costs
             .total_price
-            .unwrap_or(Binary::ZERO)
-            .checked_add(binary(minor, scale)?)
+            .unwrap_or(Decimal::ZERO)
+            .ratio()
+            .checked_add(exact(minor, scale))
             .map_err(bad)?;
-        if shipped < Binary::ZERO {
+        if shipped < Ratio::ZERO {
             return Err(bad("Shipping hook cannot make delivery cost negative"));
         }
         recorded.app_shipping_adjustment_minor = Some(combined);
@@ -259,10 +255,11 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
         if kind == "discount" {
             let total = quote
                 .discount_total
-                .unwrap_or(Binary::ZERO)
-                .checked_add(binary(minor, scale)?)
+                .unwrap_or(Decimal::ZERO)
+                .ratio()
+                .checked_add(exact(minor, scale))
                 .map_err(bad)?;
-            recorded.discount_total = Some(math_round(total, scale).map_err(bad)?);
+            recorded.discount_total = Some(total.rounded(scale).map_err(bad)?);
         }
     }
     // Strip the previous delivery components; the shared delivery owner recalculates them exactly once next.
@@ -272,13 +269,13 @@ pub fn apply(q: &mut Value, kind: &str, minor: i64) -> Result<()> {
             "Priced quote is incomplete".into(),
         )
     })?;
-    // The stored sums as the quote rounds them: binary sums of the stored numbers, then `round`.
-    let rounded_sum = |values: Vec<Binary>| -> Result<Minor> {
-        let total = values
+    // The stored sums: exact sums of the stored amounts, rounded once to the minor unit.
+    let rounded_sum = |values: Vec<Decimal>| -> Result<Minor> {
+        values
             .into_iter()
-            .try_fold(Binary::ZERO, Binary::checked_add)
-            .map_err(bad)?;
-        math_round(total, scale).map_err(bad)
+            .try_fold(Ratio::ZERO, |total, v| total.checked_add(v.ratio()))
+            .and_then(|total| total.rounded(scale))
+            .map_err(bad)
     };
     let positions = rounded_sum(
         summed
@@ -308,7 +305,7 @@ mod tests {
     use super::apply;
     use serde_json::{Value, json};
     use veyndo_core::{Result, StatusCode, bad};
-    use veyndo_pricing::binary::Binary;
+    use veyndo_pricing::decimal::Decimal;
     use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate};
     use veyndo_pricing::service::conversion as currencies;
 
@@ -348,9 +345,9 @@ mod tests {
         rules: &[(f64, f64)],
         gross: bool,
     ) -> Value {
-        let wire = |v: f64| Binary::from_wire(v).unwrap();
+        let wire = |v: f64| Decimal::from_wire(v).unwrap();
         let price = calculate(&PriceInput {
-            price: wire(price),
+            price: wire(price).ratio(),
             quantity: 1,
             decimals,
             interval: wire(interval),
@@ -359,7 +356,7 @@ mod tests {
                     .iter()
                     .map(|(rate, share)| TaxRule {
                         tax_rate: wire(*rate),
-                        percentage: wire(*share),
+                        percentage: wire(*share).ratio(),
                     })
                     .collect(),
             ),

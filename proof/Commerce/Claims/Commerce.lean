@@ -537,6 +537,18 @@ theorem rounded_quotient_half_up (k h : Nat) (hh : 0 < h)
     rw [Nat.mul_add, Nat.mul_one, Nat.mul_comm]; omega
   rw [this, Nat.mul_div_cancel_left _ hd]
 
+/-- Cash rounding to an interval of `step` minor units, as the calculator does it: the
+amount's quotient by the interval rounded to the nearest whole step (halves up), times the
+interval, is exactly that multiple and within half an interval of the amount. -/
+theorem cash_round_nearest_multiple (n step : Nat) (hs : 0 < step)
+    (h : n + step / 2 ≤ 18446744073709551615)
+    (hp : rounded_quotient n step * step ≤ 18446744073709551615) :
+    line_total (rounded_quotient n step) step = rounded_quotient n step * step ∧
+      2 * line_total (rounded_quotient n step) step ≤ 2 * n + step ∧
+      2 * n ≤ 2 * line_total (rounded_quotient n step) step + step := by
+  rw [line_total_exact _ _ hp]
+  exact ⟨rfl, rounded_quotient_nearest n step hs h⟩
+
 /-- Scaling and rounding back: an amount scaled up by a factor and rounded at that factor is unchanged. -/
 theorem scaled_round_trip (amount factor : Nat) (hf : 0 < factor)
     (h : amount * factor + factor / 2 ≤ 18446744073709551615) :

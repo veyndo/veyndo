@@ -113,9 +113,12 @@ The active checkout supports a channel-selected currency. Orders include an expl
 and three). [The multi-currency guide](currencies.md) explains automatic/fixed
 pricing, saved rates, protocol contracts and tested provider boundaries.
 
-The calculation path works in whole minor units (`Minor`/`Money` in `components/pricing`);
-the checkout boundary rejects non-finite, negative or out-of-range payment totals. Rounding
-is stated and proved in Lean (`line_total`, `rounded_quotient`, quote totals); see
+The calculation path works in whole minor units (`Minor`/`Money` in `components/pricing`)
+and exact decimals; the price calculator computes exactly and rounds each amount once,
+half away from zero, to the currency exponent, so a decimal tie is decided by the
+decimal, not by binary error. The checkout boundary rejects non-finite, negative or
+out-of-range payment totals. Rounding is stated and proved in Lean (`line_total`,
+`rounded_quotient`, the calculator's cash-interval rounding, quote totals); see
 [formal verification](formal-verification.md). Shopware compatibility is not a goal.
 
 ## Independent SaaS shops and row security
@@ -265,17 +268,16 @@ the same declared capabilities; provider output cannot become an unchecked SQL c
 - `transaction_pooler` repeats the strict-runtime suite through a real one-backend PgBouncer; poison-event, retention, login-backoff and shared-limit controls also run in both modes.
 - Payment suites use local provider fixtures for restart, capture/refund, duplicate
   notifications, version/account pinning, authorization/void and uncertain receipts.
-- Original Shopware differential suites guard the ported behavior and money boundary.
 - `store_isolation` calls the store functions of 15 components and sweeps all 135 tenant
   tables under a non-owner `NOBYPASSRLS` login: a second shop sees and changes nothing.
 - Property tests (37), mutation testing of `domain/`, generated HTTP and MCP contract cases
   (`schema_contracts`), per-component coverage floors and browser journeys cover the
   components; `schema_baseline` proves a fresh installation equals the reference schema.
   [Component test suite](testing.md#component-test-suite-phase-7).
-- Lean proves 72 rules with 197 properties, including currency precision, the per-order
+- Lean proves 74 rules with 217 properties, including currency precision, the per-order
   stock bound, the order state machine over request sequences, capture and refund bounds
   and ledger transition admission ([proof coverage](proof-coverage.md)). It does **not**
-  prove the float bridge, all Money arithmetic, SQL pool hooks, the schema, external
+  prove the JSON number conversion, the calculator's rule mix, all Money arithmetic, SQL pool hooks, the schema, external
   providers, the browser or the entire core.
 - The documentation build mirrors all tracked Markdown, copies local SVG assets,
   checks links/anchors/publication inventory, and publishes a searchable site after
