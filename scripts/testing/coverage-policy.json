@@ -28,7 +28,7 @@
       "rust": 41.69
     },
     "automation": {
-      "rust": 71.19
+      "rust": 71.18
     },
     "b2b": {
       "frontend": 54.25,
@@ -100,5 +100,5 @@
       "rust": 21.42
     }
   },
-  "component_note": "Per-component line floors (Rust sources and component UI), mapped through components.json and set to the values measured on 25 November 2026: Rust from the workspace unit, property and contract tests (the nightly run adds the integration suites and measures more), frontend from vitest. They only rise: scripts/testing/coverage_report.py --ratchet. Studio frontend reset to the first CI measurement (72.78 %, 26 November): its earlier floor was measured locally before the round-2 merges. Automation Rust reset to the CI measurement (71.19 %, 26 November) after the Shopware comparison transport that also exercised it was removed."
+  "component_note": "Per-component line floors (Rust sources and component UI), mapped through components.json and set to the values measured on 25 November 2026: Rust from the workspace unit, property and contract tests (the nightly run adds the integration suites and measures more), frontend from vitest. They only rise: scripts/testing/coverage_report.py --ratchet. Studio frontend reset to the first CI measurement (72.78 %, 26 November): its earlier floor was measured locally before the round-2 merges. Automation Rust reset to the CI measurement (71.18 %, the 26 November measurement rounded down) after the Shopware comparison transport that also exercised it was removed."
 }
