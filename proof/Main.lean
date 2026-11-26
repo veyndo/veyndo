@@ -62,6 +62,8 @@ def evalRequest (j : Json) : Except String Json := do
   | "offer_honoured" => pure (toJson (offer_honoured ((← (args.getObjVal? "expired") >>= Json.getBool?)) ((← (args.getObjVal? "same_cart") >>= Json.getBool?)) ((← (args.getObjVal? "same_revision") >>= Json.getBool?)) ((← (args.getObjVal? "same_total") >>= Json.getBool?))))
   | "amount_sum" => pure (toJson (amount_sum ((← (args.getObjVal? "left") >>= Json.getNat?)) ((← (args.getObjVal? "right") >>= Json.getNat?))))
   | "net_amount" => pure (toJson (net_amount ((← (args.getObjVal? "gross") >>= Json.getNat?)) ((← (args.getObjVal? "tax") >>= Json.getNat?))))
+  | "line_total" => pure (toJson (line_total ((← (args.getObjVal? "unit") >>= Json.getNat?)) ((← (args.getObjVal? "quantity") >>= Json.getNat?))))
+  | "rounded_quotient" => pure (toJson (rounded_quotient ((← (args.getObjVal? "numerator") >>= Json.getNat?)) ((← (args.getObjVal? "denominator") >>= Json.getNat?))))
   | "order_edit_admissible" => pure (toJson (order_edit_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?))))
   | "order_transition_admissible" => pure (toJson (order_transition_admissible ((← (args.getObjVal? "edge_listed") >>= Json.getBool?)) ((← (args.getObjVal? "target_listed") >>= Json.getBool?)) ((← (args.getObjVal? "source_terminal") >>= Json.getBool?))))
   | "completion_admissible" => pure (toJson (completion_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "payment_ready") >>= Json.getBool?)) ((← (args.getObjVal? "deliveries_ready") >>= Json.getBool?))))

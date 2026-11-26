@@ -2,7 +2,7 @@
   "format": 1,
   "notes": [
     "`components/core` has no `domain/` module; its functions are infrastructure (store, cache, HTTP limits) and are not counted here. A `domain/` module added to it is checked like the others.",
-    "Open after the money refactor (another session): order total = lines + shipping + tax, money scaling and rounding, and extractor multiplication. The functions they concern are listed under `money-representation` and `float-calculation`."
+    "Money runs on whole minor units (`Minor`, `Money`) and exact decimals and rationals (`Decimal`, `Ratio`). The calculator reproduces the original's binary64 rounding on `Binary` (integer emulation, no floating-point type), because the original's results at decimal ties depend on it. Proved and bound: line totals (`line_total`), rounding of a quotient to the minor unit (`rounded_quotient`), sums (`amount_sum`), net = gross - tax (`net_amount`), discount within its base (`discount_cap`), and the quote-total theorems over any list of lines."
   ],
   "functions": {
     "components/checkout/src/domain/admin_order.rs::admit_payment": {
@@ -15,13 +15,9 @@
       "status": "unproved",
       "reason": "document-shape"
     },
-    "components/checkout/src/domain/admin_order.rs::purchase": {
-      "status": "unproved",
-      "reason": "document-shape"
-    },
     "components/checkout/src/domain/cart_quote.rs::configuration_price": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "money-representation"
     },
     "components/checkout/src/domain/cart_quote.rs::normalized_quantity": {
       "status": "unproved",
@@ -33,7 +29,7 @@
         "amount_sum",
         "net_amount"
       ],
-      "note": "Line totals still come from the floating-point calculator; only minor-unit addition and net/gross are proved here (money refactor pending)."
+      "note": "Line totals are the calculator's proved line_total in whole minor units; the quote adds them with amount_sum and splits net and tax with net_amount. The Lean quote-total theorems state these sums for any list of lines."
     },
     "components/checkout/src/domain/quote_view.rs::QuoteView::first_line": {
       "status": "unproved",
@@ -108,7 +104,8 @@
     },
     "components/checkout/src/domain/tax_lines.rs::tax_products": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation",
+      "note": "The net-preserving rate factor is applied with the original binary arithmetic so stored product prices change exactly as before."
     },
     "components/inventory/src/domain/lines.rs::InventoryLines::ids": {
       "status": "unproved",
@@ -193,6 +190,14 @@
     "components/orders/src/domain/order_machine.rs::labels": {
       "status": "unproved",
       "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/order_patches.rs::TrackingUrl::of": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/order_patches.rs::strip_cart_token": {
+      "status": "unproved",
+      "reason": "document-shape"
     },
     "components/orders/src/domain/order_transitions.rs::cancellation_blocker": {
       "status": "unproved",
@@ -436,6 +441,126 @@
         "payment_transition_admissible"
       ]
     },
+    "components/pricing/src/domain/binary.rs::Binary::abs": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::cash_round": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::cast": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::checked_add": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::checked_div": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::checked_mul": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::checked_sub": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::cmp": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::decimal": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::deserialize": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::floor": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::from_decimal": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::from_ratio": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::from_wire": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::integer": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::is_negative": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::is_zero": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::minor": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::negated": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::partial_cmp": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::power": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::ratio": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::round": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::rounded": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::serialize": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::shortest": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Binary::to_wire": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Decimal::from_wire": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::Decimal::to_wire": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/binary.rs::bit_length": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
     "components/pricing/src/domain/cart.rs::default_channel": {
       "status": "unproved",
       "reason": "constructor-or-accessor"
@@ -471,6 +596,153 @@
     "components/pricing/src/domain/customer/mod.rs::country_default": {
       "status": "unproved",
       "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::cmp": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::deserialize": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::eq": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::integer": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::is_zero": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::new": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::parse": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::partial_cmp": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::ratio": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::scale": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::serialize": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::text": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Decimal::units": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::abs": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::checked_add": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::checked_div": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::checked_mul": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::checked_sub": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::cmp": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::denominator": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::integer": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::is_negative": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::is_zero": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::negated": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::new": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::numerator": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::partial_cmp": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::reduced": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::rounded": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::significant": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::significant_away": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::Ratio::significant_with": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::gcd": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::power": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/decimal.rs::quotient": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "rounded_quotient"
+      ],
+      "note": "Refuses operands outside the rule's range instead of letting it saturate; Ratio::rounded rounds every exact amount into minor units through it."
+    },
+    "components/pricing/src/domain/decimal.rs::wide": {
+      "status": "unproved",
+      "reason": "money-representation"
     },
     "components/pricing/src/domain/discount.rs::allocate": {
       "status": "binds-proved-rule",
@@ -517,6 +789,81 @@
       "status": "unproved",
       "reason": "constructor-or-accessor"
     },
+    "components/pricing/src/domain/money.rs::Minor::at_scale": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/pricing/src/domain/money.rs::Minor::checked_add": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/pricing/src/domain/money.rs::Minor::checked_sub": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/pricing/src/domain/money.rs::Minor::decimal": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::from_decimal": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::from_unsigned": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::minor": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Minor::new": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Minor::ratio": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::same_scale": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Minor::scale": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Minor::serialize": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::significant": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::sum": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/pricing/src/domain/money.rs::Minor::times": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "line_total"
+      ],
+      "note": "Sign and overflow refusal around the proved product; the calculator's line totals and every quantity multiplication of a minor amount use it."
+    },
+    "components/pricing/src/domain/money.rs::Minor::unsigned": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Minor::zero": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Money::amount": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
     "components/pricing/src/domain/money.rs::Money::checked_add": {
       "status": "unproved",
       "reason": "money-representation"
@@ -529,7 +876,7 @@
       "status": "unproved",
       "reason": "money-representation"
     },
-    "components/pricing/src/domain/money.rs::Money::from_legacy_eur": {
+    "components/pricing/src/domain/money.rs::Money::from_decimal": {
       "status": "unproved",
       "reason": "money-representation"
     },
@@ -549,29 +896,33 @@
       "status": "unproved",
       "reason": "money-representation"
     },
-    "components/pricing/src/domain/money.rs::from_minor": {
-      "status": "unproved",
-      "reason": "money-representation"
-    },
-    "components/pricing/src/domain/money.rs::to_minor": {
-      "status": "unproved",
-      "reason": "money-representation"
+    "components/pricing/src/domain/money.rs::unsigned_sum": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "amount_sum"
+      ],
+      "note": "Refuses an overflowing sum instead of letting the proved sum saturate."
     },
     "components/pricing/src/domain/pricing.rs::PriceInput::default": {
       "status": "unproved",
       "reason": "constructor-or-accessor"
     },
+    "components/pricing/src/domain/pricing.rs::Rounding::minor": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/pricing.rs::Rounding::new": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/pricing.rs::Rounding::round": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
     "components/pricing/src/domain/pricing.rs::calculate": {
       "status": "unproved",
-      "reason": "float-calculation"
-    },
-    "components/pricing/src/domain/pricing.rs::cash_round": {
-      "status": "unproved",
-      "reason": "float-calculation"
-    },
-    "components/pricing/src/domain/pricing.rs::cast": {
-      "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation",
+      "note": "The Shopware calculator's binary64 steps on Binary (integer emulation), bit for bit equal to the previous port (tests/calculator_reference.rs) and, in CI, to the original PHP (differential.py); its line total is the proved line_total."
     },
     "components/pricing/src/domain/pricing.rs::decimals": {
       "status": "unproved",
@@ -581,37 +932,57 @@
       "status": "unproved",
       "reason": "constructor-or-accessor"
     },
+    "components/pricing/src/domain/pricing.rs::line_total": {
+      "status": "unproved",
+      "reason": "binary-emulation",
+      "note": "The product itself is the proved line_total (through Minor::times); this function writes it as the original does (fourteen digits of its binary value)."
+    },
     "components/pricing/src/domain/pricing.rs::math_round": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/pricing.rs::merged_rules": {
+      "status": "unproved",
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/pricing.rs::percent": {
+      "status": "unproved",
+      "reason": "binary-emulation"
     },
     "components/pricing/src/domain/pricing.rs::proportional_tax_rules": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation"
     },
     "components/pricing/src/domain/pricing.rs::sum": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation"
     },
     "components/pricing/src/domain/pricing.rs::yes": {
       "status": "unproved",
       "reason": "constructor-or-accessor"
     },
-    "components/pricing/src/domain/quote.rs::CalculatedTax::from": {
-      "status": "unproved",
-      "reason": "document-shape"
-    },
     "components/pricing/src/domain/quote.rs::LinePriceUpdate::new": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "binary-emulation"
+    },
+    "components/pricing/src/domain/quote.rs::QuoteTax::at_scale": {
+      "status": "unproved",
+      "reason": "money-representation"
     },
     "components/pricing/src/domain/quote.rs::QuoteTax::from": {
       "status": "unproved",
       "reason": "document-shape"
     },
     "components/pricing/src/domain/quote.rs::QuoteTotals::new": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "net_amount"
+      ],
+      "note": "Net quotes add the tax with the proved sum (through unsigned_sum), gross quotes take the proved net; negative amounts are refused."
+    },
+    "components/pricing/src/domain/quote.rs::QuoteTotals::of_lines": {
       "status": "unproved",
-      "reason": "float-calculation"
+      "reason": "money-representation"
     },
     "components/pricing/src/domain/validation.rs::ValidationError::fmt": {
       "status": "unproved",

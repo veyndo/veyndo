@@ -171,6 +171,12 @@ def amount_sum (left : Nat) (right : Nat) : Nat :=
 def net_amount (gross : Nat) (tax : Nat) : Nat :=
   (gross - tax)
 
+def line_total (unit : Nat) (quantity : Nat) : Nat :=
+  (min (unit * quantity) 18446744073709551615)
+
+def rounded_quotient (numerator : Nat) (denominator : Nat) : Nat :=
+  ((min (numerator + ((max denominator 1) / 2)) 18446744073709551615) / (max denominator 1))
+
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
 
