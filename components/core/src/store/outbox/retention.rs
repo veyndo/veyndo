@@ -9,19 +9,15 @@ pub fn due() -> bool {
         .unwrap()
         .as_secs();
     let last = LAST.load(std::sync::atomic::Ordering::Relaxed);
-    if now.saturating_sub(last) < 60
-        || LAST
+    now.saturating_sub(last) >= 60
+        && LAST
             .compare_exchange(
                 last,
                 now,
                 std::sync::atomic::Ordering::Relaxed,
                 std::sync::atomic::Ordering::Relaxed,
             )
-            .is_err()
-    {
-        return false;
-    }
-    true
+            .is_ok()
 }
 
 pub async fn retire(a: &State, payload_days: i32, metadata_days: i32) -> Result<()> {
