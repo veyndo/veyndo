@@ -136,6 +136,9 @@ jobs:
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The component mirror release record names monorepo commits; a shallow clone lacks them.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -233,6 +236,9 @@ jobs:
       artifact-id: ${{ steps.coverage.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The component mirror release record names monorepo commits; a shallow clone lacks them.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
