@@ -219,9 +219,7 @@ depend on its binary64 arithmetic (130.4835 × 670 rounds to 87423.94 because th
 binary product is 87423.94499…), so the port performs the same binary steps on
 `Binary`, an integer emulation without a floating-point type, and returns minor
 units. It equals the previous port bit for bit on the differential population and
-on 240,000 further generated inputs (`components/pricing/tests/calculator_reference.rs`);
-CI compares it with the original PHP (`scripts/differential.py`). Its line total is
-the proved `line_total`.
+on 240,000 further generated inputs (`components/pricing/tests/calculator_reference.rs`); Its line total is the proved `line_total`.
 
 ## Consent and legal checkout additions
 

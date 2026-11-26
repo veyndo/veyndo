@@ -2315,5 +2315,5 @@ production-readiness or complete Shopware-compatibility claim.
 - Sandbox verification uses local contract fixtures; live Sandbox traffic is unverified.
 - Clear commerce-first quickstart, searchable guides and contributor information.
 
-Payments are simulated, manual or Sandbox; no real money is charged. See [the feature matrix](docs/shopware-parity.md),
+Payments are simulated, manual or Sandbox; no real money is charged. See [feature overview](docs/features.md),
 [verification record](docs/verification.json) and current CI for exact scope.

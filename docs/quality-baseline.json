@@ -83,16 +83,11 @@
     ],
     "python": [
       "scripts/app_inference.py",
-      "scripts/automation_differential.py",
-      "scripts/automation_registry.py",
       "scripts/benchmark.py",
       "scripts/build_site.py",
       "scripts/check_site.py",
       "scripts/connectors.py",
       "scripts/contention.py",
-      "scripts/context_differential.py",
-      "scripts/delivery_differential.py",
-      "scripts/differential.py",
       "scripts/formal.py",
       "scripts/formal/axioms.py",
       "scripts/formal/conformance.py",
@@ -107,9 +102,7 @@
       "scripts/prepare_host.py",
       "scripts/prepare_vercel.py",
       "scripts/product_lab.py",
-      "scripts/restart.py",
-      "scripts/rule_catalog.py",
-      "scripts/rule_differential.py"
+      "scripts/restart.py"
     ]
   },
   "unmeasured": [

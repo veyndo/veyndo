@@ -69,8 +69,8 @@ Recorded for this release candidate:
   ([proofs](formal-verification.md)) and `testing/component_mirrors_check`
   ([mirrors](component-mirrors.md)); the property tests and the mutation run of
   25 November.
-- A complete run on 23 November passed 143 of 145 suites; `money_boundary_differential`
-  needs the Shopware reference and did not run.
+- A complete run on 23 November passed 143 of 145 suites. The PHP comparisons against
+  Shopware were removed on 26 November: Shopware compatibility is no longer a goal.
 
 Open before the release is accepted:
 
@@ -505,6 +505,6 @@ Storyfront manifest links them; it contains no closed renderer or provider keys.
 
 The retained 6 October fashion demo recordings are dated evidence of those local
 workflows, not relabelled captures of this later release. For full scope, use
-[Shopware parity](shopware-parity.md), [measured tests](testing.md),
+[feature overview](features.md), [measured tests](testing.md),
 [formal boundaries](formal-verification.md), [payments](payment-provider-api.md),
 [currencies](currencies.md) and [production architecture](production-architecture.md).

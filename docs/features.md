@@ -604,7 +604,7 @@ and Flow events stay with the same native owners. [Versioned contract and workin
 purchase sequence](b2b-ucp-negotiation.md). This vendor extension does not claim a
 ratified upstream commercial-negotiation capability or autonomous bargaining.
 
-A reachable HTTPS endpoint and account-side registration are still required for hosted ChatGPT/Claude clients. A custom UI connector requiring OAuth needs its own gateway; a scoped token alone does not implement an OAuth authorization server. [Connection instructions](connectors.md) · [API catalog](studio-api-and-channels.md) · [Protocol scope](shopware-parity.md).
+A reachable HTTPS endpoint and account-side registration are still required for hosted ChatGPT/Claude clients. A custom UI connector requiring OAuth needs its own gateway; a scoped token alone does not implement an OAuth authorization server. [Connection instructions](connectors.md) · [API catalog](studio-api-and-channels.md) · [feature overview](features.md).
 
 ![Current agent-commerce connections and native protocol entry points](assets/product-tour-20261102/agent-commerce.jpg)
 
@@ -618,7 +618,7 @@ Atomic stock/order/idempotency/outbox transactions avoid partial commerce writes
 
 CI checks source ownership, frontend build/localization, Rust formatting/lint/tests, original Shopware PHP comparisons, real isolated PostgreSQL/HTTP regressions and selected extracted Lean policies. Existing price/context/tax/comparison/rule suites contain **7,000 bounded original-PHP comparisons**. Formal claims name exact production policies and exclude SQL/provider/browser/whole-system correctness.
 
-Million-product commerce measurements are dated workload-specific observations; they do not establish semantic recall, production capacity or a Shopware speed ratio. This remains an extensible working prototype with explicit gaps in full Shopware DAL/CMS/plugin parity, real PSP certification, full production identity/provider acceptance, core-wide RLS, distributed quotas, automatic relocation/failover and legal compliance. [Testing](testing.md) · [Formal boundary](formal-verification.md) · [Performance](benchmarks.md) · [Complete parity matrix](shopware-parity.md).
+Million-product commerce measurements are dated workload-specific observations; they do not establish semantic recall, production capacity or a Shopware speed ratio. This remains an extensible working prototype with explicit gaps in full Shopware DAL/CMS/plugin parity, real PSP certification, full production identity/provider acceptance, core-wide RLS, distributed quotas, automatic relocation/failover and legal compliance. [Testing](testing.md) · [Formal boundary](formal-verification.md) · [Performance](benchmarks.md) · [feature overview](features.md).
 
 ## Keep the guide current
 

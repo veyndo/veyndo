@@ -120,13 +120,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/orders.rs](../src/b2b/orders.rs) | The unit order receipt PDF renders in the server after the B2B component admits the unit order. |
 | [src/b2b/organization.rs](../src/b2b/organization.rs) | Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. |
 | [src/b2b/purchase.rs](../src/b2b/purchase.rs) | Serializes unit spending and binds an approved purchase to the authoritative native checkout quote. |
-| [src/bin/automation_rules.rs](../src/bin/automation_rules.rs) | JSON batch transport for comparisons with original Shopware rule classes; not a production authority endpoint. |
 | [src/bin/connectors.rs](../src/bin/connectors.rs) | Independent Rust standard-app service; no provider code executes in commerce request workers. |
-| [src/bin/context.rs](../src/bin/context.rs) | Bounded ports of original language-chain, rule priority and quantity selection. |
-| [src/bin/delivery.rs](../src/bin/delivery.rs) | Batch proportional-tax fixture transport for the original-PHP comparator. |
-| [src/bin/money_boundary.rs](../src/bin/money_boundary.rs) | Batch transport for comparing the wire-to-minor-unit checkout boundary against original Shopware totals. |
-| [src/bin/price.rs](../src/bin/price.rs) | Batch price fixture transport for the original-PHP differential comparator. |
-| [src/bin/rules.rs](../src/bin/rules.rs) | Batch original-PHP numeric-rule comparison transport. |
 | [src/bin/verified_kernel/dispatch/access.rs](../src/bin/verified_kernel/dispatch/access.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch/agents.rs](../src/bin/verified_kernel/dispatch/agents.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch/apps.rs](../src/bin/verified_kernel/dispatch/apps.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
@@ -3022,9 +3016,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/app_surfaces.py](../scripts/app_surfaces.py) | Actual app UI registry/API/MCP/data/staging and slow-service isolation against Rust/PostgreSQL. |
 | [scripts/apps.py](../scripts/apps.py) | Real PostgreSQL app lifecycle, managed schema/RLS, typed API/MCP, cart and observation tests. |
 | [scripts/automation.py](../scripts/automation.py) | Real HTTP/PostgreSQL branching automation, private facts, durable delays and revoked-actor regressions. No providers. |
-| [scripts/automation_differential.py](../scripts/automation_differential.py) | Compare actual original Shopware rule classes with native scopes using independent synthetic entities. |
 | [scripts/automation_lifecycle.py](../scripts/automation_lifecycle.py) | Tenant-bound default configuration, revision-safe deletion and actual event-flow effects. |
-| [scripts/automation_registry.py](../scripts/automation_registry.py) | Rebuild the native rule catalog from pinned PHP reflection and explicitly reviewed scope bindings. |
 | [scripts/b2b.py](../scripts/b2b.py) | Native company procurement with real isolated PostgreSQL: approval, budgets, catalogs and shared checkout. |
 | [scripts/b2b_ucp.py](../scripts/b2b_ucp.py) | Real UCP -> native B2B RFQ -> merchant counteroffer -> separate approval -> one durable order. |
 | [scripts/behavior_intelligence.py](../scripts/behavior_intelligence.py) | Real native event, consent, order, graph, MCP and tenant/PII regression; synthetic buyers only. |
@@ -3053,16 +3045,13 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/connector_store_tests.py](../scripts/connector_store_tests.py) | Concurrent private state, settings/import fences and encrypted mailbox persistence. |
 | [scripts/connectors.py](../scripts/connectors.py) | Start the local connector apps with private generated keys; preserve all existing app services. |
 | [scripts/contention.py](../scripts/contention.py) | Sell the remaining workshop desks under contention; separate synthetic tenant. |
-| [scripts/context_differential.py](../scripts/context_differential.py) | Compare bounded context/tier/quantity ports with original Shopware methods. |
 | [scripts/crm_history.py](../scripts/crm_history.py) | Real CRM groups/defaults, transaction-coalesced history, validated restore, tenant/role/MCP isolation. |
 | [scripts/currencies.py](../scripts/currencies.py) | Real tenant/channel multi-currency, precision, immutable order and durable fixed-price tests; no paid providers. |
 | [scripts/customer_accounts.py](../scripts/customer_accounts.py) | Real registration/address/login/checkout lifecycle, ownership, CAS and immutable financial snapshots. |
-| [scripts/delivery_differential.py](../scripts/delivery_differential.py) | Compare the original PercentageTaxRuleBuilder with the live Rust port. |
 | [scripts/demo/fixtures.py](../scripts/demo/fixtures.py) | Four-language, provider-free commerce playground definitions; no credentials or real customer data. |
 | [scripts/demo/signed_offer.py](../scripts/demo/signed_offer.py) | Buying-agent view of a signed offer: fetch it for a cart, verify the Ed25519 signature offline, then ask the shop whether checkout would confirm it. |
 | [scripts/dev_account.py](../scripts/dev_account.py) | Create or verify a local development shop and its owner account for signing in to Studio. |
 | [scripts/developer_documents.py](../scripts/developer_documents.py) | Local model wire fixtures verify app generation, provenance and document privacy, without paid providers. |
-| [scripts/differential.py](../scripts/differential.py) | Independent PHP/Rust differential; fails on any money delta, not averaged error. |
 | [scripts/durable_agents.py](../scripts/durable_agents.py) | Actual HTTP/PostgreSQL task continuation, killed Rust workers, current rights and no unapproved mutations; synthetic model only. |
 | [scripts/edi.py](../scripts/edi.py) | Registered EDI entry delegates app behavior and fixtures to the plugin owner. |
 | [scripts/email_tests.py](../scripts/email_tests.py) | Registered mail suite: archived differential contracts and the real Rust order/mail journey. |
@@ -3104,7 +3093,6 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/merchant_operations.py](../scripts/merchant_operations.py) | Real HTTP/PostgreSQL CRM, receipt, scoped-access and paid-download regressions. No PSP traffic. |
 | [scripts/merchant_reports.py](../scripts/merchant_reports.py) | Native report aggregation over real checkout/POS/consent flows plus isolated historical fixtures; no external providers. |
 | [scripts/migration_assistant.py](../scripts/migration_assistant.py) | Registered migration verification; provider fixtures and runtime code remain under the app package. |
-| [scripts/money_boundary_differential.py](../scripts/money_boundary_differential.py) | Gate the exact checkout boundary using totals from original Shopware calculators, never a PHP rewrite. |
 | [scripts/native_lifecycles.py](../scripts/native_lifecycles.py) | Native accepted app lifecycles through real HTTP/PostgreSQL/MCP and selected release. Synthetic shops only. |
 | [scripts/outbox_subscribers.py](../scripts/outbox_subscribers.py) | Real SQL failure/row-lock isolation, quarantine, explicit retry and cold worker continuation for native outbox cursors. |
 | [scripts/payment_providers.py](../scripts/payment_providers.py) | Provider-neutral financial ledger through real HTTP/PostgreSQL and a local private-service fixture. |
@@ -3126,8 +3114,6 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/read_performance.py](../scripts/read_performance.py) | .sql'), ROOT/'Cargo.toml', ROOT/'Cargo.lock']): |
 | [scripts/restart.py](../scripts/restart.py) | Persist an API snapshot, restart server+DB externally, verify exact state. |
 | [scripts/roadmap.py](../scripts/roadmap.py) | Render the one roadmap source into the handbook page, the README line and the website data module; --check rejects drift. |
-| [scripts/rule_catalog.py](../scripts/rule_catalog.py) | Inventory original Shopware conditions without claiming unsupported scopes are implemented. |
-| [scripts/rule_differential.py](../scripts/rule_differential.py) | Execute original Shopware numeric comparisons, including epsilon, null and unsupported operator semantics. |
 | [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth, export and adversarial fixtures; no external accounts. |
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
 | [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |

@@ -9,7 +9,7 @@ received, a user is authorized or stock can be sold.
 
 This guide describes the executable architecture, its current protection boundaries,
 and the next migrations. It complements the [feature tour](features.md),
-[Shopware mapping](shopware-parity.md), [module inventory](module-inventory.md)
+[feature overview](features.md), [module inventory](module-inventory.md)
 and [test coverage](testing.md). Diagram images open at full size.
 
 [![System map: experiences, admission, deterministic commerce, PostgreSQL, apps and workers](assets/architecture/system.svg)](assets/architecture/system.svg)
@@ -113,14 +113,10 @@ The active checkout supports a channel-selected currency. Orders include an expl
 and three). [The multi-currency guide](currencies.md) explains automatic/fixed
 pricing, saved rates, protocol contracts and tested provider boundaries.
 
-The Shopware-ported calculators still reproduce the original PHP float behavior.
-The currency-aware checkout boundary preserves the existing calculator rounding and rejects
-non-finite, negative or out-of-range payment totals. This is a carefully defined
-boundary, not a claim that all tax and discount arithmetic is now integer-based.
-`scripts/money_boundary_differential.py` compares the actual boundary against original
-Shopware calculator results; the existing price/context/delivery/rule differential
-gates remain required. The next arithmetic migration must retain those gates and
-introduce explicit rounding rules for every intermediate operation.
+The calculation path works in whole minor units (`Minor`/`Money` in `components/pricing`);
+the checkout boundary rejects non-finite, negative or out-of-range payment totals. Rounding
+is stated and proved in Lean (`line_total`, `rounded_quotient`, quote totals); see
+[formal verification](formal-verification.md). Shopware compatibility is not a goal.
 
 ## Independent SaaS shops and row security
 

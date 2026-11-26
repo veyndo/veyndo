@@ -1,8 +1,8 @@
 //! The exact calculator against the previous floating-point port on the differential suite's input population.
 //!
-//! `scripts/differential.py` compares the calculator with the original PHP classes in CI. This test
-//! compares it with the floating-point port that passed that comparison, on generated inputs of the
-//! same kind, field by field and bit for bit. `PRICE_CASES=<file.json>` adds a recorded population.
+//! The floating-point port was checked against the original PHP classes until 26 November, when
+//! Shopware compatibility stopped being a goal; this test keeps the exact calculator equal to that
+//! port on generated inputs, field by field and bit for bit. `PRICE_CASES=<file.json>` adds a recorded population.
 #[path = "support/float_reference.rs"]
 mod float_reference;
 
