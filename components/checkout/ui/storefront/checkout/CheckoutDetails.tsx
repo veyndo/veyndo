@@ -47,9 +47,32 @@ export default function CheckoutDetails({
     );
   }, [cart.customerId, cart.token]);
   const load = async () => {
-    if (cart.customerId)
-      setBook(await shopApi<AddressList>("/store-api/account/addresses"));
-    else setBook(undefined);
+    if (!cart.customerId) return setBook(undefined);
+    const list = await shopApi<AddressList>("/store-api/account/addresses");
+    setBook(list);
+    // The cart adopts default addresses at sign-in. An address the customer
+    // added afterwards must not leave an untouched checkout on "new address".
+    const typed = (a?: Selection["address"]) =>
+      !!(a?.street || a?.city || a?.postalCode || a?.firstName || a?.lastName);
+    const entry = (id?: string) => list.elements.find((v) => v.id === id);
+    const billing = entry(list.defaultBillingAddressId);
+    const shipping = entry(list.defaultShippingAddressId) ?? billing;
+    if (
+      billing &&
+      !selection.billingAddressId &&
+      !selection.shippingAddressId &&
+      !typed(selection.billingAddress) &&
+      !typed(selection.address)
+    ) {
+      setSame(billing.id === shipping!.id);
+      onChange({
+        billingAddressId: billing.id,
+        billingAddress: billing.address,
+        shippingAddressId: shipping!.id,
+        address: shipping!.address,
+        country: shipping!.address.country ?? selection.country,
+      });
+    }
   };
   useEffect(() => {
     void load().catch((e) => setError(e.message));
