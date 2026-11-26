@@ -160,15 +160,13 @@ Shopware SEO engine. [Current currency and price behavior](currencies.md).
 - `scripts/marketing_accounts.py`: additional shops, customer authority/history,
   concurrent limited coupons, tax/free shipping, order flows, channels,
   metadata/document releases and persisted personalization.
-- `scripts/rule_differential.py`: 1,976 numeric/string/array/UUID comparisons;
-  `automation_differential.py`: 432 cases across 74 original conditions.
 - `scripts/automation.py`: real branching/actions/delays, frozen rules, actor
   revocation, isolated failing flows and repeatable playground setup.
 - `frontend/tests/locales.mjs`: equal nonempty locale dictionaries and translated
   transport errors; strict frontend build covers typed component contracts.
 
 Fixtures verify protocol/authority/consumer behavior, not real-model quality.
-See [the feature matrix](shopware-parity.md), [source map](source-map.md) and
+See [feature overview](features.md), [source map](source-map.md) and
 [deployment preparation](deployment.md) for implementation and remaining work.
 
 ## Verified local-model walkthrough

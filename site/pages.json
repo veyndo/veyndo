@@ -20,11 +20,6 @@
     "description": "Configure a local Model Context Protocol bridge to Veyndo. Learn which tools are public and how merchant approval and workspace authority work."
   },
   {
-    "file": "shopware.html",
-    "title": "Port Shopware pricing behavior to Rust with differential tests",
-    "description": "How Veyndo checks bounded pricing, context and shipping-tax ports against original Shopware PHP classes, with explicit compatibility limits."
-  },
-  {
     "file": "playground.html",
     "title": "Try a connected commerce playground | Veyndo",
     "description": "Create a separate local shop and try product variants, customer addresses, a coupon, graphical order flows, delays and PDF invoices without a model provider."

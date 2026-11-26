@@ -43,19 +43,15 @@ two-replica purchase/cancellation/MCP regression in `production_foundations`.
 
 ## Schema baselines and releases
 
-Each component owns its schema in `components/<name>/migrations/` (the connector
-service in `extensions/services/connectors/migrations/`). The cross-cutting
-extensions, the `veyndo_authority` schema and the shared functions live in
-`components/core/migrations/0000-foundation.sql`. `src/migrations/schema.rs` lists the
-files in one global order, core first and then by `components.json` `uses`;
-`scripts/components.py` checks that order and that a file creates only its own
-component's tables. A release replaces earlier installations: there is no upgrade
-path, rolling upgrade or legacy data import, and setup refuses a database that an
-earlier release created. Change a schema in the owning baseline, regenerate the
-reviewed reference with `scripts/schema_baseline.py --write` and keep the registered
-`schema_baseline` suite passing. Baselines keep forced tenant row security, the
-authenticated scope policy, the non-owner production role and encrypted credentials.
-Demo data belongs to `fixtures/demo/`, not to a baseline.
+Each component owns `components/<name>/migrations/` (connector service:
+`extensions/services/connectors/migrations/`; shared functions and `veyndo_authority`:
+`components/core/migrations/0000-foundation.sql`), listed in `src/migrations/schema.rs`
+in the global order `scripts/components.py` checks. A release replaces earlier
+installations: no upgrade path, rolling upgrade or data import; setup refuses an earlier
+release's database. Shopware compatibility is not a goal: add no PHP parity checks.
+Change a schema in its owning baseline, run `scripts/schema_baseline.py --write` and keep
+`schema_baseline` passing, with forced tenant RLS, the scope policy, the non-owner role and
+encrypted credentials. Demo data belongs to `fixtures/demo/`.
 
 ## Internationalization contract (mandatory for every new module)
 
@@ -104,7 +100,7 @@ does not make it a supported first-party production runtime.
 
 | Python location / purpose | Allowed boundary |
 | --- | --- |
-| Verification, differential tests, source/coverage checks and site generation | Development/CI tools only; never required to serve a commerce request or deliver a notification. |
+| Verification, comparison tests, source/coverage checks and site generation | Development/CI tools only; never required to serve a commerce request or deliver a notification. |
 | `scripts/connectors.py` | Local lifecycle tooling that launches the compiled Rust connector; it is not the email/provider implementation. |
 | `scripts/mcp_stdio.py` | Optional client-side JSON-RPC bridge. The hosted `/mcp` server and its commerce operations run in Rust; no hosted Python MCP backend. |
 | `reference/connectors-python/` | Archived comparison implementation for the differential fixtures (`connector_store_tests`, `email_tests`). Do not resurrect, import into serving code or package it as a production service. |
@@ -117,28 +113,15 @@ Python installation, `.py` entry point, runtime Python subprocess, archived work
 or fallback provider implementation in either production image. Build/CI tools
 and optional independent app images are separate scopes.
 
-The former `email_config.py`, `email_templates.py`, `email_service.py` and
-`email_delivery.py` are reference code, not current service owners. Configuration,
-templates and delivery belong to `extensions/apps/email/src/`; shared actions belong to `extensions/services/connectors/src/` and storage, queues and egress to `extensions/services/connector-runtime/src/`; use the
-module table in [the Rust service guide](docs/rust-services.md) to find each owner.
-Do not introduce SQLite, a filesystem spool or process-local authoritative queues
-beside the PostgreSQL connector queue. Preserve forced tenant RLS, the dedicated
-non-owner production role, encrypted credentials, bounded worker admission and
-explicit handling of uncertain external sends.
+Email configuration, templates and delivery belong to `extensions/apps/email/src/`, shared
+actions to `extensions/services/connectors/src/`, storage, queues and egress to
+`extensions/services/connector-runtime/src/` ([Rust service guide](docs/rust-services.md));
+the archived Python email files are not owners. No SQLite, filesystem spool or
+process-local authoritative queue beside the PostgreSQL connector queue; keep forced
+tenant RLS, the non-owner production role, encrypted credentials, bounded worker
+admission and explicit handling of uncertain external sends.
 
-For a runtime extension or port:
-
-1. Identify the existing module, API/app contract, event producer and actual consumer.
-2. Extend the Rust owner while keeping API, MCP, flow and frontend contracts aligned.
-   External apps can keep their own language; do not pull them into the public core.
-3. There is no data from earlier releases to carry over; do not add import, backfill or
-   cutover paths for it. Never run two dispatchers against the same workload.
-4. Verify the real path with isolated PostgreSQL tenants and local provider fixtures.
-   Use the registered `rust_connectors` / `email_tests` suites when changing these services;
-   preserve the original comparison fixtures, concurrency checks and `schema_baseline`.
-5. Update module ownership and service documentation. Check the final runtime image
-   and startup path, not merely whether Rust code exists or unit tests pass.
-
+Runtime extensions and ports follow the five steps in [extensions/AGENTS.md](extensions/AGENTS.md#runtime-extensions-and-ports).
 
 ## Scoped ownership rules
 

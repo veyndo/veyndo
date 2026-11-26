@@ -33,13 +33,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-`reference/price.php`, `reference/context.php`, `reference/delivery.php`, and `reference/rules.php`
-instantiate the original installed upstream classes;
-the repository does not vendor Shopware, a commercial B2B package, or a model.
-PHP rounding behavior was checked against the official PHP 8.5 runtime and
-https://github.com/php/php-src/blob/PHP-8.5/ext/standard/math.c . No PHP C
-source is bundled. The reference assumes default PHP `precision=14` and the
-PHP 8.4+ decimal rounding behavior. Other runtime settings require a new gate.
 
 All catalog products, accounts and vector illustrations are synthetic demo
 content authored for this prototype. No merchant/customer data is included.

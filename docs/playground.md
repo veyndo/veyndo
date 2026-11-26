@@ -128,7 +128,7 @@ This tour covers the implemented prototype. Disabled rules, complete original
 FlowSequence import/export, all upstream triggers/configurations, production
 identity recovery, Shopware Payments and production checkout certification remain
 outside it. [Automation contracts](automation.md), [feature inventory](features.md)
-and [the Shopware parity matrix](shopware-parity.md) give precise boundaries.
+and [feature overview](features.md) give precise boundaries.
 
 `scripts/automation.py`, in the isolated integration suite, runs the same setup
 CLI, edits a rule, repeats setup to prove that the edit survives, and places both

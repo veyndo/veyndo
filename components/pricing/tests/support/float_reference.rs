@@ -1,5 +1,5 @@
 //! Test oracle only: the previous floating-point port of the Shopware 6.7.14.2 quantity calculators, kept verbatim
-//! so the exact calculator can be compared with it. CI compares it with the original PHP (`scripts/differential.py`).
+//! so the exact calculator can be compared with it.
 //! Original: Copyright (c) 2019 shopware AG, MIT; see THIRD_PARTY.md.
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};

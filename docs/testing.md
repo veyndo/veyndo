@@ -785,18 +785,6 @@ roles, then restarts a worker after its first 100-product batch and verifies com
 exact midpoint rounding and exclusion of products created after the job snapshot.
 See [multi-currency commerce](currencies.md) for the configuration and proof boundaries.
 
-The original-PHP comparisons and reflected automation catalog checks are:
-
-```sh
-python3 scripts/differential.py
-python3 scripts/context_differential.py
-python3 scripts/delivery_differential.py
-python3 scripts/rule_differential.py
-python3 scripts/automation_registry.py
-python3 scripts/automation_differential.py
-python3 scripts/money_boundary_differential.py
-```
-
 The automation suite also executes `scripts/playground.py` as documented: a new
 owner-owned shop, repeat setup after an edited rule, both checkout branches and
 actual invoice records. `tooling_tests.py` checks refusal of remote credential

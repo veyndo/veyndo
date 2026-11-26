@@ -1,14 +1,13 @@
 # Veyndo
 
 > A source-available Rust ecommerce prototype under the Veyndo Sustainable Use License for merchant-approved AI operations,
-> local LLMs, partial MCP/UCP adapters and selected original Shopware behavior ports.
+> local LLMs and partial MCP/UCP adapters.
 
 ## Start
 - [Overview](https://www.veyndo.ai/)
 - [Measured local performance](https://www.veyndo.ai/docs/benchmarks.html)
 - [Local quickstart](https://www.veyndo.ai/docs/quickstart.html)
 - [Local MCP bridge](https://www.veyndo.ai/docs/mcp.html)
-- [Shopware behavior ports](https://www.veyndo.ai/docs/shopware-parity.html)
 
 - [Connected playground](https://www.veyndo.ai/docs/playground.html)
 
@@ -47,7 +46,7 @@
 
 ## Original documentation
 - [Repository](https://github.com/veyndo/veyndo)
-- [Feature matrix](https://www.veyndo.ai/docs/shopware-parity.html)
+- [Feature overview](https://www.veyndo.ai/docs/features.html)
 - [Recorded verification](https://github.com/veyndo/veyndo/blob/main/docs/verification.json)
 - [Security and SaaS boundaries](https://www.veyndo.ai/docs/security.html)
 

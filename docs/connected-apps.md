@@ -151,9 +151,7 @@ The current executable production inventory is
 native scope bindings, and 16 Core action names. The graphical builder supports
 branches, sequences, saved references, durable delays and typed domain/app
 nodes. Complete source behavior, original trigger coverage, configuration/UUID
-mapping and FlowSequence interchange remain incomplete. The older
-`reference/rule-catalog.json` is a historical regex inventory, not the current
-production count. [Automation details](automation.md) and the
+mapping and FlowSequence interchange remain incomplete. [Automation details](automation.md) and the
 [provider-free playground](playground.md) explain what can actually be tried.
 
 ## Delivery semantics and tests
@@ -168,7 +166,6 @@ it is not an exactly-once guarantee across Slack's external network.
 python3 scripts/connector_store_tests.py
 python3 scripts/connected_apps.py
 node frontend/tests/analytics.mjs
-python3 scripts/rule_differential.py
 ```
 
 The integration suite uses real local HTTP OAuth/provider fixtures plus the actual Rust

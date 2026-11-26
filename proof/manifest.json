@@ -4834,8 +4834,8 @@
     },
     "components/pricing/tests/calculator_reference.rs": {
       "status": "unproved",
-      "sha256": "bfaf648b2c77f585ad913d00f0e620262921ebc8c8c7cb660145d178cc270cb5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "e5ef1bfea42fe071ab8b13f765d5a100acdb83724c83d41fd7ed0b15a3634bfe",
+      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
     },
     "components/pricing/tests/domain_mutants.rs": {
       "status": "unproved",
@@ -4849,8 +4849,8 @@
     },
     "components/pricing/tests/support/float_reference.rs": {
       "status": "unproved",
-      "sha256": "af0a27e225451dc4d3f324fefc6fe2ab989dc9d749b5346bdb8dbbc6979f58e9",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "ccdca80e5083e875342b37149de9ef5120fde32af33b0f382cb24270bc35304a",
+      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
     },
     "components/shipping/src/domain/booking.rs": {
       "status": "reviewed-binding",
@@ -8017,40 +8017,10 @@
       "sha256": "098e865b3b59b8148dc70239bdb449f9aa6faccd62d26bd680ec48b6aee720fc",
       "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
-    "src/bin/automation_rules.rs": {
-      "status": "unproved",
-      "sha256": "92d3afe9dd6304638128d3a5a1b827de606dec969ed957a6cf00078e305425fe",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
-    },
     "src/bin/connectors.rs": {
       "status": "unproved",
       "sha256": "d94c888f9270c4a9bc6f91bfd5cdd004ab2b5bae9b74a5aec0b3e053dd5bd85e",
       "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
-    },
-    "src/bin/context.rs": {
-      "status": "unproved",
-      "sha256": "95e03df324eacb9d8c629a2c9f0dd880d0724e99fda35303170c5730193ec6a5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
-    },
-    "src/bin/delivery.rs": {
-      "status": "unproved",
-      "sha256": "e589d76b15b5d82050a56db2ac578552e14225b3c7d17a89b046939048bda834",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
-    },
-    "src/bin/money_boundary.rs": {
-      "status": "unproved",
-      "sha256": "7b1f30d897a13dd346906abb172aa9a5bcb5ecb45cdd85cb26e25402b860d002",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
-    },
-    "src/bin/price.rs": {
-      "status": "unproved",
-      "sha256": "7bc0a6115187f6f8af1744702323d897045b4a5d8903dbcdcb60830b22483f4a",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
-    },
-    "src/bin/rules.rs": {
-      "status": "unproved",
-      "sha256": "5fa5c0fda2bdfab9bf5c539cf5c3ef7b04e57bad284bfd7a3834fc0a359cfeac",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
     "src/bin/verified_kernel/dispatch/access.rs": {
       "status": "conformance-driver",
@@ -9425,8 +9395,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "a05cbf8177c85a31a77a3831651a1e9a354a62dbf4245928504d4063ddfa5e07",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "b93dfb19dde6749691deaf075a8f196629aae0a68bb37e3cea0413ddbe2afc87",
+      "review": "Removed the Shopware PHP comparison transports (src/bin price, context, delivery, rules, money_boundary, automation_rules) on 2026-11-26: Shopware compatibility is no longer a goal; no proved rule or binding changed"
     },
     "Cargo.lock": {
       "sha256": "b2799cdb165d9eacf0c0f54205c71a922a5b4f232f5114f05288c5ef2e6d64e5",
