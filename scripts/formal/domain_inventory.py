@@ -21,11 +21,13 @@ INVENTORY = 'proof/domain-inventory.json'
 PAGE = 'docs/formal-coverage.md'
 STATUSES = ('binds-proved-rule', 'unproved')
 REASONS = {
-    'money-representation': 'Money arithmetic, scaling, rounding or totals. Open until the money '
-                            'refactor moves pricing to whole minor units; another session proves '
-                            'price total = lines + shipping + tax, scaling and rounding afterwards.',
-    'float-calculation': 'Floating-point price, tax or discount calculation ported from the original '
-                         'calculators; outside the bool/u64 extraction subset until the money refactor.',
+    'money-representation': 'Money representation and exact arithmetic outside the bool/u64 subset: '
+                            'minor-unit types, decimal parsing and text, exact rationals in i128, the '
+                            'wire conversion of JSON numbers. Rounding, products and sums inside it are '
+                            'the proved rules; the rest is unit and property tested.',
+    'binary-emulation': 'Reproduces the original calculators\' binary64 arithmetic with integers (no '
+                        'floating-point type), because their results at decimal ties depend on it; '
+                        'checked bit for bit against the previous port and the original PHP, not extracted.',
     'document-shape': 'Reads, writes or projects JSON/serde documents; data mapping, not a decision rule.',
     'text-and-locale': 'Text, labels, locale or formatting; no commerce invariant to prove.',
     'rendering': 'Renders documents (receipt text or PDF); output layout, not a decision rule.',

@@ -473,4 +473,161 @@ theorem checkout_review_stale_denied (current stale expectedTotal actualTotal : 
   have hne : revisionRun current edits ≠ stale := by omega
   simp [checkout_review_admissible, hne]
 
+/-! ### Money in whole minor units: line totals, scaling, rounding and quote totals -/
+
+/-- Below the largest representable amount a line total is the exact product. -/
+theorem line_total_exact (unit quantity : Nat) (h : unit * quantity ≤ 18446744073709551615) :
+    line_total unit quantity = unit * quantity := by
+  simp only [line_total]; exact Nat.min_eq_left h
+
+/-- A line total never wraps around. -/
+theorem line_total_bounded (unit quantity : Nat) : line_total unit quantity ≤ 18446744073709551615 := by
+  simp only [line_total]; exact Nat.min_le_right _ _
+
+/-- No units cost nothing; one unit costs its unit price. -/
+theorem line_total_zero (unit : Nat) : line_total unit 0 = 0 := by
+  simp [line_total]
+
+theorem line_total_one (unit : Nat) (h : unit ≤ 18446744073709551615) : line_total unit 1 = unit := by
+  simp only [line_total, Nat.mul_one]; exact Nat.min_eq_left h
+
+/-- Splitting a quantity splits its line total: `unit * (a + b) = unit * a + unit * b`. -/
+theorem line_total_split (unit a b : Nat) (h : unit * (a + b) ≤ 18446744073709551615) :
+    line_total unit (a + b) = line_total unit a + line_total unit b := by
+  have ha : unit * a ≤ unit * (a + b) := Nat.mul_le_mul_left _ (Nat.le_add_right a b)
+  have hb : unit * b ≤ unit * (a + b) := Nat.mul_le_mul_left _ (Nat.le_add_left b a)
+  rw [line_total_exact _ _ h, line_total_exact _ _ (Nat.le_trans ha h),
+    line_total_exact _ _ (Nat.le_trans hb h), Nat.mul_add]
+
+/-- A larger quantity never gives a smaller line total. -/
+theorem line_total_monotone (unit a b : Nat) (h : a ≤ b) : line_total unit a ≤ line_total unit b := by
+  have hm := Nat.mul_le_mul_left unit h
+  simp only [line_total]
+  generalize unit * a = x at hm ⊢
+  generalize unit * b = y at hm ⊢
+  omega
+
+/-- In range, the rounded quotient is `(n + d / 2) / d`. -/
+theorem rounded_quotient_eq (n d : Nat) (hd : 0 < d) (h : n + d / 2 ≤ 18446744073709551615) :
+    rounded_quotient n d = (n + d / 2) / d := by
+  have hm : max d 1 = d := Nat.max_eq_left hd
+  simp only [rounded_quotient, hm, Nat.min_eq_left h]
+
+/-- Rounding is to the nearest whole minor unit: `|r * d - n| ≤ d / 2`, written without
+subtraction as two inequalities on doubled values. -/
+theorem rounded_quotient_nearest (n d : Nat) (hd : 0 < d) (h : n + d / 2 ≤ 18446744073709551615) :
+    2 * (rounded_quotient n d * d) ≤ 2 * n + d ∧ 2 * n ≤ 2 * (rounded_quotient n d * d) + d := by
+  rw [rounded_quotient_eq n d hd h]
+  have below : (n + d / 2) / d * d ≤ n + d / 2 := Nat.div_mul_le_self _ _
+  have above : n + d / 2 < ((n + d / 2) / d + 1) * d := by
+    have := Nat.lt_mul_div_succ (n + d / 2) hd
+    rw [Nat.mul_comm] at this; exact this
+  rw [Nat.add_mul, Nat.one_mul] at above
+  generalize (n + d / 2) / d * d = p at below above ⊢
+  omega
+
+/-- A tie rounds up (away from zero for a magnitude): `k + 1/2` becomes `k + 1`. -/
+theorem rounded_quotient_half_up (k h : Nat) (hh : 0 < h)
+    (hr : k * (2 * h) + h + h ≤ 18446744073709551615) :
+    rounded_quotient (k * (2 * h) + h) (2 * h) = k + 1 := by
+  have hd : 0 < 2 * h := by omega
+  have half : 2 * h / 2 = h := by omega
+  rw [rounded_quotient_eq _ _ hd (by rw [half]; exact hr), half]
+  have : k * (2 * h) + h + h = (2 * h) * (k + 1) := by
+    rw [Nat.mul_add, Nat.mul_one, Nat.mul_comm]; omega
+  rw [this, Nat.mul_div_cancel_left _ hd]
+
+/-- Scaling and rounding back: an amount scaled up by a factor and rounded at that factor is unchanged. -/
+theorem scaled_round_trip (amount factor : Nat) (hf : 0 < factor)
+    (h : amount * factor + factor / 2 ≤ 18446744073709551615) :
+    rounded_quotient (line_total amount factor) factor = amount := by
+  have hp : amount * factor ≤ 18446744073709551615 := by omega
+  rw [line_total_exact _ _ hp, rounded_quotient_eq _ _ hf h]
+  have hl : factor / 2 < factor := Nat.div_lt_self hf (by decide)
+  rw [Nat.add_comm, Nat.mul_comm, Nat.add_mul_div_left _ _ hf, Nat.div_eq_of_lt hl, Nat.zero_add]
+
+/-- Rounding never decreases when the amount grows. -/
+theorem rounded_quotient_monotone (a b d : Nat) (h : a ≤ b) :
+    rounded_quotient a d ≤ rounded_quotient b d := by
+  simp only [rounded_quotient]
+  exact Nat.div_le_div_right (by omega)
+
+/-- The tax contained in a gross amount at `rate` per `base` (e.g. 19 per 100), rounded to the
+nearest minor unit, never exceeds the gross amount; so net plus that tax is the gross amount. -/
+theorem included_tax_within_gross (gross rate base : Nat) (hb : 0 < base)
+    (h : gross * rate + (base + rate) / 2 ≤ 18446744073709551615) :
+    rounded_quotient (line_total gross rate) (base + rate) ≤ gross ∧
+      net_amount gross (rounded_quotient (line_total gross rate) (base + rate))
+        + rounded_quotient (line_total gross rate) (base + rate) = gross := by
+  have hp : gross * rate ≤ 18446744073709551615 := by omega
+  have hd : 0 < base + rate := by omega
+  have within : rounded_quotient (line_total gross rate) (base + rate) ≤ gross := by
+    rw [line_total_exact _ _ hp, rounded_quotient_eq _ _ hd h]
+    apply Nat.le_of_lt_succ
+    rw [Nat.div_lt_iff_lt_mul hd, Nat.succ_mul, Nat.mul_add]
+    generalize gross * base = gb
+    generalize gross * rate = gr at h ⊢
+    have : (base + rate) / 2 < base + rate := Nat.div_lt_self hd (by decide)
+    omega
+  exact ⟨within, net_plus_tax_is_gross _ _ within⟩
+
+/-- The quote's goods total: its line totals added with the proved sum, in order. -/
+def linesTotal (lines : List Nat) : Nat := lines.foldl amount_sum 0
+
+theorem lines_fold_exact (lines : List Nat) (start : Nat)
+    (h : start + lines.sum ≤ 18446744073709551615) :
+    lines.foldl amount_sum start = start + lines.sum := by
+  induction lines generalizing start with
+  | nil => simp
+  | cons line rest ih =>
+    simp only [List.foldl_cons, List.sum_cons] at h ⊢
+    rw [amount_sum_exact _ _ (by omega), ih _ (by omega)]
+    omega
+
+/-- In range, the goods total is exactly the sum of the line totals. -/
+theorem lines_total_exact (lines : List Nat) (h : lines.sum ≤ 18446744073709551615) :
+    linesTotal lines = lines.sum := by
+  have := lines_fold_exact lines 0 (by simpa using h)
+  simpa [linesTotal] using this
+
+/-- The same lines in any order give the same goods total. -/
+theorem lines_total_order_free (a b : List Nat) (p : a.Perm b) (h : a.sum ≤ 18446744073709551615) :
+    linesTotal a = linesTotal b := by
+  rw [lines_total_exact a h, lines_total_exact b (by rw [← p.sum_nat]; exact h), p.sum_nat]
+
+/-- A net quote (tax added on top): payable = (lines + line tax) + gross shipping, and that is
+the lines plus net shipping plus all tax (line tax and shipping tax). -/
+theorem net_quote_total (lines : List Nat) (tax shipping shippingTax : Nat)
+    (hs : shippingTax ≤ shipping)
+    (h : lines.sum + tax + shipping ≤ 18446744073709551615) :
+    amount_sum (amount_sum (linesTotal lines) tax) shipping
+      = lines.sum + net_amount shipping shippingTax + (tax + shippingTax) := by
+  rw [lines_total_exact lines (by omega), amount_sum_exact lines.sum tax (by omega),
+    amount_sum_exact _ _ (by omega)]
+  simp only [net_amount]; omega
+
+/-- A gross quote (tax contained): payable = lines + shipping, and that is the net lines plus
+net shipping plus all tax, whenever each tax is part of its gross amount. -/
+theorem gross_quote_total (lines : List Nat) (tax shipping shippingTax : Nat)
+    (ht : tax ≤ lines.sum) (hs : shippingTax ≤ shipping)
+    (h : lines.sum + shipping ≤ 18446744073709551615) :
+    amount_sum (linesTotal lines) shipping
+      = net_amount lines.sum tax + net_amount shipping shippingTax + (tax + shippingTax) := by
+  rw [lines_total_exact lines (by omega), amount_sum_exact _ _ h]
+  simp only [net_amount]; omega
+
+/-- A quote total is never below its goods total: adding shipping or tax never lowers it. -/
+theorem quote_total_not_below_lines (lines : List Nat) (extra : Nat)
+    (h : lines.sum ≤ 18446744073709551615) :
+    linesTotal lines ≤ amount_sum (linesTotal lines) extra := by
+  apply amount_sum_not_below; rw [lines_total_exact lines h]; exact h
+
+/-- The same input gives the same quote total: the total is a function of the lines,
+tax and shipping only (no hidden state), so equal inputs give equal totals. -/
+theorem quote_total_deterministic (a b : List Nat) (tax shipping : Nat) (p : a.Perm b)
+    (h : a.sum ≤ 18446744073709551615) :
+    amount_sum (amount_sum (linesTotal a) tax) shipping
+      = amount_sum (amount_sum (linesTotal b) tax) shipping := by
+  rw [lines_total_order_free a b p h]
+
 end CommerceKernel

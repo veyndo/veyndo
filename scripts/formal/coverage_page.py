@@ -19,11 +19,17 @@ DOMAINS = {
 # The money path: every file a price, an order total or a payment passes through.
 MONEY = [
     ('Money primitives and discounts', lambda p: p.startswith('components/pricing/src/domain/')),
-    ('Cart and prices', lambda p: re.match(r'src/cart_\w+\.rs$', p) is not None),
-    ('Checkout and orders', lambda p: p.startswith('src/checkout/') or re.match(r'src/(checkout_\w+|order_\w+)\.rs$', p) is not None),
-    ('Payments and refunds', lambda p: p.startswith('src/payments/')),
-    ('Currencies and taxes', lambda p: p.startswith('src/currencies/') or re.match(r'src/commerce/tax\w*\.rs$', p) is not None),
-    ('Stock', lambda p: re.match(r'src/commerce/inventory\w*\.rs$', p) is not None),
+    ('Cart and prices', lambda p: p.startswith('components/checkout/src/domain/')
+        or re.match(r'src/cart_\w+\.rs$', p) is not None),
+    ('Checkout, delivery and orders', lambda p: p.startswith(('src/checkout/', 'components/checkout/src/service/',
+                                                             'components/orders/src/domain/'))
+        or re.match(r'src/(checkout_\w+|order_\w+)\.rs$', p) is not None),
+    ('Promotions', lambda p: p == 'components/marketing/src/store/promotions.rs'),
+    ('Payments and refunds', lambda p: p.startswith(('src/payments/', 'components/payments/src/domain/'))),
+    ('Currencies and taxes', lambda p: p.startswith(('src/currencies/', 'components/pricing/src/service/'))
+        or re.match(r'src/commerce/tax\w*\.rs$', p) is not None),
+    ('Stock', lambda p: p.startswith('components/inventory/src/domain/')
+        or re.match(r'src/commerce/inventory\w*\.rs$', p) is not None),
 ]
 STATUS = ('extracted-policy', 'reviewed-binding', 'conformance-driver', 'unproved')
 

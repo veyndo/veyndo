@@ -1,4 +1,6 @@
-//! Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated.
+//! Exact signed minor-unit amounts with explicit currency scale: `Money` with its currency code, `Minor` on the calculation path.
+use crate::decimal::{Decimal, MoneyError, Ratio};
+use crate::verified_kernel;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -163,29 +165,137 @@ impl Money {
             self.currency.clone(),
         ))
     }
-    /// Compatibility gate only: existing EUR checkout round behavior, with overflow/non-finite rejection.
-    /// This is not a conversion of the Shopware price calculators to integer arithmetic.
-    pub fn from_legacy_eur(total: f64) -> Result<Self, &'static str> {
-        let minor = (total * 100.).round();
-        if !total.is_finite()
-            || total < 0.
-            || !minor.is_finite()
-            || minor >= 9_223_372_036_854_775_808.
-        {
-            return Err("Invalid legacy checkout amount");
-        }
-        Ok(Self::new(minor as i64, Currency::eur()))
+    /// An exact decimal amount in this currency's minor units, rounded half away from zero.
+    pub fn from_decimal(value: Decimal, currency: Currency) -> Result<Self, MoneyError> {
+        let minor = value.ratio().rounded(currency.scale)?;
+        Ok(Self::new(minor.minor(), currency))
+    }
+    /// The amount in whole minor units without its currency code.
+    pub fn amount(&self) -> Minor {
+        Minor::new(self.minor, self.currency.scale)
     }
 }
 
-/// A calculated amount as whole minor units; `None` when it is negative, not finite or beyond exact integer range.
-pub fn to_minor(value: f64, scale: u8) -> Option<u64> {
-    let minor = (value * 10_f64.powi(i32::from(scale))).round();
-    (value.is_finite() && value >= 0. && minor <= 9_007_199_254_740_992.).then_some(minor as u64)
+/// An amount in whole minor units of a currency with `scale` decimal places (EUR cents: 2).
+///
+/// This is the money type of the calculation path: line totals, discounts, shipping,
+/// taxes, net and gross amounts and quote totals. Arithmetic is checked: an overflow
+/// or a mismatch of scales is refused, never wrapped. Rounding into it is half away
+/// from zero ([`Ratio::rounded`]); JSON writes it as the nearest number.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Minor {
+    minor: i64,
+    scale: u8,
 }
-/// Minor units as the decimal number the wire format carries.
-pub fn from_minor(minor: u64, scale: u8) -> f64 {
-    minor as f64 / 10_f64.powi(i32::from(scale))
+
+impl Minor {
+    pub fn new(minor: i64, scale: u8) -> Self {
+        Self { minor, scale }
+    }
+    pub fn zero(scale: u8) -> Self {
+        Self { minor: 0, scale }
+    }
+    pub fn minor(&self) -> i64 {
+        self.minor
+    }
+    pub fn scale(&self) -> u8 {
+        self.scale
+    }
+    pub fn decimal(&self) -> Decimal {
+        Decimal::new(self.minor.into(), self.scale.into()).unwrap_or(Decimal::ZERO)
+    }
+    pub fn ratio(&self) -> Ratio {
+        self.decimal().ratio()
+    }
+    /// An exact amount at `scale`; a value with more decimals is rounded half away from zero.
+    pub fn from_decimal(value: Decimal, scale: u8) -> Result<Self, MoneyError> {
+        value.ratio().rounded(scale)
+    }
+    fn same_scale(&self, other: &Self) -> Result<(), MoneyError> {
+        if self.scale == other.scale {
+            Ok(())
+        } else {
+            Err("Currency or scale mismatch")
+        }
+    }
+    pub fn checked_add(self, other: Self) -> Result<Self, MoneyError> {
+        self.same_scale(&other)?;
+        Ok(Self::new(
+            self.minor
+                .checked_add(other.minor)
+                .ok_or("Amount overflow")?,
+            self.scale,
+        ))
+    }
+    pub fn checked_sub(self, other: Self) -> Result<Self, MoneyError> {
+        self.same_scale(&other)?;
+        Ok(Self::new(
+            self.minor
+                .checked_sub(other.minor)
+                .ok_or("Amount overflow")?,
+            self.scale,
+        ))
+    }
+    /// The amount of `quantity` units: the proved line total on the magnitude, refused
+    /// instead of saturating.
+    pub fn times(self, quantity: u64) -> Result<Self, MoneyError> {
+        let magnitude = self.minor.unsigned_abs();
+        if magnitude.checked_mul(quantity).is_none() {
+            return Err("Amount overflow");
+        }
+        let total = i64::try_from(verified_kernel::line_total(magnitude, quantity))
+            .map_err(|_| "Amount overflow")?;
+        Ok(Self::new(
+            if self.minor < 0 { -total } else { total },
+            self.scale,
+        ))
+    }
+    /// The same amount at a scale with at least as many decimals.
+    pub fn at_scale(self, scale: u8) -> Result<Self, MoneyError> {
+        let shift = scale
+            .checked_sub(self.scale)
+            .ok_or("Currency or scale mismatch")?;
+        let factor = 10_i64.checked_pow(shift.into()).ok_or("Amount overflow")?;
+        Ok(Self::new(
+            self.minor.checked_mul(factor).ok_or("Amount overflow")?,
+            scale,
+        ))
+    }
+    /// The amount at `digits` significant digits (the calculators' precision step), same scale.
+    pub fn significant(self, digits: u32) -> Result<Self, MoneyError> {
+        Self::from_decimal(self.ratio().significant(digits)?, self.scale)
+    }
+    /// The amount as unsigned minor units for the proved sums; a negative amount is refused.
+    pub fn unsigned(self) -> Result<u64, MoneyError> {
+        u64::try_from(self.minor).map_err(|_| "Amount must not be negative")
+    }
+    pub fn from_unsigned(minor: u64, scale: u8) -> Result<Self, MoneyError> {
+        Ok(Self::new(
+            i64::try_from(minor).map_err(|_| "Amount overflow")?,
+            scale,
+        ))
+    }
+    /// The signed sum of amounts at one scale, refused on overflow or mismatched scales.
+    pub fn sum(values: impl IntoIterator<Item = Self>, scale: u8) -> Result<Self, MoneyError> {
+        values
+            .into_iter()
+            .try_fold(Self::zero(scale), |total, value| total.checked_add(value))
+    }
+}
+
+/// JSON writes an amount as the nearest number, through the one wire conversion of [`Decimal`].
+impl Serialize for Minor {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.decimal().serialize(serializer)
+    }
+}
+
+/// The sum of unsigned minor amounts through the proved `amount_sum`; refused instead of saturating.
+pub fn unsigned_sum(values: impl IntoIterator<Item = u64>) -> Result<u64, MoneyError> {
+    values.into_iter().try_fold(0_u64, |total, value| {
+        total.checked_add(value).ok_or("Amount overflow")?;
+        Ok(verified_kernel::amount_sum(total, value))
+    })
 }
 
 #[cfg(test)]
@@ -244,28 +354,6 @@ mod tests {
                 .checked_add(&Money::new(1, Currency::new("EUR", 3).unwrap()))
                 .is_err()
         );
-        for total in [
-            f64::NAN,
-            f64::INFINITY,
-            -1.,
-            -0.004,
-            -f64::MIN_POSITIVE,
-            1e30,
-        ] {
-            assert!(Money::from_legacy_eur(total).is_err());
-        }
-    }
-    #[test]
-    fn compatibility_boundary_preserves_old_rounding_for_supported_totals() {
-        for n in 0..20000 {
-            for fraction in [0., 0.0049, 0.005, 0.0051, 0.0099] {
-                let total = n as f64 / 100. + fraction;
-                assert_eq!(
-                    Money::from_legacy_eur(total).unwrap().minor(),
-                    (total * 100.).round() as i64
-                );
-            }
-        }
     }
 }
 
@@ -306,47 +394,24 @@ mod decimal_rounding {
 
 #[cfg(test)]
 mod minor_units {
-    use super::{from_minor, to_minor};
-    use crate::pricing::math_round;
+    use super::{Minor, unsigned_sum};
 
     #[test]
-    fn rounded_amounts_convert_exactly_and_back() {
-        for (value, scale, minor) in [
-            (0.0, 2, 0),
-            (19.99, 2, 1999),
-            (0.07, 2, 7),
-            (1584.0, 0, 1584),
-            (7.123, 3, 7123),
-        ] {
-            assert_eq!(to_minor(value, scale), Some(minor));
-            assert_eq!(from_minor(minor, scale), value);
-        }
-        for value in [-0.01, f64::NAN, f64::INFINITY, 1e30] {
-            assert_eq!(to_minor(value, 2), None);
-        }
-    }
-
-    #[test]
-    fn integer_totals_equal_the_rounded_decimal_totals() {
-        // The same lines added as decimals and rounded once, and added as minor units.
-        let mut state = 0x9e37_79b9_7f4a_7c15_u64;
-        for scale in [0_u8, 2, 3] {
-            for _ in 0..2000 {
-                let mut decimal = 0.0;
-                let mut minor = 0_u64;
-                for _ in 0..40 {
-                    state ^= state << 13;
-                    state ^= state >> 7;
-                    state ^= state << 17;
-                    let line = (state % 10_000_000) as f64 / 10_f64.powi(i32::from(scale));
-                    decimal += line;
-                    minor += to_minor(line, scale).unwrap();
-                }
-                assert_eq!(
-                    math_round(decimal, i32::from(scale)),
-                    from_minor(minor, scale)
-                );
-            }
-        }
+    fn line_totals_sums_and_scales_are_exact_or_refused() {
+        let unit = Minor::new(-1999, 2);
+        assert_eq!(unit.times(3).unwrap(), Minor::new(-5997, 2));
+        assert_eq!(unit.times(0).unwrap(), Minor::zero(2));
+        assert!(Minor::new(i64::MAX, 2).times(2).is_err());
+        assert_eq!(unit.at_scale(3).unwrap(), Minor::new(-19990, 3));
+        assert!(unit.at_scale(1).is_err());
+        assert!(unit.checked_add(Minor::new(1, 3)).is_err());
+        assert_eq!(unsigned_sum([1, 2, 3]).unwrap(), 6);
+        assert!(unsigned_sum([u64::MAX, 1]).is_err());
+        assert!(Minor::new(-1, 2).unsigned().is_err());
+        assert_eq!(serde_json::to_string(&Minor::new(6000, 2)).unwrap(), "60.0");
+        assert_eq!(
+            serde_json::to_string(&Minor::new(7123, 3)).unwrap(),
+            "7.123"
+        );
     }
 }

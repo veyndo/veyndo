@@ -58,10 +58,7 @@ pub fn validate(s: &Settings, conditions: Conditions<'_>) -> Result<()> {
     for t in &s.taxes {
         tax_rules::validate(t, s, conditions)?;
         validate_texts(&t.translations, &s.locales)?;
-        if t.rates
-            .values()
-            .any(|r| !r.is_finite() || !(0. ..=100.).contains(r))
-        {
+        if t.rates.values().any(|r| !tax_rules::percentage(*r)) {
             return Err(bad("Tax rates must be 0..100"));
         }
         for c in &s.countries {
@@ -70,7 +67,7 @@ pub fn validate(s: &Settings, conditions: Conditions<'_>) -> Result<()> {
                 .get(c)
                 .or(t.default_rate.as_ref())
                 .ok_or(bad("Missing country rate"))?;
-            if !r.is_finite() || !(0. ..=100.).contains(r) {
+            if !tax_rules::percentage(*r) {
                 return Err(bad("Tax rates must be 0..100"));
             }
         }
@@ -190,7 +187,9 @@ mod tests {
         s.payments[0].mode = "live-charge".into();
         assert!(validate_config(&s).is_err());
         let mut s = template();
-        s.taxes[0].rates.insert("DE".into(), -1.);
+        s.taxes[0]
+            .rates
+            .insert("DE".into(), veyndo_pricing::decimal::Decimal::integer(-1));
         assert!(validate_config(&s).is_err());
         let mut s = template();
         s.shipping[0].max_days = -1;

@@ -89,9 +89,12 @@ is rejected rather than silently producing a stale cross-currency quote. Manual
 rates are merchant-controlled and do not expire automatically.
 
 FX conversion uses rational integer arithmetic, eight-decimal rate strings and
-one half-up rounding to the target minor unit. The ported Shopware tax/discount
-calculator still uses its original float semantics behind the explicit money
-boundary; it has not been replaced by an entirely integer calculator.
+one half-up rounding to the target minor unit. Amounts on the calculation path are
+whole minor units (`Minor`, `Money`) and exact decimals; a JSON number is read as
+the shortest decimal that names it. The ported Shopware tax/discount calculator
+reproduces the original's binary64 rounding with integer arithmetic, because the
+original's results at decimal ties depend on it, and returns minor units
+([what is proved](formal-verification.md)).
 
 Before placing an order, the browser submits its reviewed cart revision, currency
 and minor-unit total. If an exchange-rate change alters the quote, checkout returns
@@ -112,7 +115,7 @@ An existing `sw-context-token` owns its saved currency; changing the header alon
 does not mutate the cart. Catalog/detail/context/options responses expose currency
 metadata; cart `price` includes `currency` and `currencyScale`, plus `currencyContext`
 with source/base currency, exact factor, strategy and rate date. Storefront amounts
-are major-unit numbers at the legacy calculator boundary. Financial `money.minor`
+are major-unit numbers on the wire; inside they are whole minor units. Financial `money.minor`
 and payment `amountMinor` are integer minor units.
 
 | Endpoint | Input / purpose | MCP tool | Authority |

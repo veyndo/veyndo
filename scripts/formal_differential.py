@@ -30,13 +30,16 @@ from extract import Parser, generated, kernel_source  # noqa: E402
 from mutations import mutated  # noqa: E402
 from runners import lean_runner  # noqa: E402
 
-# One altered rule per control: a dropped guard, a weakened bound and a flipped decision.
+# One altered rule per control: a dropped guard, a weakened bound, a flipped decision, a wrong
+# product and a truncating instead of rounding quotient.
 CONTROLS = [
     ('reservation_admissible', 'requested <= ordered.saturating_sub(held)', 'requested <= ordered'),
     ('order_transition_admissible', '&& !source_terminal', '&& true'),
     ('payment_transition_admissible', 'next > current', 'true'),
     ('stock_admissible', 'quantity <= stock', 'quantity >= stock'),
     ('discount_cap', 'total.min(requested)', 'requested'),
+    ('line_total', 'unit.saturating_mul(quantity)', 'unit.saturating_add(quantity)'),
+    ('rounded_quotient', 'denominator.max(1) / 2', '0'),
 ]
 
 

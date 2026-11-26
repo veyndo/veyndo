@@ -139,6 +139,10 @@ MUTANTS=[
  ('receipt_admissible','expected == received','true'),
  ('amount_sum','left.saturating_add(right)','left'),
  ('net_amount','gross.saturating_sub(tax)','gross'),
+ ('line_total','unit.saturating_mul(quantity)','unit.saturating_add(quantity)'),
+ ('line_total','unit.saturating_mul(quantity)','unit'),
+ ('rounded_quotient','denominator.max(1) / 2','0'),
+ ('rounded_quotient','denominator.max(1) / 2','denominator.max(1)'),
  ('offer_honoured','!expired &&','true &&'),
  ('offer_honoured','&& same_total','&& true'),
  ('offer_honoured','&& same_revision','&& true'),
@@ -190,7 +194,7 @@ def proof_failures(root):
     return len(MUTANTS)+len(rejecting)
 
 def closed_grammar():
-    bad=['x + 1','x - 1','x * 2','x.wrapping_add(1)','x as u64','if true { x } else { 0 }','{ x }',
+    bad=['x + 1','x - 1','x * 2','x / x','x / 0','x / x.max(0)','x % 2','x.wrapping_add(1)','x as u64','if true { x } else { 0 }','{ x }',
          'std::cmp::min(x,1)','unsafe { x }','panic!("x")','0.5','18446744073709551616','let y = x; y','return x;']
     for body in bad:
         try:Parser('pub fn rejected(x: u64) -> u64 { '+body+' }').parse()

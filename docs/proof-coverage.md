@@ -6,19 +6,19 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-93.9 % of the Rust source files are unproved.
+94.2 % of the Rust source files are unproved.
 
 ## In numbers
 
 | | Count | Share of source files | Meaning |
 | --- | ---: | ---: | --- |
-| **Proved rules** | 72 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
-| **Proved properties** | 197 | | Statements about those rules that hold for every possible input |
+| **Proved rules** | 74 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
+| **Proved properties** | 216 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
-| Reviewed callers | 80 | 5.1 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
-| Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1486 | 93.9 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1583 | 100 % | |
+| Reviewed callers | 83 | 4.8 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Comparison drivers | 9 | 0.5 % | Test programs that compare the compiled Rust rules with the Lean versions |
+| **Unproved files** | 1632 | 94.2 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1732 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -42,13 +42,14 @@ rounding still has to be argued by tests rather than by the type.
 
 | Area | Files | Call a proved rule | Unproved | Use floating point |
 | --- | ---: | ---: | ---: | ---: |
-| Money primitives and discounts | 14 | 3 | 11 | 4 |
-| Cart and prices | 4 | 0 | 4 | 0 |
-| Checkout and orders | 10 | 0 | 10 | 0 |
-| Payments and refunds | 22 | 0 | 22 | 0 |
-| Currencies and taxes | 9 | 0 | 9 | 0 |
-| Stock | 1 | 0 | 1 | 0 |
-| **Money path in total** | **60** | **3** | **57** | **4** |
+| Money primitives and discounts | 16 | 5 | 11 | 2 |
+| Cart and prices | 11 | 3 | 8 | 2 |
+| Checkout, delivery and orders | 32 | 6 | 26 | 4 |
+| Promotions | 1 | 0 | 1 | 1 |
+| Payments and refunds | 38 | 3 | 35 | 0 |
+| Currencies and taxes | 16 | 1 | 15 | 4 |
+| Stock | 4 | 1 | 3 | 0 |
+| **Money path in total** | **118** | **19** | **99** | **13** |
 
 The money path is also checked by tests that are not shown here: the
 differential comparison against the original PHP price calculation and the
@@ -62,13 +63,13 @@ that call it.
 
 ### Prices, stock, payments and refunds
 
-21 rules, 74 proved properties.
+23 rules, 93 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/commerce.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
 | `admin_payment_admissible` | No comment in the source | 2: `admin_payment_exact`, `admin_external_payment_denied` | `components/checkout/src/domain/admin_order.rs` |
-| `amount_sum` | The sum of two amounts in minor units; it never wraps around. | 4: `amount_sum_exact`, `amount_sum_bounded`, `amount_sum_not_below`, `amount_sum_comm` | `components/checkout/src/domain/cart_quote.rs` |
+| `amount_sum` | The sum of two amounts in minor units; it never wraps around. | 11: `amount_sum_exact`, `amount_sum_bounded`, `amount_sum_not_below`, `amount_sum_comm`, `lines_fold_exact`, `lines_total_exact`, `lines_total_order_free`, `net_quote_total`, `gross_quote_total`, `quote_total_not_below_lines`, `quote_total_deterministic` | `components/checkout/src/domain/cart_quote.rs`, `components/checkout/src/service/delivery.rs`, `components/pricing/src/domain/money.rs` |
 | `b2b_approval_admissible` | An approval requires a different employee, current authority, pending state and exact revision. | 2: `b2b_approval_exact`, `b2b_self_approval_denied` | `components/b2b/src/store/purchase.rs`, `components/b2b/src/service/approval.rs` |
 | `b2b_budget_admissible` | Spending cannot exceed a currency-bound unit budget, including existing allocations. | 6: `b2b_budget_exact`, `b2b_budget_conserves`, `budget_sequence_bounded`, `budget_sequence_conservation`, `budget_lowered_limit_denied`, `budget_zero_at_exhaustion` | `components/b2b/src/store/purchase.rs`, `crates/cognition/src/inference/budget.rs` |
 | `capture_admissible` | Captures and in-flight reservations together cannot exceed the original authorization. | 4: `capture_exact`, `capture_bounded`, `capture_zero_denied`, `capture_run_bounded` | `components/payments/src/store/capture_admission.rs` |
@@ -79,7 +80,8 @@ that call it.
 | `discount_cap` | No comment in the source | 6: `discount_bounded`, `discount_requested`, `discount_conservation`, `discount_exact`, `discount_monotone_requested`, `discount_idempotent` | `components/pricing/src/domain/discount.rs` |
 | `external_amount_admissible` | Source amounts are bounded; a zero rate cannot carry nonzero tax. No tax-law inference. | 2: `external_amount_exact`, `external_amount_tax_bounded` | `components/pricing/src/domain/external_order.rs` |
 | `external_paid_total_admissible` | Paid imports require a positive, exactly reconciled source total. | 2: `external_paid_total_exact`, `external_unpaid_denied` | `components/pricing/src/domain/external_order.rs` |
-| `net_amount` | The net part of a gross amount in minor units; it is never negative. | 2: `net_plus_tax_is_gross`, `net_not_above_gross` | `components/checkout/src/domain/cart_quote.rs` |
+| `line_total` | The amount of `quantity` units at `unit` minor units each; it never wraps around. | 6: `line_total_exact`, `line_total_bounded`, `line_total_zero`, `line_total_one`, `line_total_split`, `line_total_monotone` | `components/pricing/src/domain/money.rs` |
+| `net_amount` | The net part of a gross amount in minor units; it is never negative. | 2: `net_plus_tax_is_gross`, `net_not_above_gross` | `components/checkout/src/domain/cart_quote.rs`, `components/checkout/src/service/delivery.rs`, `components/pricing/src/domain/quote.rs` |
 | `offer_honoured` | A signed offer is honoured only before it expires and only for the same cart, revision and total. | 4: `offer_honoured_exact`, `offer_expired_denied`, `offer_changed_total_denied`, `offer_changed_revision_denied` | `components/intelligence/src/service/signed_offer.rs` |
 | `pos_cash_admissible` | Cash change is bounded and nonnegative only under cashier authorization and a reviewed total. | 3: `pos_cash_exact`, `pos_cash_conserves`, `pos_cash_unauthorized_denied` | `components/pos/src/service/settlement.rs` |
 | `pos_discount_admissible` | No comment in the source | 2: `pos_discount_exact`, `pos_discount_exceeds_denied` | `components/shop/src/types/cart.rs` |
@@ -87,6 +89,7 @@ that call it.
 | `replay_admissible` | No comment in the source | 3: `replay_same_cart`, `replay_open_fingerprint`, `replay_exact` | `components/checkout/src/service/purchase/lock.rs` |
 | `reservation_admissible` | An order holds at most what it ordered: what it already holds plus a new reservation stays within the ordered quantity. | 9: `reservation_exact`, `reservation_zero_denied`, `reservation_over_denied`, `reservation_step_bounded`, `reservation_run_bounded`, `reservation_step_conserves`, `reservation_run_conserves`, `reservation_release_idempotent`, `reservation_release_restores` | `components/inventory/src/domain/lines.rs` |
 | `revision_admissible` | No comment in the source | 4: `revision_exact`, `revision_exact_behavior`, `revision_run_monotone`, `revision_reuse_denied` | `components/orders/src/http/transitions.rs`, `components/catalog/src/service/translation_apply.rs`, `components/intelligence/src/service/platform_ai.rs`, `components/shop/src/http/operator_quotas.rs`, `components/shop/src/http/operator_lifecycle.rs`, `components/orders/src/http/delivery_split.rs`, `components/intelligence/src/store/evidence.rs`, `components/checkout/src/domain/review_binding.rs` |
+| `rounded_quotient` | `numerator / denominator` in whole minor units, rounded to the nearest one with halves up (away from zero for a magnitude); a zero denominator counts as one. | 6: `rounded_quotient_eq`, `rounded_quotient_nearest`, `rounded_quotient_half_up`, `scaled_round_trip`, `rounded_quotient_monotone`, `included_tax_within_gross` | `components/pricing/src/domain/decimal.rs` |
 | `stock_admissible` | No comment in the source | 5: `stock_positive_bounded`, `stock_conservation`, `stock_exact`, `stock_sequence_bounded`, `stock_sequence_conservation` | `components/checkout/src/service/purchase/price.rs`, `components/apps/src/service/external_orders.rs` |
 
 ### Orders, delivery and returns

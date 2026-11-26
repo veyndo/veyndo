@@ -1,10 +1,14 @@
 //! Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models.
 use proptest::prelude::*;
+use veyndo_pricing::binary::Binary;
+use veyndo_pricing::decimal::{Decimal, Ratio};
 use veyndo_pricing::discount::allocate;
-use veyndo_pricing::money::{Currency, Money, from_minor, to_minor};
+use veyndo_pricing::money::{Currency, Minor, Money, unsigned_sum};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_pricing::quote::QuoteTotals;
-use veyndo_pricing::verified_kernel::{amount_sum, discount_cap, net_amount};
+use veyndo_pricing::verified_kernel::{
+    amount_sum, discount_cap, line_total, net_amount, rounded_quotient,
+};
 
 fn currency(scale: u8) -> Currency {
     Currency::new("XTS", scale).unwrap()
@@ -28,7 +32,7 @@ fn text(minor: i128, scale: u32) -> String {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(512))]
+    #![proptest_config(ProptestConfig::with_cases(4096))]
 
     /// Every supported scale is admitted, every larger one refused (Lean: `currency_scale_admissible`).
     #[test]
@@ -109,18 +113,95 @@ proptest! {
         prop_assert!(left.checked_add(&other).is_err());
     }
 
-    /// Calculated float amounts convert to minor units and back without drift in the exact range.
+    /// The wire boundary: a JSON number reads as its exact bits and as the shortest decimal
+    /// naming it (the digits Rust and JSON print), and both write back to the same number.
     #[test]
-    fn minor_units_roundtrip_through_wire_decimals(minor in 0_u64..(1_u64 << 45), scale in 0_u8..=4) {
-        prop_assert_eq!(to_minor(from_minor(minor, scale), scale), Some(minor));
+    fn wire_numbers_convert_losslessly(negative in any::<bool>(), exponent in 957_u64..1089, fraction in 0_u64..(1 << 52)) {
+        // Every binary64 number between about 1e-20 and 1e20, of either sign.
+        let value = f64::from_bits(u64::from(negative) << 63 | exponent << 52 | fraction);
+        let binary = Binary::from_wire(value).unwrap();
+        prop_assert_eq!(binary.to_wire().to_bits(), (value + 0.).to_bits());
+        let decimal = Decimal::from_wire(value).unwrap();
+        prop_assert_eq!(decimal.text(), format!("{}", value + 0.));
+        prop_assert_eq!(decimal.to_wire().unwrap().to_bits(), (value + 0.).to_bits());
     }
 
-    /// Negative and non-finite amounts never become minor units.
+    /// Binary arithmetic is the hardware's: sums, differences, products, quotients and floors
+    /// of binary64 values agree bit for bit with `f64` (the reference the emulation replaces).
     #[test]
-    fn negative_amounts_have_no_minor_units(value in -1.0e12_f64..-1.0e-9, scale in 0_u8..=6) {
-        prop_assert_eq!(to_minor(value, scale), None);
-        prop_assert_eq!(to_minor(f64::NAN, scale), None);
-        prop_assert_eq!(to_minor(f64::INFINITY, scale), None);
+    fn binary_arithmetic_matches_binary64(a in -1.0e9_f64..1.0e9, b in -1.0e9_f64..1.0e9, scale in 0_i32..8) {
+        let a = (a * 10_f64.powi(scale)).round() / 10_f64.powi(scale);
+        let (x, y) = (Binary::from_wire(a).unwrap(), Binary::from_wire(b).unwrap());
+        let same = |emulated: Binary, hardware: f64| emulated.to_wire().to_bits() == (hardware + 0.).to_bits();
+        prop_assert!(same(x.checked_add(y).unwrap(), a + b));
+        prop_assert!(same(x.checked_sub(y).unwrap(), a - b));
+        prop_assert!(same(x.checked_mul(y).unwrap(), a * b));
+        prop_assume!(b != 0.);
+        prop_assert!(same(x.checked_div(y).unwrap(), a / b));
+        prop_assert!(same(x.floor().unwrap(), a.floor()));
+    }
+
+    /// Minor amounts: addition and subtraction are exact or refused, never wrapped, and never
+    /// across scales; a line total is the exact product or refused.
+    #[test]
+    fn minor_arithmetic_is_exact_or_refused(a in any::<i64>(), b in any::<i64>(), q in any::<u32>(), scale in 0_u8..=6) {
+        let (x, y) = (Minor::new(a, scale), Minor::new(b, scale));
+        prop_assert_eq!(x.checked_add(y).ok().map(|m| m.minor()), a.checked_add(b));
+        prop_assert_eq!(x.checked_sub(y).ok().map(|m| m.minor()), a.checked_sub(b));
+        prop_assert!(x.checked_add(Minor::new(b, (scale + 1) % 7)).is_err());
+        let product = i128::from(a) * i128::from(q);
+        match x.times(q.into()) {
+            Ok(total) => prop_assert_eq!(i128::from(total.minor()), product),
+            Err(_) => prop_assert!(i64::try_from(product).is_err() || a == i64::MIN),
+        }
+    }
+
+    /// Scaling up is exact and rounding back recovers the amount (Lean `scaled_round_trip`).
+    #[test]
+    fn scaling_and_rounding_back_is_the_identity(minor in -1_000_000_000_000_i64..1_000_000_000_000, from in 0_u8..=3, up in 0_u8..=3) {
+        let amount = Minor::new(minor, from);
+        let scaled = amount.at_scale(from + up).unwrap();
+        prop_assert_eq!(scaled.ratio(), amount.ratio());
+        prop_assert_eq!(Minor::from_decimal(scaled.decimal(), from).unwrap(), amount);
+        let factor = 10_u64.pow(up.into());
+        let magnitude = minor.unsigned_abs();
+        prop_assert_eq!(rounded_quotient(line_total(magnitude, factor), factor), magnitude);
+    }
+
+    /// The proved quotient rule rounds to the nearest whole unit, halves up (Lean
+    /// `rounded_quotient_nearest`, `rounded_quotient_half_up`), and exact decimal rounding is
+    /// half away from zero for either sign.
+    #[test]
+    fn quotient_rounding_is_nearest_with_halves_up(n in 0_u64..(1 << 62), d in 1_u64..(1 << 40), k in 0_u64..1_000_000, h in 1_u64..1_000_000) {
+        let r = u128::from(rounded_quotient(n, d));
+        let (n, d) = (u128::from(n), u128::from(d));
+        prop_assert!(2 * r * d <= 2 * n + d && 2 * n <= 2 * r * d + d);
+        prop_assert_eq!(rounded_quotient(k * 2 * h + h, 2 * h), k + 1);
+        let value = Ratio::new(n as i128, d as i128).unwrap();
+        prop_assert_eq!(value.rounded(0).unwrap().minor() as u128, r);
+        prop_assert_eq!(value.negated().unwrap().rounded(0).unwrap().minor(), -(r as i64));
+    }
+
+    /// The proved sum of unsigned amounts is the exact sum or refused (Lean `lines_total_exact`).
+    #[test]
+    fn line_sums_are_exact_or_refused(lines in prop::collection::vec(any::<u64>(), 0..8)) {
+        let exact: u128 = lines.iter().map(|v| u128::from(*v)).sum();
+        match unsigned_sum(lines.iter().copied()) {
+            Ok(sum) => prop_assert_eq!(u128::from(sum), exact),
+            Err(_) => prop_assert!(exact > u128::from(u64::MAX)),
+        }
+        let mut reversed = lines.clone();
+        reversed.reverse();
+        prop_assert_eq!(unsigned_sum(lines).ok(), unsigned_sum(reversed).ok());
+    }
+
+    /// Exact decimal rounding into minor units agrees with the string rounding of `Money::rounded`.
+    #[test]
+    fn decimal_rounding_agrees_with_money_rounding(major in 0_u64..1_000_000_000, fraction in "[0-9]{0,9}", negative in any::<bool>(), scale in 0_u8..=6) {
+        let text = format!("{}{major}{}", if negative { "-" } else { "" },
+            if fraction.is_empty() { String::new() } else { format!(".{fraction}") });
+        let exact = Money::from_decimal(Decimal::parse(&text).unwrap(), currency(scale)).unwrap();
+        prop_assert_eq!(exact, Money::rounded(&text, currency(scale)).unwrap());
     }
 
     /// Lean `discount_bounded`, `discount_requested`, `discount_idempotent`, `discount_monotone_requested`.
@@ -189,60 +270,54 @@ proptest! {
         }
     }
 
-    /// Rounding to decimals is idempotent, symmetric and within half a unit of the input.
+    /// The original's `round` reads a binary64 value as the decimal it was written as: on the
+    /// nearest binary value of a decimal it rounds that decimal half away from zero.
     #[test]
-    fn math_rounding_is_stable(cents in -100_000_000_i64..100_000_000, digits in 0_i64..1000, decimals in 0_i32..=2) {
-        let value = cents as f64 / 100. + digits as f64 / 100_000.;
-        let rounded = math_round(value, decimals);
-        prop_assert_eq!(math_round(rounded, decimals), rounded);
-        prop_assert_eq!(math_round(-value, decimals), -rounded);
-        let unit = 10_f64.powi(-decimals);
-        prop_assert!((rounded - value).abs() <= unit / 2. + 1e-9);
+    fn math_rounding_reads_the_written_decimal(units in -100_000_000_000_i64..100_000_000_000, digits in 0_u32..=6, decimals in 0_u8..=4) {
+        let written = Decimal::new(units.into(), digits).unwrap();
+        let rounded = math_round(Binary::from_decimal(written).unwrap(), decimals).unwrap();
+        prop_assert_eq!(rounded, written.ratio().rounded(decimals).unwrap());
     }
 
     /// Quote totals: a net quote's payable total is position plus tax; a gross quote's net
-    /// part plus its tax is the position (both to the quote's rounding).
+    /// part plus its tax is the position (Lean `net_quote_total`, `gross_quote_total`).
     #[test]
     fn quote_totals_add_up(position in 0_i64..100_000_000, tax_share in 0_i64..=100, net in any::<bool>()) {
-        let position = position as f64 / 100.;
-        let tax = math_round(position * tax_share as f64 / 100., 2);
-        let totals = QuoteTotals::new(position, tax, 2, net);
+        let tax = Minor::new(position * tax_share / 100, 2);
+        let position = Minor::new(position, 2);
+        let totals = QuoteTotals::new(position, tax, net).unwrap();
         prop_assert_eq!(totals.position_price, position);
         if net {
             prop_assert_eq!(totals.net_price, position);
-            prop_assert_eq!(totals.total_price, math_round(position + tax, 2));
+            prop_assert_eq!(totals.total_price, position.checked_add(tax).unwrap());
         } else {
             prop_assert_eq!(totals.total_price, position);
-            prop_assert!((totals.net_price + tax - position).abs() < 0.005);
-            prop_assert!(totals.net_price <= position);
+            prop_assert_eq!(totals.net_price.checked_add(tax).unwrap(), position);
         }
     }
 
-    /// A line price: the total is the rounded unit times the quantity, the tax never exceeds
-    /// the gross total, and the same input always gives the same price.
+    /// A line price: the total is the unit times the quantity, the tax is never negative and
+    /// never above the gross total, and the same input always gives the same price.
     #[test]
     fn a_line_price_is_unit_times_quantity(
         cents in 0_i64..10_000_000,
         quantity in 1_u32..500,
-        rate in prop::sample::select(vec![0., 7., 10., 19., 20., 21.]),
+        rate in prop::sample::select(vec!["0", "7", "10", "19", "20", "21", "7.7"]),
         gross in any::<bool>(),
     ) {
         let input = PriceInput {
-            price: cents as f64 / 100.,
+            price: Binary::from_decimal(Decimal::new(cents.into(), 2).unwrap()).unwrap(),
             quantity,
-            tax_rate: rate,
+            tax_rate: Binary::from_decimal(Decimal::parse(rate).unwrap()).unwrap(),
             gross,
-            calculated: true,
-            decimals: 2,
-            interval: 0.01,
             ..PriceInput::default()
         };
-        let price = calculate(&input);
-        prop_assert_eq!(price.total_price, math_round(price.unit_price * f64::from(quantity), 2));
-        prop_assert!(price.tax >= 0.);
+        let price = calculate(&input).unwrap();
+        prop_assert_eq!(price.total_price, price.unit_price.times(quantity.into()).unwrap());
+        prop_assert!(price.tax.minor() >= 0);
         if gross {
-            prop_assert!(price.tax <= price.total_price + 1e-9);
+            prop_assert!(price.tax.minor() <= price.total_price.minor());
         }
-        prop_assert_eq!(calculate(&input), price);
+        prop_assert_eq!(calculate(&input).unwrap(), price);
     }
 }

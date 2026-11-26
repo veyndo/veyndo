@@ -68,6 +68,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("discount_cap")
         | Some("external_amount_admissible")
         | Some("external_paid_total_admissible")
+        | Some("line_total")
         | Some("net_amount")
         | Some("offer_honoured")
         | Some("pos_cash_admissible")
@@ -76,6 +77,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("replay_admissible")
         | Some("reservation_admissible")
         | Some("revision_admissible")
+        | Some("rounded_quotient")
         | Some("stock_admissible") => commerce::eval(&request),
         Some("cancellation_admissible")
         | Some("carrier_booking_admissible")

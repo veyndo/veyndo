@@ -71,7 +71,7 @@ pub(crate) struct CatalogPage {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ElementPrice<'a, S: Serialize> {
-    price: f64,
+    price: veyndo_pricing::decimal::Decimal,
     currency: &'a str,
     currency_scale: S,
     #[serde(rename = "calculated_price")]
@@ -256,7 +256,7 @@ mod tests {
         merge(
             &mut new,
             ElementPrice {
-                price: 10.25,
+                price: veyndo_pricing::decimal::Decimal::parse("10.25").unwrap(),
                 currency: "CHF",
                 currency_scale: 2_u8,
                 calculated_price: quoted

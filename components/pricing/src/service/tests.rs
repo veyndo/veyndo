@@ -3,6 +3,10 @@ use super::conversion::{amount, convert, convert_from, validate_prices};
 use super::rates;
 use crate::types::currency::{Config, Definition, rate_units, scale};
 use serde_json::json;
+/// A wire number as the exact decimal the conversion reads.
+fn w(value: f64) -> crate::decimal::Decimal {
+    crate::decimal::Decimal::from_wire(value).unwrap()
+}
 fn config() -> Config {
     let mut c = Config::default();
     for (code, rate, strategy) in [
@@ -39,9 +43,27 @@ fn decimal_rates_are_bounded_and_do_not_accept_float_syntax() {
 #[test]
 fn conversion_is_rounded_once_at_explicit_zero_two_and_three_digit_scales() {
     let c = config();
-    assert_eq!(convert(9.9, &c, c.selected("USD").unwrap()).unwrap(), 12.38);
-    assert_eq!(convert(9.9, &c, c.selected("JPY").unwrap()).unwrap(), 1584.);
-    assert_eq!(convert(9.9, &c, c.selected("KWD").unwrap()).unwrap(), 3.3);
+    assert_eq!(
+        convert(w(9.9), &c, c.selected("USD").unwrap())
+            .unwrap()
+            .to_wire()
+            .unwrap(),
+        12.38
+    );
+    assert_eq!(
+        convert(w(9.9), &c, c.selected("JPY").unwrap())
+            .unwrap()
+            .to_wire()
+            .unwrap(),
+        1584.
+    );
+    assert_eq!(
+        convert(w(9.9), &c, c.selected("KWD").unwrap())
+            .unwrap()
+            .to_wire()
+            .unwrap(),
+        3.3
+    );
     assert_eq!(amount(7.123, "KWD", 3).unwrap().minor(), 7123);
     for n in [f64::NAN, f64::INFINITY, -1., 1e30] {
         assert!(amount(n, "USD", 2).is_err());
@@ -50,15 +72,21 @@ fn conversion_is_rounded_once_at_explicit_zero_two_and_three_digit_scales() {
 #[test]
 fn changed_exchange_base_preserves_original_monetary_source() {
     let mut c = config();
-    let old = convert(79.95, &c, c.selected("USD").unwrap()).unwrap();
+    let old = convert(w(79.95), &c, c.selected("USD").unwrap()).unwrap();
     c.base_currency = "USD".into();
     for d in &mut c.definitions {
         d.rate = format!("{:.8}", d.rate.parse::<f64>().unwrap() / 1.25);
     }
     c.validate().unwrap();
-    assert_eq!(convert(79.95, &c, c.selected("USD").unwrap()).unwrap(), old);
     assert_eq!(
-        convert_from(12.34, "USD", &c, c.selected("USD").unwrap()).unwrap(),
+        convert(w(79.95), &c, c.selected("USD").unwrap()).unwrap(),
+        old
+    );
+    assert_eq!(
+        convert_from(w(12.34), "USD", &c, c.selected("USD").unwrap())
+            .unwrap()
+            .to_wire()
+            .unwrap(),
         12.34
     );
 }

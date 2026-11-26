@@ -50,11 +50,15 @@ Production Rust operations → crates/kernel/src/verified_kernel.rs → seven po
 The application calls the Rust functions directly. There is no separate
 handwritten Lean implementation of their behavior. `scripts/formal/extract.py`
 loads the exact reviewed module registration, then accepts only `bool`/`u64` arguments/results, literals, comparisons, Boolean
-operators, `min` and `saturating_sub`. It rejects unsupported syntax instead of
+operators, `min`, `max`, `saturating_sub`, `saturating_add`, `saturating_mul` and
+division by a divisor the parser can see is positive (a positive literal or
+`x.max(k)` with a positive literal `k`). It rejects unsupported syntax instead of
 silently approximating it. Lean `Nat` subtraction saturates at zero, matching
-`u64::saturating_sub`; this subset cannot overflow through addition/multiplication
-because those operators are excluded. Claims quantify over all natural inputs,
-including all representable `u64` values.
+`u64::saturating_sub`; the saturating sum and product become `min (a + b) u64::MAX`
+and `min (a * b) u64::MAX`, and `Nat` floor division equals `u64` division because
+the divisor is never zero. Plain `+`, `-`, `*` and `%` stay excluded, so the subset
+cannot overflow. Claims quantify over all natural inputs, including all
+representable `u64` values.
 
 **The extractor is a trusted, tested translator, not a verified Rust compiler.**
 Correct production input conversion and surrounding state handling remain part
@@ -194,10 +198,30 @@ unproved with one of ten reasons in `proof/domain-inventory.json`: 144 functions
 [formal-coverage.md](formal-coverage.md). "Bound" means the decision is a proved
 rule; the input mapping around it stays reviewed Rust.
 
-**Still open, waiting for the money refactor (another session):** order total =
-lines + shipping + tax, money scaling and rounding, and multiplication in the
-extractor. Pricing still uses the floating-point port, so these cannot be stated
-over whole minor units yet.
+**Money in whole minor units (26 Nov).** The calculation path carries amounts as
+`Minor` (whole minor units with the currency's exponent) and exact `Decimal`/`Ratio`
+values; JSON numbers cross one boundary conversion in
+`components/pricing/src/domain/binary.rs`. Two rules were added: `line_total` (unit
+price times quantity, bound in `Minor::times`, which the calculator's line totals
+use) and `rounded_quotient` (a quotient rounded to the nearest minor unit, halves
+up, bound in `Ratio::rounded`, through which every exact amount is rounded into minor
+units). Proved: exact products, splitting a quantity splits the total, rounding to
+the nearest unit with halves up, scaling up and rounding back is the identity, the
+tax contained in a gross amount never exceeds it so net plus tax is the gross, and
+over any list of lines the quote total is the lines plus net shipping plus all tax
+for net and gross quotes, never below the goods total and independent of line
+order (`net_quote_total`, `gross_quote_total`, `lines_total_order_free`). The cart
+quote, the delivery totals and the quote totals compute exactly these sums with
+`amount_sum` and `net_amount`.
+
+The Shopware price calculator itself is not extracted. Its results at decimal ties
+depend on its binary64 arithmetic (130.4835 × 670 rounds to 87423.94 because the
+binary product is 87423.94499…), so the port performs the same binary steps on
+`Binary`, an integer emulation without a floating-point type, and returns minor
+units. It equals the previous port bit for bit on the differential population and
+on 240,000 further generated inputs (`components/pricing/tests/calculator_reference.rs`);
+CI compares it with the original PHP (`scripts/differential.py`). Its line total is
+the proved `line_total`.
 
 ## Consent and legal checkout additions
 

@@ -145,16 +145,25 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
         return Err(bad("Explicitly confirm the declared source price basis"));
     }
     if basis == "net" {
+        use veyndo_pricing::binary::Binary;
+        let wire = |value| Binary::from_wire(value).map_err(bad);
         price = veyndo_pricing::pricing::calculate(&veyndo_pricing::pricing::PriceInput {
-            price,
-            tax_rate: tax,
+            price: wire(price)?,
+            tax_rate: wire(tax)?,
             gross: true,
             calculated: false,
             decimals: scale.into(),
-            interval: 10_f64.powi(-i32::from(scale)),
+            interval: Binary::from_decimal(
+                veyndo_pricing::decimal::Decimal::new(1, scale.into()).map_err(bad)?,
+            )
+            .map_err(bad)?,
             ..Default::default()
         })
-        .unit_price;
+        .map_err(bad)?
+        .unit_price
+        .decimal()
+        .to_wire()
+        .map_err(bad)?;
         if !price.is_finite() || price * 10_f64.powi(scale.into()) > 9_007_199_254_740_991.0 {
             return Err(bad(
                 "Converted source price exceeds exact native compatibility range",

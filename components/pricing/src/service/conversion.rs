@@ -1,29 +1,40 @@
-//! Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings.
+//! Exact rational minor-unit FX conversion on exact decimals; fixed prices are explicit decimal strings.
 use crate::catalog::Product;
+use crate::decimal::Decimal;
 use crate::money::{Currency, Money};
 use crate::types::currency::{Config, Definition, rate_units, scale};
 use crate::types::product_currency::ProductCurrencies;
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};
+
+/// A wire amount (a JSON number) as money in `code`, rounded half away from zero to `precision`.
+/// The number is read as the shortest decimal that names it; negative and non-finite values are refused.
 pub fn amount(value: f64, code: &str, precision: u8) -> Result<Money> {
-    if !value.is_finite() || value < 0. {
+    exact_amount(
+        Decimal::from_wire(value).map_err(|_| bad("Invalid currency amount"))?,
+        code,
+        precision,
+    )
+}
+/// An exact decimal amount as money in `code`, rounded half away from zero to `precision`.
+pub fn exact_amount(value: Decimal, code: &str, precision: u8) -> Result<Money> {
+    if value < Decimal::ZERO {
         return Err(bad("Invalid currency amount"));
     }
-    Money::rounded(
-        &value.to_string(),
-        Currency::new(code, precision).map_err(bad)?,
-    )
-    .map_err(bad)
+    Money::from_decimal(value, Currency::new(code, precision).map_err(bad)?).map_err(bad)
 }
 
-pub fn convert(value: f64, cfg: &Config, d: &Definition) -> Result<f64> {
+/// A price in the pricing currency, in the cart currency `d`.
+pub fn convert(value: Decimal, cfg: &Config, d: &Definition) -> Result<Decimal> {
     convert_from(value, &cfg.pricing_currency, cfg, d)
 }
-pub fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition) -> Result<f64> {
+/// A price in `code`, in the currency `d`: unchanged in the same currency, otherwise rounded to the
+/// source's minor unit, converted with the exact rate ratio and rounded half up to the target's.
+pub fn convert_from(value: Decimal, code: &str, cfg: &Config, d: &Definition) -> Result<Decimal> {
     if d.code == code {
         return Ok(value);
     }
-    let source = amount(
+    let source = exact_amount(
         value,
         code,
         scale(code).ok_or(bad("Invalid price source currency"))?,
@@ -41,23 +52,31 @@ pub fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition) -> Res
         rate_units(&source_rate.rate)? as i128 * 10_i128.pow(source.currency().scale() as u32);
     let minor = i64::try_from((numerator + denominator / 2) / denominator)
         .map_err(|_| bad("FX overflow"))?;
-    Ok(minor as f64 / 10_f64.powi(d.scale as i32))
+    Decimal::new(minor.into(), d.scale.into()).map_err(bad)
 }
-pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<f64> {
+/// A fixed per-currency price field as an exact decimal at the currency's scale.
+fn fixed(text: &str, d: &Definition) -> Result<Decimal> {
+    Ok(
+        Money::parse(text, Currency::new(&d.code, d.scale).map_err(bad)?)
+            .map_err(bad)?
+            .amount()
+            .decimal(),
+    )
+}
+/// A stored binary64 amount (product columns, settings) as the exact decimal it names.
+pub fn stored(value: f64) -> Result<Decimal> {
+    Decimal::from_wire(value).map_err(|_| bad("Invalid stored amount"))
+}
+pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<Decimal> {
     if d.strategy == "fixed"
         && let Some(s) = ProductCurrencies::of(&p.extra)
             .fixed(&d.code)
             .field("price")
     {
-        return Ok(
-            Money::parse(s, Currency::new(&d.code, d.scale).map_err(bad)?)
-                .map_err(bad)?
-                .minor() as f64
-                / 10_f64.powi(d.scale as i32),
-        );
+        return fixed(s, d);
     }
     convert_from(
-        p.price,
+        stored(p.price)?,
         ProductCurrencies::of(&p.extra)
             .price_currency
             .as_deref()
@@ -72,21 +91,16 @@ pub fn ancillary(
     value: Option<f64>,
     cfg: &Config,
     d: &Definition,
-) -> Result<Option<f64>> {
+) -> Result<Option<Decimal>> {
     if d.strategy == "fixed"
         && let Some(s) = ProductCurrencies::of(&p.extra).fixed(&d.code).field(field)
     {
-        return Ok(Some(
-            Money::parse(s, Currency::new(&d.code, d.scale).map_err(bad)?)
-                .map_err(bad)?
-                .minor() as f64
-                / 10_f64.powi(d.scale as i32),
-        ));
+        return Ok(Some(fixed(s, d)?));
     }
     value
         .map(|v| {
             convert_from(
-                v,
+                stored(v)?,
                 ProductCurrencies::of(&p.extra)
                     .price_currency
                     .as_deref()

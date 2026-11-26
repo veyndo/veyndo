@@ -4,14 +4,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad};
+use veyndo_pricing::binary::Binary;
 use veyndo_pricing::catalog::Product;
+use veyndo_pricing::decimal::Decimal;
 use veyndo_pricing::domain::context;
+use veyndo_pricing::money::Minor;
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_pricing::service::conversion::{
     ancillary, context as currency_context, convert, convert_from, product_price,
 };
 use veyndo_pricing::types::currency::{Config, Definition, scale};
-use veyndo_pricing::{money, verified_kernel};
+use veyndo_pricing::verified_kernel;
 use veyndo_shop::Settings;
 use veyndo_shop::types::cart::{AppConfiguration, StoredCart};
 
@@ -35,13 +38,15 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
     let b2b = settings.is_business(&c.data.group);
     let cfg = &settings.currencies;
     let currency = cfg.selected(&c.data.currency)?;
-    let decimals = currency.scale as i32;
-    let interval = 10_f64.powi(-decimals);
+    let decimals = currency.scale;
+    let interval =
+        Binary::from_decimal(Decimal::new(1, decimals.into()).map_err(bad)?).map_err(bad)?;
     let mut lines = vec![];
     // Totals are added as whole minor units by the proved sum rule; the calculators deliver rounded amounts.
-    let minor = |value: f64| money::to_minor(value, currency.scale).ok_or(bad("Invalid total"));
     let mut total = 0_u64;
     let mut taxes = 0_u64;
+    let one = Binary::integer(1);
+    let hundred = Binary::integer(100);
     for i in &c.data.items {
         let p = ps
             .iter()
@@ -59,57 +64,85 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             vec!["consumer".into()]
         });
         let tier = context::select_tier(&p.advanced_prices, &rule_ids, i.quantity);
-        let discount = 1. - tier.map(|t| t.discount).unwrap_or(0.);
-        let gross = product_price(p, cfg, currency)?;
-        let base = if b2b {
-            gross / (1. + p.tax_rate / 100.)
-        } else {
-            gross
+        let tier_discount = tier
+            .map(|t| Binary::from_wire(t.discount))
+            .transpose()
+            .map_err(bad)?
+            .unwrap_or(Binary::ZERO);
+        let discount = one.checked_sub(tier_discount).map_err(bad)?;
+        let tax_rate = Binary::from_wire(p.tax_rate).map_err(bad)?;
+        // A B2B line is priced from the gross amount without its tax: `gross / (1 + rate / 100)`.
+        let net_of = |gross: Binary| -> Result<Binary> {
+            if b2b {
+                gross
+                    .checked_div(
+                        one.checked_add(tax_rate.checked_div(hundred).map_err(bad)?)
+                            .map_err(bad)?,
+                    )
+                    .map_err(bad)
+            } else {
+                Ok(gross)
+            }
+        };
+        let gross = Binary::from_decimal(product_price(p, cfg, currency)?).map_err(bad)?;
+        let ancillary_price = |field: &str, value: Option<f64>| -> Result<Option<Binary>> {
+            ancillary(p, field, value, cfg, currency)?
+                .map(|v| net_of(Binary::from_decimal(v).map_err(bad)?))
+                .transpose()
         };
         let mut calc = calculate(&PriceInput {
-            price: base * discount,
+            price: net_of(gross)?.checked_mul(discount).map_err(bad)?,
             quantity: i.quantity,
-            tax_rate: p.tax_rate,
+            tax_rate,
             gross: !b2b,
             calculated: true,
-            decimals,
+            decimals: decimals.into(),
             interval,
             round_for_net: false,
-            list_price: ancillary(p, "listPrice", p.list_price, cfg, currency)?
-                .map(|v| if b2b { v / (1. + p.tax_rate / 100.) } else { v }),
-            regulation_price: ancillary(p, "regulationPrice", p.regulation_price, cfg, currency)?
-                .map(|v| if b2b { v / (1. + p.tax_rate / 100.) } else { v }),
+            list_price: ancillary_price("listPrice", p.list_price)?,
+            regulation_price: ancillary_price("regulationPrice", p.regulation_price)?,
             reference: p.reference_price.clone(),
             ..PriceInput::default()
-        });
+        })
+        .map_err(bad)?;
         for config in c
             .data
             .app_configurations
             .values()
             .filter(|v| v.product_id == i.id)
         {
-            let gross = configuration_price(config, cfg, currency)?;
+            let fee_gross =
+                Binary::from_decimal(configuration_price(config, cfg, currency)?).map_err(bad)?;
             let fee = calculate(&PriceInput {
-                price: if b2b {
-                    gross / (1. + p.tax_rate / 100.)
-                } else {
-                    gross
-                },
+                price: net_of(fee_gross)?,
                 quantity: i.quantity,
-                decimals,
+                decimals: decimals.into(),
                 interval,
-                tax_rate: p.tax_rate,
+                tax_rate,
                 gross: !b2b,
                 ..PriceInput::default()
-            });
-            calc.unit_price = math_round(calc.unit_price + fee.unit_price, decimals);
-            calc.total_price = math_round(calc.total_price + fee.total_price, decimals);
-            calc.tax = math_round(calc.tax + fee.tax, decimals);
+            })
+            .map_err(bad)?;
+            // The fee is added in whole minor units (the previous decimal sum rounded once).
+            calc.unit_price = calc.unit_price.checked_add(fee.unit_price).map_err(bad)?;
+            calc.total_price = calc.total_price.checked_add(fee.total_price).map_err(bad)?;
+            calc.tax = calc.tax.checked_add(fee.tax).map_err(bad)?;
             calc.calculated_taxes.extend(fee.calculated_taxes);
         }
+        let minor = |amount: Minor| -> Result<u64> {
+            amount
+                .at_scale(decimals)
+                .and_then(Minor::unsigned)
+                .map_err(|_| bad("Invalid total"))
+        };
         total = verified_kernel::amount_sum(total, minor(calc.total_price)?);
         taxes = verified_kernel::amount_sum(taxes, minor(calc.tax)?);
-        lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":format!("{}{}",p.name,p.options.as_object().filter(|o|!o.is_empty()).map(|o|format!(" · {}",o.values().filter_map(|v|v.as_str()).collect::<Vec<_>>().join(" / "))).unwrap_or_default()),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":math_round((1.-discount)*100.,0),"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
+        let discount_percent = one
+            .checked_sub(discount)
+            .and_then(|d| d.checked_mul(hundred))
+            .and_then(|d| math_round(d, 0))
+            .map_err(bad)?;
+        lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":format!("{}{}",p.name,p.options.as_object().filter(|o|!o.is_empty()).map(|o|format!(" · {}",o.values().filter_map(|v|v.as_str()).collect::<Vec<_>>().join(" / "))).unwrap_or_default()),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":discount_percent,"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
     }
     for line in &mut lines {
         let mut configs = c
@@ -133,19 +166,19 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             )?;
         }
     }
-    let decimal = |minor: u64| money::from_minor(minor, currency.scale);
-    let payable = decimal(if b2b {
+    let amount = |minor: u64| Minor::from_unsigned(minor, decimals).map_err(bad);
+    let payable = amount(if b2b {
         verified_kernel::amount_sum(total, taxes)
     } else {
         total
-    });
-    let net = decimal(if b2b {
+    })?;
+    let net = amount(if b2b {
         total
     } else {
         verified_kernel::net_amount(total, taxes)
-    });
-    let total = decimal(total);
-    let taxes = decimal(taxes);
+    })?;
+    let total = amount(total)?;
+    let taxes = amount(taxes)?;
     Ok(
         json!({"token":c.token,"id":c.id,"revision":c.revision,"status":c.status,"lineItems":lines,"customerGroup":c.data.group,"customerId":c.data.customer_id,"customerEmail":c.data.email,"company":c.data.company,"price":{"positionPrice":total,"totalPrice":payable,"netPrice":net,"tax":taxes,"taxStatus":if b2b{"net"}else{"gross"},"currency":currency.code,"currencyScale":currency.scale},"currencyContext":currency_context(cfg,currency),"availableCurrencies":cfg.enabled,"order":c.data.order}),
     )
@@ -155,17 +188,21 @@ pub fn configuration_price(
     config: &AppConfiguration,
     cfg: &Config,
     currency: &Definition,
-) -> Result<f64> {
+) -> Result<Decimal> {
     if let Some(source) = &config.currency {
         let scale = scale(source).ok_or(bad("Configuration currency unavailable"))?;
         convert_from(
-            config.fee_minor as f64 / 10_f64.powi(scale as i32),
+            Decimal::new(config.fee_minor.into(), scale.into()).map_err(bad)?,
             source,
             cfg,
             currency,
         )
     } else {
-        convert(config.fee_minor as f64 / 100., cfg, currency)
+        convert(
+            Decimal::new(config.fee_minor.into(), 2).map_err(bad)?,
+            cfg,
+            currency,
+        )
     }
 }
 /// The nearest quantity the product allows: its minimum, steps and a maximum of 10,000.
@@ -183,7 +220,7 @@ pub fn normalized_quantity(p: &Product, q: u32) -> Result<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::{configuration_price, normalized_quantity, quote};
+    use super::{Decimal, configuration_price, normalized_quantity, quote};
     use serde_json::{Value, json};
     use veyndo_pricing::catalog::Product;
     use veyndo_shop::Settings;
@@ -244,6 +281,6 @@ mod tests {
         let currency = s.currencies.selected("").unwrap();
         let config: AppConfiguration = serde_json::from_value(json!({"app":"engraving","productId":"p1","fields":{},"feeMinor":250,"ruleRevision":1,"appVersion":"1.0.0","entity":"engravings","record":"r1"})).unwrap();
         let fee = configuration_price(&config, &s.currencies, currency).unwrap();
-        assert!(fee > 0.);
+        assert!(fee > Decimal::ZERO);
     }
 }

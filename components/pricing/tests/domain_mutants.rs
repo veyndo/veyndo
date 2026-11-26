@@ -130,14 +130,18 @@ fn a_birthday_needs_both_dashes_and_digits() {
 }
 
 mod calculation {
-    use serde_json::json;
-    use veyndo_pricing::pricing::{PriceInput, ReferenceDefinition, TaxRule, calculate};
+    use serde_json::{Value, json};
+    use veyndo_pricing::decimal::Decimal;
+    use veyndo_pricing::pricing::{PriceInput, calculate};
 
-    fn input(price: f64) -> PriceInput {
-        PriceInput {
-            price,
-            ..PriceInput::default()
+    /// The calculated price for a wire input (JSON numbers, as the price fixture sends them).
+    fn calc(fields: Value) -> Value {
+        let mut input = json!({"price": 0.0, "quantity": 1, "tax_rate": 19.0});
+        for (key, value) in fields.as_object().unwrap() {
+            input[key] = value.clone();
         }
+        let input: PriceInput = serde_json::from_value(input).unwrap();
+        serde_json::to_value(calculate(&input).unwrap()).unwrap()
     }
 
     #[test]
@@ -145,38 +149,26 @@ mod calculation {
         let i: PriceInput =
             serde_json::from_value(json!({"price":1.0,"quantity":1,"tax_rate":19.0})).unwrap();
         assert!(i.gross && i.calculated && !i.round_for_net);
-        assert_eq!((i.decimals, i.interval), (2, 0.01));
+        assert_eq!(
+            (i.decimals, i.interval.decimal().unwrap()),
+            (2, Decimal::parse("0.01").unwrap())
+        );
     }
 
     #[test]
     fn a_later_rule_with_the_same_rate_replaces_the_earlier_one() {
-        let price = calculate(&PriceInput {
-            tax_rules: Some(vec![
-                TaxRule {
-                    tax_rate: 19.,
-                    percentage: 50.,
-                },
-                TaxRule {
-                    tax_rate: 19.,
-                    percentage: 100.,
-                },
-            ]),
-            ..input(119.)
-        });
-        assert_eq!(price.calculated_taxes.len(), 1);
-        assert_eq!(price.calculated_taxes[0].tax, 19.);
+        let price = calc(json!({"price": 119.0, "tax_rules": [
+            {"tax_rate": 19.0, "percentage": 50.0}, {"tax_rate": 19.0, "percentage": 100.0}]}));
+        assert_eq!(price["calculated_taxes"].as_array().unwrap().len(), 1);
+        assert_eq!(price["calculated_taxes"][0]["tax"], 19.0);
     }
 
     #[test]
     fn net_prices_round_to_the_cash_interval_only_when_asked() {
-        let net = |round_for_net| {
-            calculate(&PriceInput {
-                gross: false,
-                round_for_net,
-                interval: 0.05,
-                ..input(1.02)
-            })
-            .unit_price
+        let net = |round_for_net: bool| {
+            calc(json!({"price": 1.02, "gross": false, "round_for_net": round_for_net, "interval": 0.05}))
+                ["unit_price"]
+                .clone()
         };
         assert_eq!(net(true), 1.0);
         assert_eq!(net(false), 1.02);
@@ -184,37 +176,22 @@ mod calculation {
 
     #[test]
     fn an_uncalculated_net_price_gets_each_rule_tax_added() {
-        let gross = |rules| {
-            calculate(&PriceInput {
-                calculated: false,
-                tax_rules: rules,
-                ..input(100.)
-            })
-            .unit_price
+        let gross = |rules: Value| {
+            calc(json!({"price": 100.0, "calculated": false, "tax_rules": rules}))["unit_price"]
+                .clone()
         };
-        assert_eq!(gross(None), 119.);
+        assert_eq!(gross(Value::Null), 119.0);
         assert_eq!(
-            gross(Some(vec![
-                TaxRule {
-                    tax_rate: 19.,
-                    percentage: 50.
-                },
-                TaxRule {
-                    tax_rate: 7.,
-                    percentage: 50.
-                }
-            ])),
-            113.
+            gross(
+                json!([{"tax_rate": 19.0, "percentage": 50.0}, {"tax_rate": 7.0, "percentage": 50.0}])
+            ),
+            113.0
         );
         // A rule tax at the 1e-8 zero threshold still counts; one below it is noise.
-        let tiny = |price| {
-            calculate(&PriceInput {
-                calculated: false,
-                tax_rate: 100.,
-                decimals: 10,
-                ..input(price)
-            })
-            .unit_price
+        let tiny = |price: f64| {
+            calc(json!({"price": price, "calculated": false, "tax_rate": 100.0, "decimals": 10}))
+                ["unit_price"]
+                .clone()
         };
         assert_eq!(tiny(1e-8), 2e-8);
         assert_eq!(tiny(1e-9), 1e-9);
@@ -222,44 +199,29 @@ mod calculation {
 
     #[test]
     fn net_line_taxes_and_rule_prices_scale_with_the_quantity() {
-        let price = calculate(&PriceInput {
-            gross: false,
-            quantity: 3,
-            ..input(10.)
-        });
-        assert_eq!(price.calculated_taxes[0].tax, 5.7);
-        assert_eq!(price.calculated_taxes[0].price, 30.);
-        assert_eq!(price.total_price, 30.);
+        let price = calc(json!({"price": 10.0, "gross": false, "quantity": 3}));
+        assert_eq!(price["calculated_taxes"][0]["tax"], 5.7);
+        assert_eq!(price["calculated_taxes"][0]["price"], 30.0);
+        assert_eq!(price["total_price"], 30.0);
     }
 
     #[test]
     fn a_list_price_states_its_discount_and_percentage() {
-        let list = calculate(&PriceInput {
-            list_price: Some(150.),
-            ..input(120.)
-        })
-        .list_price
-        .unwrap();
+        let list = calc(json!({"price": 120.0, "list_price": 150.0}))["list_price"].clone();
         assert_eq!(
-            (list.price, list.discount, list.percentage),
-            (150., -30., 20.)
+            list,
+            json!({"price": 150.0, "discount": -30.0, "percentage": 20.0})
         );
-        let net = calculate(&PriceInput {
-            calculated: false,
-            list_price: Some(200.),
-            ..input(100.)
-        })
-        .list_price
-        .unwrap();
-        assert_eq!((net.price, net.discount), (238., -119.));
-        for absent in [Some(0.), Some(0.001), Some(-5.), None] {
+        let net =
+            calc(json!({"price": 100.0, "calculated": false, "list_price": 200.0}))["list_price"]
+                .clone();
+        assert_eq!(
+            (net["price"].clone(), net["discount"].clone()),
+            (json!(238.0), json!(-119.0))
+        );
+        for absent in [json!(0.0), json!(0.001), json!(-5.0), Value::Null] {
             assert!(
-                calculate(&PriceInput {
-                    list_price: absent,
-                    ..input(120.)
-                })
-                .list_price
-                .is_none(),
+                calc(json!({"price": 120.0, "list_price": absent}))["list_price"].is_null(),
                 "{absent:?}"
             );
         }
@@ -268,50 +230,29 @@ mod calculation {
     #[test]
     fn a_regulation_price_is_rounded_like_the_unit() {
         assert_eq!(
-            calculate(&PriceInput {
-                regulation_price: Some(99.999),
-                ..input(1.)
-            })
-            .regulation_price,
-            Some(100.)
+            calc(json!({"price": 1.0, "regulation_price": 99.999}))["regulation_price"],
+            100.0
         );
         assert_eq!(
-            calculate(&PriceInput {
-                calculated: false,
-                regulation_price: Some(100.),
-                ..input(1.)
-            })
-            .regulation_price,
-            Some(119.)
+            calc(json!({"price": 1.0, "calculated": false, "regulation_price": 100.0}))["regulation_price"],
+            119.0
         );
-        assert_eq!(
-            calculate(&PriceInput {
-                regulation_price: Some(0.),
-                ..input(1.)
-            })
-            .regulation_price,
-            None
-        );
+        assert!(calc(json!({"price": 1.0, "regulation_price": 0.0}))["regulation_price"].is_null());
     }
 
     #[test]
     fn a_reference_price_needs_both_positive_units() {
-        let reference = |purchase_unit, reference_unit| {
-            calculate(&PriceInput {
-                reference: Some(ReferenceDefinition {
-                    purchase_unit,
-                    reference_unit,
-                    unit_name: "l".into(),
-                }),
-                ..input(3.)
-            })
-            .reference_price
-            .map(|r| r.price)
+        let reference = |purchase_unit: f64, reference_unit: f64| {
+            calc(
+                json!({"price": 3.0, "reference": {"purchase_unit": purchase_unit,
+                "reference_unit": reference_unit, "unit_name": "l"}}),
+            )["reference_price"]["price"]
+                .clone()
         };
-        assert_eq!(reference(0.5, 2.), Some(12.));
-        assert_eq!(reference(0., 1.), None);
-        assert_eq!(reference(1., 0.), None);
-        assert_eq!(reference(-1., -1.), None);
+        assert_eq!(reference(0.5, 2.), 12.0);
+        assert!(reference(0., 1.).is_null());
+        assert!(reference(1., 0.).is_null());
+        assert!(reference(-1., -1.).is_null());
     }
 }
 

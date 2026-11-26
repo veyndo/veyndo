@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
+use veyndo_pricing::binary::Binary;
+use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::money::Minor;
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_pricing::quote::{LinePriceUpdate, QuoteTotals};
 use veyndo_shop::types::cart::StoredCart;
@@ -114,23 +117,23 @@ struct PricedLine {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LinePrice {
-    total_price: f64,
+    total_price: Binary,
     calculated_taxes: Vec<LineTax>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LineTax {
-    tax: f64,
+    tax: Binary,
     #[serde(default, deserialize_with = "lenient")]
-    tax_rate: Option<f64>,
+    tax_rate: Option<Binary>,
 }
 
-/// A line while discounts are spread: its current total, first tax rate and the price it now carries.
+/// A line while discounts are spread: its current total in minor units, first tax rate and the price it now carries.
 struct Line {
-    total: f64,
-    tax_rate: f64,
-    quantity: f64,
+    total: i64,
+    tax_rate: Binary,
+    quantity: u64,
     update: Option<LinePriceUpdate>,
 }
 
@@ -141,7 +144,7 @@ struct Outcome<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     promotion_free_shipping: Option<bool>,
     discounts: Vec<Value>,
-    discount_total: f64,
+    discount_total: Minor,
     coupon_codes: &'a [String],
 }
 
@@ -152,91 +155,114 @@ fn incomplete() -> Error {
     )
 }
 
+/// A quote amount in whole minor units: the stored number times 10^decimals, rounded half away from zero.
+fn minor_units(value: Binary, decimals: u8) -> Result<i64> {
+    let factor = Binary::integer(
+        10_i64
+            .checked_pow(decimals.into())
+            .ok_or(bad("Quote scale"))?,
+    );
+    Ok(value
+        .checked_mul(factor)
+        .and_then(|v| v.ratio()?.rounded(0))
+        .map_err(bad)?
+        .minor())
+}
+
 /// Spreads a discount amount over the lines, recalculates their taxes and returns the new position total and tax.
 fn discount_lines(
     lines: &mut [Line],
-    amount: f64,
-    (decimals, factor, b2b): (i32, f64, bool),
-) -> (f64, f64) {
-    let totals = lines
-        .iter()
-        .map(|l| (l.total * factor).round() as i64)
-        .collect::<Vec<_>>();
-    let allocated = veyndo_pricing::discount::allocate(&totals, (amount * factor).round() as i64);
-    let mut after = 0.;
-    let mut tax = 0.;
+    amount: Binary,
+    (decimals, b2b): (u8, bool),
+) -> Result<(Minor, Minor)> {
+    let totals = lines.iter().map(|l| l.total).collect::<Vec<_>>();
+    let allocated = veyndo_pricing::discount::allocate(&totals, minor_units(amount, decimals)?);
+    let interval =
+        Binary::from_decimal(Decimal::new(1, decimals.into()).map_err(bad)?).map_err(bad)?;
+    let mut after = Minor::zero(decimals);
+    let mut tax = Minor::zero(decimals);
     for (index, line) in lines.iter_mut().enumerate() {
+        let price = Minor::new(allocated[index], decimals);
         let calc = calculate(&PriceInput {
-            price: allocated[index] as f64 / factor,
-            decimals,
-            interval: 1. / factor,
+            price: Binary::from_decimal(price.decimal()).map_err(bad)?,
+            decimals: decimals.into(),
+            interval,
             quantity: 1,
             tax_rate: line.tax_rate,
             gross: !b2b,
             ..PriceInput::default()
-        });
-        line.total = calc.total_price;
-        line.tax_rate = calc.calculated_taxes.first().map_or(0., |t| t.tax_rate);
-        line.update = Some(LinePriceUpdate::new(
-            calc.total_price,
-            line.quantity,
-            decimals,
-            &calc.calculated_taxes,
-        ));
-        after += calc.total_price;
-        tax += calc.tax;
+        })
+        .map_err(bad)?;
+        line.total = calc.total_price.at_scale(decimals).map_err(bad)?.minor();
+        line.tax_rate = match calc.calculated_taxes.first() {
+            Some(t) => Binary::from_decimal(t.tax_rate).map_err(bad)?,
+            None => Binary::ZERO,
+        };
+        line.update = Some(
+            LinePriceUpdate::new(calc.total_price, line.quantity, &calc.calculated_taxes)
+                .map_err(bad)?,
+        );
+        after = after.checked_add(calc.total_price).map_err(bad)?;
+        tax = tax.checked_add(calc.tax).map_err(bad)?;
     }
-    (math_round(after, decimals), math_round(tax, decimals))
+    Ok((after, tax))
 }
 
 /// Applies the promotions in order to a priced quote: discounted lines, totals, discounts and coupon codes.
 fn apply(q: &mut Value, applicable: Vec<(String, Promotion)>, coupons: &[String]) -> Result<()> {
     let quote: PromotedQuote = serde_json::from_value(q.clone()).map_err(|_| incomplete())?;
     let b2b = quote.price.tax_status.as_deref() == Some("net");
-    let decimals = quote.price.currency_scale.unwrap_or(2) as i32;
-    let factor = 10_f64.powi(decimals);
-    let units = |rate: &Option<String>| -> Result<f64> {
-        Ok(rate
-            .as_deref()
-            .map(veyndo_pricing::types::currency::rate_units)
-            .transpose()?
-            .unwrap_or(100_000_000) as f64)
+    let decimals =
+        u8::try_from(quote.price.currency_scale.unwrap_or(2)).map_err(|_| bad("Quote scale"))?;
+    let units = |rate: &Option<String>| -> Result<Binary> {
+        Ok(Binary::integer(
+            rate.as_deref()
+                .map(veyndo_pricing::types::currency::rate_units)
+                .transpose()?
+                .unwrap_or(100_000_000),
+        ))
     };
-    let pricing_rate = units(&quote.currency_context.pricing_factor)?;
-    let rate = units(&quote.currency_context.factor)? / pricing_rate;
-    let positions = quote
+    let rate = units(&quote.currency_context.factor)?
+        .checked_div(units(&quote.currency_context.pricing_factor)?)
+        .map_err(bad)?;
+    // The stored sums as the quote rounds them: binary sums of the stored numbers, then `round`.
+    let sum = |values: Vec<Binary>| -> Result<Minor> {
+        let total = values
+            .into_iter()
+            .try_fold(Binary::ZERO, Binary::checked_add)
+            .map_err(bad)?;
+        math_round(total, decimals).map_err(bad)
+    };
+    let positions = sum(quote
         .line_items
         .iter()
         .map(|l| l.price.total_price)
-        .sum::<f64>();
-    let tax = quote
+        .collect())?;
+    let tax = sum(quote
         .line_items
         .iter()
         .flat_map(|l| &l.price.calculated_taxes)
         .map(|t| t.tax)
-        .sum::<f64>();
-    let original = math_round(if b2b { positions + tax } else { positions }, decimals);
-    let mut current = QuoteTotals {
-        position_price: math_round(positions, decimals),
-        total_price: original,
-        tax: math_round(tax, decimals),
-        net_price: math_round(if b2b { positions } else { positions - tax }, decimals),
-    };
+        .collect())?;
+    let mut current = QuoteTotals::new(positions, tax, b2b).map_err(bad)?;
+    let original = current.total_price;
     let mut lines = quote
         .line_items
         .iter()
-        .map(|l| Line {
-            total: l.price.total_price,
-            tax_rate: l
-                .price
-                .calculated_taxes
-                .first()
-                .and_then(|t| t.tax_rate)
-                .unwrap_or(0.),
-            quantity: l.quantity.unwrap_or(1) as f64,
-            update: None,
+        .map(|l| {
+            Ok(Line {
+                total: minor_units(l.price.total_price, decimals)?,
+                tax_rate: l
+                    .price
+                    .calculated_taxes
+                    .first()
+                    .and_then(|t| t.tax_rate)
+                    .unwrap_or(Binary::ZERO),
+                quantity: l.quantity.unwrap_or(1),
+                update: None,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>>>()?;
     let mut free_shipping = None;
     let mut discounts = vec![];
     for (id, p) in applicable {
@@ -245,25 +271,35 @@ fn apply(q: &mut Value, applicable: Vec<(String, Promotion)>, coupons: &[String]
             discounts.push(json!({"id":id,"name":p.name,"kind":p.kind,"amount":0}));
         } else {
             let total = current.position_price;
-            if total <= 0. {
+            if total.minor() <= 0 {
                 continue;
             }
+            let base = Binary::from_decimal(total.decimal()).map_err(bad)?;
+            let amount = Binary::from_wire(p.amount).map_err(bad)?;
             let ratio = if p.kind == "percentage" {
-                p.amount / 100.
+                amount.checked_div(Binary::integer(100))
             } else {
-                (p.amount * rate / total).min(1.)
-            };
-            let (after, tax) = discount_lines(&mut lines, total * ratio, (decimals, factor, b2b));
-            current = QuoteTotals::new(after, tax, decimals, b2b);
+                amount
+                    .checked_mul(rate)
+                    .and_then(|v| v.checked_div(base))
+                    .map(|v| v.min(Binary::integer(1)))
+            }
+            .map_err(bad)?;
+            let (after, tax) = discount_lines(
+                &mut lines,
+                base.checked_mul(ratio).map_err(bad)?,
+                (decimals, b2b),
+            )?;
+            current = QuoteTotals::new(after, tax, b2b).map_err(bad)?;
             discounts.push(
-                json!({"id":id,"name":p.name,"kind":p.kind,"amount":math_round(total-after,decimals)}),
+                json!({"id":id,"name":p.name,"kind":p.kind,"amount":total.checked_sub(after).map_err(bad)?}),
             );
         }
         if p.exclusive {
             break;
         }
     }
-    let discount_total = math_round(original - current.total_price, decimals);
+    let discount_total = original.checked_sub(current.total_price).map_err(bad)?;
     let stored = q.as_object_mut().ok_or_else(incomplete)?;
     if let Some(items) = stored.get_mut("lineItems").and_then(Value::as_array_mut) {
         for (item, line) in items.iter_mut().zip(lines) {
@@ -326,7 +362,53 @@ mod tests {
     use crate::types::promotion::Promotion;
     use serde_json::{Value, json};
     use veyndo_core::Result;
-    use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
+    use veyndo_pricing::binary::Binary;
+    use veyndo_pricing::pricing::{PriceInput, calculate};
+
+    /// The previous floating-point `math_round`, part of the oracle below.
+    pub(super) fn math_round(value: f64, decimals: i32) -> f64 {
+        let scale = 10f64.powi(decimals);
+        let mut whole = (value.abs() * scale).floor();
+        if (whole + 1.0) / scale == value.abs() {
+            whole += 1.0;
+        }
+        if value.abs() >= (whole + 0.5) / scale {
+            whole += 1.0;
+        }
+        (whole / scale).copysign(value)
+    }
+
+    /// The calculator through its wire boundary, as the oracle saw it: numbers in, numbers out.
+    struct Calculated {
+        total_price: f64,
+        tax: f64,
+        calculated_taxes: Vec<Value>,
+    }
+    fn calculated(
+        price: f64,
+        decimals: i32,
+        interval: f64,
+        tax_rate: f64,
+        gross: bool,
+    ) -> Calculated {
+        let wire = |v: f64| Binary::from_wire(v).unwrap();
+        let p = calculate(&PriceInput {
+            price: wire(price),
+            decimals,
+            interval: wire(interval),
+            quantity: 1,
+            tax_rate: wire(tax_rate),
+            gross,
+            ..PriceInput::default()
+        })
+        .unwrap();
+        let v = serde_json::to_value(&p).unwrap();
+        Calculated {
+            total_price: v["total_price"].as_f64().unwrap(),
+            tax: v["tax"].as_f64().unwrap(),
+            calculated_taxes: v["calculated_taxes"].as_array().unwrap().clone(),
+        }
+    }
 
     // The previous untyped implementation, kept as the oracle of the typed one.
     /// Spreads a discount amount over the lines, recalculates their taxes and the totals, and returns the new position total.
@@ -355,22 +437,14 @@ mod tests {
                 .as_f64()
                 .unwrap_or(0.);
             let discounted = allocated[index] as f64 / factor;
-            let calc = calculate(&PriceInput {
-                price: discounted,
-                decimals,
-                interval: 1. / factor,
-                quantity: 1,
-                tax_rate,
-                gross: !b2b,
-                ..PriceInput::default()
-            });
+            let calc = calculated(discounted, decimals, 1. / factor, tax_rate, !b2b);
             let quantity = line["quantity"].as_u64().unwrap_or(1) as f64;
             line["price"]["totalPrice"] = json!(calc.total_price);
             line["price"]["unitPrice"] = json!(math_round(calc.total_price / quantity, decimals));
             line["price"]["calculatedTaxes"] = json!(
                 calc.calculated_taxes
                     .iter()
-                    .map(|t| json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price}))
+                    .map(|t| json!({"tax":t["tax"],"taxRate":t["tax_rate"],"price":t["price"]}))
                     .collect::<Vec<_>>()
             );
             after += calc.total_price;

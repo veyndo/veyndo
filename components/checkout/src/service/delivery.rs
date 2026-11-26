@@ -5,13 +5,14 @@ use serde_json::{Value, json};
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::document_slot::field;
 use veyndo_core::{Error, Result, StatusCode, bad};
+use veyndo_pricing::binary::Binary;
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::pricing::{
-    CalculatedTax, PriceInput, TaxRule, calculate, math_round, proportional_tax_rules,
-};
-use veyndo_pricing::quote::QuoteTax;
+use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::money::Minor;
+use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate, math_round, proportional_tax_rules};
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_pricing::types::currency::Definition;
+use veyndo_pricing::verified_kernel;
 use veyndo_shop::domain::method_text;
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{CheckoutSelection, Settings, Shipping};
@@ -33,10 +34,10 @@ struct PricedQuote {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct QuoteTotals {
-    position_price: f64,
-    total_price: f64,
-    net_price: f64,
-    tax: f64,
+    position_price: Binary,
+    total_price: Binary,
+    net_price: Binary,
+    tax: Binary,
 }
 
 #[derive(Deserialize)]
@@ -47,7 +48,16 @@ struct PricedLine {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LinePrice {
-    calculated_taxes: Vec<QuoteTax>,
+    calculated_taxes: Vec<StoredTax>,
+}
+
+/// One stored line tax as the quote holds it: its exact binary64 numbers.
+#[derive(Deserialize, Clone, Copy, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct StoredTax {
+    tax: Binary,
+    tax_rate: Binary,
+    price: Binary,
 }
 
 impl PricedQuote {
@@ -60,45 +70,50 @@ impl PricedQuote {
         })
     }
 
-    /// The basket taxes summed per rate, in the order the rates first appear.
-    fn taxes(&self) -> Vec<CalculatedTax> {
-        let mut taxes: Vec<CalculatedTax> = vec![];
+    /// The basket taxes summed per rate, in the order the rates first appear (binary sums of
+    /// the stored numbers, as before).
+    fn taxes(&self) -> Result<Vec<StoredTax>> {
+        let mut taxes: Vec<StoredTax> = vec![];
         for v in self
             .line_items
             .iter()
             .flat_map(|l| &l.price.calculated_taxes)
         {
             if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == v.tax_rate) {
-                t.price += v.price;
-                t.tax += v.tax;
+                t.price = t.price.checked_add(v.price).map_err(bad)?;
+                t.tax = t.tax.checked_add(v.tax).map_err(bad)?;
             } else {
-                taxes.push(CalculatedTax {
-                    tax_rate: v.tax_rate,
-                    tax: v.tax,
-                    price: v.price,
-                });
+                taxes.push(*v);
             }
         }
-        taxes
+        Ok(taxes)
     }
 }
 
 /// The tax rules of the delivery cost: the highest rate of the basket or its proportional mix.
-fn shipping_tax_rules(taxes: &[CalculatedTax], shipping: &Shipping, position: f64) -> Vec<TaxRule> {
+fn shipping_tax_rules(
+    taxes: &[StoredTax],
+    shipping: &Shipping,
+    position: Binary,
+) -> Result<Vec<TaxRule>> {
     if shipping.tax_type == "highest" {
-        taxes
+        Ok(taxes
             .iter()
             .map(|t| t.tax_rate)
-            .max_by(f64::total_cmp)
+            .max()
             .map(|tax_rate| {
                 vec![TaxRule {
                     tax_rate,
-                    percentage: 100.,
+                    percentage: Binary::integer(100),
                 }]
             })
-            .unwrap_or_default()
+            .unwrap_or_default())
     } else {
-        proportional_tax_rules(taxes, position)
+        let shares = taxes
+            .iter()
+            .map(|t| (t.tax_rate, t.price))
+            .collect::<Vec<_>>();
+        proportional_tax_rules(&shares, position).map_err(bad)
     }
 }
 /// The method candidates for every country and the methods available in the selected one.
@@ -185,8 +200,8 @@ struct MethodOptions {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ShippingPrice {
-    price: f64,
-    free_above: Option<f64>,
+    price: Decimal,
+    free_above: Option<Decimal>,
 }
 
 /// A shipping method localized for the buyer, with its price and free-shipping threshold in the currency.
@@ -200,10 +215,10 @@ pub fn priced_shipping(
     merge(
         &mut result,
         ShippingPrice {
-            price: currencies::convert(v.price, &s.currencies, currency)?,
+            price: currencies::convert(currencies::stored(v.price)?, &s.currencies, currency)?,
             free_above: v
                 .free_above
-                .map(|v| currencies::convert(v, &s.currencies, currency))
+                .map(|v| currencies::convert(currencies::stored(v)?, &s.currencies, currency))
                 .transpose()?,
         },
     )?;
@@ -214,9 +229,9 @@ pub fn priced_shipping(
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct DeliveredTotals {
-    total_price: f64,
-    net_price: f64,
-    tax: f64,
+    total_price: Minor,
+    net_price: Minor,
+    tax: Minor,
 }
 
 /// The delivery terms a quote was priced under.
@@ -259,7 +274,7 @@ pub fn enrich(
     revision: i64,
 ) -> Result<Value> {
     let currency = s.currencies.selected(&c.data.currency)?;
-    let decimals = currency.scale as i32;
+    let decimals = currency.scale;
     let shipping_view =
         |v: &Shipping| -> Result<Value> { priced_shipping(v, &c.data.locale, s, currency) };
     let selected = selection(&c.data);
@@ -287,7 +302,10 @@ pub fn enrich(
     let gross_items = priced.price.total_price;
     let free = shipping
         .free_above
-        .map(|limit| currencies::convert(limit, &s.currencies, currency))
+        .map(|limit| {
+            let limit = currencies::convert(currencies::stored(limit)?, &s.currencies, currency)?;
+            Binary::from_decimal(limit).map_err(bad)
+        })
         .transpose()?
         .is_some_and(|limit| gross_items >= limit);
     let all_free = !c.data.items.is_empty()
@@ -296,42 +314,68 @@ pub fn enrich(
                 .find(|p| p.id == i.id)
                 .is_some_and(|p| flags(&p.extra).shipping_free == true || digital(&p.extra))
         });
-    let gross = if c.data.items.is_empty()
+    let base = if c.data.items.is_empty()
         || free
         || all_free
         || priced.promotion_free_shipping == Some(true)
     {
-        0.
+        Binary::ZERO
     } else {
-        currencies::convert(shipping.price, &s.currencies, currency)?
+        let price =
+            currencies::convert(currencies::stored(shipping.price)?, &s.currencies, currency)?;
+        Binary::from_decimal(price).map_err(bad)?
     };
-    let gross = math_round(
-        gross + priced.app_shipping_adjustment_minor.unwrap_or(0) as f64 / 10_f64.powi(decimals),
-        decimals,
-    );
-    if gross < 0. {
+    // The method price plus the app adjustment, rounded once to the minor unit as before.
+    let adjustment = Minor::new(priced.app_shipping_adjustment_minor.unwrap_or(0), decimals);
+    let gross = base
+        .checked_add(Binary::from_decimal(adjustment.decimal()).map_err(bad)?)
+        .and_then(|g| math_round(g, decimals))
+        .map_err(bad)?;
+    if gross.minor() < 0 {
         return Err(bad(
             "App shipping adjustment cannot make delivery cost negative",
         ));
     }
-    let rules = shipping_tax_rules(&priced.taxes(), shipping, position);
+    let rules = shipping_tax_rules(&priced.taxes()?, shipping, position)?;
     let gross_calc = calculate(&PriceInput {
-        price: gross,
-        decimals,
-        interval: 10_f64.powi(-decimals),
+        price: Binary::from_decimal(gross.decimal()).map_err(bad)?,
+        decimals: decimals.into(),
+        interval: Binary::from_decimal(Decimal::new(1, decimals.into()).map_err(bad)?)
+            .map_err(bad)?,
         quantity: 1,
         tax_rules: Some(rules.clone()),
         ..PriceInput::default()
-    });
-    let shipping_net = math_round(gross - gross_calc.tax, decimals);
+    })
+    .map_err(bad)?;
+    // Whole minor units from here on: net shipping and the delivered totals use the proved rules.
+    let unsigned = |amount: Minor| -> Result<u64> {
+        amount
+            .at_scale(decimals)
+            .and_then(Minor::unsigned)
+            .map_err(bad)
+    };
+    let stored =
+        |amount: Binary| -> Result<u64> { unsigned(math_round(amount, decimals).map_err(bad)?) };
+    let amount = |minor: u64| Minor::from_unsigned(minor, decimals).map_err(bad);
+    let shipping_tax = unsigned(gross_calc.tax)?;
+    let shipping_net = amount(verified_kernel::net_amount(unsigned(gross)?, shipping_tax))?;
     // Native method prices are gross amounts; explicit net component for B2B display.
     let cost = json!({"unitPrice":if s.is_business(&c.data.group){shipping_net}else{gross},"totalPrice":gross,"netPrice":shipping_net,"tax":gross_calc.tax,"calculatedTaxes":gross_calc.calculated_taxes});
     merge(
         field(&mut q, "price")?,
         DeliveredTotals {
-            total_price: math_round(gross_items + gross, decimals),
-            net_price: math_round(priced.price.net_price + shipping_net, decimals),
-            tax: math_round(priced.price.tax + gross_calc.tax, decimals),
+            total_price: amount(verified_kernel::amount_sum(
+                stored(gross_items)?,
+                unsigned(gross)?,
+            ))?,
+            net_price: amount(verified_kernel::amount_sum(
+                stored(priced.price.net_price)?,
+                unsigned(shipping_net)?,
+            ))?,
+            tax: amount(verified_kernel::amount_sum(
+                stored(priced.price.tax)?,
+                shipping_tax,
+            ))?,
         },
     )?;
     merge(
@@ -404,23 +448,24 @@ pub async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> Result<
 mod tests {
     use super::PricedQuote;
     use serde_json::{Value, json};
-    use veyndo_pricing::pricing::CalculatedTax;
+    use veyndo_pricing::binary::Binary;
 
-    /// The previous untyped reading, kept as the oracle of the typed one.
-    fn legacy(q: &Value) -> (f64, f64, f64, f64, Vec<CalculatedTax>, bool, i64) {
-        let mut taxes: Vec<CalculatedTax> = vec![];
+    /// The previous untyped reading, kept as the oracle of the typed one: (rate, tax, price) per rate.
+    #[allow(clippy::type_complexity)]
+    fn legacy(q: &Value) -> (f64, f64, f64, f64, Vec<(f64, f64, f64)>, bool, i64) {
+        let mut taxes: Vec<(f64, f64, f64)> = vec![];
         for line in q["lineItems"].as_array().unwrap() {
             for v in line["price"]["calculatedTaxes"].as_array().unwrap() {
                 let rate = v["taxRate"].as_f64().unwrap();
-                if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == rate) {
-                    t.price += v["price"].as_f64().unwrap();
-                    t.tax += v["tax"].as_f64().unwrap();
+                if let Some(t) = taxes.iter_mut().find(|t| t.0 == rate) {
+                    t.2 += v["price"].as_f64().unwrap();
+                    t.1 += v["tax"].as_f64().unwrap();
                 } else {
-                    taxes.push(CalculatedTax {
-                        tax_rate: rate,
-                        tax: v["tax"].as_f64().unwrap(),
-                        price: v["price"].as_f64().unwrap(),
-                    });
+                    taxes.push((
+                        rate,
+                        v["tax"].as_f64().unwrap(),
+                        v["price"].as_f64().unwrap(),
+                    ));
                 }
             }
         }
@@ -450,12 +495,18 @@ mod tests {
                 .unwrap()
                 .extend(extra.as_object().unwrap().clone());
             let typed = PricedQuote::read(&q).unwrap();
+            let wire = Binary::to_wire;
             let typed = (
-                typed.price.position_price,
-                typed.price.total_price,
-                typed.price.net_price,
-                typed.price.tax,
-                typed.taxes(),
+                wire(&typed.price.position_price),
+                wire(&typed.price.total_price),
+                wire(&typed.price.net_price),
+                wire(&typed.price.tax),
+                typed
+                    .taxes()
+                    .unwrap()
+                    .iter()
+                    .map(|t| (wire(&t.tax_rate), wire(&t.tax), wire(&t.price)))
+                    .collect::<Vec<_>>(),
                 typed.promotion_free_shipping == Some(true),
                 typed.app_shipping_adjustment_minor.unwrap_or(0),
             );
@@ -474,7 +525,7 @@ mod tests {
     #[test]
     fn typed_quote_patches_match_the_indexed_writes() {
         use super::{
-            DateWindow, DatedDelivery, DeliveredTotals, DeliveriesAndPayment, MethodOptions,
+            DateWindow, DatedDelivery, DeliveredTotals, DeliveriesAndPayment, MethodOptions, Minor,
             PaymentCountries, ShippingPrice,
         };
         use veyndo_core::document::merge;
@@ -497,9 +548,9 @@ mod tests {
         merge(
             field(&mut typed, "price").unwrap(),
             DeliveredTotals {
-                total_price: 14.9,
-                net_price: 12.52,
-                tax: 2.38,
+                total_price: Minor::new(1490, 2),
+                net_price: Minor::new(1252, 2),
+                tax: Minor::new(238, 2),
             },
         )
         .unwrap();
@@ -556,7 +607,7 @@ mod tests {
         merge(
             &mut shipping,
             ShippingPrice {
-                price: 4.9,
+                price: veyndo_pricing::decimal::Decimal::parse("4.9").unwrap(),
                 free_above: None,
             },
         )

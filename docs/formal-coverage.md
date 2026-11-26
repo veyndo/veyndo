@@ -7,17 +7,17 @@ Generated from `proof/domain-inventory.json` by `scripts/formal/domain_inventory
 
 `components/core` has no `domain/` module; its functions are infrastructure (store, cache, HTTP limits) and are not counted here. A `domain/` module added to it is checked like the others.
 
-Open after the money refactor (another session): order total = lines + shipping + tax, money scaling and rounding, and extractor multiplication. The functions they concern are listed under `money-representation` and `float-calculation`.
+Money runs on whole minor units (`Minor`, `Money`) and exact decimals and rationals (`Decimal`, `Ratio`). The calculator reproduces the original's binary64 rounding on `Binary` (integer emulation, no floating-point type), because the original's results at decimal ties depend on it. Proved and bound: line totals (`line_total`), rounding of a quotient to the minor unit (`rounded_quotient`), sums (`amount_sum`), net = gross - tax (`net_amount`), discount within its base (`discount_cap`), and the quote-total theorems over any list of lines.
 
 | Component | Functions | Binds a proved rule | Unproved |
 | --- | ---: | ---: | ---: |
 | core | 0 | 0 | 0 |
-| pricing | 44 | 4 | 40 |
+| pricing | 132 | 8 | 124 |
 | inventory | 6 | 1 | 5 |
-| checkout | 24 | 3 | 21 |
+| checkout | 23 | 3 | 20 |
 | payments | 37 | 3 | 34 |
-| orders | 33 | 4 | 29 |
-| **all** | **144** | **15** | **129** |
+| orders | 35 | 4 | 31 |
+| **all** | **233** | **19** | **214** |
 
 ## Functions that bind proved rules
 
@@ -34,48 +34,57 @@ Open after the money refactor (another session): order total = lines + shipping 
 | `components/payments/src/domain/receipt_guard.rs::receipt_matches` | `receipt_admissible` |
 | `components/payments/src/domain/refunds.rs::checked_total` | `refund_admissible` |
 | `components/payments/src/domain/state.rs::transition` | `payment_transition_admissible` |
+| `components/pricing/src/domain/decimal.rs::quotient` | `rounded_quotient` |
 | `components/pricing/src/domain/discount.rs::allocate` | `discount_cap` |
 | `components/pricing/src/domain/external_order.rs::PaidOrder::validate` | `external_paid_total_admissible` |
 | `components/pricing/src/domain/external_order.rs::SourceAmount::valid` | `external_amount_admissible` |
 | `components/pricing/src/domain/money.rs::Currency::new` | `currency_scale_admissible` |
+| `components/pricing/src/domain/money.rs::Minor::times` | `line_total` |
+| `components/pricing/src/domain/money.rs::unsigned_sum` | `amount_sum` |
+| `components/pricing/src/domain/quote.rs::QuoteTotals::new` | `net_amount` |
 
 ## Unproved functions by reason
 
-### money-representation (13)
+### money-representation (53)
 
-Money arithmetic, scaling, rounding or totals. Open until the money refactor moves pricing to whole minor units; another session proves price total = lines + shipping + tax, scaling and rounding afterwards.
+Money representation and exact arithmetic outside the bool/u64 subset: minor-unit types, decimal parsing and text, exact rationals in i128, the wire conversion of JSON numbers. Rounding, products and sums inside it are the proved rules; the rest is unit and property tested.
 
+- `components/checkout/src/domain/cart_quote.rs`: `configuration_price`
 - `components/payments/src/domain/amounts.rs`: `format_amount`, `parse_amount`
 - `components/payments/src/domain/refunds.rs`: `used`
 - `components/payments/src/domain/settlements.rs`: `captured`
-- `components/pricing/src/domain/money.rs`: `Currency::factor`, `Money::checked_add`, `Money::decimal`, `Money::from_legacy_eur`, `Money::new`, `Money::parse`, `Money::rounded`, `from_minor`, `to_minor`
+- `components/pricing/src/domain/binary.rs`: `Binary::deserialize`, `Binary::from_wire`, `Binary::minor`, `Binary::serialize`, `Binary::shortest`, `Binary::to_wire`, `Decimal::from_wire`, `Decimal::to_wire`
+- `components/pricing/src/domain/decimal.rs`: `Decimal::cmp`, `Decimal::deserialize`, `Decimal::eq`, `Decimal::parse`, `Decimal::partial_cmp`, `Decimal::serialize`, `Decimal::text`, `Ratio::abs`, `Ratio::checked_add`, `Ratio::checked_div`, `Ratio::checked_mul`, `Ratio::checked_sub`, `Ratio::cmp`, `Ratio::negated`, `Ratio::new`, `Ratio::partial_cmp`, `Ratio::reduced`, `Ratio::rounded`, `Ratio::significant`, `Ratio::significant_away`, `Ratio::significant_with`, `gcd`, `power`, `wide`
+- `components/pricing/src/domain/money.rs`: `Currency::factor`, `Minor::decimal`, `Minor::from_decimal`, `Minor::from_unsigned`, `Minor::ratio`, `Minor::serialize`, `Minor::significant`, `Minor::unsigned`, `Money::checked_add`, `Money::decimal`, `Money::from_decimal`, `Money::new`, `Money::parse`, `Money::rounded`
+- `components/pricing/src/domain/quote.rs`: `QuoteTax::at_scale`, `QuoteTotals::of_lines`
 
-### float-calculation (10)
+### binary-emulation (30)
 
-Floating-point price, tax or discount calculation ported from the original calculators; outside the bool/u64 extraction subset until the money refactor.
+Reproduces the original calculators' binary64 arithmetic with integers (no floating-point type), because their results at decimal ties depend on it; checked bit for bit against the previous port and the original PHP, not extracted.
 
-- `components/checkout/src/domain/cart_quote.rs`: `configuration_price`
 - `components/checkout/src/domain/tax_lines.rs`: `tax_products`
-- `components/pricing/src/domain/pricing.rs`: `calculate`, `cash_round`, `cast`, `math_round`, `proportional_tax_rules`, `sum`
-- `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`, `QuoteTotals::new`
+- `components/pricing/src/domain/binary.rs`: `Binary::cash_round`, `Binary::cast`, `Binary::checked_add`, `Binary::checked_div`, `Binary::checked_mul`, `Binary::checked_sub`, `Binary::cmp`, `Binary::decimal`, `Binary::floor`, `Binary::from_decimal`, `Binary::from_ratio`, `Binary::integer`, `Binary::partial_cmp`, `Binary::power`, `Binary::ratio`, `Binary::round`, `Binary::rounded`, `bit_length`
+- `components/pricing/src/domain/pricing.rs`: `Rounding::minor`, `Rounding::new`, `Rounding::round`, `calculate`, `line_total`, `math_round`, `merged_rules`, `percent`, `proportional_tax_rules`, `sum`
+- `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`
 
 ### document-shape (22)
 
 Reads, writes or projects JSON/serde documents; data mapping, not a decision rule.
 
-- `components/checkout/src/domain/admin_order.rs`: `order`, `purchase`
+- `components/checkout/src/domain/admin_order.rs`: `order`
 - `components/checkout/src/domain/quote_view.rs`: `QuoteView::first_line`, `QuoteView::method`, `digital`, `flags`, `quote_view`
 - `components/orders/src/domain/company_model.rs`: `public`, `resolve`
 - `components/orders/src/domain/import_product.rs`: `projection`
 - `components/orders/src/domain/import_relations.rs`: `identity`, `product`
 - `components/orders/src/domain/order_fields.rs`: `order_fields`
+- `components/orders/src/domain/order_patches.rs`: `TrackingUrl::of`, `strip_cart_token`
 - `components/orders/src/domain/order_workflow.rs`: `WorkflowOrder::deliveries`
 - `components/payments/src/domain/attempt.rs`: `Attempt::ctx`, `context_of`
 - `components/payments/src/domain/instructions.rs`: `snapshot`
 - `components/payments/src/domain/receipt_ref.rs`: `reference`
 - `components/payments/src/domain/settlements.rs`: `summary`
 - `components/pricing/src/domain/catalog.rs`: `public_extra`
-- `components/pricing/src/domain/quote.rs`: `CalculatedTax::from`, `QuoteTax::from`
+- `components/pricing/src/domain/quote.rs`: `QuoteTax::from`
 
 ### text-and-locale (6)
 
@@ -130,15 +139,17 @@ A pure decision over strings, enums or collections that the bool/u64 extractor c
 - `components/payments/src/domain/settlements.rs`: `closed`, `multi`
 - `components/pricing/src/domain/context.rs`: `language_chain`, `select_tier`
 
-### constructor-or-accessor (16)
+### constructor-or-accessor (37)
 
 Builds or reads a value without a decision of its own.
 
 - `components/checkout/src/domain/session_review.rs`: `Review::session`
 - `components/inventory/src/domain/lines.rs`: `InventoryLines::ids`, `InventoryLines::quantities`
+- `components/pricing/src/domain/binary.rs`: `Binary::abs`, `Binary::is_negative`, `Binary::is_zero`, `Binary::negated`
 - `components/pricing/src/domain/cart.rs`: `default_channel`
 - `components/pricing/src/domain/customer/mod.rs`: `country_default`
-- `components/pricing/src/domain/money.rs`: `Currency::code`, `Currency::eur`, `Currency::scale`, `Currency::try_from`, `Money::currency`, `Money::minor`
+- `components/pricing/src/domain/decimal.rs`: `Decimal::integer`, `Decimal::is_zero`, `Decimal::new`, `Decimal::ratio`, `Decimal::scale`, `Decimal::units`, `Ratio::denominator`, `Ratio::integer`, `Ratio::is_negative`, `Ratio::is_zero`, `Ratio::numerator`
+- `components/pricing/src/domain/money.rs`: `Currency::code`, `Currency::eur`, `Currency::scale`, `Currency::try_from`, `Minor::minor`, `Minor::new`, `Minor::same_scale`, `Minor::scale`, `Minor::zero`, `Money::amount`, `Money::currency`, `Money::minor`
 - `components/pricing/src/domain/pricing.rs`: `PriceInput::default`, `decimals`, `interval`, `yes`
 - `components/pricing/src/domain/validation.rs`: `ValidationError::new`
 
@@ -150,18 +161,26 @@ Returns fixed catalogue data (states, providers, schema); reviewed data, no rule
 - `components/orders/src/domain/order_machine.rs`: `default_machine`
 - `components/payments/src/domain/state.rs`: `code`
 
-### signed-arithmetic (2)
+### signed-arithmetic (6)
 
 Signed (i64) quantity or amount arithmetic outside the u64 subset; unit tested.
 
 - `components/payments/src/domain/settlements.rs`: `state`
 - `components/pricing/src/domain/context.rs`: `fix_quantity`
+- `components/pricing/src/domain/money.rs`: `Minor::at_scale`, `Minor::checked_add`, `Minor::checked_sub`, `Minor::sum`
 
 ## Notes on single functions
 
-- `components/checkout/src/domain/cart_quote.rs::quote`: Line totals still come from the floating-point calculator; only minor-unit addition and net/gross are proved here (money refactor pending).
+- `components/checkout/src/domain/cart_quote.rs::quote`: Line totals are the calculator's proved line_total in whole minor units; the quote adds them with amount_sum and splits net and tax with net_amount. The Lean quote-total theorems state these sums for any list of lines.
+- `components/checkout/src/domain/tax_lines.rs::tax_products`: The net-preserving rate factor is applied with the original binary arithmetic so stored product prices change exactly as before.
 - `components/inventory/src/domain/lines.rs::InventoryLines::new`: The new order holds nothing yet (held = 0); the reservation run theorems cover any later reserve/release sequence gated by the same rule.
 - `components/orders/src/domain/order_machine.rs::OrderMachine::validate`: Graph validation of a configured machine (identifiers, labels, no edge out of a terminal state, reachability). The order run theorems do not rely on it: admitted_edge rechecks the listed target and the terminal source.
 - `components/orders/src/domain/order_transitions.rs::delivery`: Delivery state strings; terminal orders are refused before it runs by guard (order_edit_admissible).
 - `components/orders/src/domain/order_workflow.rs::terminal`: String membership; its result is the terminal input of the proved order_edit_admissible and order_transition_admissible.
+- `components/pricing/src/domain/decimal.rs::quotient`: Refuses operands outside the rule's range instead of letting it saturate; Ratio::rounded rounds every exact amount into minor units through it.
 - `components/pricing/src/domain/discount.rs::allocate`: The cap is proved; the proportional integer allocation loop and its rounding are unit tested, not proved.
+- `components/pricing/src/domain/money.rs::Minor::times`: Sign and overflow refusal around the proved product; the calculator's line totals and every quantity multiplication of a minor amount use it.
+- `components/pricing/src/domain/money.rs::unsigned_sum`: Refuses an overflowing sum instead of letting the proved sum saturate.
+- `components/pricing/src/domain/pricing.rs::calculate`: The Shopware calculator's binary64 steps on Binary (integer emulation), bit for bit equal to the previous port (tests/calculator_reference.rs) and, in CI, to the original PHP (differential.py); its line total is the proved line_total.
+- `components/pricing/src/domain/pricing.rs::line_total`: The product itself is the proved line_total (through Minor::times); this function writes it as the original does (fourteen digits of its binary value).
+- `components/pricing/src/domain/quote.rs::QuoteTotals::new`: Net quotes add the tax with the proved sum (through unsigned_sum), gross quotes take the proved net; negative amounts are refused.

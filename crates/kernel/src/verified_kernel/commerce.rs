@@ -102,3 +102,12 @@ pub fn amount_sum(left: u64, right: u64) -> u64 {
 pub fn net_amount(gross: u64, tax: u64) -> u64 {
     gross.saturating_sub(tax)
 }
+/// The amount of `quantity` units at `unit` minor units each; it never wraps around.
+pub fn line_total(unit: u64, quantity: u64) -> u64 {
+    unit.saturating_mul(quantity)
+}
+/// `numerator / denominator` in whole minor units, rounded to the nearest one with halves
+/// up (away from zero for a magnitude); a zero denominator counts as one.
+pub fn rounded_quotient(numerator: u64, denominator: u64) -> u64 {
+    numerator.saturating_add(denominator.max(1) / 2) / denominator.max(1)
+}

@@ -110,7 +110,7 @@ pub(super) async fn execute(
             .selected(input.currency.as_deref().unwrap_or(""))?;
         let product =
             crate::operations::invoke(a, h, "merchant.product.content", &json!({"id":pid})).await?;
-        let money = json!(currencies::amount(
+        let money = json!(currencies::exact_amount(
             currencies::product_price(&p, &cfg.currencies, currency)?,
             &currency.code,
             currency.scale

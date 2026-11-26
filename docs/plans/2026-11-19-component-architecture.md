@@ -198,11 +198,22 @@ Done when the server builds on both crates without glob imports from them.
       check the whole settings object; currency selection on a cart belongs to
       checkout.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
-      point" on the proof coverage page is zero for this component. Done so far:
-      cart totals (goods, tax, payable, net) are added as minor units by proved
-      rules. The calculators themselves stay a bit-exact floating-point port of the
-      original ones; replacing them needs the PHP comparison run, which CI has
-      and the local machine does not.
+      point" on the proof coverage page is zero for this component. Done 26 Nov
+      (r3-money): the calculation path carries `Minor` (whole minor units with the
+      currency exponent, checked arithmetic, rounding half away from zero) and exact
+      `Decimal`/`Ratio` values: calculator outputs, line totals (proved `line_total`),
+      discounts, app adjustments, shipping, taxes, net/gross and quote totals (proved
+      `amount_sum`/`net_amount`); payment ledger amounts were already `i64` minor units
+      with `Money`. JSON numbers cross one conversion (`domain/binary.rs`: exact bits,
+      shortest decimal). The Shopware calculator reproduces the original's binary64
+      rounding on `Binary` (integer emulation, no float type), because the original's
+      results at decimal ties depend on it (130.4835 × 670 → 87423.94); bit for bit
+      equal to the previous port on the differential population plus 240,000
+      generated inputs, the PHP comparison runs in CI. Open: the column is 2 for
+      `pricing/src/domain` (`binary.rs` is the wire boundary; `catalog.rs` keeps the
+      product snapshot's `double precision` columns as `f64` fields, read through the
+      boundary). Changing the product columns and settings fields to exact types is a
+      separate schema step.
 - [x] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.
       Since 24 Nov stored JSON documents are read through typed views
       (`veyndo_core::document::{view, lenient, lenient_list}`: a misshaped field
@@ -1155,17 +1166,29 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       or a binding that differs from the source, and the mutation run rejects seven
       such third states. Generated page: `docs/formal-coverage.md`. `core` has no
       `domain/` module yet; one added later is checked the same way.
-- [ ] Money: addition and scaling never overflow silently; rounding is stated and
+- [x] Money: addition and scaling never overflow silently; rounding is stated and
       proved; net plus tax equals gross; a discount never exceeds its base; a total
-      is never negative. Proved and bound in cart pricing: addition (`amount_sum`,
-      four properties), net plus tax equals gross and net never above gross
-      (`net_amount`), discount within its base (`discount_cap`). Open: scaling
-      and rounding — they wait for the money refactor (whole minor units) and are
-      done by another session after it.
-- [ ] Price calculation: the order total equals the sum of its lines, shipping and
-      tax for every input; the same input gives the same quote. Open: the
-      calculation is still the floating-point port, so this waits for the money
-      refactor and is done by another session after it.
+      is never negative. Proved and bound: addition (`amount_sum`, four properties),
+      net plus tax equals gross and net never above gross (`net_amount`), discount
+      within its base (`discount_cap`); 26 Nov: multiplication (`line_total`, six
+      properties: exact, bounded, zero, one, split quantity, monotone) and rounding
+      to the minor unit (`rounded_quotient`, half up on magnitudes, i.e. half away from
+      zero: nearest, halves up, monotone, scaling up and rounding back is the identity,
+      and the tax contained in a gross amount never exceeds it, so net plus tax is
+      the gross). Bound in `Minor::times` and `Ratio::rounded`; the Rust callers refuse
+      operands that would make a rule saturate. Totals are `u64` minor units, never
+      negative (`quote_total_not_below_lines`).
+- [x] Price calculation: the order total equals the sum of its lines, shipping and
+      tax for every input; the same input gives the same quote. Proved 26 Nov over
+      any list of line totals in minor units: `net_quote_total` (payable = lines +
+      net shipping + line and shipping tax), `gross_quote_total` (the same with the
+      tax contained in lines and shipping), `lines_total_exact`, `lines_total_order_free`
+      and `quote_total_deterministic` (equal lines in any order give equal totals);
+      the cart quote, the delivery totals and `QuoteTotals` compute exactly these
+      sums with `amount_sum` and `net_amount`. The calculator is a pure function
+      (property test: the same input gives the same price); its rounding steps are
+      the binary64 emulation, which is checked against the previous port and the
+      original PHP rather than proved.
 - [x] Stock: a reservation never takes stock below zero; reserve followed by
       release restores the quantity; an order holds at most what it ordered.
       Proved: the first two, also for two reservations in sequence
@@ -1197,11 +1220,12 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       honoured (`offer_honoured`, four properties).
 - [x] Sovereign AI mode admits only the self-operated provider on a self-hosted
       endpoint (`sovereign_request_admissible`, four properties).
-- [ ] Extend the extractor to saturating addition and multiplication together with
-      the first rule that uses them. Addition is done (`amount_sum`); multiplication
-      follows with line totals (open: money refactor, another session). The price calculation is still a floating-point
-      port of the original calculators, so "total equals the sum of its parts"
-      becomes provable only after phase 2 moves it to whole minor units.
+- [x] Extend the extractor to saturating addition and multiplication together with
+      the first rule that uses them. Addition: `amount_sum`. 26 Nov: `saturating_mul`
+      (`line_total`), `max` and division by a divisor the parser sees is positive
+      (`rounded_quotient`); plain `/`, `%`, `*` and a possibly zero divisor are
+      refused (closed-grammar controls). Both new rules are in the `formal_differential`
+      population and have negative controls there and mutants in `scripts/formal/mutations.py`.
 - [x] State-machine proofs as invariants over transitions, not only single steps.
       Order runs (above); payment ledger runs (`payment_run_listed`,
       `payment_run_captured_kept`, `payment_run_refunded_final`); refund and capture
@@ -1212,9 +1236,18 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       per key comes from the key lookup in SQL, not from the rule.
 - [x] The comparison driver checks the compiled Rust rules against the Lean
       versions on generated inputs for every rule above: suite
-      `formal_differential` (72 rules, 228,195 cases), with a negative control that
-      alters five rules in the Lean model and must catch each.
-- [ ] No `f64` on the money path.
+      `formal_differential` (74 rules, 229,207 cases since 26 Nov), with a negative control
+      that alters seven rules in the Lean model and must catch each.
+- [ ] No `f64` on the money path. 26 Nov: no floating-point arithmetic is left on
+      the calculation path; `f64` remains only as a wire or storage type: the boundary
+      conversion (`pricing/domain/binary.rs`), the stored product snapshot fields
+      (`pricing/domain/catalog.rs`, `double precision` columns), the entry points that
+      take a stored or wire number (`service/conversion.rs`: `amount`, `stored`,
+      `ancillary`; a closure over stored fields in `cart_quote.rs` and
+      `price_job_worker.rs`), and display code in orders (`receipt_text.rs` formats
+      stored amounts, `order_fields.rs` shows the FX factor, a rate). Non-money `f64`
+      elsewhere: rule comparisons and scores in marketing, intelligence experiments,
+      storefront display.
 
 ## Order
 
@@ -1263,7 +1296,7 @@ The release waits for all of it. Baseline on 25 November, measured by
 | H4 typed access | untyped field accesses | 2,208 | 0 outside documented protocol adapters |
 | H5 ports | foreign table accesses | 239 | 0 |
 | H6 tests | property, store per component, mutation | none | money, stock, discounts, state machines; every component; `domain/` |
-| H7 proofs | Lean | price, stock bound, order states open | proved and bound (stock bound and order states done 25 Nov; price waits for the money refactor) |
+| H7 proofs | Lean | price, stock bound, order states open | proved and bound (stock bound and order states done 25 Nov; money and quote totals 26 Nov; the calculator's binary rounding is emulated and compared, not proved) |
 | H8 migrations, mirrors | per-component baselines (done), generated mirrors; no rolling upgrade (decision of 25 November) | none | 5.3, 5.4, 5.5 |
 
 Each step lowers its ratchet in `components.json` (the check refuses growth and asks

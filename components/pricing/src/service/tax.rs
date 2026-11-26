@@ -1,9 +1,10 @@
 //! The tax rate of a delivery destination: the most specific active rule, else the country rate, else the class default.
+use crate::decimal::Decimal;
 use crate::types::tax::{Destination, DestinationRule, TaxConfig};
 use veyndo_core::{Result, bad};
 use veyndo_kernel::verified_kernel;
 
-pub fn destination_rate(t: &TaxConfig, c: &Destination, today: &str) -> Result<f64> {
+pub fn destination_rate(t: &TaxConfig, c: &Destination, today: &str) -> Result<Decimal> {
     let state = c.state;
     let postal = c.postal_code;
     let mut matches = t
@@ -82,15 +83,45 @@ mod tests {
         t.rules = vec![rule("state", 7.25, 0), rule("postal", 9.5, 0)];
         t.rules[1].postal_from = Some("90000".into());
         t.rules[1].postal_to = Some("91999".into());
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 9.5);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            9.5
+        );
         t.rules[0].priority = 1;
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 7.25);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            7.25
+        );
         t.rules[0].condition = Some(json!({"type":"alwaysValid"}));
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 9.5);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            9.5
+        );
         t.rules[1].active_until = Some("2026-10-04".into());
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 5.);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            5.
+        );
         c.country = "ZZ";
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 19.);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            19.
+        );
         t.default_rate = None;
         assert!(destination_rate(&t, &c, "2026-10-05").is_err());
     }
@@ -107,8 +138,20 @@ mod tests {
             state: "US-CA",
             postal_code: "91000",
         };
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 9.5);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            9.5
+        );
         c.postal_code = "910AA";
-        assert_eq!(destination_rate(&t, &c, "2026-10-05").unwrap(), 5.);
+        assert_eq!(
+            destination_rate(&t, &c, "2026-10-05")
+                .unwrap()
+                .to_wire()
+                .unwrap(),
+            5.
+        );
     }
 }
