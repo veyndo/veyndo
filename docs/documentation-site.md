@@ -122,7 +122,7 @@ also cover all archived Markdown, screenshots and links.
 
 The 16 October app review reconciles shared storage, saved agent work and enforced
 database/browser authority across README, app guides, architecture notes and the
-release tracker. [App-system status](app-system-status.md) is the reader's entry
+release tracker. [App-system status](app-platform.md) is the reader's entry
 to delivered/partial/open behavior. The app chapter now links that map, the
 business-capability direction and the exact storage guide before deeper tutorials.
 Dated receipts remain unchanged; later results explicitly supersede earlier
@@ -166,7 +166,7 @@ every prose claim; observed behavior, implementation scope and proposed work
 must stay distinct. Use [the testing guide](testing.md) and
 [formal scope](formal-verification.md) for exact evidence boundaries.
 
-The subsequent 8 October core review is documented in [core hardening](core-hardening.md),
+The subsequent 8 October core review is documented in [core hardening](security.md),
 with a rendered request/event diagram, all eighteen findings, deployment settings,
 regressions and remaining proof/operational boundaries. Older latency and screenshot
 measurements retain their original scope; they are not relabelled as hardening results.

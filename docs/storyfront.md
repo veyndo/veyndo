@@ -225,9 +225,8 @@ idempotent replay. CI runs it with the other database suites.
 The companion connector tests compile an imported manifest, retain variant facts
 and SKU mappings, reject foreign media/duplicates, and exercise destination
 validation, bounded responses and authoritative cart transfers. Browser verification
-covers Storyfront bag to the existing Rust checkout. See
-[checkout-handoff-verification.json](checkout-handoff-verification.json) for the
-sanitized local database checks.
+covers Storyfront bag to the existing Rust checkout; the `checkout_handoff`
+suite runs the database checks.
 
 ## Local end-to-end evidence
 

@@ -2304,7 +2304,7 @@ comparison fixtures remain part of migration and native verification.
 
 ## Connected commerce follow-ups
 
-The [dedicated implementation checklist](plans/2026-10-30-connected-commerce.md)
+The dedicated implementation checklist
 tracks all 13 areas from the Fall 2026 comparison. The first delivery links
 applied agent proposals to private customer tests and detecting outdated test
 configuration. Saved results now appear beside native release diffs with a direct
@@ -2629,7 +2629,7 @@ are included in the combined public artifact; [implementation and browser eviden
 | --- | --- | --- |
 | App storage | Shared bounded records, references, indexes, settings and immutable packages; four fixed physical tables replace per-app physical tables. Public legacy-data migration was verified. | Capacity depends on measured workloads; shared storage is not a promise of unlimited throughput. [Storage model](app-data-storage.md) |
 | Native object extensions | Versioned product/customer/order/company fields feed native details, grids, exact filters and permission-aware operations. Product lifecycle passed publicly; the other object types have local/CI coverage. | Broader arbitrary object types and every external protocol need their own contract and acceptance. [Extension contract](app-core-extensions.md) |
-| Sandbox and app lifecycle | Private previews, current rights, version/digest checks and selected configuration publication use the same native owners. Material upgrades preserve historical orders. | Arbitrary Rust/TypeScript source compilation and hosting are not established by managed app packages. [App system status](app-system-status.md) |
+| Sandbox and app lifecycle | Private previews, current rights, version/digest checks and selected configuration publication use the same native owners. Material upgrades preserve historical orders. | Arbitrary Rust/TypeScript source compilation and hosting are not established by managed app packages. [App system status](app-platform.md) |
 | Agents and model tools | Durable checkpoints, leases, cancellation, reviewed native writes, distinct revocable identities, model allocation limits, emergency stop and OpenAI/Claude/Ollama tool protocols. | Real provider quality and invoiced cost are separate from fixtures and conservative allocations. [Controls](agent-authority-controls.md), [durable work](durable-agent-runs.md) |
 | Authorization and database isolation | Current tenant/actor rights, separate restricted SQL roles, strict startup and native API/MCP operation checks. | Every new operation must retain those controls; an earlier audit is not whole-system certification. [Hosted database enforcement](evidence/database-enforcement-2026-10-15.json) |
 | Events and workers | Separate cognition/apps/flows/audit checkpoints, durable traces, bounded workers, fenced retries and per-tenant admission. | Fleet throughput, failover and large-catalogue limits require representative measurement. [Rust service ownership](rust-services.md) |
@@ -2645,7 +2645,7 @@ The first measured import improvement now resolves names for a 24-line order in
 one query instead of 24. The same query uses existing indexes in a test shop with
 200,059 products. Further throughput measurements and shared order-persistence
 work remain separate. [Import verification](evidence/external-order-batching-2026-10-23.md).
-[Concrete architecture improvements discussed with Claude](architecture-followups-2026-10-22.md)
+Concrete architecture improvements discussed with Claude
 are proposals, separate from this implementation.
 
 ## What remains to finish

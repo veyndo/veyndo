@@ -84,7 +84,7 @@ Quantity minimums, steps, maximums and customer-group tiers feed the same server
 
 Submitted reviews start pending. Studio exposes publication/hiding controls; public ratings count only published reviews. A verified-purchase flag is derived from an actual completed customer purchase, not a shopper-supplied checkbox. Cross-selling uses configured same-shop products. Merchant-approved co-purchase associations can supply recommendations without exposing private customer identities.
 
-**Ask VEYNDO** and product questions use eligible catalog facts and explicitly published sources when a model is configured. Missing facts and provider failures remain visible. These controls do not imply a model is included in every installation, and the source-retrieval test below can be used without inference. Personalization has a shopper toggle; its bounded session affinity and persisted discovery/comparison policy change retrieval/layout selection, not model weights or proven sales uplift. [Intelligence contracts](intelligence-apps-payments.md).
+**Ask VEYNDO** and product questions use eligible catalog facts and explicitly published sources when a model is configured. Missing facts and provider failures remain visible. These controls do not imply a model is included in every installation, and the source-retrieval test below can be used without inference. Personalization has a shopper toggle; its bounded session affinity and persisted discovery/comparison policy change retrieval/layout selection, not model weights or proven sales uplift. Intelligence contracts.
 
 ### One-page checkout
 
@@ -297,7 +297,7 @@ not deployed to the hosted pilot yet. The [roadmap](roadmap.md) tracks them.
 
 The merchant assistant persists conversations, messages, verified context and proposals. It receives bounded current catalog, history, observations, eligible sources and selected app facts/tools. The server attaches actual product/app/record revisions. A merchant reviews the stored fields and explicitly approves; application is atomic and rejects stale state. An LLM cannot grant permissions, execute SQL, approve itself or silently modify live content.
 
-Choose configured **Ollama**, **OpenAI Responses** or **Anthropic Messages** adapters. Cloud API credentials differ from consumer subscriptions; calls may incur provider charges. Missing configuration, malformed output and provider failures are reported without silent substitution. Conversation leases and process admission keep network calls outside database transactions. Remote app-service mutations are not made atomic by a model proposal. [Inference and app planning](intelligence-apps-payments.md) · [Provider setup](connectors.md).
+Choose configured **Ollama**, **OpenAI Responses** or **Anthropic Messages** adapters. Cloud API credentials differ from consumer subscriptions; calls may incur provider charges. Missing configuration, malformed output and provider failures are reported without silent substitution. Conversation leases and process admission keep network calls outside database transactions. Remote app-service mutations are not made atomic by a model proposal. Inference and app planning · [Provider setup](connectors.md).
 
 ![Current merchant assistant with catalogue intake actions; no model call performed](assets/product-tour-20261102/assistant.jpg)
 
@@ -647,7 +647,7 @@ and network/certification limits](edi.md).
 
 ## Connected feature audit — 12 October 2026
 
-[The integration matrix](feature-integration.md) links POS, B2B/EDI, marketplaces
+The integration matrix links POS, B2B/EDI, marketplaces
 and behavioral intelligence to their actual versions, settings, sandbox, rights,
 API/MCP and event owners. Native analytics now has inherited enabled/retention/
 intake controls; B2B editors expose history and selected configuration publication.

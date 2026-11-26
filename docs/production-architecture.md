@@ -143,7 +143,7 @@ direct queries in a scoped transaction. Session mode binds every checkout, with 
 second reset query on return. Unknown tasks fail closed. Transaction pooling is
 verified through actual PgBouncer with one backend, protocol prepared statements
 and two Rust replicas. It needs a separate direct/session `DATABASE_LISTENER_URL`;
-statement pooling is unsupported. [Configuration and all eighteen review fixes](core-hardening.md).
+statement pooling is unsupported. [Security boundaries](security.md).
 
 Identity resolution, authenticated platform operations, registration/provisioning,
 staging/developer control paths and fleet workers deliberately use trusted system

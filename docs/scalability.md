@@ -85,7 +85,7 @@ commerce locks, durable login throttles and commit-notification worker wakes.
 Real transaction-mode PgBouncer is covered by the strict-runtime suite. Per-event
 savepoints and quarantine isolate poison outbox messages; bounded retirement
 prevents indefinite duplicate payload growth while keeping referenced evidence.
-[Exact review findings and configuration](core-hardening.md).
+[Security and database configuration](security.md).
 
 **Remaining:** complete token/spend quotas, cell placement, sustained competing
 load measurements, online large-schema upgrades and independently isolated

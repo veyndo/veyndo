@@ -189,7 +189,7 @@ returned confirmation and cleared the Storyfront bag.
 [Hosted evidence](evidence/shared-app-storage-hosted-2026-10-15.json) ·
 [Shared storage and maintenance](app-data-storage.md).
 
-The [app-system implementation map](app-system-status.md) distinguishes these
+The [app-system implementation map](app-platform.md) distinguishes these
 released foundations from the unfinished full B2B configurator, entity/lifecycle
 extensions, historical business replay, isolated source builds, managed runtimes
 and fleet compatibility. A documentation refresh does not deploy those features
@@ -217,7 +217,7 @@ intelligence share native version, rights, settings, sandbox, API/MCP and event
 owners. The audit closes selective-release permission gaps, app Flow admission,
 POS defaults, staging analytics capture and B2B history/policy publication. A real
 Linux coverage MCP stack overflow is repaired in the shared dispatcher without
-raising worker limits. [Integration matrix and walkthroughs](feature-integration.md)
+raising worker limits. Integration matrix and walkthroughs
 · [Current test evidence and proof boundary](testing.md).
 
 The source audit below is separate from the VEYNDO deployment above. The following
@@ -250,7 +250,7 @@ App Studio retains confirmed form revisions and filters selected-app versions.
 Generic core code fences writes against current installed packages and shares
 app-network admission across replicas. The ERP example includes an app-owned
 Rust adapter and forced-RLS receipts, signed events, cold-restart deduplication
-and explicit reconciliation. [Contracts and verification boundaries](connected-workbench.md#lifecycle-and-reference-app-follow-up--12-october-2026).
+and explicit reconciliation. Contracts and verification boundaries.
 
 The companion private Experience admission fix is publicly active. A 12 October
 browser check reproduced the old HTTP-reference 400, then accepted the normalized
@@ -299,7 +299,7 @@ extracted policy proofs. Qodo's local CLI was unavailable; no external local rev
 is claimed. The ERP Docker dependency closure was checked, while local container
 execution was unavailable; the actual Rust adapter process was tested independently.
 
-**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. [How to use it, ownership and verification boundaries](connected-workbench.md).
+**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. How to use it, ownership and verification boundaries.
 
 **Illustrated app workshops:** five practical guides now cover product advice,
 private returns, customer fields, UTC review reminders and ERP handoff. Fourteen
@@ -314,7 +314,7 @@ The earlier connected intelligence and app release was merged in Core
 `598bbec112165fcac1847797786e2ba5c606e06f`. The private Experience adapter pins
 that Core and original Storyfront `2087783606e5c925317bae57625256a82c16bff0`;
 its dated release was `f970543124d669971330945f74b87e9c799a76e4`. The public native update below supersedes that runtime observation.
-[Complete changes, repeatable acceptance and remaining work](release-acceptance-2026-10-09.md).
+Complete changes, repeatable acceptance and remaining work.
 
 The static API catalogue contains **280 HTTP method/path pairs**; installed app
 routes are discovered separately. The source inventory contains **432 Rust
@@ -457,7 +457,7 @@ public acceptance establishes external payment settlement or production capacity
 
 ## Core hardening update
 
-The eighteen-point core review is addressed in [the hardening guide](core-hardening.md): typed trusted identity and explicit route rights, strict deployment roles, consolidated current grants, shared tenant/connection leases, transaction-local SQL/PgBouncer, bounded off-thread Wasm/image work, commit wakes, isolated outbox retries and retention. The guide distinguishes source/tests from a verified public rollout.
+The eighteen-point core review is addressed in [the hardening guide](security.md): typed trusted identity and explicit route rights, strict deployment roles, consolidated current grants, shared tenant/connection leases, transaction-local SQL/PgBouncer, bounded off-thread Wasm/image work, commit wakes, isolated outbox retries and retention. The guide distinguishes source/tests from a verified public rollout.
 
 ## What changed and where to use it
 

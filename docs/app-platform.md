@@ -1,7 +1,5 @@
 # The app platform
 
-**Implementation status:** [Delivered foundations and remaining business-capability gates](app-system-status.md).
-
 **Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
 
 An app is an immutable, reviewed Manifest. Studio, coding agents, API, MCP, Flow

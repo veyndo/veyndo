@@ -159,7 +159,7 @@ Read [current status](status.md) for the deployed image and hosted acceptance.
 A successful local run or an updated guide does not deploy a runtime. Historical
 whole-business replay, arbitrary isolated Rust/TypeScript builds and managed
 service/cell provisioning remain separate parts of the
-[full app programme](app-system-status.md).
+[full app programme](app-platform.md).
 
 ## Public acceptance
 

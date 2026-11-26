@@ -16,7 +16,7 @@ A method name or arbitrary service action alone still cannot register settlement
 or write payment state. Providers must implement and verify the shared contract.
 
 The existing [checkout contract](checkout.md) and
-[payment ledger description](intelligence-apps-payments.md#payment-adapter-and-ledger)
+payment ledger description
 remain authoritative. The private Shopware Payments connector is a separate
 integration; another payment rail cannot satisfy that compatibility requirement.
 

@@ -41,8 +41,8 @@ use the existing native ledgers through host-only HttpOnly cookies, exact origin
 and per-tab anti-CSRF fences. API bearer clients remain compatible. The merchant
 credential origin permits only build-owned scripts; shared checkout keeps manual
 addresses rather than loading third-party code with merchant authority. See the
-[browser session contract and migration limits](browser-sessions.md),
-[account MFA/recovery](account-security.md) and [eighteen review fixes](core-hardening.md).
+[browser session contract and migration limits](browser-sessions.md)
+and [account MFA/recovery](account-security.md).
 
 Studio validates a visible connected session once per minute and on return to
 the tab. An authoritative merchant-authentication rejection from either JSON
@@ -105,7 +105,7 @@ Wasm guests have no host imports/WASI and bounded fuel/memory/stack/source.
 Cold compilation uses a bounded LRU and blocking-pool slots before cart/product locks; checkout verifies its persisted digest under the lock. Pure app Wasm shares the same cache implementation, without compilation under its global cache mutex. Traps roll back
 purchase. A process-isolated compiler is still a production requirement.
 
-See [app and payment boundaries](intelligence-apps-payments.md) for the opaque
+See [app security](app-security.md) and the [payment provider API](payment-provider-api.md) for the opaque
 iframe/action gateway, native adapter, exact receipt checks and remaining gaps.
 
 Learning counts use synthetic sessions/orders; they are not LLM weight

@@ -181,8 +181,7 @@ drafts for exact selected product IDs, including products created earlier in the
 same plan. The existing translation worker retains original task authority and
 returns a real job link. The parent waits for ready drafts, stops on child failure
 and resumes only after explicit continuation. Draft review/apply and selected
-publication remain separate. See [the delivery tracker](connected-merchant-followups.md)
-for the actual source and [public collection acceptance](evidence/release-history-through-2026-10-21.md#21-october-connected-collection-preparation-runs-publicly).
+publication remain separate. See the [public collection acceptance](evidence/release-history-through-2026-10-21.md#21-october-connected-collection-preparation-runs-publicly).
 Current inline workspace illustrations were refreshed on 2 November. Earlier completed-work and provider-answer examples remain dated links to their 20 October source captures.
 
 ```mermaid

@@ -176,7 +176,7 @@ credentials explicitly; changing this template alone does not reconfigure them.
 Transaction pooling requires PgBouncer 1.21+, protocol prepared-statement support
 and a **direct/session** `DATABASE_LISTENER_URL` under the non-owner login. Set
 `DB_POOLER_MODE=transaction`; statement pooling is unsupported. [Complete settings,
-upgrade sequence, worker retention and tested boundaries](core-hardening.md).
+upgrade sequence, worker retention and tested boundaries](security.md).
 
 ## Production image compile-time dependencies
 

@@ -230,7 +230,7 @@ HTTP has bounded local and shared tenant permits, reserved checkout capacity,
 429/Retry-After saturation responses, persistent login throttles, daily interactive
 AI quotas and operator histogram buckets. Actual model calls and app/provider work
 have shared concurrency caps. Token/spend quotas and telemetry export remain open.
-[Configuration, tradeoffs and tests](core-hardening.md).
+[Security and database configuration](security.md).
 
 ## CPU and RLS changes deliberately requiring measurement
 

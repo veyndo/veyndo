@@ -88,5 +88,5 @@ Existing customer-order/receipt/download and app-surface suites remain required.
 These are tested implementation boundaries, not a whole-system formal proof or a
 claim that every third-party script is safe. Production acceptance must additionally
 verify the deployed origin, proxy Host handling, actual browser login/reload/logout,
-private previews and Experience handoff. Code, CI, migration and live activation are
-recorded separately in the [delivery audit](delivery-audit-2026-10-15.md).
+private previews and Experience handoff. Code, CI and live activation are
+separate evidence.

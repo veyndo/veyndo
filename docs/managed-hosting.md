@@ -63,7 +63,6 @@ in Studio and completed the default order Flow. Anonymous merchant/operator API
 reads were denied. Public MCP shopper discovery remained available; a private
 merchant-orders call returned `isError=true` without order data. These targeted
 checks do not certify every route, paid provider, load, restore or failover.
-See the [consistency audit](system-consistency-audit.md).
 
 ## Growing into database islands
 

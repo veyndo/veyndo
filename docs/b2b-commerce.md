@@ -178,7 +178,7 @@ Current live members and allocations remain; their period/currency guards can
 reject a change that passed in the empty sandbox. Stale digests or live policy
 changes reject the entire release. Existing generic deletion limitations remain.
 B2B-referenced shipping/payment methods and currencies cannot be removed from
-configuration without resolving dependencies. [Full audit](feature-integration.md).
+configuration without resolving dependencies.
 
 ## Concurrent checkout and customer preferences
 

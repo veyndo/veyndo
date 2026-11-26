@@ -1,7 +1,7 @@
 # Connected commerce: external access
 
-Checked against primary documentation on 30 October 2026. These decisions belong
-to the [implementation checklist](../plans/2026-10-30-connected-commerce.md).
+Checked against primary documentation on 30 October 2026. These decisions
+scope the [agentic commerce guide](../agentic-commerce.md).
 They distinguish Veyndo accepting an assistant from importing another platform's
 catalogue and checkout into Veyndo.
 

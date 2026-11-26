@@ -2092,7 +2092,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Expose B2B entity history over the shared MCP schema and company/unit Studio controls. Restore configuration with current revision and native allocation/hierarchy validation; financial history remains inspection-only.
 - Clone/publish selected B2B company/unit policies and catalog selection through shared transactional writers, preserving live employees/spending and denying hidden/unauthorized changes.
 - Include B2B method/currency dependencies and monetary-storage guards in existing configuration/release owners. Add actual PostgreSQL/HTTP and UI regressions; no new commerce ledger or plugin source relocation.
-- Refresh owner documentation, README and complete rendered documentation. [Audit matrix and boundaries](docs/feature-integration.md).
+- Refresh owner documentation, README and complete rendered documentation. Audit matrix and boundaries.
 
 ## Visitor behavior intelligence — 12 October 2026
 
@@ -2201,7 +2201,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Route approved whole-catalogue translation proposals into the existing durable draft queue, with a direct review link and idempotent replay.
 - Explain consent-bound personalization and prevent cross-shop/cart state or delayed-response reuse.
 - Companion private changes checkpoint completed imports and protect payment referral replay/disconnect state.
-- [Architecture, usage, tests and precise remaining boundaries](docs/connected-workbench.md). Local fixtures are not live-provider or hosted acceptance.
+- Architecture, usage, tests and precise remaining boundaries. Local fixtures are not live-provider or hosted acceptance.
 
 ## Storyfront connection consent — 2026-10-09
 
@@ -2266,7 +2266,7 @@ retry checkpoints, explicit native money/stock and actual fixture proof boundari
 - Fix merchant-registration slug validation for modern browsers; add valid/invalid slug regression coverage. Repeat the full original Storyfront suite and actual product history/app publish journeys.
 - Fix the real mail/Flow regression fixture to honor the existing native PostgreSQL selector instead of hard-coding Docker; the same fixture retains Docker CI support.
 
-[Detailed changes, tests and limitations](docs/release-acceptance-2026-10-09.md). Historical recordings and performance measurements keep their original source/date.
+Detailed changes, tests and limitations. Historical recordings and performance measurements keep their original source/date.
 
 ## Request hotpath and delivery — 8 October 2026
 
@@ -2316,4 +2316,4 @@ production-readiness or complete Shopware-compatibility claim.
 - Clear commerce-first quickstart, searchable guides and contributor information.
 
 Payments are simulated, manual or Sandbox; no real money is charged. See [feature overview](docs/features.md),
-[verification record](docs/verification.json) and current CI for exact scope.
+verification record and current CI for exact scope.

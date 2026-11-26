@@ -1,6 +1,6 @@
 # Rust standard services and language boundaries
 
-**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. [How to use it, ownership and verification boundaries](connected-workbench.md).
+**12 October workbench update:** editable app patterns, explicit AI/agent proposal review, native control generation, approved catalogue translation jobs and scoped personalization. How to use it, ownership and verification boundaries.
 
 VEYNDO's commerce server and bundled Email Delivery / Google Analytics / Gmail / Slack
 service run in Rust. The connector is a separate process (`cargo build --locked --bin
@@ -223,7 +223,7 @@ bot tokens, unrestricted mailbox backfill or measured provider throughput are cl
 - `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/retention.rs`, `components/core/src/store/outbox_control.rs`, `retention.sql` and the core baseline: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 
-[All eighteen findings, shared architecture and exact limits](core-hardening.md).
+[Security boundaries](security.md).
 
 ## Modular B2B and EDI — 12 October 2026
 

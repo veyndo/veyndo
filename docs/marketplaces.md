@@ -200,4 +200,3 @@ proofs do not establish tax-law correctness, provider payment authenticity,
 PostgreSQL execution or whole-system correctness; real provider fixtures and
 tenant/concurrency integration tests cover those adapter boundaries.
 
-[Cross-feature architecture, sandbox and rights audit](feature-integration.md).

@@ -186,7 +186,7 @@ App-Dienst besitzt wiederum seinen eigenen Prozess und begrenzte Rückrufe in de
 Kern. Das Manifest-Build kompiliert noch keinen beliebigen Rust- oder
 TypeScript-Quellcode in einer vom Betreiber bereitgestellten isolierten Buildfarm.
 
-[App Sicherheit](app-security.md), [Tatsächlicher Umsetzungsstand](app-system-status.md).
+[App Sicherheit](app-security.md), [Tatsächlicher Umsetzungsstand](app-platform.md).
 
 ## 6. Wie die KI eingebunden ist
 

@@ -4,7 +4,7 @@ This work follows the 15 October 2026 source review against `3034beb`. It is a
 tracked implementation programme, not a claim that every review proposal is
 already delivered. The [business-capability design](business-capabilities.md)
 builds on these repairs rather than introducing another operation or app runtime.
-The [delivery audit](delivery-audit-2026-10-15.md) maps both supplied reviews to
+The delivery audit maps both supplied reviews to
 implemented work, remaining requirements and concrete acceptance outcomes.
 
 ## One operation, several callers

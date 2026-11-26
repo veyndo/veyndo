@@ -22,7 +22,7 @@ The [earlier hosted app workflow](evidence/platform-hardening-hosted-2026-10-16.
 covers pattern creation, private material writes, immutable version, reviewed
 sandbox install and selected publication. All these purchasing tests use synthetic
 customers and simulated payment. Real settlement and the wider
-[business-capability programme](app-system-status.md) remain separate.
+[business-capability programme](app-platform.md) remain separate.
 
 ## Build and try it
 

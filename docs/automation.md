@@ -158,7 +158,7 @@ deletes and condition import require `automation.manage`. Channel reads/writes u
 recheck the actual kind in native handlers. Legacy settings grants still imply
 these rights. Each Flow action checks its specific domain permissions. Preview
 uses the ordinary cart context. HTTP/MCP discovery and invocation are covered by
-[narrow-grant regressions](system-consistency-audit.md).
+narrow-grant regressions in the [test suites](testing.md).
 
 Example native graph (`data.pipeline`, together with a translated flow name, instruction, locale, trigger and top-level condition):
 

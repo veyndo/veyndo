@@ -167,4 +167,4 @@ the [earlier successful embedded purchase](native-app-fields-hosted-2026-10-17.m
 retains its own source boundary. Neither result is relabeled as this release.
 
 See [the workflow contract](../app-native-lifecycles.md),
-[canonical status](../status.md) and [the remaining programme](../app-system-status.md).
+[canonical status](../status.md) and [the remaining programme](../app-platform.md).

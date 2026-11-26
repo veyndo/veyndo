@@ -87,8 +87,7 @@
         "docs/agentic-migration.md",
         "docs/cognitive-commerce.md",
         "docs/behavior-intelligence.md",
-        "docs/agentic-grids.md",
-        "docs/connected-workbench.md"
+        "docs/agentic-grids.md"
       ]
     },
     {
@@ -114,7 +113,6 @@
         "docs/knowledge-component.md",
         "docs/automation-component.md",
         "docs/connector-component.md",
-        "docs/app-system-status.md",
         "docs/business-capabilities.md",
         "docs/furniture-configurator.md",
         "docs/app-studio-workspace.md",
@@ -229,7 +227,6 @@
         "docs/proof-coverage.md",
         "docs/formal-coverage.md",
         "docs/benchmarks.md",
-        "docs/system-consistency-audit.md",
         "docs/licensing.md",
         "docs/documentation-site.md"
       ]

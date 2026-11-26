@@ -372,7 +372,7 @@ account submission is counted, and the real original cart can still review its
 purchase. All nine affected native suites pass. A separate native migration-only
 upgrade confirms 093 withdraws the old badge while retaining approval/text/rating.
 
-[Second pass and full component matrix](system-consistency-audit.md#component-status-at-the-second-pass):
+Second pass and full component matrix:
 **49 registered native HTTP/PostgreSQL/provider suites** pass at `b4fb561`, followed
 by a reproduced history-discovery counterexample and its targeted repair. MCP now
 requires the same entity read/write/PII conjunctions as invocation. Rust format,
@@ -394,7 +394,7 @@ and oversized responses; failures retain bounded diagnostics rather than becomin
 successful gateway claims. Typed-body extraction can still produce a plain-text
 422. This is not completed public onboarding or authenticated end-to-end acceptance.
 
-[Full findings and boundaries](system-consistency-audit.md). Thirteen selected
+Full findings and boundaries. Thirteen selected
 isolated HTTP/PostgreSQL/provider suites passed before new counterexamples
 exposed knowledge-source stage rights and HTTP/MCP automation admission defects.
 The repaired paths passed seven affected suites plus new narrow-role regressions
@@ -451,7 +451,7 @@ build checks **203 pages, all 196 Markdown sources and 4,983 local links/assets*
 
 ## Connected feature audit — 12 October 2026
 
-[Integration map and repaired boundaries](feature-integration.md). Real isolated
+Integration map and repaired boundaries. Real isolated
 PostgreSQL/HTTP regression runs cover POS, B2B history and policy staging, inherited
 analytics settings/capture, selective release, settings scopes, customer history,
 foreign-tenant references, legal consent, currency behavior, native/app automation,
@@ -505,7 +505,7 @@ at 100%, and neither coverage nor the Lean subset proves the entire system bug-f
 
 ## Current acceptance (9 October 2026)
 
-[Complete change and end-to-end record](release-acceptance-2026-10-09.md) joins the
+Complete change and end-to-end record joins the
 source owners, all registered suites, actual browser/private purchase checks and
 remaining audit work. The completed merged-Core CI at `598bbec` measures Rust
 **90.55% lines / 87.94% functions / 87.24% regions**, frontend **63.23% lines /
@@ -1047,7 +1047,7 @@ This exposed and removed nested pooled borrows under checkout/login locks.
 CI installs PgBouncer 1.21+ and uses the same suite registry. Native execution may
 select `TEST_PSQL` and `TEST_PGBOUNCER`; all databases and pooler processes are
 isolated fixtures and cleaned up. Unknown route rights and trusted Principal
-extraction also have unit/static controls. [Implementation and boundaries](core-hardening.md).
+extraction also have unit/static controls. [Security boundaries](security.md).
 
 These checks establish those behaviors, not 100% whole-system coverage, public
 rollout status, a speed-up percentage or protection against a compromised server.
@@ -1085,4 +1085,4 @@ The original failure is retained; no equality assertion was weakened.
 A separate read-only hosted check of Core `540e066` found the mandatory RLS switch
 unset and no separate runtime credential. This is an open hosting configuration
 issue, not evidence that local strict-RLS tests enable production protection.
-See the [complete status and prepared provisioning boundary](system-consistency-audit.md).
+See the complete status and prepared provisioning boundary.

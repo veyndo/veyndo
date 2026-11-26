@@ -104,4 +104,4 @@ it is not a separate public acceptance for all four object editors, every graph
 visualization, public UCP fields, arbitrary source builds or historical replay.
 Real settlement, provider mail delivery, fiscal invoice/refund acceptance and the
 Apple callback repair remain separate. See [current status](../status.md) and
-the [app-system matrix](../app-system-status.md).
+the [app-system matrix](../app-platform.md).

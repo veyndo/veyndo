@@ -191,4 +191,4 @@ Environment management never substitutes for catalog/app/B2B permissions.
 Every selected unit requires its current native domain write right; Flow actions
 add their own permissions and use the publishing actor. Channel release uses the
 native validator and POS cash/pickup setup. B2B configuration release preserves
-live employee and spending state. [Connected audit](feature-integration.md).
+live employee and spending state.
