@@ -18,7 +18,7 @@ export const de: Dictionary = {
   storefront: "Shop öffnen",
   settings: "Einstellungen",
   language: "Sprache",
-  theme: "Ansicht wechseln",
+  theme: "Farbschema wechseln",
   newChat: "Neues Gespräch",
   conversations: "Gespräche",
   connect: "Shop verbinden",
