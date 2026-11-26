@@ -1,4 +1,4 @@
-/** Customer consent and real GA4 ecommerce events; absent apps produce no external script. */
+/** Customer consent and real GA4 ecommerce events; absent apps produce no external script and no probe request. */
 import { useEffect, useRef, useState } from "react";
 import { createAnalytics, type Analytics } from "../../../sdk/analytics.js";
 import {
@@ -8,6 +8,7 @@ import {
   type Product,
 } from "../../../../frontend/src/shared/api/shop-api";
 import { usePurpose } from "../../../../frontend/src/shared/legal/consent-store";
+import { useAppRegistry } from "../../../../frontend/src/shared/apps/AppSurfaces";
 let current: Analytics | undefined;
 export const commerceEvent = (name: string, data: unknown) =>
   current?.event(name, data);
@@ -37,6 +38,9 @@ export default function ShopAnalytics({
   const privateJourney =
     scope.get("sandbox") === "1" || scope.get("preview") === "1";
   const allowed = usePurpose("analytics");
+  // The registry read already lists installed apps with public actions; an
+  // uninstalled GA app must not cost every page view a failed 404 probe.
+  const installed = useAppRegistry().publicApps.includes("google_analytics");
   const [choice, setChoice] = useState<string | null>(null);
   const [configured, setConfigured] = useState(false);
   const client = useRef<Analytics | undefined>(undefined);
@@ -46,7 +50,7 @@ export default function ShopAnalytics({
     let active = true;
     setConfigured(false);
     client.current = undefined;
-    if (privateJourney) return;
+    if (privateJourney || !installed) return;
     shopApi<{ measurementId?: string }>(
       "/store-api/apps/google_analytics/actions/tracking",
       { salesChannel: channel },
@@ -69,7 +73,7 @@ export default function ShopAnalytics({
       client.current?.dispose();
       if (current === client.current) current = undefined;
     };
-  }, [shop, channel, privateJourney]);
+  }, [shop, channel, privateJourney, installed]);
   useEffect(() => {
     if (configured && choice === "granted")
       window.dispatchEvent(new Event("commerce:analytics-ready"));
