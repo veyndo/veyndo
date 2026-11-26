@@ -9,7 +9,7 @@ import { accountOverview, orderList } from "./AccountOverview";
 import type { AnyPart } from "./contract";
 export { definePart } from "./contract";
 export type { AnyPart, Part, PartDefinition, PartEvents } from "./contract";
-export { storefrontText, money } from "./storefront-i18n";
+export { storefrontText, money, day } from "./storefront-i18n";
 export {
   registerPartElements,
   addToCartEvent,

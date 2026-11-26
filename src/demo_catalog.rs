@@ -79,7 +79,23 @@ mod tests {
         for p in products {
             assert!(p["price"].as_f64().unwrap() > 0.);
             if let Some(parent) = p["parent_id"].as_str() {
-                assert!(roots.iter().any(|r| r["id"] == parent));
+                let root = roots.iter().find(|r| r["id"] == parent).unwrap();
+                // Cart, order and POS labels append the options; a size in the
+                // variant name would read "Coat · L · camel / L".
+                assert_eq!(
+                    p["name"], root["name"],
+                    "variant {} repeats its options",
+                    p["id"]
+                );
+                for tr in data["translations"].as_array().unwrap() {
+                    if tr["product_id"] == p["id"] {
+                        assert!(data["translations"].as_array().unwrap().iter().any(
+                            |r| r["product_id"] == parent
+                                && r["language_id"] == tr["language_id"]
+                                && r["name"] == tr["name"]
+                        ));
+                    }
+                }
             }
             for media in p["media"].as_array().unwrap() {
                 let url = media["url"].as_str().unwrap();

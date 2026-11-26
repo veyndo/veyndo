@@ -89,6 +89,16 @@ export default function CollectionView() {
               </div>
               <div className="shop-filters">
                 {catalogLoading && <p role="status">{s("loading")}</p>}
+                {!catalogLoading && !list.length && (
+                  <p role="status" className="shop-no-matches">
+                    {s("noMatches")}{" "}
+                    {query && (
+                      <button onClick={() => setQuery("")}>
+                        {s("clearSearch")}
+                      </button>
+                    )}
+                  </p>
+                )}
                 {pageCursor && (
                   <button
                     disabled={catalogLoading || busy}

@@ -10,6 +10,7 @@ import {
 import AppSlot from "../../../../../frontend/src/shared/apps/AppSlot";
 import { AppSurfaceSlot } from "../../../../../frontend/src/shared/apps/AppSurfaces";
 import { productSummary } from "../../../../../frontend/src/kit/storefront";
+import { orderOptionValues } from "./option-order";
 const Summary = productSummary.Component;
 export type ProductPurchaseProps = {
   preview?: boolean;
@@ -144,15 +145,17 @@ export default function ProductPurchase({
           id: group,
           label: s(group),
           selected: s(p.options[group]),
-          options: [...new Set(data.variants.map((v) => v.options[group]))]
-            .filter(Boolean)
-            .map((option) => ({
-              value: option,
-              label: s(option),
-              available: !!variantFor(group, option),
-              selected: p.options[group] === option,
-              swatch: group === "color" ? option : undefined,
-            })),
+          options: orderOptionValues(
+            [...new Set(data.variants.map((v) => v.options[group]))].filter(
+              Boolean,
+            ),
+          ).map((option) => ({
+            value: option,
+            label: s(option),
+            available: !!variantFor(group, option),
+            selected: p.options[group] === option,
+            swatch: group === "color" ? option : undefined,
+          })),
         }))}
         moreVariants={
           !data.variantsPagination.nextCursor

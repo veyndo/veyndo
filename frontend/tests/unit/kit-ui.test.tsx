@@ -431,3 +431,15 @@ describe("tokens and catalogue", () => {
     );
   });
 });
+
+describe("dialog layout", () => {
+  it("keeps long tokens inside the dialog so its actions stay visible", async () => {
+    const { readFileSync } = await import("node:fs");
+    const css = readFileSync("src/kit/ui/ui.css", "utf8");
+    const rule = css.match(/\.vy-dialog \{([^}]*)\}/)?.[1] ?? "";
+    // A grid column sized by its content let a package hash widen the dialog to
+    // 618px of 520px and hid the Install button behind a horizontal scroll.
+    expect(rule).toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+    expect(rule).toMatch(/overflow-wrap:\s*anywhere/);
+  });
+});

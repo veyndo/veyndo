@@ -251,6 +251,10 @@ a.vy-button {
 }
 .vy-dialog {
   display: grid;
+  /* One column no wider than the dialog: a long token (package hash, URL) wraps
+     instead of widening the content and pushing the actions out of view. */
+  grid-template-columns: minmax(0, 1fr);
+  overflow-wrap: anywhere;
   gap: var(--vy-space-3);
   width: min(520px, 100%);
   max-height: calc(100dvh - 2 * var(--vy-space-4));

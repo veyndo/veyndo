@@ -981,6 +981,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/ui/storefront/catalog/ProductQuestion.tsx](../components/catalog/ui/storefront/catalog/ProductQuestion.tsx) | Read-only product questions cite only tenant-owned, explicitly published source documents. |
 | [components/catalog/ui/storefront/catalog/ProductReviews.tsx](../components/catalog/ui/storefront/catalog/ProductReviews.tsx) | ProductReviews: focused pdp-reviews view with explicit typed inputs and callbacks. |
 | [components/catalog/ui/storefront/catalog/ProductSafety.tsx](../components/catalog/ui/storefront/catalog/ProductSafety.tsx) | Explicit PDP safety/sector facts; no generated warning, certification or origin is invented. |
+| [components/catalog/ui/storefront/catalog/option-order.ts](../components/catalog/ui/storefront/catalog/option-order.ts) | Display order of variant option values: apparel sizes small to large, numbers ascending, other values as returned. |
 | [components/catalog/ui/storefront/catalog/product-url.ts](../components/catalog/ui/storefront/catalog/product-url.ts) | Stable, collision-free product addresses: SKU identity plus the inherited localized SEO slug. |
 | [components/checkout/migrations/0001-baseline.sql](../components/checkout/migrations/0001-baseline.sql) | Baseline schema of the checkout component (Cart, quote, checkout transaction and order placement): its tables, sequences, functions, |
 | [components/checkout/src/domain/admin_order.rs](../components/checkout/src/domain/admin_order.rs) | Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record. |
@@ -2495,7 +2496,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/google-analytics/src/actions.rs](../extensions/apps/google-analytics/src/actions.rs) | App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage. |
 | [extensions/apps/google-analytics/src/lib.rs](../extensions/apps/google-analytics/src/lib.rs) | The Google Analytics app: its OAuth policy and settings, property actions and the report source import. |
 | [extensions/apps/google-analytics/src/provider.rs](../extensions/apps/google-analytics/src/provider.rs) | Exact bounded GA4 source rows, quota metadata and stale-report tombstones; no invented causal claims. |
-| [extensions/apps/google-analytics/storefront/ShopAnalytics.tsx](../extensions/apps/google-analytics/storefront/ShopAnalytics.tsx) | Customer consent and real GA4 ecommerce events; absent apps produce no external script. |
+| [extensions/apps/google-analytics/storefront/ShopAnalytics.tsx](../extensions/apps/google-analytics/storefront/ShopAnalytics.tsx) | Customer consent and real GA4 ecommerce events; absent apps produce no external script and no probe request. |
 | [extensions/apps/hubspot/src/lib.rs](../extensions/apps/hubspot/src/lib.rs) | The HubSpot app: verified contact upserts. |
 | [extensions/apps/hubspot/src/provider.rs](../extensions/apps/hubspot/src/provider.rs) | Explicit bounded CRM contact upsert; no subscriptions, bulk customer reads or implicit opt-ins. |
 | [extensions/apps/klaviyo/src/lib.rs](../extensions/apps/klaviyo/src/lib.rs) | The Klaviyo app: order events for marketing profiles. |

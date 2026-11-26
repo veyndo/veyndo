@@ -2,15 +2,16 @@
 use crate::ports::records;
 use serde_json::Value;
 use sqlx::PgConnection;
-use veyndo_core::Result;
+use veyndo_core::{Error, Result, StatusCode};
 use veyndo_shop::types::cart::StoredCart;
 
-/// The cart behind `token`, locked for this transaction; a missing cart is an error.
+/// The cart behind `token`, locked for this transaction; an unknown or expired
+/// token is a 404 like the cart read, not a database failure.
 pub async fn lock(conn: &mut PgConnection, tenant: &str, token: &str) -> Result<StoredCart> {
     records()?
         .lock_cart(conn, tenant, token)
         .await?
-        .ok_or_else(|| sqlx::Error::RowNotFound.into())
+        .ok_or_else(|| Error(StatusCode::NOT_FOUND, "Cart not found".into()))
 }
 
 /// Stores the cart document and advances its revision by one.

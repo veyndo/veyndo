@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { Button } from "../ui";
 import { amount, currency, definePart, locale, url } from "./contract";
-import { money, storefrontText } from "./storefront-i18n";
+import { day, money, storefrontText } from "./storefront-i18n";
 
 const count = z.number().int().min(1).max(100000);
 
@@ -168,8 +168,8 @@ export const cartSummary = definePart({
         {props.delivery && (
           <p className="vy-sf-delivery">
             {t("deliveryWindow", {
-              from: props.delivery.earliest,
-              to: props.delivery.latest,
+              from: day(props.locale, props.delivery.earliest),
+              to: day(props.locale, props.delivery.latest),
             })}
           </p>
         )}

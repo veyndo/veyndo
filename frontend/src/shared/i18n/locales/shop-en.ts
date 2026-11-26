@@ -86,6 +86,8 @@ export const en: Record<Key, string> = {
   lighting: "Lighting",
   objects: "Everyday objects",
   search: "Search products",
+  noMatches: "No products match this selection.",
+  clearSearch: "Clear search",
   details: "View product",
   add: "Add to bag",
   back: "Back to collection",

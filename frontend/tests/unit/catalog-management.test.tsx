@@ -85,6 +85,33 @@ it("creates a revision-zero aggregate without fabricating translations", async (
   expect(payload.catalog.active).toBe(false);
   expect(payload).not.toHaveProperty("id");
 });
+it("asks for the main-language name instead of sending an empty one", async () => {
+  const user = userEvent.setup();
+  const request = vi.fn(async () => ({ id: "created", revision: 1 }));
+  render(
+    <LocaleProvider>
+      <ProductEditor
+        id=""
+        request={request}
+        categories={[]}
+        onBack={vi.fn()}
+        onCreated={vi.fn()}
+      />
+    </LocaleProvider>,
+  );
+  const language = screen.getByLabelText("Content language");
+  await user.selectOptions(language, "de");
+  await user.type(screen.getByLabelText("Name"), "Leinenhemd");
+  await user.type(screen.getByLabelText("Product number"), "LIN-1");
+  await user.click(screen.getByRole("button", { name: "Save product" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Enter the product name in the shop's main language.",
+  );
+  expect(language).toHaveValue("en");
+  expect(request.mock.calls.some((args: any) => args[2] === "POST")).toBe(
+    false,
+  );
+});
 it("retains dirty edits after a conflict and requires an explicit discard when leaving", async () => {
   const user = userEvent.setup();
   const d = newDraft();

@@ -121,6 +121,12 @@ const words = {
     "Les avis des clients apparaîtront ici pour examen et publication.",
     "Las opiniones aparecerán aquí para que las revises y publiques.",
   ],
+  mainNameRequired: [
+    "Enter the product name in the shop's main language. Other languages inherit it.",
+    "Gib den Produktnamen in der Hauptsprache des Shops ein. Andere Sprachen übernehmen ihn.",
+    "Saisissez le nom du produit dans la langue principale de la boutique. Les autres langues en héritent.",
+    "Introduce el nombre del producto en el idioma principal de la tienda. Los demás idiomas lo heredan.",
+  ],
 } as const;
 export type ProductEditorWord = keyof typeof words;
 export function useProductEditorText() {

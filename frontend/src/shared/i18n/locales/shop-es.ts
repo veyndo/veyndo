@@ -85,6 +85,8 @@ export const es: Record<Key, string> = {
   lighting: "Iluminación",
   objects: "Objetos cotidianos",
   search: "Buscar productos",
+  noMatches: "Ningún producto coincide con esta selección.",
+  clearSearch: "Borrar búsqueda",
   details: "Ver producto",
   add: "Añadir al carrito",
   back: "Volver a la colección",
