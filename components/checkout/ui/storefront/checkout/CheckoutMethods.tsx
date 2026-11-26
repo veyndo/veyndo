@@ -72,6 +72,11 @@ export default function CheckoutMethods({
                 {"mode" in method && method.mode === "simulated" && (
                   <small>{x("test")}</small>
                 )}
+                {"freeAbove" in method && method.freeAbove != null && (
+                  <small>
+                    {s("freeFrom")} {money(method.freeAbove)}
+                  </small>
+                )}
               </span>
               {"price" in method && <strong>{money(method.price)}</strong>}
             </label>
