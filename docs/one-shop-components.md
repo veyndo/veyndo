@@ -35,7 +35,7 @@ uses a simulated payment.*
 flowchart TB
   UI["Shop · Studio · POS · Agents"]
   API["SDK / HTTP / MCP"]
-  C["Commerce Core"]
+  C["Commerce server<br/>22 components"]
   Q["Checkout"]
   P["Payments"]
   E["Order · Stock · Event"]
@@ -51,10 +51,13 @@ flowchart TB
   E --> K
 ```
 
-The purchase commits in Core. Workers process follow-up jobs from committed
+The purchase commits in the commerce server, where checkout, pricing, inventory and
+orders are components of one transaction. Workers process follow-up jobs from committed
 events. Knowledge and reporting read from sources that can be rebuilt. That
 keeps the price and inventory authoritative across interfaces and lets teams
-use the same shop from a native screen, a custom frontend or an agent.
+use the same shop from a native screen, a custom frontend or an agent. Inside the
+server each component owns its tables, rules, schema and screens and reaches others only
+through declared dependencies and ports: [component architecture](architecture.md).
 
 ### What the agent sees
 
@@ -182,13 +185,14 @@ The storefront and Studio use that same shop identity and transaction boundary. 
 
 ## Choose a starting point
 
-For Rust integrations, the [Commerce crate guide](../components/pricing/README.md)
+For Rust integrations, the [pricing crate guide](../components/pricing/README.md)
 shows shared product, cart, contact and address contracts. Its contact example
-runs without a server. The host still owns account identity, PII admission and
-the atomic order transaction. Independent HTTP/MCP hosting for the remaining
-Commerce domains is tracked in CORE-02..10.
+runs without a server. Account identity, PII admission and the atomic order
+transaction stay with the customers, orders and checkout components. Every
+component with a crate can be generated as a standalone mirror that builds and
+tests alone: [component mirrors](component-mirrors.md).
 
-The four public development repositories are linked below. The other links explain the component's contract and its place in the complete shop. Some have separate builds or access-controlled source, and some are still domains in the product repository. The [implementation plan](commerce-components.md) tracks each extraction and the [current status](status.md) records what has been released and tested.
+The four public development repositories are linked below. The other links explain the component's contract and its place in the complete shop. Some have separate builds or access-controlled source, and some are still domains in the product repository. [Component repositories and release acceptance](commerce-components.md) separates the components inside the server from separately run services, and the [current status](status.md) records what has been released and tested.
 
 The same release checker prepares a pinned update for any build-backed
 component while retaining every peer. A presentation update does not move

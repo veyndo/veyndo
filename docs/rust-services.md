@@ -217,10 +217,10 @@ bot tokens, unrestricted mailbox backfill or measured provider throughput are cl
 
 ## Core hardening owners
 
-- `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/{identity,abuse}.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
-- `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security,cluster_lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
+- `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/identity.rs`, `components/identity/src/http/abuse.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
+- `crates/runtime/src/scoped_pool.rs`, `components/core/src/store/{pool,row_security,lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
 - `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `extensions/apps/marketplaces/service/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
-- `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
+- `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/retention.rs`, `components/core/src/store/outbox_control.rs`, `retention.sql` and the core baseline: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 
 [All eighteen findings, shared architecture and exact limits](core-hardening.md).
