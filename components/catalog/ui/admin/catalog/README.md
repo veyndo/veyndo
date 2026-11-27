@@ -13,6 +13,7 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`EditorBuffer.ts`](../../../../../frontend/src/shared/content/editor/EditorBuffer.ts): Unsaved Markdown source participates in the aggregate's save/navigation guard without becoming product content.
 - [`MarkdownSource.tsx`](../../../../../frontend/src/shared/content/editor/MarkdownSource.tsx): Live Markdown buffer updates the same structured product document; no raw HTML is rendered or persisted.
 - [`MediaDropzone.tsx`](MediaDropzone.tsx): Accessible multi-file upload with drag/drop, visible progress and the same validated asset API as attachments.
+- [`OptionValueNames.tsx`](OptionValueNames.tsx): Names of a family's option values in the editor's one content language, stored on the family root (`extra.optionValues`); a missing name inherits the main language, never a copied text.
 - [`PairFields.tsx`](PairFields.tsx): Explicit key/value row creation and collision-safe names for properties, specifications and variant options.
 - [`ProductAssignments.tsx`](ProductAssignments.tsx): Searchable category paths, retained selection and explicit channel restrictions in the native product draft.
 - [`product-assignment-model.ts`](product-assignment-model.ts): Cycle-bounded category paths, enabled-region language resolution and current channel IDs.

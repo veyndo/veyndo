@@ -258,3 +258,37 @@ it("uses the latest draft callback after an asynchronous upload", async () => {
   await waitFor(() => expect(latest).toHaveBeenCalledWith("logo-after-edit"));
   expect(first).not.toHaveBeenCalled();
 });
+it("saves a normalized shop-wide order number prefix and hides it in channel scope", async () => {
+  const request = api(),
+    user = userEvent.setup();
+  request.mockImplementationOnce(async () => ({
+    data: structuredClone(base),
+    revision: 2,
+    defaultOrderNumberPrefix: "SYNTHE",
+  }));
+  render(<MasterDataSettings request={request} canWrite />, {
+    wrapper: LocaleProvider,
+  });
+  await screen.findByDisplayValue("Synthetic GmbH");
+  const prefix = screen.getByLabelText("Order number prefix");
+  expect(prefix).toHaveAttribute("placeholder", "SYNTHE");
+  expect(screen.getByText(/Leave empty to use SYNTHE/)).toBeTruthy();
+  await user.type(prefix, "na-7xyz!");
+  expect(prefix).toHaveValue("NA7XYZ");
+  expect(screen.getByText(/numbered like NA7XYZ-74ab58ea/)).toBeTruthy();
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() =>
+    expect(request).toHaveBeenCalledWith(
+      "/api/settings/master-data",
+      expect.objectContaining({
+        data: expect.objectContaining({ orderNumberPrefix: "NA7XYZ" }),
+      }),
+      "PUT",
+    ),
+  );
+  await screen.findByRole("option", { name: "North" });
+  await user.selectOptions(screen.getByLabelText("Applies to"), "north");
+  await waitFor(() =>
+    expect(screen.queryByLabelText("Order number prefix")).toBeNull(),
+  );
+});

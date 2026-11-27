@@ -4,6 +4,8 @@ import { useStorefrontActions } from "./useStorefrontActions";
 import { routeProductId } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { shopScope } from "../../shared/api/shop-scope";
 import { useCompanyIdentity } from "./useCompanyIdentity";
+import { shopBrandName } from "../../shared/content/shop-brand";
+import { mediaImage } from "../../shared/media/product-media";
 import {
   useStorefrontAnchors,
   useStorefrontNavigation,
@@ -317,8 +319,19 @@ export function useStorefrontController({
     }
   };
 
+  const brand = shopBrandName(
+    company,
+    shopTenant,
+    shopTenant === "nord-atelier" &&
+      products.some((p) =>
+        mediaImage(p.media)?.startsWith("/media/demo/fashion/"),
+      )
+      ? s("fashionBrand")
+      : undefined,
+  );
   return {
     company,
+    brand,
     actions,
     openBag,
     onMerchant,

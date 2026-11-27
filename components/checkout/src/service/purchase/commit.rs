@@ -130,6 +130,7 @@ fn order_document(
     c: &StoredCart,
     priced: &Priced,
     id: &str,
+    number: &str,
     locale: Option<&String>,
     review: Option<&Review>,
 ) -> Result<Value> {
@@ -138,7 +139,7 @@ fn order_document(
     let simulated = quoted.method().mode == "simulated";
     let mut cart = q.clone();
     merge(&mut cart, CartLocale { locale })?;
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":cart,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":quoted.deliveries,"payment":{"method":quoted.payment_method,"provider":if simulated{"simulated"}else{"manual"},"state":if simulated{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
+    let mut order = json!({"id":id,"orderNumber":number,"cart":cart,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":quoted.deliveries,"payment":{"method":quoted.payment_method,"provider":if simulated{"simulated"}else{"manual"},"state":if simulated{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
     if let Some(review) = review {
         merge(
             &mut order,
@@ -239,7 +240,16 @@ pub(super) async fn run<P: Purchase>(
     let customer = customer_snapshot(&mut tx, &c, &priced.selected).await?;
     let id = uid();
     // Explicit simulated authorization: no external money is charged.
-    let mut order = order_document(&c, &priced, &id, prepared.locale_chain.first(), review)?;
+    let prefix = veyndo_orders::store::company::order_prefix(&mut tx, &c.tenant).await?;
+    let number = veyndo_orders::domain::company_model::order_number(&prefix, &id);
+    let mut order = order_document(
+        &c,
+        &priced,
+        &id,
+        &number,
+        prepared.locale_chain.first(),
+        review,
+    )?;
     port.bind_order(&mut tx, &c.tenant, &mut order).await?;
     admin_order(&c, &mut order)?;
     merge(

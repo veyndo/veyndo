@@ -1,6 +1,6 @@
 /** Shared native home hero for the storefront and visual preview; no commerce commands. */
 import { mediaImage } from "../../shared/media/product-media";
-import { BRAND } from "../../shared/ui/Brand";
+import { brandKicker, useShopBrand } from "../../shared/content/shop-brand";
 import Icon from "../../shared/ui/Icon";
 import Art from "../../shared/ui/ProductArt";
 import { useShopText } from "../../shared/i18n/shop-i18n";
@@ -16,7 +16,8 @@ export default function HomeHero({
 }) {
   const { s } = useShopText(),
     { w } = useWorkbenchText(),
-    { u } = useExperienceUIText();
+    { u } = useExperienceUIText(),
+    brand = useShopBrand();
   const fashion = products.some((p) =>
     mediaImage(p.media)?.startsWith("/media/demo/fashion/"),
   );
@@ -26,8 +27,10 @@ export default function HomeHero({
     <section className="shop-hero">
       <div>
         <p className="shop-kicker">
-          {fashion ? s("fashionBrand") : BRAND.name} /{" "}
-          {fashion ? s("fashionCollection") : w("consideredObjects")}
+          {brandKicker(
+            brand || (fashion ? s("fashionBrand") : ""),
+            fashion ? s("fashionCollection") : w("consideredObjects"),
+          )}
         </p>
         <h1>
           {experience?.headline &&

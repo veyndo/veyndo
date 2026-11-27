@@ -11,6 +11,7 @@ import { useCatalogText } from "../../../../../frontend/src/shared/i18n/catalog-
 import { type ProductDraft } from "./catalog-model";
 import PairFields from "./PairFields";
 import VariantGenerator from "./VariantGenerator";
+import OptionValueNames from "./OptionValueNames";
 import Icon from "../../../../../frontend/src/shared/ui/Icon";
 import { useVariantText } from "./variant-i18n";
 import "./variants.css";
@@ -67,6 +68,7 @@ export default function ProductVariants({
             }
           />
         </fieldset>
+        <p className="variant-family-hint">{v("optionNamesOnParent")}</p>
       </>
     );
   return (
@@ -139,6 +141,12 @@ export default function ProductVariants({
         </Button>
       )}
       {error && <Notice tone="danger">{error}</Notice>}
+      <OptionValueNames
+        draft={draft}
+        variants={items}
+        onChange={onChange}
+        canWrite={canWrite}
+      />
       {canWrite && (
         <details className="variant-create">
           <summary>

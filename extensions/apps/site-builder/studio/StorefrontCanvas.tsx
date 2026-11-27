@@ -17,6 +17,7 @@ import NativeHomePreview, {
   PreviewFooter,
 } from "./NativeHomePreview";
 import { useDesignText } from "./design-i18n";
+import { ShopBrandProvider } from "../../../../frontend/src/shared/content/shop-brand";
 import { AppSurfaceProvider } from "../../../../frontend/src/shared/apps/AppSurfaces";
 import "../../../../frontend/src/storefront/styles/shop.css";
 import "../../../../frontend/src/storefront/styles/storefront-polish.css";
@@ -222,36 +223,38 @@ export default function StorefrontCanvas({
             scopeKey={`${workspace}:${channel}:${language}`}
           >
             <LocaleScope locale={language}>
-              <div
-                className="shop"
-                data-designed={appearance ? "true" : undefined}
-                style={appearance ? themeStyle(appearance) : undefined}
-                onClickCapture={(event) => {
-                  const el = event.target as Element;
-                  if (
-                    el.closest("a,button") &&
-                    !el.closest(".is-design-preview")
-                  ) {
+              <ShopBrandProvider value={name}>
+                <div
+                  className="shop"
+                  data-designed={appearance ? "true" : undefined}
+                  style={appearance ? themeStyle(appearance) : undefined}
+                  onClickCapture={(event) => {
+                    const el = event.target as Element;
+                    if (
+                      el.closest("a,button") &&
+                      !el.closest(".is-design-preview")
+                    ) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      if (!children) {
+                        if (el.closest(".shop-hero")) select("hero");
+                        else if (el.closest(".shop-collection"))
+                          select("products");
+                      }
+                    }
+                  }}
+                  onSubmitCapture={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    if (!children) {
-                      if (el.closest(".shop-hero")) select("hero");
-                      else if (el.closest(".shop-collection"))
-                        select("products");
-                    }
-                  }
-                }}
-                onSubmitCapture={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              >
-                <PreviewHeader displayName={name} company={company} />
-                {children || (
-                  <NativeHomePreview products={products} onSelect={select} />
-                )}
-                <PreviewFooter name={name} />
-              </div>
+                  }}
+                >
+                  <PreviewHeader displayName={name} company={company} />
+                  {children || (
+                    <NativeHomePreview products={products} onSelect={select} />
+                  )}
+                  <PreviewFooter name={name} />
+                </div>
+              </ShopBrandProvider>
             </LocaleScope>
           </AppSurfaceProvider>,
           mount,

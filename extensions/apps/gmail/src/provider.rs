@@ -155,7 +155,6 @@ pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
         "Mailbox window exceeds bounded sync",
     )?;
     let mut sources = vec![];
-    let re = regex::Regex::new(r"RAC-[A-Za-z0-9]+").unwrap();
     for id in ids.difference(&deleted).cloned().collect::<Vec<_>>() {
         let path = format!("messages/{}", percent(&id));
         let value = match get(&base, &path, &[("format", "full")], &token).await {
@@ -192,7 +191,7 @@ pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
             .chars()
             .take(4000)
             .collect::<String>();
-        let order = re.find(&text).map(|m| m.as_str());
+        let order = order_reference(&text);
         sources.push(json!({"id":format!("message-{id}"),"kind":"support_email","title":subject,"text":text,"sourceUrl":format!("https://mail.google.com/mail/u/0/#all/{}",value["threadId"].as_str().unwrap_or(&id)),"metadata":{"messageId":id,"threadId":value["threadId"],"from":headers["from"].as_str().unwrap_or(""),"date":headers["date"].as_str().unwrap_or(""),"orderNumber":order}}));
     }
     if full {
@@ -222,6 +221,15 @@ pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
         .await?;
     Ok(json!({"messagesImported":sources.len(),"historyId":history}))
 }
+/// The first order number in a message: the shop's prefix (1 to 6 capital letters or
+/// digits), a dash and the first eight hex characters of the order ID.
+fn order_reference(text: &str) -> Option<&str> {
+    static ORDER: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"\b[A-Z0-9]{1,6}-[0-9a-f]{8}\b").expect("static pattern")
+    });
+    ORDER.find(text).map(|m| m.as_str())
+}
+
 fn percent(raw: &str) -> String {
     raw.bytes()
         .map(|b| {
@@ -232,4 +240,20 @@ fn percent(raw: &str) -> String {
             }
         })
         .collect()
+}
+
+#[cfg(test)]
+mod order_reference_tests {
+    /// Order numbers with any configured shop prefix are recognised; other dashed words are not.
+    #[test]
+    fn recognises_configured_prefixes() {
+        use super::order_reference;
+        assert_eq!(
+            order_reference("Where is UXACCE-74ab58ea?"),
+            Some("UXACCE-74ab58ea")
+        );
+        assert_eq!(order_reference("Re: RAC-38fed56b"), Some("RAC-38fed56b"));
+        assert_eq!(order_reference("order NORD7-0a1b2c3d4"), None);
+        assert_eq!(order_reference("e-mail re-send"), None);
+    }
 }

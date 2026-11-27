@@ -10,6 +10,7 @@ pub mod intake_schema;
 pub mod media;
 pub mod model_format;
 pub mod navigation;
+pub mod option_values;
 pub mod preparation;
 pub mod product_admission;
 pub mod rich;

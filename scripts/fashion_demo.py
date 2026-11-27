@@ -86,6 +86,34 @@ with (ROOT / 'artifacts/fashion-demo-server.log').open('w') as log:
         assert request('/store-api/product/coat-s', headers=h)['product']['stock'] == stock-1
         assert request('/store-api/checkout/order', {}, {**ch,'Idempotency-Key':suffix})['id'] == order['id']
         check('A fashion size variant places one durable simulated order; another shop keeps its own stock')
+        # Variant option values are merchant content: localized per language with main-language fallback.
+        for locale, name in [('de-DE','Haferbeige'),('en-GB','Oatmeal'),('fr-FR','Avoine'),('es-ES','Avena')]:
+            knit = request('/store-api/product/knit-s', headers={**h, 'x-commerce-locale': locale})
+            assert knit['product']['extra']['optionLabels'] == {'color': name, 'size': 'S'}, knit['product']['extra']
+            assert name in knit['product']['variantLabel'], knit['product']
+        found = request('/store-api/product', {'limit': 24, 'search': 'haferbeige'}, {**h, 'x-commerce-locale': 'de-DE'})['elements']
+        assert [p['id'] for p in found] == ['knit'], [p['id'] for p in found]
+        assert not request('/store-api/product', {'limit': 24, 'search': 'haferbeige'}, {**h, 'x-commerce-locale': 'es-ES'})['elements']
+        deh = {**h, 'x-commerce-locale': 'de-DE'}
+        cart = request('/store-api/checkout/cart', {'session': suffix + '-de'}, deh)
+        dch = {**deh, 'sw-context-token': cart['token']}
+        cart = request('/store-api/checkout/cart/line-item', {'items':[{'referencedId':'knit-s','quantity':1}]}, dch)
+        label = cart['lineItems'][0]['label']
+        assert label.endswith(' · Haferbeige / S'), label
+        placed = request('/store-api/checkout/order', {}, {**dch,'Idempotency-Key':suffix + '-de'})
+        knit = request('/api/merchant/products/knit', headers=merchant)
+        assert knit['extra']['optionValues']['color']['oatmeal']['de'] == 'Haferbeige'
+        knit['extra']['optionValues']['color']['oatmeal'] = {**knit['extra']['optionValues']['color']['oatmeal'], 'it': 'Avena'}
+        request('/api/merchant/products/knit', knit, merchant, method='PUT', expected=400)
+        knit = request('/api/merchant/products/knit', headers=merchant)
+        knit['extra']['optionValues']['color']['oatmeal']['de'] = 'Hafer'
+        knit['extra']['optionValues']['color']['oatmeal']['es'] = None
+        assert request('/api/merchant/products/knit', knit, merchant, method='PUT')['saved'] is True
+        assert request('/store-api/product/knit-s', headers=deh)['product']['extra']['optionLabels']['color'] == 'Hafer'
+        assert request('/store-api/product/knit-s', headers={**h, 'x-commerce-locale': 'es-ES'})['product']['extra']['optionLabels']['color'] == 'Oatmeal'
+        saved_order = next(o for o in request('/api/search/order', {}, merchant)['data'] if o['id'] == placed['id'])
+        assert saved_order['cart']['lineItems'][0]['label'] == label, saved_order['cart']['lineItems'][0]
+        check('Option value names: four languages, main-language fallback, localized search and cart label, enabled-language validation, frozen order snapshot')
         # A merchant edit to the built-in demo must survive a fresh server process.
         subprocess.run(psql(os.environ['DB_CONTAINER'],'commerce',os.environ['TEST_DATABASE'],'-v','ON_ERROR_STOP=1','-c',"UPDATE products SET price=251 WHERE tenant='nord-atelier' AND id='coat'"), check=True, capture_output=True)
         stop(server)

@@ -72,6 +72,9 @@ pub struct Extra {
     pub identity: Value,
     #[serde(default)]
     pub compliance: Value,
+    /// Names of variant option values per content language; see `domain::option_values`.
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub option_values: crate::domain::option_values::OptionValues,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -197,6 +200,7 @@ impl Edit {
                 return Err(bad("Invalid specification metadata"));
             }
         }
+        crate::domain::option_values::validate(&extra.option_values, languages)?;
         if !extra.rich_description.is_null() {
             validate_rich(&extra.rich_description)?;
             if extra

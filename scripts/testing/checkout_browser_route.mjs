@@ -273,7 +273,7 @@ try {
     const receipt = page.locator(".order-reference strong");
     await receipt.waitFor();
     const orderNumber = await receipt.innerText();
-    assert.match(orderNumber, /^RAC-/);
+    assert.match(orderNumber, /^[A-Z0-9]{1,6}-[0-9a-f]{8}$/);
     if (drop) assert.equal(remoteReceipt?.orderNumber, orderNumber);
     if (paypal) {
       const result = drop ? remoteReceipt : await (await confirmation).json();
