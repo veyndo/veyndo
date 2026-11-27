@@ -13,11 +13,16 @@ GROUPS = {
     'Studio, storefront, platform and shared frontend': ('frontend/src', {'.ts', '.tsx', '.css'}),
     'Independent apps, services and SDK': ('extensions', {'.rs', '.ts', '.tsx', '.css', '.py', '.js', '.wat', '.html'}),
     'Verification tools and fixtures': ('scripts', {'.py'}),
+    'Generated client SDKs': ('sdks', {'.rs', '.ts', '.py'}),
 }
 
 
 def responsibility(path):
     text = path.read_text()
+    # A Python module's docstring states its responsibility, even when it generates other languages.
+    docstring = re.match(r'(?:#![^\n]*\n)?\s*"""([^\n"]+)', text) if path.suffix == '.py' else None
+    if docstring:
+        return docstring[1]
     comment = re.search(r'(?m)^//! (.*)', text)
     if comment:
         return comment[1]

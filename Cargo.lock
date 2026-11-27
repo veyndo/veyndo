@@ -4220,6 +4220,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-sdk"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "veyndo-shipping"
 version = "0.5.0"
 dependencies = [
