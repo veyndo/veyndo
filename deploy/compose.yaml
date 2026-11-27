@@ -39,6 +39,18 @@ services:
     depends_on:
       migrate: {condition: service_completed_successfully}
     restart: "no"
+  provision:
+    image: veyndo:${COMMERCE_IMAGE_TAG:-local}
+    build: *commerce-build
+    command: ["/app/veyndo", "--provision"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?migration owner URL required}
+      BOOTSTRAP_MODE: migrate
+      DB_RUNTIME_ROLE: veyndo_runtime
+      DB_CONNECTOR_LOGIN: veyndo_connectors
+    depends_on:
+      provision-runtime: {condition: service_completed_successfully}
+    restart: "no"
   commerce:
     image: veyndo:${COMMERCE_IMAGE_TAG:-local}
     build: *commerce-build
@@ -70,7 +82,7 @@ services:
       APP_SERVICES: ${APP_SERVICES:-{}}
 
     depends_on:
-      provision-runtime: {condition: service_completed_successfully}
+      provision: {condition: service_completed_successfully}
     restart: unless-stopped
   operator:
     profiles: [operator-setup]
@@ -106,7 +118,7 @@ services:
       SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET:-}
       EMAIL_SMTP_HOSTS: ${EMAIL_SMTP_HOSTS:-}
     depends_on:
-      provision-runtime: {condition: service_completed_successfully}
+      provision: {condition: service_completed_successfully}
     restart: unless-stopped
   gateway:
     image: caddy:2

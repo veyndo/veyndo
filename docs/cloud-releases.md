@@ -178,7 +178,14 @@ offers explicit version reload, preserving ordinary unsaved-change checks.
 
 `vendune-migrate` runs `/app/veyndo` with `BOOTSTRAP_MODE=migrate`, without
 operator credentials or demo seeding. It inherits only the existing private
-PostgreSQL URI from `vendune-runtime`. Migration ledger/checksums and the database
+PostgreSQL URI from `vendune-runtime`. After the baselines it grants the current
+tables to the runtime group and the connector login and re-applies the configured
+database authority, so tables a release adds reach `veyndo_runtime`,
+`DB_CONNECTOR_LOGIN` (`vendune_connectors`: set it on the job) and the tenant login
+without manual SQL; a missing grant fails the job before Core is deployed. A fresh
+database additionally needs one `veyndo --provision` run
+([provisioning](deployment.md#provision-roles-and-database-authority)); no release
+needs hand-written SQL. Migration ledger/checksums and the database
 migration lock remain authoritative. The existing maintenance job now starts with
 a bounded health check against its configured `QDRANT_URL` (5-second connect,
 10-second request, two retries), then `exec /app/veyndo`. This follows two observed
