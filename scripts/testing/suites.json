@@ -121,6 +121,7 @@
     "testing/test_integration_partitions",
     "testing/test_partition_coverage",
     "testing/component_mirrors_check",
-    "testing/schema_contracts"
+    "testing/schema_contracts",
+    "event_contracts"
   ]
 }
