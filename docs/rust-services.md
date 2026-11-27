@@ -145,10 +145,12 @@ follow the Rust rule and use the documented gateway, tenant ownership and durabl
 
 ## Schema baselines
 
-A fresh installation is the only setup path. `BOOTSTRAP_MODE=migrate` (or `auto`) runs
-`src/migrations.rs`, which applies the files listed in `src/migrations/schema.rs`, each in
-its own transaction under the setup advisory lock, and records `<component>/<file>` with
-the file's SHA-256 in `commerce_migrations`:
+`BOOTSTRAP_MODE=migrate` (or `auto`) runs `src/migrations.rs`, which applies the files
+listed in `src/migrations/schema.rs` that the ledger does not record yet, under the setup
+advisory lock, and records `<component>/<file>` with the file's SHA-256 in
+`commerce_migrations`. A fresh installation applies the baselines below and then every
+forward migration; a production database applies only the forward migrations it lacks
+([Forward migrations](#forward-migrations)):
 
 | Order | File | Contents |
 | --- | --- | --- |
@@ -164,22 +166,63 @@ functions, the rows a fresh installation starts with, then its constraints, inde
 triggers, row security and grants. A foreign key or policy that references a later
 component's table is created in that later component's file.
 
-Readiness (`ready`) requires every baseline with the shipped checksum. Setup refuses a
-database whose ledger records migrations of an earlier release, and a database whose
-recorded baseline differs from the shipped file: there is no upgrade path, rolling
-upgrade or legacy import; set up a new database. The demo data runs after the schema
-from `fixtures/demo/*.sql` and the Rust seed, marked `demo-v1` in the same ledger.
+Readiness (`ready`) requires every migration the binary ships, recorded with the shipped
+checksum; migrations a newer release recorded do not stop an older binary from serving
+(expand/contract keeps them compatible). Setup refuses a database whose ledger records the
+pre-baseline incremental release (`001`): there is no upgrade path from it. The demo data
+runs after the schema from `fixtures/demo/*.sql` and the Rust seed, marked `demo-v1` in the
+same ledger.
 
 The registered `schema_baseline` suite sets up a new database with the built binary and
 compares a normalized `pg_dump --schema-only` (every statement, sorted, owners left out)
-and the starting rows with `fixtures/schema/reference.sql`. That reference was taken
-from a fresh installation of the last release with incremental migrations (commit
-`ce4285d7`), so the baselines were proven to produce exactly the same schema. A deliberate
-schema change regenerates it with `python3 scripts/schema_baseline.py --write`.
+and the starting rows with `fixtures/schema/reference.sql`, the schema of "baselines + all
+forward migrations". The baselines were proven equal to the last release with incremental
+migrations (commit `ce4285d7`) when they were introduced; every forward migration since
+regenerates the reference with `python3 scripts/schema_baseline.py --write`, so the diff
+shows up in review. The `schema_upgrade` suite proves the same schema is reached by
+upgrading a database that the previous release installed (see below).
 
 Older guides, audits and the changelog name the incremental migrations 001–113 of
 earlier releases (for example "migration 099"). Their schema is contained in the
 owning component's baseline; the numbered files no longer exist.
+
+## Forward migrations
+
+Production went live on 27 November 2026 from the baselines and holds real data. Every
+schema change since is a forward migration that upgrades the live database:
+
+- **File and number.** `components/<name>/migrations/NNNN-lowercase-words.sql` in the
+  component that owns the changed tables (`0002` after the baseline, no gaps or
+  duplicates within a component). `src/migrations/schema.rs` lists every file ordered by
+  number, then by the global component order; `scripts/components.py` refuses another
+  order, a numbering gap, a badly named file and a forward migration that creates,
+  alters, drops, indexes, triggers, writes or adds a policy to another component's table.
+- **Ledger.** Each migration is recorded as `<component>/<file stem>` with its SHA-256.
+  An applied file that changed is refused ("restore it and add a new migration"). A
+  pending migration that sorts before an applied one is refused too: a database must
+  apply migrations in the same order as a fresh installation, so a new file needs a
+  number above every migration already in production (two components may share a
+  number in one release). One session-level advisory lock serializes concurrent setups.
+- **Transactions.** A migration runs in one transaction with its ledger row. A file whose
+  first line is `-- veyndo:no-transaction` runs as steps separated by `-- veyndo:step`
+  lines, each committed on its own (a batched backfill `DO` block may `COMMIT` between
+  batches; `CREATE INDEX CONCURRENTLY` needs its own step). Its ledger row is written after
+  the last step, so every step must be safe to run again after an interrupted setup
+  (`IF NOT EXISTS`, backfills that only touch unconverted rows).
+- **Expand/contract.** The release workflow migrates (`vendune-migrate`) while the previous
+  release still serves, and both releases serve together during a rolling deploy. A
+  migration therefore only expands: add nullable or defaulted columns, new tables and
+  indexes, triggers that keep an old and a new representation in step, and backfills in
+  bounded batches. Constraints on new columns (`NOT NULL`, `CHECK`, foreign keys), dropping
+  or renaming columns, tightening types and removing compatibility triggers belong to a
+  later release, once no binary that needs the old shape serves. Never rename or retype a
+  column the previous release reads.
+- **Proof.** `schema_upgrade` builds the previous release (the commit before the newest
+  migration file) in a temporary worktree under `target/`, installs it fresh, writes a
+  shop, products, a cart, an order and a payment through its HTTP API, migrates with the
+  new binary, checks the data and the new behaviour, compares the upgraded schema with
+  `fixtures/schema/reference.sql` and serves one request round from the old and the new
+  binary at the same time against the migrated database.
 
 ## Typed inputs and checked queries
 

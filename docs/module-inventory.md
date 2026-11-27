@@ -269,8 +269,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/mcp/storefront_views.rs](../src/mcp/storefront_views.rs) | Storefront kit parts as an MCP App view: the `ui://` document, the tool links and each tool result's part payload. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |
-| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one |
-| [src/migrations.rs](../src/migrations.rs) | Fresh-installation setup, separate from serving: applies the component schema baselines in their |
+| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema migrations: the cross-cutting foundation, one baseline per component, then the |
+| [src/migrations.rs](../src/migrations.rs) | Schema setup, separate from serving: applies the component baselines and then the forward |
 | [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant address operations live in the customers component. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
@@ -366,7 +366,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
 | [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
-| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time. |
+| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script or one separately committed step, and the demo-seed marker. Static statements are checked at compile time. |
 | [src/store/platform.rs](../src/store/platform.rs) | Operator bootstrap and shop-creation steps of the control plane. The email lock is the server's own; accounts belong to identity and the operator grant and audit to shop. |
 | [src/store/process.rs](../src/store/process.rs) | Process-level statements: the readiness ping, the short lock wait of a background digest and the queue ages of the app worker sample. |
 | [src/store/shops.rs](../src/store/shops.rs) | Shop provisioning: the server composes the starter rows of every component a new shop needs. The ID lock and the automation seed are the server's own; each row belongs to its component's store. |
@@ -3130,7 +3130,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
 | [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
-| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
+| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | /migrations', |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/store_isolation.py](../scripts/store_isolation.py) | Store tests per component against an isolated PostgreSQL database under forced row security. |

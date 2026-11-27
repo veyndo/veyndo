@@ -41,17 +41,20 @@ out of sandbox configuration digests; history restoration never restores stock.
 See `docs/product-management.md#editing-while-orders-arrive` and retain the actual
 two-replica purchase/cancellation/MCP regression in `production_foundations`.
 
-## Schema baselines and releases
+## Schema baselines and forward migrations
 
 Each component owns `components/<name>/migrations/` (connector service:
 `extensions/services/connectors/migrations/`; shared functions and `veyndo_authority`:
 `components/core/migrations/0000-foundation.sql`), listed in `src/migrations/schema.rs`
-in the global order `scripts/components.py` checks. A release replaces earlier
-installations: no upgrade path, rolling upgrade or data import; setup refuses an earlier
-release's database. Shopware compatibility is not a goal: add no PHP parity checks.
-Change a schema in its owning baseline, run `scripts/schema_baseline.py --write` and keep
-`schema_baseline` passing, with forced tenant RLS, the scope policy, the non-owner role and
-encrypted credentials. Demo data belongs to `fixtures/demo/`.
+by number, then global component order; `scripts/components.py` checks it. Production
+holds real data since the 27 November baselines: never edit an applied file. Every schema
+change is a new `NNNN-name.sql` (0002 on) in the owning component that upgrades the live
+database and works while the previous release still serves (expand/contract, see
+[migration rules](docs/rust-services.md#forward-migrations)); keep the `schema_upgrade`
+and `schema_baseline` suites passing (`scripts/schema_baseline.py --write` after a
+change), with forced tenant RLS, the scope policy, the non-owner role and encrypted
+credentials. Pre-baseline databases stay refused. No Shopware/PHP parity checks. Demo
+data belongs to `fixtures/demo/`.
 
 ## Internationalization contract (mandatory for every new module)
 

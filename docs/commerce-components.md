@@ -62,9 +62,9 @@ HTTP and MCP, five separate workloads on Northflank with signed database scope, 
 load comparisons of native and independent confirmation, and the Connected Shop example.
 [Composed release rehearsal](evidence/composed-release-rehearsal-2026-11-10.md).
 
-The component-architecture release replaces earlier installations. There is no upgrade,
-rolling upgrade or data import from an earlier release; a hosted shop is set up on a new
-database.
+The component-architecture release replaced the pre-baseline installations without
+upgrade or data import. Databases set up from its baselines are upgraded by expand/contract
+forward migrations ([forward migrations](rust-services.md#forward-migrations)).
 
 ## CORE: modular transactional commerce
 

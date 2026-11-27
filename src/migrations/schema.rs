@@ -1,7 +1,9 @@
-//! The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one
-//! baseline per component in the global order (core first, then `components.json` `uses`).
-//! `scripts/components.py` checks that this list names every component migration file in that order.
-pub(super) const BASELINES: &[(&str, &str)] = &[
+//! The ordered schema migrations: the cross-cutting foundation, one baseline per component, then the
+//! forward migrations. The order is by file number, and within one number by the global component
+//! order (core first, then `components.json` `uses`), so every forward migration of a release comes
+//! after every earlier one. `scripts/components.py` checks that this list names every component
+//! migration file in that order; the runner refuses a pending migration that sorts before an applied one.
+pub(super) const MIGRATIONS: &[(&str, &str)] = &[
     (
         "core/0000-foundation",
         include_str!("../../components/core/migrations/0000-foundation.sql"),

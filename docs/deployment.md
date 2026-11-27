@@ -49,12 +49,14 @@ reachable configured domain. Persistent volumes retain PostgreSQL, uploaded
 binary product assets (stored in PostgreSQL), connector state and certificates.
 Automatic backup/restore/failover is not implemented.
 
-Setup applies the checksummed component baselines ([schema baselines](rust-services.md#schema-baselines)).
-`BOOTSTRAP_MODE=migrate` performs setup without workers; `serve` requires every
-baseline to be ready. Run the migration-only job, then the runtime-role provisioning
-job, then start `serve` replicas. This release is a fresh installation only: setup
-refuses a database created by an earlier release, and there is no upgrade path or
-data import ([release notes](current-release.md#what-operators-must-know)).
+Setup applies the checksummed component baselines and forward migrations
+([schema baselines](rust-services.md#schema-baselines)). `BOOTSTRAP_MODE=migrate` performs
+setup or the upgrade without workers; `serve` requires every migration it ships to be
+recorded. Run the migration-only job, then the runtime-role provisioning job, then start
+`serve` replicas; forward migrations are expand/contract, so the previous release keeps
+serving meanwhile ([forward migrations](rust-services.md#forward-migrations)). Setup
+refuses a database of the pre-baseline incremental release
+([release notes](current-release.md#what-operators-must-know)).
 
 Ollama is an operator-controlled private service. Compose does not download a
 model or reserve a GPU. Optional OpenAI/Anthropic credentials stay in Rust.

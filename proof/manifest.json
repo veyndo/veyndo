@@ -8757,13 +8757,13 @@
     },
     "src/migrations/schema.rs": {
       "status": "unproved",
-      "sha256": "abd212a2d5b1bce736ba3fe921565156cd1a3f76a59e09436eb7e347db64eaf6",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "80470f322ba875e3416e5c48a7ceb9268ac24710148dd23298e7e7968302bb60",
+      "review": "Forward migration runner (J0): ordered MIGRATIONS list replaces BASELINES, checksum and order refusal, no-transaction steps; ledger store gains run_step. Adapter-only change, no proved rule affected."
     },
     "src/migrations.rs": {
       "status": "unproved",
-      "sha256": "3699bd7f04c086aad1117ae9f1427af8ccabbce77ed8ac122046f65132911d90",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "373d552543e655a3b30781006477cd001bdbb018511dcc41524b4e33356a1bcf",
+      "review": "Forward migration runner (J0): ordered MIGRATIONS list replaces BASELINES, checksum and order refusal, no-transaction steps; ledger store gains run_step. Adapter-only change, no proved rule affected."
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -9242,8 +9242,8 @@
     },
     "src/store/migrations.rs": {
       "status": "unproved",
-      "sha256": "6a9391d4f272a94eced66332a68a73d0aca8e78aa2238a19b309adc398eeed4c",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "b912eff8a43dc4c5d7d943cc31b48902a9b89a090274e88b1758e2ecb5d2f2d6",
+      "review": "Forward migration runner (J0): ordered MIGRATIONS list replaces BASELINES, checksum and order refusal, no-transaction steps; ledger store gains run_step. Adapter-only change, no proved rule affected."
     },
     "src/store/platform.rs": {
       "status": "unproved",
