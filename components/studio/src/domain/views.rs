@@ -26,6 +26,8 @@ pub struct Evidence {
     pub translation_inference: Value,
     #[serde(deserialize_with = "lenient")]
     pub policy_revision: Option<i64>,
+    /// The shop twin's stored result, absent on proposals saved before simulation existed.
+    pub simulation: Value,
 }
 
 /// The parts of a proposal that decide how it is applied.

@@ -27,6 +27,16 @@ pub async fn status(
         agent_runs::operate(&a, &h, "merchant.run.status", &json!({"id":id})).await?,
     ))
 }
+/// Why a saved run acted, with the source references the reader may see.
+pub async fn explanation(
+    Shared(a): Shared<State>,
+    h: RequestContext,
+    Path(id): Path<String>,
+) -> Result<Json<Value>> {
+    Ok(Json(
+        agent_runs::operate(&a, &h, "merchant.run.explain", &json!({"id":id})).await?,
+    ))
+}
 /// Cancels a saved run at its expected revision.
 pub async fn cancel(
     Shared(a): Shared<State>,

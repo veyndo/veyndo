@@ -75,6 +75,14 @@ pub trait AgentHost: Send + Sync {
         locale: &'a str,
         candidate: &'a Value,
     ) -> PortFuture<'a, (Self::Plan, Vec<Product>, i64)>;
+    /// Replays an admitted plan in the shop twin; the stored result never fails or changes the plan.
+    fn simulate<'a>(
+        &'a self,
+        t: &'a str,
+        h: &'a RequestContext,
+        plan: &'a Self::Plan,
+        policy_revision: i64,
+    ) -> PortFuture<'a, Value>;
     /// The digest of a sandbox's release configuration projection; it excludes credentials, stock and operational records.
     fn configuration_digest<'a>(&'a self, t: &'a str) -> PortFuture<'a, String>;
     /// Gives empty products of a private sandbox a test stock quantity.

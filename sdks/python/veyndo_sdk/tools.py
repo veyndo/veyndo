@@ -2308,6 +2308,40 @@ class MerchantRunStatusInput:
 
 
 @dataclass
+class MerchantRunExplainInputInference:
+    """Part of the `MerchantRunExplainInputInference` tool contract."""
+    provider: Literal["platform", "ollama", "openai", "anthropic"] = field(metadata={"json": "provider"})
+    model: Optional[Optional[str]] = field(default=None, metadata={"json": "model"})
+
+
+@dataclass
+class MerchantRunExplainInputWorkspaceContextSelected:
+    """Part of the `MerchantRunExplainInputWorkspaceContextSelected` tool contract."""
+    id: str = field(metadata={"json": "id"})
+    kind: Literal["product", "order", "customer", "company", "app", "page", "flow"] = field(metadata={"json": "kind"})
+
+
+@dataclass
+class MerchantRunExplainInputWorkspaceContext:
+    """Part of the `MerchantRunExplainInputWorkspaceContext` tool contract."""
+    view: Literal["assistant", "workspace", "setup", "overview", "knowledge", "agents", "commerce", "design", "productData", "products", "orders", "customers", "b2b", "pos", "storyfronts", "channels", "automation", "apps", "developers", "environments", "users"] = field(metadata={"json": "view"})
+    selected: Optional[MerchantRunExplainInputWorkspaceContextSelected] = field(default=None, metadata={"json": "selected"})
+
+
+@dataclass
+class MerchantRunExplainInput:
+    """Input of the `merchant.run.explain` tool contract."""
+    TOOL: ClassVar[str] = "merchant.run.explain"
+    id: str = field(metadata={"json": "id"})
+    approve: Optional[bool] = field(default=None, metadata={"json": "approve"})
+    inference: Optional[MerchantRunExplainInputInference] = field(default=None, metadata={"json": "inference"})
+    instruction: Optional[str] = field(default=None, metadata={"json": "instruction"})
+    request_id: Optional[str] = field(default=None, metadata={"json": "requestId"})
+    revision: Optional[int] = field(default=None, metadata={"json": "revision"})
+    workspace_context: Optional[MerchantRunExplainInputWorkspaceContext] = field(default=None, metadata={"json": "workspaceContext"})
+
+
+@dataclass
 class MerchantRunCancelInputInference:
     """Part of the `MerchantRunCancelInputInference` tool contract."""
     provider: Literal["platform", "ollama", "openai", "anthropic"] = field(metadata={"json": "provider"})
@@ -2974,6 +3008,7 @@ TOOLS: dict[str, dict[str, Any]] = {
     "merchant.apply": {"component": "intelligence", "read_only": False, "input": MerchantApplyInput, "description": "Approve stored change; merchant authorization required"},
     "merchant.run.create": {"component": "intelligence", "read_only": False, "input": MerchantRunCreateInput, "description": "Queue a durable native planning task; no automatic business writes"},
     "merchant.run.status": {"component": "intelligence", "read_only": True, "input": MerchantRunStatusInput, "description": "Read a saved run and completed proposal with current rights"},
+    "merchant.run.explain": {"component": "intelligence", "read_only": True, "input": MerchantRunExplainInput, "description": "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change"},
     "merchant.run.cancel": {"component": "intelligence", "read_only": False, "input": MerchantRunCancelInput, "description": "Cancel a saved run with its expected revision"},
     "merchant.run.resume": {"component": "intelligence", "read_only": False, "input": MerchantRunResumeInput, "description": "Explicitly resume a failed or ambiguous run from completed checkpoints"},
     "merchant.scenario.create": {"component": "intelligence", "read_only": False, "input": MerchantScenarioCreateInput, "description": "Run a bounded fictional customer cohort in a private sandbox"},

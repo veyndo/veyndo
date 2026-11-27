@@ -1,4 +1,4 @@
-//! The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary and proposal admission.
+//! The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary, proposal admission and the shop twin simulation.
 use crate::foundation::App;
 use crate::{
     agent_runs, apps, auth, capabilities, cognition, commerce, operations, staging, studio,
@@ -93,6 +93,24 @@ impl AgentHost for Host<'_> {
         Box::pin(veyndo_studio::service::proposal_admission::admit(
             self, t, h, prepared, locale, candidate,
         ))
+    }
+    fn simulate<'a>(
+        &'a self,
+        t: &'a str,
+        h: &'a RequestContext,
+        plan: &'a Proposal,
+        policy_revision: i64,
+    ) -> PortFuture<'a, Value> {
+        Box::pin(async move {
+            Ok(veyndo_studio::service::proposal_simulation::simulate(
+                self,
+                t,
+                h,
+                plan,
+                policy_revision,
+            )
+            .await)
+        })
     }
     fn configuration_digest<'a>(&'a self, t: &'a str) -> PortFuture<'a, String> {
         Box::pin(async move {

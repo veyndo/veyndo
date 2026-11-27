@@ -40,6 +40,10 @@ export class IntelligenceApi {
   getAgentRunsById(params: { "id": string }, options?: RequestOptions): Promise<JsonValue> {
     return this.#transport.request("GET", "/api/agent/runs/{id}", params, options);
   }
+  /** `GET /api/agent/runs/{id}/explanation` · permission `assistant.use` */
+  getAgentRunsByIdExplanation(params: { "id": string }, options?: RequestOptions): Promise<JsonValue> {
+    return this.#transport.request("GET", "/api/agent/runs/{id}/explanation", params, options);
+  }
   /** `GET /api/agent/scenario-probes` · permission `assistant.use` */
   getAgentScenarioProbes(options?: RequestOptions): Promise<JsonValue> {
     return this.#transport.request("GET", "/api/agent/scenario-probes", {}, options);

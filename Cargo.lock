@@ -4269,6 +4269,7 @@ name = "veyndo-site-builder"
 version = "0.5.0"
 dependencies = [
  "axum",
+ "chrono",
  "reqwest",
  "serde",
  "serde_json",

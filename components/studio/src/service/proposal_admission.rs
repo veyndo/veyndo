@@ -1,4 +1,4 @@
-//! Native admission of model proposals and list views; every initial or repaired proposal traverses the same read-only checks.
+//! Native admission of model proposals and list views; every initial or repaired proposal traverses the same read-only checks and receives trusted aggregate and content clocks.
 use super::work_plan::bind;
 use crate::domain::grid_criteria::validate as validate_criteria;
 use crate::domain::proposal::{Proposal, View, validate_proposal};
@@ -13,7 +13,7 @@ use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filter;
 use veyndo_catalog::service::translation_apply::admit_selection;
 use veyndo_core::document::{lenient, merge, view};
-use veyndo_core::{RequestContext, Result, State, bad};
+use veyndo_core::{RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::{allowed, permit};
 use veyndo_intelligence::domain::price_guardrails::check;
 use veyndo_intelligence::service::navigation::{admit as admit_navigation, validate_view};
@@ -55,17 +55,19 @@ pub async fn admit_view(a: &State, h: &RequestContext, view: &mut View) -> Resul
 }
 
 /// Checks every price change of a plan against the current guardrails and returns the settings revision.
+/// A corridor conflict does not refuse the plan: the twin records it as a blocking finding the merchant sees, and apply
+/// still refuses it. Configuration errors (unknown currency, invalid tax basis) still refuse the candidate.
 async fn validate_plan(a: &State, t: &str, p: &Proposal, ps: &[Product]) -> Result<i64> {
     let (settings, revision) = config(a, t).await?;
     for c in &p.changes {
-        check(
-            &settings,
-            ps.iter()
-                .find(|p| p.id == c.product_id)
-                .ok_or(bad("Unknown product"))?,
-            c,
-            false,
-        )?;
+        let product = ps
+            .iter()
+            .find(|p| p.id == c.product_id)
+            .ok_or(bad("Unknown product"))?;
+        match check(&settings, product, c, false) {
+            Err(e) if e.0 == StatusCode::CONFLICT => {}
+            other => other?,
+        }
     }
     Ok(revision)
 }
@@ -141,12 +143,28 @@ pub async fn admit<H: WorkHost>(
         host.bind_change(t, change, authority).await?;
     }
     // Concurrency tokens are trusted state, never facts invented by the model.
+    let ids = p
+        .changes
+        .iter()
+        .map(|c| c.product_id.clone())
+        .collect::<Vec<_>>();
+    let clocks = if ids.is_empty() {
+        vec![]
+    } else {
+        let mut tx = a.db.begin().await?;
+        products::clocks(&mut tx, t, &ids).await?
+    };
     for c in &mut p.changes {
         let before = ps
             .iter()
             .find(|p| p.id == c.product_id)
             .ok_or(bad("Unknown product in plan"))?;
         c.expected_revision = before.revision;
+        // The content clock belongs to the row the model saw only while its aggregate revision is unchanged.
+        c.expected_content_revision = clocks
+            .iter()
+            .find(|k| k.id == c.product_id && k.revision == before.revision)
+            .map(|k| k.content_revision);
         if c.price == Some(before.price) {
             c.price = None;
         }

@@ -26,6 +26,11 @@ pub async fn mark_applied(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<()> {
     veyndo_intelligence::store::work_tasks::mark_applied(tx, t, id).await
 }
 
+/// Appends the applied action to the proposal's explanation.
+pub async fn explain_applied(tx: &mut Tx<'_>, t: &str, id: &str, action: &Value) -> Result<()> {
+    veyndo_intelligence::store::work_tasks::explain_applied(tx, t, id, action).await
+}
+
 /// The task's approval state.
 pub async fn get(a: &State, t: &str, id: &str) -> Result<WorkTask> {
     veyndo_intelligence::store::work_tasks::reviewed_work(a, t, id).await

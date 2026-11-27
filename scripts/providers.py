@@ -149,8 +149,13 @@ try:
     behavior['mode']='normal'
     passed('Shared merchant agent reads current native AI boundaries through the authorized commerce capability before preparing a proposal')
     proposal['changes']=[{'product_id':'lamp','price':69}]
-    rejected=call('/api/agent/chat',{'message':'Try outside price corridor','inference':{'provider':'openai'}})
-    assert rejected['messages'][-1]['data']['error'];passed('Merchant price corridors reject invalid previews before executable tasks exist')
+    rejected=call('/api/agent/chat',{'message':'Try outside price corridor','inference':{'provider':'openai'}})['messages'][-1]['data']
+    simulation=rejected['preview']['simulation']
+    assert simulation['blocking'] and any(r['rule']=='priceGuardrail' and 'corridorMinimum' in r['codes'] for r in simulation['rules']),simulation
+    call('/api/agent/tasks/'+rejected['taskId']+'/apply',{'approve':True},expected=409)
+    call('/api/intelligence/autonomy.apply',{'taskId':rejected['taskId']},expected=409)
+    assert next(p for p in call('/api/search/product',{})['elements'] if p['id']=='lamp')['price']!=69
+    passed('Merchant price corridors turn invalid previews into visible blocking findings; neither approval nor autonomy can execute them')
     proposal['changes']=[{'product_id':'lamp','price':72.5}]
     draft=call('/api/agent/chat',{'message':'Within explicit budget','inference':{'provider':'openai'}})['messages'][-1]['data']
     call('/api/intelligence/autonomy.apply',{'taskId':draft['taskId']},headers={**ah,'x-tenant':'atelier'},expected=404)

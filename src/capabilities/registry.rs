@@ -65,6 +65,7 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                 || name == "automation.validate_flow"
                 || name == "merchant.import.inspect"
                 || name == "merchant.run.status"
+                || name == "merchant.run.explain"
                 || name == "merchant.scenario.status"
                 || name == "merchant.scenario.list"
                 || name == "merchant.scenario.readiness"

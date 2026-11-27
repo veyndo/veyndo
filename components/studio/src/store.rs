@@ -18,6 +18,7 @@ pub mod staging_release;
 pub mod staging_snapshot;
 pub mod tasks;
 pub mod translation_runs;
+pub mod twin;
 pub mod work_items;
 pub mod work_runs;
 pub mod workspaces;

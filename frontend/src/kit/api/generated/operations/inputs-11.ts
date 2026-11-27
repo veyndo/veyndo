@@ -2,6 +2,11 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs11 {
+  "checkout.payment.method.revoke": {
+    approve: boolean;
+    id: string;
+    requestKey: string;
+  };
   "checkout.payment.instructions": { id: string };
   "merchant.payment.instructions": { id: string };
   "merchant.payment": {
@@ -67,5 +72,4 @@ export interface Inputs11 {
     style?: boolean;
     urls?: Array<string>;
   };
-  "merchant.site.apply": { approve: boolean; taskId: string };
 }

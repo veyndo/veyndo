@@ -2788,6 +2788,128 @@
       "readOnly": true
     },
     {
+      "description": "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "id": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "inference": {
+            "additionalProperties": false,
+            "properties": {
+              "model": {
+                "maxLength": 128,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider": {
+                "enum": [
+                  "platform",
+                  "ollama",
+                  "openai",
+                  "anthropic"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "provider"
+            ],
+            "type": "object"
+          },
+          "instruction": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requestId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "workspaceContext": {
+            "additionalProperties": false,
+            "properties": {
+              "selected": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "kind": {
+                    "enum": [
+                      "product",
+                      "order",
+                      "customer",
+                      "company",
+                      "app",
+                      "page",
+                      "flow"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "type": "object"
+              },
+              "view": {
+                "enum": [
+                  "assistant",
+                  "workspace",
+                  "setup",
+                  "overview",
+                  "knowledge",
+                  "agents",
+                  "commerce",
+                  "design",
+                  "productData",
+                  "products",
+                  "orders",
+                  "customers",
+                  "b2b",
+                  "pos",
+                  "storyfronts",
+                  "channels",
+                  "automation",
+                  "apps",
+                  "developers",
+                  "environments",
+                  "users"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "view"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "name": "merchant.run.explain",
+      "readOnly": true
+    },
+    {
       "description": "Cancel a saved run with its expected revision",
       "inputSchema": {
         "additionalProperties": false,
