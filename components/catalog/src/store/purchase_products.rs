@@ -1,4 +1,5 @@
 //! The product facts a purchase and the product detail page read from the catalog, on the caller's connection: product locks, channel visibility and selection, and published reviews.
+use crate::store::exact::Exact;
 use crate::store::products::ProductRow;
 use sqlx::{Executor, PgConnection, Postgres};
 use veyndo_core::Result;
@@ -27,7 +28,7 @@ pub async fn lock(
     tenant: &str,
     ids: &[String],
 ) -> Result<Vec<LockedProduct>> {
-    let rows = sqlx::query!(r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number,active FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE"#, tenant, ids)
+    let rows = sqlx::query!(r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number,active FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE"#, tenant, ids)
         .fetch_all(tx)
         .await?;
     Ok(rows

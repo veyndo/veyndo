@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::service::conversion::amount;
+use veyndo_pricing::decimal::{Decimal, Ratio};
+use veyndo_pricing::service::conversion::exact_amount;
 use veyndo_shop::Settings;
 
 /// One proposed product change: a new price, a new stock level, or both, bound to the revision it was planned on.
@@ -14,7 +15,7 @@ pub struct Change {
     #[serde(default)]
     pub expected_revision: i64,
     #[serde(default)]
-    pub price: Option<f64>,
+    pub price: Option<Decimal>,
     #[serde(default)]
     pub stock: Option<i32>,
 }
@@ -33,8 +34,8 @@ pub fn check(s: &Settings, p: &Product, c: &Change, autonomous: bool) -> Result<
         .find(|d| d.code == code)
         .ok_or(bad("Product price currency is not configured"))?
         .scale;
-    let proposed = amount(price, code, scale)?.minor() as u64;
-    let before = amount(p.price, code, scale)?.minor() as u64;
+    let proposed = exact_amount(price, code, scale)?.minor() as u64;
+    let before = exact_amount(p.price, code, scale)?.minor() as u64;
     let rule = s.ai_policy.corridors.iter().find(|r| r.product_id == p.id);
     if autonomous && rule.is_none() {
         return Err(bad("Autonomy requires an explicit product corridor"));
@@ -46,8 +47,15 @@ pub fn check(s: &Settings, p: &Product, c: &Change, autonomous: bool) -> Result<
             ));
         }
         // Base gross prices preserve the product's native base tax. This margin excludes shipping, fees and returns.
-        let tax = (p.tax_rate * 100.).round();
-        if !tax.is_finite() || !(0.0..=10000.0).contains(&tax) {
+        // The rate in basis points, rounded half away from zero.
+        let tax = p
+            .tax_rate
+            .ratio()
+            .checked_mul(Ratio::integer(100))
+            .and_then(|bps| bps.rounded(0))
+            .map_err(|_| bad("Invalid product tax basis"))?
+            .minor();
+        if !(0..=10000).contains(&tax) {
             return Err(bad("Invalid product tax basis"));
         }
         let net = (proposed as u128) * 10000 / (10000 + tax as u128);
@@ -88,7 +96,7 @@ pub fn check(s: &Settings, p: &Product, c: &Change, autonomous: bool) -> Result<
 
 #[cfg(test)]
 mod tests {
-    use super::{Change, check};
+    use super::{Change, Decimal, check};
     use serde_json::json;
     use veyndo_pricing::catalog::Product;
     use veyndo_shop::Settings;
@@ -121,7 +129,7 @@ mod tests {
         Change {
             product_id: "p1".into(),
             expected_revision: 1,
-            price,
+            price: price.map(|p| Decimal::from_wire(p).unwrap()),
             stock: None,
         }
     }

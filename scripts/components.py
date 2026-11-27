@@ -23,6 +23,14 @@ SQL_CALL = re.compile(r'\bsqlx::(?:query|query_as|query_scalar|QueryBuilder)\b')
 # A query whose SQL the compiler does not check: a runtime string or a dynamic QueryBuilder.
 RUNTIME_SQL = re.compile(r'\bsqlx::(?:(?:query|query_as|query_scalar)(?:::<|\()|QueryBuilder\b)')
 READ = r'(?i)\b(?:FROM|JOIN)\s+(?:ONLY\s+)?(?:public\.)?'
+# A statement in a migration file that changes a table or its rows: the table must belong to the file's component.
+TOUCH = re.compile(r'(?i)\b(?:CREATE TABLE(?: IF NOT EXISTS)?|ALTER TABLE(?: IF EXISTS)?(?: ONLY)?|DROP TABLE(?: IF EXISTS)?'
+                   r'|INSERT INTO|UPDATE(?: ONLY)?|DELETE FROM(?: ONLY)?|TRUNCATE(?: TABLE)?(?: ONLY)?'
+                   r'|CREATE (?:UNIQUE )?INDEX(?: CONCURRENTLY)?(?: IF NOT EXISTS)?(?: \w+)? ON(?: ONLY)?'
+                   r'|CREATE (?:OR REPLACE )?(?:CONSTRAINT )?TRIGGER \w+ (?:BEFORE|AFTER|INSTEAD OF) [\w\s]+? ON'
+                   r'|CREATE POLICY \w+ ON|COMMENT ON COLUMN)\s+(?:public\.)?"?([a-z_][a-z0-9_]*)')
+# A migration file: `NNNN-name.sql`; 0000 is the core foundation, 0001 each baseline, 0002 on forward migrations.
+MIGRATION_STEM = re.compile(r'^([0-9]{4})-([a-z0-9]+(?:-[a-z0-9]+)*)$')
 
 
 def split_source(text):
@@ -213,12 +221,34 @@ class Tree:
         # `public.%I` in a migration is a format placeholder for per-app tables, not a table called "public".
         return names - {'public'}
 
-    def migrations(self, catalogue=None):
-        """Problems with the baseline layout: the runner list must name every component migration file in the
-        global order (core first, then `uses`), and a component's files create only that component's tables."""
+    def migrations(self, catalogue=None, files=None):
+        """Problems with the migration layout. Each component numbers its files without gaps: core starts with
+        `0000-foundation`, every component has `0001-baseline`, forward migrations continue at 0002. The runner
+        list must name every file ordered by number and, within one number, by the global component order (core
+        first, then `uses`), so a release's forward migrations come after every earlier one. A file touches only
+        its own component's tables (create, alter, drop, index, trigger, policy, row writes); a
+        baseline is checked for the tables it creates."""
         problems = []
-        files = self.migration_files()
-        expected = [f'{name}/{path.stem}' for name in global_order(self.map['components']) for path in files.get(name, [])]
+        files = files or self.migration_files()
+        order = global_order(self.map['components'])
+        numbered = []
+        for name, paths in files.items():
+            numbers = []
+            for path in paths:
+                match = MIGRATION_STEM.match(path.stem)
+                if not match:
+                    problems.append(f'{migration_folder(name)}/{path.name} must be named NNNN-lowercase-words.sql')
+                    continue
+                number = int(match.group(1))
+                if (number == 0 and (name, path.stem) != ('core', '0000-foundation')) or (number == 1 and match.group(2) != 'baseline'):
+                    problems.append(f'{migration_folder(name)}/{path.name}: 0000 is only core/0000-foundation and 0001 is only NNNN-baseline')
+                numbers.append(number)
+                numbered.append((number, order.index(name) if name in order else len(order), f'{name}/{path.stem}'))
+            first = 0 if name == 'core' else 1
+            if numbers and sorted(numbers) != list(range(first, first + len(numbers))):
+                problems.append(f'{migration_folder(name)} must number its migrations {first:04d}, {first + 1:04d}, ... without gaps or duplicates: '
+                                + ', '.join(f'{n:04d}' for n in sorted(numbers)))
+        expected = [version for _, _, version in sorted(numbered)]
         catalogue = catalogue or (self.root / MIGRATION_LIST).read_text()
         listed = re.findall(r'\(\s*"([a-z0-9_-]+/[0-9]{4}-[a-z0-9-]+)",\s*include_str!\("\.\./\.\./([^"]+)"\)', catalogue)
         for version, path in listed:
@@ -226,14 +256,19 @@ class Tree:
             if path != f'{migration_folder(name)}/{stem}.sql':
                 problems.append(f'{MIGRATION_LIST}: {version} must include {migration_folder(name)}/{stem}.sql, not {path}')
         if [version for version, _ in listed] != expected:
-            problems.append(f'{MIGRATION_LIST} must list the component migrations in the global order: ' + ', '.join(expected))
+            problems.append(f'{MIGRATION_LIST} must list the component migrations by number, then in the global order: ' + ', '.join(expected))
         owners = {table: name for name, row in self.map['components'].items() for table in row.get('tables', [])}
         for name, paths in files.items():
             for path in paths:
-                for table in TABLE.findall(path.read_text()):
+                # The frozen baselines hold functions that write other components' tables; they are checked
+                # for the tables they create. A forward migration may change only its own component's tables.
+                match = MIGRATION_STEM.match(path.stem)
+                forward = match is not None and int(match.group(1)) >= 2
+                for table in sorted(set((TOUCH if forward else TABLE).findall(path.read_text()))):
                     owner = owners.get(table.lower())
                     if table.lower() != 'public' and owner not in (None, name):
-                        problems.append(f'{path.relative_to(self.root)} creates table {table} of {owner}')
+                        verb = 'touches' if forward else 'creates'
+                        problems.append(f'{migration_folder(name)}/{path.name} {verb} table {table} of {owner}')
         return problems
 
     def table_use(self, tables):
@@ -413,6 +448,18 @@ def main(argv=None):
     assert any('has no owning component' in line for line in findings(Tree(mapping=broken))[0]), 'an unowned table must fail'
     swapped = (ROOT / MIGRATION_LIST).read_text().replace('"identity/0001-baseline"', '"<swap>"').replace('"pricing/0001-baseline"', '"identity/0001-baseline"').replace('"<swap>"', '"pricing/0001-baseline"')
     assert any('global order' in line for line in tree.migrations(swapped)), 'a migration list out of the global order must fail'
+    scratch = ROOT / 'target/components-check'
+    scratch.mkdir(parents=True, exist_ok=True)
+    skipped = scratch / '0009-skipped.sql'
+    skipped.write_text('SELECT 1;\n')
+    gapped = {name: list(paths) for name, paths in tree.migration_files().items()}
+    gapped['catalog'] = gapped['catalog'] + [skipped]
+    assert any('without gaps' in line for line in tree.migrations(files=gapped)), 'a gap in a component\'s numbering must fail'
+    foreign = scratch / '0002-foreign.sql'
+    foreign.write_text('ALTER TABLE public.orders ADD COLUMN note text;\n')
+    touched = {name: list(paths) for name, paths in tree.migration_files().items()}
+    touched['catalog'] = touched['catalog'] + [foreign]
+    assert any('touches table orders of orders' in line for line in tree.migrations(files=touched)), 'a migration touching another component\'s table must fail'
     broken = json.loads(json.dumps(tree.map))
     del broken['components'][first]
     assert any('belongs to no component' in line for line in Tree(mapping=broken).problems), 'an unowned source must fail'

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price,p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id",
+  "query": "SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price_decimal AS \"price!: Exact\",p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id",
   "describe": {
     "columns": [
       {
@@ -49,12 +49,12 @@
       },
       {
         "ordinal": 4,
-        "name": "price",
-        "type_info": "Float8",
+        "name": "price!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "price"
+            "name": "price_decimal"
           }
         }
       },
@@ -80,9 +80,9 @@
       false,
       false,
       false,
-      false,
+      true,
       false
     ]
   },
-  "hash": "4e8fc5be406a73867a64596db0e3bf7b0a3b8fbfcd56f2465f85eb9613f4fe6d"
+  "hash": "c5501294dfa6962a489dde050bdedc90a753d57c60c8b75576f4968212d9fd04"
 }

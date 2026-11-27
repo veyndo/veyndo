@@ -1,8 +1,10 @@
 //! The autonomous price budget in storage: today's baselines, exposure rows, reservations and the reverting price write. Columns checked at compile time.
 use serde_json::Value;
 use sqlx::{PgConnection, PgExecutor};
+use veyndo_catalog::store::exact::Exact;
 use veyndo_core::Result;
 use veyndo_pricing::catalog::Product;
+use veyndo_pricing::decimal::Decimal;
 
 /// Products the shop's autonomous runs changed today.
 pub async fn used_today(e: impl PgExecutor<'_>, tenant: &str) -> Result<i64> {
@@ -45,13 +47,13 @@ pub struct Exposure {
     pub baseline_minor: i64,
     pub currency: String,
     pub name: String,
-    pub price: f64,
+    pub price: Exact,
     pub stock: i32,
 }
 
 /// Today's changed products of the shop.
 pub async fn exposures(e: impl PgExecutor<'_>, tenant: &str) -> Result<Vec<Exposure>> {
-    Ok(sqlx::query_as!(Exposure, "SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price,p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id",
+    Ok(sqlx::query_as!(Exposure, "SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price_decimal AS \"price!: Exact\",p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id",
         tenant).fetch_all(e).await?)
 }
 
@@ -60,7 +62,7 @@ pub struct Changed {
     pub product_id: String,
     pub baseline_minor: i64,
     pub currency: String,
-    pub price: f64,
+    pub price: Exact,
     pub revision: i64,
     /// The changes of the run's proposal.
     pub changes: Option<Value>,
@@ -72,7 +74,7 @@ pub async fn changed_locked(
     tenant: &str,
     only: Option<&str>,
 ) -> Result<Vec<Changed>> {
-    Ok(sqlx::query_as!(Changed, "SELECT b.product_id,b.baseline_minor,b.currency,p.price,p.revision,k.proposal->'proposal'->'changes' AS changes FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id JOIN tasks k ON k.tenant=b.tenant AND k.id=b.task_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date AND ($2::text IS NULL OR b.product_id=$2) ORDER BY b.product_id FOR UPDATE OF p",
+    Ok(sqlx::query_as!(Changed, "SELECT b.product_id,b.baseline_minor,b.currency,p.price_decimal AS \"price!: Exact\",p.revision,k.proposal->'proposal'->'changes' AS changes FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id JOIN tasks k ON k.tenant=b.tenant AND k.id=b.task_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date AND ($2::text IS NULL OR b.product_id=$2) ORDER BY b.product_id FOR UPDATE OF p",
         tenant, only).fetch_all(e).await?)
 }
 
@@ -81,12 +83,12 @@ pub async fn restore_price(
     tx: &mut PgConnection,
     tenant: &str,
     id: &str,
-    price: f64,
+    price: Decimal,
     revision: i64,
 ) -> Result<Option<Product>> {
     // runtime SQL: the returned row goes to veyndo_catalog::store::products::product, which maps a PgRow.
-    let row = sqlx::query("UPDATE products SET price=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 RETURNING *")
-        .bind(price).bind(tenant).bind(id).bind(revision).fetch_optional(tx).await?;
+    let row = sqlx::query("UPDATE products SET price_decimal=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 RETURNING *")
+        .bind(Exact(price)).bind(tenant).bind(id).bind(revision).fetch_optional(tx).await?;
     Ok(row.as_ref().map(veyndo_catalog::store::products::product))
 }
 

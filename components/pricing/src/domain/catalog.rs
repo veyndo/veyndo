@@ -1,5 +1,7 @@
-//! Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and
-//! tier discounts keep the database's binary64 columns; pricing reads them through the wire conversion.
+//! Shared product snapshot and tier contracts, without database or transport authority. Prices and the tax
+//! rate are exact decimals (the database's `numeric` columns); JSON still carries them as numbers through the
+//! one wire conversion of [`Decimal`]. Tier discounts are fractions inside the stored tier document.
+use crate::decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -21,12 +23,12 @@ pub struct Product {
     pub name: String,
     pub category: String,
     pub description: String,
-    pub price: f64,
-    pub tax_rate: f64,
+    pub price: Decimal,
+    pub tax_rate: Decimal,
     pub stock: i32,
     pub revision: i64,
-    pub list_price: Option<f64>,
-    pub regulation_price: Option<f64>,
+    pub list_price: Option<Decimal>,
+    pub regulation_price: Option<Decimal>,
     pub reference_price: Option<crate::pricing::ReferenceDefinition>,
     pub advanced_prices: Vec<Tier>,
     pub min_purchase: u32,

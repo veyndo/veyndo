@@ -1,5 +1,6 @@
 //! Storefront experience, policies and knowledge documents of a sandbox shop: copying, locked snapshot reads and release writes, inside the caller's transaction.
 use serde_json::Value;
+use veyndo_catalog::store::exact::Exact;
 use veyndo_catalog::store::products::ProductRow;
 use veyndo_core::Result;
 use veyndo_pricing::catalog::Product;
@@ -57,7 +58,7 @@ pub async fn copy_sources(c: &mut sqlx::PgConnection, live: &str, stage: &str) -
 
 /// The sandbox products whose knowledge relations a clone rebuilds: every parent and every product a source describes.
 pub async fn source_products(c: &mut sqlx::PgConnection, stage: &str) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, "SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND (parent_id IS NULL OR id IN (SELECT product_id FROM knowledge_documents WHERE tenant=$1))", stage)
+    Ok(sqlx::query_as!(ProductRow, "SELECT id,name,category,description,price_decimal AS \"price!: Exact\",tax_rate_decimal AS \"tax_rate!: Exact\",stock,revision,list_price_decimal AS \"list_price: Exact\",regulation_price_decimal AS \"regulation_price: Exact\",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND (parent_id IS NULL OR id IN (SELECT product_id FROM knowledge_documents WHERE tenant=$1))", stage)
         .fetch_all(&mut *c)
         .await?
         .into_iter()

@@ -26,7 +26,7 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
                 .find(|t| {
                     t.id == if let Some(id) = class.as_str() {
                         id
-                    } else if p.tax_rate == 7. {
+                    } else if p.tax_rate == Decimal::integer(7) {
                         "reduced"
                     } else {
                         "standard"
@@ -41,12 +41,12 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
                 rate
             };
             // The net-preserving factor `(100 + rate) / (100 + product rate)`, exact. A converted
-            // price is kept at fifteen significant digits: the snapshot's binary64 number then
-            // reads back as exactly that decimal, and the calculation rounds it once.
+            // price is kept at fifteen significant digits, so the snapshot's JSON number names
+            // exactly that decimal, and the calculation rounds it once.
             let one = Ratio::integer(1);
             let hundred = Ratio::integer(100);
             let gross_of = |rate: Decimal| hundred.checked_add(rate.ratio());
-            let product_rate = Decimal::from_wire(p.tax_rate).map_err(bad)?;
+            let product_rate = p.tax_rate;
             let factor = gross_of(rate)
                 .and_then(|g| g.checked_div(gross_of(product_rate)?))
                 .map_err(bad)?;
@@ -74,18 +74,16 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
                     }
                 }
             }
-            let stored = |value: f64| -> Result<f64> {
+            let stored = |value: Decimal| -> Result<Decimal> {
                 if factor == one {
                     return Ok(value);
                 }
-                scaled(Decimal::from_wire(value).map_err(bad)?)?
-                    .to_wire()
-                    .map_err(bad)
+                scaled(value)
             };
             p.price = stored(p.price)?;
             p.list_price = p.list_price.map(stored).transpose()?;
             p.regulation_price = p.regulation_price.map(stored).transpose()?;
-            p.tax_rate = rate.to_wire().map_err(bad)?;
+            p.tax_rate = rate;
             Ok(p)
         })
         .collect()
@@ -97,7 +95,12 @@ mod tests {
     use super::tax_products;
     use serde_json::{Value, json};
     use veyndo_pricing::catalog::Product;
+    use veyndo_pricing::decimal::Decimal;
     use veyndo_shop::types::settings::{CheckoutSelection, Settings};
+
+    fn d(text: &str) -> Decimal {
+        Decimal::parse(text).unwrap()
+    }
 
     fn product(tax_rate: f64, extra: Value) -> Product {
         serde_json::from_value(json!({
@@ -131,17 +134,18 @@ mod tests {
                 .map(|p| (p.price, p.tax_rate))
                 .collect::<Vec<_>>(),
             // 119 × 107 / 119 is exactly 107 (binary64 had 107.00000000000001).
-            [(119., 19.), (119., 7.), (107., 7.)]
+            [(d("119"), d("19")), (d("119"), d("7")), (d("107"), d("7"))]
         );
         let abroad = tax_products(&ps, &selection("AT"), &s).unwrap();
         assert_eq!(
             abroad.iter().map(|p| p.tax_rate).collect::<Vec<_>>(),
-            [20., 10., 10.]
+            [d("20"), d("10"), d("10")]
         );
-        assert_eq!(abroad[0].price, 120.);
-        assert_eq!(abroad[0].list_price, Some(240.));
+        assert_eq!(abroad[0].price, d("120"));
+        assert_eq!(abroad[0].list_price, Some(d("240")));
         assert_eq!(abroad[0].regulation_price, None);
-        assert!((abroad[1].price / 1.10 - 119. / 1.07).abs() < 1e-9);
+        // 119 × 110 / 107 at fifteen significant digits.
+        assert_eq!(abroad[1].price, d("122.336448598131"));
     }
 
     #[test]

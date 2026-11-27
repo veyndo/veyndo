@@ -1,4 +1,5 @@
 //! Storefront catalogue reads: the keyset-paged listing with its specialised queries, and bounded product lookups.
+use crate::store::exact::Exact;
 use crate::store::products::{ProductRow, product};
 use crate::types::catalog_page::CatalogCriteria;
 use veyndo_core::{Result, State};
@@ -122,9 +123,9 @@ pub async fn page(
             .map(product)
             .collect()
     } else if let Some(category) = category {
-        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active AND id>$2 AND category=$3 AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$5 AND NOT v.visible)  AND ($6::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$6 AND (b.product_id=products.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=products.tenant AND child.parent_id=products.id AND child.id=b.product_id)))) ORDER BY id LIMIT $4"#, tenant, after, category, (limit+1) as i64, &criteria.channel_id, criteria.b2b_unit.as_deref()).fetch_all(&a.db).await?.into_iter().map(Product::from).collect()
+        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active AND id>$2 AND category=$3 AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$5 AND NOT v.visible)  AND ($6::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$6 AND (b.product_id=products.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=products.tenant AND child.parent_id=products.id AND child.id=b.product_id)))) ORDER BY id LIMIT $4"#, tenant, after, category, (limit+1) as i64, &criteria.channel_id, criteria.b2b_unit.as_deref()).fetch_all(&a.db).await?.into_iter().map(Product::from).collect()
     } else {
-        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active AND id>$2 AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$4 AND NOT v.visible)  AND ($5::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$5 AND (b.product_id=products.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=products.tenant AND child.parent_id=products.id AND child.id=b.product_id)))) ORDER BY id LIMIT $3"#, tenant, after, (limit+1) as i64, &criteria.channel_id, criteria.b2b_unit.as_deref()).fetch_all(&a.db).await?.into_iter().map(Product::from).collect()
+        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active AND id>$2 AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$4 AND NOT v.visible)  AND ($5::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$5 AND (b.product_id=products.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=products.tenant AND child.parent_id=products.id AND child.id=b.product_id)))) ORDER BY id LIMIT $3"#, tenant, after, (limit+1) as i64, &criteria.channel_id, criteria.b2b_unit.as_deref()).fetch_all(&a.db).await?.into_iter().map(Product::from).collect()
     };
     Ok(rows)
 }
@@ -132,7 +133,7 @@ pub async fn page(
 /// The given products in ID order.
 pub async fn by_ids(a: &State, tenant: &str, ids: &[String]) -> Result<Vec<Product>> {
     Ok(
-        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id"#, tenant, ids)
+        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id"#, tenant, ids)
             .fetch_all(&a.db)
             .await?
             .into_iter()
@@ -143,7 +144,7 @@ pub async fn by_ids(a: &State, tenant: &str, ids: &[String]) -> Result<Vec<Produ
 
 pub async fn find(a: &State, tenant: &str, id: &str) -> Result<Option<Product>> {
     Ok(
-        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, tenant, id)
+        sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, tenant, id)
             .fetch_optional(&a.db)
             .await?
             .map(Product::from),
@@ -163,7 +164,7 @@ pub async fn variants(
         .as_ref()
         .filter(|ids| !ids.iter().any(|id| id == family))
         .map(Vec::as_slice);
-    let rows = sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id=$2 AND active AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$6 AND NOT v.visible) AND id>$3 AND ($5::text[] IS NULL OR id=ANY($5)) AND ($7::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$7 AND (b.product_id=products.id OR b.product_id=products.parent_id))) ORDER BY id LIMIT $4"#, tenant, family, criteria.after.as_deref().unwrap_or(""), (limit + 1) as i64, allowed, &criteria.channel_id, criteria.b2b_unit.as_deref())
+    let rows = sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id=$2 AND active AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$6 AND NOT v.visible) AND id>$3 AND ($5::text[] IS NULL OR id=ANY($5)) AND ($7::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$7 AND (b.product_id=products.id OR b.product_id=products.parent_id))) ORDER BY id LIMIT $4"#, tenant, family, criteria.after.as_deref().unwrap_or(""), (limit + 1) as i64, allowed, &criteria.channel_id, criteria.b2b_unit.as_deref())
     .fetch_all(&a.db)
     .await?;
     let next_cursor = (rows.len() > limit).then(|| rows[limit - 1].id.clone());

@@ -104,6 +104,7 @@
     "browser_journeys",
     "schema_baseline",
     "managed_install",
+    "schema_upgrade",
     "store_isolation"
   ],
   "browser_contracts": [

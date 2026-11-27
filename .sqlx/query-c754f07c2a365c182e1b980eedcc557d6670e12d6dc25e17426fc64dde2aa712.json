@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "RESET search_path",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "c754f07c2a365c182e1b980eedcc557d6670e12d6dc25e17426fc64dde2aa712"
+}

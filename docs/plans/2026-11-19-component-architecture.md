@@ -210,11 +210,15 @@ Done when the server builds on both crates without glob imports from them.
       each amount is rounded once, half away from zero, per currency exponent, so ties
       follow the decimal (130.4835 × 670 → 87423.95); 481 of 40,344 surveyed outputs
       changed by one minor unit, all at decimal ties or on binary-noise inputs
-      (`pricing/tests/decimal_ties.rs`). Open: the column is 2 for
-      `pricing/src/domain` (`decimal.rs` is the wire boundary; `catalog.rs` keeps the
-      product snapshot's `double precision` columns as `f64` fields, read through the
-      boundary). Changing the product columns and settings fields to exact types is a
-      separate schema step.
+      (`pricing/tests/decimal_ties.rs`). Since 27 Nov (j-schema) the product columns are
+      exact: forward migration `catalog/0002-exact-product-prices` adds `numeric`
+      `price_decimal`, `tax_rate_decimal`, `list_price_decimal` and
+      `regulation_price_decimal` (expand/contract, a trigger keeps the binary64 columns of
+      the previous release in step), the store reads them through
+      `catalog/src/store/exact.rs` and the snapshot (`catalog.rs`) holds `Decimal`. Open:
+      `pricing/src/domain` still has `decimal.rs` (the wire boundary) and the tier discount
+      fraction in `catalog.rs`; settings amounts (shipping prices, limits) are still JSON
+      numbers read through `conversion::stored`.
 - [x] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.
       Since 24 Nov stored JSON documents are read through typed views
       (`veyndo_core::document::{view, lenient, lenient_list}`: a misshaped field
@@ -1242,13 +1246,19 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       `formal_differential` (74 rules, 229,207 cases since 26 Nov), with a negative control
       that alters seven rules in the Lean model and must catch each.
 - [ ] No `f64` on the money path. 26 Nov: no floating-point arithmetic is left on
-      the calculation path; `f64` remains only as a wire or storage type: the boundary
-      conversion (`pricing/domain/decimal.rs`), the stored product snapshot fields
-      (`pricing/domain/catalog.rs`, `double precision` columns), the entry points that
-      take a stored or wire number (`service/conversion.rs`: `amount`, `stored`,
-      `ancillary`; a closure over stored fields in `cart_quote.rs` and
-      `price_job_worker.rs`), and display code in orders (`receipt_text.rs` formats
-      stored amounts, `order_fields.rs` shows the FX factor, a rate). Non-money `f64`
+      the calculation path. 27 Nov: the product price, list price, regulation price and
+      tax rate are stored as `numeric` (`catalog/0002-exact-product-prices`), read and
+      bound as `Decimal` (`catalog/src/store/exact.rs`), and the product snapshot, the
+      editor fields, staging, demo template, B2B accepted offers and the AI price
+      guardrails, autonomy and revert carry `Decimal`; no checked query reads or writes
+      the `double precision` price columns. `f64` remains as a wire or storage type: the
+      JSON boundary (`pricing/domain/decimal.rs`, every JSON number in and out is still
+      binary64), the tier discount fraction (`catalog.rs` `Tier.discount`, inside the
+      `advanced_prices` document), settings amounts read through `conversion::stored` and
+      wire amounts through `conversion::amount` (shipping prices and limits, scenario
+      samples), display code in orders (`receipt_text.rs`, `order_fields.rs`), and, until
+      the contract release drops them, the four `double precision` mirror columns that
+      the `exact_prices_sync` trigger keeps for the previous release. Non-money `f64`
       elsewhere: rule comparisons and scores in marketing, intelligence experiments,
       storefront display.
 

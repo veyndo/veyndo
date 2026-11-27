@@ -76,7 +76,7 @@ pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<Decima
         return fixed(s, d);
     }
     convert_from(
-        stored(p.price)?,
+        p.price,
         ProductCurrencies::of(&p.extra)
             .price_currency
             .as_deref()
@@ -88,7 +88,7 @@ pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<Decima
 pub fn ancillary(
     p: &Product,
     field: &str,
-    value: Option<f64>,
+    value: Option<Decimal>,
     cfg: &Config,
     d: &Definition,
 ) -> Result<Option<Decimal>> {
@@ -100,7 +100,7 @@ pub fn ancillary(
     value
         .map(|v| {
             convert_from(
-                stored(v)?,
+                v,
                 ProductCurrencies::of(&p.extra)
                     .price_currency
                     .as_deref()

@@ -269,8 +269,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/mcp/storefront_views.rs](../src/mcp/storefront_views.rs) | Storefront kit parts as an MCP App view: the `ui://` document, the tool links and each tool result's part payload. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |
-| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one |
-| [src/migrations.rs](../src/migrations.rs) | Fresh-installation setup, separate from serving: applies the component schema baselines in their |
+| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema migrations: the cross-cutting foundation, one baseline per component, then the |
+| [src/migrations.rs](../src/migrations.rs) | Schema setup, separate from serving: applies the component baselines and then the forward |
 | [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant address operations live in the customers component. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
@@ -367,7 +367,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
 | [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
-| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time. |
+| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script or one separately committed step, and the demo-seed marker. Static statements are checked at compile time. |
 | [src/store/platform.rs](../src/store/platform.rs) | Operator bootstrap and shop-creation steps of the control plane. The email lock is the server's own; accounts belong to identity and the operator grant and audit to shop. |
 | [src/store/process.rs](../src/store/process.rs) | Process-level statements: the readiness ping, the short lock wait of a background digest and the queue ages of the app worker sample. |
 | [src/store/provision.rs](../src/store/provision.rs) | Release provisioning SQL on the migration-owner connection: role lookups, the grant statements for the runtime group and the connector login, and the privilege coverage that verifies them. Statements are generated server-side with `format('%I')`, so role and table names are always quoted identifiers. |
@@ -813,6 +813,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/ui/admin/b2b/reference.ts](../components/b2b/ui/admin/b2b/reference.ts) | Native organization IDs require a lowercase letter first and at most 32 characters. |
 | [components/b2b/ui/admin/b2b/studio-extension.ts](../components/b2b/ui/admin/b2b/studio-extension.ts) | Studio extension of B2B companies and quotes; the sidebar shows them in their own section when B2B is enabled. |
 | [components/catalog/migrations/0001-baseline.sql](../components/catalog/migrations/0001-baseline.sql) | Baseline schema of the catalog component (Products, categories, media, reviews, translations and catalogue reads): its tables, sequences, functions, |
+| [components/catalog/migrations/0002-exact-product-prices.sql](../components/catalog/migrations/0002-exact-product-prices.sql) | veyndo:no-transaction |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/csv_rows.rs](../components/catalog/src/domain/csv_rows.rs) | Bounded UTF-8 CSV reader: quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
@@ -865,6 +866,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Static assignments and saved current-public-fact queries share category/channel pagination. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. The channels themselves come through the registries port. |
 | [components/catalog/src/store/demo_template.rs](../components/catalog/src/store/demo_template.rs) | Demo template rows: the products and translations of a bundled catalogue template, and the template's category translations. |
+| [components/catalog/src/store/exact.rs](../components/catalog/src/store/exact.rs) | The PostgreSQL `numeric` codec of exact product prices and rates: reads and binds a `numeric` column as the pricing [`Decimal`], without a floating-point intermediary. |
 | [components/catalog/src/store/imported_lines/labels.sql](../components/catalog/src/store/imported_lines/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
 | [components/catalog/src/store/imported_lines.rs](../components/catalog/src/store/imported_lines.rs) | Products of an external order import: their parents, the locked lines, channel visibility and translated labels. |
 | [components/catalog/src/store/imports.rs](../components/catalog/src/store/imports.rs) | Native catalogue state that reviewed migration imports replay against and compare with: categories, product fields, assets and reviews. |
@@ -892,7 +894,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/catalog_page.rs](../components/catalog/src/types/catalog_page.rs) | The filters and cursor of a storefront catalogue read, and one page of products. |
 | [components/catalog/src/types/category.rs](../components/catalog/src/types/category.rs) | A category write: its place in the tree and its data with translations per content language. |
 | [components/catalog/src/types/product_edit.rs](../components/catalog/src/types/product_edit.rs) | The product edit payload: translated texts, multilingual metadata and the optional commerce and identity fields. |
-| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
+| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them, prices and the tax rate as exact decimals; stock is optional so an untouched quantity is never written back. |
 | [components/catalog/src/types/product_list.rs](../components/catalog/src/types/product_list.rs) | The filters, sort and cursor of the merchant product list, and one listed product. |
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
@@ -1752,7 +1754,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/migrations/0001-baseline.sql](../components/pricing/migrations/0001-baseline.sql) | Baseline schema of the pricing component (Money, price calculation, discounts, currencies, taxes and customer groups): its tables, sequences, functions, |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
-| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and |
+| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices and the tax |
 | [components/pricing/src/domain/context.rs](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
 | [components/pricing/src/domain/customer/address.rs](../components/pricing/src/domain/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
 | [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
@@ -3127,6 +3129,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
 | [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |
 | [scripts/schema_contracts.py](../scripts/schema_contracts.py) | HTTP and MCP contract cases generated from the route catalogue and the operation contracts, against the running server. |
+| [scripts/schema_upgrade.py](../scripts/schema_upgrade.py) | /migrations', 'extensions/services/connectors/migrations'] |
 | [scripts/security/authenticated_scope.py](../scripts/security/authenticated_scope.py) | Adversarial SQL uses the actual tenant login, not SET ROLE on a privileged fixture session. |
 | [scripts/security/core_hardening.py](../scripts/security/core_hardening.py) | Real replica regressions for auth admission, poison-event isolation, retention and bounded resource leases. |
 | [scripts/security/tenant_schema.py](../scripts/security/tenant_schema.py) | Database adversarial checks: reject cross-shop links even when API predicates are accidentally omitted. |
@@ -3140,7 +3143,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
 | [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
-| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
+| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | /migrations', |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/store_isolation.py](../scripts/store_isolation.py) | Store tests per component against an isolated PostgreSQL database under forced row security. |

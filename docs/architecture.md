@@ -198,15 +198,16 @@ table forces row security; the runtime login is a non-owner, `NOBYPASSRLS` role
 - **One baseline per component.** `components/core/migrations/0000-foundation.sql` holds the
   extensions, the `veyndo_authority` schema and the shared functions; each component's
   `migrations/0001-baseline.sql` creates only its own tables. `src/migrations/schema.rs` lists
-  the files in one global order: core first, then by `uses`.
-- **Fresh installation only.** The release replaces earlier installations. There is no
-  upgrade path, rolling upgrade or legacy import, and data of a deployed earlier release is
-  not carried over: setup refuses a database that an earlier release created. Demo data
-  lives in `fixtures/demo/`.
+  the files by number, then in the global order: core first, then by `uses`.
+- **Forward migrations upgrade production.** Since the 27 November go-live every schema
+  change is a numbered file (`0002-…`) in the owning component, checksummed in the ledger
+  and written expand/contract so the previous release keeps serving. Databases of the
+  pre-baseline incremental release are still refused. Demo data lives in `fixtures/demo/`.
 
 The `schema_baseline` suite proves that a fresh installation equals the normalized schema
-and starting rows of the last release with incremental migrations
-(`fixtures/schema/reference.sql`). Details: [Rust services](rust-services.md).
+and starting rows of "baselines + all forward migrations" (`fixtures/schema/reference.sql`);
+`schema_upgrade` proves that the previous release's database reaches the same schema with
+its data intact. Details: [Rust services](rust-services.md#forward-migrations).
 
 ## Connector service and apps
 

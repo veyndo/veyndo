@@ -1,7 +1,9 @@
 //! Demo template rows: the products and translations of a bundled catalogue template, and the template's category translations.
+use crate::store::exact::Exact;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};
+use veyndo_pricing::decimal::Decimal;
 
 /// A bundled catalogue template: products, translations and category translations.
 #[derive(Deserialize)]
@@ -19,11 +21,11 @@ struct TemplateProduct {
     name: Option<String>,
     category: Option<String>,
     description: Option<String>,
-    price: Option<f64>,
-    tax_rate: Option<f64>,
+    price: Option<Decimal>,
+    tax_rate: Option<Decimal>,
     stock: i32,
-    list_price: Option<f64>,
-    regulation_price: Option<f64>,
+    list_price: Option<Decimal>,
+    regulation_price: Option<Decimal>,
     #[serde(default)]
     reference_price: Value,
     #[serde(default)]
@@ -72,7 +74,7 @@ pub async fn insert_template(
 ) -> Result<()> {
     let template = parse(template)?;
     for p in &template.products {
-        sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)"#, tenant, p.id.as_deref(), p.name.as_deref(), p.category.as_deref(), p.description.as_deref(), p.price, p.tax_rate, p.stock, p.list_price, p.regulation_price, p.reference_price.is_object().then(|| p.reference_price.clone()), &p.advanced_prices, p.min_purchase, p.purchase_steps, p.max_purchase, p.parent_id.as_deref(), &p.options, &p.media, &p.properties, p.delivery_days, p.extra.clone().unwrap_or(json!({}))).execute(&mut *tx).await?;
+        sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price_decimal,tax_rate_decimal,stock,revision,list_price_decimal,regulation_price_decimal,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)"#, tenant, p.id.as_deref(), p.name.as_deref(), p.category.as_deref(), p.description.as_deref(), p.price.map(Exact) as Option<Exact>, p.tax_rate.map(Exact) as Option<Exact>, p.stock, p.list_price.map(Exact) as Option<Exact>, p.regulation_price.map(Exact) as Option<Exact>, p.reference_price.is_object().then(|| p.reference_price.clone()), &p.advanced_prices, p.min_purchase, p.purchase_steps, p.max_purchase, p.parent_id.as_deref(), &p.options, &p.media, &p.properties, p.delivery_days, p.extra.clone().unwrap_or(json!({}))).execute(&mut *tx).await?;
     }
     for tr in &template.translations {
         sqlx::query!(r#"INSERT INTO product_translations(tenant,product_id,language_id,name,description) VALUES($1,$2,$3,$4,$5)"#, tenant, tr.product_id.as_deref(), tr.language_id.as_deref(), tr.name.as_deref(), tr.description.as_deref()).execute(&mut *tx).await?;
@@ -97,9 +99,9 @@ pub async fn insert_basic(
     a: &veyndo_core::State,
     tenant: &str,
     (id, name, category, description): (&str, &str, &str, &str),
-    (price, tax, stock): (f64, f64, i32),
+    (price, tax, stock): (Decimal, Decimal, i32),
 ) -> Result<()> {
-    sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING"#, tenant, id, name, category, description, price, tax, stock).execute(&a.db).await?;
+    sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price_decimal,tax_rate_decimal,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING"#, tenant, id, name, category, description, Exact(price) as Exact, Exact(tax) as Exact, stock).execute(&a.db).await?;
     Ok(())
 }
 
