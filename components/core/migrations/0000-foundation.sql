@@ -93,9 +93,8 @@ END;
 $fn$;
 -- END signed scope
 
+-- No COMMENT ON EXTENSION: on managed PostgreSQL the provider owns the extension; CREATE EXTENSION sets the comment.
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
-
-COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
 
 CREATE FUNCTION public.capture_entity_history() RETURNS trigger
     LANGUAGE plpgsql
