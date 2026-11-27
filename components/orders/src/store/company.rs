@@ -57,7 +57,11 @@ pub async fn records(
             json!({"data":data,"revision":revision,"baseRevision":rev,"inherited":base,"effective":company_model::resolve(&base,&data),"channelId":channel}),
         )
     } else {
-        Ok(json!({"data":base,"revision":rev}))
+        let live = veyndo_core::store::environments::live_parent(tx, t)
+            .await?
+            .unwrap_or_else(|| t.to_owned());
+        let default = company_model::default_order_prefix(&live);
+        Ok(json!({"data":base,"revision":rev,"defaultOrderNumberPrefix":default}))
     }
 }
 /// The basis, or one channel's override with what it inherits, read under the company lock.
@@ -144,6 +148,15 @@ pub async fn save(
     tx.commit().await?;
     Ok(value)
 }
+/// The order number prefix of the shop: configured on the live shop's company basis, else derived from its ID.
+pub async fn order_prefix(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<String> {
+    let live = veyndo_core::store::environments::live_parent(tx, t)
+        .await?
+        .unwrap_or_else(|| t.to_owned());
+    let basis: CompanyRecord = view(&records(tx, t, None).await?);
+    Ok(company_model::order_prefix(&basis.data, &live))
+}
+
 pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) -> Result<Value> {
     lock(tx, t).await?;
     let basis: CompanyRecord = view(&records(tx, t, None).await?);

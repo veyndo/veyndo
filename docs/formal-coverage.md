@@ -16,8 +16,8 @@ Money runs on whole minor units (`Minor`, `Money`) and exact decimals and ration
 | inventory | 6 | 1 | 5 |
 | checkout | 23 | 3 | 20 |
 | payments | 37 | 3 | 34 |
-| orders | 35 | 4 | 31 |
-| **all** | **206** | **20** | **186** |
+| orders | 39 | 4 | 35 |
+| **all** | **210** | **20** | **190** |
 
 ## Functions that bind proved rules
 
@@ -60,13 +60,13 @@ Money representation and exact arithmetic outside the bool/u64 subset: minor-uni
 - `components/pricing/src/domain/pricing.rs`: `Rounding::new`, `Rounding::plain`, `calculate`, `merged_rules`, `percent`, `proportional_tax_rules`
 - `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`, `QuoteTax::at_scale`, `QuoteTotals::of_lines`
 
-### document-shape (22)
+### document-shape (23)
 
 Reads, writes or projects JSON/serde documents; data mapping, not a decision rule.
 
 - `components/checkout/src/domain/admin_order.rs`: `order`
 - `components/checkout/src/domain/quote_view.rs`: `QuoteView::first_line`, `QuoteView::method`, `digital`, `flags`, `quote_view`
-- `components/orders/src/domain/company_model.rs`: `public`, `resolve`
+- `components/orders/src/domain/company_model.rs`: `order_prefix`, `public`, `resolve`
 - `components/orders/src/domain/import_product.rs`: `projection`
 - `components/orders/src/domain/import_relations.rs`: `identity`, `product`
 - `components/orders/src/domain/order_fields.rs`: `order_fields`
@@ -79,11 +79,11 @@ Reads, writes or projects JSON/serde documents; data mapping, not a decision rul
 - `components/pricing/src/domain/catalog.rs`: `public_extra`
 - `components/pricing/src/domain/quote.rs`: `QuoteTax::from`
 
-### text-and-locale (6)
+### text-and-locale (8)
 
 Text, labels, locale or formatting; no commerce invariant to prove.
 
-- `components/orders/src/domain/company_model.rs`: `address`
+- `components/orders/src/domain/company_model.rs`: `address`, `default_order_prefix`, `order_number`
 - `components/orders/src/domain/import_product.rs`: `text`
 - `components/orders/src/domain/order_machine.rs`: `labels`
 - `components/payments/src/domain/diagnostics.rs`: `code`, `response`
@@ -98,13 +98,13 @@ Renders documents (receipt text or PDF); output layout, not a decision rule.
 - `components/orders/src/domain/receipt_pdf.rs`: `render`, `winansi`
 - `components/orders/src/domain/receipt_text.rs`: `lines`, `pos_message`, `positions`, `seller_details`, `text`, `totals`
 
-### validation-of-strings (18)
+### validation-of-strings (19)
 
 Validates identifiers, URLs, names or other strings and collections; outside the bool/u64 subset, covered by unit and HTTP tests.
 
 - `components/checkout/src/domain/session_review.rs`: `key`
 - `components/inventory/src/domain/supply.rs`: `Config::validate`
-- `components/orders/src/domain/company_model.rs`: `validate`
+- `components/orders/src/domain/company_model.rs`: `valid_order_prefix`, `validate`
 - `components/payments/src/domain/amounts.rs`: `wire_currency`
 - `components/payments/src/domain/details_model.rs`: `Amount::validate`, `Details::validate`, `date`, `status`
 - `components/payments/src/domain/instructions.rs`: `Instructions::validate`, `validated`

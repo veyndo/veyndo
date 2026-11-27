@@ -1,6 +1,24 @@
 /** Company identity, field inheritance and legal storefront vocabulary in four interface languages. */
 import { useLocale } from "./i18n";
 const words = {
+  orderNumbers: [
+    "Order numbers",
+    "Bestellnummern",
+    "Numéros de commande",
+    "Números de pedido",
+  ],
+  orderNumberPrefix: [
+    "Order number prefix",
+    "Präfix der Bestellnummer",
+    "Préfixe du numéro de commande",
+    "Prefijo del número de pedido",
+  ],
+  orderNumberHint: [
+    "Up to 6 capital letters or digits, shared by all sales channels. Leave empty to use {prefix}. New orders are numbered like {example}; existing orders keep their number.",
+    "Bis zu 6 Großbuchstaben oder Ziffern, gilt für alle Verkaufskanäle. Leer lassen für {prefix}. Neue Bestellungen heißen dann z. B. {example}; bestehende behalten ihre Nummer.",
+    "Jusqu’à 6 majuscules ou chiffres, commun à tous les canaux. Laissez vide pour utiliser {prefix}. Les nouvelles commandes seront numérotées comme {example} ; les commandes existantes gardent leur numéro.",
+    "Hasta 6 mayúsculas o cifras, común a todos los canales. Déjalo vacío para usar {prefix}. Los pedidos nuevos se numeran como {example}; los existentes conservan su número.",
+  ],
   company: [
     "Company & legal identity",
     "Unternehmen & Rechtliches",

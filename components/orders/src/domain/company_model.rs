@@ -45,7 +45,10 @@ pub const FIELDS: &[&str] = &[
     "brandName",
     "legalNotice",
     "responsibilityScope",
+    ORDER_PREFIX,
 ];
+/// Shop-wide order number prefix; empty or missing means the prefix derived from the shop ID.
+pub const ORDER_PREFIX: &str = "orderNumberPrefix";
 pub const LOCALIZED: &[&str] = &["brandName", "legalNotice", "responsibilityScope"];
 /// The single-line company address derived from its parts.
 #[derive(Serialize)]
@@ -144,6 +147,51 @@ struct CompanyFacts {
     professional_rules_url: Option<String>,
 }
 
+/// The order number prefix field of a company record, typed as `order_prefix` reads it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderPrefix {
+    #[serde(deserialize_with = "lenient")]
+    order_number_prefix: Option<String>,
+}
+
+/// A configured prefix: one to six capital letters or digits.
+pub fn valid_order_prefix(prefix: &str) -> bool {
+    (1..=6).contains(&prefix.len())
+        && prefix
+            .bytes()
+            .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit())
+}
+
+/// The prefix derived from a shop ID: its letters and digits, upper-cased, at most six.
+pub fn default_order_prefix(shop: &str) -> String {
+    let prefix: String = shop
+        .chars()
+        .filter(char::is_ascii_alphanumeric)
+        .take(6)
+        .collect::<String>()
+        .to_ascii_uppercase();
+    if prefix.is_empty() {
+        "ORDER".into()
+    } else {
+        prefix
+    }
+}
+
+/// The order number prefix of a company record: the configured one, else the derived one.
+pub fn order_prefix(data: &Value, shop: &str) -> String {
+    view::<OrderPrefix>(data)
+        .order_number_prefix
+        .as_deref()
+        .filter(|p| valid_order_prefix(p))
+        .map_or_else(|| default_order_prefix(shop), str::to_owned)
+}
+
+/// An order number: the prefix, a dash and the first eight characters of the order ID.
+pub fn order_number(prefix: &str, id: &str) -> String {
+    format!("{prefix}-{}", id.get(..8).unwrap_or(id))
+}
+
 pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> {
     let object = data.as_object().ok_or(bad("Master data object required"))?;
     for (key, v) in object {
@@ -151,6 +199,18 @@ pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> 
             return Err(bad("Unknown company field"));
         }
         if v.is_null() && partial {
+            continue;
+        }
+        if key == ORDER_PREFIX {
+            // Numbering is shop-wide: a sales channel cannot override the prefix.
+            if partial {
+                return Err(bad("Order number prefix belongs to the shop basis"));
+            }
+            if v.as_str()
+                .is_none_or(|p| !p.is_empty() && !valid_order_prefix(p))
+            {
+                return Err(bad("Order number prefix: 1 to 6 capital letters or digits"));
+            }
             continue;
         }
         if LOCALIZED.contains(&key.as_str()) {
@@ -463,5 +523,41 @@ mod tests {
         );
         assert_eq!(branded["brandName"], "Default brand");
         assert!(branded.get("logoUrl").is_none());
+    }
+
+    /// Order numbers use the configured shop prefix, else one derived from the shop ID; channels cannot override it.
+    #[test]
+    fn order_number_prefix_is_shop_wide_and_bounded() {
+        use super::{default_order_prefix, order_number, order_prefix};
+        assert_eq!(default_order_prefix("ux-accept"), "UXACCE");
+        assert_eq!(default_order_prefix("nord-atelier"), "NORDAT");
+        assert_eq!(default_order_prefix("a1"), "A1");
+        assert_eq!(default_order_prefix("---"), "ORDER");
+        assert_eq!(order_prefix(&json!({}), "dev-shop"), "DEVSHO");
+        assert_eq!(
+            order_prefix(&json!({"orderNumberPrefix":""}), "dev-shop"),
+            "DEVSHO"
+        );
+        assert_eq!(
+            order_prefix(&json!({"orderNumberPrefix":"NA"}), "dev-shop"),
+            "NA"
+        );
+        assert_eq!(
+            order_number("NA", "74ab58ea0000000000000000000000ff"),
+            "NA-74ab58ea"
+        );
+        let s = settings();
+        for ok in ["", "NA", "SHOP26"] {
+            let mut data = company();
+            data["orderNumberPrefix"] = json!(ok);
+            assert!(validate(&data, &s, false).is_ok(), "{ok}");
+        }
+        for bad in ["toolong", "na", "N-A", "SEVENXX", "Ä"] {
+            let mut data = company();
+            data["orderNumberPrefix"] = json!(bad);
+            assert!(validate(&data, &s, false).is_err(), "{bad}");
+        }
+        assert!(validate(&json!({"orderNumberPrefix":"CH"}), &s, true).is_err());
+        assert!(validate(&json!({"orderNumberPrefix":null}), &s, true).is_ok());
     }
 }

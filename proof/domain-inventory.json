@@ -138,6 +138,18 @@
       "status": "unproved",
       "reason": "text-and-locale"
     },
+    "components/orders/src/domain/company_model.rs::default_order_prefix": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/company_model.rs::order_number": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/company_model.rs::order_prefix": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
     "components/orders/src/domain/company_model.rs::public": {
       "status": "unproved",
       "reason": "document-shape"
@@ -145,6 +157,10 @@
     "components/orders/src/domain/company_model.rs::resolve": {
       "status": "unproved",
       "reason": "document-shape"
+    },
+    "components/orders/src/domain/company_model.rs::valid_order_prefix": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
     },
     "components/orders/src/domain/company_model.rs::validate": {
       "status": "unproved",

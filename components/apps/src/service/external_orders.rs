@@ -260,7 +260,9 @@ pub async fn import_external(
     let customer =
         veyndo_checkout::store::customer_snapshot::snapshot(&mut tx, &c, &selection).await?;
     let id = uid();
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":currency_context});
+    let prefix = veyndo_orders::store::company::order_prefix(&mut tx, &t).await?;
+    let number = veyndo_orders::domain::company_model::order_number(&prefix, &id);
+    let mut order = json!({"id":id,"orderNumber":number,"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":currency_context});
     order
         .as_object_mut()
         .unwrap()

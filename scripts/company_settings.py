@@ -61,12 +61,22 @@ ch={**public,'sw-sales-channel-id':'north'};cart=call('/store-api/checkout/cart'
 order=call('/store-api/checkout/order',{}, {**ch,'Idempotency-Key':'company-order-'+tag});assert order['salesChannelId']=='north'
 receipt=call('/api/merchant/orders/'+order['id']+'/receipts',{'revision':order['revision'],'kind':'invoice','locale':'en','requestKey':'company-invoice-'+tag},h)
 pdf=call(receipt['pdfPath'],h=h,binary=True);assert b'Synthetic North GmbH' in pdf and b'NORTH-456' in pdf and b'Example Road 12A' in pdf
+assert saved['defaultOrderNumberPrefix']=='COMPAN' and order['orderNumber']=='COMPAN-'+order['id'][:8] and order['orderNumber'].encode() in pdf
 north=call(path,h=h);north['data']['name']='Changed Seller';call(path,north,h,'PUT')
 assert call(receipt['pdfPath'],h=h,binary=True)==pdf
 cancel=call('/api/merchant/orders/'+order['id']+'/receipts',{'revision':order['revision'],'kind':'cancellation','locale':'en','requestKey':'company-cancel-'+tag,'referenceId':receipt['id']},h)
 assert b'Synthetic North GmbH' in call(cancel['pdfPath'],h=h,binary=True)
 result=call('/mcp',{'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':'merchant.company','arguments':{'channelId':'north'}}},h)['result'];assert not result.get('isError')
 print('PASS actual channel checkout, correct legal issuer PDF, immutable invoice/cancellation and MCP company access')
+# The order number prefix is one shop-wide setting on the company basis; issued numbers never change.
+record=call('/api/settings/master-data',h=h)
+for bad in ['syn','TOOLONG','S-1']:call('/api/settings/master-data',{**record,'data':{**record['data'],'orderNumberPrefix':bad}},h,'PUT',400)
+north=call(path,h=h);call(path,{**north,'data':{**north['data'],'orderNumberPrefix':'NO'}},h,'PUT',400)
+record=call('/api/settings/master-data',{**record,'data':{**record['data'],'orderNumberPrefix':'SYN26'}},h,'PUT');assert record['data']['orderNumberPrefix']=='SYN26'
+cart=call('/store-api/checkout/cart',{'session':'company-prefix-'+tag},public);ph={**public,'sw-context-token':cart['token']};call('/store-api/checkout/cart/line-item',{'items':[{'referencedId':'mug','quantity':1}]},ph)
+second=call('/store-api/checkout/order',{},{**ph,'Idempotency-Key':'company-prefix-order-'+tag});assert second['orderNumber']=='SYN26-'+second['id'][:8],second['orderNumber']
+assert call('/api/merchant/orders/'+order['id'],h=h)['orderNumber']==order['orderNumber']
+print('PASS shop-wide order number prefix: derived default, validated setting, no channel override, issued numbers unchanged')
 # Two concurrent writers cannot overwrite one another.
 record=call('/api/settings/master-data',h=h)
 def race(i):

@@ -29,6 +29,7 @@ import {
 import CompanyField from "./CompanyField";
 import CompanyLogo from "./CompanyLogo";
 import CompanyTranslations from "./CompanyTranslations";
+import OrderNumberSettings from "./OrderNumberSettings";
 import SettingsSaveBar from "./SettingsSaveBar";
 import "./company-settings.css";
 const groups: {
@@ -88,7 +89,10 @@ export default function MasterDataSettings({
   const [uploading, setUploading] = useState(false);
   const [scope, setScope] = useState(initialChannel),
     [pending, setPending] = useState<string>();
-  const state = useSettingsDraft<CompanyData, CompanyContext>(
+  const state = useSettingsDraft<
+    CompanyData,
+    CompanyContext & { defaultOrderNumberPrefix?: string }
+  >(
     request,
     scope
       ? `/api/settings/master-data/channels/${scope}`
@@ -245,6 +249,15 @@ export default function MasterDataSettings({
                 </div>
               </fieldset>
             </details>
+            {!scope && (
+              <fieldset className="settings-group" disabled={!canWrite || busy}>
+                <OrderNumberSettings
+                  data={data}
+                  derived={value?.defaultOrderNumberPrefix ?? ""}
+                  onChange={state.change}
+                />
+              </fieldset>
+            )}
             <fieldset className="settings-group" disabled={!canWrite || busy}>
               <legend>{co("publicText")}</legend>
               <ContentLanguagePicker />

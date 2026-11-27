@@ -1192,8 +1192,8 @@
     },
     "components/apps/src/service/external_orders.rs": {
       "status": "reviewed-binding",
-      "sha256": "25128eee856ac5016f6cf4ed0d2224412d842c529c399044f7d779081ab88c49",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5eb02ec6ea2a02e9654db3ce7c6de7f3dc4ccdd64e6b656a81b7f20572ab3e0f",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "components/apps/src/service/flow_apps.rs": {
       "status": "reviewed-binding",
@@ -2207,8 +2207,8 @@
     },
     "components/checkout/src/service/purchase/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "e5a400fb02acb76221717f512966c1adde54aaea0f4e635c17e5fc588c72fddb",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "7f39df6307cd06ce5ee81d2ef75c6191715991acdedaacc78fcf7fe459233531",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "components/checkout/src/service/purchase/lock.rs": {
       "status": "reviewed-binding",
@@ -4022,8 +4022,8 @@
     },
     "components/orders/src/domain/company_model.rs": {
       "status": "unproved",
-      "sha256": "eff9adf828b1373266ef74ea18495b08a4b225c98b32c4c9a7a93489fe36826f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "417ca55c196d6487ea2c20f74a8e7b74e050e488e2e31a508aec4c1923f20dde",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "components/orders/src/domain/creation_schema.rs": {
       "status": "unproved",
@@ -4157,8 +4157,8 @@
     },
     "components/orders/src/store/company.rs": {
       "status": "unproved",
-      "sha256": "f0acdff048fc81178d103e0f049e255b21da6a74865e4f1a4bebb8119df9034e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "a4797c556f81ea6da849a1670e675ace8d5574a9412126e9469c44e27ae65174",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "components/orders/src/store/company_logos.rs": {
       "status": "unproved",
@@ -6027,8 +6027,8 @@
     },
     "extensions/apps/gmail/src/provider.rs": {
       "status": "unproved",
-      "sha256": "d86a87cb3c74a648e0c2961e4026b044cc6c5b8340fcd473d1b7ff02656096d8",
-      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+      "sha256": "319e060a544c42fca08c2510b5fda4be8be4df67ac23d44fe0da21b91080a72a",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "extensions/apps/google-analytics/src/actions.rs": {
       "status": "unproved",
@@ -9720,8 +9720,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/domain-inventory.json": {
-      "sha256": "3fa16fc862ce7c911ee72225ee83b8f3bde47ffc339fd6ba913ff2f7d90ad6ca",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "b74dc8d38addc203ea78054fdc270704175979149464796eae2ac7926d4a9938",
+      "review": "Order numbers take the shop's configured prefix (company basis orderNumberPrefix) instead of the fixed RAC- literal; numbering rule (prefix, dash, first eight ID characters) unchanged"
     },
     "proof/lakefile.toml": {
       "sha256": "1cda05bac02223024b93388cf858edad4719c46f8d37a826a73a6a6e15d79432",
