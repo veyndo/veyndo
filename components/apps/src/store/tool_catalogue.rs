@@ -86,3 +86,28 @@ pub async fn app_tools_for(a: &State, h: &RequestContext, public_only: bool) -> 
     }
     Ok(tools)
 }
+
+/// The planner facts of one app tool (`app.<app>.<action>`) of an active package in the caller's
+/// shop, and whether the publisher declared them; `None` when no such tool is installed. The
+/// planner reads this; it is not an admission check, which stays with the gateway.
+pub async fn tool_facts(
+    a: &State,
+    h: &RequestContext,
+    name: &str,
+) -> Result<Option<(crate::domain::app_facts::AppFacts, bool)>> {
+    let Some((app, action)) = name.strip_prefix("app.").and_then(|n| n.split_once('.')) else {
+        return Ok(None);
+    };
+    let t = tenant(h)?;
+    let contract = package_contracts::of_app(&a.db, &t, app).await?;
+    Ok(active_manifests(a, h)
+        .await?
+        .iter()
+        .find(|m| m.id == app)
+        .and_then(|m| {
+            m.actions
+                .iter()
+                .find(|x| x.name == action)
+                .map(|x| facts(m, x, contract.as_ref()))
+        }))
+}

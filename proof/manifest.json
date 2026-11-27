@@ -1562,8 +1562,8 @@
     },
     "components/apps/src/store/tool_catalogue.rs": {
       "status": "reviewed-binding",
-      "sha256": "9cd6c4043653e566b48b13bf48044c253aee97078486e56b24b9358a41795840",
-      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
+      "sha256": "4081b1667783727513f65d28d8c03a360174780f47f2632f27980e7ba5ed790e",
+      "review": "Batch L: planner lookup for app tool facts (read-only adapter)"
     },
     "components/apps/src/store/webhook_receipts.rs": {
       "status": "unproved",
