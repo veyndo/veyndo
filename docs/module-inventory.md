@@ -3092,7 +3092,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/edi.py](../scripts/edi.py) | Registered EDI entry delegates app behavior and fixtures to the plugin owner. |
 | [scripts/email_tests.py](../scripts/email_tests.py) | Registered mail suite: archived differential contracts and the real Rust order/mail journey. |
 | [scripts/erp_handoff.py](../scripts/erp_handoff.py) | Registered integration entry delegates reference-app behavior to its package-owned verification. |
-| [scripts/event_contracts.py](../scripts/event_contracts.py) | .rs')): |
+| [scripts/event_contracts.py](../scripts/event_contracts.py) | Versioned outbox event contracts: generation, the compatibility gate and its negative controls. |
 | [scripts/extensions.py](../scripts/extensions.py) | Activate actual Wasm policies and prove their effect on B2B checkout. |
 | [scripts/fashion_demo.py](../scripts/fashion_demo.py) | Actual default signup, fashion variants/media/localization, isolated checkout and restart; synthetic data only. |
 | [scripts/formal/axioms.py](../scripts/formal/axioms.py) | Audit owned proof sources and transitive Lean dependencies; no extra axioms are allowed. |
@@ -3156,7 +3156,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
 | [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |
 | [scripts/schema_contracts.py](../scripts/schema_contracts.py) | HTTP and MCP contract cases generated from the route catalogue and the operation contracts, against the running server. |
-| [scripts/schema_upgrade.py](../scripts/schema_upgrade.py) | /migrations', 'extensions/services/connectors/migrations'] |
+| [scripts/schema_upgrade.py](../scripts/schema_upgrade.py) | Upgrade from the previous release: its database must survive the forward migrations intact, and both |
 | [scripts/sdk_smoke.py](../scripts/sdk_smoke.py) | Run the generated TypeScript, Python and Rust SDK smoke tests against the suite's running server. |
 | [scripts/sdks/contracts.py](../scripts/sdks/contracts.py) | Generate the per-component and combined OpenAPI 3.1 contracts from the Rust router declarations, the compiled operation registry and the shared failure type. |
 | [scripts/sdks/generate.py](../scripts/sdks/generate.py) | Generate the component contracts and the TypeScript, Python and Rust SDKs from them; `--check` fails on any drift. |
@@ -3177,7 +3177,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
 | [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
-| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | /migrations', |
+| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/store_isolation.py](../scripts/store_isolation.py) | Store tests per component against an isolated PostgreSQL database under forced row security. |

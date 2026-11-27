@@ -182,10 +182,13 @@ def merchant_view(server, h, products, order_id):
     return view
 
 
-def schema_only(container, user, database):
+def schema_only(container, user, database, release_roles):
     dump = subprocess.run(['docker', 'exec', container, 'pg_dump', '-U', user, '-d', database, '--no-owner', '--schema-only'],
                           capture_output=True, text=True, check=True).stdout
-    return ';\n\n'.join(normalize_schema(dump)) + ';'
+    # Setup grants the current tables to this run's own runtime group and connector login (as in
+    # schema_baseline); the fresh-install reference leaves those provisioning grants out, so this does too.
+    kept, _ = normalize_schema(dump, release_roles)
+    return ';\n\n'.join(kept) + ';'
 
 
 def main():
@@ -200,8 +203,10 @@ def main():
     print(f'Previous release: {commit[:12]} ({git("show", "-s", "--format=%s", commit)})', flush=True)
     old_binary, new_binary = build(commit), Path(args.binary)
     name = 'schema_upgrade_' + uuid.uuid4().hex
-    psql(container, user, 'postgres', f'CREATE DATABASE "{name}";')
+    roles = ('su_runtime_' + name[-12:], 'su_connector_' + name[-12:])
+    psql(container, user, 'postgres', f'CREATE DATABASE "{name}"; CREATE ROLE {roles[0]} NOLOGIN; CREATE ROLE {roles[1]} NOLOGIN;')
     database = {**env, 'DATABASE_URL': urllib.parse.urlunsplit(url._replace(path='/' + name)), 'SEED_DEMO': 'false',
+                'DB_RUNTIME_ROLE': roles[0], 'DB_CONNECTOR_LOGIN': roles[1],
                 'MERCHANT_TOKEN': env.get('MERCHANT_TOKEN', 'schema-upgrade-synthetic-bootstrap-credential')}
     for key in ('DATABASE_RUNTIME_URL', 'DATABASE_TENANT_URL', 'DATABASE_LISTENER_URL'):
         database.pop(key, None)
@@ -248,7 +253,7 @@ def main():
                          f"WHERE tenant='{tenant}' AND id='{id}';") for id in (lamp, mug)}
         assert rows == {lamp: '49.9|19|59.9', mug: '0.3|19|'}, rows
         reference = REFERENCE.read_text().split('\n\n-- rows\n', 1)[0].removeprefix('-- schema\n').strip()
-        upgraded = schema_only(container, user, name)
+        upgraded = schema_only(container, user, name, roles)
         if upgraded != reference:
             import difflib
             diff = ''.join(difflib.unified_diff(reference.splitlines(True), upgraded.splitlines(True), 'fresh install', 'upgraded', n=2))
@@ -301,7 +306,8 @@ def main():
     finally:
         old.stop()
         new.stop()
-        psql(container, user, 'postgres', f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE);')
+        psql(container, user, 'postgres', f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE); '
+             f'DROP ROLE IF EXISTS {roles[0]}; DROP ROLE IF EXISTS {roles[1]};')
     print(f'PASS schema upgrade from {commit[:12]}: {len(checks)} checks')
 
 

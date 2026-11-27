@@ -12,12 +12,12 @@ Money runs on whole minor units (`Minor`, `Money`) and exact decimals and ration
 | Component | Functions | Binds a proved rule | Unproved |
 | --- | ---: | ---: | ---: |
 | core | 0 | 0 | 0 |
-| pricing | 105 | 9 | 96 |
+| pricing | 106 | 9 | 97 |
 | inventory | 6 | 1 | 5 |
 | checkout | 24 | 3 | 21 |
 | payments | 37 | 3 | 34 |
 | orders | 39 | 4 | 35 |
-| **all** | **211** | **20** | **191** |
+| **all** | **212** | **20** | **192** |
 
 ## Functions that bind proved rules
 
@@ -46,7 +46,7 @@ Money runs on whole minor units (`Minor`, `Money`) and exact decimals and ration
 
 ## Unproved functions by reason
 
-### money-representation (58)
+### money-representation (59)
 
 Money representation and exact arithmetic outside the bool/u64 subset: minor-unit types, decimal parsing and text, exact rationals in i128, the exact calculator's rule mix, the wire conversion of JSON numbers. Rounding, products and sums inside it are the proved rules; the rest is unit and property tested.
 
@@ -55,7 +55,7 @@ Money representation and exact arithmetic outside the bool/u64 subset: minor-uni
 - `components/payments/src/domain/amounts.rs`: `format_amount`, `parse_amount`
 - `components/payments/src/domain/refunds.rs`: `used`
 - `components/payments/src/domain/settlements.rs`: `captured`
-- `components/pricing/src/domain/decimal.rs`: `Decimal::checked_add`, `Decimal::cmp`, `Decimal::deserialize`, `Decimal::eq`, `Decimal::from_wire`, `Decimal::normalized`, `Decimal::parse`, `Decimal::partial_cmp`, `Decimal::serialize`, `Decimal::text`, `Decimal::to_wire`, `Ratio::abs`, `Ratio::checked_add`, `Ratio::checked_div`, `Ratio::checked_mul`, `Ratio::checked_sub`, `Ratio::cmp`, `Ratio::deserialize`, `Ratio::negated`, `Ratio::new`, `Ratio::partial_cmp`, `Ratio::reduced`, `Ratio::rounded`, `Ratio::significant`, `Ratio::significant_away`, `Ratio::significant_with`, `gcd`, `power`, `wide`
+- `components/pricing/src/domain/decimal.rs`: `Decimal::checked_add`, `Decimal::cmp`, `Decimal::deserialize`, `Decimal::eq`, `Decimal::fmt`, `Decimal::from_wire`, `Decimal::normalized`, `Decimal::parse`, `Decimal::partial_cmp`, `Decimal::serialize`, `Decimal::text`, `Decimal::to_wire`, `Ratio::abs`, `Ratio::checked_add`, `Ratio::checked_div`, `Ratio::checked_mul`, `Ratio::checked_sub`, `Ratio::cmp`, `Ratio::deserialize`, `Ratio::negated`, `Ratio::new`, `Ratio::partial_cmp`, `Ratio::reduced`, `Ratio::rounded`, `Ratio::significant`, `Ratio::significant_away`, `Ratio::significant_with`, `gcd`, `power`, `wide`
 - `components/pricing/src/domain/money.rs`: `Currency::factor`, `Minor::decimal`, `Minor::from_decimal`, `Minor::from_unsigned`, `Minor::ratio`, `Minor::serialize`, `Minor::significant`, `Minor::unsigned`, `Money::checked_add`, `Money::decimal`, `Money::from_decimal`, `Money::new`, `Money::parse`, `Money::rounded`
 - `components/pricing/src/domain/pricing.rs`: `Rounding::new`, `Rounding::plain`, `calculate`, `merged_rules`, `percent`, `proportional_tax_rules`
 - `components/pricing/src/domain/quote.rs`: `LinePriceUpdate::new`, `QuoteTax::at_scale`, `QuoteTotals::of_lines`

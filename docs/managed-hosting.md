@@ -16,6 +16,33 @@ Frankfurt: one Managed PostgreSQL addon, one Rust Core replica and one private Q
 
 Recorded test-topology estimate (October 2026; not a live pricing quotation): Core $12, PostgreSQL $12, Qdrant $12, PostgreSQL 6 GB $0.90, Qdrant 6 GB $0.90 = $37.80 (the recorded estimate also carried a since-retired 20 GB volume at $3). Example 10 GB egress adds $0.60. Jobs/builds, backup storage, AI APIs and taxes are additional. This single-instance test topology has no HA guarantee. Qdrant's attached single-writer volume requires recreate deployment and cannot be scaled by simply increasing replicas.
 
+## Staging environment
+
+Staging is the separate Northflank project `veyndo-staging` (Frankfurt), created by the
+team template `veyndo-staging`. The template source is
+[`deploy/northflank/staging.template.json`](../deploy/northflank/staging.template.json);
+paste it into the template's code editor and run it. It creates its own PostgreSQL 17
+addon, a private Qdrant with a 6 GB volume, `staging-core` (built from `main` with
+`deploy/Dockerfile`) and three manual jobs:
+
+| Job | Runs |
+| --- | --- |
+| `staging-roles` | Database-manager step on `postgres:17` with the addon admin login: creates `veyndo_runtime`, `veyndo_runtime_login`, `veyndo_tenant_login` (NOINHERIT) and `veyndo_connectors` with their passwords, gives the migration owner `CREATE, CONNECT, TEMPORARY` on the database and `ADMIN OPTION` on `veyndo_runtime`. Idempotent. |
+| `staging-migrate` | `BOOTSTRAP_MODE=migrate` on the owner connection. |
+| `staging-setup` | `veyndo --provision` with the system and tenant logins; set `PLATFORM_ADMIN_EMAIL`/`PLATFORM_ADMIN_PASSWORD` for this job only for the first operator, then remove the password. |
+
+Run them in that order after the first build. Secrets never appear in the template:
+`argumentOverrides` generate the login passwords, `PLATFORM_SECRET_KEY` and
+`FACT_SIGNING_SEED` with `fn.randomSecret`, and the group `staging-shared` carries them.
+The owner URI and admin login are linked only into the restricted group `staging-owner`
+(the three jobs), never into Core. Core composes its connection URLs from these values
+with Northflank runtime `${VAR}` references; the template writes those references through
+`fn.replaceAll` and `fn.fromBase64` so the template engine does not evaluate them.
+
+Managed PostgreSQL refuses `ALTER ROLE … NOSUPERUSER`, so the role step sets only the
+attributes it may change. Each template run starts a new Core build of the same commit;
+abort the duplicates.
+
 ## Restricted hosted runtime
 
 On **15 October 2026**, hosted Core `5e4c18b` was switched to the separate
