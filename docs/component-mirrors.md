@@ -116,8 +116,10 @@ is the `veyndo/apps` app-storage repository; the mirror `apps` is the app platfo
    recorded commit is the source of every mirror. It assigns the new versions, prepends a
    section to each changed component's changelog, writes `components.release.json`,
    regenerates every mirror (with `CHANGELOG.md` and its version in `MIRROR.json`) and
-   regenerates the contracts and SDKs with the new versions. Commit
-   `components.release.json`, `contracts/` and `sdks/`.
+   regenerates the contracts and SDKs with the new versions (the SDK crate's version
+   also lands in `Cargo.lock`, which the mirrors copy, so this happens before the
+   mirrors are generated). Commit `components.release.json`, `contracts/`, `sdks/` and
+   `Cargo.lock` as the release commit that follows the recorded one.
 4. **Plan the publish**: `python3 scripts/component_mirrors.py --publish --dry-run`
    prints, per component, the repository, branch, tag and file count it would push, and
    the npm, PyPI and crates.io packages of the SDKs, and writes the plan to

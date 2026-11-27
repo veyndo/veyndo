@@ -29,7 +29,12 @@ import contracts  # noqa: E402
 INITIAL = '1.0.0'
 CHANGELOGS = ROOT / 'contracts/changelogs'
 LEVELS = {None: 0, 'patch': 1, 'minor': 2, 'major': 3}
+# Changelog paths of the SDKs, and (SDK_SOURCES) the inputs a patch release follows: the generators and the
+# hand-written examples and smoke tests. Generated SDK files are left out: they follow from the contract and
+# the generators, and a recorded release rewrites them with the new version.
 SDK_PATHS = ['sdks', 'scripts/sdks', 'contracts/http/veyndo.openapi.json']
+SDK_SOURCES = ['scripts/sdks', 'sdks/typescript/examples', 'sdks/typescript/tests', 'sdks/python/examples',
+               'sdks/python/tests', 'sdks/rust/examples', 'sdks/rust/smoke']
 
 
 # Version arithmetic ----------------------------------------------------------------------
@@ -223,7 +228,7 @@ def plan(release, commit):
                       'since': previous and previous['commit']}
     combined = docs['veyndo.openapi.json']
     previous = release.get('sdk')
-    digest, source = contracts.contract_digest(combined), files_digest(SDK_PATHS[:2])
+    digest, source = contracts.contract_digest(combined), files_digest(SDK_SOURCES)
     if previous is None:
         level, reasons, version = 'initial', ['first versioned release'], INITIAL
     else:

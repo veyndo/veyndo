@@ -319,6 +319,11 @@ def record(chosen, commit):
     releases.write_changelogs(rows, commit, date)
     releases.apply(release, rows, commit)
     RELEASE.write_text(json.dumps(release, indent=2) + '\n')
+    # Contracts and SDKs state the recorded versions, and the SDK crate's version is in Cargo.lock,
+    # which every mirror copies: regenerate both before the mirrors, so they match the release commit
+    # that follows this record.
+    subprocess.run([sys.executable, str(ROOT / 'scripts/sdks/generate.py')], cwd=ROOT, check=True)
+    subprocess.run(['cargo', 'metadata', '--format-version', '1', '--offline'], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     release['version'] = 1
     release['generator'] = 'scripts/component_mirrors.py'
     release['not_mirrored'] = {n: NOT_MIRRORED[n] for n, c in components().items() if not c}
@@ -333,11 +338,9 @@ def record(chosen, commit):
         release['components'][name] = row
     release['components'] = dict(sorted(release['components'].items()))
     RELEASE.write_text(json.dumps(release, indent=2) + '\n')
-    # Contracts and SDKs state the recorded versions; regenerate them for the release commit.
-    subprocess.run([sys.executable, str(ROOT / 'scripts/sdks/generate.py')], cwd=ROOT, check=True)
     releases.print_plan(rows)
     print(f'Recorded {len(chosen)} mirrors and {len(rows) - 1} component versions at {commit} in {RELEASE.relative_to(ROOT)}; '
-          'commit components.release.json, contracts/ and sdks/')
+          'commit components.release.json, contracts/, sdks/ and Cargo.lock')
 
 
 def check(chosen, commit, keep_going=True):
