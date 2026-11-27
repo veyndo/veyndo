@@ -27,7 +27,7 @@ addon, a private Qdrant with a 6 GB volume, `staging-core` (built from `main` wi
 
 | Job | Runs |
 | --- | --- |
-| `staging-roles` | Database-manager step on `postgres:17` with the addon admin login: creates `veyndo_runtime`, `veyndo_runtime_login`, `veyndo_tenant_login` (NOINHERIT) and `veyndo_connectors` with their passwords, gives the migration owner `CREATE, CONNECT, TEMPORARY` on the database and `ADMIN OPTION` on `veyndo_runtime`. Idempotent. |
+| `staging-roles` | Database-manager step on `postgres:17` with the addon admin login: creates `veyndo_runtime`, `veyndo_runtime_login`, `veyndo_tenant_login` (NOINHERIT) and `veyndo_connectors` with their passwords, gives the migration owner `CREATE, CONNECT, TEMPORARY` on the database and `ADMIN OPTION` on `veyndo_runtime` and on the system login `veyndo_runtime_login` (authority `configure` makes the owner a member of it). Idempotent. |
 | `staging-migrate` | `BOOTSTRAP_MODE=migrate` on the owner connection. |
 | `staging-setup` | `veyndo --provision` with the system and tenant logins; set `PLATFORM_ADMIN_EMAIL`/`PLATFORM_ADMIN_PASSWORD` for this job only for the first operator, then remove the password. |
 
