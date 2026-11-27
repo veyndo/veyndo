@@ -52,6 +52,7 @@ mod ports;
 mod pos;
 mod proposal_apply;
 mod proposal_routes;
+mod provision;
 mod routes;
 mod runtime_config;
 mod sandbox_cache;

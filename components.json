@@ -737,6 +737,7 @@
         "src/pos",
         "src/proposal_apply.rs",
         "src/proposal_routes.rs",
+        "src/provision.rs",
         "src/routes",
         "src/routes.rs",
         "src/runtime_config.rs",

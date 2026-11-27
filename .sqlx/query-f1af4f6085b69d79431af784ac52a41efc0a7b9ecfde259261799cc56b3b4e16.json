@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT format(CASE WHEN c.relkind='S' THEN 'GRANT USAGE,SELECT ON SEQUENCE public.%I TO %I'\n                    WHEN left(c.relname,10)='connector_' THEN 'REVOKE ALL ON public.%I FROM %I'\n                    WHEN c.relkind IN ('v','m') THEN 'GRANT SELECT ON public.%I TO %I'\n                    ELSE 'GRANT SELECT,INSERT,UPDATE,DELETE,REFERENCES ON public.%I TO %I' END,\n                c.relname,$1::text) AS \"statement!\"\n           FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace\n           WHERE n.nspname='public' AND c.relkind IN ('r','p','v','m','S')\n           ORDER BY c.relname",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "statement!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f1af4f6085b69d79431af784ac52a41efc0a7b9ecfde259261799cc56b3b4e16"
+}
