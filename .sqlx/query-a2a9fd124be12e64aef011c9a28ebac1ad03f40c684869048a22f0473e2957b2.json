@@ -1,10 +1,21 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT name,description,active,product_number,parent_id,options,revision,content_revision,extra,price,tax_rate,stock,min_purchase,purchase_steps,max_purchase,delivery_days,list_price,regulation_price,reference_price,advanced_prices,media,properties FROM products WHERE tenant=$1 AND id=$2",
+  "query": "SELECT id,name,category,description,price_decimal AS \"price!: Exact\",tax_rate_decimal AS \"tax_rate!: Exact\",stock,revision,list_price_decimal AS \"list_price: Exact\",regulation_price_decimal AS \"regulation_price: Exact\",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
         "name": "name",
         "type_info": "Text",
         "origin": {
@@ -15,7 +26,18 @@
         }
       },
       {
-        "ordinal": 1,
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "category"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
         "name": "description",
         "type_info": "Text",
         "origin": {
@@ -26,51 +48,40 @@
         }
       },
       {
-        "ordinal": 2,
-        "name": "active",
-        "type_info": "Bool",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "active"
-          }
-        }
-      },
-      {
-        "ordinal": 3,
-        "name": "product_number",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "product_number"
-          }
-        }
-      },
-      {
         "ordinal": 4,
-        "name": "parent_id",
-        "type_info": "Text",
+        "name": "price!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "parent_id"
+            "name": "price_decimal"
           }
         }
       },
       {
         "ordinal": 5,
-        "name": "options",
-        "type_info": "Jsonb",
+        "name": "tax_rate!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "options"
+            "name": "tax_rate_decimal"
           }
         }
       },
       {
         "ordinal": 6,
+        "name": "stock",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "stock"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
         "name": "revision",
         "type_info": "Int8",
         "origin": {
@@ -81,57 +92,46 @@
         }
       },
       {
-        "ordinal": 7,
-        "name": "content_revision",
-        "type_info": "Int8",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "content_revision"
-          }
-        }
-      },
-      {
         "ordinal": 8,
-        "name": "extra",
-        "type_info": "Jsonb",
+        "name": "list_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "extra"
+            "name": "list_price_decimal"
           }
         }
       },
       {
         "ordinal": 9,
-        "name": "price",
-        "type_info": "Float8",
+        "name": "regulation_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "price"
+            "name": "regulation_price_decimal"
           }
         }
       },
       {
         "ordinal": 10,
-        "name": "tax_rate",
-        "type_info": "Float8",
+        "name": "reference_price",
+        "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "tax_rate"
+            "name": "reference_price"
           }
         }
       },
       {
         "ordinal": 11,
-        "name": "stock",
-        "type_info": "Int4",
+        "name": "advanced_prices",
+        "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "stock"
+            "name": "advanced_prices"
           }
         }
       },
@@ -170,61 +170,28 @@
       },
       {
         "ordinal": 15,
-        "name": "delivery_days",
-        "type_info": "Int4",
+        "name": "parent_id",
+        "type_info": "Text",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "delivery_days"
+            "name": "parent_id"
           }
         }
       },
       {
         "ordinal": 16,
-        "name": "list_price",
-        "type_info": "Float8",
+        "name": "options",
+        "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "list_price"
+            "name": "options"
           }
         }
       },
       {
         "ordinal": 17,
-        "name": "regulation_price",
-        "type_info": "Float8",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "regulation_price"
-          }
-        }
-      },
-      {
-        "ordinal": 18,
-        "name": "reference_price",
-        "type_info": "Jsonb",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "reference_price"
-          }
-        }
-      },
-      {
-        "ordinal": 19,
-        "name": "advanced_prices",
-        "type_info": "Jsonb",
-        "origin": {
-          "Table": {
-            "table": "products",
-            "name": "advanced_prices"
-          }
-        }
-      },
-      {
-        "ordinal": 20,
         "name": "media",
         "type_info": "Jsonb",
         "origin": {
@@ -235,13 +202,46 @@
         }
       },
       {
-        "ordinal": 21,
+        "ordinal": 18,
         "name": "properties",
         "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "products",
             "name": "properties"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "delivery_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "delivery_days"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "extra",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "extra"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "product_number",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "product_number"
           }
         }
       }
@@ -256,6 +256,17 @@
       false,
       false,
       false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
       true,
       true,
       false,
@@ -263,19 +274,8 @@
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      true,
-      false,
-      true,
-      true,
-      true,
-      false,
-      false,
-      false
+      true
     ]
   },
-  "hash": "f86f900c8767da4be425a11818d2cc32a41ee5ce5f79f102076e3f295cfa4e93"
+  "hash": "a2a9fd124be12e64aef011c9a28ebac1ad03f40c684869048a22f0473e2957b2"
 }

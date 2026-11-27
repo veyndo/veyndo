@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO products(tenant,id,name,description,category,price_decimal,tax_rate_decimal,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "08c964186c9561c073557c3334cfac58d175948c6e853c47a29aeacf0d2ccdf3"
+}

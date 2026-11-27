@@ -1607,8 +1607,8 @@
     },
     "components/b2b/src/service/quote_contract.rs": {
       "status": "unproved",
-      "sha256": "1e40d4b875345e56e15875d32848d93357854ab5e77859d443cccaf24fa22a4b",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "25dd10432e8fd2f012627dbdee264afbb6772cd65d61c652d76b311c46b0fb1c",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/b2b/src/service/quotes.rs": {
       "status": "unproved",
@@ -1722,8 +1722,8 @@
     },
     "components/catalog/src/domain/family.rs": {
       "status": "unproved",
-      "sha256": "9d4b739f94f9c79734196a031251b9544023b7baf8eba646cff0d1ea1afcd9ae",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "348f204d2abdc2666601cb893f859eae1f9be4ab36cd959e174579569149d0af",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/domain/graph_query.rs": {
       "status": "unproved",
@@ -1927,8 +1927,8 @@
     },
     "components/catalog/src/store/catalog_reads.rs": {
       "status": "unproved",
-      "sha256": "a07b724d374f6c19b97cfa5933a54d3155f9ab3cc0dfacee8f19f4271caa9f3b",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "fb028ef37a348eea2d702d2b0a0b351dbbb22097abe8f278b2d3977de9131a1b",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/categories.rs": {
       "status": "unproved",
@@ -1942,8 +1942,13 @@
     },
     "components/catalog/src/store/demo_template.rs": {
       "status": "unproved",
-      "sha256": "99c1719bf11d7c4925a7d1378b5d3dc4541e099ef1d1cd8c8951c6840a2bff48",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "2ccdcdc4040126b0106df7f07084ae7bd75a47ca2d0f7de90b056dbb6f87d9b2",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
+    },
+    "components/catalog/src/store/exact.rs": {
+      "status": "unproved",
+      "sha256": "0d5ddf345d894a47f795e0107a48d638be54befb90552c6a54933361939cbbf8",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/imported_lines.rs": {
       "status": "unproved",
@@ -1972,13 +1977,13 @@
     },
     "components/catalog/src/store/product_edit.rs": {
       "status": "unproved",
-      "sha256": "67446c9fabf66a4f3cb11ab274c9abe5382a3d47066c136d847aabc063d83f3e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "1dd3346152e0a13e3ea3fee366103ee0f57b647031b3ff816793b92ff79b8f47",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/product_fields.rs": {
       "status": "unproved",
-      "sha256": "cd089961cab9381e3be3dab3cea796d81d5c7eadce587dd5322380ab90f0bb37",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "ac04f6777ade4d9573ef04d4b81c01ff23f57041a6a9d2ecb8a6229993bdc1d7",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/product_list.rs": {
       "status": "unproved",
@@ -1987,13 +1992,13 @@
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
-      "sha256": "31acc6db6bad7e3ae168a6dab298a4aa9aaccefe3f6b905c2c104d43a8aaffe9",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "c225bd3e3f663ad3ed343ed8c9634266db473f3b4871f954f5fcdf7661e035a6",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/purchase_products.rs": {
       "status": "unproved",
-      "sha256": "c6dfdd2982429307fa1d82a0ad1cd8faf11d6dc56bedd86ec39b8a69153cf783",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "2af6c82165b0c61d23b6d2c0ed21bc549b405d97b703a0d5280b8cc95d6a467d",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/references.rs": {
       "status": "unproved",
@@ -2007,8 +2012,8 @@
     },
     "components/catalog/src/store/rule_products.rs": {
       "status": "unproved",
-      "sha256": "43c5838725b3544b16a7d258141020bbb7849d2087d9cf73da67ba0b2d9781f2",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "6f17091ed906ace902ee60a332298e7ea96816a3156981c79d1099294c663b25",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/shop_reads.rs": {
       "status": "unproved",
@@ -2017,13 +2022,13 @@
     },
     "components/catalog/src/store/staging.rs": {
       "status": "unproved",
-      "sha256": "6f9e83634e3c808484de4af951cced3985b17aec6070e68e9db83fd1c5636677",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "a3c82d52f2ec3c7990113aeba2e15295cbd4704caf27e38ccf95ca9fdb0f5d14",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/stock.rs": {
       "status": "unproved",
-      "sha256": "c20aa166a3597f4013c6639bf4a38e2f0faeb2964a6ad24b691fe63a1d3ca1a5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "e6d08434fd4e562bf4c585b52783f756764b0f05715ff81477064194f0702b35",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store/translation_jobs.rs": {
       "status": "unproved",
@@ -2047,13 +2052,13 @@
     },
     "components/catalog/src/store/workspace.rs": {
       "status": "unproved",
-      "sha256": "83632400c4bf417442734d17c627adf40721ebaf60e9ab3d62129179e1a8b1d6",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5e60cdcbef0d3317e232ac89cffb0c137bc85e8796159ffe881bf355e9bb8491",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "01ed0f81e3399581820e035e39e66efbf7d622578ab2d6e69fe1c9ab492948eb",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "c9e5be1e8c4ffedec8de24fffd27d9ff6862090b968075c669ed2ae4265fd43c",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/types/asset.rs": {
       "status": "unproved",
@@ -2077,8 +2082,8 @@
     },
     "components/catalog/src/types/product_fields.rs": {
       "status": "unproved",
-      "sha256": "2f28c2040ecf04dd3a308d18ea6b53a8c633b20b73a4ec4cc4b2718db8b56627",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "c81d8940a7e73ee6367fcf62468fdf0ed42b5c37ff16f83984b66a4b34f43c7a",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/catalog/src/types/product_list.rs": {
       "status": "unproved",
@@ -2112,8 +2117,8 @@
     },
     "components/checkout/src/domain/cart_quote.rs": {
       "status": "reviewed-binding",
-      "sha256": "ae89f30db2d3c39df04a3e5a3493f9d451f354c7a66764d953b558a970f60527",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "9652f3e255e18a16140a726613888882daab4b9266d1008b2dda7a2ece51d1af",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/checkout/src/domain/quote_view.rs": {
       "status": "unproved",
@@ -2137,8 +2142,8 @@
     },
     "components/checkout/src/domain/tax_lines.rs": {
       "status": "unproved",
-      "sha256": "13e5c34ad6b0ef5040042b14280e1ed08c492bffbd5fc77df82945399d99b602",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "e6e0de507643522b722123bb46f3f6381fc5efa8765b42bc1db1a6947918e987",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
@@ -2362,8 +2367,8 @@
     },
     "components/checkout/tests/domain_mutants.rs": {
       "status": "unproved",
-      "sha256": "dd667fd1ab709494158b0c2173c8be9a38f4b0a2ab1d3f17b35957cf8dedbd0f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "9ff290bbdc146fde023e7ea51d526cca8f1058b26128cdf8a087e0b195601165",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/checkout/tests/port_adapters.rs": {
       "status": "unproved",
@@ -3052,8 +3057,8 @@
     },
     "components/intelligence/src/domain/price_guardrails.rs": {
       "status": "reviewed-binding",
-      "sha256": "804fc0d82ea4cfe0574064cc82e9fec5af950ca33a337ef4ba8852b5b9b30795",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "8c73f0db8203b57cfd4d5e99d32c123a0ea234e9ea79e0bca5f09052aa81132f",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/domain/prompt_context.rs": {
       "status": "unproved",
@@ -3207,13 +3212,13 @@
     },
     "components/intelligence/src/service/autonomy.rs": {
       "status": "reviewed-binding",
-      "sha256": "03cabeae3b13d94d0141d7e7b16dbe4611fcd1088c7176996b789f0c4470da86",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "42ce487234e13814d45aea54cba77cebf557e60917ddd14810c5d59a036f6e0e",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/service/autonomy_revert.rs": {
       "status": "unproved",
-      "sha256": "22d8f6931979b4c0f35753ab88f7863f8f76b89eecd51daa86979b6c22b7ba0e",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "94691ca9e145a81934e6be2c18d94756b07f207ad0612a24dec57a0583082cf1",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/service/behavior.rs": {
       "status": "unproved",
@@ -3432,8 +3437,8 @@
     },
     "components/intelligence/src/store/autonomy.rs": {
       "status": "unproved",
-      "sha256": "bb9ec50557368293e71e3457a0f46e6da694d32ece9f39c3ee8af463913689f5",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "87fed530a06633c3ee6cb8a94bdc131686ac4620bcdd3c9a1985b37d1d689b69",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/store/behavior.rs": {
       "status": "unproved",
@@ -3452,8 +3457,8 @@
     },
     "components/intelligence/src/store/context_products.rs": {
       "status": "unproved",
-      "sha256": "97ceebd2a83aa48dac1c58f555d693ab81d134bf86cb6cee5e358d35de16ac02",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "76f9b03e14cf19253f869289668aa2bb25ba8e4a7dfed2bf479df8536d00b9b0",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/store/conversations.rs": {
       "status": "unproved",
@@ -3547,8 +3552,8 @@
     },
     "components/intelligence/src/store/staging.rs": {
       "status": "unproved",
-      "sha256": "ecddc86675c1abc5d54205687cb6e74f04be437fe841ca46a00c0c760c5f122b",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "537ff177771ea34cabf9b93348a3bd4e9b3e84db2f196d6d3c78d0f6722de490",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/intelligence/src/store/vectors.rs": {
       "status": "unproved",
@@ -4642,8 +4647,8 @@
     },
     "components/pricing/src/domain/catalog.rs": {
       "status": "unproved",
-      "sha256": "16b2af2e64c0d5e09a9801a795106a2032b443cd3479ae6049f01ff00041695f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "f4a821e42d3a40b36288978d128bbdc5299b74aafdaaf8b9ae043d99029a0ebc",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/pricing/src/domain/context.rs": {
       "status": "unproved",
@@ -4672,8 +4677,8 @@
     },
     "components/pricing/src/domain/decimal.rs": {
       "status": "reviewed-binding",
-      "sha256": "ca622234c776c2440840b34b8db24d14abfbcc113f8937476540abac8b557d0e",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "5df01affc7a6c500a94b2cf54e48e23acc60213f38587710ec2821b362fa821e",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/pricing/src/domain/discount/boundaries.rs": {
       "status": "unproved",
@@ -4742,8 +4747,8 @@
     },
     "components/pricing/src/service/conversion.rs": {
       "status": "unproved",
-      "sha256": "5a5029f9fc01f13f8b9f60ab4baaa3b2543009124514532fecf6217280aba097",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5d693a0e3117f2882a5896d10d3a57ecd6ee1e139aa088f115e188bbddd96ab3",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/pricing/src/service/currency_change.rs": {
       "status": "unproved",
@@ -4752,8 +4757,8 @@
     },
     "components/pricing/src/service/price_job_worker.rs": {
       "status": "unproved",
-      "sha256": "1871a83f1dc4132a0e0ec11029bccef96798f8da35d3d82982f77a177ab589a9",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "563b2aad1614455ea3fecaedfa0927a57c2828ddc03c42fb94f6f061711ca73d",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/pricing/src/service/price_jobs.rs": {
       "status": "unproved",
@@ -5227,8 +5232,8 @@
     },
     "components/studio/src/domain/proposal.rs": {
       "status": "unproved",
-      "sha256": "31df55102139a21ea2ab99d6e209ca6b3765ce75e2abcadcf919f2609bb1f8c3",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "d0dd349b4d26298cbf8645f6f737722c6f701f0b465328c7a7bf55c9d134a9e7",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/studio/src/domain/report_config.rs": {
       "status": "unproved",
@@ -5447,8 +5452,8 @@
     },
     "components/studio/src/service/staging/snapshot.rs": {
       "status": "unproved",
-      "sha256": "bf2f8f8d313f876a37c83ed9462f45b1ab64541fd3ac374883f3a93ad8323298",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "09960c81d0604e4706556187f2aa77a4964f9d498fa6bed5ebc90f9b2789a8a6",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/studio/src/service/staging.rs": {
       "status": "unproved",
@@ -8757,13 +8762,13 @@
     },
     "src/migrations/schema.rs": {
       "status": "unproved",
-      "sha256": "80470f322ba875e3416e5c48a7ceb9268ac24710148dd23298e7e7968302bb60",
-      "review": "Forward migration runner (J0): ordered MIGRATIONS list replaces BASELINES, checksum and order refusal, no-transaction steps; ledger store gains run_step. Adapter-only change, no proved rule affected."
+      "sha256": "78da8737f1e1c5b6724a0e68648f025109e249fb5a2e9e15b79616c9b6dfbe13",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "src/migrations.rs": {
       "status": "unproved",
-      "sha256": "373d552543e655a3b30781006477cd001bdbb018511dcc41524b4e33356a1bcf",
-      "review": "Forward migration runner (J0): ordered MIGRATIONS list replaces BASELINES, checksum and order refusal, no-transaction steps; ledger store gains run_step. Adapter-only change, no proved rule affected."
+      "sha256": "c6c25e5aae95bf27034f7cf9d58168dee319d9772a7e50511fd23cffa4ac2e92",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -9207,8 +9212,8 @@
     },
     "src/seed.rs": {
       "status": "unproved",
-      "sha256": "4a5df8537a76dc0592a533ff21472842c03e926b5880a9c77c0485be99dacd3b",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "2efd9f275992bbc96764933c760c3fda2d2bb6945ec16c5bbeef11ff1ddbbdc7",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "src/shop_domains/frontend_bindings.rs": {
       "status": "unproved",
@@ -9410,6 +9415,10 @@
     "components/catalog/migrations/0001-baseline.sql": {
       "sha256": "7b1f1d7cf8a957082f7d8cb8e8ba868b437103f40a2b120e6f83345813cea786",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+    },
+    "components/catalog/migrations/0002-exact-product-prices.sql": {
+      "sha256": "8ff4c4935f8ce1105485a95c0a467d1628786a70cb894ab5434d1db0ad14434d",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "components/checkout/migrations/0001-baseline.sql": {
       "sha256": "2e379d1de9434ddcf03ec89a43a0b45ce8e0f5e59fc7a14fa1ffb32a4591ff16",
@@ -9720,8 +9729,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/domain-inventory.json": {
-      "sha256": "3fa16fc862ce7c911ee72225ee83b8f3bde47ffc339fd6ba913ff2f7d90ad6ca",
-      "review": "Exact decimal calculator (2026-11-26): Shopware compatibility is no longer a goal, so the binary64 emulation (pricing domain/binary.rs) and the float-reference oracle are removed; calculate computes on exact Ratio values and rounds each amount once, half away from zero, through Ratio::rounded (proved rounded_quotient); the cash-interval rounding Rounding::price binds rounded_quotient and line_total directly (new theorem cash_round_nearest_multiple); callers in checkout, marketing, catalog and studio read stored numbers through Decimal::from_wire. Changes differ from before only at decimal ties (tests/decimal_ties.rs)."
+      "sha256": "dca553b62bcaf6c2befab7fa13179cc21c8321d42ec531298f28d66c6558a6fd",
+      "review": "Exact product prices (catalog/0002): numeric columns read through the new store codec catalog/src/store/exact.rs; the product snapshot, editor fields and AI guardrails carry Decimal; Decimal gains Display (its plain text, listed unproved as money representation). Storage/adapter change only: no proved rule or its inputs changed."
     },
     "proof/lakefile.toml": {
       "sha256": "1cda05bac02223024b93388cf858edad4719c46f8d37a826a73a6a6e15d79432",

@@ -121,13 +121,19 @@ pub async fn prices(
         .ok_or(bad("Unknown offer currency"))?;
     for p in ps {
         if let Some(line) = lines.iter().find(|l| l.id == p.id) {
-            let price = line.gross_minor as f64 / 10_f64.powi(scale as i32);
-            p.price = price;
+            // The accepted gross amount in whole minor units, exactly.
+            let minor =
+                i64::try_from(line.gross_minor).map_err(|_| bad("Invalid accepted offer"))?;
+            let price = veyndo_pricing::money::Money::new(
+                minor,
+                veyndo_pricing::money::Currency::new(&c.data.currency, scale).map_err(bad)?,
+            );
+            p.price = price.amount().decimal();
             p.advanced_prices.clear();
             // Both fixed-currency and automatic-FX strategies resolve through their existing owner.
             merge(
                 &mut p.extra,
-                json!({"priceCurrency":c.data.currency,"currencyPrices":{&c.data.currency:{"price":format!("{price:.precision$}",precision=scale as usize)}}}),
+                json!({"priceCurrency":c.data.currency,"currencyPrices":{&c.data.currency:{"price":price.decimal()}}}),
             )?;
         }
     }

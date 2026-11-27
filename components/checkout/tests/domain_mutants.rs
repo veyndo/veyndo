@@ -211,7 +211,10 @@ fn foreign_rates_convert_fixed_currency_and_regulation_prices() {
         "extra":{"currencyPrices":{"EUR":{"price":"119.00"},"XXX":{"price":"119.00"}}}}),
     );
     let abroad = tax_products(&[p], &selection, &settings()).unwrap();
-    assert!((abroad[0].regulation_price.unwrap() - 120.).abs() < 1e-9);
+    assert_eq!(
+        abroad[0].regulation_price,
+        Some(veyndo_pricing::decimal::Decimal::integer(120))
+    );
     assert_eq!(
         abroad[0].extra["currencyPrices"]["EUR"]["price"],
         json!("120.00")

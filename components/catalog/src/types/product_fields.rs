@@ -1,4 +1,4 @@
-//! The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back.
+//! The commerce fields of a product as the editor sends them, prices and the tax rate as exact decimals; stock is optional so an untouched quantity is never written back.
 use crate::domain::media;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -11,8 +11,8 @@ use veyndo_pricing::pricing::ReferenceDefinition;
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ProductFields {
-    pub price: f64,
-    pub tax_rate: f64,
+    pub price: Decimal,
+    pub tax_rate: Decimal,
     /// `None` keeps the stored quantity; `Some` is an explicit absolute quantity.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stock: Option<i32>,
@@ -20,9 +20,9 @@ pub struct ProductFields {
     pub purchase_steps: u32,
     pub max_purchase: Option<u32>,
     pub delivery_days: i32,
-    pub list_price: Option<f64>,
+    pub list_price: Option<Decimal>,
     #[serde(default)]
-    pub regulation_price: Option<f64>,
+    pub regulation_price: Option<Decimal>,
     #[serde(default)]
     pub reference_price: Option<ReferenceDefinition>,
     pub advanced_prices: Vec<Tier>,
@@ -33,10 +33,10 @@ pub struct ProductFields {
 impl ProductFields {
     /// Bounds on prices, purchase quantities, tiers, properties and media, independent of what is stored.
     pub fn validate(&self) -> Result<()> {
-        if !self.price.is_finite()
-            || !(0.0..=1_000_000.).contains(&self.price)
-            || !self.tax_rate.is_finite()
-            || !(0.0..=50.).contains(&self.tax_rate)
+        // Exact decimals are finite once read; JSON numbers that name no decimal are refused on reading.
+        let price_range = Decimal::ZERO..=Decimal::integer(1_000_000);
+        if !price_range.contains(&self.price)
+            || !(Decimal::ZERO..=Decimal::integer(50)).contains(&self.tax_rate)
             || self.stock.is_some_and(|stock| stock < 0)
             || self.min_purchase == 0
             || self.min_purchase > 1_000_000
@@ -46,9 +46,7 @@ impl ProductFields {
                 .max_purchase
                 .is_some_and(|v| v < self.min_purchase || v > 1_000_000)
             || !(0..=365).contains(&self.delivery_days)
-            || self
-                .list_price
-                .is_some_and(|v| !v.is_finite() || !(0. ..=1_000_000.).contains(&v))
+            || self.list_price.is_some_and(|v| !price_range.contains(&v))
             || self.advanced_prices.len() > 100
             || self.properties.len() > 40
             || self
@@ -60,7 +58,7 @@ impl ProductFields {
         }
         if self
             .regulation_price
-            .is_some_and(|n| !n.is_finite() || !(0.0..=1_000_000.0).contains(&n))
+            .is_some_and(|n| !(Decimal::ZERO..=Decimal::integer(1_000_000)).contains(&n))
             || self.reference_price.as_ref().is_some_and(|p| {
                 // Reference units are exact decimals: always finite once read.
                 p.purchase_unit <= Decimal::ZERO

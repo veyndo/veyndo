@@ -68,7 +68,7 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             .map_err(bad)?
             .unwrap_or(Decimal::ZERO);
         let discount = one.checked_sub(tier_discount.ratio()).map_err(bad)?;
-        let tax_rate = Decimal::from_wire(p.tax_rate).map_err(bad)?;
+        let tax_rate = p.tax_rate;
         // A B2B line is priced from the gross amount without its tax: `gross / (1 + rate / 100)`, exact.
         let net_of = |gross: Ratio| -> Result<Ratio> {
             if b2b {
@@ -83,7 +83,7 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             }
         };
         let gross = product_price(p, cfg, currency)?.ratio();
-        let ancillary_price = |field: &str, value: Option<f64>| -> Result<Option<Ratio>> {
+        let ancillary_price = |field: &str, value: Option<Decimal>| -> Result<Option<Ratio>> {
             ancillary(p, field, value, cfg, currency)?
                 .map(|v| net_of(v.ratio()))
                 .transpose()

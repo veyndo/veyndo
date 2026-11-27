@@ -87,12 +87,14 @@ pub(crate) async fn apply(pool: &PgPool) {
     for (version, source) in pending(&applied) {
         let checksum = hash(source);
         if let Some(steps) = steps(source) {
+            // The one setup connection (holding the lock) runs every step, then records the migration.
             let mut conn = pool.acquire().await.expect("migration connection");
             for step in steps {
                 store::run_step(&mut conn, step)
                     .await
                     .unwrap_or_else(|e| panic!("Migration {version}: {}", e.1));
             }
+            drop(conn);
             let mut tx = pool.begin().await.expect("migration transaction");
             store::record(&mut tx, version, &checksum)
                 .await

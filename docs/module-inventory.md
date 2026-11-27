@@ -811,6 +811,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/ui/admin/b2b/reference.ts](../components/b2b/ui/admin/b2b/reference.ts) | Native organization IDs require a lowercase letter first and at most 32 characters. |
 | [components/b2b/ui/admin/b2b/studio-extension.ts](../components/b2b/ui/admin/b2b/studio-extension.ts) | Studio extension of B2B companies and quotes; the sidebar shows them in their own section when B2B is enabled. |
 | [components/catalog/migrations/0001-baseline.sql](../components/catalog/migrations/0001-baseline.sql) | Baseline schema of the catalog component (Products, categories, media, reviews, translations and catalogue reads): its tables, sequences, functions, |
+| [components/catalog/migrations/0002-exact-product-prices.sql](../components/catalog/migrations/0002-exact-product-prices.sql) | veyndo:no-transaction |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/csv_rows.rs](../components/catalog/src/domain/csv_rows.rs) | Bounded UTF-8 CSV reader: quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
@@ -862,6 +863,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Static assignments and saved current-public-fact queries share category/channel pagination. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. The channels themselves come through the registries port. |
 | [components/catalog/src/store/demo_template.rs](../components/catalog/src/store/demo_template.rs) | Demo template rows: the products and translations of a bundled catalogue template, and the template's category translations. |
+| [components/catalog/src/store/exact.rs](../components/catalog/src/store/exact.rs) | The PostgreSQL `numeric` codec of exact product prices and rates: reads and binds a `numeric` column as the pricing [`Decimal`], without a floating-point intermediary. |
 | [components/catalog/src/store/imported_lines/labels.sql](../components/catalog/src/store/imported_lines/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
 | [components/catalog/src/store/imported_lines.rs](../components/catalog/src/store/imported_lines.rs) | Products of an external order import: their parents, the locked lines, channel visibility and translated labels. |
 | [components/catalog/src/store/imports.rs](../components/catalog/src/store/imports.rs) | Native catalogue state that reviewed migration imports replay against and compare with: categories, product fields, assets and reviews. |
@@ -889,7 +891,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/catalog_page.rs](../components/catalog/src/types/catalog_page.rs) | The filters and cursor of a storefront catalogue read, and one page of products. |
 | [components/catalog/src/types/category.rs](../components/catalog/src/types/category.rs) | A category write: its place in the tree and its data with translations per content language. |
 | [components/catalog/src/types/product_edit.rs](../components/catalog/src/types/product_edit.rs) | The product edit payload: translated texts, multilingual metadata and the optional commerce and identity fields. |
-| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
+| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them, prices and the tax rate as exact decimals; stock is optional so an untouched quantity is never written back. |
 | [components/catalog/src/types/product_list.rs](../components/catalog/src/types/product_list.rs) | The filters, sort and cursor of the merchant product list, and one listed product. |
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
@@ -1748,7 +1750,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/migrations/0001-baseline.sql](../components/pricing/migrations/0001-baseline.sql) | Baseline schema of the pricing component (Money, price calculation, discounts, currencies, taxes and customer groups): its tables, sequences, functions, |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
-| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and |
+| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices and the tax |
 | [components/pricing/src/domain/context.rs](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
 | [components/pricing/src/domain/customer/address.rs](../components/pricing/src/domain/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
 | [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |

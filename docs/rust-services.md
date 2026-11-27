@@ -224,6 +224,28 @@ schema change since is a forward migration that upgrades the live database:
   `fixtures/schema/reference.sql` and serves one request round from the old and the new
   binary at the same time against the migrated database.
 
+### First forward migration: exact product prices
+
+`catalog/0002-exact-product-prices` (no-transaction: expand step, then a backfill of 500
+rows per committed batch) adds `numeric` columns `price_decimal`, `tax_rate_decimal`,
+`list_price_decimal` and `regulation_price_decimal` beside the baseline's `double
+precision` columns. The type is `numeric` without a fixed scale: a product price is the
+decimal the merchant entered in the shop's main currency, which the quote rounds to that
+currency's minor unit (`Ratio::rounded`, `Minor`) only when it prices a line. A fixed
+`numeric(20, e)` or integer minor units would need one currency exponent per column,
+but shops differ (JPY 0, EUR 2, KWD 3), may change their main currency and may enter
+more digits than the exponent; `numeric` maps one to one onto `Decimal` (units and scale).
+
+The trigger `exact_prices_sync` keeps both representations in step while the previous
+release serves: a write of an exact column sets the binary64 column to the nearest
+double, a write of only the binary64 column sets the exact one to its shortest decimal
+(the digits `Decimal::from_wire` reads). The release reads and writes only the exact
+columns through `veyndo_catalog::store::exact::Exact` (binary `numeric` codec, no new
+crate feature); JSON still carries the same numbers. The contract step for a later
+release: `NOT NULL` and `>= 0` on the exact columns, then drop the trigger, its function
+and the four binary64 columns (test fixtures that still insert `price`/`tax_rate`, such
+as the vendored marketplaces tests, must move first).
+
 ## Typed inputs and checked queries
 
 - Component and server functions read JSON inputs and stored documents through typed views

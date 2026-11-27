@@ -9,13 +9,14 @@ use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, bad};
 use veyndo_identity::permit;
+use veyndo_pricing::decimal::Decimal;
 use veyndo_pricing::money::{Currency, Money};
-use veyndo_pricing::service::conversion::amount;
+use veyndo_pricing::service::conversion::exact_amount;
 use veyndo_shop::Settings;
 use veyndo_shop::service::read_cache::config;
 static LAST_GUARD: AtomicU64 = AtomicU64::new(0);
 /// A price in minor units with its scale.
-fn minor(s: &Settings, code: &str, price: f64) -> Result<(i64, u8)> {
+fn minor(s: &Settings, code: &str, price: Decimal) -> Result<(i64, u8)> {
     let scale = s
         .currencies
         .definitions
@@ -23,7 +24,7 @@ fn minor(s: &Settings, code: &str, price: f64) -> Result<(i64, u8)> {
         .find(|d| d.code == code)
         .ok_or(bad("Currency missing"))?
         .scale;
-    Ok((amount(price, code, scale)?.minor(), scale))
+    Ok((exact_amount(price, code, scale)?.minor(), scale))
 }
 /// A product is only restored while it still carries the price the autopilot set; a later manual edit wins.
 pub async fn revert(
@@ -40,7 +41,7 @@ pub async fn revert(
     for row in rows {
         let (id, code) = (row.product_id, row.currency);
         let baseline = row.baseline_minor;
-        let (current, scale) = minor(&s, &code, row.price)?;
+        let (current, scale) = minor(&s, &code, row.price.0)?;
         if current == baseline {
             skipped.push(json!({"productId":id,"reason":"at_baseline"}));
             continue;
@@ -62,9 +63,8 @@ pub async fn revert(
             continue;
         }
         let price = Money::new(baseline, Currency::new(&code, scale).map_err(bad)?)
-            .decimal()
-            .parse::<f64>()
-            .map_err(|_| bad("Invalid baseline price"))?;
+            .amount()
+            .decimal();
         let changed = store::restore_price(&mut tx, t, &id, price, row.revision).await?;
         let Some(changed) = changed else {
             skipped.push(json!({"productId":id,"reason":"changed_since"}));
@@ -168,7 +168,7 @@ struct ProposedChange {
     #[serde(deserialize_with = "lenient")]
     product_id: Option<String>,
     #[serde(deserialize_with = "lenient")]
-    price: Option<f64>,
+    price: Option<Decimal>,
 }
 
 /// The products a revert restored.

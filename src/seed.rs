@@ -8,6 +8,7 @@ use argon2::password_hash::SaltString;
 use serde_json::json;
 use uuid::Uuid;
 use veyndo_core::Result;
+use veyndo_pricing::decimal::Decimal;
 
 pub(crate) async fn seed(a: &App) -> Result<()> {
     let demo = [
@@ -16,8 +17,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Arc Desk Light",
             "lighting",
             "Warm dimmable light, recycled aluminium.",
-            79.9,
-            19.,
+            "79.9",
+            "19",
             40,
         ),
         (
@@ -25,8 +26,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Form Chair",
             "furniture",
             "Oak frame, natural linen, compact design.",
-            189.,
-            19.,
+            "189",
+            "19",
             20,
         ),
         (
@@ -34,8 +35,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Studio Desk",
             "furniture",
             "Solid oak workspace with concealed cable tray.",
-            449.,
-            19.,
+            "449",
+            "19",
             10,
         ),
         (
@@ -43,8 +44,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Everyday Cup",
             "objects",
             "Hand-finished stoneware, dishwasher safe.",
-            24.9,
-            19.,
+            "24.9",
+            "19",
             80,
         ),
         (
@@ -52,8 +53,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Field Notes",
             "objects",
             "Recycled paper and stitched binding.",
-            12.5,
-            7.,
+            "12.5",
+            "7",
             150,
         ),
         (
@@ -61,8 +62,8 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             "Line Shelf",
             "furniture",
             "Modular oak storage, wall or desk mounting.",
-            119.,
-            19.,
+            "119",
+            "19",
             25,
         ),
     ];
@@ -72,7 +73,11 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
                 a,
                 t,
                 (id, name, category, description),
-                (price, tax, stock),
+                (
+                    Decimal::parse(price).expect("demo price"),
+                    Decimal::parse(tax).expect("demo tax rate"),
+                    stock,
+                ),
             )
             .await?;
         }

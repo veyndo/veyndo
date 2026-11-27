@@ -8,7 +8,8 @@ use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflic
 use veyndo_identity::{allowed, permit};
 use veyndo_kernel::verified_kernel;
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::service::conversion::amount;
+use veyndo_pricing::decimal::Decimal;
+use veyndo_pricing::service::conversion::exact_amount;
 use veyndo_shop::Settings;
 use veyndo_shop::service::read_cache::config;
 
@@ -76,14 +77,14 @@ pub async fn reserve(
             t,
             store::Baseline {
                 product: &product.id,
-                minor: amount(product.price, code, scale)?.minor(),
+                minor: exact_amount(product.price, code, scale)?.minor(),
                 currency: code,
                 task: id,
                 actor: header(h, "x-rac-user").unwrap_or("integration"),
             },
         )
         .await?;
-        let proposed = amount(c.price.unwrap(), code, scale)?.minor();
+        let proposed = exact_amount(c.price.unwrap(), code, scale)?.minor();
         let baseline_currency = store::baseline_currency(&mut **tx, t, &product.id).await?;
         if code != baseline_currency
             || (first.abs_diff(proposed) as u128) * 10000
@@ -134,7 +135,7 @@ pub fn exposure(baseline_minor: i64, price_minor: i64, stock: i64) -> u128 {
     (baseline_minor.saturating_sub(price_minor).max(0) as u128) * (stock.max(0) as u128)
 }
 /// A price in minor units of its currency.
-fn minor(s: &Settings, code: &str, price: f64) -> Result<i64> {
+fn minor(s: &Settings, code: &str, price: Decimal) -> Result<i64> {
     let scale = s
         .currencies
         .definitions
@@ -142,7 +143,7 @@ fn minor(s: &Settings, code: &str, price: f64) -> Result<i64> {
         .find(|d| d.code == code)
         .ok_or(bad("Currency missing"))?
         .scale;
-    Ok(amount(price, code, scale)?.minor())
+    Ok(exact_amount(price, code, scale)?.minor())
 }
 /// Today's autonomous price rows with live price and stock; `proposed` replaces the live price of products about to change.
 pub async fn today<'e>(
@@ -158,7 +159,7 @@ pub async fn today<'e>(
         let (baseline, stock) = (row.baseline_minor, row.stock);
         let current = match proposed.iter().find(|(p, _)| p == &id) {
             Some((_, price)) => *price,
-            None => minor(s, &code, row.price)?,
+            None => minor(s, &code, row.price.0)?,
         };
         let counted = code == s.currencies.pricing_currency;
         let amount = exposure(baseline, current, i64::from(stock));

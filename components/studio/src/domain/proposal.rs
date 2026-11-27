@@ -8,6 +8,7 @@ use veyndo_core::{Result, bad, conflict};
 pub use veyndo_intelligence::domain::price_guardrails::Change;
 use veyndo_intelligence::service::navigation::{Entity, Navigation};
 use veyndo_pricing::catalog::Product;
+use veyndo_pricing::decimal::Decimal;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -151,9 +152,10 @@ pub fn validate_proposal(p: &Proposal, ps: &[Product]) -> Result<()> {
         if c.expected_revision != product.revision {
             return Err(conflict("Model used a stale product revision"));
         }
-        if c.price
-            .is_some_and(|p| !p.is_finite() || !(0.01..=1_000_000.).contains(&p))
-            || c.stock.is_some_and(|s| !(0..=1_000_000).contains(&s))
+        if c.price.is_some_and(|p| {
+            !(Decimal::new(1, 2).unwrap_or(Decimal::ZERO)..=Decimal::integer(1_000_000))
+                .contains(&p)
+        }) || c.stock.is_some_and(|s| !(0..=1_000_000).contains(&s))
         {
             return Err(bad("Change outside allowed range"));
         }

@@ -1,4 +1,5 @@
 //! Stock quantity writes on product rows for the inventory component: reservations, releases and test stock.
+use crate::store::exact::Exact;
 use crate::store::products::ProductRow;
 use sqlx::PgConnection;
 use veyndo_core::Result;
@@ -36,7 +37,7 @@ pub async fn fill_empty(
     quantity: i32,
     batch: i64,
 ) -> Result<Vec<ProductRow>> {
-    Ok(sqlx::query_as!(ProductRow, r#"UPDATE products p SET stock=$2,revision=revision+1 WHERE tenant=$1 AND id IN (SELECT id FROM products e WHERE e.tenant=$1 AND e.active AND e.stock<=0 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=e.tenant AND c.parent_id=e.id) ORDER BY e.id LIMIT $3 FOR UPDATE) RETURNING id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number"#, tenant, quantity, batch)
+    Ok(sqlx::query_as!(ProductRow, r#"UPDATE products p SET stock=$2,revision=revision+1 WHERE tenant=$1 AND id IN (SELECT id FROM products e WHERE e.tenant=$1 AND e.active AND e.stock<=0 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=e.tenant AND c.parent_id=e.id) ORDER BY e.id LIMIT $3 FOR UPDATE) RETURNING id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number"#, tenant, quantity, batch)
         .fetch_all(tx)
         .await?)
 }

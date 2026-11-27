@@ -1,7 +1,8 @@
 //! Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas.
 use crate::catalog::Product;
+use crate::decimal::Decimal;
 use crate::ports::Pricing;
-use crate::service::conversion::{convert_from, exact_amount, stored};
+use crate::service::conversion::{convert_from, exact_amount};
 use crate::store::price_jobs;
 use crate::types::currency::{Config, Definition};
 use crate::types::price_job::{JobData, QueuedJob};
@@ -23,13 +24,8 @@ pub fn fixed_prices(
         .price_currency
         .as_deref()
         .unwrap_or(&cfg.pricing_currency);
-    let exact = |value: f64| -> Result<String> {
-        Ok(exact_amount(
-            convert_from(stored(value)?, source, cfg, d)?,
-            &d.code,
-            d.scale,
-        )?
-        .decimal())
+    let exact = |value: Decimal| -> Result<String> {
+        Ok(exact_amount(convert_from(value, source, cfg, d)?, &d.code, d.scale)?.decimal())
     };
     let mut prices = json!({"price":exact(p.price)?,"generatedAt":generated_at});
     for (key, value) in [

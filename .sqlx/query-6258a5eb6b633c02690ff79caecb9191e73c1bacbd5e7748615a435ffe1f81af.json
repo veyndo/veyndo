@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE products p SET stock=$2,revision=revision+1 WHERE tenant=$1 AND id IN (SELECT id FROM products e WHERE e.tenant=$1 AND e.active AND e.stock<=0 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=e.tenant AND c.parent_id=e.id) ORDER BY e.id LIMIT $3 FOR UPDATE) RETURNING id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number",
+  "query": "SELECT id,name,category,description,price_decimal AS \"price!: Exact\",tax_rate_decimal AS \"tax_rate!: Exact\",stock,revision,list_price_decimal AS \"list_price: Exact\",regulation_price_decimal AS \"regulation_price: Exact\",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NULL",
   "describe": {
     "columns": [
       {
@@ -49,23 +49,23 @@
       },
       {
         "ordinal": 4,
-        "name": "price",
-        "type_info": "Float8",
+        "name": "price!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "price"
+            "name": "price_decimal"
           }
         }
       },
       {
         "ordinal": 5,
-        "name": "tax_rate",
-        "type_info": "Float8",
+        "name": "tax_rate!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "tax_rate"
+            "name": "tax_rate_decimal"
           }
         }
       },
@@ -93,23 +93,23 @@
       },
       {
         "ordinal": 8,
-        "name": "list_price",
-        "type_info": "Float8",
+        "name": "list_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "list_price"
+            "name": "list_price_decimal"
           }
         }
       },
       {
         "ordinal": 9,
-        "name": "regulation_price",
-        "type_info": "Float8",
+        "name": "regulation_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "regulation_price"
+            "name": "regulation_price_decimal"
           }
         }
       },
@@ -249,8 +249,7 @@
     "parameters": {
       "Left": [
         "Text",
-        "Int4",
-        "Int8"
+        "TextArray"
       ]
     },
     "nullable": [
@@ -258,8 +257,8 @@
       false,
       false,
       false,
-      false,
-      false,
+      true,
+      true,
       false,
       false,
       true,
@@ -278,5 +277,5 @@
       true
     ]
   },
-  "hash": "c6a235173c9d4c7a0bcd69b9300baf9a2e3ec752d46920fdae99a60e1d66a382"
+  "hash": "6258a5eb6b633c02690ff79caecb9191e73c1bacbd5e7748615a435ffe1f81af"
 }

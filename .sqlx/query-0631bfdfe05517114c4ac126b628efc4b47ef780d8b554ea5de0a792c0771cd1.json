@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE products SET price_decimal=$1,tax_rate_decimal=$2,stock=coalesce($3,stock),min_purchase=$4,purchase_steps=$5,max_purchase=$6,delivery_days=$7,list_price_decimal=$8,advanced_prices=$9,media=$10,properties=$11 WHERE tenant=$12 AND id=$13",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Numeric",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0631bfdfe05517114c4ac126b628efc4b47ef780d8b554ea5de0a792c0771cd1"
+}

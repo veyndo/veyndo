@@ -16,6 +16,7 @@ use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_orders::domain::order_machine::default_machine;
 use veyndo_orders::store::company_release as company;
+use veyndo_pricing::decimal::Decimal;
 use veyndo_shop::service::settings_writes::snapshot_scopes;
 /// The transaction every staging step shares.
 pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
@@ -112,9 +113,9 @@ struct StagedProduct {
     #[serde(deserialize_with = "lenient")]
     description: Option<String>,
     #[serde(deserialize_with = "lenient")]
-    price: Option<f64>,
+    price: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
-    tax_rate: Option<f64>,
+    tax_rate: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
     active: Option<bool>,
     #[serde(deserialize_with = "lenient")]

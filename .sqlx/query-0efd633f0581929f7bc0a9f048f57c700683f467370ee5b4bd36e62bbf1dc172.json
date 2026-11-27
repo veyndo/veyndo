@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active ORDER BY id LIMIT 101",
+  "query": "-- Bounded explicit channel IDs, with effective-language search before pagination.\nSELECT p.id,p.name,p.category,p.description,p.price_decimal AS \"price!: Exact\",p.tax_rate_decimal AS \"tax_rate!: Exact\",p.stock,p.revision,p.list_price_decimal AS \"list_price: Exact\",p.regulation_price_decimal AS \"regulation_price: Exact\",p.reference_price,p.advanced_prices,p.min_purchase,p.purchase_steps,p.max_purchase,p.parent_id,p.options,p.media,p.properties,p.delivery_days,p.extra,p.product_number FROM products p WHERE p.tenant=$1 AND p.parent_id IS NULL AND p.active AND ($9::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$9 AND (b.product_id=p.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id)))) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.product_id=p.id AND v.channel_id=$8 AND NOT v.visible)\nAND p.id=ANY($2) AND p.id>$3 AND ($4::text IS NULL OR p.category=$4)\nAND ($6::text IS NULL OR lower(\n coalesce((SELECT tr.name FROM product_translations tr WHERE tr.tenant=p.tenant\n AND tr.product_id=p.id AND tr.language_id=ANY($5) AND tr.name IS NOT NULL\n ORDER BY array_position($5,tr.language_id) LIMIT 1),p.name)\n ||' '||coalesce((SELECT tr.description FROM product_translations tr WHERE tr.tenant=p.tenant\n AND tr.product_id=p.id AND tr.language_id=ANY($5) AND tr.description IS NOT NULL\n ORDER BY array_position($5,tr.language_id) LIMIT 1),p.description)) LIKE $6)\nORDER BY p.id LIMIT $7;\n",
   "describe": {
     "columns": [
       {
@@ -49,23 +49,23 @@
       },
       {
         "ordinal": 4,
-        "name": "price",
-        "type_info": "Float8",
+        "name": "price!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "price"
+            "name": "price_decimal"
           }
         }
       },
       {
         "ordinal": 5,
-        "name": "tax_rate",
-        "type_info": "Float8",
+        "name": "tax_rate!: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "tax_rate"
+            "name": "tax_rate_decimal"
           }
         }
       },
@@ -93,23 +93,23 @@
       },
       {
         "ordinal": 8,
-        "name": "list_price",
-        "type_info": "Float8",
+        "name": "list_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "list_price"
+            "name": "list_price_decimal"
           }
         }
       },
       {
         "ordinal": 9,
-        "name": "regulation_price",
-        "type_info": "Float8",
+        "name": "regulation_price: Exact",
+        "type_info": "Numeric",
         "origin": {
           "Table": {
             "table": "products",
-            "name": "regulation_price"
+            "name": "regulation_price_decimal"
           }
         }
       },
@@ -248,6 +248,14 @@
     ],
     "parameters": {
       "Left": [
+        "Text",
+        "TextArray",
+        "Text",
+        "Text",
+        "TextArray",
+        "Text",
+        "Int8",
+        "Text",
         "Text"
       ]
     },
@@ -256,8 +264,8 @@
       false,
       false,
       false,
-      false,
-      false,
+      true,
+      true,
       false,
       false,
       true,
@@ -276,5 +284,5 @@
       true
     ]
   },
-  "hash": "8036c72c402b8e1415a944981e306f8233f9134eea34567fc720af42007c39e4"
+  "hash": "0efd633f0581929f7bc0a9f048f57c700683f467370ee5b4bd36e62bbf1dc172"
 }

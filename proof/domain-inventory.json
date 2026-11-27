@@ -510,6 +510,10 @@
       "status": "unproved",
       "reason": "constructor-or-accessor"
     },
+    "components/pricing/src/domain/decimal.rs::Decimal::fmt": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
     "components/pricing/src/domain/decimal.rs::Decimal::normalized": {
       "status": "unproved",
       "reason": "money-representation"

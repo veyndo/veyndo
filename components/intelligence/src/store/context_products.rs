@@ -1,4 +1,5 @@
 //! Bounded localized products for a model context; exact-ID hydration never falls back to a different catalogue.
+use veyndo_catalog::store::exact::Exact;
 use veyndo_catalog::store::products::ProductRow;
 use veyndo_core::{Result, State};
 use veyndo_pricing::domain::catalog::Product;
@@ -12,7 +13,7 @@ pub async fn localized_products(
     fallback: bool,
 ) -> Result<Vec<Product>> {
     // Empty retrieval still provides a stable bounded catalog for explicitly named IDs/fixtures.
-    let mut ps = sqlx::query_as!(ProductRow, "SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products p WHERE p.tenant=$1 AND p.parent_id IS NULL AND (($3 AND cardinality($2::text[])=0) OR p.id=ANY($2)) ORDER BY coalesce(array_position($2,p.id),1000),p.id LIMIT 24", t, ids, fallback)
+    let mut ps = sqlx::query_as!(ProductRow, "SELECT id,name,category,description,price_decimal AS \"price!: Exact\",tax_rate_decimal AS \"tax_rate!: Exact\",stock,revision,list_price_decimal AS \"list_price: Exact\",regulation_price_decimal AS \"regulation_price: Exact\",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products p WHERE p.tenant=$1 AND p.parent_id IS NULL AND (($3 AND cardinality($2::text[])=0) OR p.id=ANY($2)) ORDER BY coalesce(array_position($2,p.id),1000),p.id LIMIT 24", t, ids, fallback)
         .fetch_all(&a.db)
         .await?
         .into_iter()

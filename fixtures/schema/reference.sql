@@ -2256,6 +2256,47 @@ BEGIN
 END;
 $$;
 
+CREATE FUNCTION public.products_exact_prices() RETURNS trigger
+    LANGUAGE plpgsql
+    SET extra_float_digits TO '1'
+    AS $$
+BEGIN
+ IF TG_OP = 'INSERT' THEN
+  IF NEW.price_decimal IS NOT NULL THEN NEW.price := NEW.price_decimal::double precision;
+  ELSE NEW.price_decimal := NEW.price::text::numeric; END IF;
+  IF NEW.tax_rate_decimal IS NOT NULL THEN NEW.tax_rate := NEW.tax_rate_decimal::double precision;
+  ELSE NEW.tax_rate_decimal := NEW.tax_rate::text::numeric; END IF;
+  IF NEW.list_price_decimal IS NOT NULL THEN NEW.list_price := NEW.list_price_decimal::double precision;
+  ELSE NEW.list_price_decimal := NEW.list_price::text::numeric; END IF;
+  IF NEW.regulation_price_decimal IS NOT NULL THEN NEW.regulation_price := NEW.regulation_price_decimal::double precision;
+  ELSE NEW.regulation_price_decimal := NEW.regulation_price::text::numeric; END IF;
+  RETURN NEW;
+ END IF;
+ -- An update follows whichever representation the statement changed; the exact one wins.
+ -- A required exact column left empty (a row the backfill has not reached) follows the binary64 one.
+ IF NEW.price_decimal IS DISTINCT FROM OLD.price_decimal AND NEW.price_decimal IS NOT NULL THEN
+  NEW.price := NEW.price_decimal::double precision;
+ ELSIF NEW.price IS DISTINCT FROM OLD.price OR NEW.price_decimal IS NULL THEN
+  NEW.price_decimal := NEW.price::text::numeric;
+ END IF;
+ IF NEW.tax_rate_decimal IS DISTINCT FROM OLD.tax_rate_decimal AND NEW.tax_rate_decimal IS NOT NULL THEN
+  NEW.tax_rate := NEW.tax_rate_decimal::double precision;
+ ELSIF NEW.tax_rate IS DISTINCT FROM OLD.tax_rate OR NEW.tax_rate_decimal IS NULL THEN
+  NEW.tax_rate_decimal := NEW.tax_rate::text::numeric;
+ END IF;
+ IF NEW.list_price_decimal IS DISTINCT FROM OLD.list_price_decimal THEN
+  NEW.list_price := NEW.list_price_decimal::double precision;
+ ELSIF NEW.list_price IS DISTINCT FROM OLD.list_price OR (NEW.list_price_decimal IS NULL AND NEW.list_price IS NOT NULL) THEN
+  NEW.list_price_decimal := NEW.list_price::text::numeric;
+ END IF;
+ IF NEW.regulation_price_decimal IS DISTINCT FROM OLD.regulation_price_decimal THEN
+  NEW.regulation_price := NEW.regulation_price_decimal::double precision;
+ ELSIF NEW.regulation_price IS DISTINCT FROM OLD.regulation_price OR (NEW.regulation_price_decimal IS NULL AND NEW.regulation_price IS NOT NULL) THEN
+  NEW.regulation_price_decimal := NEW.regulation_price::text::numeric;
+ END IF;
+ RETURN NEW;
+END $$;
+
 CREATE FUNCTION public.queue_vector_index() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -4826,6 +4867,10 @@ CREATE TABLE public.products (
     product_number text,
     created_at timestamp with time zone DEFAULT clock_timestamp() NOT NULL,
     content_revision bigint DEFAULT 1 NOT NULL,
+    price_decimal numeric,
+    tax_rate_decimal numeric,
+    list_price_decimal numeric,
+    regulation_price_decimal numeric,
     CONSTRAINT products_content_revision_check CHECK ((content_revision >= 0)),
     CONSTRAINT products_delivery_days_check CHECK (((delivery_days >= 0) AND (delivery_days <= 365))),
     CONSTRAINT products_max_purchase_check CHECK ((max_purchase > 0)),
@@ -5139,6 +5184,8 @@ CREATE TRIGGER commerce_settings_cache_version BEFORE INSERT OR UPDATE ON public
 
 CREATE TRIGGER document_index_outbox AFTER INSERT OR DELETE OR UPDATE ON public.knowledge_chunks FOR EACH ROW EXECUTE FUNCTION public.queue_vector_index('document');
 
+CREATE TRIGGER exact_prices_sync BEFORE INSERT OR UPDATE ON public.products FOR EACH ROW EXECUTE FUNCTION public.products_exact_prices();
+
 CREATE TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON public.b2b_approvals FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('b2bApproval', 'id');
 
 CREATE TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON public.b2b_catalog FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('b2bUnit', 'unit_id');
@@ -5276,6 +5323,20 @@ CREATE VIEW public.membership_grants WITH (security_invoker='true') AS
         END AS permissions
    FROM (public.memberships m
      JOIN public.workspace_roles r ON (((r.tenant = m.tenant) AND (r.id = m.role))));
+
+GRANT SELECT ON TABLE public.membership_grants TO veyndo_runtime;
+
+GRANT SELECT,INSERT,DELETE ON TABLE public.app_record_versions TO veyndo_runtime;
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.outbox_tenant_dispatch TO veyndo_runtime;
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.studio_workspace_versions TO veyndo_runtime;
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.studio_workspaces TO veyndo_runtime;
+
+GRANT SELECT,INSERT,REFERENCES,DELETE,UPDATE ON TABLE public.workspace_roles TO veyndo_runtime;
+
+GRANT SELECT,USAGE ON SEQUENCE public.outbox_dispatch_sequence TO veyndo_runtime;
 
 REVOKE ALL ON FUNCTION public.app_record_prepare() FROM PUBLIC;
 
@@ -5666,7 +5727,7 @@ COPY public.product_reviews (id, tenant, product_id, session, author, rating, ti
 COPY public.product_translations (tenant, product_id, language_id, name, description) FROM stdin;
 
 
-COPY public.products (tenant, id, name, category, description, price, tax_rate, stock, revision, list_price, regulation_price, reference_price, advanced_prices, min_purchase, purchase_steps, max_purchase, parent_id, options, media, properties, delivery_days, extra, active, product_number, created_at, content_revision) FROM stdin;
+COPY public.products (tenant, id, name, category, description, price, tax_rate, stock, revision, list_price, regulation_price, reference_price, advanced_prices, min_purchase, purchase_steps, max_purchase, parent_id, options, media, properties, delivery_days, extra, active, product_number, created_at, content_revision, price_decimal, tax_rate_decimal, list_price_decimal, regulation_price_decimal) FROM stdin;
 
 
 COPY public.projections (event_id, tenant, kind, data, projected_at) FROM stdin;
