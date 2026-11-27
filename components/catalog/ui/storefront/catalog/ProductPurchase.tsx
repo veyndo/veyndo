@@ -1,5 +1,6 @@
 /** Product page purchase area: adapts the product detail to the kit product-summary part and keeps variant navigation, app slots and cart rules. */
 import { productURL } from "./product-url";
+import { optionLabel } from "../../../../../frontend/src/shared/content/option-labels";
 import {
   brandKicker,
   useShopBrand,
@@ -148,14 +149,14 @@ export default function ProductPurchase({
         groups={groups.map((group) => ({
           id: group,
           label: s(group),
-          selected: s(p.options[group]),
+          selected: optionLabel([p, ...data.variants], group, p.options[group]),
           options: orderOptionValues(
             [...new Set(data.variants.map((v) => v.options[group]))].filter(
               Boolean,
             ),
           ).map((option) => ({
             value: option,
-            label: s(option),
+            label: optionLabel(data.variants, group, option),
             available: !!variantFor(group, option),
             selected: p.options[group] === option,
             swatch: group === "color" ? option : undefined,

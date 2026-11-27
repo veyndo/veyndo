@@ -67,6 +67,7 @@ export type PosProduct = {
   min_purchase?: number;
   purchase_steps?: number;
   options?: Record<string, string>;
+  extra?: { optionLabels?: Record<string, string> } | null;
   parentId?: string;
   children?: unknown[];
 };

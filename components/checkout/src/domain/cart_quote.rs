@@ -139,7 +139,7 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
             .and_then(|d| d.checked_mul(hundred))
             .and_then(|d| d.rounded(0))
             .map_err(bad)?;
-        lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":format!("{}{}",p.name,p.options.as_object().filter(|o|!o.is_empty()).map(|o|format!(" · {}",o.values().filter_map(|v|v.as_str()).collect::<Vec<_>>().join(" / "))).unwrap_or_default()),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":discount_percent,"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
+        lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":line_label(p),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":discount_percent,"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
     }
     for line in &mut lines {
         let mut configs = c
@@ -181,6 +181,17 @@ pub fn quote(c: &StoredCart, ps: &[Product], settings: &Settings) -> Result<Valu
     )
 }
 /// The fee of an app configuration in the cart currency.
+/// A cart line's label: the product name and its option values in the cart's language ("Coat · Camel / L").
+/// The quote is frozen into the order snapshot, so a placed order keeps the names it was bought with.
+fn line_label(p: &Product) -> String {
+    let options = veyndo_catalog::domain::option_values::display(&p.extra, &p.options);
+    if options.is_empty() {
+        p.name.clone()
+    } else {
+        format!("{} · {options}", p.name)
+    }
+}
+
 pub fn configuration_price(
     config: &AppConfiguration,
     cfg: &Config,
@@ -217,7 +228,7 @@ pub fn normalized_quantity(p: &Product, q: u32) -> Result<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Decimal, configuration_price, normalized_quantity, quote};
+    use super::{Decimal, configuration_price, line_label, normalized_quantity, quote};
     use serde_json::{Value, json};
     use veyndo_pricing::catalog::Product;
     use veyndo_shop::Settings;
@@ -279,5 +290,18 @@ mod tests {
         let config: AppConfiguration = serde_json::from_value(json!({"app":"engraving","productId":"p1","fields":{},"feeMinor":250,"ruleRevision":1,"appVersion":"1.0.0","entity":"engravings","record":"r1"})).unwrap();
         let fee = configuration_price(&config, &s.currencies, currency).unwrap();
         assert!(fee > Decimal::ZERO);
+    }
+
+    /// A line names the product and its option values in the cart's language, falling back to the value key.
+    #[test]
+    fn a_line_label_uses_the_resolved_option_names() {
+        let mut p = product(1, 1, None);
+        p.name = "Harbor Wollmantel".into();
+        p.options = json!({"color":"camel","size":"L"});
+        assert_eq!(line_label(&p), "Harbor Wollmantel · camel / L");
+        p.extra = json!({"optionLabels":{"color":"Kamel","size":"L"}});
+        assert_eq!(line_label(&p), "Harbor Wollmantel · Kamel / L");
+        p.options = json!({});
+        assert_eq!(line_label(&p), "Harbor Wollmantel");
     }
 }

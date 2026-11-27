@@ -68,6 +68,13 @@ export type Product = {
     shippingFree?: boolean;
     digital?: boolean;
     compliance?: Record<string, unknown>;
+    /** Effective names of this product's option values in the requested language. */
+    optionLabels?: Record<string, string>;
+    /** Stored names per option group, value key and content language (family root). */
+    optionValues?: Record<
+      string,
+      Record<string, Record<string, string | null | undefined>>
+    >;
     richDescription?: Record<
       string,
       import("../content/RichDescription").RichBlock[]

@@ -14,10 +14,10 @@ Money runs on whole minor units (`Minor`, `Money`) and exact decimals and ration
 | core | 0 | 0 | 0 |
 | pricing | 105 | 9 | 96 |
 | inventory | 6 | 1 | 5 |
-| checkout | 23 | 3 | 20 |
+| checkout | 24 | 3 | 21 |
 | payments | 37 | 3 | 34 |
 | orders | 39 | 4 | 35 |
-| **all** | **210** | **20** | **190** |
+| **all** | **211** | **20** | **191** |
 
 ## Functions that bind proved rules
 
@@ -79,10 +79,11 @@ Reads, writes or projects JSON/serde documents; data mapping, not a decision rul
 - `components/pricing/src/domain/catalog.rs`: `public_extra`
 - `components/pricing/src/domain/quote.rs`: `QuoteTax::from`
 
-### text-and-locale (8)
+### text-and-locale (9)
 
 Text, labels, locale or formatting; no commerce invariant to prove.
 
+- `components/checkout/src/domain/cart_quote.rs`: `line_label`
 - `components/orders/src/domain/company_model.rs`: `address`, `default_order_prefix`, `order_number`
 - `components/orders/src/domain/import_product.rs`: `text`
 - `components/orders/src/domain/order_machine.rs`: `labels`

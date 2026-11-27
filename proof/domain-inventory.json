@@ -19,6 +19,10 @@
       "status": "unproved",
       "reason": "money-representation"
     },
+    "components/checkout/src/domain/cart_quote.rs::line_label": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
     "components/checkout/src/domain/cart_quote.rs::normalized_quantity": {
       "status": "unproved",
       "reason": "decision-outside-subset"

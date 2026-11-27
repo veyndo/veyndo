@@ -8,6 +8,7 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 
 - [`AssistantMarkdown.tsx`](AssistantMarkdown.tsx): Display model prose and tables in Studio and storefront without enabling model-generated links or HTML.
 - [`RichDescription.tsx`](RichDescription.tsx): Safe rich blocks with native image/video rendering; no HTML interpretation or script execution.
+- [`option-labels.ts`](option-labels.ts): Variant option value names resolved by the server (`extra.optionLabels`); the value key is shown only when no language names it.
 - [`product-seo.ts`](product-seo.ts): Shared per-field SEO inheritance, encoded product paths and client feedback matching native metadata limits.
 - [`shop-brand.tsx`](shop-brand.tsx): Shop brand for storefront kickers, breadcrumbs and titles (brand name, company name, shop ID); the platform brand never stands in.
 - [`rich-document.tsx`](rich-document.tsx): Safe structured editor rendering. Only known nodes/marks produce elements; URLs are never executable.

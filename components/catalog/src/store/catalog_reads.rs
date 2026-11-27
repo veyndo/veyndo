@@ -13,6 +13,7 @@ pub async fn page(
     criteria: &CatalogCriteria,
     locale: &str,
     main_locale: &str,
+    name_locales: &[String],
 ) -> Result<Vec<Product>> {
     let limit = criteria.page_size()?;
     let category = criteria.category.as_deref().filter(|s| !s.is_empty());
@@ -114,6 +115,7 @@ pub async fn page(
             .bind(literal_pattern(candidate))
             .bind(&criteria.channel_id)
             .bind(criteria.b2b_unit.as_deref())
+            .bind(name_keys(name_locales))
             .fetch_all(&a.db)
             .await?
             .iter()
@@ -169,4 +171,17 @@ pub async fn variants(
         rows.into_iter().take(limit).map(Product::from).collect(),
         next_cursor,
     ))
+}
+
+/// The content keys option value names may be stored under for these locales: each locale and its base language.
+fn name_keys(locales: &[String]) -> Vec<String> {
+    let mut keys = Vec::new();
+    for locale in locales {
+        for key in [locale.as_str(), locale.split('-').next().unwrap_or(locale)] {
+            if !keys.iter().any(|k| k == key) {
+                keys.push(key.to_owned());
+            }
+        }
+    }
+    keys
 }

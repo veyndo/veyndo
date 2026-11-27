@@ -39,4 +39,17 @@ SELECT DISTINCT ON (id) * FROM (
      ) LIKE $4
      OFFSET 0
    ) p ORDER BY hits.product_id LIMIT $6)
+  UNION ALL
+  -- Variant option value names in the effective languages ($10: locale and base keys),
+  -- stored on the family root as extra.optionValues. Only roots that name values are read.
+  (SELECT p.* FROM products p
+   WHERE p.tenant=$1 AND p.parent_id IS NULL AND p.active AND p.extra ? 'optionValues' AND cardinality($10::text[])>0 AND ($9::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$9 AND (b.product_id=p.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id)))) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.product_id=p.id AND v.channel_id=$8 AND NOT v.visible) AND p.id>$2
+     AND ($3::text IS NULL OR p.category=$3)
+     AND jsonb_typeof(p.extra->'optionValues')='object'
+     AND EXISTS(
+       SELECT 1 FROM jsonb_each(p.extra->'optionValues') g(name,vals)
+       CROSS JOIN LATERAL jsonb_each(CASE WHEN jsonb_typeof(g.vals)='object' THEN g.vals ELSE '{}'::jsonb END) o(name,texts)
+       CROSS JOIN LATERAL jsonb_each_text(CASE WHEN jsonb_typeof(o.texts)='object' THEN o.texts ELSE '{}'::jsonb END) l(lang,label)
+       WHERE l.lang=ANY($10) AND lower(l.label) LIKE $4)
+   ORDER BY p.id LIMIT $6)
 ) hits ORDER BY id LIMIT $6;
