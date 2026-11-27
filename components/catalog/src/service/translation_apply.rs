@@ -3,11 +3,12 @@ use crate::domain::selection;
 use crate::domain::translation_fields::merge_metadata;
 use crate::ports::Catalog;
 use crate::store::{product_edit, translation_jobs};
+use crate::types::events::TranslationApplied;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::{RequestContext, Result, bad, conflict, store::outbox};
+use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_pricing::verified_kernel;
 
@@ -86,18 +87,13 @@ pub async fn apply(c: &Catalog, h: &RequestContext, id: &str, v: &Value) -> Resu
             )
             .await?;
             translation_jobs::update_metadata(&mut tx, &tenant, &draft.product_id, extra).await?;
-            outbox::publish(
-                &mut tx,
-                &tenant,
-                "product.updated",
-                translation_jobs::applied_event(
-                    &draft.product_id,
-                    &job.target_locale,
-                    draft.revision + 1,
-                    id,
-                ),
-            )
-            .await?;
+            let applied_event = TranslationApplied {
+                product_id: &draft.product_id,
+                locale: &job.target_locale,
+                revision: draft.revision + 1,
+                job_id: id,
+            };
+            veyndo_core::events::emit(&mut *tx, &tenant, &applied_event).await?;
             applied += 1;
             "applied"
         } else {

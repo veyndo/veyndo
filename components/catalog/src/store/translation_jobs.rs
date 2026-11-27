@@ -1,5 +1,5 @@
 //! Translation jobs and their per-product drafts, as far as applying reviewed drafts needs them.
-use serde_json::{Value, json};
+use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
@@ -102,11 +102,6 @@ pub async fn ready_drafts(tx: &mut PgConnection, tenant: &str, job: &str) -> Res
     Ok(sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM translation_items WHERE tenant=$1 AND job_id=$2 AND status='ready'"#, tenant, job)
     .fetch_one(tx)
     .await?)
-}
-
-/// The event payload of a product changed by an applied translation.
-pub fn applied_event(product: &str, locale: &str, revision: i64, job: &str) -> Value {
-    json!({"productId":product,"locale":locale,"revision":revision,"jobId":job})
 }
 
 /// How many products a new job covers and the highest product ID it will reach.

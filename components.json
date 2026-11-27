@@ -706,6 +706,7 @@
         "src/demo_catalog.rs",
         "src/developer",
         "src/documents",
+        "src/events.rs",
         "src/experience.rs",
         "src/extensions.rs",
         "src/foundation.rs",

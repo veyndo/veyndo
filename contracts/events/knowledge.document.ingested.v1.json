@@ -1,0 +1,44 @@
+{
+  "$id": "knowledge.document.ingested.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A knowledge source was stored for the first time.",
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "productId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sourceType": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "documentId",
+    "productId",
+    "sourceType"
+  ],
+  "title": "knowledge.document.ingested",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "knowledge.document.ingested",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "DocumentIngested"
+      }
+    ],
+    "version": 1
+  }
+}

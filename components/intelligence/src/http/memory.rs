@@ -1,6 +1,7 @@
 //! Merchant memory reads and revision-bound hypothesis decisions.
 use crate::store::observations::observations;
 use crate::store::product_reads::decide_hypothesis;
+use crate::types::events::HypothesisDecided;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -49,13 +50,12 @@ pub async fn decide(
     if !decide_hypothesis(&mut *tx, &t, &id, state, revision).await? {
         return Err(conflict("Hypothesis revision changed"));
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "intelligence.decision",
-        &json!({"hypothesisId":id,"state":state,"experimentStarted":false}),
-    )
-    .await?;
+    let decided = HypothesisDecided {
+        hypothesis_id: &id,
+        state,
+        experiment_started: false,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &decided).await?;
     tx.commit().await?;
     Ok(Json(
         json!({"state":state,"experimentStarted":false,"nextStep":"Configure a controlled experiment; marking an idea does not run one"}),

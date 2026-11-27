@@ -1,4 +1,5 @@
 //! Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed.
+use crate::types::events::ConfigurationChanged;
 use serde_json::json;
 use std::collections::HashMap;
 use veyndo_core::Result;
@@ -32,7 +33,19 @@ pub async fn configuration_events(
             .values()
             .map(|v| &v.product_id)
             .collect::<std::collections::BTreeSet<_>>();
-        veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, "app.configuration.changed", &json!({"app":app,"cartId":c.id,"revision":c.revision,"salesChannelId":c.data.sales_channel,"operation":if new.is_empty() {"removed"} else {"configured"},"products":products})).await?;
+        let changed = ConfigurationChanged {
+            app,
+            cart_id: &c.id,
+            revision: c.revision,
+            sales_channel_id: &c.data.sales_channel,
+            operation: if new.is_empty() {
+                "removed"
+            } else {
+                "configured"
+            },
+            products,
+        };
+        veyndo_core::events::emit(&mut **tx, &c.tenant, &changed).await?;
     }
     Ok(())
 }

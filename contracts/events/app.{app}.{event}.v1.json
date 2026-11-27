@@ -1,0 +1,25 @@
+{
+  "$id": "app.{app}.{event}.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An app emitted an event in its own namespace, received one by webhook or a schedule fired; the payload is the app's (at most 16 KiB when emitted through the gateway). App-defined payload: the app's manifest declares its shape.",
+  "title": "app.{app}.{event}",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows",
+      "app:migration",
+      "app:marketplaces"
+    ],
+    "kind": "app.{app}.{event}",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "AppDefined"
+      }
+    ],
+    "version": 1
+  }
+}

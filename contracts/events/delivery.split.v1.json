@@ -1,0 +1,61 @@
+{
+  "$id": "delivery.split.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Positions of one delivery were split into a new parcel; `order` is the snapshot without the cart token.",
+  "properties": {
+    "deliveryId": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "order": {},
+    "orderId": {
+      "type": "string"
+    },
+    "positions": {},
+    "requestKey": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "sourceIndex": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deliveryId",
+    "kind",
+    "order",
+    "orderId",
+    "positions",
+    "requestKey",
+    "revision",
+    "sourceIndex",
+    "state"
+  ],
+  "title": "delivery.split",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "delivery.split",
+    "producers": [
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "DeliverySplit"
+      }
+    ],
+    "version": 1
+  }
+}

@@ -1,5 +1,6 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use crate::service::guard;
+use crate::types::events::DiscountChanged;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::service::{app_adjustments, delivery};
@@ -60,7 +61,15 @@ pub async fn save(
     c.revision += 1;
     let quote = carts.view(&c).await?;
     register_carts::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.discount_changed", &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).await?;
+    let changed = DiscountChanged {
+        cart_id: &c.id,
+        sales_channel_id: &c.data.sales_channel,
+        cashier_id: h.pos.as_ref().map(|p| p.actor.as_str()),
+        previous: json!(previous),
+        discount: json!(c.data.pos_discount),
+        revision: c.revision,
+    };
+    veyndo_core::events::emit(&mut *tx, &c.tenant, &changed).await?;
     tx.commit().await?;
     Ok(quote)
 }

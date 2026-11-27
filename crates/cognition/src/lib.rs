@@ -4,3 +4,4 @@ pub mod images;
 pub mod inference;
 pub mod ports;
 pub mod prompts;
+pub mod types;

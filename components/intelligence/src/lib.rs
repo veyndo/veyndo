@@ -5,3 +5,4 @@ pub mod knowledge;
 pub mod ports;
 pub mod service;
 pub mod store;
+pub mod types;

@@ -1,6 +1,7 @@
 //! Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. The unit's listed product ids are read here and checked against product identity from the records port in the same transaction.
 use crate::ports::{CatalogProduct, records};
 use crate::store::access::guard_conn;
+use crate::types::events::CatalogChanged;
 use crate::types::model::Access;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -112,13 +113,11 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Resul
     )
     .execute(&mut *conn)
     .await?;
-    crate::store::organization::event(
-        conn,
-        t,
-        "b2b.catalog_changed",
-        json!({"unitId":unit,"revision":revision+1}),
-    )
-    .await?;
+    let changed = CatalogChanged {
+        unit_id: unit,
+        revision: revision + 1,
+    };
+    crate::store::organization::event(conn, t, &changed).await?;
     Ok(json!({"revision":revision+1}))
 }
 

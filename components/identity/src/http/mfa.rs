@@ -4,6 +4,7 @@ use crate::domain::credentials::{password, verify_password};
 use crate::domain::totp;
 use crate::store::sessions::{self, SessionProof, issue_verified_tx};
 use crate::store::{merchant_accounts, mfa};
+use crate::types::events::MfaChanged;
 use axum::Json;
 use axum::extract::State;
 use serde::Deserialize;
@@ -143,13 +144,12 @@ pub async fn confirm(
     let digests: Vec<String> = codes.iter().map(|c| hash(c)).collect();
     mfa::enable(&mut tx, user, &cipher, &json!(digests), step).await?;
     sessions::revoke_all(&mut tx, user).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &tenant(&h)?,
-        "account.security.updated",
-        &json!({"userId":user,"action":"mfa.enabled","revision":row.revision+1}),
-    )
-    .await?;
+    let enabled = MfaChanged {
+        user_id: user,
+        action: "mfa.enabled",
+        revision: row.revision + 1,
+    };
+    veyndo_core::events::emit(&mut *tx, &tenant(&h)?, &enabled).await?;
     let session =
         issue_verified_tx(&mut tx, user, &tenant(&h)?, SessionProof::SecondFactor).await?;
     tx.commit().await?;
@@ -203,7 +203,12 @@ pub async fn disable(
         return Err(conflict("Security settings changed; reload"));
     }
     sessions::revoke_all(&mut tx, user).await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &tenant(&h)?, "account.security.updated", &json!({"userId":user,"action":"mfa.disabled","revision":input.revision.unwrap_or_default()+1})).await?;
+    let disabled = MfaChanged {
+        user_id: user,
+        action: "mfa.disabled",
+        revision: input.revision.unwrap_or_default() + 1,
+    };
+    veyndo_core::events::emit(&mut *tx, &tenant(&h)?, &disabled).await?;
     tx.commit().await?;
     Ok(Json(json!({"enabled":false,"signInRequired":true})))
 }

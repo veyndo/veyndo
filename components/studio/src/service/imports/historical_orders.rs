@@ -1,6 +1,7 @@
 //! Immutable native historical orders preserve exact amounts and provenance without purchase, stock, account or payment effects.
 use super::SourceRecord;
 use crate::store::imports as db;
+use crate::types::events::RecordImported;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_platform::store::package_fence::lock_package_write;
@@ -167,13 +168,11 @@ pub async fn import(
         },
     )
     .await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "migration.record.imported",
-        &json!({"kind":"orders","targetId":id}),
-    )
-    .await?;
+    let imported = RecordImported {
+        kind: "orders",
+        target_id: &id,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &imported).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"replayed":false,"historical":true}))
 }

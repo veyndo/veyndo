@@ -1,0 +1,79 @@
+{
+  "$id": "settings.master_data_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "type": "integer"
+        },
+        "salesChannelId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "revision",
+        "salesChannelId"
+      ],
+      "title": "MasterDataSaved (veyndo-orders)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "release": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "release"
+      ],
+      "title": "MasterDataReleased (veyndo-orders)",
+      "type": "object"
+    }
+  ],
+  "description": "The seller master data of the shop or one sales channel was saved. | A staging release published seller master data to the live shop.",
+  "properties": {
+    "release": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "salesChannelId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [],
+  "title": "settings.master_data_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "settings.master_data_changed",
+    "producers": [
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "MasterDataSaved"
+      },
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "MasterDataReleased"
+      }
+    ],
+    "version": 1
+  }
+}

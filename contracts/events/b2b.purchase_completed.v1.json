@@ -1,0 +1,56 @@
+{
+  "$id": "b2b.purchase_completed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A company purchase was placed against its budget; `totalMinor` is in minor units of `currency`.",
+  "properties": {
+    "approvalId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "companyId": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "totalMinor": {
+      "type": "integer"
+    },
+    "unitId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "approvalId",
+    "companyId",
+    "currency",
+    "orderId",
+    "totalMinor",
+    "unitId"
+  ],
+  "title": "b2b.purchase_completed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.purchase_completed",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "PurchaseCompleted"
+      }
+    ],
+    "version": 1
+  }
+}

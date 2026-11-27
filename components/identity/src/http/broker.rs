@@ -4,6 +4,7 @@ use crate::domain::credentials::{email, hash_password, password, verify_password
 use crate::store::broker::{self, Claims, assertion};
 use crate::store::merchant_accounts;
 use crate::store::sessions::{self, issue_session, issue_session_with_proof};
+use crate::types::events::PasswordChanged;
 use axum::Json;
 use axum::extract::State;
 use serde_json::{Value, json};
@@ -56,7 +57,12 @@ pub async fn credentials(
         broker::set_password(&mut tx, &user, saved).await?;
         // Password recovery also invalidates older Studio sessions and unredeemed handoffs.
         sessions::revoke_sessions_and_handoffs(&mut tx, &user).await?;
-        veyndo_core::store::outbox::publish_on(&mut *tx, shop, "account.security.updated", &json!({"userId":user,"action":"password.changed","credentialRevision":row.credential_revision+1})).await?;
+        let changed = PasswordChanged {
+            user_id: &user,
+            action: "password.changed",
+            credential_revision: row.credential_revision + 1,
+        };
+        veyndo_core::events::emit(&mut *tx, shop, &changed).await?;
     }
     tx.commit().await?;
     Ok(Json(issue_session(&a, &user, shop).await?))

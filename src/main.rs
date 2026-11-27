@@ -29,6 +29,7 @@ mod customer;
 mod demo_catalog;
 mod developer;
 mod documents;
+mod events;
 mod experience;
 mod extensions;
 mod foundation;

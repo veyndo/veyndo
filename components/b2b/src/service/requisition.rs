@@ -3,6 +3,7 @@ use crate::service::quick_order;
 use crate::store::access::{access, require};
 use crate::store::lists;
 use crate::store::{catalog, organization};
+use crate::types::events::RequisitionCreated;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
@@ -85,13 +86,12 @@ pub async fn import(
     }
     let owner = lists::Owner { unit, owner: buyer };
     lists::insert(&mut tx, t, id, owner, &normalized).await?;
-    organization::event(
-        &mut tx,
-        t,
-        "b2b.list_changed",
-        json!({"id":id,"unitId":unit,"revision":1}),
-    )
-    .await?;
+    let created = RequisitionCreated {
+        id,
+        unit_id: unit,
+        revision: 1,
+    };
+    organization::event(&mut tx, t, &created).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"revision":1,"replayed":false}))
 }

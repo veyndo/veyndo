@@ -226,6 +226,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/documents/questions.rs](../src/documents/questions.rs) | Product question route; the intelligence component owns the answer, its citations and the re-admission. |
 | [src/documents/retrieval.rs](../src/documents/retrieval.rs) | Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component. |
 | [src/documents/tools.rs](../src/documents/tools.rs) | Knowledge workspace/source MCP tools delegate to the same authorized HTTP operations and schemas. |
+| [src/events.rs](../src/events.rs) | The outbox event schema registry: every component's typed payloads, their consumers and the contracts generated into `contracts/events/`. |
 | [src/experience.rs](../src/experience.rs) | The storefront experience lives in the intelligence component; this handler supplies the experiment assignment secret. |
 | [src/extensions.rs](../src/extensions.rs) | Merchant catalogue route and the business policy routes; the apps component owns policy activation and state. |
 | [src/foundation.rs](../src/foundation.rs) | Application dependencies, error responses and request context helpers. |
@@ -430,6 +431,8 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
 | [crates/cognition/src/ports.rs](../crates/cognition/src/ports.rs) | What the inference component needs from the server without depending on the owners: agent key budgets |
 | [crates/cognition/src/prompts.rs](../crates/cognition/src/prompts.rs) | Versioned system-prompt provenance; no prompt text or private context is exposed in evidence. |
+| [crates/cognition/src/types/events.rs](../crates/cognition/src/types/events.rs) | The outbox events the inference crate publishes: typed payloads behind `contracts/events/`. |
+| [crates/cognition/src/types.rs](../crates/cognition/src/types.rs) | Records the inference crate publishes to other components. |
 | [crates/flow-graph/src/catalog.rs](../crates/flow-graph/src/catalog.rs) | Stable built-in Flow identifiers shared by discovery and native admission. |
 | [crates/flow-graph/src/execution.rs](../crates/flow-graph/src/execution.rs) | Typed instructions from a validated graph. The host evaluates facts and performs effects. |
 | [crates/flow-graph/src/lib.rs](../crates/flow-graph/src/lib.rs) | Dependency-free validation and indexed lookup for bounded commerce flow graphs. |
@@ -621,6 +624,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/webhook_receipts.rs](../components/apps/src/store/webhook_receipts.rs) | Receipts of incoming app webhooks: one outbox event per (app, webhook, sender event ID), replayed on repeats. |
 | [components/apps/src/store/workspace.rs](../components/apps/src/store/workspace.rs) | App samples for the merchant workspace: active apps with failed jobs and the activity check of workflow source apps. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
+| [components/apps/src/types/events.rs](../components/apps/src/types/events.rs) | The outbox events the apps component publishes: typed payloads behind `contracts/events/`. |
+| [components/apps/src/types.rs](../components/apps/src/types.rs) | Records the apps component publishes to other components. |
 | [components/apps/tests/port_adapters.rs](../components/apps/tests/port_adapters.rs) | Test adapters for the app platform ports (`RecordRules`, `CommerceInstall`, `HostActions`, `HostedInstall`), so the apps mirror builds and tests without the server. |
 | [components/apps/ui/admin/apps/AppAccess.tsx](../components/apps/ui/admin/apps/AppAccess.tsx) | Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. |
 | [components/apps/ui/admin/apps/AppActivity.tsx](../components/apps/ui/admin/apps/AppActivity.tsx) | API-backed per-app call metadata, storage budgets and explicitly approved durable replay. |
@@ -795,8 +800,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/store/staging.rs](../components/b2b/src/store/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
 | [components/b2b/src/store/units.rs](../components/b2b/src/store/units.rs) | What an employee sees of their purchasing units: active memberships with unit and company (checked columns), and the unit's orders with their issued receipts, which belong to orders and are read through the records port. |
 | [components/b2b/src/store.rs](../components/b2b/src/store.rs) | store of this component. |
+| [components/b2b/src/types/events.rs](../components/b2b/src/types/events.rs) | The outbox events the b2b component publishes: typed payloads behind `contracts/events/`. |
 | [components/b2b/src/types/model.rs](../components/b2b/src/types/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
-| [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
+| [components/b2b/src/types.rs](../components/b2b/src/types.rs) | Records of the b2b component: its stored model and the events it publishes. |
 | [components/b2b/tests/port_adapters.rs](../components/b2b/tests/port_adapters.rs) | Test adapters for the b2b ports (`QuoteLifecycle`, `ListCarts`, `Procurement`), so the b2b mirror builds and tests without the server. |
 | [components/b2b/ui/admin/b2b/B2BRoute.tsx](../components/b2b/ui/admin/b2b/B2BRoute.tsx) | B2B route: companies or quotes in the current stage, or the disabled notice when the shop has not enabled them. |
 | [components/b2b/ui/admin/b2b/B2BWorkspace.tsx](../components/b2b/ui/admin/b2b/B2BWorkspace.tsx) | Tenant-scoped company workspace; canonical API operations are also exposed through MCP. |
@@ -888,6 +894,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/asset.rs](../components/catalog/src/types/asset.rs) | A stored product file as merchant lists show it; the content itself never enters a list. |
 | [components/catalog/src/types/catalog_page.rs](../components/catalog/src/types/catalog_page.rs) | The filters and cursor of a storefront catalogue read, and one page of products. |
 | [components/catalog/src/types/category.rs](../components/catalog/src/types/category.rs) | A category write: its place in the tree and its data with translations per content language. |
+| [components/catalog/src/types/events.rs](../components/catalog/src/types/events.rs) | The outbox events the catalog component publishes: typed payloads behind `contracts/events/`. |
 | [components/catalog/src/types/product_edit.rs](../components/catalog/src/types/product_edit.rs) | The product edit payload: translated texts, multilingual metadata and the optional commerce and identity fields. |
 | [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
 | [components/catalog/src/types/product_list.rs](../components/catalog/src/types/product_list.rs) | The filters, sort and cursor of the merchant product list, and one listed product. |
@@ -1035,6 +1042,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
+| [components/checkout/src/types/events.rs](../components/checkout/src/types/events.rs) | The outbox events the checkout component publishes: typed payloads behind `contracts/events/`. |
+| [components/checkout/src/types.rs](../components/checkout/src/types.rs) | Records the checkout component publishes to other components. |
 | [components/checkout/tests/domain_mutants.rs](../components/checkout/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in checkout `domain/`: exact quote amounts for consumer and business carts, tiers, list/regulation/reference prices, app fees, and the review and tax-line rules. |
 | [components/checkout/tests/port_adapters.rs](../components/checkout/tests/port_adapters.rs) | Test adapters for the checkout ports (`Quotes`, `CartEdits`, `Purchase`), so the checkout mirror builds and tests without the server. |
 | [components/checkout/tests/properties.rs](../components/checkout/tests/properties.rs) | Property tests for the cart quote: totals are the sum of line totals plus tax in whole minor units, and the same cart always gives the same quote. |
@@ -1068,6 +1077,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/conversions.rs](../components/core/src/conversions.rs) | Conversions from library errors into the shared error contract; the wire messages are part of the public API. |
 | [components/core/src/document.rs](../components/core/src/document.rs) | Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted. |
 | [components/core/src/document_slot.rs](../components/core/src/document_slot.rs) | Typed writes into nested fields of stored JSON documents: `field` reaches a child slot exactly as JSON index assignment does, so a typed patch (`document::merge`) can land below the top level. |
+| [components/core/src/events.rs](../components/core/src/events.rs) | The versioned outbox event contract: typed payloads declared with `event!`, their JSON Schema and the only way producers publish them. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
@@ -1146,6 +1156,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. Columns checked at compile time. |
 | [components/customers/src/store/sign_in.rs](../components/customers/src/store/sign_in.rs) | Buyer sign-in records: the active account with its credential and defaults and the login times; the cart goes through the purchases port. Columns checked at compile time. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
+| [components/customers/src/types/events.rs](../components/customers/src/types/events.rs) | The outbox events the customers component publishes: typed payloads behind `contracts/events/`. |
+| [components/customers/src/types.rs](../components/customers/src/types.rs) | Records the customers component publishes to other components. |
 | [components/customers/tests/port_adapters.rs](../components/customers/tests/port_adapters.rs) | Test adapter for the customers port `SignIn`, so the customers mirror builds and tests without the server. |
 | [components/customers/ui/admin/customers/CustomerCreate.tsx](../components/customers/ui/admin/customers/CustomerCreate.tsx) | Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. |
 | [components/customers/ui/admin/customers/CustomerDirectory.tsx](../components/customers/ui/admin/customers/CustomerDirectory.tsx) | Registered and guest contacts share native directory filters and permission-aware grid controls. |
@@ -1218,7 +1230,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/store/shop_reads.rs](../components/identity/src/store/shop_reads.rs) | Account and membership reads for the shop component's operator views: user totals, member counts, a shop's roster and an operator's account. |
 | [components/identity/src/store.rs](../components/identity/src/store.rs) | SQL of the identity component. |
 | [components/identity/src/types/envelopes.rs](../components/identity/src/types/envelopes.rs) | Stable typed authentication envelopes; field validation remains in the shared credential owner. |
-| [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
+| [components/identity/src/types/events.rs](../components/identity/src/types/events.rs) | The outbox events the identity component publishes: typed payloads behind `contracts/events/`. |
+| [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes and published events of the identity component. |
 | [components/identity/tests/port_adapters.rs](../components/identity/tests/port_adapters.rs) | Test adapter for the identity port `RoleLanguages`, so the identity mirror builds and tests without the server. |
 | [components/identity/ui/admin/team/AccessManager.tsx](../components/identity/ui/admin/team/AccessManager.tsx) | Fine-grained team overrides, revocable invitations and personal session inventory. |
 | [components/identity/ui/admin/team/AgentBudgetFields.tsx](../components/identity/ui/admin/team/AgentBudgetFields.tsx) | Explicit delegation limits; empty or invalid fields never create unbounded agent authority. |
@@ -1361,6 +1374,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/store/work_tasks.rs](../components/intelligence/src/store/work_tasks.rs) | Reviewed work and proposal tasks: proposal reads and application marks, queued execution, leased work-run checkpoints and receipts, turn release and the wake-up of tasks waiting on translation jobs. |
 | [components/intelligence/src/store/workspace.rs](../components/intelligence/src/store/workspace.rs) | Agent run samples for the merchant workspace: the actor's failed or uncertain runs within their scopes. |
 | [components/intelligence/src/store.rs](../components/intelligence/src/store.rs) | SQL of the intelligence component. |
+| [components/intelligence/src/types/events.rs](../components/intelligence/src/types/events.rs) | The outbox events the intelligence component publishes: typed payloads behind `contracts/events/`. |
+| [components/intelligence/src/types.rs](../components/intelligence/src/types.rs) | Records the intelligence component publishes to other components. |
 | [components/intelligence/ui/admin/agents/AgentsRoute.tsx](../components/intelligence/ui/admin/agents/AgentsRoute.tsx) | Agents route: the agents view over the loaded workspace data. |
 | [components/intelligence/ui/admin/agents/AgentsView.tsx](../components/intelligence/ui/admin/agents/AgentsView.tsx) | AgentsView renders verified shop state and typed user actions. |
 | [components/intelligence/ui/admin/agents/studio-extension.ts](../components/intelligence/ui/admin/agents/studio-extension.ts) | Studio extension of the agents view. |
@@ -1439,6 +1454,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/inventory/src/types/events.rs](../components/inventory/src/types/events.rs) | The outbox events the inventory component publishes: typed payloads behind `contracts/events/`. |
+| [components/inventory/src/types.rs](../components/inventory/src/types.rs) | Records the inventory component publishes to other components. |
 | [components/inventory/tests/domain_mutants.rs](../components/inventory/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in inventory `domain/`: each pins one boundary or clause of the supplier link rules. |
 | [components/inventory/tests/port_adapters.rs](../components/inventory/tests/port_adapters.rs) | Test adapters for the inventory ports (`Environments`, `ProductIndex`), so the inventory mirror builds and tests without the server. |
 | [components/inventory/tests/properties.rs](../components/inventory/tests/properties.rs) | Property tests for stock: reservations against the proved stock rule, checked inventory batches and the reorder ceiling. |
@@ -1622,6 +1639,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/unit_orders.rs](../components/orders/src/store/unit_orders.rs) | The orders of a company purchasing unit and their issued receipts, as the B2B component reads them through its records port. Columns checked at compile time. |
 | [components/orders/src/store/workflow.rs](../components/orders/src/store/workflow.rs) | The stored order workflow: its locked revision, the stranded-order check and saves at the next revision. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
+| [components/orders/src/types/events.rs](../components/orders/src/types/events.rs) | The outbox events the orders component publishes: typed payloads behind `contracts/events/`. |
 | [components/orders/src/types/list_criteria.rs](../components/orders/src/types/list_criteria.rs) | Bounded order and customer list filters and sorts, reused by HTTP, MCP and reviewed grid plans; the app host admits the app filter. |
 | [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
@@ -1695,6 +1713,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/payments/src/types/events.rs](../components/payments/src/types/events.rs) | The outbox events the payments component publishes: typed payloads behind `contracts/events/`. |
+| [components/payments/src/types.rs](../components/payments/src/types.rs) | Records the payments component publishes to other components. |
 | [components/payments/tests/domain_mutants.rs](../components/payments/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in payments `domain/`: each pins one boundary or clause of amounts, transaction details, instructions, receipts and provider URLs. |
 | [components/payments/tests/port_adapters.rs](../components/payments/tests/port_adapters.rs) | Test adapter for the payments port `Gateway`, so the payments mirror builds and tests without the server. |
 | [components/payments/tests/properties.rs](../components/payments/tests/properties.rs) | Property tests for the payment ledger: listed transitions only, no backward monetary step, captures and refunds within their bounds. |
@@ -1719,6 +1739,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/service.rs](../components/pos/src/service.rs) | Cashier operations on top of the ordinary cart and checkout. |
 | [components/pos/src/store/channel_setup.rs](../components/pos/src/store/channel_setup.rs) | A new POS channel brings its cash payment and collection delivery as channel overrides; there is no second settings store. The settings rows are read and written through the shop store. |
 | [components/pos/src/store.rs](../components/pos/src/store.rs) | POS channel setup inside the channel save; the rows it changes belong to the shop settings owner. |
+| [components/pos/src/types/events.rs](../components/pos/src/types/events.rs) | The outbox events the POS component publishes: typed payloads behind `contracts/events/`. |
+| [components/pos/src/types.rs](../components/pos/src/types.rs) | Records the POS component publishes to other components. |
 | [components/pos/tests/port_adapters.rs](../components/pos/tests/port_adapters.rs) | Test adapter for the POS port `Register`, so the pos mirror builds and tests without the server. |
 | [components/pos/ui/admin/pos/POSRoute.tsx](../components/pos/ui/admin/pos/POSRoute.tsx) | POS route: the register for the current shop or stage, with order links and authenticated receipt downloads. |
 | [components/pos/ui/admin/pos/POSWorkspace.tsx](../components/pos/ui/admin/pos/POSWorkspace.tsx) | Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. |
@@ -1859,10 +1881,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/store.rs](../components/shop/src/store.rs) | SQL of the shop component. |
 | [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [components/shop/src/types/cart.rs](../components/shop/src/types/cart.rs) | The cart as every commerce component reads it: the shared cart contract bound to this shop's contexts. |
+| [components/shop/src/types/events.rs](../components/shop/src/types/events.rs) | The outbox events the shop component publishes: typed payloads behind `contracts/events/`. |
 | [components/shop/src/types/guardrails.rs](../components/shop/src/types/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
-| [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
+| [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores and the events it publishes. |
 | [components/shop/tests/port_adapters.rs](../components/shop/tests/port_adapters.rs) | Test adapters for the shop ports (`Carts`, `SettingsGuards`), so the shop mirror builds and tests without the server. |
 | [components/shop/ui/admin/legal/ConsumerRequests.tsx](../components/shop/ui/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |
 | [components/shop/ui/admin/legal/LegalServices.tsx](../components/shop/ui/admin/legal/LegalServices.tsx) | Purpose inventory and provider disclosures edited in the selected content language. |
@@ -1983,6 +2006,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/store/work_runs.rs](../components/studio/src/store/work_runs.rs) | SQL of approved work execution: lease-fenced task checkpoints, operation admission and translation draft steps. |
 | [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
 | [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |
+| [components/studio/src/types/events.rs](../components/studio/src/types/events.rs) | The outbox events the studio component publishes: typed payloads behind `contracts/events/`. |
+| [components/studio/src/types.rs](../components/studio/src/types.rs) | Records the studio component publishes to other components. |
 | [components/studio/ui/admin/dashboard/OverviewRoute.tsx](../components/studio/ui/admin/dashboard/OverviewRoute.tsx) | Overview route: the dashboard over the loaded workspace data; product picks open the preview on narrow screens. |
 | [components/studio/ui/admin/dashboard/OverviewView.tsx](../components/studio/ui/admin/dashboard/OverviewView.tsx) | OverviewView renders verified shop state and typed user actions. |
 | [components/studio/ui/admin/dashboard/studio-extension.ts](../components/studio/ui/admin/dashboard/studio-extension.ts) | Studio extension of the overview dashboard; its cards come from the dashboard slot. |
@@ -3055,6 +3080,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/edi.py](../scripts/edi.py) | Registered EDI entry delegates app behavior and fixtures to the plugin owner. |
 | [scripts/email_tests.py](../scripts/email_tests.py) | Registered mail suite: archived differential contracts and the real Rust order/mail journey. |
 | [scripts/erp_handoff.py](../scripts/erp_handoff.py) | Registered integration entry delegates reference-app behavior to its package-owned verification. |
+| [scripts/event_contracts.py](../scripts/event_contracts.py) | .rs')): |
 | [scripts/extensions.py](../scripts/extensions.py) | Activate actual Wasm policies and prove their effect on B2B checkout. |
 | [scripts/fashion_demo.py](../scripts/fashion_demo.py) | Actual default signup, fashion variants/media/localization, isolated checkout and restart; synthetic data only. |
 | [scripts/formal/axioms.py](../scripts/formal/axioms.py) | Audit owned proof sources and transitive Lean dependencies; no extra axioms are allowed. |

@@ -1,0 +1,45 @@
+{
+  "$id": "app.{app}.submitted.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A shopper submitted an app form (for example a site form); the entity row holds the fields.",
+  "properties": {
+    "app": {
+      "type": "string"
+    },
+    "entity": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "intakeKey": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "app",
+    "entity",
+    "id",
+    "intakeKey"
+  ],
+  "title": "app.{app}.submitted",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "app.{app}.submitted",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "Submitted"
+      }
+    ],
+    "version": 1
+  }
+}

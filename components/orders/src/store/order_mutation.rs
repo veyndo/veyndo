@@ -1,8 +1,10 @@
 //! Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox.
 use crate::domain::order_fields::order_fields;
+use crate::types::events::OrderUpdated;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_core::document::{lenient, view};
+use veyndo_core::events::{self, Event};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 
@@ -31,19 +33,22 @@ pub async fn replay(
     Ok(None)
 }
 
-pub struct Audit<'a> {
+/// The audit entry of a mutation and the typed event it publishes under `event_kind`.
+pub struct Audit<'a, E> {
     pub kind: &'a str,
     pub data: Value,
     pub event_kind: &'a str,
-    pub event: Value,
+    pub event: E,
 }
 
 /// The change kind and target state an audit entry records.
 #[derive(Deserialize, Default)]
 #[serde(default)]
 struct AuditFields {
-    kind: Value,
-    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
 }
 
 /// The identity, revision and import origin of an order being persisted.
@@ -55,12 +60,12 @@ struct MutatedOrder {
     id: Option<String>,
     revision: Value,
 }
-pub async fn persist(
+pub async fn persist<E: Event>(
     tx: &mut Tx<'_>,
     t: &str,
     h: &RequestContext,
     o: &mut Value,
-    audit: Audit<'_>,
+    audit: Audit<'_, E>,
 ) -> Result<()> {
     let stored: MutatedOrder = view(o);
     if !stored.historical_import.is_null() {
@@ -92,8 +97,15 @@ pub async fn persist(
     .execute(&mut **tx)
     .await?;
     sqlx::query!("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3", &*o, t, id).execute(&mut **tx).await?;
-    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":view::<AuditFields>(&audit.data).kind,"state":view::<AuditFields>(&audit.data).state,"revision":stored.revision})).await?;
-    veyndo_core::store::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
+    let fields: AuditFields = view(&audit.data);
+    let updated = OrderUpdated {
+        order_id: id,
+        kind: fields.kind.as_deref(),
+        state: fields.state.as_deref(),
+        revision: stored.revision.as_i64(),
+    };
+    events::emit(&mut **tx, t, &updated).await?;
+    events::emit_as(&mut **tx, t, audit.event_kind, &audit.event).await?;
     Ok(())
 }
 

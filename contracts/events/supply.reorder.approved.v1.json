@@ -1,0 +1,58 @@
+{
+  "$id": "supply.reorder.approved.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant approved a supplier reorder; `totalMinor` is a decimal string in minor units of `currency`.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "productId": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "supplierShop": {
+      "type": "string"
+    },
+    "totalMinor": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actor",
+    "currency",
+    "productId",
+    "quantity",
+    "supplierShop",
+    "totalMinor"
+  ],
+  "title": "supply.reorder.approved",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "supply.reorder.approved",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "ReorderApproved"
+      }
+    ],
+    "version": 1
+  }
+}

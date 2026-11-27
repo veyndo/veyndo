@@ -1,7 +1,7 @@
 //! Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry.
 use crate::ports::{CommerceInstall, RecordRules};
 use crate::store::package_install::install_tx;
-use serde_json::json;
+use crate::types::events::Activated;
 use sqlx::{Postgres, Transaction};
 use veyndo_core::{Result, bad};
 
@@ -46,13 +46,11 @@ pub async fn ensure(
             )
             .execute(&mut **tx)
             .await?;
-            veyndo_core::store::outbox::publish_on(
-                &mut **tx,
-                tenant,
-                "app.activated",
-                &json!({"app":id,"reason":"hosted_frontend"}),
-            )
-            .await?;
+            let activated = Activated {
+                app: id,
+                reason: "hosted_frontend",
+            };
+            veyndo_core::events::emit(&mut **tx, tenant, &activated).await?;
         }
         Some(true) => {}
     }

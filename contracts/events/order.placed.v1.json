@@ -1,0 +1,95 @@
+{
+  "$id": "order.placed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "appId": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "salesChannelId": {
+          "type": "string"
+        },
+        "totalMinor": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "appId",
+        "orderId",
+        "salesChannelId",
+        "totalMinor"
+      ],
+      "title": "ExternalOrderPlaced (veyndo-app-platform)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "orderId": {
+          "type": "string"
+        },
+        "totalMinor": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "orderId",
+        "totalMinor"
+      ],
+      "title": "OrderPlaced (veyndo-checkout)",
+      "type": "object"
+    }
+  ],
+  "description": "An app placed an external order (for example a marketplace sale); `totalMinor` is in minor units. | Checkout placed an order; `totalMinor` is the order total in minor units of the order currency.",
+  "properties": {
+    "appId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "salesChannelId": {
+      "type": "string"
+    },
+    "totalMinor": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "orderId",
+    "totalMinor"
+  ],
+  "title": "order.placed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows",
+      "cognition",
+      "app:email",
+      "app:slack"
+    ],
+    "kind": "order.placed",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "ExternalOrderPlaced"
+      },
+      {
+        "component": "checkout",
+        "crate": "veyndo-checkout",
+        "source": "rust",
+        "type": "OrderPlaced"
+      }
+    ],
+    "version": 1
+  }
+}

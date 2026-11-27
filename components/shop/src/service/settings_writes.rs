@@ -8,6 +8,7 @@ use crate::service::read_cache::config;
 use crate::store::group_usage::guard as group_guard;
 use crate::store::settings::{self, scoped_locked};
 use crate::store::settings_view;
+use crate::types::events::{ChannelConfigured, CommerceConfigured};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -124,13 +125,7 @@ pub async fn save_config(
     let r = settings::replace_basis_at(&mut tx, &t, &json!(s), revision)
         .await?
         .ok_or(conflict("Configuration changed; reload first"))?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "commerce.configured",
-        &json!({"revision":r}),
-    )
-    .await?;
+    veyndo_core::events::emit(&mut *tx, &t, &CommerceConfigured { revision: r }).await?;
     tx.commit().await?;
     Ok(Json(json!({"revision":r})))
 }
@@ -244,13 +239,11 @@ pub async fn save_scope(
     }
     let patch = difference(&base, &next);
     settings::upsert_override(&mut tx, &t, &channel, &patch).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "commerce.configured",
-        &json!({"channelId":channel,"revision":revision.unwrap_or(0)+1}),
-    )
-    .await?;
+    let configured = ChannelConfigured {
+        channel_id: &channel,
+        revision: revision.unwrap_or(0) + 1,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &configured).await?;
     tx.commit().await?;
     Ok(Json(
         json!({"data":next,"revision":revision.unwrap_or(0)+1,"baseRevision":input.base_revision,"inherited":base,"overrides":patch,"channelId":channel}),

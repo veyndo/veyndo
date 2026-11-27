@@ -8,6 +8,7 @@ use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
 use crate::store::{staging_clone as clone, staging_release as db};
+use crate::types::events::ReleasePublished;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -335,13 +336,11 @@ pub async fn release<H: ReleaseHost>(
         header(&h, "x-rac-user").unwrap_or("unknown"),
     )
     .await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "shop.release.published",
-        &json!({"releaseId":release,"selections":selected}),
-    )
-    .await?;
+    let published = ReleasePublished {
+        release_id: &release,
+        selections: &keys,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &published).await?;
     validate_settings_release(
         host.settings_guards(),
         &mut tx,

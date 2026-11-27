@@ -1,0 +1,50 @@
+{
+  "$id": "knowledge.document.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant edited a knowledge source; it is private again until republished.",
+  "properties": {
+    "decision": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "type": "integer"
+        },
+        "visibility": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "visibility"
+      ],
+      "type": "object"
+    },
+    "documentId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "documentId"
+  ],
+  "title": "knowledge.document.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "knowledge.document.updated",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "DocumentUpdated"
+      }
+    ],
+    "version": 1
+  }
+}

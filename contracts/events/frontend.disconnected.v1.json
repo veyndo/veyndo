@@ -1,0 +1,39 @@
+{
+  "$id": "frontend.disconnected.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant disconnected a frontend address.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "alias": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actor",
+    "alias"
+  ],
+  "title": "frontend.disconnected",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "frontend.disconnected",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "FrontendDisconnected"
+      }
+    ],
+    "version": 1
+  }
+}

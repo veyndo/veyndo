@@ -2,6 +2,7 @@
 use super::autonomy::today;
 use crate::knowledge;
 use crate::store::autonomy as store;
+use crate::types::events::{AutonomyReverted, PriceReverted};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -71,23 +72,20 @@ pub async fn revert(
             continue;
         };
         knowledge::sync_product(&mut tx, t, &json!(changed)).await?;
-        veyndo_core::store::outbox::publish_on(
-            &mut *tx,
-            t,
-            "product.updated",
-            &json!({"productId":id,"revision":changed.revision}),
-        )
-        .await?;
+        let reverted_price = PriceReverted {
+            product_id: &id,
+            revision: changed.revision,
+        };
+        veyndo_core::events::emit(&mut *tx, t, &reverted_price).await?;
         reverted.push(id);
     }
     if !reverted.is_empty() {
-        veyndo_core::store::outbox::publish_on(
-            &mut *tx,
-            t,
-            "ai.autonomy.reverted",
-            &json!({"actor":actor,"automatic":automatic,"productIds":reverted}),
-        )
-        .await?;
+        let event = AutonomyReverted {
+            actor,
+            automatic,
+            product_ids: &reverted,
+        };
+        veyndo_core::events::emit(&mut *tx, t, &event).await?;
     }
     tx.commit().await?;
     Ok(json!({"reverted":reverted,"skipped":skipped,"automatic":automatic}))

@@ -1,6 +1,7 @@
 //! The merchant product editor: revision-bound multilingual content, identity, commerce fields, channels and categories, checked against the shop settings, compliance rules, automation metadata and app extensions.
 use crate::domain::views::Visibility;
 use crate::store::products as studio_products;
+use crate::types::events::ProductSaved;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
@@ -166,17 +167,16 @@ pub async fn save_product(
     }
     let (saved, content_revision) = store::saved(&mut tx, &t, &id).await?;
     sync_product(&mut tx, &t, &json!(saved)).await?;
-    veyndo_core::store::outbox::publish(
-        &mut tx,
-        &t,
-        if create {
-            "product.created"
-        } else {
-            "product.updated"
-        },
-        json!({"productId":id,"revision":edit.revision+1}),
-    )
-    .await?;
+    let kind = if create {
+        "product.created"
+    } else {
+        "product.updated"
+    };
+    let product_saved = ProductSaved {
+        product_id: &id,
+        revision: edit.revision + 1,
+    };
+    veyndo_core::events::emit_as(&mut *tx, &t, kind, &product_saved).await?;
     let result = json!({"id":id,"saved":true,"revision":saved.revision,"contentRevision":content_revision,"stock":saved.stock});
     tx.commit().await?;
     Ok(Json(result))

@@ -2,6 +2,7 @@
 use crate::domain::{action_admission, approval};
 use crate::store::credentials;
 use crate::store::packages::package;
+use crate::types::events::CallbackApproved;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -98,13 +99,18 @@ pub async fn create(
         },
     )
     .await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "app.callback_approved",
-        &json!({"app":id,"digest":digest,"permissions":requested,"actor":user,"keyId":key_id}),
-    )
-    .await?;
+    let approved = CallbackApproved {
+        app: &id,
+        digest: &digest,
+        // `requested_scopes` admitted the list, so it is an array of permission names.
+        permissions: requested
+            .as_array()
+            .map(|names| names.iter().filter_map(Value::as_str).collect())
+            .unwrap_or_default(),
+        actor: user,
+        key_id: &key_id,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &approved).await?;
     tx.commit().await?;
     Ok(Json(
         json!({"id":key_id,"key":key,"permissions":requested,"coreScopes":scopes,"digest":digest,"expiresInDays":days}),

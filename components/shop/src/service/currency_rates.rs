@@ -1,6 +1,7 @@
 //! Stores refreshed reference rates in the shop settings under the expected revision; the refresh never runs inside a checkout.
 use crate::service::read_cache::config;
 use crate::store::settings::replace_currencies_at;
+use crate::types::events::RatesRefreshed;
 use serde_json::{Value, json};
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, conflict};
@@ -21,13 +22,11 @@ pub async fn refresh(a: &State, t: &str, expected: i64, actor: &RequestContext) 
     replace_currencies_at(&mut tx, t, &json!(next), expected)
         .await?
         .ok_or(conflict("Settings changed during rate refresh"))?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "commerce.configured",
-        &json!({"revision":expected+1,"reason":"currency_rates"}),
-    )
-    .await?;
+    let refreshed = RatesRefreshed {
+        revision: expected + 1,
+        reason: "currency_rates",
+    };
+    veyndo_core::events::emit(&mut *tx, t, &refreshed).await?;
     tx.commit().await?;
     Ok(json!({"currencies":next,"revision":expected+1}))
 }

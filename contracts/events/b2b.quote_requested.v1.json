@@ -1,0 +1,37 @@
+{
+  "$id": "b2b.quote_requested.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A buyer requested a quote for the reviewed cart.",
+  "properties": {
+    "quoteId": {
+      "type": "string"
+    },
+    "unitId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "quoteId",
+    "unitId"
+  ],
+  "title": "b2b.quote_requested",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.quote_requested",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "QuoteRequested"
+      }
+    ],
+    "version": 1
+  }
+}

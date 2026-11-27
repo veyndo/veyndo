@@ -1,5 +1,6 @@
 //! Serializes unit spending and binds an approved purchase to the authoritative native checkout quote.
 use crate::store::access::{access, catalog_guard, guard_conn, require};
+use crate::types::events::PurchaseCompleted;
 use crate::types::model::{Access, Context};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -184,7 +185,15 @@ pub async fn record(
     if let Some(approval) = &p.approval {
         sqlx::query!("UPDATE b2b_approvals SET state='consumed',revision=revision+1,data=data||jsonb_build_object('orderId',$3::text) WHERE tenant=$1 AND id=$2 AND state='approved'", &c.tenant, approval, id).execute(&mut *conn).await?;
     }
-    crate::store::organization::event(conn,&c.tenant,"b2b.purchase_completed",json!({"orderId":id,"companyId":p.company_id,"unitId":p.context.unit_id,"currency":p.currency,"totalMinor":p.total,"approvalId":p.approval})).await
+    let completed = PurchaseCompleted {
+        order_id: id,
+        company_id: &p.company_id,
+        unit_id: &p.context.unit_id,
+        currency: &p.currency,
+        total_minor: p.total,
+        approval_id: p.approval.as_deref(),
+    };
+    crate::store::organization::event(conn, &c.tenant, &completed).await
 }
 /// The quote total a company budget preview checks.
 #[derive(Deserialize, Default)]

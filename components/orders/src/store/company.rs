@@ -1,5 +1,6 @@
 //! Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance.
 use crate::domain::company_model::{self, CompanyFields, CompanyRecord};
+use crate::types::events::MasterDataSaved;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
 use veyndo_core::document::view;
@@ -133,13 +134,11 @@ pub async fn save(
     } else {
         sqlx::query!("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1", t, data).execute(&mut *tx).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "settings.master_data_changed",
-        &json!({"revision":expected+1,"salesChannelId":channel}),
-    )
-    .await?;
+    let saved = MasterDataSaved {
+        revision: expected + 1,
+        sales_channel_id: channel,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &saved).await?;
     let value = records(&mut tx, t, channel).await?;
     tx.commit().await?;
     Ok(value)

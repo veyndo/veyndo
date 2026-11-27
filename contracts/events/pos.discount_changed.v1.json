@@ -1,0 +1,52 @@
+{
+  "$id": "pos.discount_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A cashier changed the discount of a register cart; `previous` and `discount` are the cart's discount records or `null`.",
+  "properties": {
+    "cartId": {
+      "type": "string"
+    },
+    "cashierId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "discount": {},
+    "previous": {},
+    "revision": {
+      "type": "integer"
+    },
+    "salesChannelId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cartId",
+    "cashierId",
+    "discount",
+    "previous",
+    "revision",
+    "salesChannelId"
+  ],
+  "title": "pos.discount_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "pos.discount_changed",
+    "producers": [
+      {
+        "component": "pos",
+        "crate": "veyndo-pos",
+        "source": "rust",
+        "type": "DiscountChanged"
+      }
+    ],
+    "version": 1
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$id": "intelligence.agents.controlled.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant stopped or resumed all agents of the shop; `cancelled` counts the runs that were cancelled.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cancelled": {
+      "type": "integer"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "stopped": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "actor",
+    "cancelled",
+    "revision",
+    "stopped"
+  ],
+  "title": "intelligence.agents.controlled",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.agents.controlled",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "AgentsControlled"
+      }
+    ],
+    "version": 1
+  }
+}

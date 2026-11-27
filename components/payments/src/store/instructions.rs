@@ -1,8 +1,9 @@
 //! The outbox event that makes accepted recipient instructions available, with a native invoice snapshot.
 use crate::domain::attempt::Attempt;
 use crate::domain::instructions::snapshot;
+use crate::types::events::InstructionsAvailable;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::document::view;
 use veyndo_orders::domain::order_patches::strip_cart_token;
@@ -28,13 +29,12 @@ pub async fn publish(
     .fetch_one(&mut **tx)
     .await?;
     strip_cart_token(&mut order)?;
-    let data = json!({"orderId":p.order,"attemptId":p.id,"order":order,"paymentInstructions":snapshot(p,&input.recipient_instructions)?});
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        &p.tenant,
-        "payment.instructions.available",
-        &data,
-    )
-    .await?;
+    let available = InstructionsAvailable {
+        order_id: &p.order,
+        attempt_id: &p.id,
+        order,
+        payment_instructions: snapshot(p, &input.recipient_instructions)?,
+    };
+    veyndo_core::events::emit(&mut **tx, &p.tenant, &available).await?;
     Ok(())
 }

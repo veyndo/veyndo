@@ -1,0 +1,41 @@
+{
+  "$id": "consumer.request.reviewed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant reviewed a consumer-rights request.",
+  "properties": {
+    "requestId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "requestId",
+    "revision",
+    "state"
+  ],
+  "title": "consumer.request.reviewed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "consumer.request.reviewed",
+    "producers": [
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "rust",
+        "type": "ConsumerRequestReviewed"
+      }
+    ],
+    "version": 1
+  }
+}
