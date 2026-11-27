@@ -1,0 +1,14 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "operations-agent-budget-exhausted",
+ "runDigest": "cdaaa394e05fbe638f5356587b023044213efaf903641736955303abaf565607",
+ "source": {
+  "kind": "model",
+  "provider": "ollama",
+  "model": "qwen3.6:35b",
+  "recordedAt": "2026-11-27T13:28:01+00:00",
+  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd",
+  "reason": "First local qwen3.6:35b run: clean, correct behaviour worth replaying as recorded"
+ },
+ "steps": []
+}

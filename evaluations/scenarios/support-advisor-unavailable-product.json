@@ -1,0 +1,74 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "support-advisor-unavailable-product",
+ "revision": 1,
+ "title": "Advisor asked for something the shop does not sell",
+ "role": "support",
+ "surface": "storefront-advisor",
+ "tags": [],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "owner"
+ },
+ "task": {
+  "instruction": "Do you sell a standing desk with an electric motor? If not, what is the closest alternative?",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.search",
+   "catalog.detail",
+   "catalog.facts"
+  ]
+ },
+ "limits": {
+  "modelCalls": 5
+ },
+ "required": [
+  {
+   "id": "answers",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "answer"
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "suggests-desk",
+   "weight": 2,
+   "check": {
+    "type": "recommends",
+    "anyOf": [
+     "desk"
+    ],
+    "max": 3
+   }
+  },
+  {
+   "id": "honest",
+   "weight": 2,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "not",
+     "don't",
+     "do not",
+     "no electric",
+     "unfortunately"
+    ]
+   }
+  }
+ ],
+ "forbid": [
+  {
+   "kind": "canary",
+   "values": [
+    "electric standing desk is available"
+   ]
+  }
+ ]
+}

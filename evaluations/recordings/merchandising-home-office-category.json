@@ -1,0 +1,159 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "merchandising-home-office-category",
+ "runDigest": "8d10f64977a1fcfb42bf62e547faceb5bf5a846292c22a8a9ac3e0f25a658d32",
+ "source": {
+  "kind": "authored",
+  "recordedAt": "2026-11-27T13:33:32+00:00",
+  "reason": "Initial reference decisions bound to the current planner requests",
+  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+ },
+ "steps": [
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "automation.catalog",
+     "automation.compare_history",
+     "automation.list",
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.apps.read",
+     "merchant.apps.search",
+     "merchant.catalog.context",
+     "merchant.commerce.read",
+     "merchant.company",
+     "merchant.order",
+     "merchant.orders",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read",
+     "studio.workspace.work.read"
+    ],
+    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": [
+     {
+      "name": "merchant.product.content",
+      "arguments_json": "{\"id\":\"desk\"}"
+     },
+     {
+      "name": "merchant.product.content",
+      "arguments_json": "{\"id\":\"lamp\"}"
+     },
+     {
+      "name": "merchant.product.content",
+      "arguments_json": "{\"id\":\"chair\"}"
+     }
+    ]
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "automation.catalog",
+     "automation.compare_history",
+     "automation.list",
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.apps.read",
+     "merchant.apps.search",
+     "merchant.catalog.context",
+     "merchant.commerce.read",
+     "merchant.company",
+     "merchant.order",
+     "merchant.orders",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read",
+     "studio.workspace.work.read"
+    ],
+    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": []
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "final",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [],
+    "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "schemaDigest": "f282ddfb263711bddfeef6e963798c9aff475c76d11cbda547f1bc19e3801c7c"
+   },
+   "decision": {
+    "final": {
+     "summary": "Prepared a new category Home Office with the Studio Desk, the Arc Desk Light and the Form Chair for your review.",
+     "changes": [],
+     "operations": [
+      {
+       "name": "merchant.category.create",
+       "label": "Create the category Home Office",
+       "arguments_json": "{\"category\":{\"id\":\"home_office\",\"position\":0,\"data\":{\"active\":true,\"visible\":true,\"type\":\"page\",\"translations\":{\"en-GB\":{\"name\":\"Home Office\"}}}}}"
+      },
+      {
+       "name": "merchant.product.save",
+       "label": "Add desk to Home Office",
+       "arguments_json": "{\"id\":\"desk\",\"product\":{\"revision\":1,\"categoryIds\":[\"home_office\"]}}"
+      },
+      {
+       "name": "merchant.product.save",
+       "label": "Add lamp to Home Office",
+       "arguments_json": "{\"id\":\"lamp\",\"product\":{\"revision\":1,\"categoryIds\":[\"home_office\"]}}"
+      },
+      {
+       "name": "merchant.product.save",
+       "label": "Add chair to Home Office",
+       "arguments_json": "{\"id\":\"chair\",\"product\":{\"revision\":1,\"categoryIds\":[\"home_office\"]}}"
+      }
+     ]
+    }
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  }
+ ]
+}

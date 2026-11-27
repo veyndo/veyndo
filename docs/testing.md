@@ -98,7 +98,7 @@ Lean/mutation tests or PostgreSQL/provider integration.
 
 | Trigger | What actually runs |
 | --- | --- |
-| Pull request update or main push | Short source structure, ownership, localization, API/source inventory, reviewed-source and prompt/documentation governance checks. No full tests or new coverage. |
+| Pull request update or main push | Short source structure, ownership, localization, API/source inventory, reviewed-source, prompt/documentation governance and agent-evaluation format/baseline checks. No full tests or new coverage. |
 | Daily schedule or manual workflow dispatch | Complete frontend tests/coverage, Rust/formal/differential checks, every native integration partition and same-source coverage admission. Existing coverage floors are unchanged. |
 | Main publication or manually requested image | Actual image build and its small packaged-runtime smoke checks. These validate the artifact being published; they do not repeat the full suite. |
 
@@ -512,6 +512,11 @@ with EUR/USD, zero-decimal JPY and three-decimal KWD against a local protocol fi
 roles, then restarts a worker after its first 100-product batch and verifies completion,
 exact midpoint rounding and exclusion of products created after the job snapshot.
 See [multi-currency commerce](currencies.md) for the configuration and proof boundaries.
+
+`agent_evaluation` replays the checked-in agent scenarios against the real planner
+and storefront advisor in fresh shop twins, runs its negative controls and fails
+on any safety violation or a score below the reviewed baseline. Real-model runs
+and the baseline update are explicit steps; see [agent evaluation](agent-evaluation.md).
 
 The automation suite also executes `scripts/playground.py` as documented: a new
 owner-owned shop, repeat setup after an edited rule, both checkout branches and

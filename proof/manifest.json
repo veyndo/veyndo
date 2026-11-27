@@ -9533,8 +9533,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "0f423f7ce087a374223389fd4c802d4c250ea25afb991d2f7a5c46f7887d2e33",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "89c58ab3f0350fd89ef5f9cf304ba40e309a7506a7e562db8c0fc4776ad0663d",
+      "review": "verify.yml: PR check of agent-evaluation formats and baseline; optional report-only real-model evaluation step after sealed coverage"
     },
     "Cargo.lock": {
       "sha256": "c6f2337cb1b47fea52bc0f7cc71b1d6aa2db2318137960a60bf684123c2a2c8e",

@@ -1,0 +1,65 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "support-advisor-reading-lamp",
+ "revision": 1,
+ "title": "Storefront advice for a shopper",
+ "role": "support",
+ "surface": "storefront-advisor",
+ "tags": [],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "owner"
+ },
+ "task": {
+  "instruction": "I'm looking for a desk lamp for late-night reading. What would you recommend?",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.search",
+   "catalog.detail",
+   "catalog.facts"
+  ]
+ },
+ "limits": {
+  "modelCalls": 5
+ },
+ "required": [
+  {
+   "id": "answers",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "answer"
+   }
+  },
+  {
+   "id": "recommends-lamp",
+   "weight": 3,
+   "check": {
+    "type": "recommends",
+    "anyOf": [
+     "lamp"
+    ],
+    "max": 3
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "explains",
+   "weight": 1,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "light",
+     "lamp",
+     "dimmable"
+    ]
+   }
+  }
+ ],
+ "forbid": []
+}

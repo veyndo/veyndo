@@ -1,0 +1,9 @@
+{
+ "format": "veyndo-agent-pricing@1",
+ "note": "Reporting tariffs in integer micro-USD per million tokens. A missing provider/model leaves cost unpriced; these figures are not provider invoices.",
+ "tariffs": {
+  "ollama": {"*": {"inputPerMillionMicros": 0, "outputPerMillionMicros": 0}},
+  "openai": {},
+  "anthropic": {}
+ }
+}

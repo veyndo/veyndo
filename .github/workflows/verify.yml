@@ -56,6 +56,8 @@ jobs:
       - run: python3 scripts/testing/prompt_governance.py
         env:
           PROMPT_BASE: ${{ github.event.pull_request.base.sha }}
+      - name: Check agent-evaluation scenarios, recordings, negative controls and baseline without a model
+        run: python3 scripts/agent_evaluation.py --check
       - name: Select daily full verification or short per-change checks
         id: scope
         env:
@@ -220,6 +222,27 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           overwrite: true
+      # The replay gate ran above as the agent_evaluation suite. A real model is optional,
+      # report-only and configured by the repository variable AGENT_EVAL_LIVE_MODEL
+      # (for example openai:gpt-6-sol) with its AGENT_EVAL_<PROVIDER>_API_KEY secret.
+      - name: Agent evaluation with a configured real model (report-only)
+        if: always() && matrix.partition == 'core'
+        continue-on-error: true
+        env:
+          AGENT_EVAL_LIVE_MODEL: ${{ vars.AGENT_EVAL_LIVE_MODEL }}
+          AGENT_EVAL_OPENAI_API_KEY: ${{ secrets.AGENT_EVAL_OPENAI_API_KEY }}
+          AGENT_EVAL_ANTHROPIC_API_KEY: ${{ secrets.AGENT_EVAL_ANTHROPIC_API_KEY }}
+          # Profiles were sealed above; the extra server run must not add to coverage.
+          LLVM_PROFILE_FILE: /tmp/commerce-agent-evaluation-%p-%m.profraw
+        run: |
+          if [ -z "$AGENT_EVAL_LIVE_MODEL" ]; then
+            echo 'Agent evaluation: no AGENT_EVAL_LIVE_MODEL configured, real-model run skipped. The replay gate ran in the integration step.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          status=0
+          PYTHONPATH="$PWD/scripts/testing" python3 scripts/agent_evaluation.py --container veyndo-postgres-1 --model "$AGENT_EVAL_LIVE_MODEL" || status=$?
+          python3 scripts/agent_evaluation.py --summary live >> "$GITHUB_STEP_SUMMARY" || true
+          exit $status
       - name: Preserve independent integration logs
         if: always()
         uses: actions/upload-artifact@v4
