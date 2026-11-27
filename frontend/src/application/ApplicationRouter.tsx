@@ -1,4 +1,4 @@
-/** Select independent lazy applications; contain failed imports and reset boundaries on navigation. */
+/** Select independent lazy applications; send sign-in surfaces to the Studio origin; contain failed imports and reset boundaries on navigation. */
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocale } from "../shared/i18n/i18n";
 import WorkspaceBoundary from "../shared/ui/WorkspaceBoundary";
@@ -7,7 +7,9 @@ import {
   shopScope,
   storefrontURL,
   canonicalShopURL,
+  hostnameShop,
 } from "../shared/api/shop-scope";
+import { studioAddress, useStudioOrigin } from "../shared/api/studio-origin";
 const AdminHub = lazy(() => import("../platform/AdminHub"));
 const Merchant = lazy(() => import("../admin/shell/Merchant"));
 const Storefront = lazy(() => import("../storefront/shell/Storefront"));
@@ -51,7 +53,15 @@ export default function ApplicationRouter() {
     window.addEventListener("hashchange", change);
     return () => window.removeEventListener("hashchange", change);
   }, []);
-  if (canonical) return <div role="status">…</div>;
+  // Sign-in works only on the configured Studio origin. On another host (the service
+  // directory) the operator console and Studio would fail as "no access": go there instead.
+  const studio = useStudioOrigin(!canonical && (platform || admin));
+  const moving = !!studio && (platform || admin);
+  useEffect(() => {
+    if (moving && studio)
+      location.replace(studioAddress(studio, hostnameShop()));
+  }, [moving, studio]);
+  if (canonical || moving) return <div role="status">…</div>;
   const content = hub ? (
     <AdminHub />
   ) : platform ? (

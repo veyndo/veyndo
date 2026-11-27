@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n            count(*) FILTER (WHERE c.relkind<>'S') AS \"tables!\",\n            count(*) FILTER (WHERE c.relkind IN ('v','m') AND NOT has_table_privilege($1::text,c.oid,'SELECT')\n                OR c.relkind IN ('r','p') AND NOT (\n                has_table_privilege($1::text,c.oid,'SELECT') AND has_table_privilege($1::text,c.oid,'INSERT')\n                AND has_table_privilege($1::text,c.oid,'UPDATE') AND has_table_privilege($1::text,c.oid,'DELETE')\n                AND has_table_privilege($1::text,c.oid,'REFERENCES'))) AS \"missing_tables!\",\n            count(*) FILTER (WHERE c.relkind='S') AS \"sequences!\",\n            count(*) FILTER (WHERE c.relkind='S' AND NOT (has_sequence_privilege($1::text,c.oid,'USAGE')\n                AND has_sequence_privilege($1::text,c.oid,'SELECT'))) AS \"missing_sequences!\",\n            has_database_privilege($1::text,current_database(),'CONNECT') AS \"connect!\",\n            has_schema_privilege($1::text,'public','USAGE') AS \"schema_usage!\"\n           FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace\n           WHERE n.nspname='public' AND c.relkind IN ('r','p','v','m','S')\n             AND (c.relkind='S' OR left(c.relname,10)<>'connector_')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tables!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "missing_tables!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sequences!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "missing_sequences!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "connect!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "schema_usage!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "81ca31a117101752a4a5f6209bc5b053491b08cd08ff0444ed6391420d6f31d3"
+}
