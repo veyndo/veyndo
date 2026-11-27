@@ -9416,8 +9416,8 @@
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
     "components/core/migrations/0000-foundation.sql": {
-      "sha256": "ee623871ed821fcb485d80c89505e3eeb55be3bc57d0c504c8d9f8fc3d78d6a0",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "03fd16b2d40a47e32a1b0b8d57a7014495180a8cc4589ba281a0785ce09a011a",
+      "review": "Foundation baseline drops COMMENT ON EXTENSION pg_trgm: managed PostgreSQL owns the extension; CREATE EXTENSION sets the comment"
     },
     "components/core/migrations/0001-baseline.sql": {
       "sha256": "f70e9582e6bd8b1499fba1294d3fe1a022844c417836f7b6b1c9245806fa2a69",
