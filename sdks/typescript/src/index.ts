@@ -41,7 +41,7 @@ export { ProtocolsApi } from "./components/protocols.ts";
 export { HostApi } from "./components/host.ts";
 
 /** Contract version the SDK was generated from. */
-export const contractVersion = "0.1.0";
+export const contractVersion = "1.0.0";
 
 /** Calls Veyndo over HTTP and MCP with one shop, channel and credential. */
 export class VeyndoClient {

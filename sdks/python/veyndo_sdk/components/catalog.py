@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class CatalogApi:
-    """Products, categories, media, reviews, translations and catalogue reads (contract version 0.1.0)."""
+    """Products, categories, media, reviews, translations and catalogue reads (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

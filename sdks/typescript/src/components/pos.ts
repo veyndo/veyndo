@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Point-of-sale register adapters (contract version 0.1.0). */
+/** Point-of-sale register adapters (contract version 1.0.0). */
 export class PosApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

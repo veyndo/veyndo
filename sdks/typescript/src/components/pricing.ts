@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Money, price calculation, discounts, currencies, taxes and customer groups (contract version 0.1.0). */
+/** Money, price calculation, discounts, currencies, taxes and customer groups (contract version 1.0.0). */
 export class PricingApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

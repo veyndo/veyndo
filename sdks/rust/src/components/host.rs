@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Process entry, route registry, worker roles, migrations and command-line tools (contract version 0.1.0).
+/// Process entry, route registry, worker roles, migrations and command-line tools (contract version 1.0.0).
 #[derive(Debug)]
 pub struct HostApi<'a> {
     pub(crate) client: &'a Client,

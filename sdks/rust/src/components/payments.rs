@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Provider-independent payment ledger, captures, refunds and provider workers (contract version 0.1.0).
+/// Provider-independent payment ledger, captures, refunds and provider workers (contract version 1.0.0).
 #[derive(Debug)]
 pub struct PaymentsApi<'a> {
     pub(crate) client: &'a Client,

@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Order state, fulfilment, receipts, documents and merchant order work (contract version 0.1.0).
+/// Order state, fulfilment, receipts, documents and merchant order work (contract version 1.0.0).
 #[derive(Debug)]
 pub struct OrdersApi<'a> {
     pub(crate) client: &'a Client,

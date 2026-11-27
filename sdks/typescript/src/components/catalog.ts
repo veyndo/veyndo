@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Products, categories, media, reviews, translations and catalogue reads (contract version 0.1.0). */
+/** Products, categories, media, reviews, translations and catalogue reads (contract version 1.0.0). */
 export class CatalogApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

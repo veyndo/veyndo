@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 0.1.0). */
+/** MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 1.0.0). */
 export class ProtocolsApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

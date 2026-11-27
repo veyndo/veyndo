@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class OrdersApi:
-    """Order state, fulfilment, receipts, documents and merchant order work (contract version 0.1.0)."""
+    """Order state, fulfilment, receipts, documents and merchant order work (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

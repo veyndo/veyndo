@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class IdentityApi:
-    """Merchant accounts, memberships, sessions, roles and route policy (contract version 0.1.0)."""
+    """Merchant accounts, memberships, sessions, roles and route policy (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

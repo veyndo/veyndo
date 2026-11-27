@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class StudioApi:
-    """Merchant overview, reports, private staging shops and history (contract version 0.1.0)."""
+    """Merchant overview, reports, private staging shops and history (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

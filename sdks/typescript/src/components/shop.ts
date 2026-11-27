@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Shop configuration, domains, legal texts and the operator control plane (contract version 0.1.0). */
+/** Shop configuration, domains, legal texts and the operator control plane (contract version 1.0.0). */
 export class ShopApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class PosApi:
-    """Point-of-sale register adapters (contract version 0.1.0)."""
+    """Point-of-sale register adapters (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

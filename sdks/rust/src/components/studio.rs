@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Merchant overview, reports, private staging shops and history (contract version 0.1.0).
+/// Merchant overview, reports, private staging shops and history (contract version 1.0.0).
 #[derive(Debug)]
 pub struct StudioApi<'a> {
     pub(crate) client: &'a Client,

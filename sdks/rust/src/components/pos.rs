@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Point-of-sale register adapters (contract version 0.1.0).
+/// Point-of-sale register adapters (contract version 1.0.0).
 #[derive(Debug)]
 pub struct PosApi<'a> {
     pub(crate) client: &'a Client,

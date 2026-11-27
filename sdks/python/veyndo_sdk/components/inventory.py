@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class InventoryApi:
-    """Stock, reservations and supply (contract version 0.1.0)."""
+    """Stock, reservations and supply (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

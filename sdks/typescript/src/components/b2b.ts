@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Company procurement: organisations, budgets, approvals and quotes (contract version 0.1.0). */
+/** Company procurement: organisations, budgets, approvals and quotes (contract version 1.0.0). */
 export class B2bApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 0.1.0). */
+/** App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 1.0.0). */
 export class AppsApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Merchant overview, reports, private staging shops and history (contract version 0.1.0). */
+/** Merchant overview, reports, private staging shops and history (contract version 1.0.0). */
 export class StudioApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

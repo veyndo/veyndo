@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Rules, coupons, promotions, flows and sales channels (contract version 0.1.0). */
+/** Rules, coupons, promotions, flows and sales channels (contract version 1.0.0). */
 export class MarketingApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

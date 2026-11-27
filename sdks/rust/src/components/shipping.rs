@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Delivery methods, destinations, delivery splits and carrier booking (contract version 0.1.0).
+/// Delivery methods, destinations, delivery splits and carrier booking (contract version 1.0.0).
 #[derive(Debug)]
 pub struct ShippingApi<'a> {
     pub(crate) client: &'a Client,

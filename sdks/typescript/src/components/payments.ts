@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Provider-independent payment ledger, captures, refunds and provider workers (contract version 0.1.0). */
+/** Provider-independent payment ledger, captures, refunds and provider workers (contract version 1.0.0). */
 export class PaymentsApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

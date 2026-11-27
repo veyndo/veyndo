@@ -1,6 +1,6 @@
 {
   "name": "@veyndo/commerce-client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Typed Veyndo Commerce client generated from the component contracts (fetch, no runtime dependencies).",
   "license": "SEE LICENSE IN ../../LICENSE",
   "type": "module",

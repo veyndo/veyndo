@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class AppsApi:
-    """App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 0.1.0)."""
+    """App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

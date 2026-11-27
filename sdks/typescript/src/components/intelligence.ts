@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 0.1.0). */
+/** Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 1.0.0). */
 export class IntelligenceApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

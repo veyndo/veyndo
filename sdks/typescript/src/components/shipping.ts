@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Delivery methods, destinations, delivery splits and carrier booking (contract version 0.1.0). */
+/** Delivery methods, destinations, delivery splits and carrier booking (contract version 1.0.0). */
 export class ShippingApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

@@ -25,7 +25,7 @@ from .components.studio import StudioApi
 from .components.protocols import ProtocolsApi
 from .components.host import HostApi
 
-CONTRACT_VERSION = "0.1.0"
+CONTRACT_VERSION = "1.0.0"
 __version__ = CONTRACT_VERSION
 __all__ = ["Auth", "CONTRACT_VERSION", "McpProtocolError", "Mcp", "Problem", "TOOLS", "Transport", "VeyndoClient", "VeyndoError", "encode", "paginate"]
 

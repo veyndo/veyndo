@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Order state, fulfilment, receipts, documents and merchant order work (contract version 0.1.0). */
+/** Order state, fulfilment, receipts, documents and merchant order work (contract version 1.0.0). */
 export class OrdersApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

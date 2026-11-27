@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Merchant accounts, memberships, sessions, roles and route policy (contract version 0.1.0). */
+/** Merchant accounts, memberships, sessions, roles and route policy (contract version 1.0.0). */
 export class IdentityApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

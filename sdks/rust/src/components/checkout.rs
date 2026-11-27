@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Cart, quote, checkout transaction and order placement (contract version 0.1.0).
+/// Cart, quote, checkout transaction and order placement (contract version 1.0.0).
 #[derive(Debug)]
 pub struct CheckoutApi<'a> {
     pub(crate) client: &'a Client,

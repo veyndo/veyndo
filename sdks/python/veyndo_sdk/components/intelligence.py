@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class IntelligenceApi:
-    """Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 0.1.0)."""
+    """Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

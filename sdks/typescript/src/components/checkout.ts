@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Cart, quote, checkout transaction and order placement (contract version 0.1.0). */
+/** Cart, quote, checkout transaction and order placement (contract version 1.0.0). */
 export class CheckoutApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

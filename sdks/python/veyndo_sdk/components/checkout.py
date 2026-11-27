@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class CheckoutApi:
-    """Cart, quote, checkout transaction and order placement (contract version 0.1.0)."""
+    """Cart, quote, checkout transaction and order placement (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

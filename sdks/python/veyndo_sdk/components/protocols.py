@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class ProtocolsApi:
-    """MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 0.1.0)."""
+    """MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

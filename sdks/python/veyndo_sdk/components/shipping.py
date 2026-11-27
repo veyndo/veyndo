@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class ShippingApi:
-    """Delivery methods, destinations, delivery splits and carrier booking (contract version 0.1.0)."""
+    """Delivery methods, destinations, delivery splits and carrier booking (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

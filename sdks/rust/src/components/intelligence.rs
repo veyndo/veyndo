@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 0.1.0).
+/// Shop memory, knowledge retrieval, agents, proposals and model inference (contract version 1.0.0).
 #[derive(Debug)]
 pub struct IntelligenceApi<'a> {
     pub(crate) client: &'a Client,

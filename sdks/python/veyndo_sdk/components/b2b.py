@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class B2bApi:
-    """Company procurement: organisations, budgets, approvals and quotes (contract version 0.1.0)."""
+    """Company procurement: organisations, budgets, approvals and quotes (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

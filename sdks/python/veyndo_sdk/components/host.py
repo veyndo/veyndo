@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class HostApi:
-    """Process entry, route registry, worker roles, migrations and command-line tools (contract version 0.1.0)."""
+    """Process entry, route registry, worker roles, migrations and command-line tools (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class ShopApi:
-    """Shop configuration, domains, legal texts and the operator control plane (contract version 0.1.0)."""
+    """Shop configuration, domains, legal texts and the operator control plane (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

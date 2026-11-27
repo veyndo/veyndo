@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Stock, reservations and supply (contract version 0.1.0). */
+/** Stock, reservations and supply (contract version 1.0.0). */
 export class InventoryApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

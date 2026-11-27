@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// Customer accounts, sessions, addresses and the merchant customer directory (contract version 0.1.0).
+/// Customer accounts, sessions, addresses and the merchant customer directory (contract version 1.0.0).
 #[derive(Debug)]
 pub struct CustomersApi<'a> {
     pub(crate) client: &'a Client,

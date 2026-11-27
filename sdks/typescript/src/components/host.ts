@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Process entry, route registry, worker roles, migrations and command-line tools (contract version 0.1.0). */
+/** Process entry, route registry, worker roles, migrations and command-line tools (contract version 1.0.0). */
 export class HostApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

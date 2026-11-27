@@ -2,7 +2,7 @@
 
 import type { JsonValue, RequestOptions, Transport } from "../runtime.ts";
 
-/** Customer accounts, sessions, addresses and the merchant customer directory (contract version 0.1.0). */
+/** Customer accounts, sessions, addresses and the merchant customer directory (contract version 1.0.0). */
 export class CustomersApi {
   readonly #transport: Transport;
   constructor(transport: Transport) {

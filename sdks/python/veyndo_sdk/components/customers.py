@@ -8,7 +8,7 @@ from ..runtime import Transport
 
 
 class CustomersApi:
-    """Customer accounts, sessions, addresses and the merchant customer directory (contract version 0.1.0)."""
+    """Customer accounts, sessions, addresses and the merchant customer directory (contract version 1.0.0)."""
 
     def __init__(self, transport: Transport):
         self._transport = transport

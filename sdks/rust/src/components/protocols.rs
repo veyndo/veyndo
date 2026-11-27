@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 0.1.0).
+/// MCP, UCP and the shared capability dispatch; adapters without business rules (contract version 1.0.0).
 #[derive(Debug)]
 pub struct ProtocolsApi<'a> {
     pub(crate) client: &'a Client,

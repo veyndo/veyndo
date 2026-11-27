@@ -4,7 +4,7 @@ use crate::runtime::{Client, Error, RequestOptions};
 use reqwest::Method;
 use serde_json::Value;
 
-/// App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 0.1.0).
+/// App packages, managed data, UI surfaces, Wasm extensions and the app builder (contract version 1.0.0).
 #[derive(Debug)]
 pub struct AppsApi<'a> {
     pub(crate) client: &'a Client,
