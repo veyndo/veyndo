@@ -76,4 +76,8 @@ pub(super) const MIGRATIONS: &[(&str, &str)] = &[
         "catalog/0002-exact-product-prices",
         include_str!("../../components/catalog/migrations/0002-exact-product-prices.sql"),
     ),
+    (
+        "apps/0002-package-contracts",
+        include_str!("../../components/apps/migrations/0002-package-contracts.sql"),
+    ),
 ];
