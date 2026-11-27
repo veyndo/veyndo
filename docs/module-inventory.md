@@ -2247,6 +2247,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/content/product-seo.ts](../frontend/src/shared/content/product-seo.ts) | Shared SEO field fallback and encoded product paths keep Studio previews and native storefront presentation consistent. |
 | [frontend/src/shared/content/product-specifications.ts](../frontend/src/shared/content/product-specifications.ts) | Match the native field-level specification merge; explicit blanks survive and no unrelated English fallback is invented. |
 | [frontend/src/shared/content/rich-document.tsx](../frontend/src/shared/content/rich-document.tsx) | Safe structured editor rendering. Only known nodes/marks produce elements; URLs are never executable. |
+| [frontend/src/shared/content/shop-brand.tsx](../frontend/src/shared/content/shop-brand.tsx) | Shop brand shown in storefront kickers, breadcrumbs and titles; the platform brand never stands in for it. |
 | [frontend/src/shared/customer/AddressBook.tsx](../frontend/src/shared/customer/AddressBook.tsx) | Tenant-owned address cards, defaults and revision-aware CRUD shared by account and CRM. |
 | [frontend/src/shared/customer/AddressCard.tsx](../frontend/src/shared/customer/AddressCard.tsx) | Human-readable address used in order snapshots and address books. |
 | [frontend/src/shared/customer/AddressFields.tsx](../frontend/src/shared/customer/AddressFields.tsx) | Structured accessible address editor; no hidden JSON or storefront-only duplicate model. |

@@ -1,7 +1,7 @@
 /** CollectionView: storefront view composed from the scoped cart/controller. */
 import CommerceLayout from "../../../../extensions/apps/site-builder/storefront/CommerceLayout";
 import { useBuildingText } from "../../shared/i18n/app-building-i18n";
-import { BRAND } from "../../shared/ui/Brand";
+import { brandKicker } from "../../shared/content/shop-brand";
 import ProductTile from "./ProductTile";
 import CatalogNavigation from "./CatalogNavigation";
 import "../../shared/styles/apps.css";
@@ -26,14 +26,13 @@ export default function CollectionView() {
     run,
     catalog,
     nextCursor,
+    brand,
   } = useStorefront();
   return (
     <section className="shop-collection" id="collection">
       <div className="collection-title">
         <div>
-          <p className="shop-kicker">
-            {BRAND.name} / {s("collection")}
-          </p>
+          <p className="shop-kicker">{brandKicker(brand, s("collection"))}</p>
           <h2>{s("collection")}</h2>
         </div>
         <span>

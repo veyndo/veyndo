@@ -2,7 +2,7 @@
 import type { Product } from "../../../../../frontend/src/shared/api/shop-api";
 import { useShopText } from "../../../../../frontend/src/shared/i18n/shop-i18n";
 import { productSpecifications } from "../../../../../frontend/src/shared/content/product-specifications";
-import { BRAND } from "../../../../../frontend/src/shared/ui/Brand";
+import { useShopBrand } from "../../../../../frontend/src/shared/content/shop-brand";
 import RichDescription from "../../../../../frontend/src/shared/content/RichDescription";
 import ProductAttachments from "./ProductAttachments";
 export default function ProductDetails({
@@ -15,6 +15,7 @@ export default function ProductDetails({
   preview?: boolean;
 }) {
   const { s } = useShopText();
+  const brand = useShopBrand();
   const contentLanguage = language.split("-")[0];
   const specs = productSpecifications(p.extra?.specifications, language);
   return (
@@ -29,7 +30,9 @@ export default function ProductDetails({
         )}
         {!preview && <ProductAttachments id={p.id} />}
         <p className="product-material">
-          {s(p.properties.material ?? "")} · {BRAND.name} /
+          {[s(p.properties.material ?? ""), brand && `${brand} /`]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </section>
       <section>

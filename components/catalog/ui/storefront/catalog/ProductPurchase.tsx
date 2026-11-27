@@ -1,6 +1,9 @@
 /** Product page purchase area: adapts the product detail to the kit product-summary part and keeps variant navigation, app slots and cart rules. */
 import { productURL } from "./product-url";
-import { BRAND } from "../../../../../frontend/src/shared/ui/Brand";
+import {
+  brandKicker,
+  useShopBrand,
+} from "../../../../../frontend/src/shared/content/shop-brand";
 import { useShopText } from "../../../../../frontend/src/shared/i18n/shop-i18n";
 
 import {
@@ -68,6 +71,7 @@ export default function ProductPurchase({
   onAdd,
 }: ProductPurchaseProps) {
   const { locale, currency: shopCurrency } = useShopText();
+  const brand = useShopBrand();
   const loadMore = async () => {
     if (preview || !data.variantsPagination.nextCursor) return;
     const request = detailRequest.current;
@@ -128,7 +132,7 @@ export default function ProductPurchase({
           minPurchase: p.min_purchase,
           purchaseSteps: p.purchase_steps,
           maxPurchase: p.max_purchase ?? undefined,
-          kicker: `${BRAND.name} / ${s(p.category)}`,
+          kicker: brandKicker(brand, s(p.category)),
           sku: p.product_number || p.id,
           rating: {
             average: data.reviews.average,
