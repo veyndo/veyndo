@@ -3037,6 +3037,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/commerce.py](../scripts/commerce.py) | Real HTTP/PG tests for SKUs, moderated reviews, tax/shipping/payment and deliveries. |
 | [scripts/company_settings.py](../scripts/company_settings.py) | Real HTTP company basis/channel inheritance, immutable issuer snapshots, bounded logos and private staging. No external services. |
 | [scripts/component_mirrors.py](../scripts/component_mirrors.py) | Generate standalone component mirrors from the monorepo, check that each builds and tests alone, and record the released commit. |
+| [scripts/component_releases.py](../scripts/component_releases.py) | Derive semantic component versions from contract changes, write per-component changelogs from git history and plan (never perform) a publish. |
 | [scripts/component_sources.py](../scripts/component_sources.py) | Verify pinned component source snapshots; explicit imports use clean, reviewed Git commits, never mutable branches. |
 | [scripts/components.py](../scripts/components.py) | Check the component map: every Rust source has one owner, every table has one owner, and no component gains an undeclared dependency on another component's code or tables. |
 | [scripts/composition_release.py](../scripts/composition_release.py) | Validate the Lumen release lock and optionally compare it with Northflank. |
@@ -3163,6 +3164,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/ci_scope.py](../scripts/testing/ci_scope.py) | Choose prototype CI by the complete Git diff; unknown or sensitive changes retain full verification. |
 | [scripts/testing/collection_work.py](../scripts/testing/collection_work.py) | Exercise one reviewed collection task through native categories, pages and durable translation drafts. |
 | [scripts/testing/component_mirrors_check.py](../scripts/testing/component_mirrors_check.py) | Tooling suite: every component mirror builds and tests alone; negative controls for the mirror rules first. |
+| [scripts/testing/component_releases_test.py](../scripts/testing/component_releases_test.py) | Tooling suite: semantic version bumps follow contract changes (negative controls), and the publish only ever plans. |
 | [scripts/testing/component_sources_test.py](../scripts/testing/component_sources_test.py) | Mutation checks for the exact upstream component snapshot consumed by the Veyndo composition. |
 | [scripts/testing/composition_release_test.py](../scripts/testing/composition_release_test.py) | Reject drift and incomplete evidence in the hosted composition preflight. |
 | [scripts/testing/connected_contracts/__init__.py](../scripts/testing/connected_contracts/__init__.py) | OAuth, private retrieval and Slack-flow regression modules using local provider fixtures. |
@@ -3219,6 +3221,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/runtime.py](../scripts/testing/runtime.py) | Owned synthetic server lifetime, child checks and loopback readiness for verification. |
 | [scripts/testing/scenario_source.py](../scripts/testing/scenario_source.py) | Native task ownership and applied-proposal admission for customer-test references. |
 | [scripts/testing/schema_contracts.py](../scripts/testing/schema_contracts.py) | Generate one valid and one invalid request per HTTP route and per MCP tool from the route catalogue and the operation contracts. |
+| [scripts/testing/sdk_contracts_test.py](../scripts/testing/sdk_contracts_test.py) | Tooling suite: negative controls for the contract and SDK generators, then the drift check on the real tree. |
 | [scripts/testing/shop_setup_checks.py](../scripts/testing/shop_setup_checks.py) | Personal setup progression exercises the native HTTP/MCP workspace CAS and tenant boundaries. |
 | [scripts/testing/site_release.py](../scripts/testing/site_release.py) | Actual selective publication resolves page dependencies atomically; no provider calls. |
 | [scripts/testing/sitecustomize.py](../scripts/testing/sitecustomize.py) | Opt-in subprocess instrumentation for synthetic verification; never loaded by production. |

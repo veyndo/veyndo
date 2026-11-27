@@ -100,21 +100,70 @@ is the `veyndo/apps` app-storage repository; the mirror `apps` is the app platfo
 | `published` | the commit in the component repository once published; `null` until then |
 | `publish: false`, `reason` | set for a mirror whose upstream is its own repository (`automation`) |
 | `not_mirrored` | components without a crate of their own, with the reason |
+| `versions.<component>` | for all 22 components: semantic `version`, the version-independent `contract` digest of `contracts/http/<component>.openapi.json`, the `source` digest of the component's own files and the `commit` the version was recorded at |
+| `sdk` | the same for the combined contract `contracts/http/veyndo.openapi.json`, which versions the generated SDKs, plus their package names |
 
 ## Release flow
 
 1. **Generate and check** on the release candidate:
    `python3 scripts/component_mirrors.py --check`. Every mirror must build and test
-   alone; review new `NEEDS` lines.
-2. **Record** from a clean checkout of the release commit:
+   alone; review new `NEEDS` lines. `python3 scripts/sdks/generate.py --check` (part of
+   `scripts/structure.py`) confirms the contracts and SDKs match the code.
+2. **Review the versions** `--record` would assign:
+   `python3 scripts/component_mirrors.py --versions`.
+3. **Record** from a clean checkout of the release commit:
    `python3 scripts/component_mirrors.py --record`. It refuses a dirty tree, so the
-   recorded commit is the source of every mirror, and writes `components.release.json`.
-   Commit that file.
-3. **Publish** (not done yet): for each component with `publish` not `false`, replace
-   the tree of its repository with `target/mirrors/<component>/` regenerated from the
-   recorded commit, commit it with the monorepo commit in the message, tag it with the
-   Veyndo version and write that repository commit into `published`. Nobody edits a
-   component repository directly; changes return to the monorepo.
+   recorded commit is the source of every mirror. It assigns the new versions, prepends a
+   section to each changed component's changelog, writes `components.release.json`,
+   regenerates every mirror (with `CHANGELOG.md` and its version in `MIRROR.json`) and
+   regenerates the contracts and SDKs with the new versions. Commit
+   `components.release.json`, `contracts/` and `sdks/`.
+4. **Plan the publish**: `python3 scripts/component_mirrors.py --publish --dry-run`
+   prints, per component, the repository, branch, tag and file count it would push, and
+   the npm, PyPI and crates.io packages of the SDKs, and writes the plan to
+   `target/mirrors/publish-plan.json`. It warns when a mirror generated from the
+   checkout differs from its recorded digest. Without `--dry-run` it refuses.
+5. **Publish** (not done yet, and not done by this tool): for each component with
+   `publish` not `false`, replace the tree of its repository with
+   `target/mirrors/<component>/` regenerated from the recorded commit, commit it with the
+   monorepo commit in the message, tag it `v<version>` and write that repository commit
+   into `published`. Nobody edits a component repository directly; changes return to the
+   monorepo.
+
+## Versions, changelogs and the dry-run publish
+
+Each of the 22 components has a semantic version, and so has the combined contract that
+the generated SDKs follow. `scripts/component_releases.py` derives the next version when
+a release is recorded, by comparing the component's contract with the one committed at
+the previous version's commit:
+
+| Change since the previous version | Bump |
+| --- | --- |
+| A route, method or tool removed; a route permission changed; a tool input that newly requires a field, drops a field or enum value, narrows a type or limit, or newly rejects unknown fields; a declared output that drops, retypes or no longer always returns a field | major |
+| Only additions: a route, a tool, an optional input field, a wider limit or type, a new output field | minor |
+| The contract is the same apart from descriptions or source locations, or only the component's own files changed | patch |
+| Nothing | none |
+
+The first recorded version of every contract is `1.0.0`: the contracts as served at the
+go-live on 27 November are the baseline. The comparison works on real contract files
+from git, so the reasons are listed in the changelog. HTTP bodies are open JSON in the
+contracts (see [contracts and SDKs](sdks.md)), so a change inside an HTTP body is not
+seen; tool schemas, routes, methods and permissions are.
+
+The changelog of a component, `contracts/changelogs/<component>.md`, gets one section
+per recorded version: the bump, the contract differences and the subjects of the
+commits that touched the component's sources or contract since the previous version
+(at most 60 listed). The mirror carries it as `CHANGELOG.md`. The SDK changelog
+`contracts/changelogs/sdk.md` follows `sdks/`, `scripts/sdks/` and the combined
+contract.
+
+`--publish --dry-run` covers the 18 publishable mirrors (each pushed to `main` with
+tag `v<version>`), lists `automation` as skipped (its upstream is its own repository)
+and `host`, `protocols` and `connectors` as contract-only (they ship in the Veyndo and
+connector images), and prints the three SDK package commands. The tests of this logic
+are the tooling suite `testing/component_releases_test`: twelve contract changes with
+their expected bump, output growth rules, version arithmetic, a source-only patch and
+the refusal to publish without `--dry-run`.
 
 Later, published mirrors can depend on each other's released repositories (Git
 dependencies at their `published` commits) instead of carrying source copies of their

@@ -123,6 +123,7 @@
     "testing/test_partition_coverage",
     "testing/component_mirrors_check",
     "testing/schema_contracts",
-    "testing/sdk_contracts_test"
+    "testing/sdk_contracts_test",
+    "testing/component_releases_test"
   ]
 }

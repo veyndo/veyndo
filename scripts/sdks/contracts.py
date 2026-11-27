@@ -198,9 +198,10 @@ def tool_schema_name(name, suffix):
 
 
 def load_versions():
+    """Component -> recorded version, and the SDK (combined contract) version; see scripts/component_releases.py."""
     data = json.loads(RELEASE.read_text()) if RELEASE.exists() else {}
-    rows = {**data.get('components', {}), **data.get('not_mirrored', {})}
-    return {name: (row.get('version') if isinstance(row, dict) else None) or DEFAULT_VERSION for name, row in rows.items()}, data.get('contracts', {}).get('version', DEFAULT_VERSION)
+    versions = {name: row['version'] for name, row in data.get('versions', {}).items()}
+    return versions, (data.get('sdk') or {}).get('version', DEFAULT_VERSION)
 
 
 def security_schemes():
