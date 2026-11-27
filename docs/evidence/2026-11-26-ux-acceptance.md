@@ -104,6 +104,9 @@ manifest review for the changed marketing file was recorded with `scripts/formal
 
 ## Open items (not fixed, with reason)
 
+Option value names, the mobile header, the `RAC-` order prefix and the platform brand on
+product pages were fixed on 27 November: see [UX fixes after go-live](2026-11-27-ux-fixes.md).
+
 | Item | Why it was left |
 | --- | --- |
 | Variant option values are raw keys in cart, order and POS labels ("camel / L", "warm-gray / one-size") | Option values are not localizable content today; needs a content-model decision, not a UI patch |
