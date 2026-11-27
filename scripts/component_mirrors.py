@@ -164,26 +164,48 @@ def workspace_manifest(own):
             f'{shared}\n\n[profile.release]\nlto = "thin"\ncodegen-units = 1\n')
 
 
+MONOREPO = 'https://github.com/veyndo/veyndo'
+
+
+def intro(name):
+    """The first paragraph of the component's own README, its relative links pointed at the monorepo."""
+    path = ROOT / 'components' / name / 'README.md'
+    if not path.exists():
+        return ''
+    body = path.read_text().split('\n\n')
+    paragraph = next((block for block in body[1:] if block.strip() and not block.lstrip().startswith(('#', '|', '```'))), '')
+
+    def absolute(match):
+        target = match.group(2)
+        if re.match(r'^(https?:|#|mailto:)', target):
+            return match.group(0)
+        resolved = os.path.normpath(os.path.join('components', name, target))
+        return f'{match.group(1)}({MONOREPO}/blob/main/{resolved})'
+    return re.sub(r'(\[[^\]]*\])\(([^)]+)\)', absolute, paragraph.strip())
+
+
 def readme(name, layout, commit):
     title = json.loads((ROOT / 'components.json').read_text())['components'][name]['title']
     deps = '\n'.join(f'- `{c}` ({crate_name(c)})' for c in layout['dependencies']) or '- none'
     own = '\n'.join(f'- `{c}` ({crate_name(c)})' for c in layout['crates'])
-    return f"""# Veyndo component: {name}
+    about = intro(name)
+    about = f'\n{about}\n' if about else ''
+    return f"""<p align="center">
+  <img src="{MONOREPO}/raw/main/docs/brand/veyndo-readme.svg" alt="Veyndo Commerce: commerce that thinks and acts." width="100%">
+</p>
 
-{title}.
+# Veyndo {name}: {title[0].lower() + title[1:] if title[1:2].islower() else title}
 
-This repository is a generated mirror of the Veyndo monorepo (commit `{commit}`).
-Do not change it here: changes go to the monorepo, which regenerates this mirror with
-`scripts/component_mirrors.py`. Every file keeps its monorepo path and bytes;
-`MIRROR.json` lists the source commit.
-
-## Crates of this component
-
-{own}
-
-## Crates it builds against
-
-{deps}
+**One of the 22 components of [Veyndo Commerce]({MONOREPO}), the AI-native commerce
+platform built in Rust.** Shoppers, merchants and their agents work on the same
+functions; one core decides price, stock and order.
+{about}
+| | |
+| --- | --- |
+| **Contract** | [`contracts/http/{name}.openapi.json`]({MONOREPO}/blob/main/contracts/http/{name}.openapi.json): its HTTP routes, permissions and MCP tools |
+| **Events** | [Versioned event contracts]({MONOREPO}/tree/main/contracts/events) shared by every component |
+| **Clients** | [Generated TypeScript, Python and Rust SDKs]({MONOREPO}/blob/main/docs/sdks.md) |
+| **Platform** | [Architecture]({MONOREPO}/blob/main/docs/architecture.md) · [Components]({MONOREPO}/blob/main/docs/commerce-components.md) · [Status]({MONOREPO}/blob/main/docs/status.md) · [Website](https://www.veyndo.ai/) |
 
 ## Build and test alone
 
@@ -200,6 +222,22 @@ Database queries compile from the checked `.sqlx` cache (`SQLX_OFFLINE=true` in
 are implemented here by its test adapters; in production the Veyndo server implements
 them. A `ui/` folder holds the component's Studio and storefront screens; they build
 inside the Veyndo frontend, not on their own.
+
+## Crates of this component
+
+{own}
+
+## Crates it builds against
+
+{deps}
+
+## Where changes go
+
+This repository is a generated mirror of the Veyndo monorepo (commit `{commit}`).
+Do not change it here: changes go to [the monorepo]({MONOREPO}), which regenerates this
+mirror with `scripts/component_mirrors.py`. Every file keeps its monorepo path and bytes;
+`MIRROR.json` lists the source commit. Licensed under the
+[Veyndo Sustainable Use License 1.0]({MONOREPO}/blob/main/LICENSE).
 """
 
 

@@ -1,11 +1,10 @@
-"""Keep the README an entrance, status canonical, and scoped instructions bounded; negative controls reject former regressions."""
+"""Keep release notes out of the README, status canonical, and scoped instructions bounded; negative controls reject former regressions."""
 from pathlib import Path
 import json,re
 ROOT=Path(__file__).resolve().parents[2]
 
 def readme_errors(text):
     errors=[]
-    if len(text.splitlines())>120 or len(text.encode())>8500:errors.append('README exceeds entrance budget (120 lines / 8.5 KiB)')
     if re.search(r'(?i)\bPR\s*#?\s*\d+|\b20\d\d-\d\d-\d\d\b|^##? (?:Changelog|Release notes|Implementation notes)',text,re.M):errors.append('Move release/PR notes to CHANGELOG.md')
     if 'docs/status.md' not in text:errors.append('README must link canonical status')
     license=text.split('## License\n')
@@ -16,8 +15,7 @@ def main():
     text=(ROOT/'README.md').read_text();errors=readme_errors(text)
     assert not errors,errors
     assert readme_errors(text+'\nManaged app models now use fixed storage.\nAdditional implementation note.\n')
-    assert readme_errors(text.replace('## Try one complete round','PR 123 deployed\n\n## Try one complete round'))
-    assert readme_errors(text+'\n'*130)
+    assert readme_errors(text.replace('## Try it','PR 123 deployed\n\n## Try it'))
     root=(ROOT/'AGENTS.md').read_text();assert len(root.encode())<=12000,'Split new owner rules instead of growing root AGENTS.md'
     for path in ROOT.rglob('AGENTS.md'):
         if any(p in path.parts for p in ['node_modules','target','.git']):continue

@@ -3218,7 +3218,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/coverage_env.py](../scripts/testing/coverage_env.py) | Convert trusted cargo-llvm-cov environment output to GitHub's environment-file syntax. |
 | [scripts/testing/coverage_report.py](../scripts/testing/coverage_report.py) | Publish separate all-source coverage totals, untested files and enforce reviewed minimums. |
 | [scripts/testing/database.py](../scripts/testing/database.py) | Use the same PostgreSQL fixtures through Docker or an explicitly selected native psql executable. |
-| [scripts/testing/documentation_hygiene.py](../scripts/testing/documentation_hygiene.py) | Keep the README an entrance, status canonical, and scoped instructions bounded; negative controls reject former regressions. |
+| [scripts/testing/documentation_hygiene.py](../scripts/testing/documentation_hygiene.py) | Keep release notes out of the README, status canonical, and scoped instructions bounded; negative controls reject former regressions. |
 | [scripts/testing/extraction.py](../scripts/testing/extraction.py) | Native document-event extraction, review boundary and shared AI quotas; local provider only. |
 | [scripts/testing/host_exchange_contract.py](../scripts/testing/host_exchange_contract.py) | Keep exported host inputs connected to native deserialization fields and admission schemas. |
 | [scripts/testing/hotpath.py](../scripts/testing/hotpath.py) | Real HTTP wire bytes and SQL tracing checks for the existing read-performance suite. |
