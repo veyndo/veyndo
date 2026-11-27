@@ -1,0 +1,46 @@
+{
+  "$id": "order.workflow.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The merchant saved the order workflow (state machine); `sourceApp` names an app that supplied it.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "sourceApp": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "actor",
+    "revision",
+    "sourceApp"
+  ],
+  "title": "order.workflow.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "order.workflow.updated",
+    "producers": [
+      {
+        "component": "studio",
+        "crate": "veyndo-studio",
+        "source": "rust",
+        "type": "WorkflowUpdated"
+      }
+    ],
+    "version": 1
+  }
+}

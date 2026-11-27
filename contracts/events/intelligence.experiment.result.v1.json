@@ -1,0 +1,48 @@
+{
+  "$id": "intelligence.experiment.result.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A mature experiment readout was recorded for its channel.",
+  "properties": {
+    "asOf": {
+      "type": "string"
+    },
+    "causalUpliftProven": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "channelId": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asOf",
+    "causalUpliftProven",
+    "channelId",
+    "id"
+  ],
+  "title": "intelligence.experiment.result",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.experiment.result",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "ExperimentResult"
+      }
+    ],
+    "version": 1
+  }
+}

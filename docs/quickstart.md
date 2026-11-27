@@ -165,8 +165,8 @@ or provider calls and places no orders. [Ten-minute playground walkthrough](play
 
 ### An older local checkout
 
-A database created by an earlier release is refused at setup: this release is a
-fresh installation only. `scripts/dev.sh` still detects an older `rust-ai-commerce`
+A database created by the pre-baseline incremental release is refused at setup; a
+database set up from the component baselines is upgraded by its forward migrations. `scripts/dev.sh` still detects an older `rust-ai-commerce`
 Compose project and would reuse its database; set `COMPOSE_PROJECT_NAME=veyndo` (or
 another new name) to start with a new database instead. Rebuild frontend and Rust
 before starting `target/debug/veyndo`.

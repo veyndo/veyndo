@@ -3,6 +3,7 @@ use crate::ports::ListCarts;
 use crate::store::access::{access, identity, require};
 use crate::store::lists as list_rows;
 use crate::store::{catalog, organization};
+use crate::types::events::ListChanged;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashMap;
@@ -157,13 +158,13 @@ pub async fn invoke(
         };
         list_rows::upsert(&mut tx, &t, id, owner, &json!(data)).await?;
     }
-    organization::event(
-        &mut tx,
-        &t,
-        "b2b.list_changed",
-        json!({"listId":id,"unitId":unit,"operation":op,"revision":expected+1}),
-    )
-    .await?;
+    let changed = ListChanged {
+        list_id: id,
+        unit_id: unit,
+        operation: op,
+        revision: expected + 1,
+    };
+    organization::event(&mut tx, &t, &changed).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"revision":expected+1,"deleted":op=="list.delete"}))
 }

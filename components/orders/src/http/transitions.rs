@@ -6,6 +6,7 @@ use crate::domain::order_transitions::{cancellation_blocker, delivery, payment};
 use crate::domain::order_workflow::{admitted_edge, guard, workflow};
 use crate::store::machine::machine;
 use crate::store::order_mutation;
+use crate::types::events::StateChanged;
 use crate::types::order_document::OrderControl;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
@@ -155,11 +156,20 @@ pub async fn transition_order(
     };
     let mut event_order = o.clone();
     strip_cart_token(&mut event_order)?;
+    let from_state = if kind == "order" {
+        before.state.clone()
+    } else if kind == "payment" {
+        before.payment.state.clone()
+    } else {
+        before
+            .delivery(input.delivery_index.as_u64().unwrap_or(0) as usize)
+            .state
+    };
     order_mutation::persist(&mut tx, &t, &h, &mut o, order_mutation::Audit {
         kind:"transition",
         data:json!({"kind":kind,"state":target,"revision":revision+1,"trackingCode":input.tracking_code,"trackingUrl":input.tracking_url,"deliveryIndex":input.delivery_index,"requestKey":request_key,"lifecycle":if kind=="order" {machine.transitions.iter().find(|e|e.to==target && e.from==before.state).and_then(|e|e.policy.as_ref())} else {None}}),
         event_kind,
-        event:json!({"orderId":id,"kind":kind,"from":if kind=="order" {before.state.clone()} else if kind=="payment" {before.payment.state.clone()} else {before.delivery(input.delivery_index.as_u64().unwrap_or(0) as usize).state},"state":target,"revision":revision+1,"requestKey":request_key,"order":event_order}),
+        event:StateChanged{order_id:&id,kind,from:from_state.as_str(),state:target,revision:revision+1,request_key,order:event_order},
     }).await?;
     let mut response = o.clone();
     strip_cart_token(&mut response)?;

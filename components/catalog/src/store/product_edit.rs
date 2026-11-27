@@ -1,4 +1,5 @@
 //! Writes of one product edit inside its transaction: allocation lock, creation, clocks, identity, content and translations.
+use crate::store::exact::Exact;
 use crate::store::products::ProductRow;
 use crate::types::product_edit::CatalogFields;
 use serde_json::{Value, json};
@@ -32,7 +33,7 @@ pub async fn insert(
     description: &str,
     parent: Option<&str>,
 ) -> Result<bool> {
-    Ok(sqlx::query!(r#"INSERT INTO products(tenant,id,name,description,category,price,tax_rate,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING"#, tenant, id, name, description, parent)
+    Ok(sqlx::query!(r#"INSERT INTO products(tenant,id,name,description,category,price_decimal,tax_rate_decimal,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING"#, tenant, id, name, description, parent)
         .execute(tx)
         .await?
         .rows_affected()
@@ -136,7 +137,7 @@ pub async fn upsert_translation(
 
 /// The product as stored after the edit, with its content clock.
 pub async fn saved(tx: &mut PgConnection, tenant: &str, id: &str) -> Result<(Product, i64)> {
-    let row = sqlx::query!(r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number,content_revision FROM products WHERE tenant=$1 AND id=$2"#, tenant, id)
+    let row = sqlx::query!(r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number,content_revision FROM products WHERE tenant=$1 AND id=$2"#, tenant, id)
         .fetch_one(tx)
         .await?;
     let product = ProductRow {

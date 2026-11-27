@@ -1,22 +1,25 @@
 //! Product rows as the shared product contract, and the bounded locked reads and writes price jobs use.
+use crate::store::exact::Exact;
 use serde_json::Value;
 use sqlx::postgres::PgRow;
 use sqlx::{PgConnection, Row};
 use veyndo_core::{Result, State};
 use veyndo_pricing::catalog::Product;
+use veyndo_pricing::decimal::Decimal;
 
-/// A complete `products` row as the product contract reads it; checked queries select exactly these columns.
+/// A complete `products` row as the product contract reads it; checked queries select exactly these columns,
+/// prices and the tax rate from the exact `numeric` columns.
 pub struct ProductRow {
     pub id: String,
     pub name: String,
     pub category: String,
     pub description: String,
-    pub price: f64,
-    pub tax_rate: f64,
+    pub price: Exact,
+    pub tax_rate: Exact,
     pub stock: i32,
     pub revision: i64,
-    pub list_price: Option<f64>,
-    pub regulation_price: Option<f64>,
+    pub list_price: Option<Exact>,
+    pub regulation_price: Option<Exact>,
     pub reference_price: Option<Value>,
     pub advanced_prices: Value,
     pub min_purchase: i32,
@@ -45,12 +48,12 @@ impl From<ProductRow> for Product {
             name: r.name,
             category: r.category,
             description: r.description,
-            price: r.price,
-            tax_rate: r.tax_rate,
+            price: r.price.0,
+            tax_rate: r.tax_rate.0,
             stock: r.stock,
             revision: r.revision,
-            list_price: r.list_price,
-            regulation_price: r.regulation_price,
+            list_price: r.list_price.map(Decimal::from),
+            regulation_price: r.regulation_price.map(Decimal::from),
             advanced_prices: serde_json::from_value(r.advanced_prices).unwrap_or_default(),
             min_purchase: r.min_purchase as u32,
             purchase_steps: r.purchase_steps as u32,
@@ -69,12 +72,12 @@ pub fn product(r: &PgRow) -> Product {
         name: r.get("name"),
         category: r.get("category"),
         description: r.get("description"),
-        price: r.get("price"),
-        tax_rate: r.get("tax_rate"),
+        price: r.get("price_decimal"),
+        tax_rate: r.get("tax_rate_decimal"),
         stock: r.get("stock"),
         revision: r.get("revision"),
-        list_price: r.get("list_price"),
-        regulation_price: r.get("regulation_price"),
+        list_price: r.get("list_price_decimal"),
+        regulation_price: r.get("regulation_price_decimal"),
         reference_price: r.get("reference_price"),
         advanced_prices: r.get("advanced_prices"),
         min_purchase: r.get("min_purchase"),
@@ -93,7 +96,7 @@ pub fn product(r: &PgRow) -> Product {
 
 /// The active main products of the template shop a new shop is seeded from, at most 101.
 pub async fn prototype(a: &State, tenant: &str) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active ORDER BY id LIMIT 101"#, tenant)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id IS NULL AND active ORDER BY id LIMIT 101"#, tenant)
     .fetch_all(&a.db)
     .await?
     .into_iter()
@@ -103,7 +106,7 @@ pub async fn prototype(a: &State, tenant: &str) -> Result<Vec<Product>> {
 
 /// The main products of `tenant` among `ids` (the bounded built-in demo set), in no particular order.
 pub async fn main_by_ids(a: &State, tenant: &str, ids: &[String]) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NULL"#, tenant, ids)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NULL"#, tenant, ids)
     .fetch_all(&a.db)
     .await?
     .into_iter()
@@ -119,7 +122,7 @@ pub async fn lock_range(
     ceiling: &str,
     snapshot: &str,
 ) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id>$2 AND id<=$3 AND created_at<=$4::text::timestamptz ORDER BY id LIMIT 100 FOR UPDATE"#, tenant, cursor, ceiling, snapshot)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id>$2 AND id<=$3 AND created_at<=$4::text::timestamptz ORDER BY id LIMIT 100 FOR UPDATE"#, tenant, cursor, ceiling, snapshot)
         .fetch_all(tx)
         .await?
         .into_iter()
@@ -170,7 +173,7 @@ pub async fn in_channel(
     id: &str,
     channel: &str,
 ) -> Result<Option<(Product, bool)>> {
-    let Some(row) = sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, t, id)
+    let Some(row) = sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, t, id)
         .fetch_optional(&a.db)
         .await?
     else {

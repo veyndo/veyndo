@@ -1,0 +1,44 @@
+{
+  "$id": "merchant.change.applied.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A reviewed proposal (task) was applied to the shop, by the merchant or autonomously.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "autonomous": {
+      "type": "boolean"
+    },
+    "taskId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actor",
+    "autonomous",
+    "taskId"
+  ],
+  "title": "merchant.change.applied",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "merchant.change.applied",
+    "producers": [
+      {
+        "component": "studio",
+        "crate": "veyndo-studio",
+        "source": "rust",
+        "type": "ChangeApplied"
+      }
+    ],
+    "version": 1
+  }
+}

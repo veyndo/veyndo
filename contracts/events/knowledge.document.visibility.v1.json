@@ -1,0 +1,46 @@
+{
+  "$id": "knowledge.document.visibility.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant changed who may read a knowledge source.",
+  "properties": {
+    "decision": {
+      "additionalProperties": false,
+      "properties": {
+        "visibility": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "visibility"
+      ],
+      "type": "object"
+    },
+    "documentId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "documentId"
+  ],
+  "title": "knowledge.document.visibility",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "knowledge.document.visibility",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "DocumentVisibility"
+      }
+    ],
+    "version": 1
+  }
+}

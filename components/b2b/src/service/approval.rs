@@ -2,6 +2,7 @@
 use crate::store::access::{access, catalog_guard, guard_conn, identity, require};
 use crate::store::purchase;
 use crate::store::{approvals, carts as cart_rows};
+use crate::types::events::{ApprovalDecided, ApprovalRequested};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -66,13 +67,11 @@ pub async fn request(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value
     let r = approvals::by_fingerprint(&mut tx, &c.tenant, &c.id, &digest).await?;
     let actual = r.id;
     if actual == id {
-        crate::store::organization::event(
-            &mut tx,
-            &c.tenant,
-            "b2b.approval_requested",
-            json!({"approvalId":id,"unitId":context.unit_id}),
-        )
-        .await?;
+        let requested = ApprovalRequested {
+            approval_id: &id,
+            unit_id: &context.unit_id,
+        };
+        crate::store::organization::event(&mut tx, &c.tenant, &requested).await?;
     }
     tx.commit().await?;
     Ok(json!({"id":actual,"state":r.state,"revision":r.revision}))
@@ -145,13 +144,12 @@ pub async fn decide(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
         ));
     }
     approvals::decide(&mut tx, &t, id, target, &customer).await?;
-    crate::store::organization::event(
-        &mut tx,
-        &t,
-        "b2b.approval_decided",
-        json!({"approvalId":id,"unitId":unit,"state":target}),
-    )
-    .await?;
+    let decided = ApprovalDecided {
+        approval_id: id,
+        unit_id: &unit,
+        state: target,
+    };
+    crate::store::organization::event(&mut tx, &t, &decided).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"state":target,"revision":revision+1}))
 }

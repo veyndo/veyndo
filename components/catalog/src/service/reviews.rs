@@ -1,9 +1,10 @@
 //! Review submission with server-derived purchase verification, and the import of historical reviews with their provenance.
 use crate::ports::Catalog;
 use crate::store::{products, reviews};
+use crate::types::events::RecordImported;
 use crate::types::review::{ImportedReview, NewReview};
 use serde_json::{Value, json};
-use veyndo_core::{RequestContext, Result, bad, conflict, store::outbox, uid};
+use veyndo_core::{RequestContext, Result, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
 
 /// Stores a shopper's review unpublished; whether it is a verified purchase comes from the orders, never from the request.
@@ -75,13 +76,11 @@ pub async fn import(
         return Ok(json!({"id":id,"replayed":true}));
     }
     reviews::insert_imported(&mut tx, &tenant, id, product, &review, source).await?;
-    outbox::publish(
-        &mut tx,
-        &tenant,
-        "migration.record.imported",
-        json!({"kind":"reviews","targetId":id}),
-    )
-    .await?;
+    let imported = RecordImported {
+        kind: "reviews",
+        target_id: id,
+    };
+    veyndo_core::events::emit(&mut *tx, &tenant, &imported).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"replayed":false,"state":"pending-moderation","verifiedPurchase":false}))
 }

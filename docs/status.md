@@ -18,9 +18,9 @@ Updated 26 November 2026.
 ## Release state
 
 The **component architecture** release is a release candidate on branch
-`refactor/component-architecture`. It has not gone live yet. It is a fresh installation
-only: it replaces earlier installations, there is no upgrade path or data import, and
-setup refuses a database that an earlier release created
+`refactor/component-architecture`. It has not gone live yet. It replaced the pre-baseline
+installations without data import (setup refuses their databases); databases set up from
+its baselines are upgraded by forward migrations
 ([what operators must know](current-release.md#what-operators-must-know)).
 
 ## Platform at a glance

@@ -2,6 +2,7 @@
 use crate::domain::permissions::{SCOPES, validate_permissions};
 use crate::ports::RoleLanguages;
 use crate::store::roles::{self, current, usage};
+use crate::types::events::RoleChanged;
 use crate::{merchant, permit};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -145,7 +146,13 @@ pub async fn invoke(
         }
         roles::save(&mut tx, &t, id, d).await?;
     }
-    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "team.role_changed", &json!({"actor":header(&actor,"x-rac-user"),"id":id,"revision":expected+1,"deleted":name=="team.role.delete"})).await?;
+    let changed = RoleChanged {
+        actor: header(&actor, "x-rac-user"),
+        id,
+        revision: expected + 1,
+        deleted: name == "team.role.delete",
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &changed).await?;
     tx.commit().await?;
     Ok(
         json!({"id":id,"revision":expected+1,"saved":name=="team.role.save","deleted":name=="team.role.delete"}),

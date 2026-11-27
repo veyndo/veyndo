@@ -133,7 +133,10 @@ this iframe. The availability result is explicitly synthetic, not a real ERP.
 The app UI owns its content localization; the host supplies the selected locale
 in the SDK context. This example provides English, German, French and Spanish copy and shows ordinary notes instead of raw JSON.
 
-Events contain tenant, event ID, kind, data and stable `idempotencyKey`.
+Events contain tenant, event ID, kind, data and stable `idempotencyKey`. The `data`
+of each core kind follows its published schema in
+[`contracts/events/`](../contracts/events/index.json); the receiver SDKs below verify
+the envelope and signature, and the schema describes the payload.
 The service must deduplicate `(tenant, idempotencyKey)` in its own storage. Delivery
 is at least once; timeouts are retried, never exactly-once remote execution.
 The SQLite example persists and deduplicates its inbox. Eight failed deliveries

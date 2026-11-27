@@ -2,6 +2,7 @@
 import type { Product } from "../../../../../frontend/src/shared/api/shop-api";
 import { useShopText } from "../../../../../frontend/src/shared/i18n/shop-i18n";
 import ImagePlaceholder from "./ImagePlaceholder";
+import { optionText } from "../../../../../frontend/src/shared/content/option-labels";
 import ModelViewer from "../../../../../frontend/src/shared/media/ModelViewer";
 import {
   isModel,
@@ -50,7 +51,7 @@ export default function ProductGallery({
         ) : selected?.url ? (
           <img
             src={selected.url}
-            alt={`${p.name} · ${Object.values(p.options).map(s).join(" / ")} · ${s(selected.view ?? "front")}`}
+            alt={`${p.name} · ${optionText(p)} · ${s(selected.view ?? "front")}`}
             width="780"
             height="600"
           />

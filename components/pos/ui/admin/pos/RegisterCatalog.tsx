@@ -7,6 +7,7 @@ import type { useRegister } from "./useRegister";
 import { usePosText } from "./pos-i18n";
 import Icon from "../../../../../frontend/src/shared/ui/Icon";
 import type { PosProduct } from "./pos-model";
+import { optionText } from "../../../../../frontend/src/shared/content/option-labels";
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 import type { Channel } from "../../../../marketing/ui/admin/channels/channel-model";
 import { AppSurfaceSlot } from "../../../../../frontend/src/shared/apps/AppSurfaces";
@@ -191,7 +192,7 @@ export default function RegisterCatalog({
               disabled={r.busy || v.stock <= 0}
               onClick={() => void add(v).then(() => setVariants(null))}
             >
-              {v.name} · {Object.values(v.options ?? {}).join(" / ")}
+              {v.name} · {optionText(v)}
               <strong>
                 {money(typeof v.price === "number" ? v.price : 0)}
               </strong>

@@ -1,0 +1,52 @@
+{
+  "$id": "app.callback_approved.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant approved a callback key with the listed permissions for an app package digest.",
+  "properties": {
+    "actor": {
+      "type": "string"
+    },
+    "app": {
+      "type": "string"
+    },
+    "digest": {
+      "type": "string"
+    },
+    "keyId": {
+      "type": "string"
+    },
+    "permissions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "actor",
+    "app",
+    "digest",
+    "keyId",
+    "permissions"
+  ],
+  "title": "app.callback_approved",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "app.callback_approved",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "CallbackApproved"
+      }
+    ],
+    "version": 1
+  }
+}

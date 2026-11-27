@@ -1,0 +1,61 @@
+{
+  "$id": "order.state_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The order, its payment or one delivery moved to a new state; `order` is the order snapshot without the cart token.",
+  "properties": {
+    "from": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "kind": {
+      "type": "string"
+    },
+    "order": {},
+    "orderId": {
+      "type": "string"
+    },
+    "requestKey": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "from",
+    "kind",
+    "order",
+    "orderId",
+    "requestKey",
+    "revision",
+    "state"
+  ],
+  "title": "order.state_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "order.state_changed",
+    "producers": [
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "StateChanged"
+      }
+    ],
+    "version": 1
+  }
+}

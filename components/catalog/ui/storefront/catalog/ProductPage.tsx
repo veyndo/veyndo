@@ -4,6 +4,7 @@ import ProductDetails from "./ProductDetails";
 import CrossSelling from "./CrossSelling";
 import { productSeoFields } from "../../../../../frontend/src/shared/content/product-seo";
 import { productURL, collectionURL } from "./product-url";
+import { useShopBrand } from "../../../../../frontend/src/shared/content/shop-brand";
 import ProductGallery from "./ProductGallery";
 import {
   analyticsItems,
@@ -37,6 +38,7 @@ export default function ProductPage({
   onConfigure: import("../../../../../frontend/src/shared/apps/AppSlot").Props["onConfigure"];
 }) {
   const { s, locale } = useShopText();
+  const brand = useShopBrand();
   const [data, setData] = useState<Detail>();
   const [error, setError] = useState("");
   const [image, setImage] = useState(0);
@@ -141,7 +143,7 @@ export default function ProductPage({
     }
     if (data) {
       const seo = productSeoFields(data.product.extra?.seo, getContentLocale());
-      document.title = seo.title ?? data?.product.name ?? "Veyndo";
+      document.title = seo.title ?? (data.product.name || brand);
       let meta = document.querySelector<HTMLMetaElement>(
         'meta[name="description"]',
       );
@@ -152,7 +154,7 @@ export default function ProductPage({
       }
       meta.content = seo.description ?? data?.product.description ?? "";
     }
-  }, [data, locale]);
+  }, [data, locale, brand]);
   if (!data)
     return (
       <main className="shop-content" aria-busy={!error}>

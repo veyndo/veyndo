@@ -1,6 +1,30 @@
 /** Guided variant creation and editing vocabulary; content still follows shop language inheritance. */
 import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
 const words = {
+  optionNames: [
+    "Option value names",
+    "Namen der Optionswerte",
+    "Noms des valeurs d’option",
+    "Nombres de los valores de opción",
+  ],
+  optionNamesHint: [
+    "Name each size, colour or other value for shoppers in the selected content language. Values without a name show the main language, then the value itself. Names apply to the whole variant family.",
+    "Benenne jede Größe, Farbe oder andere Ausprägung für Kundinnen und Kunden in der gewählten Inhaltssprache. Werte ohne Namen zeigen die Hauptsprache, sonst den Wert selbst. Die Namen gelten für die ganze Variantenfamilie.",
+    "Nommez chaque taille, couleur ou autre valeur pour les clients dans la langue de contenu choisie. Sans nom, la langue principale puis la valeur elle-même s’affichent. Les noms valent pour toute la famille de variantes.",
+    "Nombra cada talla, color u otro valor para la clientela en el idioma de contenido elegido. Sin nombre se muestra el idioma principal y, si no, el propio valor. Los nombres valen para toda la familia de variantes.",
+  ],
+  optionNamesOnParent: [
+    "Option value names are edited on the main product of this family.",
+    "Namen der Optionswerte bearbeitest du am Hauptprodukt dieser Familie.",
+    "Les noms des valeurs d’option se modifient sur le produit principal de cette famille.",
+    "Los nombres de los valores de opción se editan en el producto principal de esta familia.",
+  ],
+  usesValue: [
+    "Shows the value itself",
+    "Zeigt den Wert selbst",
+    "Affiche la valeur elle-même",
+    "Muestra el propio valor",
+  ],
   loading: [
     "Loading variants…",
     "Varianten werden geladen…",

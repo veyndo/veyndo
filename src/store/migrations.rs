@@ -1,4 +1,4 @@
-//! The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time.
+//! The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script or one separately committed step, and the demo-seed marker. Static statements are checked at compile time.
 use sqlx::{PgConnection, PgPool};
 use veyndo_core::Result;
 
@@ -45,6 +45,21 @@ pub(crate) async fn run_script(conn: &mut PgConnection, source: &'static str) ->
         .await?;
     // A migration script is many statements, applied as written: no single query to check.
     sqlx::raw_sql(source).execute(conn).await?;
+    Ok(())
+}
+
+/// Runs one separately committed step of a no-transaction migration in the public schema; the step's
+/// own statements decide its transactions (a batched backfill commits between batches).
+pub(crate) async fn run_step(conn: &mut PgConnection, source: &'static str) -> Result<()> {
+    sqlx::query!("SET search_path=public")
+        .execute(&mut *conn)
+        .await?;
+    // A migration step is one or more statements, applied as written: no single query to check.
+    let result = sqlx::raw_sql(source).execute(&mut *conn).await;
+    sqlx::query!("RESET search_path")
+        .execute(&mut *conn)
+        .await?;
+    result?;
     Ok(())
 }
 

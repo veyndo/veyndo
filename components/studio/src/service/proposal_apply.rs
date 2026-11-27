@@ -5,6 +5,7 @@ use crate::domain::proposal::{Change, Proposal, validate_proposal};
 use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
+use crate::types::events::ChangeApplied;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_cognition::inference::Choice;
@@ -212,13 +213,12 @@ pub async fn apply_mode<H: WorkHost>(
     )
     .await?;
     tasks::mark_applied(&mut tx, t, id).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "merchant.change.applied",
-        &json!({"taskId":id,"autonomous":autonomous,"actor":header(h,"x-rac-user")}),
-    )
-    .await?;
+    let applied = ChangeApplied {
+        task_id: id,
+        autonomous,
+        actor: header(h, "x-rac-user"),
+    };
+    veyndo_core::events::emit(&mut *tx, t, &applied).await?;
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":true,"translationJobId":p.translation.as_ref().map(|_|id)}))
 }

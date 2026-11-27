@@ -1,6 +1,7 @@
 //! Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing.
 use crate::service::signed_offer;
 use crate::store::product_reads::stock as product_stock;
+use crate::types::events::ReorderApproved;
 use axum::Json;
 use axum::extract::State as Shared;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
@@ -198,7 +199,16 @@ pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value
     .await?
     .0;
     let handoff: Handoff = view(&handoff);
-    veyndo_core::store::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":view::<OfferPayload>(&signed).currency,"actor":header(h,"x-rac-user")})).await?;
+    let offer: OfferPayload = view(&signed);
+    let approved = ReorderApproved {
+        product_id: product,
+        supplier_shop: &link.supplier_shop,
+        quantity: link.reorder_quantity,
+        total_minor: total.to_string(),
+        currency: offer.currency.as_str(),
+        actor: header(h, "x-rac-user"),
+    };
+    veyndo_core::events::emit(&a.db, &t, &approved).await?;
     Ok(
         json!({"approved":true,"ordered":false,"supplierShop":link.supplier_shop,"checkoutPath":handoff.checkout_path,"expiresInSeconds":handoff.expires_in_seconds,"totalMinor":total.to_string()}),
     )

@@ -1,6 +1,7 @@
 //! Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate.
 use crate::domain::company_model::CompanyFields;
 use crate::store::order_mutation::Tx;
+use crate::types::events::MasterDataReleased;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, merge, view};
@@ -107,13 +108,7 @@ pub async fn publish(
             .ok_or(bad("Invalid company release scope"))?;
         sqlx::query!("INSERT INTO company_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=company_overrides.revision+1", live, channel, data).execute(&mut **tx).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        live,
-        "settings.master_data_changed",
-        &json!({"release":key}),
-    )
-    .await?;
+    veyndo_core::events::emit(&mut **tx, live, &MasterDataReleased { release: key }).await?;
     Ok(())
 }
 

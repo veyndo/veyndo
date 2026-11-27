@@ -1,5 +1,6 @@
 //! Private provenance-bearing app sources for merchant retrieval; never public PDP answers.
 use crate::store::locks;
+use crate::types::events::SourceImported;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -185,7 +186,15 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
         .rows_affected();
         if n > 0 {
             sync_integration(&mut tx, t, app, id, s, false).await?;
-            veyndo_core::store::outbox::publish_on(&mut *tx, t, &format!("app.{app}.source_imported"), &json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":source.metadata})).await?;
+            let imported = SourceImported {
+                source_id: id,
+                app,
+                source_kind: kind,
+                title,
+                metadata: &source.metadata,
+            };
+            let kind = format!("app.{app}.source_imported");
+            veyndo_core::events::emit_as(&mut *tx, t, &kind, &imported).await?;
         }
     }
     sqlx::query!(

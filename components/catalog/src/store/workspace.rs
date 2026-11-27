@@ -1,9 +1,11 @@
 //! Catalogue reads and writes of the merchant workspace: product rows for proposals and the editor, reviewed price/stock changes, existence checks, products out of stock and translation jobs with reviewable items.
 use super::products::ProductRow;
+use crate::store::exact::Exact;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 use veyndo_pricing::catalog::Product;
+use veyndo_pricing::decimal::Decimal;
 
 /// Up to four products without stock, by ID.
 pub async fn out_of_stock(a: &State, t: &str) -> Result<Vec<String>> {
@@ -22,7 +24,7 @@ pub async fn reviewable_translations(a: &State, t: &str) -> Result<Vec<String>> 
 
 /// Up to 100 of the requested products.
 pub async fn requested(a: &State, t: &str, ids: &[String]) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id LIMIT 100"#, t, ids)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id LIMIT 100"#, t, ids)
         .fetch_all(&a.db)
         .await?
         .into_iter()
@@ -32,7 +34,7 @@ pub async fn requested(a: &State, t: &str, ids: &[String]) -> Result<Vec<Product
 
 /// The given products, locked in ID order.
 pub async fn lock(c: &mut PgConnection, t: &str, ids: &[String]) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE"#, t, ids)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE"#, t, ids)
         .fetch_all(&mut *c)
         .await?
         .into_iter()
@@ -42,7 +44,7 @@ pub async fn lock(c: &mut PgConnection, t: &str, ids: &[String]) -> Result<Vec<P
 
 /// One product inside a transaction.
 pub async fn get(c: &mut PgConnection, t: &str, id: &str) -> Result<Product> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, t, id)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=$2"#, t, id)
         .fetch_one(&mut *c)
         .await?
         .into())
@@ -59,15 +61,15 @@ pub struct EditorProduct {
     pub revision: i64,
     pub content_revision: i64,
     pub extra: Value,
-    pub price: f64,
-    pub tax_rate: f64,
+    pub price: Exact,
+    pub tax_rate: Exact,
     pub stock: i32,
     pub min_purchase: i32,
     pub purchase_steps: i32,
     pub max_purchase: Option<i32>,
     pub delivery_days: i32,
-    pub list_price: Option<f64>,
-    pub regulation_price: Option<f64>,
+    pub list_price: Option<Exact>,
+    pub regulation_price: Option<Exact>,
     pub reference_price: Option<Value>,
     pub advanced_prices: Value,
     pub media: Value,
@@ -83,7 +85,7 @@ impl EditorProduct {
 
 /// A product as the merchant editor reads it.
 pub async fn editor_product(a: &State, t: &str, id: &str) -> Result<Option<EditorProduct>> {
-    Ok(sqlx::query_as!(EditorProduct, "SELECT name,description,active,product_number,parent_id,options,revision,content_revision,extra,price,tax_rate,stock,min_purchase,purchase_steps,max_purchase,delivery_days,list_price,regulation_price,reference_price,advanced_prices,media,properties FROM products WHERE tenant=$1 AND id=$2", t, id)
+    Ok(sqlx::query_as!(EditorProduct, "SELECT name,description,active,product_number,parent_id,options,revision,content_revision,extra,price_decimal AS \"price!: Exact\",tax_rate_decimal AS \"tax_rate!: Exact\",stock,min_purchase,purchase_steps,max_purchase,delivery_days,list_price_decimal AS \"list_price: Exact\",regulation_price_decimal AS \"regulation_price: Exact\",reference_price,advanced_prices,media,properties FROM products WHERE tenant=$1 AND id=$2", t, id)
         .fetch_optional(&a.db)
         .await?)
 }
@@ -103,10 +105,10 @@ pub async fn apply_change(
     c: &mut PgConnection,
     t: &str,
     (product_id, expected_revision): (&str, i64),
-    price: Option<f64>,
+    price: Option<Decimal>,
     stock: Option<i32>,
 ) -> Result<u64> {
-    Ok(sqlx::query!("UPDATE products SET price=COALESCE($1,price),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5", price, stock, t, product_id, expected_revision).execute(&mut *c).await?.rows_affected())
+    Ok(sqlx::query!("UPDATE products SET price_decimal=COALESCE($1,price_decimal),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5", price.map(Exact) as Option<Exact>, stock, t, product_id, expected_revision).execute(&mut *c).await?.rows_affected())
 }
 
 /// Whether a product exists.

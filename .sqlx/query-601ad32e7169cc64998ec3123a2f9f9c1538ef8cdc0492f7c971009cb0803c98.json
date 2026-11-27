@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT format(CASE WHEN c.relkind='S' THEN 'GRANT USAGE,SELECT,UPDATE ON SEQUENCE public.%I TO %I'\n                    ELSE 'GRANT SELECT,INSERT,UPDATE,DELETE ON public.%I TO %I' END,\n                c.relname,$1::text) AS \"statement!\"\n           FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace\n           WHERE n.nspname='public' AND c.relkind IN ('r','p','S') AND left(c.relname,10)='connector_'\n           UNION ALL SELECT format('GRANT SELECT ON public.commerce_migrations TO %I',$1::text)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "statement!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "601ad32e7169cc64998ec3123a2f9f9c1538ef8cdc0492f7c971009cb0803c98"
+}

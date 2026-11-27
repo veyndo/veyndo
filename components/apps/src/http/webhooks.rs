@@ -2,6 +2,7 @@
 use crate::domain::input_schema;
 use crate::domain::webhook_signature::verify;
 use crate::store::{locks, packages, secrets, webhook_receipts};
+use crate::types::events::AppDefined;
 use axum::Json;
 use axum::body::Bytes;
 use axum::extract::{Path, State as Shared};
@@ -87,11 +88,11 @@ pub async fn receive(
             json!({"accepted":true,"replayed":true,"eventId":r.event_id}),
         ));
     }
-    let event = veyndo_core::store::outbox::publish_id_on(
+    let event = veyndo_core::events::emit_id_as(
         &mut *tx,
         &t,
         &format!("app.{id}.{}", w.action),
-        &input,
+        &AppDefined(input.clone()),
     )
     .await?;
     webhook_receipts::record(

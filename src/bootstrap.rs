@@ -1,11 +1,11 @@
-//! Startup, additive migrations, persisted extensions and outbox worker.
+//! Startup, schema setup with release grants, persisted extensions and outbox worker.
 use crate::foundation::App;
 use crate::routes::router;
 use crate::{
-    apps, currencies, demo_catalog, marketing, migrations, performance, platform, runtime_config,
-    workers,
+    apps, currencies, demo_catalog, marketing, migrations, performance, platform, provision,
+    runtime_config, workers,
 };
-use crate::{capabilities, documents};
+use crate::{capabilities, documents, events};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::sync::Arc;
@@ -43,6 +43,9 @@ pub(crate) async fn bootstrap() -> App {
             .await
             .expect("PostgreSQL setup connection");
         migrations::apply(&pool).await;
+        provision::after_migrate(&pool)
+            .await
+            .unwrap_or_else(|e| panic!("Release grants: {e}"));
         Some(pool)
     };
     let db = performance::connect_database(&database_url).await;
@@ -139,6 +142,10 @@ pub(crate) async fn run() {
             .expect("PostgreSQL migration connection");
         migrations::apply(&db).await;
         migrations::ready(&PgPool::new(db.clone(), false)).await;
+        // Every release grants its new tables to the existing runtime, connector and tenant roles.
+        provision::after_migrate(&db)
+            .await
+            .unwrap_or_else(|e| panic!("Release grants: {e}"));
         let aliases = knowledge::vector_namespace::migrate_configured()
             .await
             .expect("Qdrant namespace migration failed");
@@ -209,11 +216,25 @@ pub(crate) fn entry() {
         println!("{}", capabilities::export());
         return;
     }
+    if env::args().nth(1).as_deref() == Some("--event-contracts") {
+        println!("{}", events::export());
+        return;
+    }
     if env::args().nth(1).as_deref() == Some("--database-authority") {
         tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(veyndo::database_scope::provision::run())
             .expect("Database authority command failed");
+        return;
+    }
+    if env::args().nth(1).as_deref() == Some("--provision") {
+        tokio::runtime::Runtime::new()
+            .unwrap()
+            // The optional operator bootstrap writes system rows that forced row security admits only in system scope.
+            .block_on(veyndo::tenant_scope::scoped(
+                veyndo::tenant_scope::Scope::System,
+                provision::command(),
+            ));
         return;
     }
     if env::args().nth(1).as_deref() == Some("--sign-app") {

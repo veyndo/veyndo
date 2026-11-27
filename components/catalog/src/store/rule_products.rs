@@ -1,4 +1,5 @@
 //! Product rows as rules, flows and channels read and change them: complete products for rule facts, a customer's review count, the flow's download grants of an order, the revision-bound automation write and the channel's visibility count. Marketing calls these directly on its own connection. Columns checked at compile time.
+use crate::store::exact::Exact;
 use crate::store::products::ProductRow;
 use serde_json::Value;
 use sqlx::PgConnection;
@@ -7,7 +8,7 @@ use veyndo_pricing::catalog::Product;
 
 /// The products among `ids`, in no particular order.
 pub async fn by_ids(conn: &mut PgConnection, tenant: &str, ids: &[String]) -> Result<Vec<Product>> {
-    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2)"#, tenant, ids)
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price_decimal AS "price!: Exact",tax_rate_decimal AS "tax_rate!: Exact",stock,revision,list_price_decimal AS "list_price: Exact",regulation_price_decimal AS "regulation_price: Exact",reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2)"#, tenant, ids)
         .fetch_all(conn)
         .await?
         .into_iter()

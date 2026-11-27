@@ -1,0 +1,57 @@
+{
+  "$id": "membership.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A team membership changed role, activity or permissions; `permissions` is the explicit list or `null` for the role's grants.",
+  "properties": {
+    "active": {
+      "type": "boolean"
+    },
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "permissions": {},
+    "previousActive": {
+      "type": "boolean"
+    },
+    "previousRole": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "active",
+    "actor",
+    "permissions",
+    "previousActive",
+    "previousRole",
+    "role",
+    "subject"
+  ],
+  "title": "membership.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "membership.updated",
+    "producers": [
+      {
+        "component": "identity",
+        "crate": "veyndo-identity",
+        "source": "rust",
+        "type": "MembershipUpdated"
+      }
+    ],
+    "version": 1
+  }
+}

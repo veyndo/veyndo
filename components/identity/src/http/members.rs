@@ -1,6 +1,7 @@
 //! Workspace member visibility and immediately effective role/revocation changes.
 use crate::domain::credentials::role_allowed;
 use crate::store::{invitations, members, roles};
+use crate::types::events::MembershipUpdated;
 use crate::{merchant, permit, validate_permissions};
 use axum::Json;
 use axum::extract::{Path, State};
@@ -95,7 +96,16 @@ pub async fn update_member(
         return Err(bad("Owner permissions cannot be restricted"));
     }
     members::update(&mut tx, (&t, &user), (role, active), &permissions).await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.role,"previousActive":old.active})).await?;
+    let updated = MembershipUpdated {
+        actor: header(&h, "x-rac-user"),
+        subject: &user,
+        role,
+        active,
+        permissions: &permissions,
+        previous_role: &old.role,
+        previous_active: old.active,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &updated).await?;
     tx.commit().await?;
     Ok(Json(json!({"updated":true})))
 }

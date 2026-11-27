@@ -55,8 +55,12 @@ def migration_binary():
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if built.returncode == 0:
         return ROOT / 'target/debug/veyndo', None
-    changed = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'migrations', 'src/migrations.rs', 'src/migrations'],
-                             cwd=ROOT).returncode
+    # Only the schema files and the list of them decide the migrated schema; a runner change keeps HEAD's schema.
+    changed = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'components/*/migrations',
+                              'extensions/services/connectors/migrations'], cwd=ROOT).returncode
+    listed = subprocess.run(['git', 'diff', '-U0', 'HEAD', '--', 'src/migrations/schema.rs'], cwd=ROOT,
+                            capture_output=True, text=True, check=True).stdout
+    changed = changed or any(line.startswith(('+', '-')) and 'include_str!' in line for line in listed.splitlines())
     if changed:
         raise SystemExit('New query macros and changed migrations together: commit the migrations first, then regenerate')
     tree = Path(tempfile.mkdtemp(prefix='veyndo-sqlx-'))

@@ -11,9 +11,9 @@ IF NOT EXISTS(SELECT 1 FROM seed_versions WHERE version='commerce-v4') THEN
  properties=CASE id WHEN 'chair' THEN '{"material":"oak-linen","width":"54 cm","height":"78 cm","weight":"6.5 kg"}'::jsonb WHEN 'desk' THEN '{"material":"oak","width":"120 cm","height":"74 cm","weight":"18 kg"}'::jsonb WHEN 'lamp' THEN '{"material":"steel","height":"48 cm","power":"8 W LED"}'::jsonb WHEN 'mug' THEN '{"material":"stoneware","volume":"350 ml","care":"dishwasher"}'::jsonb WHEN 'notebook' THEN '{"material":"recycled-paper","size":"A5","pages":"160"}'::jsonb ELSE '{"material":"oak","width":"80 cm","height":"110 cm"}'::jsonb END,
  options=CASE id WHEN 'mug' THEN '{"color":"terracotta","size":"350"}'::jsonb WHEN 'chair' THEN '{"color":"natural","material":"oak"}'::jsonb ELSE '{}'::jsonb END;
  -- Existing base IDs remain purchasable SKUs, including all existing carts.
- INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,parent_id,options,media,properties,delivery_days,list_price,regulation_price,advanced_prices,min_purchase,purchase_steps,max_purchase)
- SELECT tenant,id||'-'||v.suffix,name,category,description,price+v.delta,tax_rate,v.stock,id,v.options,
- media,properties,delivery_days,list_price,regulation_price,advanced_prices,min_purchase,purchase_steps,max_purchase
+ INSERT INTO products(tenant,id,name,category,description,price_decimal,tax_rate_decimal,stock,parent_id,options,media,properties,delivery_days,list_price_decimal,regulation_price_decimal,advanced_prices,min_purchase,purchase_steps,max_purchase)
+ SELECT tenant,id||'-'||v.suffix,name,category,description,price_decimal+v.delta,tax_rate_decimal,v.stock,id,v.options,
+ media,properties,delivery_days,list_price_decimal,regulation_price_decimal,advanced_prices,min_purchase,purchase_steps,max_purchase
  FROM products CROSS JOIN (VALUES
  ('mug','sage-350','{"color":"sage","size":"350"}'::jsonb,0.0,36),
  ('mug','terracotta-500','{"color":"terracotta","size":"500"}'::jsonb,5.0,24),

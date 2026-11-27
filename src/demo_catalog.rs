@@ -122,4 +122,30 @@ mod tests {
             }
         }
     }
+
+    /// Every colour and the one-size value of the fashion catalogue are named in en/de/fr/es on the
+    /// family root, where `extra.optionValues` is read for the whole family.
+    #[test]
+    fn fashion_option_values_are_named_in_four_languages() {
+        let data = template();
+        let products = data["products"].as_array().unwrap();
+        for p in products {
+            let root_id = p["parent_id"].as_str().unwrap_or(p["id"].as_str().unwrap());
+            let root = products.iter().find(|r| r["id"] == root_id).unwrap();
+            assert!(p["parent_id"].is_null() || p["extra"].get("optionValues").is_none());
+            for (group, value) in p["options"].as_object().unwrap() {
+                let value = value.as_str().unwrap();
+                if group == "size" && value != "one-size" {
+                    continue; // S, M, L and shoe sizes read the same in every language.
+                }
+                let names = &root["extra"]["optionValues"][group][value];
+                for language in ["en", "de", "fr", "es"] {
+                    assert!(
+                        names[language].as_str().is_some_and(|s| !s.is_empty()),
+                        "{root_id} {group}={value} lacks {language}"
+                    );
+                }
+            }
+        }
+    }
 }

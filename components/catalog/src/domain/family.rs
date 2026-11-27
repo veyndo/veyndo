@@ -23,6 +23,7 @@ mod tests {
     use super::{inherit, inherited_extra};
     use serde_json::{Value, json};
     use veyndo_pricing::catalog::Product;
+    use veyndo_pricing::decimal::Decimal;
 
     fn product(id: &str, name: &str, extra: Value) -> Product {
         serde_json::from_value(json!({
@@ -43,7 +44,7 @@ mod tests {
             json!({"shippingFree":true,"seo":{"en":{"title":"Mug"}}}),
         );
         let mut variant = product("family-red", "family-red", json!({"shippingFree":false}));
-        variant.price = 12.5;
+        variant.price = Decimal::parse("12.5").unwrap();
         inherit(&mut variant, &root);
         assert_eq!(variant.name, "Mug");
         assert_eq!(variant.description, "About Mug");
@@ -51,7 +52,10 @@ mod tests {
             variant.extra,
             json!({"shippingFree":false,"seo":{"en":{"title":"Mug"}}})
         );
-        assert_eq!((variant.id.as_str(), variant.price), ("family-red", 12.5));
+        assert_eq!(
+            (variant.id.as_str(), variant.price),
+            ("family-red", Decimal::parse("12.5").unwrap())
+        );
     }
 
     #[test]

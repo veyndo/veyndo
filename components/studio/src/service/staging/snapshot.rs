@@ -4,6 +4,7 @@ use crate::store::staging_snapshot as db;
 use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
+use crate::types::events::ProductPublished;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -16,6 +17,7 @@ use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_orders::domain::order_machine::default_machine;
 use veyndo_orders::store::company_release as company;
+use veyndo_pricing::decimal::Decimal;
 use veyndo_shop::service::settings_writes::snapshot_scopes;
 /// The transaction every staging step shares.
 pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
@@ -112,9 +114,9 @@ struct StagedProduct {
     #[serde(deserialize_with = "lenient")]
     description: Option<String>,
     #[serde(deserialize_with = "lenient")]
-    price: Option<f64>,
+    price: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
-    tax_rate: Option<f64>,
+    tax_rate: Option<Decimal>,
     #[serde(deserialize_with = "lenient")]
     active: Option<bool>,
     #[serde(deserialize_with = "lenient")]
@@ -215,13 +217,11 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
     }
     let stored = crate::store::products::get(tx, t, id).await?;
     sync_product(tx, t, &json!(stored)).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        t,
-        "product.published",
-        &json!({"productId":id,"revision":stored.revision}),
-    )
-    .await?;
+    let published = ProductPublished {
+        product_id: id,
+        revision: stored.revision,
+    };
+    veyndo_core::events::emit(&mut **tx, t, &published).await?;
     Ok(())
 }
 

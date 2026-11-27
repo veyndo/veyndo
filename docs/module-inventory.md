@@ -130,7 +130,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/bin/verified_kernel/dispatch/intelligence.rs](../src/bin/verified_kernel/dispatch/intelligence.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch.rs](../src/bin/verified_kernel/dispatch.rs) | Generated domain dispatcher; each bounded module calls the original production policies. |
 | [src/bin/verified_kernel/main.rs](../src/bin/verified_kernel/main.rs) | Generated input/output driver; production policies are dispatched by the generated module. |
-| [src/bootstrap.rs](../src/bootstrap.rs) | Startup, additive migrations, persisted extensions and outbox worker. |
+| [src/bootstrap.rs](../src/bootstrap.rs) | Startup, schema setup with release grants, persisted extensions and outbox worker. |
 | [src/brand_redirect.rs](../src/brand_redirect.rs) | Move browser pages to the configured domain while retaining integration and checkout endpoints. |
 | [src/capabilities/admission.rs](../src/capabilities/admission.rs) | MCP discovery applies current merchant permissions through the same capability owners as invocation. |
 | [src/capabilities/catalog/core_catalog.rs](../src/capabilities/catalog/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
@@ -226,6 +226,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/documents/questions.rs](../src/documents/questions.rs) | Product question route; the intelligence component owns the answer, its citations and the re-admission. |
 | [src/documents/retrieval.rs](../src/documents/retrieval.rs) | Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component. |
 | [src/documents/tools.rs](../src/documents/tools.rs) | Knowledge workspace/source MCP tools delegate to the same authorized HTTP operations and schemas. |
+| [src/events.rs](../src/events.rs) | The outbox event schema registry: every component's typed payloads, their consumers and the contracts generated into `contracts/events/`. |
 | [src/experience.rs](../src/experience.rs) | The storefront experience lives in the intelligence component; this handler supplies the experiment assignment secret. |
 | [src/extensions.rs](../src/extensions.rs) | Merchant catalogue route and the business policy routes; the apps component owns policy activation and state. |
 | [src/foundation.rs](../src/foundation.rs) | Application dependencies, error responses and request context helpers. |
@@ -269,8 +270,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/mcp/storefront_views.rs](../src/mcp/storefront_views.rs) | Storefront kit parts as an MCP App view: the `ui://` document, the tool links and each tool result's part payload. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |
-| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema baselines of a fresh installation: the cross-cutting foundation, then one |
-| [src/migrations.rs](../src/migrations.rs) | Fresh-installation setup, separate from serving: applies the component schema baselines in their |
+| [src/migrations/schema.rs](../src/migrations/schema.rs) | The ordered schema migrations: the cross-cutting foundation, one baseline per component, then the |
+| [src/migrations.rs](../src/migrations.rs) | Schema setup, separate from serving: applies the component baselines and then the forward |
 | [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant address operations live in the customers component. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
@@ -354,6 +355,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
 | [src/proposal_apply.rs](../src/proposal_apply.rs) | Proposal application lives in the studio component; these entries lend it the server's ports. |
 | [src/proposal_routes.rs](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. |
+| [src/provision.rs](../src/provision.rs) | Release provisioning on the migration-owner connection (`--provision`, and the grant part after every migration): grants every schema object to the existing runtime group and connector login, configures and activates database authority, verifies the result and optionally bootstraps the first operator. It never creates logins or passwords; those belong to the database manager. |
 | [src/routes/http_profile.rs](../src/routes/http_profile.rs) | Serve the same commerce operations without the native storefront or Studio shell. |
 | [src/routes.rs](../src/routes.rs) | HTTP transport registry; domain behavior lives in dedicated modules. |
 | [src/runtime_config.rs](../src/runtime_config.rs) | Immutable process configuration, validated once at startup. Mutable shop/provider settings remain in PostgreSQL. |
@@ -366,11 +368,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
 | [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
-| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time. |
+| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script or one separately committed step, and the demo-seed marker. Static statements are checked at compile time. |
 | [src/store/platform.rs](../src/store/platform.rs) | Operator bootstrap and shop-creation steps of the control plane. The email lock is the server's own; accounts belong to identity and the operator grant and audit to shop. |
 | [src/store/process.rs](../src/store/process.rs) | Process-level statements: the readiness ping, the short lock wait of a background digest and the queue ages of the app worker sample. |
+| [src/store/provision.rs](../src/store/provision.rs) | Release provisioning SQL on the migration-owner connection: role lookups, the grant statements for the runtime group and the connector login, and the privilege coverage that verifies them. Statements are generated server-side with `format('%I')`, so role and table names are always quoted identifiers. |
 | [src/store/shops.rs](../src/store/shops.rs) | Shop provisioning: the server composes the starter rows of every component a new shop needs. The ID lock and the automation seed are the server's own; each row belongs to its component's store. |
-| [src/store.rs](../src/store.rs) | The server's own SQL: shop provisioning across components, the operator control plane, the migration runner and process-level checks. Components keep theirs in their own store modules. |
+| [src/store.rs](../src/store.rs) | The server's own SQL: shop provisioning across components, the operator control plane, the migration runner, release grants and process-level checks. Components keep theirs in their own store modules. |
 | [src/storefront_islands.rs](../src/storefront_islands.rs) | Server-rendered storefront-kit islands for deep-linked product pages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
@@ -430,6 +433,8 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
 | [crates/cognition/src/ports.rs](../crates/cognition/src/ports.rs) | What the inference component needs from the server without depending on the owners: agent key budgets |
 | [crates/cognition/src/prompts.rs](../crates/cognition/src/prompts.rs) | Versioned system-prompt provenance; no prompt text or private context is exposed in evidence. |
+| [crates/cognition/src/types/events.rs](../crates/cognition/src/types/events.rs) | The outbox events the inference crate publishes: typed payloads behind `contracts/events/`. |
+| [crates/cognition/src/types.rs](../crates/cognition/src/types.rs) | Records the inference crate publishes to other components. |
 | [crates/flow-graph/src/catalog.rs](../crates/flow-graph/src/catalog.rs) | Stable built-in Flow identifiers shared by discovery and native admission. |
 | [crates/flow-graph/src/execution.rs](../crates/flow-graph/src/execution.rs) | Typed instructions from a validated graph. The host evaluates facts and performs effects. |
 | [crates/flow-graph/src/lib.rs](../crates/flow-graph/src/lib.rs) | Dependency-free validation and indexed lookup for bounded commerce flow graphs. |
@@ -621,6 +626,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/webhook_receipts.rs](../components/apps/src/store/webhook_receipts.rs) | Receipts of incoming app webhooks: one outbox event per (app, webhook, sender event ID), replayed on repeats. |
 | [components/apps/src/store/workspace.rs](../components/apps/src/store/workspace.rs) | App samples for the merchant workspace: active apps with failed jobs and the activity check of workflow source apps. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
+| [components/apps/src/types/events.rs](../components/apps/src/types/events.rs) | The outbox events the apps component publishes: typed payloads behind `contracts/events/`. |
+| [components/apps/src/types.rs](../components/apps/src/types.rs) | Records the apps component publishes to other components. |
 | [components/apps/tests/port_adapters.rs](../components/apps/tests/port_adapters.rs) | Test adapters for the app platform ports (`RecordRules`, `CommerceInstall`, `HostActions`, `HostedInstall`), so the apps mirror builds and tests without the server. |
 | [components/apps/ui/admin/apps/AppAccess.tsx](../components/apps/ui/admin/apps/AppAccess.tsx) | Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. |
 | [components/apps/ui/admin/apps/AppActivity.tsx](../components/apps/ui/admin/apps/AppActivity.tsx) | API-backed per-app call metadata, storage budgets and explicitly approved durable replay. |
@@ -795,8 +802,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/store/staging.rs](../components/b2b/src/store/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
 | [components/b2b/src/store/units.rs](../components/b2b/src/store/units.rs) | What an employee sees of their purchasing units: active memberships with unit and company (checked columns), and the unit's orders with their issued receipts, which belong to orders and are read through the records port. |
 | [components/b2b/src/store.rs](../components/b2b/src/store.rs) | store of this component. |
+| [components/b2b/src/types/events.rs](../components/b2b/src/types/events.rs) | The outbox events the b2b component publishes: typed payloads behind `contracts/events/`. |
 | [components/b2b/src/types/model.rs](../components/b2b/src/types/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
-| [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
+| [components/b2b/src/types.rs](../components/b2b/src/types.rs) | Records of the b2b component: its stored model and the events it publishes. |
 | [components/b2b/tests/port_adapters.rs](../components/b2b/tests/port_adapters.rs) | Test adapters for the b2b ports (`QuoteLifecycle`, `ListCarts`, `Procurement`), so the b2b mirror builds and tests without the server. |
 | [components/b2b/ui/admin/b2b/B2BRoute.tsx](../components/b2b/ui/admin/b2b/B2BRoute.tsx) | B2B route: companies or quotes in the current stage, or the disabled notice when the shop has not enabled them. |
 | [components/b2b/ui/admin/b2b/B2BWorkspace.tsx](../components/b2b/ui/admin/b2b/B2BWorkspace.tsx) | Tenant-scoped company workspace; canonical API operations are also exposed through MCP. |
@@ -811,6 +819,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/ui/admin/b2b/reference.ts](../components/b2b/ui/admin/b2b/reference.ts) | Native organization IDs require a lowercase letter first and at most 32 characters. |
 | [components/b2b/ui/admin/b2b/studio-extension.ts](../components/b2b/ui/admin/b2b/studio-extension.ts) | Studio extension of B2B companies and quotes; the sidebar shows them in their own section when B2B is enabled. |
 | [components/catalog/migrations/0001-baseline.sql](../components/catalog/migrations/0001-baseline.sql) | Baseline schema of the catalog component (Products, categories, media, reviews, translations and catalogue reads): its tables, sequences, functions, |
+| [components/catalog/migrations/0002-exact-product-prices.sql](../components/catalog/migrations/0002-exact-product-prices.sql) | veyndo:no-transaction |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/csv_rows.rs](../components/catalog/src/domain/csv_rows.rs) | Bounded UTF-8 CSV reader: quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
@@ -822,6 +831,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/media.rs](../components/catalog/src/domain/media.rs) | Which media a product may reference: images and at most four uploaded 3D models, with safe URLs and bounded labels. |
 | [components/catalog/src/domain/model_format.rs](../components/catalog/src/domain/model_format.rs) | Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden. |
 | [components/catalog/src/domain/navigation.rs](../components/catalog/src/domain/navigation.rs) | Public navigation: a hidden category hides its whole branch, and every entry is shown in the visitor's language. |
+| [components/catalog/src/domain/option_values.rs](../components/catalog/src/domain/option_values.rs) | Localized variant option values: merchant names per content language for each option value key, |
 | [components/catalog/src/domain/preparation.rs](../components/catalog/src/domain/preparation.rs) | Which content languages of a product already have a name or a description, as the catalogue preparation view shows it. |
 | [components/catalog/src/domain/product_admission.rs](../components/catalog/src/domain/product_admission.rs) | Admit native product edits and expand explicit category-only changes through the same revisioned editor. |
 | [components/catalog/src/domain/rich.rs](../components/catalog/src/domain/rich.rs) | Safe structured rich content, never executable HTML. Same schema for merchant API and frontend. |
@@ -862,6 +872,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Static assignments and saved current-public-fact queries share category/channel pagination. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. The channels themselves come through the registries port. |
 | [components/catalog/src/store/demo_template.rs](../components/catalog/src/store/demo_template.rs) | Demo template rows: the products and translations of a bundled catalogue template, and the template's category translations. |
+| [components/catalog/src/store/exact.rs](../components/catalog/src/store/exact.rs) | The PostgreSQL `numeric` codec of exact product prices and rates: reads and binds a `numeric` column as the pricing [`Decimal`], without a floating-point intermediary. |
 | [components/catalog/src/store/imported_lines/labels.sql](../components/catalog/src/store/imported_lines/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
 | [components/catalog/src/store/imported_lines.rs](../components/catalog/src/store/imported_lines.rs) | Products of an external order import: their parents, the locked lines, channel visibility and translated labels. |
 | [components/catalog/src/store/imports.rs](../components/catalog/src/store/imports.rs) | Native catalogue state that reviewed migration imports replay against and compare with: categories, product fields, assets and reviews. |
@@ -888,8 +899,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/asset.rs](../components/catalog/src/types/asset.rs) | A stored product file as merchant lists show it; the content itself never enters a list. |
 | [components/catalog/src/types/catalog_page.rs](../components/catalog/src/types/catalog_page.rs) | The filters and cursor of a storefront catalogue read, and one page of products. |
 | [components/catalog/src/types/category.rs](../components/catalog/src/types/category.rs) | A category write: its place in the tree and its data with translations per content language. |
+| [components/catalog/src/types/events.rs](../components/catalog/src/types/events.rs) | The outbox events the catalog component publishes: typed payloads behind `contracts/events/`. |
 | [components/catalog/src/types/product_edit.rs](../components/catalog/src/types/product_edit.rs) | The product edit payload: translated texts, multilingual metadata and the optional commerce and identity fields. |
-| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
+| [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them, prices and the tax rate as exact decimals; stock is optional so an untouched quantity is never written back. |
 | [components/catalog/src/types/product_list.rs](../components/catalog/src/types/product_list.rs) | The filters, sort and cursor of the merchant product list, and one listed product. |
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
@@ -905,6 +917,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/ui/admin/catalog/CategoriesWorkspace.tsx](../components/catalog/ui/admin/catalog/CategoriesWorkspace.tsx) | Localized category tree editor; parent moves and revisions are validated in the API. |
 | [components/catalog/ui/admin/catalog/CategoryFactQuery.tsx](../components/catalog/ui/admin/catalog/CategoryFactQuery.tsx) | One saved predicate on current public evidence; reuses category CAS and the editor's selected content language. |
 | [components/catalog/ui/admin/catalog/MediaDropzone.tsx](../components/catalog/ui/admin/catalog/MediaDropzone.tsx) | Accessible multi-file upload with drag/drop, visible progress and the same validated asset API as attachments. |
+| [components/catalog/ui/admin/catalog/OptionValueNames.tsx](../components/catalog/ui/admin/catalog/OptionValueNames.tsx) | Names of a family's option values in the editor's one content language, stored on the family root (`extra.optionValues`); a missing name inherits the main language, never a copied text. |
 | [components/catalog/ui/admin/catalog/PairFields.tsx](../components/catalog/ui/admin/catalog/PairFields.tsx) | Native map editing uses explicit row creation and collision-safe rename on blur, never whitespace keys or overwritten siblings. |
 | [components/catalog/ui/admin/catalog/ProductAssets.tsx](../components/catalog/ui/admin/catalog/ProductAssets.tsx) | Bounded upload and explicit digest-bound publication of attachments and paid files. |
 | [components/catalog/ui/admin/catalog/ProductAssignments.tsx](../components/catalog/ui/admin/catalog/ProductAssignments.tsx) | Searchable product category paths and explicit channel choices share the native revisioned aggregate save. |
@@ -1035,6 +1048,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
+| [components/checkout/src/types/events.rs](../components/checkout/src/types/events.rs) | The outbox events the checkout component publishes: typed payloads behind `contracts/events/`. |
+| [components/checkout/src/types.rs](../components/checkout/src/types.rs) | Records the checkout component publishes to other components. |
 | [components/checkout/tests/domain_mutants.rs](../components/checkout/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in checkout `domain/`: exact quote amounts for consumer and business carts, tiers, list/regulation/reference prices, app fees, and the review and tax-line rules. |
 | [components/checkout/tests/port_adapters.rs](../components/checkout/tests/port_adapters.rs) | Test adapters for the checkout ports (`Quotes`, `CartEdits`, `Purchase`), so the checkout mirror builds and tests without the server. |
 | [components/checkout/tests/properties.rs](../components/checkout/tests/properties.rs) | Property tests for the cart quote: totals are the sum of line totals plus tax in whole minor units, and the same cart always gives the same quote. |
@@ -1068,6 +1083,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/conversions.rs](../components/core/src/conversions.rs) | Conversions from library errors into the shared error contract; the wire messages are part of the public API. |
 | [components/core/src/document.rs](../components/core/src/document.rs) | Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted. |
 | [components/core/src/document_slot.rs](../components/core/src/document_slot.rs) | Typed writes into nested fields of stored JSON documents: `field` reaches a child slot exactly as JSON index assignment does, so a typed patch (`document::merge`) can land below the top level. |
+| [components/core/src/events.rs](../components/core/src/events.rs) | The versioned outbox event contract: typed payloads declared with `event!`, their JSON Schema and the only way producers publish them. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
@@ -1146,6 +1162,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. Columns checked at compile time. |
 | [components/customers/src/store/sign_in.rs](../components/customers/src/store/sign_in.rs) | Buyer sign-in records: the active account with its credential and defaults and the login times; the cart goes through the purchases port. Columns checked at compile time. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
+| [components/customers/src/types/events.rs](../components/customers/src/types/events.rs) | The outbox events the customers component publishes: typed payloads behind `contracts/events/`. |
+| [components/customers/src/types.rs](../components/customers/src/types.rs) | Records the customers component publishes to other components. |
 | [components/customers/tests/port_adapters.rs](../components/customers/tests/port_adapters.rs) | Test adapter for the customers port `SignIn`, so the customers mirror builds and tests without the server. |
 | [components/customers/ui/admin/customers/CustomerCreate.tsx](../components/customers/ui/admin/customers/CustomerCreate.tsx) | Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. |
 | [components/customers/ui/admin/customers/CustomerDirectory.tsx](../components/customers/ui/admin/customers/CustomerDirectory.tsx) | Registered and guest contacts share native directory filters and permission-aware grid controls. |
@@ -1218,7 +1236,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/store/shop_reads.rs](../components/identity/src/store/shop_reads.rs) | Account and membership reads for the shop component's operator views: user totals, member counts, a shop's roster and an operator's account. |
 | [components/identity/src/store.rs](../components/identity/src/store.rs) | SQL of the identity component. |
 | [components/identity/src/types/envelopes.rs](../components/identity/src/types/envelopes.rs) | Stable typed authentication envelopes; field validation remains in the shared credential owner. |
-| [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
+| [components/identity/src/types/events.rs](../components/identity/src/types/events.rs) | The outbox events the identity component publishes: typed payloads behind `contracts/events/`. |
+| [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes and published events of the identity component. |
 | [components/identity/tests/port_adapters.rs](../components/identity/tests/port_adapters.rs) | Test adapter for the identity port `RoleLanguages`, so the identity mirror builds and tests without the server. |
 | [components/identity/ui/admin/team/AccessManager.tsx](../components/identity/ui/admin/team/AccessManager.tsx) | Fine-grained team overrides, revocable invitations and personal session inventory. |
 | [components/identity/ui/admin/team/AgentBudgetFields.tsx](../components/identity/ui/admin/team/AgentBudgetFields.tsx) | Explicit delegation limits; empty or invalid fields never create unbounded agent authority. |
@@ -1361,6 +1380,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/store/work_tasks.rs](../components/intelligence/src/store/work_tasks.rs) | Reviewed work and proposal tasks: proposal reads and application marks, queued execution, leased work-run checkpoints and receipts, turn release and the wake-up of tasks waiting on translation jobs. |
 | [components/intelligence/src/store/workspace.rs](../components/intelligence/src/store/workspace.rs) | Agent run samples for the merchant workspace: the actor's failed or uncertain runs within their scopes. |
 | [components/intelligence/src/store.rs](../components/intelligence/src/store.rs) | SQL of the intelligence component. |
+| [components/intelligence/src/types/events.rs](../components/intelligence/src/types/events.rs) | The outbox events the intelligence component publishes: typed payloads behind `contracts/events/`. |
+| [components/intelligence/src/types.rs](../components/intelligence/src/types.rs) | Records the intelligence component publishes to other components. |
 | [components/intelligence/ui/admin/agents/AgentsRoute.tsx](../components/intelligence/ui/admin/agents/AgentsRoute.tsx) | Agents route: the agents view over the loaded workspace data. |
 | [components/intelligence/ui/admin/agents/AgentsView.tsx](../components/intelligence/ui/admin/agents/AgentsView.tsx) | AgentsView renders verified shop state and typed user actions. |
 | [components/intelligence/ui/admin/agents/studio-extension.ts](../components/intelligence/ui/admin/agents/studio-extension.ts) | Studio extension of the agents view. |
@@ -1439,6 +1460,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/inventory/src/types/events.rs](../components/inventory/src/types/events.rs) | The outbox events the inventory component publishes: typed payloads behind `contracts/events/`. |
+| [components/inventory/src/types.rs](../components/inventory/src/types.rs) | Records the inventory component publishes to other components. |
 | [components/inventory/tests/domain_mutants.rs](../components/inventory/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in inventory `domain/`: each pins one boundary or clause of the supplier link rules. |
 | [components/inventory/tests/port_adapters.rs](../components/inventory/tests/port_adapters.rs) | Test adapters for the inventory ports (`Environments`, `ProductIndex`), so the inventory mirror builds and tests without the server. |
 | [components/inventory/tests/properties.rs](../components/inventory/tests/properties.rs) | Property tests for stock: reservations against the proved stock rule, checked inventory batches and the reorder ceiling. |
@@ -1622,6 +1645,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/unit_orders.rs](../components/orders/src/store/unit_orders.rs) | The orders of a company purchasing unit and their issued receipts, as the B2B component reads them through its records port. Columns checked at compile time. |
 | [components/orders/src/store/workflow.rs](../components/orders/src/store/workflow.rs) | The stored order workflow: its locked revision, the stranded-order check and saves at the next revision. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
+| [components/orders/src/types/events.rs](../components/orders/src/types/events.rs) | The outbox events the orders component publishes: typed payloads behind `contracts/events/`. |
 | [components/orders/src/types/list_criteria.rs](../components/orders/src/types/list_criteria.rs) | Bounded order and customer list filters and sorts, reused by HTTP, MCP and reviewed grid plans; the app host admits the app filter. |
 | [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
@@ -1695,6 +1719,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/payments/src/types/events.rs](../components/payments/src/types/events.rs) | The outbox events the payments component publishes: typed payloads behind `contracts/events/`. |
+| [components/payments/src/types.rs](../components/payments/src/types.rs) | Records the payments component publishes to other components. |
 | [components/payments/tests/domain_mutants.rs](../components/payments/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in payments `domain/`: each pins one boundary or clause of amounts, transaction details, instructions, receipts and provider URLs. |
 | [components/payments/tests/port_adapters.rs](../components/payments/tests/port_adapters.rs) | Test adapter for the payments port `Gateway`, so the payments mirror builds and tests without the server. |
 | [components/payments/tests/properties.rs](../components/payments/tests/properties.rs) | Property tests for the payment ledger: listed transitions only, no backward monetary step, captures and refunds within their bounds. |
@@ -1719,6 +1745,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/service.rs](../components/pos/src/service.rs) | Cashier operations on top of the ordinary cart and checkout. |
 | [components/pos/src/store/channel_setup.rs](../components/pos/src/store/channel_setup.rs) | A new POS channel brings its cash payment and collection delivery as channel overrides; there is no second settings store. The settings rows are read and written through the shop store. |
 | [components/pos/src/store.rs](../components/pos/src/store.rs) | POS channel setup inside the channel save; the rows it changes belong to the shop settings owner. |
+| [components/pos/src/types/events.rs](../components/pos/src/types/events.rs) | The outbox events the POS component publishes: typed payloads behind `contracts/events/`. |
+| [components/pos/src/types.rs](../components/pos/src/types.rs) | Records the POS component publishes to other components. |
 | [components/pos/tests/port_adapters.rs](../components/pos/tests/port_adapters.rs) | Test adapter for the POS port `Register`, so the pos mirror builds and tests without the server. |
 | [components/pos/ui/admin/pos/POSRoute.tsx](../components/pos/ui/admin/pos/POSRoute.tsx) | POS route: the register for the current shop or stage, with order links and authenticated receipt downloads. |
 | [components/pos/ui/admin/pos/POSWorkspace.tsx](../components/pos/ui/admin/pos/POSWorkspace.tsx) | Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. |
@@ -1748,7 +1776,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/migrations/0001-baseline.sql](../components/pricing/migrations/0001-baseline.sql) | Baseline schema of the pricing component (Money, price calculation, discounts, currencies, taxes and customer groups): its tables, sequences, functions, |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
-| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices, rates and |
+| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. Prices and the tax |
 | [components/pricing/src/domain/context.rs](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
 | [components/pricing/src/domain/customer/address.rs](../components/pricing/src/domain/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
 | [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
@@ -1859,10 +1887,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/store.rs](../components/shop/src/store.rs) | SQL of the shop component. |
 | [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [components/shop/src/types/cart.rs](../components/shop/src/types/cart.rs) | The cart as every commerce component reads it: the shared cart contract bound to this shop's contexts. |
+| [components/shop/src/types/events.rs](../components/shop/src/types/events.rs) | The outbox events the shop component publishes: typed payloads behind `contracts/events/`. |
 | [components/shop/src/types/guardrails.rs](../components/shop/src/types/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
-| [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
+| [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores and the events it publishes. |
 | [components/shop/tests/port_adapters.rs](../components/shop/tests/port_adapters.rs) | Test adapters for the shop ports (`Carts`, `SettingsGuards`), so the shop mirror builds and tests without the server. |
 | [components/shop/ui/admin/legal/ConsumerRequests.tsx](../components/shop/ui/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |
 | [components/shop/ui/admin/legal/LegalServices.tsx](../components/shop/ui/admin/legal/LegalServices.tsx) | Purpose inventory and provider disclosures edited in the selected content language. |
@@ -1883,6 +1912,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/ui/admin/settings/MasterDataSettings.tsx](../components/shop/ui/admin/settings/MasterDataSettings.tsx) | Structured company profile with single-language content, inherited channel scopes, logo drafts and revision-bound saves. |
 | [components/shop/ui/admin/settings/MethodRemoval.tsx](../components/shop/ui/admin/settings/MethodRemoval.tsx) | Dependency preflight is advisory; aggregate save repeats it under the checkout configuration lock. |
 | [components/shop/ui/admin/settings/MethodSettings.tsx](../components/shop/ui/admin/settings/MethodSettings.tsx) | Master/detail shipping and payment configuration, translated content and searchable country availability. |
+| [components/shop/ui/admin/settings/OrderNumberSettings.tsx](../components/shop/ui/admin/settings/OrderNumberSettings.tsx) | Shop-wide order number prefix on the company basis; channels inherit it and cannot override it. |
 | [components/shop/ui/admin/settings/SettingsRoute.tsx](../components/shop/ui/admin/settings/SettingsRoute.tsx) | Settings route: shop settings with links to connections, team, automation, B2B, channels and apps. |
 | [components/shop/ui/admin/settings/SettingsSaveBar.tsx](../components/shop/ui/admin/settings/SettingsSaveBar.tsx) | Consistent settings save feedback, dirty state and permission-aware controls. |
 | [components/shop/ui/admin/settings/SettingsWorkspace.tsx](../components/shop/ui/admin/settings/SettingsWorkspace.tsx) | Independent settings workspace: grouped navigation, explicit dirty-draft guards and native API forms. |
@@ -1983,6 +2013,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/store/work_runs.rs](../components/studio/src/store/work_runs.rs) | SQL of approved work execution: lease-fenced task checkpoints, operation admission and translation draft steps. |
 | [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
 | [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |
+| [components/studio/src/types/events.rs](../components/studio/src/types/events.rs) | The outbox events the studio component publishes: typed payloads behind `contracts/events/`. |
+| [components/studio/src/types.rs](../components/studio/src/types.rs) | Records the studio component publishes to other components. |
 | [components/studio/ui/admin/dashboard/OverviewRoute.tsx](../components/studio/ui/admin/dashboard/OverviewRoute.tsx) | Overview route: the dashboard over the loaded workspace data; product picks open the preview on narrow screens. |
 | [components/studio/ui/admin/dashboard/OverviewView.tsx](../components/studio/ui/admin/dashboard/OverviewView.tsx) | OverviewView renders verified shop state and typed user actions. |
 | [components/studio/ui/admin/dashboard/studio-extension.ts](../components/studio/ui/admin/dashboard/studio-extension.ts) | Studio extension of the overview dashboard; its cards come from the dashboard slot. |
@@ -2101,7 +2133,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/studio.css](../frontend/src/admin/styles/studio.css) | Ordered studio stylesheet entry; domain rules live in the adjacent folder. |
 | [frontend/src/admin/styles/workspace-copilot.css](../frontend/src/admin/styles/workspace-copilot.css) | The conversation is a sibling of native editors; expanding it never remounts their drafts. |
 | [frontend/src/admin/styles/workspace-polish.css](../frontend/src/admin/styles/workspace-polish.css) | Consistent Studio density, readable hierarchy and independently scrollable navigation across workspaces. |
-| [frontend/src/application/ApplicationRouter.tsx](../frontend/src/application/ApplicationRouter.tsx) | Select independent lazy applications; contain failed imports and reset boundaries on navigation. |
+| [frontend/src/application/ApplicationRouter.tsx](../frontend/src/application/ApplicationRouter.tsx) | Select independent lazy applications; send sign-in surfaces to the Studio origin; contain failed imports and reset boundaries on navigation. |
 | [frontend/src/kit/api/client.ts](../frontend/src/kit/api/client.ts) | The generated API client: typed route calls over the route catalogue and typed native operation calls over MCP. |
 | [frontend/src/kit/api/generated/operations/index.ts](../frontend/src/kit/api/generated/operations/index.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/kit/api/generated/operations/inputs-0.ts](../frontend/src/kit/api/generated/operations/inputs-0.ts) | Generated native operation input contracts; do not edit. |
@@ -2158,7 +2190,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/ui/primitives.ts](../frontend/src/kit/ui/primitives.ts) | Headless primitives: focus containment, roving focus and controlled-or-uncontrolled state, without markup or text. |
 | [frontend/src/kit/ui/ui.css](../frontend/src/kit/ui/ui.css) | Styles of the kit/ui atoms and molecules; colours, spacing, radii and type come only from design tokens. |
 | [frontend/src/main.tsx](../frontend/src/main.tsx) | Browser bootstrap only; application selection and error recovery live in application/. |
-| [frontend/src/platform/AdminHub.tsx](../frontend/src/platform/AdminHub.tsx) | Public service directory. Links select a login surface without granting operator or merchant permissions. |
+| [frontend/src/platform/AdminHub.tsx](../frontend/src/platform/AdminHub.tsx) | Public service directory. Links select a login surface on the configured Studio origin without granting operator or merchant permissions. |
 | [frontend/src/platform/HTTPResponses.tsx](../frontend/src/platform/HTTPResponses.tsx) | Exact HTTP outcomes; historical undifferentiated totals never become fabricated success rates. |
 | [frontend/src/platform/PlatformAI.tsx](../frontend/src/platform/PlatformAI.tsx) | Central inference editor; write-only secrets, optimistic revisions and explicit environment fallback. |
 | [frontend/src/platform/PlatformConsole.tsx](../frontend/src/platform/PlatformConsole.tsx) | Independent platform control plane: personal operator access, bounded statistics and audited shop creation. |
@@ -2168,7 +2200,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/platform/PlatformShopDetail.tsx](../frontend/src/platform/PlatformShopDetail.tsx) | Connected shop dossier and reversible lifecycle controls; confirmations are explicit and revision guarded. |
 | [frontend/src/platform/PlatformShops.tsx](../frontend/src/platform/PlatformShops.tsx) | Searchable shop directory and server-validated provisioning form. |
 | [frontend/src/platform/PlatformSidebar.tsx](../frontend/src/platform/PlatformSidebar.tsx) | Stable operator navigation and profile; business state remains in the console owner. |
-| [frontend/src/platform/PlatformSignIn.tsx](../frontend/src/platform/PlatformSignIn.tsx) | Personal sign-in verifies the current operator grant before retaining a browser session. |
+| [frontend/src/platform/PlatformSignIn.tsx](../frontend/src/platform/PlatformSignIn.tsx) | Personal sign-in verifies the current operator grant before retaining a browser session; a host that admits no browser session is reported as such, with the Studio origin to use. |
 | [frontend/src/platform/platform-api.ts](../frontend/src/platform/platform-api.ts) | Tenant-independent operator API using the same HttpOnly browser boundary as Studio. |
 | [frontend/src/platform/styles/platform/01-platform-console.css](../frontend/src/platform/styles/platform/01-platform-console.css) | platform: platform-console styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/platform/styles/platform/02-platform-shop-stats-span.css](../frontend/src/platform/styles/platform/02-platform-shop-stats-span.css) | platform: platform-shop-stats-span styles. Source order is preserved by the entry stylesheet. |
@@ -2189,6 +2221,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/api/request-json.ts](../frontend/src/shared/api/request-json.ts) | Coalesce simultaneous identical core reads with complete identity; no persisted response cache. |
 | [frontend/src/shared/api/shop-api.ts](../frontend/src/shared/api/shop-api.ts) | shop api: Typed commerce contracts, merchant/store transports and binary download helper. |
 | [frontend/src/shared/api/shop-scope.ts](../frontend/src/shared/api/shop-scope.ts) | Canonical shop hosts; Studio identity remains on the shared origin. Reserved service hosts never become tenant IDs. |
+| [frontend/src/shared/api/studio-origin.ts](../frontend/src/shared/api/studio-origin.ts) | Browser sessions are admitted only on the configured Studio origin. Another host (the service directory) asks the server where that is, so sign-in is sent there instead of failing as missing access. |
 | [frontend/src/shared/api/types.ts](../frontend/src/shared/api/types.ts) | Request contracts: the open one app surfaces receive and the catalogue-checked one first-party screens use. |
 | [frontend/src/shared/api/vite-env.d.ts](../frontend/src/shared/api/vite-env.d.ts) | Typed public build configuration; browser-visible values never contain server credentials. |
 | [frontend/src/shared/apps/AppFrame.tsx](../frontend/src/shared/apps/AppFrame.tsx) | Opaque-origin app UI. Its SDK can invoke only this app's declared, server-authorized actions. |
@@ -2244,9 +2277,11 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/content/editor/editor-i18n.ts](../frontend/src/shared/content/editor/editor-i18n.ts) | Four-language controls for visual/Markdown editing without changing content-language inheritance. |
 | [frontend/src/shared/content/editor/markdown-content.ts](../frontend/src/shared/content/editor/markdown-content.ts) | Markdown admission shares the public rich-document node/URL boundary; rich-only features never silently disappear. |
 | [frontend/src/shared/content/editor/rich-conversion.ts](../frontend/src/shared/content/editor/rich-conversion.ts) | Lossless import of legacy blocks into structured WYSIWYG content, preserving inline emphasis. |
+| [frontend/src/shared/content/option-labels.ts](../frontend/src/shared/content/option-labels.ts) | Variant option value names resolved by the server (`extra.optionLabels`); the value key is shown only when no language names it. |
 | [frontend/src/shared/content/product-seo.ts](../frontend/src/shared/content/product-seo.ts) | Shared SEO field fallback and encoded product paths keep Studio previews and native storefront presentation consistent. |
 | [frontend/src/shared/content/product-specifications.ts](../frontend/src/shared/content/product-specifications.ts) | Match the native field-level specification merge; explicit blanks survive and no unrelated English fallback is invented. |
 | [frontend/src/shared/content/rich-document.tsx](../frontend/src/shared/content/rich-document.tsx) | Safe structured editor rendering. Only known nodes/marks produce elements; URLs are never executable. |
+| [frontend/src/shared/content/shop-brand.tsx](../frontend/src/shared/content/shop-brand.tsx) | Shop brand shown in storefront kickers, breadcrumbs and titles; the platform brand never stands in for it. |
 | [frontend/src/shared/customer/AddressBook.tsx](../frontend/src/shared/customer/AddressBook.tsx) | Tenant-owned address cards, defaults and revision-aware CRUD shared by account and CRM. |
 | [frontend/src/shared/customer/AddressCard.tsx](../frontend/src/shared/customer/AddressCard.tsx) | Human-readable address used in order snapshots and address books. |
 | [frontend/src/shared/customer/AddressFields.tsx](../frontend/src/shared/customer/AddressFields.tsx) | Structured accessible address editor; no hidden JSON or storefront-only duplicate model. |
@@ -2411,7 +2446,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/shell/StorefrontCurrency.tsx](../frontend/src/storefront/shell/StorefrontCurrency.tsx) | Currency switching is a revision-bound server re-quote, scoped to tenant and sales channel. |
 | [frontend/src/storefront/shell/StorefrontFooter.tsx](../frontend/src/storefront/shell/StorefrontFooter.tsx) | Shared native legal footer; preview containers prevent navigation and submission. |
 | [frontend/src/storefront/shell/StorefrontHeader.tsx](../frontend/src/storefront/shell/StorefrontHeader.tsx) | StorefrontHeader: storefront view composed from the scoped cart/controller. |
-| [frontend/src/storefront/shell/StorefrontHeaderView.tsx](../frontend/src/storefront/shell/StorefrontHeaderView.tsx) | Shared native shop header markup; callers supply authorized commands or a read-only preview. |
+| [frontend/src/storefront/shell/StorefrontHeaderView.tsx](../frontend/src/storefront/shell/StorefrontHeaderView.tsx) | Shared native shop header markup; callers supply authorized commands or a read-only preview. Narrow screens get one compact row and a menu drawer. |
 | [frontend/src/storefront/shell/StorefrontHome.tsx](../frontend/src/storefront/shell/StorefrontHome.tsx) | Native home composition; previews reuse the same presentational hero and catalogue cards. |
 | [frontend/src/storefront/shell/StorefrontLanguage.tsx](../frontend/src/storefront/shell/StorefrontLanguage.tsx) | Shop-configured content languages, including custom locales; the interface keeps its supported language vocabulary. |
 | [frontend/src/storefront/shell/cart-commands.ts](../frontend/src/storefront/shell/cart-commands.ts) | Native cart lifecycle and revision-bound quantity updates; retain original consent capability after purchase. |
@@ -2435,6 +2470,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/styles/cross-selling.css](../frontend/src/storefront/styles/cross-selling.css) | Merchant-selected product tiles retain the storefront grid and its native responsive breakpoints. |
 | [frontend/src/storefront/styles/experience-polish.css](../frontend/src/storefront/styles/experience-polish.css) | Shared storefront interaction layer: stable navigation, editorial surfaces and catalogue-grounded AI discovery. |
 | [frontend/src/storefront/styles/legal.css](../frontend/src/storefront/styles/legal.css) | Responsive, equally weighted consent controls and readable legal/customer forms. |
+| [frontend/src/storefront/styles/mobile-header.css](../frontend/src/storefront/styles/mobile-header.css) | Compact storefront header below 760px: one row (menu, brand, search, bag) and a menu drawer; wider screens keep the full header. |
 | [frontend/src/storefront/styles/order-completion.css](../frontend/src/storefront/styles/order-completion.css) | Order receipt page and finite transform-only celebration; honors reduced motion. |
 | [frontend/src/storefront/styles/payment-instructions.css](../frontend/src/storefront/styles/payment-instructions.css) | Recipient details use the same payment surface, with wrapping for small embedded checkouts. |
 | [frontend/src/storefront/styles/saved-payments.css](../frontend/src/storefront/styles/saved-payments.css) | Saved-method choices and account revocation retain the storefront's shared tokens and native form controls. |
@@ -2992,7 +3028,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/agent_authorities.py](../scripts/agent_authorities.py) | Real HTTP/PostgreSQL agent-key allocations, two replicas, stop, revocation and restart; local model only. |
 | [scripts/agentic_commerce.py](../scripts/agentic_commerce.py) | Real UCP cart transfer into native checkout: scoped single-use capability and one durable order. |
 | [scripts/agentic_scenarios.py](../scripts/agentic_scenarios.py) | Customer agents use the native isolated shop, cart and checkout; only inference is synthetic. |
-| [scripts/api_catalogue.py](../scripts/api_catalogue.py) | Generated by scripts/api_catalogue.py from the Rust router declarations; do not edit. |
+| [scripts/api_catalogue.py](../scripts/api_catalogue.py) | Generate a drift-checked static HTTP route catalogue from the compiled Rust router declarations. |
 | [scripts/app_assets.py](../scripts/app_assets.py) | Actual native scoped file upload, callback read, product/digest/key fences and public-file policy. |
 | [scripts/app_assistants.py](../scripts/app_assistants.py) | Real assistant packages: editor context, rights, MCP opt-out, cron, signed webhooks, flows and local service fixtures. |
 | [scripts/app_callbacks.py](../scripts/app_callbacks.py) | Real app identity, separate PII consent, digest/creator fences and foreign-object tests. No paid services. |
@@ -3036,9 +3072,10 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/cognitive_experiments.py](../scripts/cognitive_experiments.py) | Real native consent/layout/payment paths with synthetic live-receipt fixtures, not a measured commerce experiment. |
 | [scripts/commerce.py](../scripts/commerce.py) | Real HTTP/PG tests for SKUs, moderated reviews, tax/shipping/payment and deliveries. |
 | [scripts/company_settings.py](../scripts/company_settings.py) | Real HTTP company basis/channel inheritance, immutable issuer snapshots, bounded logos and private staging. No external services. |
-| [scripts/component_mirrors.py](../scripts/component_mirrors.py) | .rs')) |
+| [scripts/component_mirrors.py](../scripts/component_mirrors.py) | Generate standalone component mirrors from the monorepo, check that each builds and tests alone, and record the released commit. |
+| [scripts/component_releases.py](../scripts/component_releases.py) | Derive semantic component versions from contract changes, write per-component changelogs from git history and plan (never perform) a publish. |
 | [scripts/component_sources.py](../scripts/component_sources.py) | Verify pinned component source snapshots; explicit imports use clean, reviewed Git commits, never mutable branches. |
-| [scripts/components.py](../scripts/components.py) | ', i): |
+| [scripts/components.py](../scripts/components.py) | Check the component map: every Rust source has one owner, every table has one owner, and no component gains an undeclared dependency on another component's code or tables. |
 | [scripts/composition_release.py](../scripts/composition_release.py) | Validate the Lumen release lock and optionally compare it with Northflank. |
 | [scripts/connected_apps.py](../scripts/connected_apps.py) | Registered connected-app suite: archived OAuth oracle to real Rust knowledge, MCP and Flow consumers. |
 | [scripts/connector_store_tests.py](../scripts/connector_store_tests.py) | Concurrent private state, settings/import fences and encrypted mailbox persistence. |
@@ -3055,6 +3092,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/edi.py](../scripts/edi.py) | Registered EDI entry delegates app behavior and fixtures to the plugin owner. |
 | [scripts/email_tests.py](../scripts/email_tests.py) | Registered mail suite: archived differential contracts and the real Rust order/mail journey. |
 | [scripts/erp_handoff.py](../scripts/erp_handoff.py) | Registered integration entry delegates reference-app behavior to its package-owned verification. |
+| [scripts/event_contracts.py](../scripts/event_contracts.py) | Versioned outbox event contracts: generation, the compatibility gate and its negative controls. |
 | [scripts/extensions.py](../scripts/extensions.py) | Activate actual Wasm policies and prove their effect on B2B checkout. |
 | [scripts/fashion_demo.py](../scripts/fashion_demo.py) | Actual default signup, fashion variants/media/localization, isolated checkout and restart; synthetic data only. |
 | [scripts/formal/axioms.py](../scripts/formal/axioms.py) | Audit owned proof sources and transitive Lean dependencies; no extra axioms are allowed. |
@@ -3066,7 +3104,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/formal/layout_tests.py](../scripts/formal/layout_tests.py) | Negative controls for missing claims and Rust facade escapes without editing the real source tree. |
 | [scripts/formal/modules.py](../scripts/formal/modules.py) | Explicit production policy modules; no dynamic Rust module resolution is trusted. |
 | [scripts/formal/mutations.py](../scripts/formal/mutations.py) | Prove the verification gate rejects representative broken policies and stale/disconnected source bindings. |
-| [scripts/formal/registry.py](../scripts/formal/registry.py) | .sql'),*(root/'extensions/services/connectors/migrations').glob('*.sql'),*(root/'fixtures').glob('*.json'), |
+| [scripts/formal/registry.py](../scripts/formal/registry.py) | Explicit full-source inventory and reviewed adapter locks, not proof coverage claims. |
 | [scripts/formal/runners.py](../scripts/formal/runners.py) | Generate conformance drivers from parsed policy signatures, never a second policy implementation. |
 | [scripts/formal.py](../scripts/formal.py) | Run extraction, Lean proofs/axiom audit, compiled conformance and complete source-inventory checks. |
 | [scripts/formal_differential.py](../scripts/formal_differential.py) | Differential driver: every proved rule, compiled Rust against its Lean version, with a negative control. |
@@ -3085,6 +3123,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/legal_privacy.py](../scripts/legal_privacy.py) | Real tenant-scoped consent, checkout guards, declarations, MCP and flow consumers; no external providers. |
 | [scripts/lexical_search.py](../scripts/lexical_search.py) | Native lexical candidates: real forced-RLS plans, backfill, source edits and isolation. |
 | [scripts/load.py](../scripts/load.py) | Local HTTP latency sample. Does not claim production or Shopware speedup. |
+| [scripts/managed_install.py](../scripts/managed_install.py) | Fresh install on a managed-PostgreSQL-shaped database: a non-superuser owner owns the objects, another role owns |
 | [scripts/managed_search.py](../scripts/managed_search.py) | Real PostgreSQL/Qdrant synchronization; synthetic embeddings test transport, not AI quality. |
 | [scripts/marketing_accounts.py](../scripts/marketing_accounts.py) | Real isolated shops: customer authority, limited coupons, event flows, channels and selected releases. No paid models. |
 | [scripts/marketplaces.py](../scripts/marketplaces.py) | Registered verification entry; marketplace fixture and assertions remain app-owned. |
@@ -3110,13 +3149,21 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/production_foundations.py](../scripts/production_foundations.py) | Strict non-owner PostgreSQL runtime, pool isolation, inventory and two-replica invalidation regressions. |
 | [scripts/protocols.py](../scripts/protocols.py) | Protocol flows exercise the same commerce core; model smoke test is opt-in. |
 | [scripts/providers.py](../scripts/providers.py) | Cloud wire-contract tests using local HTTP servers, NOT live cloud inference. |
-| [scripts/read_performance.py](../scripts/read_performance.py) | .sql'), ROOT/'Cargo.toml', ROOT/'Cargo.lock']): |
+| [scripts/read_performance.py](../scripts/read_performance.py) | Two real Rust replicas test coherent read caches; optional matched local HTTP baseline probe. |
 | [scripts/restart.py](../scripts/restart.py) | Persist an API snapshot, restart server+DB externally, verify exact state. |
 | [scripts/roadmap.py](../scripts/roadmap.py) | Render the one roadmap source into the handbook page, the README line and the website data module; --check rejects drift. |
 | [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth, export and adversarial fixtures; no external accounts. |
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
 | [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |
 | [scripts/schema_contracts.py](../scripts/schema_contracts.py) | HTTP and MCP contract cases generated from the route catalogue and the operation contracts, against the running server. |
+| [scripts/schema_upgrade.py](../scripts/schema_upgrade.py) | Upgrade from the previous release: its database must survive the forward migrations intact, and both |
+| [scripts/sdk_smoke.py](../scripts/sdk_smoke.py) | Run the generated TypeScript, Python and Rust SDK smoke tests against the suite's running server. |
+| [scripts/sdks/contracts.py](../scripts/sdks/contracts.py) | Generate the per-component and combined OpenAPI 3.1 contracts from the Rust router declarations, the compiled operation registry and the shared failure type. |
+| [scripts/sdks/generate.py](../scripts/sdks/generate.py) | Generate the component contracts and the TypeScript, Python and Rust SDKs from them; `--check` fails on any drift. |
+| [scripts/sdks/model.py](../scripts/sdks/model.py) | Read the generated OpenAPI contracts into one language-neutral model the SDK generators render. |
+| [scripts/sdks/python.py](../scripts/sdks/python.py) | Render the Python SDK (standard library `urllib` and dataclasses only) from the contract model. |
+| [scripts/sdks/rust.py](../scripts/sdks/rust.py) | Render the Rust SDK (reqwest + serde) from the contract model. |
+| [scripts/sdks/typescript.py](../scripts/sdks/typescript.py) | Render the TypeScript SDK (ESM, fetch, no runtime dependencies) from the contract model. |
 | [scripts/security/authenticated_scope.py](../scripts/security/authenticated_scope.py) | Adversarial SQL uses the actual tenant login, not SET ROLE on a privileged fixture session. |
 | [scripts/security/core_hardening.py](../scripts/security/core_hardening.py) | Real replica regressions for auth admission, poison-event isolation, retention and bounded resource leases. |
 | [scripts/security/tenant_schema.py](../scripts/security/tenant_schema.py) | Database adversarial checks: reject cross-shop links even when API predicates are accidentally omitted. |
@@ -3156,6 +3203,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/ci_scope.py](../scripts/testing/ci_scope.py) | Choose prototype CI by the complete Git diff; unknown or sensitive changes retain full verification. |
 | [scripts/testing/collection_work.py](../scripts/testing/collection_work.py) | Exercise one reviewed collection task through native categories, pages and durable translation drafts. |
 | [scripts/testing/component_mirrors_check.py](../scripts/testing/component_mirrors_check.py) | Tooling suite: every component mirror builds and tests alone; negative controls for the mirror rules first. |
+| [scripts/testing/component_releases_test.py](../scripts/testing/component_releases_test.py) | Tooling suite: semantic version bumps follow contract changes (negative controls), and the publish only ever plans. |
 | [scripts/testing/component_sources_test.py](../scripts/testing/component_sources_test.py) | Mutation checks for the exact upstream component snapshot consumed by the Veyndo composition. |
 | [scripts/testing/composition_release_test.py](../scripts/testing/composition_release_test.py) | Reject drift and incomplete evidence in the hosted composition preflight. |
 | [scripts/testing/connected_contracts/__init__.py](../scripts/testing/connected_contracts/__init__.py) | OAuth, private retrieval and Slack-flow regression modules using local provider fixtures. |
@@ -3174,7 +3222,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/extraction.py](../scripts/testing/extraction.py) | Native document-event extraction, review boundary and shared AI quotas; local provider only. |
 | [scripts/testing/host_exchange_contract.py](../scripts/testing/host_exchange_contract.py) | Keep exported host inputs connected to native deserialization fields and admission schemas. |
 | [scripts/testing/hotpath.py](../scripts/testing/hotpath.py) | Real HTTP wire bytes and SQL tracing checks for the existing read-performance suite. |
-| [scripts/testing/image_context.py](../scripts/testing/image_context.py) | /Dockerfile')] |
+| [scripts/testing/image_context.py](../scripts/testing/image_context.py) | Check real Rust include! inputs against the production image's explicit build COPY set. |
 | [scripts/testing/integration_partitions.py](../scripts/testing/integration_partitions.py) | Disjoint outer integration partitions; nested production-rights repetitions stay intact. |
 | [scripts/testing/intent_navigation.py](../scripts/testing/intent_navigation.py) | Exercise saved fact categories through native catalog/MCP, source review and selective staging; no models. |
 | [scripts/testing/inventory_batch.py](../scripts/testing/inventory_batch.py) | Concurrent two-product allocation/release on the actual HTTP path, reused by strict runtime verification. |
@@ -3191,10 +3239,10 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/media_caption_checks.py](../scripts/testing/media_caption_checks.py) | Actual caption proposal, ownership, locale persistence and selected page-release regressions; synthetic provider only. |
 | [scripts/testing/merchant_guidance.py](../scripts/testing/merchant_guidance.py) | Explicit versioned merchant guidance reaches actual model input and is withdrawn by the native archive path. |
 | [scripts/testing/model_fixture.py](../scripts/testing/model_fixture.py) | Original compact GLB furniture fixture with embedded geometry and two material variants; no external assets. |
-| [scripts/testing/mutation_domain.py](../scripts/testing/mutation_domain.py) | ` against that crate's own tests, in parallel |
+| [scripts/testing/mutation_domain.py](../scripts/testing/mutation_domain.py) | On-demand mutation testing of the pure `domain/` modules: a surviving mutant is a missing test. |
 | [scripts/testing/native_lifecycle_race.py](../scripts/testing/native_lifecycle_race.py) | Force native workflow editing against app installation at the real database boundary. |
 | [scripts/testing/native_tools.py](../scripts/testing/native_tools.py) | Synthetic provider-native wire responses shared by real HTTP integration fixtures; not a model implementation. |
-| [scripts/testing/operation_contracts.py](../scripts/testing/operation_contracts.py) | Generated native operation input contracts; do not edit. |
+| [scripts/testing/operation_contracts.py](../scripts/testing/operation_contracts.py) | Generate typed operation contracts from the compiled canonical registry. |
 | [scripts/testing/outbox_cases.py](../scripts/testing/outbox_cases.py) | Disposable real-transaction counterexamples for subscriber schedules and commit-order gaps. |
 | [scripts/testing/parallel_check.py](../scripts/testing/parallel_check.py) | Owned background verification process group; failures stay fatal and logs survive cleanup. |
 | [scripts/testing/partition_coverage.py](../scripts/testing/partition_coverage.py) | Transfer same-source raw LLVM/Python profiles; official collectors calculate coverage. |
@@ -3212,6 +3260,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/runtime.py](../scripts/testing/runtime.py) | Owned synthetic server lifetime, child checks and loopback readiness for verification. |
 | [scripts/testing/scenario_source.py](../scripts/testing/scenario_source.py) | Native task ownership and applied-proposal admission for customer-test references. |
 | [scripts/testing/schema_contracts.py](../scripts/testing/schema_contracts.py) | Generate one valid and one invalid request per HTTP route and per MCP tool from the route catalogue and the operation contracts. |
+| [scripts/testing/sdk_contracts_test.py](../scripts/testing/sdk_contracts_test.py) | Tooling suite: negative controls for the contract and SDK generators, then the drift check on the real tree. |
 | [scripts/testing/shop_setup_checks.py](../scripts/testing/shop_setup_checks.py) | Personal setup progression exercises the native HTTP/MCP workspace CAS and tenant boundaries. |
 | [scripts/testing/site_release.py](../scripts/testing/site_release.py) | Actual selective publication resolves page dependencies atomically; no provider calls. |
 | [scripts/testing/sitecustomize.py](../scripts/testing/sitecustomize.py) | Opt-in subprocess instrumentation for synthetic verification; never loaded by production. |
@@ -3221,7 +3270,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/test_integration_partitions.py](../scripts/testing/test_integration_partitions.py) | Prove complete, disjoint outer-suite admission before parallel CI can pass. |
 | [scripts/testing/test_parallel_check.py](../scripts/testing/test_parallel_check.py) | Exercise actual parallel child overlap, failure propagation, owned cleanup and fixture isolation. |
 | [scripts/testing/test_partition_coverage.py](../scripts/testing/test_partition_coverage.py) | Reject incomplete, stale or modified partition profiles before combining coverage. |
-| [scripts/testing/tooling_tests.py](../scripts/testing/tooling_tests.py) | Ordered Studio layout. |
+| [scripts/testing/tooling_tests.py](../scripts/testing/tooling_tests.py) | Verification helpers reject coverage gaps and emit literal CI environment values. |
 | [scripts/testing/typed_inputs.py](../scripts/testing/typed_inputs.py) | Typed inputs gate: component and server functions read their JSON parameters through typed views. |
 | [scripts/testing/workspace_boundaries.py](../scripts/testing/workspace_boundaries.py) | Enforce reviewed Cargo owners and dependency capabilities, including aliases and unnamed helper crates. |
 | [scripts/testing/workspace_boundary_tests.py](../scripts/testing/workspace_boundary_tests.py) | Mutation controls against real Cargo metadata: aliases, hidden helpers, build scripts and source-owner escapes. |
@@ -3232,3 +3281,79 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/verify_integration.py](../scripts/verify_integration.py) | Single integration suite registry, isolated DB by default; never alters an existing shop. |
 | [scripts/visual_workspace.py](../scripts/visual_workspace.py) | Actual Rust/PostgreSQL workspace, page publication, form privacy and reviewed AI paths; synthetic model only. |
 | [scripts/workspace_roles.py](../scripts/workspace_roles.py) | Real HTTP/PostgreSQL role edits, current session/key/worker grants and native B2B setup regressions. |
+
+## Generated client SDKs
+
+| Module | Responsibility |
+|---|---|
+| [sdks/python/examples/catalog.py](../sdks/python/examples/catalog.py) | Example: list a shop's products page by page, then call a typed MCP tool. |
+| [sdks/python/tests/smoke.py](../sdks/python/tests/smoke.py) | Smoke test of the generated Python SDK against a running Veyndo server (BASE_URL); synthetic accounts only. |
+| [sdks/python/veyndo_sdk/__init__.py](../sdks/python/veyndo_sdk/__init__.py) | Veyndo client: one typed API object per component plus MCP. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/__init__.py](../sdks/python/veyndo_sdk/components/__init__.py) | One module per component with HTTP routes. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/apps.py](../sdks/python/veyndo_sdk/components/apps.py) | HTTP routes of the apps component: App packages, managed data, UI surfaces, Wasm extensions and the app builder. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/b2b.py](../sdks/python/veyndo_sdk/components/b2b.py) | HTTP routes of the b2b component: Company procurement: organisations, budgets, approvals and quotes. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/catalog.py](../sdks/python/veyndo_sdk/components/catalog.py) | HTTP routes of the catalog component: Products, categories, media, reviews, translations and catalogue reads. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/checkout.py](../sdks/python/veyndo_sdk/components/checkout.py) | HTTP routes of the checkout component: Cart, quote, checkout transaction and order placement. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/customers.py](../sdks/python/veyndo_sdk/components/customers.py) | HTTP routes of the customers component: Customer accounts, sessions, addresses and the merchant customer directory. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/host.py](../sdks/python/veyndo_sdk/components/host.py) | HTTP routes of the host component: Process entry, route registry, worker roles, migrations and command-line tools. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/identity.py](../sdks/python/veyndo_sdk/components/identity.py) | HTTP routes of the identity component: Merchant accounts, memberships, sessions, roles and route policy. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/intelligence.py](../sdks/python/veyndo_sdk/components/intelligence.py) | HTTP routes of the intelligence component: Shop memory, knowledge retrieval, agents, proposals and model inference. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/inventory.py](../sdks/python/veyndo_sdk/components/inventory.py) | HTTP routes of the inventory component: Stock, reservations and supply. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/marketing.py](../sdks/python/veyndo_sdk/components/marketing.py) | HTTP routes of the marketing component: Rules, coupons, promotions, flows and sales channels. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/orders.py](../sdks/python/veyndo_sdk/components/orders.py) | HTTP routes of the orders component: Order state, fulfilment, receipts, documents and merchant order work. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/payments.py](../sdks/python/veyndo_sdk/components/payments.py) | HTTP routes of the payments component: Provider-independent payment ledger, captures, refunds and provider workers. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/pos.py](../sdks/python/veyndo_sdk/components/pos.py) | HTTP routes of the pos component: Point-of-sale register adapters. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/pricing.py](../sdks/python/veyndo_sdk/components/pricing.py) | HTTP routes of the pricing component: Money, price calculation, discounts, currencies, taxes and customer groups. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/protocols.py](../sdks/python/veyndo_sdk/components/protocols.py) | HTTP routes of the protocols component: MCP, UCP and the shared capability dispatch; adapters without business rules. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/shipping.py](../sdks/python/veyndo_sdk/components/shipping.py) | HTTP routes of the shipping component: Delivery methods, destinations, delivery splits and carrier booking. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/shop.py](../sdks/python/veyndo_sdk/components/shop.py) | HTTP routes of the shop component: Shop configuration, domains, legal texts and the operator control plane. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/components/studio.py](../sdks/python/veyndo_sdk/components/studio.py) | HTTP routes of the studio component: Merchant overview, reports, private staging shops and history. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/runtime.py](../sdks/python/veyndo_sdk/runtime.py) | Transport, authentication, typed failures, cursor pagination and MCP tool calls shared by every component client. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/python/veyndo_sdk/tools.py](../sdks/python/veyndo_sdk/tools.py) | Typed inputs and declared outputs of every native MCP tool. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
+| [sdks/rust/examples/catalog.rs](../sdks/rust/examples/catalog.rs) | Example: list a shop's products page by page, then call a typed MCP tool. Run with `VEYNDO_URL=... VEYNDO_SHOP=... cargo run -p veyndo-sdk --example catalog`. |
+| [sdks/rust/smoke/main.rs](../sdks/rust/smoke/main.rs) | Smoke test of the generated Rust SDK against a running Veyndo server (BASE_URL); synthetic accounts only. Run by scripts/sdk_smoke.py. |
+| [sdks/rust/src/components/apps.rs](../sdks/rust/src/components/apps.rs) | HTTP routes of the apps component: App packages, managed data, UI surfaces, Wasm extensions and the app builder. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/b2b.rs](../sdks/rust/src/components/b2b.rs) | HTTP routes of the b2b component: Company procurement: organisations, budgets, approvals and quotes. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/catalog.rs](../sdks/rust/src/components/catalog.rs) | HTTP routes of the catalog component: Products, categories, media, reviews, translations and catalogue reads. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/checkout.rs](../sdks/rust/src/components/checkout.rs) | HTTP routes of the checkout component: Cart, quote, checkout transaction and order placement. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/customers.rs](../sdks/rust/src/components/customers.rs) | HTTP routes of the customers component: Customer accounts, sessions, addresses and the merchant customer directory. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/host.rs](../sdks/rust/src/components/host.rs) | HTTP routes of the host component: Process entry, route registry, worker roles, migrations and command-line tools. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/identity.rs](../sdks/rust/src/components/identity.rs) | HTTP routes of the identity component: Merchant accounts, memberships, sessions, roles and route policy. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/intelligence.rs](../sdks/rust/src/components/intelligence.rs) | HTTP routes of the intelligence component: Shop memory, knowledge retrieval, agents, proposals and model inference. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/inventory.rs](../sdks/rust/src/components/inventory.rs) | HTTP routes of the inventory component: Stock, reservations and supply. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/marketing.rs](../sdks/rust/src/components/marketing.rs) | HTTP routes of the marketing component: Rules, coupons, promotions, flows and sales channels. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/mod.rs](../sdks/rust/src/components/mod.rs) | One module per component with HTTP routes. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/orders.rs](../sdks/rust/src/components/orders.rs) | HTTP routes of the orders component: Order state, fulfilment, receipts, documents and merchant order work. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/payments.rs](../sdks/rust/src/components/payments.rs) | HTTP routes of the payments component: Provider-independent payment ledger, captures, refunds and provider workers. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/pos.rs](../sdks/rust/src/components/pos.rs) | HTTP routes of the pos component: Point-of-sale register adapters. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/pricing.rs](../sdks/rust/src/components/pricing.rs) | HTTP routes of the pricing component: Money, price calculation, discounts, currencies, taxes and customer groups. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/protocols.rs](../sdks/rust/src/components/protocols.rs) | HTTP routes of the protocols component: MCP, UCP and the shared capability dispatch; adapters without business rules. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/shipping.rs](../sdks/rust/src/components/shipping.rs) | HTTP routes of the shipping component: Delivery methods, destinations, delivery splits and carrier booking. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/shop.rs](../sdks/rust/src/components/shop.rs) | HTTP routes of the shop component: Shop configuration, domains, legal texts and the operator control plane. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/components/studio.rs](../sdks/rust/src/components/studio.rs) | HTTP routes of the studio component: Merchant overview, reports, private staging shops and history. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/lib.rs](../sdks/rust/src/lib.rs) | Veyndo client: one typed API object per component plus MCP. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/runtime.rs](../sdks/rust/src/runtime.rs) | Transport, authentication, typed failures, cursor pagination and MCP tool calls shared by every component client. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/rust/src/tools.rs](../sdks/rust/src/tools.rs) | Typed inputs and declared outputs of every native MCP tool. Generated by scripts/sdks/rust.py from contracts/http; do not edit. |
+| [sdks/typescript/examples/catalog.ts](../sdks/typescript/examples/catalog.ts) | Example: list a shop's products page by page, then call a typed MCP tool. Run with `VEYNDO_URL=... VEYNDO_SHOP=... node examples/catalog.ts`. |
+| [sdks/typescript/src/components/apps.ts](../sdks/typescript/src/components/apps.ts) | HTTP routes of the apps component: App packages, managed data, UI surfaces, Wasm extensions and the app builder. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/b2b.ts](../sdks/typescript/src/components/b2b.ts) | HTTP routes of the b2b component: Company procurement: organisations, budgets, approvals and quotes. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/catalog.ts](../sdks/typescript/src/components/catalog.ts) | HTTP routes of the catalog component: Products, categories, media, reviews, translations and catalogue reads. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/checkout.ts](../sdks/typescript/src/components/checkout.ts) | HTTP routes of the checkout component: Cart, quote, checkout transaction and order placement. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/customers.ts](../sdks/typescript/src/components/customers.ts) | HTTP routes of the customers component: Customer accounts, sessions, addresses and the merchant customer directory. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/host.ts](../sdks/typescript/src/components/host.ts) | HTTP routes of the host component: Process entry, route registry, worker roles, migrations and command-line tools. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/identity.ts](../sdks/typescript/src/components/identity.ts) | HTTP routes of the identity component: Merchant accounts, memberships, sessions, roles and route policy. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/intelligence.ts](../sdks/typescript/src/components/intelligence.ts) | HTTP routes of the intelligence component: Shop memory, knowledge retrieval, agents, proposals and model inference. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/inventory.ts](../sdks/typescript/src/components/inventory.ts) | HTTP routes of the inventory component: Stock, reservations and supply. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/marketing.ts](../sdks/typescript/src/components/marketing.ts) | HTTP routes of the marketing component: Rules, coupons, promotions, flows and sales channels. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/orders.ts](../sdks/typescript/src/components/orders.ts) | HTTP routes of the orders component: Order state, fulfilment, receipts, documents and merchant order work. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/payments.ts](../sdks/typescript/src/components/payments.ts) | HTTP routes of the payments component: Provider-independent payment ledger, captures, refunds and provider workers. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/pos.ts](../sdks/typescript/src/components/pos.ts) | HTTP routes of the pos component: Point-of-sale register adapters. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/pricing.ts](../sdks/typescript/src/components/pricing.ts) | HTTP routes of the pricing component: Money, price calculation, discounts, currencies, taxes and customer groups. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/protocols.ts](../sdks/typescript/src/components/protocols.ts) | HTTP routes of the protocols component: MCP, UCP and the shared capability dispatch; adapters without business rules. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/shipping.ts](../sdks/typescript/src/components/shipping.ts) | HTTP routes of the shipping component: Delivery methods, destinations, delivery splits and carrier booking. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/shop.ts](../sdks/typescript/src/components/shop.ts) | HTTP routes of the shop component: Shop configuration, domains, legal texts and the operator control plane. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/components/studio.ts](../sdks/typescript/src/components/studio.ts) | HTTP routes of the studio component: Merchant overview, reports, private staging shops and history. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/index.ts](../sdks/typescript/src/index.ts) | Veyndo client: one typed API object per component plus MCP. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/runtime.ts](../sdks/typescript/src/runtime.ts) | Transport, authentication, typed failures, cursor pagination and MCP tool calls shared by every component client. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/src/tools.ts](../sdks/typescript/src/tools.ts) | Typed inputs and declared outputs of every native MCP tool. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
+| [sdks/typescript/tests/smoke.ts](../sdks/typescript/tests/smoke.ts) | Smoke test of the generated TypeScript SDK against a running Veyndo server (BASE_URL); synthetic accounts only. Run by scripts/sdk_smoke.py with Node type stripping. |

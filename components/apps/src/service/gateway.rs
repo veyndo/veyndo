@@ -6,6 +6,7 @@ use crate::ports::{HostCall, Platform};
 use crate::service::service_call::service_call;
 use crate::store::packages::package;
 use crate::store::{action_log, jobs, managed_data};
+use crate::types::events::AppDefined;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -105,11 +106,11 @@ async fn execute(
             if v.to_string().len() > 16384 {
                 return Err(bad("App event exceeds limit"));
             }
-            let event = veyndo_core::store::outbox::publish_id_on(
+            let event = veyndo_core::events::emit_id_as(
                 &a.db,
                 &t,
                 &format!("app.{id}.{name}"),
-                v,
+                &AppDefined(v.clone()),
             )
             .await?;
             Ok(json!({"eventId":event,"accepted":true}))

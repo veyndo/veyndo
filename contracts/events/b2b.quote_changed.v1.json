@@ -1,0 +1,47 @@
+{
+  "$id": "b2b.quote_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A quote moved between states; `lifecycle` is the app lifecycle transition record or `null`.",
+  "properties": {
+    "from": {
+      "type": "string"
+    },
+    "lifecycle": {},
+    "quoteId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "from",
+    "lifecycle",
+    "quoteId",
+    "revision",
+    "state"
+  ],
+  "title": "b2b.quote_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.quote_changed",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "QuoteChanged"
+      }
+    ],
+    "version": 1
+  }
+}

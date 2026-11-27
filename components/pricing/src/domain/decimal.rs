@@ -102,6 +102,13 @@ impl Decimal {
     }
 }
 
+/// Displays the plain decimal digits ([`Decimal::text`]): `19`, `7.7`, `-0.05`.
+impl std::fmt::Display for Decimal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.text())
+    }
+}
+
 impl PartialEq for Decimal {
     fn eq(&self, other: &Self) -> bool {
         self.ratio() == other.ratio()

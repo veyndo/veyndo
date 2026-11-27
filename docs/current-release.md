@@ -40,10 +40,12 @@ release candidate: it has not gone live, and the acceptance listed under
 
 ### What operators must know
 
-- **Fresh installation only.** This release replaces earlier installations. There is no
-  upgrade path, rolling upgrade or legacy import, and data of a deployed earlier release is
-  not carried over. Setup refuses a database that an earlier release created; set up a new
-  database with `BOOTSTRAP_MODE=migrate`.
+- **Upgrades from the baselines onward.** A database set up from the component baselines
+  (production since 27 November) is upgraded by `BOOTSTRAP_MODE=migrate`, which applies the
+  forward migrations it lacks while the previous release still serves
+  ([forward migrations](rust-services.md#forward-migrations)). A database of the
+  pre-baseline incremental release is refused: there is no upgrade path or legacy import
+  from it; set up a new database.
 - The runtime contract is unchanged: a separate migration owner, a non-owner
   `NOBYPASSRLS` runtime login, `DATABASE_RUNTIME_URL` and `DB_RLS_REQUIRED=true`
   ([deploy safely](production-architecture.md#deploy-safely)).

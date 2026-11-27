@@ -238,16 +238,7 @@ pub async fn product_detail(
     merge(
         &mut product,
         VariantLabel {
-            variant_label: p
-                .options
-                .as_object()
-                .map(|o| {
-                    o.values()
-                        .filter_map(|v| v.as_str())
-                        .collect::<Vec<_>>()
-                        .join(" / ")
-                })
-                .unwrap_or_default(),
+            variant_label: veyndo_catalog::domain::option_values::display(&p.extra, &p.options),
         },
     )?;
     let variants = visible

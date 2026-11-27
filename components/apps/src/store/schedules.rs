@@ -1,5 +1,6 @@
 //! Durable UTC cron ticks emit namespaced outbox events; replicas lock due rows and staging never runs them.
 use crate::domain::schedule::parse;
+use crate::types::events::AppDefined;
 use serde_json::json;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::triggers::AppSchedule;
@@ -58,11 +59,11 @@ pub async fn schedule_once(a: &State) -> Result<()> {
             .next()
             .ok_or(bad("Schedule exhausted"))?
             .to_rfc3339();
-        let event = veyndo_core::store::outbox::publish_id_on(
+        let event = veyndo_core::events::emit_id_as(
             &mut *tx,
             &t,
             &format!("app.{app}.{}", s.action),
-            &s.input,
+            &AppDefined(s.input),
         )
         .await?;
         sqlx::query!(

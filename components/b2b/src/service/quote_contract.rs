@@ -2,6 +2,7 @@
 use crate::store::access::{guard_conn, require};
 use crate::store::purchase;
 use crate::store::{carts as cart_rows, quotes};
+use crate::types::events::QuoteSelected;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, merge, view};
@@ -84,7 +85,12 @@ pub async fn select(
     }
     c.revision += 1;
     cart_rows::save(&mut tx, &c.tenant, &c.id, &json!(c.data), c.revision).await?;
-    crate::store::organization::event(&mut tx,&c.tenant,"b2b.quote_selected",json!({"cartId":c.id,"quoteId":c.data.b2b.as_ref().and_then(|b|b.quote_id.as_ref()),"revision":c.revision})).await?;
+    let selected = QuoteSelected {
+        cart_id: &c.id,
+        quote_id: c.data.b2b.as_ref().and_then(|b| b.quote_id.as_deref()),
+        revision: c.revision,
+    };
+    crate::store::organization::event(&mut tx, &c.tenant, &selected).await?;
     tx.commit().await?;
     carts.view(&c).await
 }
@@ -121,13 +127,19 @@ pub async fn prices(
         .ok_or(bad("Unknown offer currency"))?;
     for p in ps {
         if let Some(line) = lines.iter().find(|l| l.id == p.id) {
-            let price = line.gross_minor as f64 / 10_f64.powi(scale as i32);
-            p.price = price;
+            // The accepted gross amount in whole minor units, exactly.
+            let minor =
+                i64::try_from(line.gross_minor).map_err(|_| bad("Invalid accepted offer"))?;
+            let price = veyndo_pricing::money::Money::new(
+                minor,
+                veyndo_pricing::money::Currency::new(&c.data.currency, scale).map_err(bad)?,
+            );
+            p.price = price.amount().decimal();
             p.advanced_prices.clear();
             // Both fixed-currency and automatic-FX strategies resolve through their existing owner.
             merge(
                 &mut p.extra,
-                json!({"priceCurrency":c.data.currency,"currencyPrices":{&c.data.currency:{"price":format!("{price:.precision$}",precision=scale as usize)}}}),
+                json!({"priceCurrency":c.data.currency,"currencyPrices":{&c.data.currency:{"price":price.decimal()}}}),
             )?;
         }
     }

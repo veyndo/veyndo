@@ -15,7 +15,11 @@ inside the component itself, normally its test adapters.
 
     python3 scripts/component_mirrors.py                 generate every mirror under target/mirrors/
     python3 scripts/component_mirrors.py --check         generate, then cargo check + cargo test each mirror alone
-    python3 scripts/component_mirrors.py --record        record HEAD as the released commit in components.release.json
+    python3 scripts/component_mirrors.py --record        record HEAD as the released commit in components.release.json,
+                                                         with new component versions and changelogs
+    python3 scripts/component_mirrors.py --versions      show the versions --record would assign now
+    python3 scripts/component_mirrors.py --publish --dry-run
+                                                         print what would be pushed where; never pushes
 
 See docs/component-mirrors.md for the release flow.
 """
@@ -30,6 +34,8 @@ import subprocess
 import sys
 import time
 import tomllib
+
+import component_releases as releases
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'target/mirrors'
@@ -210,9 +216,13 @@ def generate(name, own, commit):
     (out / '.cargo').mkdir(exist_ok=True)
     (out / '.cargo/config.toml').write_text('# Query macros compile from the checked .sqlx cache.\n[env]\nSQLX_OFFLINE = "true"\n')
     (out / 'README.md').write_text(readme(name, layout, commit))
+    changelog = releases.CHANGELOGS / f'{name}.md'
+    if changelog.exists():
+        shutil.copy2(changelog, out / 'CHANGELOG.md')
     layout['digest'] = digest(out)
+    version = json.loads(RELEASE.read_text()).get('versions', {}).get(name, {}).get('version') if RELEASE.exists() else None
     (out / 'MIRROR.json').write_text(json.dumps({
-        'component': name, 'monorepo': 'https://github.com/veyndo/veyndo', 'commit': commit,
+        'component': name, 'version': version, 'monorepo': 'https://github.com/veyndo/veyndo', 'commit': commit,
         'crates': layout['crates'], 'dependencies': layout['dependencies'],
         'digest': layout['digest']}, indent=2) + '\n')
     return layout
@@ -298,11 +308,22 @@ def verify_release(mirrored):
             problems.append(f'{name}: recorded commit {row["commit"]} is not in this repository')
         if not re.fullmatch('[0-9a-f]{64}', row.get('digest', '')):
             problems.append(f'{name}: mirror digest required')
-    return problems
+    return problems + releases.verify(release)
 
 
 def record(chosen, commit):
     release = json.loads(RELEASE.read_text()) if RELEASE.exists() else {'version': 1, 'components': {}}
+    # Versions first: the mirrors carry the new version and changelog.
+    rows = releases.plan(release, commit)
+    date = subprocess.check_output(['git', '-C', str(ROOT), 'show', '-s', '--format=%cs', commit], text=True).strip()
+    releases.write_changelogs(rows, commit, date)
+    releases.apply(release, rows, commit)
+    RELEASE.write_text(json.dumps(release, indent=2) + '\n')
+    # Contracts and SDKs state the recorded versions, and the SDK crate's version is in Cargo.lock,
+    # which every mirror copies: regenerate both before the mirrors, so they match the release commit
+    # that follows this record.
+    subprocess.run([sys.executable, str(ROOT / 'scripts/sdks/generate.py')], cwd=ROOT, check=True)
+    subprocess.run(['cargo', 'metadata', '--format-version', '1', '--offline'], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     release['version'] = 1
     release['generator'] = 'scripts/component_mirrors.py'
     release['not_mirrored'] = {n: NOT_MIRRORED[n] for n, c in components().items() if not c}
@@ -317,7 +338,9 @@ def record(chosen, commit):
         release['components'][name] = row
     release['components'] = dict(sorted(release['components'].items()))
     RELEASE.write_text(json.dumps(release, indent=2) + '\n')
-    print(f'Recorded {len(chosen)} mirrors at {commit} in {RELEASE.relative_to(ROOT)}')
+    releases.print_plan(rows)
+    print(f'Recorded {len(chosen)} mirrors and {len(rows) - 1} component versions at {commit} in {RELEASE.relative_to(ROOT)}; '
+          'commit components.release.json, contracts/, sdks/ and Cargo.lock')
 
 
 def check(chosen, commit, keep_going=True):
@@ -358,15 +381,85 @@ def check(chosen, commit, keep_going=True):
     return failed, report
 
 
+def publish_plan(commit):
+    """What a publish would push where, from the recorded release; nothing is pushed or uploaded."""
+    release = json.loads(RELEASE.read_text())
+    versions, sdk = release.get('versions', {}), release.get('sdk') or {}
+    steps, warnings = [], []
+    for name, own in selected(None).items():
+        row = release['components'][name]
+        version = versions.get(name, {}).get('version')
+        if row.get('publish') is False:
+            steps.append({'component': name, 'action': 'skip', 'reason': row['reason']})
+            continue
+        layout = generate(name, own, row['commit'])
+        current = layout['digest'] == row['digest']
+        if not current:
+            warnings.append(f'{name}: the tree generated from this checkout differs from the recorded digest; re-record before publishing')
+        steps.append({'component': name, 'action': 'push', 'repository': row['repository'], 'branch': 'main', 'tag': f'v{version}',
+                      'version': version, 'source_commit': row['commit'], 'files': len(layout['files']) + 4, 'digest': layout['digest'],
+                      'matches_record': current, 'previously_published': row.get('published'),
+                      'commands': [f'git -C target/mirrors/{name} init -b main',
+                                   f'git -C target/mirrors/{name} add -A',
+                                   f'git -C target/mirrors/{name} commit -m "Veyndo {name} {version} from monorepo {row["commit"][:12]}"',
+                                   f'git -C target/mirrors/{name} tag v{version}',
+                                   f'git -C target/mirrors/{name} push --force-with-lease {row["repository"]} main v{version}']})
+    for name, reason in release.get('not_mirrored', {}).items():
+        steps.append({'component': name, 'action': 'contract-only', 'version': versions.get(name, {}).get('version'), 'reason': reason})
+    sdk_version = sdk.get('version')
+    steps.append({'component': 'sdk', 'action': 'packages', 'version': sdk_version, 'commands': [
+        f'npm --prefix sdks/typescript run build && npm publish sdks/typescript  # @veyndo/commerce-client@{sdk_version}',
+        f'python3 -m build sdks/python && twine upload sdks/python/dist/*  # veyndo-commerce-client=={sdk_version}',
+        f'cargo publish -p veyndo-sdk  # veyndo-sdk {sdk_version}']})
+    (OUT / 'publish-plan.json').write_text(json.dumps({'commit': commit, 'steps': steps, 'warnings': warnings}, indent=2) + '\n')
+    return steps, warnings
+
+
+def print_publish(steps, warnings):
+    for step in steps:
+        if step['action'] == 'push':
+            state = 'matches record' if step['matches_record'] else 'DIFFERS from record'
+            print(f'WOULD PUSH {step["component"]} {step["version"]} -> {step["repository"]} (main, tag {step["tag"]}), '
+                  f'{step["files"]} files from monorepo {step["source_commit"][:12]}, {state}')
+        elif step['action'] == 'skip':
+            print(f'SKIP {step["component"]}: {step["reason"]}')
+        elif step['action'] == 'contract-only':
+            print(f'CONTRACT ONLY {step["component"]} {step["version"]}: {step["reason"]}')
+        else:
+            print(f'WOULD PUBLISH SDK {step["version"]}:')
+            for command in step['commands']:
+                print('  ' + command)
+    for warning in warnings:
+        print('WARN ' + warning)
+    print(f'Dry run only: nothing was pushed or uploaded. Plan: {(OUT / "publish-plan.json").relative_to(ROOT)}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--check', action='store_true', help='build and test every generated mirror alone')
     parser.add_argument('--record', action='store_true', help='record HEAD as released commit (clean checkout)')
     parser.add_argument('--component', nargs='+', help='limit to these components')
     parser.add_argument('--fail-fast', action='store_true')
+    parser.add_argument('--versions', action='store_true', help='show the versions --record would assign now')
+    parser.add_argument('--publish', action='store_true', help='plan the publish of the recorded release (requires --dry-run)')
+    parser.add_argument('--dry-run', action='store_true', help='with --publish: print what would be pushed; never pushes')
     args = parser.parse_args()
     chosen = selected(args.component)
     commit = head()
+    if args.versions:
+        release = json.loads(RELEASE.read_text()) if RELEASE.exists() else {}
+        releases.print_plan(releases.plan(release, commit))
+        return
+    if args.publish:
+        # Publishing to component repositories and package registries is a release decision outside
+        # this tool; it only plans the push.
+        if not args.dry_run:
+            sys.exit('Publishing is not enabled here; run with --dry-run to see what would be pushed')
+        problems = verify_release(selected(None))
+        for problem in problems:
+            print('FAIL ' + problem)
+        print_publish(*publish_plan(commit))
+        sys.exit(1 if problems else 0)
     if args.record:
         assert clean(), 'Record a release only from a clean checkout, so the commit is the source of every mirror'
         record(chosen, commit)

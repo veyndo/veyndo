@@ -1,5 +1,6 @@
 //! Translated product hydration: each field is resolved on its own along the language chain.
 use crate::domain::content::localize_extra;
+use crate::domain::option_values;
 use crate::types::translation::ProductText;
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
@@ -26,6 +27,7 @@ pub fn hydrate(
     }
     for p in &mut ps {
         localize_extra(&mut p.extra, locale_chain);
+        option_values::localize(&mut p.extra, &p.options, locale_chain);
         if let Some(media) = p.media.as_array_mut() {
             for m in media {
                 localize_media(m, locale_chain);

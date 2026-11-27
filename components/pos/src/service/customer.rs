@@ -1,5 +1,6 @@
 //! Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials.
 use crate::service::guard;
+use crate::types::events::CustomerSelected;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::store::carts::{self, CartRow};
@@ -81,7 +82,13 @@ pub async fn select(
         ));
     }
     register_carts::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.customer_selected", &json!({"cartId":c.id,"customerId":id,"cashierId":h.pos.as_ref().map(|p|&p.actor),"salesChannelId":c.data.sales_channel})).await?;
+    let selected = CustomerSelected {
+        cart_id: &c.id,
+        customer_id: id,
+        cashier_id: h.pos.as_ref().map(|p| p.actor.as_str()),
+        sales_channel_id: &c.data.sales_channel,
+    };
+    veyndo_core::events::emit(&mut *tx, &c.tenant, &selected).await?;
     tx.commit().await?;
     Ok(quote)
 }

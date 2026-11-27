@@ -1,5 +1,6 @@
 //! Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance.
 use crate::domain::company_model::{self, CompanyFields, CompanyRecord};
+use crate::types::events::MasterDataSaved;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
 use veyndo_core::document::view;
@@ -57,7 +58,11 @@ pub async fn records(
             json!({"data":data,"revision":revision,"baseRevision":rev,"inherited":base,"effective":company_model::resolve(&base,&data),"channelId":channel}),
         )
     } else {
-        Ok(json!({"data":base,"revision":rev}))
+        let live = veyndo_core::store::environments::live_parent(tx, t)
+            .await?
+            .unwrap_or_else(|| t.to_owned());
+        let default = company_model::default_order_prefix(&live);
+        Ok(json!({"data":base,"revision":rev,"defaultOrderNumberPrefix":default}))
     }
 }
 /// The basis, or one channel's override with what it inherits, read under the company lock.
@@ -133,17 +138,24 @@ pub async fn save(
     } else {
         sqlx::query!("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1", t, data).execute(&mut *tx).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "settings.master_data_changed",
-        &json!({"revision":expected+1,"salesChannelId":channel}),
-    )
-    .await?;
+    let saved = MasterDataSaved {
+        revision: expected + 1,
+        sales_channel_id: channel,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &saved).await?;
     let value = records(&mut tx, t, channel).await?;
     tx.commit().await?;
     Ok(value)
 }
+/// The order number prefix of the shop: configured on the live shop's company basis, else derived from its ID.
+pub async fn order_prefix(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<String> {
+    let live = veyndo_core::store::environments::live_parent(tx, t)
+        .await?
+        .unwrap_or_else(|| t.to_owned());
+    let basis: CompanyRecord = view(&records(tx, t, None).await?);
+    Ok(company_model::order_prefix(&basis.data, &live))
+}
+
 pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) -> Result<Value> {
     lock(tx, t).await?;
     let basis: CompanyRecord = view(&records(tx, t, None).await?);

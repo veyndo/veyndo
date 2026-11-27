@@ -73,6 +73,13 @@ pub fn origin(request: &Request) -> Option<(String, bool)> {
     }
     None
 }
+/// The configured HTTPS Studio origin, the only public origin that admits browser sessions.
+fn studio_origin() -> Option<axum::http::HeaderValue> {
+    let url = reqwest::Url::parse(&env::var("COMMERCE_PUBLIC_ORIGIN").ok()?).ok()?;
+    (url.scheme() == "https")
+        .then(|| url.origin().ascii_serialization().parse().ok())
+        .flatten()
+}
 fn same_origin(request: &Request, expected: &str) -> bool {
     if let Some(value) = request.headers().get("origin") {
         return value.to_str().ok() == Some(expected);
@@ -124,11 +131,19 @@ pub async fn apply(
     }
     let Some((expected, secure)) = origin(&request) else {
         if browser {
-            return Error(
+            let mut response = Error(
                 StatusCode::FORBIDDEN,
                 "Browser session origin is not admitted".into(),
             )
             .into_response();
+            // Names where sign-in works, so another host (the service directory) can send people
+            // there instead of reporting missing access. It admits nothing on this host.
+            if let Some(studio) = studio_origin() {
+                response
+                    .headers_mut()
+                    .insert("x-veyndo-studio-origin", studio);
+            }
+            return response;
         }
         return next.run(request).await;
     };

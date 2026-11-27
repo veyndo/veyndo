@@ -40,11 +40,11 @@ import { useStorefrontController } from "./useStorefrontController";
 import "../styles/storefront-polish.css";
 import "../styles/experience-polish.css";
 import ChannelPreview, { channelPreview } from "./ChannelPreview";
+import { ShopBrandProvider } from "../../shared/content/shop-brand";
 export default function Storefront(props: { onMerchant: () => void }) {
   const c = useStorefrontController(props);
   const returnedAttempt = paymentReturnAttempt(location.hash);
   const {
-    company,
     cart,
     shopTenant,
     salesChannel,
@@ -70,136 +70,139 @@ export default function Storefront(props: { onMerchant: () => void }) {
   return (
     <CurrencyContext.Provider value={cart?.price.currency ?? "EUR"}>
       <StorefrontContext.Provider value={c}>
-        <PrivacyProvider token={cart?.token}>
-          <AppSurfaceProvider
-            public
-            request={forApps((path, body) => shopApi(path, body, cart?.token))}
-            scopeKey={`${shopTenant}:${salesChannel}`}
-          >
-            <PublishedSite>
-              <div className="shop">
-                <ChannelPreview />
-                <BehaviorAnalytics
-                  shop={shopTenant}
-                  channel={salesChannel}
-                  cart={cart}
-                  id={id}
-                  bag={bag}
-                  query={c.query}
-                  route={appPath}
-                />
-                {!channelPreview() && (
-                  <ShopAnalytics
+        <ShopBrandProvider value={c.brand}>
+          <PrivacyProvider token={cart?.token}>
+            <AppSurfaceProvider
+              public
+              request={forApps((path, body) =>
+                shopApi(path, body, cart?.token),
+              )}
+              scopeKey={`${shopTenant}:${salesChannel}`}
+            >
+              <PublishedSite>
+                <div className="shop">
+                  <ChannelPreview />
+                  <BehaviorAnalytics
                     shop={shopTenant}
                     channel={salesChannel}
-                    products={products}
                     cart={cart}
-                    bag={bag}
-                    order={order}
-                  />
-                )}
-                {new URLSearchParams(location.search).get("sandbox") ===
-                  "1" && (
-                  <div className="sandbox-banner">
-                    {w("stage")} · {w("exclusion")}
-                  </div>
-                )}
-                {!checkoutParent() && <StorefrontHeader />}
-                <AppSurfaceSlot
-                  location="storefront.header"
-                  context={{ salesChannel }}
-                />
-                {error && (
-                  <div role="alert" className="shop-error">
-                    {error}
-                    <button
-                      aria-label={s("close")}
-                      onClick={() => setError("")}
-                    >
-                      <Icon name="close" />
-                    </button>
-                  </div>
-                )}
-                {appPath === "#order-confirmed" && order ? (
-                  <OrderCompletion order={order} onBack={returnToCollection} />
-                ) : returnedAttempt &&
-                  localStorage.getItem(
-                    `rac-payment-token:${returnedAttempt}`,
-                  ) ? (
-                  <main className="shop-content">
-                    <PaymentSession
-                      id={returnedAttempt}
-                      token={localStorage.getItem(
-                        `rac-payment-token:${returnedAttempt}`,
-                      )!}
-                    />
-                  </main>
-                ) : appPath.startsWith("#app/") ? (
-                  <StorefrontAppPage path={appPath} />
-                ) : appPath === "#withdrawal" ||
-                  appPath === "#privacy-rights" ? (
-                  <ConsumerRequestForm
-                    token={cart?.token}
-                    withdrawal={appPath === "#withdrawal"}
-                  />
-                ) : appPath.startsWith("#legal/") ? (
-                  <LegalDocument kind={appPath.slice(7)} />
-                ) : appPath === "#legal" ? (
-                  <CompanyLegalPage />
-                ) : checkoutParent() ? null : id ? (
-                  <ProductPage
                     id={id}
-                    cart={cart}
-                    busy={busy}
-                    onAdd={add}
-                    onConfigure={c.actions.configureProduct}
+                    bag={bag}
+                    query={c.query}
+                    route={appPath}
                   />
-                ) : (
-                  <ShopSite fallback={<StorefrontHome />} />
-                )}
-                {!checkoutParent() && (
-                  <StorefrontFooter
-                    name={company.brandName || company.name || shopTenant}
+                  {!channelPreview() && (
+                    <ShopAnalytics
+                      shop={shopTenant}
+                      channel={salesChannel}
+                      products={products}
+                      cart={cart}
+                      bag={bag}
+                      order={order}
+                    />
+                  )}
+                  {new URLSearchParams(location.search).get("sandbox") ===
+                    "1" && (
+                    <div className="sandbox-banner">
+                      {w("stage")} · {w("exclusion")}
+                    </div>
+                  )}
+                  {!checkoutParent() && <StorefrontHeader />}
+                  <AppSurfaceSlot
+                    location="storefront.header"
+                    context={{ salesChannel }}
                   />
-                )}
-                {account && !channelPreview() && (
-                  <CustomerAccount
-                    initialPage={account}
-                    cart={cart}
-                    onCart={save}
-                    onClose={() => setAccount(false)}
-                  />
-                )}
-                {bag && (
-                  <CheckoutPanel
-                    cart={cart}
-                    requestError={error}
-                    order={order}
-                    busy={busy}
-                    onClose={() => {
-                      returnFromCheckout();
-                      setBag(false);
-                    }}
-                    onQuantity={quantity}
-                    onSelection={selection}
-                    onCart={save}
-                    preview={channelPreview()}
-                    onBuy={buy}
-                    onCoupons={async (codes) => {
-                      const result = await shopApi<Cart>(
-                        "/store-api/checkout/coupons",
-                        { codes, revision: cart?.revision },
-                        cart?.token,
-                        "PUT",
-                      );
-                      save(result);
-                    }}
-                  />
-                )}
-              </div>
-            </PublishedSite>
-          </AppSurfaceProvider>
-        </PrivacyProvider>
+                  {error && (
+                    <div role="alert" className="shop-error">
+                      {error}
+                      <button
+                        aria-label={s("close")}
+                        onClick={() => setError("")}
+                      >
+                        <Icon name="close" />
+                      </button>
+                    </div>
+                  )}
+                  {appPath === "#order-confirmed" && order ? (
+                    <OrderCompletion
+                      order={order}
+                      onBack={returnToCollection}
+                    />
+                  ) : returnedAttempt &&
+                    localStorage.getItem(
+                      `rac-payment-token:${returnedAttempt}`,
+                    ) ? (
+                    <main className="shop-content">
+                      <PaymentSession
+                        id={returnedAttempt}
+                        token={localStorage.getItem(
+                          `rac-payment-token:${returnedAttempt}`,
+                        )!}
+                      />
+                    </main>
+                  ) : appPath.startsWith("#app/") ? (
+                    <StorefrontAppPage path={appPath} />
+                  ) : appPath === "#withdrawal" ||
+                    appPath === "#privacy-rights" ? (
+                    <ConsumerRequestForm
+                      token={cart?.token}
+                      withdrawal={appPath === "#withdrawal"}
+                    />
+                  ) : appPath.startsWith("#legal/") ? (
+                    <LegalDocument kind={appPath.slice(7)} />
+                  ) : appPath === "#legal" ? (
+                    <CompanyLegalPage />
+                  ) : checkoutParent() ? null : id ? (
+                    <ProductPage
+                      id={id}
+                      cart={cart}
+                      busy={busy}
+                      onAdd={add}
+                      onConfigure={c.actions.configureProduct}
+                    />
+                  ) : (
+                    <ShopSite fallback={<StorefrontHome />} />
+                  )}
+                  {!checkoutParent() && <StorefrontFooter name={c.brand} />}
+                  {account && !channelPreview() && (
+                    <CustomerAccount
+                      initialPage={account}
+                      cart={cart}
+                      onCart={save}
+                      onClose={() => setAccount(false)}
+                    />
+                  )}
+                  {bag && (
+                    <CheckoutPanel
+                      cart={cart}
+                      requestError={error}
+                      order={order}
+                      busy={busy}
+                      onClose={() => {
+                        returnFromCheckout();
+                        setBag(false);
+                      }}
+                      onQuantity={quantity}
+                      onSelection={selection}
+                      onCart={save}
+                      preview={channelPreview()}
+                      onBuy={buy}
+                      onCoupons={async (codes) => {
+                        const result = await shopApi<Cart>(
+                          "/store-api/checkout/coupons",
+                          { codes, revision: cart?.revision },
+                          cart?.token,
+                          "PUT",
+                        );
+                        save(result);
+                      }}
+                    />
+                  )}
+                </div>
+              </PublishedSite>
+            </AppSurfaceProvider>
+          </PrivacyProvider>
+        </ShopBrandProvider>
       </StorefrontContext.Provider>
     </CurrencyContext.Provider>
   );

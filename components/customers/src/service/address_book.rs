@@ -1,9 +1,11 @@
 //! The address book of a customer: bounded, revision-checked, with defaults that are never left empty.
 use crate::store::addresses::{self, Entry};
+use crate::types::events::{AddressChanged, AddressDeleted};
 use serde::Serialize;
 use serde_json::json;
 use sqlx::PgConnection;
-use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, store::outbox, uid};
+use veyndo_core::events;
+use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_pricing::customer::Address;
 
 #[derive(Serialize)]
@@ -73,13 +75,11 @@ pub async fn save(
     )
     .await?;
     if request.announce {
-        outbox::publish(
-            conn,
-            t,
-            "customer.address_changed",
-            json!({"email":email,"addressId":id}),
-        )
-        .await?;
+        let changed = AddressChanged {
+            email,
+            address_id: &id,
+        };
+        events::emit(&mut *conn, t, &changed).await?;
     }
     Ok(id)
 }
@@ -99,13 +99,11 @@ pub async fn delete(
         return Err(conflict("Address changed or unavailable"));
     }
     addresses::touch_customer(conn, t, email).await?;
-    outbox::publish(
-        conn,
-        t,
-        "customer.address_deleted",
-        json!({"email":email,"addressId":id}),
-    )
-    .await
+    let deleted = AddressDeleted {
+        email,
+        address_id: id,
+    };
+    events::emit(conn, t, &deleted).await
 }
 
 /// A stored address of the customer, checked again and share-locked for the rest of the transaction.

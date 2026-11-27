@@ -1,0 +1,91 @@
+{
+  "$id": "account.security.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "credentialRevision": {
+          "type": "integer"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "credentialRevision",
+        "userId"
+      ],
+      "title": "PasswordChanged (veyndo-identity)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "revision",
+        "userId"
+      ],
+      "title": "MfaChanged (veyndo-identity)",
+      "type": "object"
+    }
+  ],
+  "description": "A merchant account recovered its password; older sessions and handoffs were revoked. | A merchant account enabled or disabled its second factor (`action`: `mfa.enabled` / `mfa.disabled`).",
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "credentialRevision": {
+      "type": "integer"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "userId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "action",
+    "userId"
+  ],
+  "title": "account.security.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "account.security.updated",
+    "producers": [
+      {
+        "component": "identity",
+        "crate": "veyndo-identity",
+        "source": "rust",
+        "type": "PasswordChanged"
+      },
+      {
+        "component": "identity",
+        "crate": "veyndo-identity",
+        "source": "rust",
+        "type": "MfaChanged"
+      }
+    ],
+    "version": 1
+  }
+}

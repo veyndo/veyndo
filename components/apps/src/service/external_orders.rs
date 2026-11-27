@@ -1,6 +1,7 @@
 //! Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox.
 use crate::store::external_orders as stored;
 use crate::store::{locks, packages};
+use crate::types::events::ExternalOrderPlaced;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
@@ -260,7 +261,9 @@ pub async fn import_external(
     let customer =
         veyndo_checkout::store::customer_snapshot::snapshot(&mut tx, &c, &selection).await?;
     let id = uid();
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":currency_context});
+    let prefix = veyndo_orders::store::company::order_prefix(&mut tx, &t).await?;
+    let number = veyndo_orders::domain::company_model::order_number(&prefix, &id);
+    let mut order = json!({"id":id,"orderNumber":number,"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":currency_context});
     order
         .as_object_mut()
         .unwrap()
@@ -291,10 +294,13 @@ pub async fn import_external(
     reservations::allocate(&mut tx, &t, &inventory, &id).await?;
     reservations::consume(&mut tx, &t, &inventory).await?;
     veyndo_catalog::store::order_downloads::grant(&mut tx, &t, &ids, &id).await?;
-    {
-        let kind = "order.placed";
-        veyndo_core::store::outbox::publish_on(&mut *tx, &t, kind, &json!({"orderId":id,"totalMinor":input.total_minor,"salesChannelId":input.sales_channel_id,"appId":app})).await?;
-    }
+    let placed = ExternalOrderPlaced {
+        order_id: &id,
+        total_minor: input.total_minor,
+        sales_channel_id: &input.sales_channel_id,
+        app_id: app,
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &placed).await?;
     tx.commit().await?;
     // Customer/order reads must never expose the private completed-cart token.
     Ok(json!({"order":order,"replayed":false}))

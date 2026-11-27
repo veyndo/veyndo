@@ -4,6 +4,7 @@ use crate::ports::QuoteLifecycle;
 use crate::store::access::{access, guard_conn, identity, require};
 use crate::store::organization;
 use crate::store::{carts as cart_rows, quotes};
+use crate::types::events::{QuoteChanged, QuoteRequested};
 use crate::types::model::OfferLine;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -140,13 +141,14 @@ pub async fn invoke(
     }
     messages.push(json!({"actor":if admin{header(h,"x-rac-user").unwrap_or("merchant")}else{&buyer},"merchant":admin,"message":message(v)?,"operation":op,"lifecycle":lifecycle,"from":state,"to":next,"createdAt":chrono::Utc::now().to_rfc3339()}));
     quotes::transition(&mut tx, &t, id, next, &data).await?;
-    organization::event(
-        &mut tx,
-        &t,
-        "b2b.quote_changed",
-        json!({"quoteId":id,"state":next,"from":state,"revision":revision+1,"lifecycle":lifecycle}),
-    )
-    .await?;
+    let changed = QuoteChanged {
+        quote_id: id,
+        state: next,
+        from: &state,
+        revision: revision + 1,
+        lifecycle,
+    };
+    organization::event(&mut tx, &t, &changed).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"state":next,"revision":revision+1}))
 }
@@ -222,13 +224,11 @@ async fn request(
     };
     let data = json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted});
     quotes::request(&mut tx, t, &id, owner, &data).await?;
-    organization::event(
-        &mut tx,
-        t,
-        "b2b.quote_requested",
-        json!({"quoteId":id,"unitId":context.unit_id}),
-    )
-    .await?;
+    let requested = QuoteRequested {
+        quote_id: &id,
+        unit_id: &context.unit_id,
+    };
+    organization::event(&mut tx, t, &requested).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"revision":1,"state":"requested"}))
 }

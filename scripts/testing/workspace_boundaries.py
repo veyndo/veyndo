@@ -44,10 +44,13 @@ OWNERS.update({'veyndo': ROOT, 'veyndo-port-contracts': ROOT / 'crates/port-cont
                'veyndo-provider-contentful': ROOT / 'extensions/apps/contentful',
                'veyndo-provider-hubspot': ROOT / 'extensions/apps/hubspot',
                'veyndo-provider-klaviyo': ROOT / 'extensions/apps/klaviyo',
-               'veyndo-provider-vercel': ROOT / 'extensions/apps/vercel'})
+               'veyndo-provider-vercel': ROOT / 'extensions/apps/vercel',
+               # Generated external client: speaks HTTP only, never links a workspace crate.
+               'veyndo-sdk': ROOT / 'sdks/rust'})
 ALLOWED = {
     'veyndo-port-contracts': {'veyndo-core', 'veyndo-shop', 'veyndo-pricing', 'veyndo-shipping', 'veyndo-payments', 'veyndo-intelligence', 'veyndo-app-platform', 'veyndo-app-model'},
     'veyndo-app-model': set(),
+    'veyndo-sdk': set(),
     'veyndo-app-runtime': {'veyndo-app-model'},
     'veyndo-app-storage': {'veyndo-app-model'},
     'veyndo-marketplaces': set(),
@@ -102,6 +105,7 @@ ALLOWED = {
 EXTERNAL = {
     'veyndo-port-contracts': {'serde_json', 'reqwest', 'sqlx', 'tokio'},
     'veyndo-app-model': {'serde', 'serde_json', 'chrono', 'cron', 'sha2', 'semver', 'url'},
+    'veyndo-sdk': {'reqwest', 'serde', 'serde_json', 'tokio'},
     'veyndo-app-runtime': {'wasmtime', 'wat', 'sha2', 'serde_json'},
     'veyndo-app-storage': {'sqlx', 'serde_json', 'sha2', 'tokio', 'chrono', 'base64', 'ring', 'zeroize'},
     'veyndo-paypal': {'axum', 'reqwest', 'serde_json', 'sqlx'},

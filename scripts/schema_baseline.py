@@ -92,8 +92,16 @@ def strip_meta(text):
     return '\n'.join(keep)
 
 
-def normalize_schema(dump):
-    return sorted(statements(strip_meta(dump)))
+def normalize_schema(dump, release_roles=()):
+    """Release grants to this run's own roles come from the provisioning step after the baselines, not
+    from the baselines; they are counted and left out, so the reference keeps only what baselines create."""
+    kept, granted = [], 0
+    for statement in statements(strip_meta(dump)):
+        if any(re.search(rf'\b(TO|FROM) {role}\b', statement) for role in release_roles):
+            granted += 1
+        else:
+            kept.append(statement)
+    return sorted(kept), granted
 
 
 def normalize_data(dump):
@@ -119,7 +127,7 @@ def render(schema, data):
     return '-- schema\n' + ';\n\n'.join(schema) + ';\n\n-- rows\n' + '\n\n'.join(data) + '\n'
 
 
-def dump(container, user, database):
+def dump(container, user, database, release_roles=()):
     common = ['docker', 'exec', container, 'pg_dump', '-U', user, '-d', database, '--no-owner']
     schema = subprocess.run(common + ['--schema-only'], capture_output=True, text=True, check=True).stdout
     data = subprocess.run(common + ['--data-only'] + [f'--exclude-table-data={t}' for t in DATA_EXCLUDE],
@@ -127,22 +135,30 @@ def dump(container, user, database):
     keys = subprocess.run(['docker', 'exec', container, 'psql', '-U', user, '-d', database, '-Atc',
                            "SELECT count(*) FILTER (WHERE active AND octet_length(secret)=32 AND id ~ '^[0-9a-f]{32}$') || '/' || count(*) FROM veyndo_authority.keys"],
                           capture_output=True, text=True, check=True).stdout.strip()
-    return render(normalize_schema(schema), normalize_data(data) + [f'veyndo_authority.keys: {keys} active random 32-byte keys'])
+    kept, granted = normalize_schema(schema, release_roles)
+    if release_roles:
+        assert granted > 0, 'Setup granted nothing to the release runtime and connector roles'
+    return render(kept, normalize_data(data) + [f'veyndo_authority.keys: {keys} active random 32-byte keys'])
 
 
 def setup(env, container, user, binary):
     """A new database set up by the server binary alone, as a fresh installation does it."""
-    name = 'schema_baseline_' + uuid.uuid4().hex
+    suffix = uuid.uuid4().hex
+    name = 'schema_baseline_' + suffix
+    # Setup grants the current tables to the runtime group and connector login; this run names its own.
+    roles = ('sb_runtime_' + suffix[:12], 'sb_connector_' + suffix[:12])
     psql = ['docker', 'exec', '-i', container, 'psql', '-U', user, '-d', 'postgres', '-qv', 'ON_ERROR_STOP=1']
-    subprocess.run(psql, input=f'CREATE DATABASE "{name}";', text=True, check=True)
+    subprocess.run(psql, input=f'CREATE DATABASE "{name}"; CREATE ROLE {roles[0]} NOLOGIN; CREATE ROLE {roles[1]} NOLOGIN;', text=True, check=True)
     url = urllib.parse.urlsplit(env['DATABASE_URL'])
     child = {**env, 'DATABASE_URL': urllib.parse.urlunsplit(url._replace(path='/' + name)),
-             'BOOTSTRAP_MODE': 'migrate', 'SEED_DEMO': 'false'}
+             'BOOTSTRAP_MODE': 'migrate', 'SEED_DEMO': 'false',
+             'DB_RUNTIME_ROLE': roles[0], 'DB_CONNECTOR_LOGIN': roles[1]}
     for key in ('DATABASE_RUNTIME_URL', 'DATABASE_TENANT_URL', 'DATABASE_LISTENER_URL'):
         child.pop(key, None)
     with artifact_path('schema-baseline/migrate.log').open('w') as log:
         subprocess.run([str(binary)], cwd=ROOT, env=child, stdout=log, stderr=log, check=True)
-    return name, lambda: subprocess.run(psql, input=f'DROP DATABASE "{name}" WITH (FORCE);', text=True, check=True)
+    drop = f'DROP DATABASE "{name}" WITH (FORCE); DROP ROLE {roles[0]}; DROP ROLE {roles[1]};'
+    return name, roles, lambda: subprocess.run(psql, input=drop, text=True, check=True)
 
 
 def main():
@@ -154,9 +170,9 @@ def main():
     container = env.get('TEST_DB_CONTAINER') or env.get('DB_CONTAINER') or 'veyndo-postgres-1'
     user = urllib.parse.urlsplit(env['DATABASE_URL']).username or 'commerce'
     env.setdefault('MERCHANT_TOKEN', 'schema-baseline-fixture-credential')
-    name, drop = setup(env, container, user, args.binary)
+    name, roles, drop = setup(env, container, user, args.binary)
     try:
-        actual = dump(container, user, name)
+        actual = dump(container, user, name, roles)
     finally:
         drop()
     if args.write:

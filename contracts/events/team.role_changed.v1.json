@@ -1,0 +1,47 @@
+{
+  "$id": "team.role_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A custom team role was saved or deleted.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deleted": {
+      "type": "boolean"
+    },
+    "id": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "actor",
+    "deleted",
+    "id",
+    "revision"
+  ],
+  "title": "team.role_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "team.role_changed",
+    "producers": [
+      {
+        "component": "identity",
+        "crate": "veyndo-identity",
+        "source": "rust",
+        "type": "RoleChanged"
+      }
+    ],
+    "version": 1
+  }
+}

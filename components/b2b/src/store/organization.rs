@@ -1,5 +1,6 @@
 //! Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. Member contacts and customer existence come from the records port, settings from the shop store.
 use crate::ports::records;
+use crate::types::events::{EmployeeChanged, OrganizationChanged};
 use crate::types::model::{Company, Member, Unit};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -229,13 +230,12 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
         }
         sqlx::query!("INSERT INTO b2b_units(tenant,id,company_id,parent_id,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET parent_id=excluded.parent_id,data=excluded.data,revision=b2b_units.revision+1", t, id, company, parent, data).execute(&mut *conn).await?;
     }
-    event(
-        conn,
-        t,
-        "b2b.organization_changed",
-        json!({"id":id,"kind":table,"revision":expected+1}),
-    )
-    .await?;
+    let changed = OrganizationChanged {
+        id,
+        kind: table,
+        revision: expected + 1,
+    };
+    event(conn, t, &changed).await?;
     Ok(json!({"id":id,"revision":expected+1}))
 }
 pub async fn member(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
@@ -278,18 +278,21 @@ pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Res
         return Err(conflict("Employee grant changed; reload before saving"));
     }
     sqlx::query!("INSERT INTO b2b_members(tenant,unit_id,customer_id,data) VALUES($1,$2,$3,$4) ON CONFLICT(tenant,unit_id,customer_id) DO UPDATE SET data=excluded.data,revision=b2b_members.revision+1", t, unit, customer, json!(member)).execute(&mut *conn).await?;
-    event(
-        conn,
-        t,
-        "b2b.employee_changed",
-        json!({"unitId":unit,"customerId":customer,"revision":expected+1}),
-    )
-    .await?;
+    let changed = EmployeeChanged {
+        unit_id: unit,
+        customer_id: customer,
+        revision: expected + 1,
+    };
+    event(conn, t, &changed).await?;
     Ok(json!({"revision":expected+1}))
 }
-pub async fn event(conn: &mut sqlx::PgConnection, t: &str, kind: &str, data: Value) -> Result<()> {
-    veyndo_core::store::outbox::publish_on(conn, t, kind, &data).await?;
-    Ok(())
+/// Publishes a b2b event in the caller's transaction.
+pub async fn event<E: veyndo_core::events::Event>(
+    conn: &mut sqlx::PgConnection,
+    t: &str,
+    event: &E,
+) -> Result<()> {
+    veyndo_core::events::emit(conn, t, event).await
 }
 
 /// The budget terms of a unit that reserved spending fixes.

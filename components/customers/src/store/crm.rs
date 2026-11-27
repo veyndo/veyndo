@@ -1,6 +1,7 @@
 //! Merchant CRM writes: creation on native contact and address storage, and revision-checked changes; credentials never leave storage.
 use crate::service::address_book::{self, Save};
 use crate::store::address_restore;
+use crate::types::events::{CustomerCreated, CustomerUpdated};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -145,17 +146,17 @@ pub async fn create(
     for (address, flags) in address_plan(&json!(input))? {
         save_address(&mut tx, t, &email, source.is_some(), &flags, &address).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        if source.is_some() {
-            "migration.record.imported"
-        } else {
-            "customer.created"
-        },
-        &json!({"customerId":id,"actor":header(h,"x-rac-user"),"source":"merchant"}),
-    )
-    .await?;
+    let created = CustomerCreated {
+        customer_id: &id,
+        actor: header(h, "x-rac-user"),
+        source: "merchant",
+    };
+    let kind = if source.is_some() {
+        "migration.record.imported"
+    } else {
+        "customer.created"
+    };
+    veyndo_core::events::emit_as(&mut *tx, t, kind, &created).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"email":email,"created":true}))
 }
@@ -333,7 +334,13 @@ pub async fn save(
     crate::ports::purchases()?
         .detach_carts(&mut tx, t, email, &uid())
         .await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
+    let updated = CustomerUpdated {
+        actor: header(h, "x-rac-user"),
+        email,
+        revision: saved_revision,
+        active: e.active,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &updated).await?;
     tx.commit().await?;
     Ok(json!({"saved":true,"revision":saved_revision}))
 }

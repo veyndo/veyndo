@@ -35,7 +35,7 @@ of a table, look in `tables`. `python3 scripts/components.py` checks both.
 | intelligence | `components/intelligence` (`veyndo-intelligence`) | Knowledge, shop memory, agents and runs, proposals, consent, personalization, catalogue intake | knowledge, agent and behaviour suites |
 | studio | `components/studio` (`veyndo-studio`) | Overview, reports, staging shops, history, manual orders, flow work templates, catalogue translation worker | staging, report and history suites |
 | protocols | `src/mcp`, `src/ucp`, `src/capabilities` | MCP, UCP and capability dispatch; no tables, no business rule | `schema_contracts`, MCP and UCP suites |
-| host | `src/` (everything else), `crates/port-contracts` | Process entry, route registry, worker roles, schema setup, port implementations, provisioning | the HTTP suites, `schema_baseline` |
+| host | `src/` (everything else), `crates/port-contracts` | Process entry, route registry, worker roles, schema setup, port implementations, provisioning | the HTTP suites, `schema_baseline`, `schema_upgrade` |
 | connectors | `extensions/services/connectors`, `extensions/services/connector-runtime`, `extensions/apps/<app>` | Six `connector_*` tables, the provider delivery queue | `rust_connectors`, `email_tests` |
 
 ## Commerce domain owners
@@ -174,7 +174,7 @@ Details: [Rust services](rust-services.md), [connectors](connector-component.md)
 | Area | Suites and checks |
 | --- | --- |
 | Tenant isolation | `store_isolation`, `production_foundations`, `transaction_pooler` ([tenant isolation](tenant-isolation.md)) |
-| Schema | `schema_baseline`, `sql_prepare` |
+| Schema | `schema_baseline`, `schema_upgrade`, `sql_prepare` |
 | Domain rules | `cargo test` per component (unit, `properties`, `domain_mutants`), `scripts/testing/mutation_domain.py`, `formal_differential` |
 | Interfaces | `schema_contracts`, port contracts in `crates/port-contracts`, `testing/component_mirrors_check` |
 | User journeys | `browser_journeys` |

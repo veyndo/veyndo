@@ -7,6 +7,7 @@ COPY .cargo/ .cargo/
 COPY .sqlx/ .sqlx/
 COPY src/ src/
 COPY crates/ crates/
+COPY sdks/rust/ sdks/rust/
 COPY components/ components/
 COPY extensions/ extensions/
 COPY fixtures/ fixtures/

@@ -6,7 +6,7 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-94.1 % of the Rust source files are unproved.
+94.2 % of the Rust source files are unproved.
 
 ## In numbers
 
@@ -15,10 +15,10 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | **Proved rules** | 74 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
 | **Proved properties** | 217 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
-| Reviewed callers | 84 | 4.9 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Reviewed callers | 84 | 4.8 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.5 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1623 | 94.1 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1724 | 100 % | |
+| **Unproved files** | 1652 | 94.2 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1753 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -43,13 +43,13 @@ rounding still has to be argued by tests rather than by the type.
 | Area | Files | Call a proved rule | Unproved | Use floating point |
 | --- | ---: | ---: | ---: | ---: |
 | Money primitives and discounts | 15 | 6 | 9 | 2 |
-| Cart and prices | 11 | 3 | 8 | 2 |
+| Cart and prices | 11 | 3 | 8 | 1 |
 | Checkout, delivery and orders | 32 | 6 | 26 | 4 |
 | Promotions | 1 | 0 | 1 | 1 |
 | Payments and refunds | 38 | 3 | 35 | 0 |
 | Currencies and taxes | 16 | 1 | 15 | 4 |
 | Stock | 4 | 1 | 3 | 0 |
-| **Money path in total** | **117** | **20** | **97** | **13** |
+| **Money path in total** | **117** | **20** | **97** | **12** |
 
 The money path is also checked by tests that are not shown here: the
 differential comparison against the original PHP price calculation and the

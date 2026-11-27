@@ -1,0 +1,47 @@
+{
+  "$id": "app.{app}.source_imported.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An integration app exported a merchant-private knowledge source into the shop.",
+  "properties": {
+    "app": {
+      "type": "string"
+    },
+    "metadata": {},
+    "sourceId": {
+      "type": "string"
+    },
+    "sourceKind": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "app",
+    "metadata",
+    "sourceId",
+    "sourceKind",
+    "title"
+  ],
+  "title": "app.{app}.source_imported",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "app.{app}.source_imported",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "SourceImported"
+      }
+    ],
+    "version": 1
+  }
+}

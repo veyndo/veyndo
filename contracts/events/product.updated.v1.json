@@ -1,0 +1,138 @@
+{
+  "$id": "product.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "jobId": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jobId",
+        "locale",
+        "productId",
+        "revision"
+      ],
+      "title": "TranslationApplied (veyndo-catalog)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ],
+      "title": "PriceReverted (veyndo-intelligence)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ],
+      "title": "TestStockFilled (veyndo-inventory)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ],
+      "title": "ProductSaved (veyndo-studio)",
+      "type": "object"
+    }
+  ],
+  "description": "An approved translation job wrote a product's texts in one locale. | An autonomy revert restored a product's baseline price at a new product revision. | Sandbox test stock filled an empty product at a new product revision. | The merchant product editor created (`product.created`) or saved (`product.updated`) a product.",
+  "properties": {
+    "jobId": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string"
+    },
+    "productId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "productId",
+    "revision"
+  ],
+  "title": "product.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "product.updated",
+    "producers": [
+      {
+        "component": "catalog",
+        "crate": "veyndo-catalog",
+        "source": "rust",
+        "type": "TranslationApplied"
+      },
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "PriceReverted"
+      },
+      {
+        "component": "inventory",
+        "crate": "veyndo-inventory",
+        "source": "rust",
+        "type": "TestStockFilled"
+      },
+      {
+        "component": "studio",
+        "crate": "veyndo-studio",
+        "source": "rust",
+        "type": "ProductSaved"
+      }
+    ],
+    "version": 1
+  }
+}

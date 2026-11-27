@@ -2,6 +2,7 @@
 use crate::domain::order_patches::strip_cart_token;
 use crate::ports::Payments;
 use crate::store::company;
+use crate::types::events::ReceiptCreated;
 use crate::types::order_document::OrderControl;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -199,13 +200,12 @@ pub async fn create(
     )
     .execute(&mut *tx)
     .await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "document.created",
-        &json!({"orderId":id,"documentId":receipt,"kind":kind}),
-    )
-    .await?;
+    let created = ReceiptCreated {
+        order_id: id,
+        document_id: &receipt,
+        kind,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &created).await?;
     tx.commit().await?;
     Ok(
         json!({"id":receipt,"number":number,"pdfPath":format!("/api/merchant/receipts/{receipt}/pdf")}),

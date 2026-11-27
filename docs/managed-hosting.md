@@ -10,11 +10,38 @@ Fresh installations need neither AGE nor pgvector; there is no conversion of an 
 
 ## Northflank test topology
 
-Frankfurt: one Managed PostgreSQL addon, one Rust Core replica and one private Qdrant replica with `/qdrant/storage` on a 6 GB persistent volume. Core port 8787 exposes the UI and same-origin APIs over HTTPS. PostgreSQL and Qdrant ports stay private. `BOOTSTRAP_MODE=migrate` runs as a controlled setup job before `serve` is started. `SEED_DEMO`, `ALLOW_PUBLIC_SIGNUP`, `ALLOW_BOOTSTRAP_AUTH` are false. Personal-only hosting needs no shared merchant token. Initial operator credentials are restricted to the setup job; remove that password from cloud setup secrets after successful bootstrap. Merchant sessions use personal accounts.
+Frankfurt: one Managed PostgreSQL addon, one Rust Core replica and one private Qdrant replica with `/qdrant/storage` on a 6 GB persistent volume. Core port 8787 exposes the UI and same-origin APIs over HTTPS. PostgreSQL and Qdrant ports stay private. `BOOTSTRAP_MODE=migrate` runs as a controlled setup job before `serve` is started. `SEED_DEMO`, `ALLOW_PUBLIC_SIGNUP`, `ALLOW_BOOTSTRAP_AUTH` are false. Personal-only hosting needs no shared merchant token. On a fresh database, run the `vendune-setup` job once after the migration job with the command `/app/veyndo --provision` and `BOOTSTRAP_MODE=migrate`, `DB_CONNECTOR_LOGIN`, `DB_SYSTEM_LOGIN` and `DB_TENANT_LOGIN` set: grants, authority configuration and activation, verification and, with `PLATFORM_ADMIN_EMAIL`/`PLATFORM_ADMIN_PASSWORD`, the first operator ([provisioning](deployment.md#provision-roles-and-database-authority)). Initial operator credentials are restricted to that setup job; remove that password from cloud setup secrets after successful bootstrap. Merchant sessions use personal accounts.
 
-`SHOP_DOMAIN_SUFFIX=veyndo.ai` binds shop hostnames to tenant scope. Unknown shops and conflicting tenant headers are rejected. `admin.veyndo.ai` opens the service directory (merchant/platform login and docs), `admin.veyndo.ai/#platform` opens the operator console; `SHOP.veyndo.ai` opens that shop, and `/?shop=SHOP#merchant` opens its Studio on the operator origin. Before DNS is ready the same paths work on the default Northflank HTTPS origin. Creating a shop is a database transaction, not a new container, database or certificate.
+`SHOP_DOMAIN_SUFFIX=veyndo.ai` binds shop hostnames to tenant scope. Unknown shops and conflicting tenant headers are rejected. `admin.veyndo.ai` opens the service directory (merchant/platform login and docs), `admin.veyndo.ai/#platform` moves to the operator console on the Studio origin (browser sessions are admitted only on `COMMERCE_PUBLIC_ORIGIN`); `SHOP.veyndo.ai` opens that shop, and `/?shop=SHOP#merchant` opens its Studio on the operator origin. Before DNS is ready the same paths work on the default Northflank HTTPS origin. Creating a shop is a database transaction, not a new container, database or certificate.
 
 Recorded test-topology estimate (October 2026; not a live pricing quotation): Core $12, PostgreSQL $12, Qdrant $12, PostgreSQL 6 GB $0.90, Qdrant 6 GB $0.90 = $37.80 (the recorded estimate also carried a since-retired 20 GB volume at $3). Example 10 GB egress adds $0.60. Jobs/builds, backup storage, AI APIs and taxes are additional. This single-instance test topology has no HA guarantee. Qdrant's attached single-writer volume requires recreate deployment and cannot be scaled by simply increasing replicas.
+
+## Staging environment
+
+Staging is the separate Northflank project `veyndo-staging` (Frankfurt), created by the
+team template `veyndo-staging`. The template source is
+[`deploy/northflank/staging.template.json`](../deploy/northflank/staging.template.json);
+paste it into the template's code editor and run it. It creates its own PostgreSQL 17
+addon, a private Qdrant with a 6 GB volume, `staging-core` (built from `main` with
+`deploy/Dockerfile`) and three manual jobs:
+
+| Job | Runs |
+| --- | --- |
+| `staging-roles` | Database-manager step on `postgres:17` with the addon admin login: creates `veyndo_runtime`, `veyndo_runtime_login`, `veyndo_tenant_login` (NOINHERIT) and `veyndo_connectors` with their passwords, gives the migration owner `CREATE, CONNECT, TEMPORARY` on the database and `ADMIN OPTION` on `veyndo_runtime`. Idempotent. |
+| `staging-migrate` | `BOOTSTRAP_MODE=migrate` on the owner connection. |
+| `staging-setup` | `veyndo --provision` with the system and tenant logins; set `PLATFORM_ADMIN_EMAIL`/`PLATFORM_ADMIN_PASSWORD` for this job only for the first operator, then remove the password. |
+
+Run them in that order after the first build. Secrets never appear in the template:
+`argumentOverrides` generate the login passwords, `PLATFORM_SECRET_KEY` and
+`FACT_SIGNING_SEED` with `fn.randomSecret`, and the group `staging-shared` carries them.
+The owner URI and admin login are linked only into the restricted group `staging-owner`
+(the three jobs), never into Core. Core composes its connection URLs from these values
+with Northflank runtime `${VAR}` references; the template writes those references through
+`fn.replaceAll` and `fn.fromBase64` so the template engine does not evaluate them.
+
+Managed PostgreSQL refuses `ALTER ROLE … NOSUPERUSER`, so the role step sets only the
+attributes it may change. Each template run starts a new Core build of the same commit;
+abort the duplicates.
 
 ## Restricted hosted runtime
 
@@ -39,8 +66,10 @@ For the same transition on another host:
    non-database secrets. Preserve `PLATFORM_SECRET_KEY` exactly: a replacement
    cannot decrypt existing provider credentials.
 2. Use the managed database administrator to create the limited group/login and
-   grant database/schema access. Use the actual table owner for table/sequence
-   grants and managed app ownership transfer. These may be different principals.
+   grant database/schema access. Table/sequence grants and the database authority
+   come from `veyndo --provision` on the actual table owner's connection
+   ([provisioning](deployment.md#provision-roles-and-database-authority)); the
+   administrator and the table owner may be different principals.
    Non-superuser `CREATEROLE` administrators cannot change every restricted role
    attribute; create safe defaults and audit the resulting flags rather than
    requesting superuser access. [PostgreSQL role administration](https://www.postgresql.org/docs/17/sql-alterrole.html).
@@ -51,8 +80,9 @@ For the same transition on another host:
 4. Check own/foreign/unknown scope through the restricted connection. Attach the
    complete Core configuration and detach its owner-secret group. Remove temporary
    diagnostic jobs from the new secrets. Retain separate owner migrations on later
-   releases, with explicitly reviewed grants for new tables rather than blanket
-   default privileges on future tables.
+   releases: each migration grants exactly the tables it adds to the runtime group,
+   the connector login and the configured tenant login, rather than blanket default
+   privileges on future tables.
 5. Roll the Core and verify its actual infrastructure response/database identity.
    Test personal sign-in, provider/settings reads, shop provisioning, browsing,
    simulated checkout, Admin projections and native Flow completion.

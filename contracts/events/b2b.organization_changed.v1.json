@@ -1,0 +1,41 @@
+{
+  "$id": "b2b.organization_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A company or purchasing unit was saved; `kind` names the table (`company` or `unit`).",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "revision"
+  ],
+  "title": "b2b.organization_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.organization_changed",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "OrganizationChanged"
+      }
+    ],
+    "version": 1
+  }
+}

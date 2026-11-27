@@ -1,0 +1,41 @@
+{
+  "$id": "delivery.booking_reserved.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A carrier app reserved or released the booking of one package of an order.",
+  "properties": {
+    "deliveryIndex": {
+      "type": "integer"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "sourceApp": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deliveryIndex",
+    "orderId",
+    "sourceApp"
+  ],
+  "title": "delivery.booking_reserved",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "delivery.booking_reserved",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "BookingChanged"
+      }
+    ],
+    "version": 1
+  }
+}

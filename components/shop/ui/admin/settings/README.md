@@ -10,6 +10,7 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`CompanyField.tsx`](CompanyField.tsx): One factual field with visible channel inheritance, an explicit reset and searchable geographic selection.
 - [`CompanyLogo.tsx`](CompanyLogo.tsx): Private logo preview and bounded upload; attaching/removing is a draft change until the profile is saved.
 - [`CompanyTranslations.tsx`](CompanyTranslations.tsx): Brand and legal text use one content-language selector and independent language/channel inheritance.
+- [`OrderNumberSettings.tsx`](OrderNumberSettings.tsx): Shop-wide order number prefix on the company basis; channels inherit it and cannot override it.
 - [`CountriesSettings.tsx`](CountriesSettings.tsx): Delivery-country selection and editable catalogue definitions, including tenant-owned subdivisions.
 - [`CountryDefinition.tsx`](CountryDefinition.tsx): Country metadata and subdivision editing with multilingual names; custom definitions cannot invent ISO assignment.
 - [`CustomerGroupsSettings.tsx`](CustomerGroupsSettings.tsx): Customer groups share the translation/inheritance editor and revisioned settings aggregate.

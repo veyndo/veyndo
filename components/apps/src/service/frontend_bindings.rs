@@ -2,6 +2,7 @@
 use crate::ports::HostedInstall;
 use crate::store::frontend_bindings as stored;
 use crate::store::locks;
+use crate::types::events::{FrontendConfigured, FrontendDisconnected};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
@@ -149,7 +150,13 @@ pub async fn bind(
         },
     )
     .await?;
-    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "frontend.configured", &json!({"alias":alias,"channel":channel,"revision":revision,"actor":header(h,"x-rac-user")})).await?;
+    let configured = FrontendConfigured {
+        alias,
+        channel,
+        revision,
+        actor: header(h, "x-rac-user"),
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &configured).await?;
     tx.commit().await?;
     Ok(json!({"alias":alias,"channel":channel,"revision":revision,"urls":links(alias)}))
 }
@@ -174,13 +181,11 @@ pub async fn remove(a: &State, h: &RequestContext, alias: &str, v: &Value) -> Re
     if n == 0 {
         return Err(conflict("Frontend absent or revision changed"));
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "frontend.disconnected",
-        &json!({"alias":alias,"actor":header(h,"x-rac-user")}),
-    )
-    .await?;
+    let disconnected = FrontendDisconnected {
+        alias,
+        actor: header(h, "x-rac-user"),
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &disconnected).await?;
     tx.commit().await?;
     Ok(json!({"disconnected":true,"alias":alias}))
 }

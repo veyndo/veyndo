@@ -3,8 +3,8 @@
   "components": {
     "apps": {
       "repository": "https://github.com/veyndo/app-platform",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "29779928c363a3f741561bb3b9f29db3fea3061f18f39b9d27cd7391566c4dd8",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "d333ff622edf5183f68d371da187f13cbbfea2ab89fc9eac57cb61343466f957",
       "crates": [
         "components/apps",
         "crates/apps"
@@ -39,8 +39,8 @@
     },
     "automation": {
       "repository": "https://github.com/veyndo/automation",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "039ec88d03cf212346871b824aaa0270ab174d238aea5f7f9fb7b57de47ca71e",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "fde83ead2bee323f91a83ea6345a9768dd5c63e52966c3e59849f9b2a3639319",
       "crates": [
         "crates/automation",
         "crates/flow-graph"
@@ -54,8 +54,8 @@
     },
     "b2b": {
       "repository": "https://github.com/veyndo/b2b",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "bcea672f189dff55e582f0c79912a48cf0df740f6f0241617e686a15d1d3214b",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "eeae2b970b3dc14c905abcc76f9b1caa2cdf39dcf6023890ffeec82b6014e0fa",
       "crates": [
         "components/b2b"
       ],
@@ -77,8 +77,8 @@
     },
     "catalog": {
       "repository": "https://github.com/veyndo/catalog",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "e1275768ead1dbc7b42c6010eaeb2a23e64fb13a7acdccf587b1c5c91f920224",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "79012f19eec9e87258f3bf58062e9cb36eff193a06d8a724d2adfbb87e97e4b7",
       "crates": [
         "components/catalog"
       ],
@@ -96,8 +96,8 @@
     },
     "checkout": {
       "repository": "https://github.com/veyndo/checkout",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "15dff668a8bed0cd924162883c764f2203459d8855fd69384c7738816663c63b",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "408fb74c2139da81e4d0d7c4060fcc6a49cc0b48aea569ca34c82353d3ef8418",
       "crates": [
         "components/checkout"
       ],
@@ -126,8 +126,8 @@
     },
     "core": {
       "repository": "https://github.com/veyndo/core",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "129d9249d564d9d180be93036ded6045e0c184f836e69a3cff25e1dd9f3dff90",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "afe988f81b53ce73856a285b3a588851b48fed905eee2cf5f9a2e5b63d79eb12",
       "crates": [
         "crates/kernel",
         "crates/runtime",
@@ -141,8 +141,8 @@
     },
     "customers": {
       "repository": "https://github.com/veyndo/customers",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "11430b0e0c6a9f7b51059a406487f88ef03c200e7d1868d0a5780adb8311a569",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "f95c16cd8d96c931939912c0095f262f5467b268d6512ef8bf5de14a7766fadc",
       "crates": [
         "components/customers"
       ],
@@ -168,8 +168,8 @@
     },
     "identity": {
       "repository": "https://github.com/veyndo/identity",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "2d75d5cc2635f64dcf4545d2b185f71851da1b832641a645d2704a7ddeb3e335",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "5987b3c82f637c6291418f9473c4448be865216b05e59944264c0fde434f63da",
       "crates": [
         "components/identity"
       ],
@@ -185,8 +185,8 @@
     },
     "inference": {
       "repository": "https://github.com/veyndo/cognition",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "a7fc746c086ee8c0a704145fbf481a0b98e7e11f2c288ecae891f76155eb02f1",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "2b2b9f581aee26200c48e9ae5dd20b6449c1b64a1d8d2fd3198b572f4fa3f446",
       "crates": [
         "crates/cognition"
       ],
@@ -201,8 +201,8 @@
     },
     "intelligence": {
       "repository": "https://github.com/veyndo/intelligence",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "95b02d0430a9ba3c89f2fa43dce560ea072013c5672b0f23a1d62a62339e963b",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "e2f26163435ad55739bde72038d576310a5086a395110d96db05a3cdf1cd85e9",
       "crates": [
         "components/intelligence"
       ],
@@ -233,8 +233,8 @@
     },
     "inventory": {
       "repository": "https://github.com/veyndo/inventory",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "9fd8241e951acb24db075e358dbdfa5b21a95b0627490f3b069b3bcda494b514",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "96deba8d695aef8aae89a95c612bfcb5371d9fcc671b6119cd6d78c5f4ae73a2",
       "crates": [
         "components/inventory"
       ],
@@ -253,8 +253,8 @@
     },
     "marketing": {
       "repository": "https://github.com/veyndo/marketing",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "717f5e1c879ae0c1adfd6ccb76c6f65c1acae546aa6a4cfef8e2a683d54ca22c",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "aad0d1aa1390fb812b1be1950ff599bc1d7a0ba33832e41159a1ef270086cb48",
       "crates": [
         "components/marketing"
       ],
@@ -279,8 +279,8 @@
     },
     "orders": {
       "repository": "https://github.com/veyndo/orders",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "73cb34c068394d7f513960468bf2e064917a6e5951021c88b67ccdd2818550a6",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "d7e0b4debcde61f5375abaabd85093203cbc132fb96a546458ee2a181e943086",
       "crates": [
         "components/orders"
       ],
@@ -307,8 +307,8 @@
     },
     "payments": {
       "repository": "https://github.com/veyndo/payments",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "c7902ddccef5ca780c6b7310dbd4883fd87e12b2eb6abf14b6a7c586bb4c6239",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "37f5fcc1f5eb8a08f6d0f4417b96d56b01660243187be0dedbe759f9821a458f",
       "crates": [
         "components/payments"
       ],
@@ -336,8 +336,8 @@
     },
     "pos": {
       "repository": "https://github.com/veyndo/pos",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "68824b3d30ecb0f4c66b9b296bd2433aee0af3f7bc181c9d7f9ae3f359647ffc",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "de8df6adf4ad1f7118e088f86f430baab8ed1c3f521b0d75df92deb965164489",
       "crates": [
         "components/pos"
       ],
@@ -369,8 +369,8 @@
     },
     "pricing": {
       "repository": "https://github.com/veyndo/pricing",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "db96b0f13efe01905942d0c5b5ee045951975e2217fa790f4f3e666da37f79cd",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "4d0e81c37f9a54694cd23e8a1c3114aa5fb460c814ebb42cc4824c2881dc9b07",
       "crates": [
         "components/pricing"
       ],
@@ -387,8 +387,8 @@
     },
     "shipping": {
       "repository": "https://github.com/veyndo/shipping",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "740daee7470414b6f7eb371812ecc0262c5f837ae3cdb7e2eb65a8c7bc55a405",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "c842835e6c46c9ff775e9511c142ab8a1eb34ce1103e577dbb588fba310db2db",
       "crates": [
         "components/shipping"
       ],
@@ -406,8 +406,8 @@
     },
     "shop": {
       "repository": "https://github.com/veyndo/shop",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "e56d4408b68a163bbaa46bf4277f0c847e0d81e02ff77a01f85c8cc406611c0f",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "88e7bc0b9f1af2072d592d1fa36ffc70ef67f4f41989833ccc9f5601e8e184f1",
       "crates": [
         "components/shop"
       ],
@@ -428,8 +428,8 @@
     },
     "studio": {
       "repository": "https://github.com/veyndo/studio",
-      "commit": "2f80cf62c3ccb3d2f7b829c410adb553dede3784",
-      "digest": "cfbe0e1e1ac2d66a44ad53e2ab6f37ef5e79d6963f278d42dbeaf16a1c775ddb",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+      "digest": "cfb0154ce8d9bce6843ed7443876394bd180f35115f14401b5e1613841f1b5e2",
       "crates": [
         "components/studio"
       ],
@@ -470,5 +470,150 @@
     "protocols": "MCP/UCP/capability adapters still live in the server crate (src/mcp, src/ucp); no crate of their own yet",
     "host": "the server binary itself (src/); it composes the components and is released as the Veyndo image",
     "connectors": "separate connector service (extensions/services/connectors), released with its own image, not a component crate"
+  },
+  "versions": {
+    "apps": {
+      "version": "1.0.0",
+      "contract": "61ee5d1c8719fb36d62ee3a814d27173d1f15cac3b86a675f63cde53d08b9956",
+      "source": "91f02a3cdb9a5d99268aedae80f852ee36d5cc38f12a40eab95129a25aa1c314",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "automation": {
+      "version": "1.0.0",
+      "contract": "2418e3fa88a2fbddb843c25109c594ee30b80367e11f4e56cd1aacd033628550",
+      "source": "ccf1a2d6ce2b13d76f33972fab4c36cc4b697c76a383204b7ffcf701f543d325",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "b2b": {
+      "version": "1.0.0",
+      "contract": "b3e7da728ad60f43a6de8a556a96c270b1f80ca6583317a990bf546a5a3f61b0",
+      "source": "096e5461fd106f7b2debba079a4ec3d8a6e1e9547af9d1e20dcf92215ff2982f",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "catalog": {
+      "version": "1.0.0",
+      "contract": "4bd70f3492dab43be98f4715daf9b010e9106ffd1425d16146323084b46306f3",
+      "source": "892a35ebbdd815304ed009a52ec0e1757b92d8bc4683857eaa983e237c10ae8f",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "checkout": {
+      "version": "1.0.0",
+      "contract": "6b52d7819c8f38b2b9ebdc2b076af2496bfcf344b781d2448e5932e3e186801c",
+      "source": "1f2bb1c38c3419e52c55f21e39dc1d45d559165a8cc1ae5d234cdb8443905773",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "connectors": {
+      "version": "1.0.0",
+      "contract": "762c9365053ffbb5b6e2cbb2f015319b9926f9337ff952ed6410ac0cd8ab9b2d",
+      "source": "086f59a90a25fbca816d85dbdfb10ee7e1a55cccb9efc27cb2fbb93a3bb79df4",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "core": {
+      "version": "1.0.0",
+      "contract": "8b0807d7aa397e9e20c8d84a4c736a746c48b02bf336950ded64d2440f2f337c",
+      "source": "927727741d63d114b9466872bb114e7697a4e816083fa98276fd3cdc88a9caa2",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "customers": {
+      "version": "1.0.0",
+      "contract": "da78abdcb811fb5718a9292a66e581ff5d193ba4adebddd07da3124a71805ae7",
+      "source": "476a6fb1e0f09514d5f7f20a07a8b22abeaa6ba5cca74aadb61fd35e451a3489",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "host": {
+      "version": "1.0.0",
+      "contract": "f613fe17fe92f18a6528526d0fa13326f286e270d01bbd4ec72139d0fcabefc6",
+      "source": "db76c4023bb5383e1ce408f7aea96dff119384a11e2426d08dea1f590ddd1caa",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "identity": {
+      "version": "1.0.0",
+      "contract": "e0858eb010fd22c9479aafbb71208ff54934a5c1e730d117dbc75fccd63ddd70",
+      "source": "f458568c5b0500ab8b430c056f8cdaff4d356d201105f4927564c18a2499be66",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "inference": {
+      "version": "1.0.0",
+      "contract": "8660d6ba7b7c50aace1dc235e1f29037cf6b062e14e22e7a40d00e8428ea1442",
+      "source": "2bf8f8df4f95d0130f343e2896b6d818e58b57585241bc2d336d55a05c6eb831",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "intelligence": {
+      "version": "1.0.0",
+      "contract": "b24d91709ae96debed04abdb3870b5941ff972dcfbd4b0ee76695a97818dea88",
+      "source": "118d1ccbdc3c7ca4eba69d37413370912b0490677e061ce7b89e41be5b22b12f",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "inventory": {
+      "version": "1.0.0",
+      "contract": "4068c6ef449002e0043eeb0b621a1d78ce7eeded0ab86eaa64e0fa6c0ea424d8",
+      "source": "406d1d1b47576969bcb91cf10013f565a77634a0fcc10793119728ef7f6b2195",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "marketing": {
+      "version": "1.0.0",
+      "contract": "670b8813309bae60a354dd25f9bc3df1785085b303756414d62eda40e1a695c0",
+      "source": "118c0d792bbcd864ea2156a817bbc5d744e32b674e3604d42a25068b950dd968",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "orders": {
+      "version": "1.0.0",
+      "contract": "e1f5fcc482811562272907af07bec8a4e68f7f4f99199f8666b1d4cbd2147f32",
+      "source": "c10fed327f3faf86be262d8095d0019d0c88c9acc048f683c5397deed21bbbab",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "payments": {
+      "version": "1.0.0",
+      "contract": "6c071bdc2755a1efb600f209c5a8f4781889d1ae81ce5af6fd33e5d43f1bcde6",
+      "source": "3620125da58a282dd26c8361cdd0f2769357114e83fc047761343abb51aaaba0",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "pos": {
+      "version": "1.0.0",
+      "contract": "7e2154194d38a5cb9dcc405d6015229ced1cde4a86202b7b4a4b41239e7a6c2a",
+      "source": "f9778d74fbcb1d59478dbc7db814a52e56ed8c1cbc82f0450e217d79c4c8337b",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "pricing": {
+      "version": "1.0.0",
+      "contract": "9ab5dd125550f87fa925a03ae46e8160f2428363ec4197c0cb0f7b022aa0d643",
+      "source": "5bf8a75a5f9be322228279b66fbebf13a2964a12ac9c809f9b6f0dd0a637d2d5",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "protocols": {
+      "version": "1.0.0",
+      "contract": "1bda1aeced8b03f385d042be4021fc43fe47be2f366c2ad6da5daa5f11ee4481",
+      "source": "9c055713fbaa6831bc7ac1689bbfead3c52c5b0dd2ed82546761ecb314b610e4",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "shipping": {
+      "version": "1.0.0",
+      "contract": "707b8e26137ddf866ace847b14a121c662fd6f88301323d7ddc83864b6273890",
+      "source": "eaecb2067261c268b325f0bbe0649ee7876368a71d99acd662143ccad0de3b66",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "shop": {
+      "version": "1.0.0",
+      "contract": "a9967e40cc666eac68191bd422baf21e8f14f0dde567d2b2267972bd96f8669b",
+      "source": "2cfb830e9a4aca830e4ad02cea339f33ffba0ee7dd88e47fa824dbb6a421dd94",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    },
+    "studio": {
+      "version": "1.0.0",
+      "contract": "b9c414565be41039b83496ef139cc96f560b00b08694c595f4ac741e86da66ae",
+      "source": "266dfb242e9fb27dfc133d3873146f9afd592da45a019af5d43122f9b07aad58",
+      "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7"
+    }
+  },
+  "sdk": {
+    "version": "1.0.0",
+    "contract": "e9ce735d46da3b48633013a2f3c5a49069b4ea2b692f4be8d24a4c1e1efe5616",
+    "source": "07049e2394602a2be01cca0fd77a4d9aac4aff8b26dc3e5d3ac570ba6642d346",
+    "commit": "2046bec818c25d854fa15e2d2c44d8d3c01be3f7",
+    "packages": {
+      "npm": "@veyndo/commerce-client",
+      "pypi": "veyndo-commerce-client",
+      "crates.io": "veyndo-sdk"
+    }
   }
 }

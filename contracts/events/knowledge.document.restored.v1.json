@@ -1,0 +1,46 @@
+{
+  "$id": "knowledge.document.restored.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant archived or restored a knowledge source.",
+  "properties": {
+    "decision": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision"
+      ],
+      "type": "object"
+    },
+    "documentId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "documentId"
+  ],
+  "title": "knowledge.document.restored",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "knowledge.document.restored",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "DocumentLifecycle"
+      }
+    ],
+    "version": 1
+  }
+}

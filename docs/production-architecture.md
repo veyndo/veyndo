@@ -158,10 +158,13 @@ injection, a compromised process, all side channels or arbitrary external servic
 1. Set up a new database with `DATABASE_URL` using `BOOTSTRAP_MODE=migrate`; it applies
    the component baselines. A release replaces earlier installations, so there is no
    upgrade of an existing database.
-2. Provision a dedicated runtime login through the database/secret manager.
-   [runtime-role.sql](../deploy/sql/runtime-role.sql) grants only core DML/reference
-   privileges and grants existing fixed Core/app tables (excluding connector credentials).
-   Shared app tables stay with the migration owner. Run it as the actual migration owner after setup. Never grant the migration owner to runtime.
+2. Provision a dedicated runtime login through the database/secret manager
+   ([runtime-role.sql](../deploy/sql/runtime-role.sql) creates the passwordless group).
+   Then run `veyndo --provision` as the migration owner: it grants Core DML to the group
+   (never connector tables), connector tables to the connector login, configures and
+   activates the database authority and verifies the result. Every later migration grants
+   the tables a release adds. Shared app tables stay with the migration owner. Never grant
+   the migration owner to runtime.
 3. Set `DATABASE_RUNTIME_URL`, `DB_RLS_REQUIRED=true`, `BOOTSTRAP_MODE=serve` and
    `ALLOW_BOOTSTRAP_AUTH=false` for public HTTP and worker deployments. Membership
    in `veyndo_runtime` must be inherited by the runtime login. All fixed Core/app tables stay with the migration owner. Separate signed tenant/system

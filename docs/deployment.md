@@ -49,12 +49,48 @@ reachable configured domain. Persistent volumes retain PostgreSQL, uploaded
 binary product assets (stored in PostgreSQL), connector state and certificates.
 Automatic backup/restore/failover is not implemented.
 
-Setup applies the checksummed component baselines ([schema baselines](rust-services.md#schema-baselines)).
-`BOOTSTRAP_MODE=migrate` performs setup without workers; `serve` requires every
-baseline to be ready. Run the migration-only job, then the runtime-role provisioning
-job, then start `serve` replicas. This release is a fresh installation only: setup
-refuses a database created by an earlier release, and there is no upgrade path or
-data import ([release notes](current-release.md#what-operators-must-know)).
+Setup applies the checksummed component baselines and forward migrations
+([schema baselines](rust-services.md#schema-baselines)). `BOOTSTRAP_MODE=migrate` performs
+setup or the upgrade without workers; `serve` requires every migration it ships to be
+recorded. Run the migration-only job, then `veyndo --provision`, then start
+`serve` replicas; forward migrations are expand/contract, so the previous release keeps
+serving meanwhile ([forward migrations](rust-services.md#forward-migrations)). Setup
+refuses a database of the pre-baseline incremental release
+([release notes](current-release.md#what-operators-must-know)).
+
+## Provision roles and database authority
+
+A fresh installation and every later release need no hand-written SQL. The database
+manager (your provider console, or `deploy/sql/provision-runtime.sh` in the bundled
+Compose stack) creates the logins and their passwords; the product never creates a
+login or sees a password. Then run, on the migration-owner connection:
+
+```sh
+BOOTSTRAP_MODE=migrate DATABASE_URL=<migration owner> \
+DB_RUNTIME_ROLE=veyndo_runtime DB_CONNECTOR_LOGIN=<connector login> \
+DB_SYSTEM_LOGIN=<runtime/system login> DB_TENANT_LOGIN=<tenant login> \
+  veyndo --provision
+```
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `DB_RUNTIME_ROLE` | `veyndo_runtime` | Group granted `SELECT,INSERT,UPDATE,DELETE,REFERENCES` on every non-`connector_` table and `USAGE,SELECT` on every sequence; connector tables are revoked from it. Must exist. |
+| `DB_CONNECTOR_LOGIN` | `veyndo_connectors` | Connector service login granted DML on `connector_` tables, `USAGE,SELECT,UPDATE` on their sequences and `SELECT` on `commerce_migrations`. An explicitly named login must exist; the default is skipped when absent. |
+| `DB_SYSTEM_LOGIN`, `DB_TENANT_LOGIN` | unset | Both set: `--database-authority configure` with these logins, then `activate`. Both unset: an existing configuration is re-applied, a missing one is reported and left alone. |
+| `PLATFORM_ADMIN_EMAIL`, `PLATFORM_ADMIN_PASSWORD` | unset | Both set: the first operator is bootstrapped as by `--bootstrap-operator` (also set `SEED_DEMO=false` and `ALLOW_BOOTSTRAP_AUTH=false`). |
+
+The command is idempotent. It then verifies and prints the coverage of each role
+(`granted/total` tables and sequences), the system login's reach through the runtime
+group, the tenant login's scoped tables, that the tenant login cannot create temporary
+objects, and the authority `status`. Any gap fails the command with the role and the
+count; it prints no secrets.
+
+Every `BOOTSTRAP_MODE=migrate` run applies the same grant part after the baselines:
+the runtime group (when it exists) and the connector login (`DB_CONNECTOR_LOGIN`, or
+the default when it exists) receive the current tables, and an existing authority
+configuration is re-applied so the tenant login reaches tables a release adds. It
+never activates a staged authority. Set `DB_RUNTIME_ROLE` and `DB_CONNECTOR_LOGIN` on
+the migration job when your names differ from the defaults.
 
 Ollama is an operator-controlled private service. Compose does not download a
 model or reserve a GPU. Optional OpenAI/Anthropic credentials stay in Rust.
@@ -130,6 +166,10 @@ The Northflank topology, cost model and migration boundaries are in [managed-hos
 With wildcard DNS/TLS and `SHOP_DOMAIN_SUFFIX=veyndo.ai`, new shops use
 `SHOP.veyndo.ai`; `admin.veyndo.ai` is the public service directory. Set
 `COMMERCE_PUBLIC_ORIGIN=https://app.veyndo.ai` for the shared merchant Studio.
+Browser sessions are admitted only on that origin. A refused browser request names it
+in the `x-veyndo-studio-origin` header, so the directory links both sign-ins there and
+`/#platform` or a merchant sign-in opened on another host moves to it; the operator
+sign-in reports such a host separately from an account without platform access.
 Provision `PLATFORM_SECRET_KEY` as a persistent runtime-only 64-character random
 hex key before saving provider API keys in the operator console. All replicas and
 AI workers need the same key; back it up separately. Do not rotate it without
@@ -164,7 +204,7 @@ redirect history are not implemented by this change.
 ## Strict runtime and real transaction pooling
 
 The production Compose template separates migration owner, commerce runtime and
-connector credentials. Migrations finish before role provisioning; commerce starts
+connector credentials. Migrations finish before `veyndo --provision`; commerce starts
 in `serve` with strict RLS, no bootstrap auth and no demo fallback.
 
 `DB_CLUSTER_CONNECTION_BUDGET` is shared by all HTTP/worker processes. Each reserves

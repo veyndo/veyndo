@@ -1,0 +1,44 @@
+{
+  "$id": "privacy.consent_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A shopper's consent choices per purpose were recorded for a cart and channel.",
+  "properties": {
+    "cartId": {
+      "type": "string"
+    },
+    "choices": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "type": "object"
+    },
+    "salesChannelId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cartId",
+    "choices",
+    "salesChannelId"
+  ],
+  "title": "privacy.consent_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "privacy.consent_changed",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "ConsentChanged"
+      }
+    ],
+    "version": 1
+  }
+}

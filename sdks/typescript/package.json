@@ -1,0 +1,24 @@
+{
+  "name": "@veyndo/commerce-client",
+  "version": "1.0.0",
+  "description": "Typed Veyndo Commerce client generated from the component contracts (fetch, no runtime dependencies).",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "smoke": "node tests/smoke.ts"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

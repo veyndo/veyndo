@@ -1,0 +1,48 @@
+{
+  "$id": "app.replay_requested.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant re-queued an app's past event deliveries after an outbox ID.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "after": {
+      "type": "integer"
+    },
+    "app": {
+      "type": "string"
+    },
+    "queued": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "actor",
+    "after",
+    "app",
+    "queued"
+  ],
+  "title": "app.replay_requested",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "app.replay_requested",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "ReplayRequested"
+      }
+    ],
+    "version": 1
+  }
+}

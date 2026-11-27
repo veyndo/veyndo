@@ -6,6 +6,7 @@ pub mod catalog_reads;
 pub mod categories;
 pub mod channels;
 pub mod demo_template;
+pub mod exact;
 pub mod imported_lines;
 pub mod imports;
 pub mod intelligence_reads;

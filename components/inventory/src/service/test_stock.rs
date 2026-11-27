@@ -1,8 +1,9 @@
 //! Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event.
 use crate::ports::Inventory;
 use crate::store::test_stock;
+use crate::types::events::TestStockFilled;
 use serde_json::{Value, json};
-use veyndo_core::{Result, bad, conflict, store::outbox};
+use veyndo_core::{Result, bad, conflict};
 
 const BATCH: i64 = 500;
 
@@ -20,13 +21,11 @@ pub async fn fill(i: &Inventory, tenant: &str, quantity: i32) -> Result<Value> {
         i.index
             .product_changed(&mut tx, tenant, &row.product)
             .await?;
-        outbox::publish(
-            &mut tx,
-            tenant,
-            "product.updated",
-            json!({"productId":row.product.id,"revision":row.revision}),
-        )
-        .await?;
+        let filled = TestStockFilled {
+            product_id: &row.product.id,
+            revision: row.revision,
+        };
+        veyndo_core::events::emit(&mut *tx, tenant, &filled).await?;
     }
     let remaining = test_stock::remaining(&mut tx, tenant).await?;
     tx.commit().await?;

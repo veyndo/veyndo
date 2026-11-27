@@ -1,0 +1,44 @@
+{
+  "$id": "intelligence.claim.reviewed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant or integration confirmed or rejected a product claim.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "claimId": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actor",
+    "claimId",
+    "state"
+  ],
+  "title": "intelligence.claim.reviewed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.claim.reviewed",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "ClaimReviewed"
+      }
+    ],
+    "version": 1
+  }
+}

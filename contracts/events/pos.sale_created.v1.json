@@ -1,0 +1,57 @@
+{
+  "$id": "pos.sale_created.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A register sale was placed: `pos.sale_completed` once paid, otherwise `pos.sale_created`. `totalMinor` is the order's minor-unit total as the order document stores it.",
+  "properties": {
+    "cashierId": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paymentState": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "salesChannelId": {
+      "type": "string"
+    },
+    "totalMinor": {}
+  },
+  "required": [
+    "cashierId",
+    "currency",
+    "orderId",
+    "paymentState",
+    "salesChannelId",
+    "totalMinor"
+  ],
+  "title": "pos.sale_created",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "pos.sale_created",
+    "producers": [
+      {
+        "component": "pos",
+        "crate": "veyndo-pos",
+        "source": "rust",
+        "type": "SalePlaced"
+      }
+    ],
+    "version": 1
+  }
+}

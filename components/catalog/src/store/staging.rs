@@ -1,14 +1,16 @@
 //! Catalogue units of a sandbox shop: copying products, translations, assets, categories and channel visibility, locked snapshot reads and release writes, all inside the caller's transaction.
+use crate::store::exact::Exact;
 use serde_json::Value;
 use veyndo_core::Result;
+use veyndo_pricing::decimal::Decimal;
 
 /// The columns a newly staged product enters live with; stock starts at zero.
 pub struct NewProduct<'a> {
     pub name: Option<&'a str>,
     pub category: Option<&'a str>,
     pub description: Option<&'a str>,
-    pub price: Option<f64>,
-    pub tax_rate: Option<f64>,
+    pub price: Option<Decimal>,
+    pub tax_rate: Option<Decimal>,
     pub active: bool,
     pub product_number: Option<&'a str>,
 }
@@ -63,18 +65,19 @@ pub async fn insert_product(
     id: &str,
     p: &NewProduct<'_>,
 ) -> Result<()> {
-    sqlx::query!("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,active,product_number) VALUES($1,$2,$3,$4,$5,$6,$7,0,$8,$9) ON CONFLICT(tenant,id) DO NOTHING", t, id, p.name, p.category, p.description, p.price, p.tax_rate, p.active, p.product_number).execute(&mut *c).await?;
+    sqlx::query!("INSERT INTO products(tenant,id,name,category,description,price_decimal,tax_rate_decimal,stock,active,product_number) VALUES($1,$2,$3,$4,$5,$6,$7,0,$8,$9) ON CONFLICT(tenant,id) DO NOTHING", t, id, p.name, p.category, p.description, p.price.map(Exact) as Option<Exact>, p.tax_rate.map(Exact) as Option<Exact>, p.active, p.product_number).execute(&mut *c).await?;
     Ok(())
 }
 
 /// Overwrites a product's content columns from a document through an explicit allowlist; returns the rows changed.
+/// Prices and the tax rate are read as the exact decimal of the document's number (or of its `*_decimal` key).
 pub async fn update_product_content(
     c: &mut sqlx::PgConnection,
     t: &str,
     id: &str,
     value: &Value,
 ) -> Result<u64> {
-    Ok(sqlx::query!("UPDATE products SET (name,category,description,price,tax_rate,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,active,product_number)=(SELECT x.name,x.category,x.description,x.price,x.tax_rate,x.list_price,x.regulation_price,x.reference_price,x.advanced_prices,x.min_purchase,x.purchase_steps,x.max_purchase,x.parent_id,x.options,x.media,x.properties,x.delivery_days,x.extra,x.active,x.product_number FROM jsonb_populate_record(NULL::products,$1) x),revision=revision+1 WHERE tenant=$2 AND id=$3", value, t, id).execute(&mut *c).await?.rows_affected())
+    Ok(sqlx::query!("UPDATE products SET (name,category,description,price_decimal,tax_rate_decimal,list_price_decimal,regulation_price_decimal,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,active,product_number)=(SELECT x.name,x.category,x.description,coalesce($1->>'price_decimal',$1->>'price')::numeric,coalesce($1->>'tax_rate_decimal',$1->>'tax_rate')::numeric,coalesce($1->>'list_price_decimal',$1->>'list_price')::numeric,coalesce($1->>'regulation_price_decimal',$1->>'regulation_price')::numeric,x.reference_price,x.advanced_prices,x.min_purchase,x.purchase_steps,x.max_purchase,x.parent_id,x.options,x.media,x.properties,x.delivery_days,x.extra,x.active,x.product_number FROM jsonb_populate_record(NULL::products,$1) x),revision=revision+1 WHERE tenant=$2 AND id=$3", value, t, id).execute(&mut *c).await?.rows_affected())
 }
 
 /// Removes a product's channel visibility rows.

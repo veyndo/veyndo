@@ -31,6 +31,19 @@ Legal metadata includes `legalForm`, `registerType`, `registrationNumber`,
 `liquidationNotice`. Contact fields are `email`, `phoneNumber`, `website`;
 internal document fields include `taxId`, `bankName`, `iban`, `bic`.
 
+## Order numbers
+
+`orderNumberPrefix` on the company basis sets the prefix of new order numbers:
+one to six capital letters or digits, shared by every sales channel (a channel
+override is rejected). Empty or missing means the prefix derived from the live
+shop ID: its letters and digits, upper-cased, at most six (`ux-accept` →
+`UXACCE`); the master-data read returns it as `defaultOrderNumberPrefix`. An order
+number is the prefix, a dash and the first eight characters of the order ID, as
+before, and is frozen in the order snapshot, so invoices, delivery notes and order
+emails print the number the order was placed with. Changing the prefix renumbers
+nothing. Checkout and recorded marketplace orders read the same setting; the Gmail
+app recognises any such number in support mail.
+
 The field selection follows the conditional information categories of
 [§ 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html) and the content
 responsibility provisions of [§ 18 MStV](https://www.gesetze-bayern.de/Content/Document/MStV-18?view=Print).

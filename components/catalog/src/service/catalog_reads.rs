@@ -45,7 +45,26 @@ pub async fn page(
     } else {
         (String::new(), String::new())
     };
-    let mut rows = catalog_reads::page(&c.core, tenant, chain, criteria, &locale, &main).await?;
+    // Option value names match a search in the requested language and its fallbacks.
+    let name_locales = if criteria
+        .search
+        .as_deref()
+        .is_some_and(|s| !s.trim().is_empty())
+    {
+        c.shop.locales(chain).await?
+    } else {
+        Vec::new()
+    };
+    let mut rows = catalog_reads::page(
+        &c.core,
+        tenant,
+        chain,
+        criteria,
+        &locale,
+        &main,
+        &name_locales,
+    )
+    .await?;
     let has_more = rows.len() > limit;
     rows.truncate(limit);
     let products = localize(c, tenant, chain, rows).await?;

@@ -1,7 +1,7 @@
 /** StorefrontHeader: storefront view composed from the scoped cart/controller. */
+import { returnToCollection } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { commercePage } from "../../../../extensions/apps/site-builder/commerce-layout";
 import { usePublishedSite } from "../../../../extensions/apps/site-builder/storefront/PublishedSite";
-import { mediaImage } from "../../shared/media/product-media";
 import { openConsent } from "../../shared/legal/consent-store";
 import { StorefrontAppNavigation } from "../../shared/apps/AppSurfaces";
 import StorefrontHeaderView from "./StorefrontHeaderView";
@@ -17,29 +17,21 @@ export default function StorefrontHeader() {
   const {
     company,
     salesChannel,
-    s,
     busy,
     cart,
     setAccount,
     onMerchant,
     adaptation,
-    shopTenant,
-    products,
+    brand,
     openBag,
+    id,
+    query,
+    setQuery,
   } = useStorefront();
   const { pages } = usePublishedSite();
-  const displayName =
-    company.brandName ||
-    company.name ||
-    (shopTenant === "nord-atelier" &&
-    products.some((p) =>
-      mediaImage(p.media)?.startsWith("/media/demo/fashion/"),
-    )
-      ? s("fashionBrand")
-      : shopTenant);
   return (
     <StorefrontHeaderView
-      displayName={displayName}
+      displayName={brand}
       company={company}
       busy={busy}
       business={cart?.customerGroup === "business"}
@@ -56,6 +48,14 @@ export default function StorefrontHeader() {
       onMerchant={onMerchant}
       onConsent={openConsent}
       onBag={openBag}
+      query={query}
+      onSearch={(text) => {
+        setQuery(text);
+        if (id) returnToCollection();
+        requestAnimationFrame(() =>
+          document.getElementById("collection")?.scrollIntoView(),
+        );
+      }}
       onBusiness={() => setAccount("business")}
     >
       <StorefrontLanguage />
