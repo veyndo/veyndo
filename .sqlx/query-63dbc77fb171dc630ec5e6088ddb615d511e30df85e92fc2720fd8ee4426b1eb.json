@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM app_schema_history WHERE tenant=$1 AND app=$2 AND to_version=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "63dbc77fb171dc630ec5e6088ddb615d511e30df85e92fc2720fd8ee4426b1eb"
+}

@@ -16,6 +16,7 @@ import ConfirmDialog from "../../../../../frontend/src/shared/ui/ConfirmDialog";
 import { useState } from "react";
 import "../../../../../frontend/src/shared/styles/apps.css";
 import AppActivity from "./AppActivity";
+import AppSandbox from "./AppSandbox";
 import AppAccess from "./AppAccess";
 import AppSettings from "./AppSettings";
 import AppSecrets from "./AppSecrets";
@@ -242,6 +243,9 @@ export default function AppDetails({
               </>
             )}
           </>
+        )}
+        {detailTab === "appDetails" && manage && (
+          <AppSandbox app={p.id} request={request} />
         )}
         {detailTab === "appDetails" && manage && !serviceIntegrations[p.id] && (
           <AppActivity app={p.id} request={request} />

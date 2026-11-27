@@ -101,4 +101,28 @@ mod tests {
         assert!(c.get("tenant-199", "wrong").is_none());
         assert!(c.get("tenant-199", s.digest()).is_some());
     }
+
+    /// An upgrade needs no restart: the next call compiles the new module, while a call that already
+    /// holds the old module finishes on it.
+    #[tokio::test]
+    async fn an_upgrade_swaps_the_module_while_a_held_call_finishes_on_the_old_one() {
+        let v1 =
+            include_str!("../../../../extensions/apps/engraving/configuration.wat").to_string();
+        let v2 = v1.replace(
+            "if (result i64) local.get $fee else",
+            "if (result i64) local.get $fee i64.const 2 i64.mul else",
+        );
+        assert_ne!(v1, v2);
+        let c = Cache::default();
+        let in_flight = c.compile("shop:engraving", v1).await.unwrap();
+        let swapped = c.compile("shop:engraving", v2).await.unwrap();
+        assert_ne!(in_flight.digest(), swapped.digest());
+        assert!(c.get("shop:engraving", in_flight.digest()).is_none());
+        assert_eq!(in_flight.contribution(300, 3).unwrap(), 300);
+        assert_eq!(swapped.contribution(300, 3).unwrap(), 600);
+        assert!(
+            Arc::strong_count(&in_flight) == 1,
+            "the cache no longer retains the old module"
+        );
+    }
 }

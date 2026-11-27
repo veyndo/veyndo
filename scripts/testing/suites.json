@@ -95,6 +95,7 @@
     "app_events",
     "app_export",
     "app_distribution",
+    "app_agent_packages",
     "app_generation",
     "erp_handoff",
     "edi",

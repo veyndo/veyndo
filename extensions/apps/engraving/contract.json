@@ -1,0 +1,22 @@
+{
+  "app": "engraving",
+  "version": "1.1.0",
+  "tools": {
+    "rules": {
+      "reversibility": { "kind": "reversible" },
+      "risk": "low",
+      "data": { "entities": ["app"], "money": true }
+    },
+    "save_rules": {
+      "reversibility": { "kind": "reversible" },
+      "risk": "medium",
+      "data": { "entities": ["app", "cart"], "money": true },
+      "requires": ["app.engraving.rules"]
+    },
+    "orders": {
+      "reversibility": { "kind": "reversible" },
+      "risk": "medium",
+      "data": { "entities": ["order"], "pii": true }
+    }
+  }
+}

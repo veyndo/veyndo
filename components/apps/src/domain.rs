@@ -2,6 +2,7 @@
 pub mod action_admission;
 pub mod action_inputs;
 pub mod action_policy;
+pub mod app_facts;
 pub mod app_generation;
 pub mod approval;
 pub mod build_admission;
@@ -40,8 +41,10 @@ pub mod model_contract;
 pub mod native_lifecycle;
 pub mod native_views;
 pub mod ontology;
+pub mod package_contract;
 pub mod persistence;
 pub mod planning;
+pub mod port_wiring;
 pub mod presentation;
 pub mod record_lifecycle;
 pub mod reference_policy;
