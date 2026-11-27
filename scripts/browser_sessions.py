@@ -64,6 +64,13 @@ call('/api/auth/session',headers={'Cookie':jar,'x-tenant':shop},status=401)
 call('/api/auth/session',headers=browser(shop,jar+'; '+jar,proof),status=401)
 passed('Missing/forged CSRF, same-site foreign origins, unmarked ambient cookies and duplicate cookies cannot read or mutate a personal account')
 
+directory={'Host':'admin.example.test','Origin':'https://admin.example.test','x-veyndo-browser-session':'1'}
+denied,denied_headers=call('/api/auth/login',{'email':email,'password':'Synthetic-browser-password-2026!'},headers=directory,status=403)
+assert denied['errors'][0]['detail']=='Browser session origin is not admitted' and not denied_headers.get_all('set-cookie')
+if origin.startswith('https:'):
+    assert denied_headers['x-veyndo-studio-origin']==urllib.parse.urlsplit(origin)._replace(path='').geturl()
+passed('A sign-in on another host (the service directory) is refused without a cookie and names the configured Studio origin instead of reporting missing access')
+
 handoff,_=call('/api/auth/handoff',{},headers=browser(shop,jar,proof))
 renewed,headers=call('/api/auth/redeem',{'ticket':handoff['ticket']},headers=browser(shop))
 new_jar,new_proof,new_opaque=cookies(headers)

@@ -72,6 +72,9 @@ const en = {
   fresh: "Last updated",
   language: "Language",
   invalid: "Check your email and password.",
+  originNotAdmitted:
+    "This address does not admit browser sign-in, so access cannot be checked here.",
+  signInAt: "Sign in at",
 };
 const de: typeof en = {
   shopSlugExample: "mein-shop",
@@ -145,6 +148,9 @@ const de: typeof en = {
   fresh: "Aktualisiert",
   language: "Sprache",
   invalid: "E-Mail und Passwort prüfen.",
+  originNotAdmitted:
+    "Diese Adresse lässt keine Browser-Anmeldung zu, daher kann der Zugang hier nicht geprüft werden.",
+  signInAt: "Anmelden unter",
 };
 const fr: typeof en = {
   shopSlugExample: "ma-boutique",
@@ -217,6 +223,9 @@ const fr: typeof en = {
   fresh: "Actualisé",
   language: "Langue",
   invalid: "Vérifiez votre e-mail et mot de passe.",
+  originNotAdmitted:
+    "Cette adresse n’accepte pas la connexion par navigateur ; l’accès ne peut pas être vérifié ici.",
+  signInAt: "Se connecter sur",
 };
 const es: typeof en = {
   shopSlugExample: "mi-tienda",
@@ -290,6 +299,9 @@ const es: typeof en = {
   fresh: "Actualizado",
   language: "Idioma",
   invalid: "Revisa tu correo y contraseña.",
+  originNotAdmitted:
+    "Esta dirección no admite el inicio de sesión en el navegador, así que aquí no se puede comprobar el acceso.",
+  signInAt: "Inicia sesión en",
 };
 export function usePlatformText() {
   const { locale } = useLocale();

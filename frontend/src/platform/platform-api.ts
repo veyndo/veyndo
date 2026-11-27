@@ -1,6 +1,10 @@
 /** Tenant-independent operator API using the same HttpOnly browser boundary as Studio. */
 import type { ApiPath } from "../kit/api";
 import { browserRequest } from "../shared/api/browser-session";
+import {
+  namedStudioOrigin,
+  originNotAdmitted,
+} from "../shared/api/studio-origin";
 export type Amount = {
   currency: string;
   orders: number;
@@ -66,9 +70,26 @@ export type Audit = {
   time: string;
 };
 export class PlatformError extends Error {
-  constructor(public status: number) {
+  constructor(
+    public status: number,
+    public detail = "",
+    public studioOrigin?: string,
+  ) {
     super(String(status));
   }
+  /** This host does not admit browser sessions: not the same as an account without platform access. */
+  get originNotAdmitted(): boolean {
+    return this.status === 403 && this.detail === originNotAdmitted;
+  }
+}
+async function failure(r: Response): Promise<PlatformError> {
+  const body = (await r.json().catch(() => undefined)) as
+    { errors?: { detail?: string }[] } | undefined;
+  return new PlatformError(
+    r.status,
+    body?.errors?.[0]?.detail ?? "",
+    namedStudioOrigin(r),
+  );
 }
 export async function platformRequest<T>(
   token: string,
@@ -88,7 +109,7 @@ export async function platformRequest<T>(
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     }),
   );
-  if (!r.ok) throw new PlatformError(r.status);
+  if (!r.ok) throw await failure(r);
   return r.json();
 }
 

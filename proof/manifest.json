@@ -2842,8 +2842,8 @@
     },
     "components/identity/src/http/browser.rs": {
       "status": "unproved",
-      "sha256": "82b785ca5dd03d48e4c01cb015591ac3f0fdf4cea8b0a7a7fe6af3522aa6d8c7",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "102063febe3230e47c098ddd80a454a487a047ee7d47e58383452a838e09c17e",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
     },
     "components/identity/src/http/handoff.rs": {
       "status": "unproved",
@@ -8062,8 +8062,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "84973dcbb7c4a5adbf7dda97a73d33b031020dbaf3c2014fec052c8aeebffbf1",
-      "review": "Operator bootstrap runs in system scope like serving"
+      "sha256": "817b93a64b0ce3bf124c48ff2dada7c0ebb6c4aa6d94127ab574a734ee2df03f",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -8607,8 +8607,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "8b29d11934e534dc1161100d27ff23f7ce3ff1a554f1e96ba1dc49398322dddd",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "54e50e28999d4296e6c021d36ee314ef65070426b5cafd45e78444641444f735",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
@@ -9180,6 +9180,11 @@
       "sha256": "b0eda7b12fdb99050ba0a07f904cb739224eafa3010adbee1d08d9d167d923f4",
       "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
+    "src/provision.rs": {
+      "status": "unproved",
+      "sha256": "cea1f4effb5aa61ad5884d1da6eeb870bc57825e51d0098b9d9abcd205616232",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
+    },
     "src/routes/http_profile.rs": {
       "status": "unproved",
       "sha256": "c6f6eba1e1c05d5c335c95b6c3186b63a7a3cf6a163f474a58cbd565a2688af7",
@@ -9255,6 +9260,11 @@
       "sha256": "f4c8ac7e812ae105b461414c30266de04b1a905cbb88edd88f373a95dc8e21bd",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
+    "src/store/provision.rs": {
+      "status": "unproved",
+      "sha256": "531b3e4ca079eaba3f425d9055254a0c9153e7823e1ccb33837242605c437b4b",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
+    },
     "src/store/shops.rs": {
       "status": "unproved",
       "sha256": "b85654c5f0d187e764040ad81f785f9ebccf0d62532110e1d5335979eb69699c",
@@ -9262,8 +9272,8 @@
     },
     "src/store.rs": {
       "status": "unproved",
-      "sha256": "668a63850ef90b1c415700d226f5bc20a6663db2fac5623a4aee1cce1d5c6479",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "16f2035ebd065ec358cc676eec124063fc5eeea02c180100369c707a83035002",
+      "review": "Release provisioning: veyndo --provision and post-migration grants run generated GRANT/REVOKE statements and the existing authority configure/activate functions on the migration-owner connection, verified by privilege coverage and the managed_install suite; browser origin refusal names the configured Studio origin in a header without admitting the host. No proved policy changes."
     },
     "src/storefront_islands.rs": {
       "status": "unproved",

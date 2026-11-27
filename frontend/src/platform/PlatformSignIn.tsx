@@ -1,4 +1,4 @@
-/** Personal sign-in verifies the current operator grant before retaining a browser session. */
+/** Personal sign-in verifies the current operator grant before retaining a browser session; a host that admits no browser session is reported as such, with the Studio origin to use. */
 import Brand from "../shared/ui/Brand";
 import { useState } from "react";
 import { activateBrowserSession } from "../shared/api/browser-session";
@@ -29,11 +29,13 @@ export default function PlatformSignIn({
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
     [busy, setBusy] = useState(false),
-    [failure, setFailure] = useState("");
+    [failure, setFailure] = useState(""),
+    [studio, setStudio] = useState<string>();
   const login = async () => {
     if (busy || loading) return;
     setBusy(true);
     setFailure("");
+    setStudio(undefined);
     let issued = "";
     try {
       const s = await request<Session | MfaChallenge>("", "/api/auth/login", {
@@ -53,12 +55,16 @@ export default function PlatformSignIn({
       onAuthenticated(issued);
     } catch (e) {
       if (issued) await request(issued, "/api/auth/logout", {}).catch(() => {});
+      if (e instanceof PlatformError && e.originNotAdmitted)
+        setStudio(e.studioOrigin);
       setFailure(
         e instanceof PlatformError && e.status === 401
           ? t("invalid")
-          : e instanceof PlatformError && e.status === 403
-            ? t("restricted")
-            : t("retry"),
+          : e instanceof PlatformError && e.originNotAdmitted
+            ? t("originNotAdmitted")
+            : e instanceof PlatformError && e.status === 403
+              ? t("restricted")
+              : t("retry"),
       );
     } finally {
       setBusy(false);
@@ -114,7 +120,19 @@ export default function PlatformSignIn({
                 onChange={(e) => setPassword(e.target.value)}
               />
             </label>
-            {(failure || error) && <p role="alert">{failure || error}</p>}
+            {(failure || error) && (
+              <p role="alert">
+                {failure || error}
+                {failure && studio && (
+                  <>
+                    {" "}
+                    <a href={`${studio}/#platform`}>
+                      {t("signInAt")} {studio}
+                    </a>
+                  </>
+                )}
+              </p>
+            )}
             <button className="platform-primary" disabled={busy || loading}>
               {busy || loading ? t("loading") : t("login")}
             </button>

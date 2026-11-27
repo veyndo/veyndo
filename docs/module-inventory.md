@@ -130,7 +130,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/bin/verified_kernel/dispatch/intelligence.rs](../src/bin/verified_kernel/dispatch/intelligence.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch.rs](../src/bin/verified_kernel/dispatch.rs) | Generated domain dispatcher; each bounded module calls the original production policies. |
 | [src/bin/verified_kernel/main.rs](../src/bin/verified_kernel/main.rs) | Generated input/output driver; production policies are dispatched by the generated module. |
-| [src/bootstrap.rs](../src/bootstrap.rs) | Startup, additive migrations, persisted extensions and outbox worker. |
+| [src/bootstrap.rs](../src/bootstrap.rs) | Startup, schema setup with release grants, persisted extensions and outbox worker. |
 | [src/brand_redirect.rs](../src/brand_redirect.rs) | Move browser pages to the configured domain while retaining integration and checkout endpoints. |
 | [src/capabilities/admission.rs](../src/capabilities/admission.rs) | MCP discovery applies current merchant permissions through the same capability owners as invocation. |
 | [src/capabilities/catalog/core_catalog.rs](../src/capabilities/catalog/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
@@ -354,6 +354,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
 | [src/proposal_apply.rs](../src/proposal_apply.rs) | Proposal application lives in the studio component; these entries lend it the server's ports. |
 | [src/proposal_routes.rs](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. |
+| [src/provision.rs](../src/provision.rs) | Release provisioning on the migration-owner connection (`--provision`, and the grant part after every migration): grants every schema object to the existing runtime group and connector login, configures and activates database authority, verifies the result and optionally bootstraps the first operator. It never creates logins or passwords; those belong to the database manager. |
 | [src/routes/http_profile.rs](../src/routes/http_profile.rs) | Serve the same commerce operations without the native storefront or Studio shell. |
 | [src/routes.rs](../src/routes.rs) | HTTP transport registry; domain behavior lives in dedicated modules. |
 | [src/runtime_config.rs](../src/runtime_config.rs) | Immutable process configuration, validated once at startup. Mutable shop/provider settings remain in PostgreSQL. |
@@ -369,8 +370,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time. |
 | [src/store/platform.rs](../src/store/platform.rs) | Operator bootstrap and shop-creation steps of the control plane. The email lock is the server's own; accounts belong to identity and the operator grant and audit to shop. |
 | [src/store/process.rs](../src/store/process.rs) | Process-level statements: the readiness ping, the short lock wait of a background digest and the queue ages of the app worker sample. |
+| [src/store/provision.rs](../src/store/provision.rs) | Release provisioning SQL on the migration-owner connection: role lookups, the grant statements for the runtime group and the connector login, and the privilege coverage that verifies them. Statements are generated server-side with `format('%I')`, so role and table names are always quoted identifiers. |
 | [src/store/shops.rs](../src/store/shops.rs) | Shop provisioning: the server composes the starter rows of every component a new shop needs. The ID lock and the automation seed are the server's own; each row belongs to its component's store. |
-| [src/store.rs](../src/store.rs) | The server's own SQL: shop provisioning across components, the operator control plane, the migration runner and process-level checks. Components keep theirs in their own store modules. |
+| [src/store.rs](../src/store.rs) | The server's own SQL: shop provisioning across components, the operator control plane, the migration runner, release grants and process-level checks. Components keep theirs in their own store modules. |
 | [src/storefront_islands.rs](../src/storefront_islands.rs) | Server-rendered storefront-kit islands for deep-linked product pages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
@@ -2101,7 +2103,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/studio.css](../frontend/src/admin/styles/studio.css) | Ordered studio stylesheet entry; domain rules live in the adjacent folder. |
 | [frontend/src/admin/styles/workspace-copilot.css](../frontend/src/admin/styles/workspace-copilot.css) | The conversation is a sibling of native editors; expanding it never remounts their drafts. |
 | [frontend/src/admin/styles/workspace-polish.css](../frontend/src/admin/styles/workspace-polish.css) | Consistent Studio density, readable hierarchy and independently scrollable navigation across workspaces. |
-| [frontend/src/application/ApplicationRouter.tsx](../frontend/src/application/ApplicationRouter.tsx) | Select independent lazy applications; contain failed imports and reset boundaries on navigation. |
+| [frontend/src/application/ApplicationRouter.tsx](../frontend/src/application/ApplicationRouter.tsx) | Select independent lazy applications; send sign-in surfaces to the Studio origin; contain failed imports and reset boundaries on navigation. |
 | [frontend/src/kit/api/client.ts](../frontend/src/kit/api/client.ts) | The generated API client: typed route calls over the route catalogue and typed native operation calls over MCP. |
 | [frontend/src/kit/api/generated/operations/index.ts](../frontend/src/kit/api/generated/operations/index.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/kit/api/generated/operations/inputs-0.ts](../frontend/src/kit/api/generated/operations/inputs-0.ts) | Generated native operation input contracts; do not edit. |
@@ -2158,7 +2160,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/ui/primitives.ts](../frontend/src/kit/ui/primitives.ts) | Headless primitives: focus containment, roving focus and controlled-or-uncontrolled state, without markup or text. |
 | [frontend/src/kit/ui/ui.css](../frontend/src/kit/ui/ui.css) | Styles of the kit/ui atoms and molecules; colours, spacing, radii and type come only from design tokens. |
 | [frontend/src/main.tsx](../frontend/src/main.tsx) | Browser bootstrap only; application selection and error recovery live in application/. |
-| [frontend/src/platform/AdminHub.tsx](../frontend/src/platform/AdminHub.tsx) | Public service directory. Links select a login surface without granting operator or merchant permissions. |
+| [frontend/src/platform/AdminHub.tsx](../frontend/src/platform/AdminHub.tsx) | Public service directory. Links select a login surface on the configured Studio origin without granting operator or merchant permissions. |
 | [frontend/src/platform/HTTPResponses.tsx](../frontend/src/platform/HTTPResponses.tsx) | Exact HTTP outcomes; historical undifferentiated totals never become fabricated success rates. |
 | [frontend/src/platform/PlatformAI.tsx](../frontend/src/platform/PlatformAI.tsx) | Central inference editor; write-only secrets, optimistic revisions and explicit environment fallback. |
 | [frontend/src/platform/PlatformConsole.tsx](../frontend/src/platform/PlatformConsole.tsx) | Independent platform control plane: personal operator access, bounded statistics and audited shop creation. |
@@ -2168,7 +2170,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/platform/PlatformShopDetail.tsx](../frontend/src/platform/PlatformShopDetail.tsx) | Connected shop dossier and reversible lifecycle controls; confirmations are explicit and revision guarded. |
 | [frontend/src/platform/PlatformShops.tsx](../frontend/src/platform/PlatformShops.tsx) | Searchable shop directory and server-validated provisioning form. |
 | [frontend/src/platform/PlatformSidebar.tsx](../frontend/src/platform/PlatformSidebar.tsx) | Stable operator navigation and profile; business state remains in the console owner. |
-| [frontend/src/platform/PlatformSignIn.tsx](../frontend/src/platform/PlatformSignIn.tsx) | Personal sign-in verifies the current operator grant before retaining a browser session. |
+| [frontend/src/platform/PlatformSignIn.tsx](../frontend/src/platform/PlatformSignIn.tsx) | Personal sign-in verifies the current operator grant before retaining a browser session; a host that admits no browser session is reported as such, with the Studio origin to use. |
 | [frontend/src/platform/platform-api.ts](../frontend/src/platform/platform-api.ts) | Tenant-independent operator API using the same HttpOnly browser boundary as Studio. |
 | [frontend/src/platform/styles/platform/01-platform-console.css](../frontend/src/platform/styles/platform/01-platform-console.css) | platform: platform-console styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/platform/styles/platform/02-platform-shop-stats-span.css](../frontend/src/platform/styles/platform/02-platform-shop-stats-span.css) | platform: platform-shop-stats-span styles. Source order is preserved by the entry stylesheet. |
@@ -2189,6 +2191,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/api/request-json.ts](../frontend/src/shared/api/request-json.ts) | Coalesce simultaneous identical core reads with complete identity; no persisted response cache. |
 | [frontend/src/shared/api/shop-api.ts](../frontend/src/shared/api/shop-api.ts) | shop api: Typed commerce contracts, merchant/store transports and binary download helper. |
 | [frontend/src/shared/api/shop-scope.ts](../frontend/src/shared/api/shop-scope.ts) | Canonical shop hosts; Studio identity remains on the shared origin. Reserved service hosts never become tenant IDs. |
+| [frontend/src/shared/api/studio-origin.ts](../frontend/src/shared/api/studio-origin.ts) | Browser sessions are admitted only on the configured Studio origin. Another host (the service directory) asks the server where that is, so sign-in is sent there instead of failing as missing access. |
 | [frontend/src/shared/api/types.ts](../frontend/src/shared/api/types.ts) | Request contracts: the open one app surfaces receive and the catalogue-checked one first-party screens use. |
 | [frontend/src/shared/api/vite-env.d.ts](../frontend/src/shared/api/vite-env.d.ts) | Typed public build configuration; browser-visible values never contain server credentials. |
 | [frontend/src/shared/apps/AppFrame.tsx](../frontend/src/shared/apps/AppFrame.tsx) | Opaque-origin app UI. Its SDK can invoke only this app's declared, server-authorized actions. |
@@ -3085,6 +3088,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/legal_privacy.py](../scripts/legal_privacy.py) | Real tenant-scoped consent, checkout guards, declarations, MCP and flow consumers; no external providers. |
 | [scripts/lexical_search.py](../scripts/lexical_search.py) | Native lexical candidates: real forced-RLS plans, backfill, source edits and isolation. |
 | [scripts/load.py](../scripts/load.py) | Local HTTP latency sample. Does not claim production or Shopware speedup. |
+| [scripts/managed_install.py](../scripts/managed_install.py) | Fresh install on a managed-PostgreSQL-shaped database: a non-superuser owner owns the objects, another role owns |
 | [scripts/managed_search.py](../scripts/managed_search.py) | Real PostgreSQL/Qdrant synchronization; synthetic embeddings test transport, not AI quality. |
 | [scripts/marketing_accounts.py](../scripts/marketing_accounts.py) | Real isolated shops: customer authority, limited coupons, event flows, channels and selected releases. No paid models. |
 | [scripts/marketplaces.py](../scripts/marketplaces.py) | Registered verification entry; marketplace fixture and assertions remain app-owned. |

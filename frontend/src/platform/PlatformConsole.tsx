@@ -52,9 +52,11 @@ export default function PlatformConsole() {
   const [refresh, setRefresh] = useState(0);
   const fail = (e: unknown) => {
     setError(
-      e instanceof PlatformError && (e.status === 401 || e.status === 403)
-        ? t("restricted")
-        : t("retry"),
+      e instanceof PlatformError && e.originNotAdmitted
+        ? t("originNotAdmitted")
+        : e instanceof PlatformError && (e.status === 401 || e.status === 403)
+          ? t("restricted")
+          : t("retry"),
     );
   };
   useEffect(() => {
