@@ -1,0 +1,44 @@
+{
+  "$id": "b2b.quote_selected.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A buyer selected an offered quote for the cart.",
+  "properties": {
+    "cartId": {
+      "type": "string"
+    },
+    "quoteId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "cartId",
+    "quoteId",
+    "revision"
+  ],
+  "title": "b2b.quote_selected",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.quote_selected",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "QuoteSelected"
+      }
+    ],
+    "version": 1
+  }
+}

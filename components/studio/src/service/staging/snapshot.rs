@@ -4,6 +4,7 @@ use crate::store::staging_snapshot as db;
 use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
+use crate::types::events::ProductPublished;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -216,13 +217,11 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
     }
     let stored = crate::store::products::get(tx, t, id).await?;
     sync_product(tx, t, &json!(stored)).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        t,
-        "product.published",
-        &json!({"productId":id,"revision":stored.revision}),
-    )
-    .await?;
+    let published = ProductPublished {
+        product_id: id,
+        revision: stored.revision,
+    };
+    veyndo_core::events::emit(&mut **tx, t, &published).await?;
     Ok(())
 }
 

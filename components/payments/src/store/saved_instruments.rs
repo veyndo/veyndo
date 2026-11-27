@@ -1,5 +1,6 @@
 //! Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs.
 use crate::store::jobs::enqueue_tx;
+use crate::types::events::InstrumentRevoked;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -96,13 +97,8 @@ pub async fn revoke(a: &State, t: &str, customer: &str, id: &str, key: &str) -> 
     )
     .await?;
     if row.state == "active" {
-        veyndo_core::store::outbox::publish_on(
-            &mut *tx,
-            t,
-            "payment.instrument.revoked",
-            &json!({"instrumentId":id}),
-        )
-        .await?;
+        let revoked = InstrumentRevoked { instrument_id: id };
+        veyndo_core::events::emit(&mut *tx, t, &revoked).await?;
     }
     tx.commit().await?;
     Ok(json!({"id":id,"state":"revoked","jobId":job}))

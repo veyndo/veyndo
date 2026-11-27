@@ -1,5 +1,6 @@
 //! Revision-bound order workflow configuration used by installed apps and selective sandbox releases.
 use crate::store::order_workflow as workflow;
+use crate::types::events::WorkflowUpdated;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
@@ -74,13 +75,12 @@ pub async fn save(
         return Err(conflict("Workflow removes an active order state"));
     }
     workflow::save(&mut tx, &t, &json!(m)).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "order.workflow.updated",
-        &json!({"revision":revision+1,"actor":header(&h,"x-rac-user"),"sourceApp":m.source_app}),
-    )
-    .await?;
+    let updated = WorkflowUpdated {
+        revision: revision + 1,
+        actor: header(&h, "x-rac-user"),
+        source_app: m.source_app.as_deref(),
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &updated).await?;
     tx.commit().await?;
     Ok(Json(json!({"saved":true,"revision":revision+1})))
 }

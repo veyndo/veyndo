@@ -1,5 +1,6 @@
 //! Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot.
 use crate::store::agent_controls as store;
+use crate::types::events::AgentsControlled;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
@@ -148,7 +149,13 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
     } else {
         0
     };
-    veyndo_core::store::outbox::publish_on(&mut *tx, &live, "intelligence.agents.controlled", &json!({"stopped":stopped,"revision":revision+1,"actor":h.principal.user,"cancelled":cancelled})).await?;
+    let controlled = AgentsControlled {
+        stopped,
+        revision: revision + 1,
+        actor: h.principal.user.as_deref(),
+        cancelled,
+    };
+    veyndo_core::events::emit(&mut *tx, &live, &controlled).await?;
     tx.commit().await?;
     Ok(json!({"stopped":stopped,"revision":revision+1,"liveShop":live,"cancelled":cancelled}))
 }

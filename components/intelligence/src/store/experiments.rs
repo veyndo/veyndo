@@ -1,5 +1,6 @@
 //! Controlled experiments on the storefront layout: preregistration, transitions, assignment, the delayed readout from the payment ledger and the worker steps.
 use crate::domain::experiment_model::{Automation, Design, interval};
+use crate::types::events::{ExperimentChanged, ExperimentDecided, ExperimentResult};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
@@ -133,13 +134,12 @@ pub async fn change(
         }
         id.to_owned()
     };
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "intelligence.experiment.changed",
-        &json!({"id":id,"operation":name,"actor":actor}),
-    )
-    .await?;
+    let changed = ExperimentChanged {
+        id: &id,
+        operation: name,
+        actor,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &changed).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"saved":true}))
 }
@@ -276,7 +276,13 @@ pub async fn report(a: &State, t: &str, id: &str) -> Result<Value> {
         .await?;
         sqlx::query!("INSERT INTO knowledge_relations(tenant,kind,source_kind,source_id,target_kind,target_id,state,confidence,data,actor) VALUES($1,'EXPERIMENT_RESULT','experiment',$2,'channel',$3,'evidenced',1,$4,'native-payment-readout') ON CONFLICT(tenant,kind,source_id,target_id) DO UPDATE SET data=excluded.data",
             t, id, d.channel, result).execute(&mut *tx).await?;
-        veyndo_core::store::outbox::publish_on(&mut *tx, t, "intelligence.experiment.result", &json!({"id":id,"channelId":d.channel,"causalUpliftProven":view::<Readout>(&result).causal_uplift_proven,"asOf":as_of})).await?;
+        let readout = ExperimentResult {
+            id,
+            channel_id: &d.channel,
+            causal_uplift_proven: view::<Readout>(&result).causal_uplift_proven.as_bool(),
+            as_of: &as_of,
+        };
+        veyndo_core::events::emit(&mut *tx, t, &readout).await?;
     }
     tx.commit().await?;
     Ok(result)
@@ -406,13 +412,12 @@ pub async fn auto_once(a: &State) -> Result<bool> {
         .fetch_all(&a.db).await?;
     for row in due {
         worked = true;
-        veyndo_core::store::outbox::publish_on(
-            &a.db,
-            &row.tenant,
-            "intelligence.experiment.changed",
-            &json!({"id":row.id,"operation":"knowledge.experiment.finish","actor":ACTOR}),
-        )
-        .await?;
+        let finished = ExperimentChanged {
+            id: &row.id,
+            operation: "knowledge.experiment.finish",
+            actor: ACTOR,
+        };
+        veyndo_core::events::emit(&a.db, &row.tenant, &finished).await?;
     }
     let settled = sqlx::query!("SELECT tenant,id,data FROM intelligence_experiments WHERE state='completed' AND withdrawn=0 AND coalesce((data->'automation'->>'finish')::boolean,false) AND (final_report IS NULL OR NOT final_report ? 'decision') AND now()>=ends_at+((data->>'settlementDays')::integer*interval '1 day') ORDER BY ends_at LIMIT 50")
         .fetch_all(&a.db).await?;
@@ -439,7 +444,13 @@ pub async fn auto_once(a: &State) -> Result<bool> {
                 sqlx::query!("UPDATE experiences SET data=jsonb_set(data,'{mode}',to_jsonb($2::text)),revision=revision+1 WHERE tenant=$1",
                     t, design.treatment).execute(&mut *tx).await?;
             }
-            veyndo_core::store::outbox::publish_on(&mut *tx, &t, "intelligence.experiment.changed", &json!({"id":id,"operation":"knowledge.experiment.decide","decision":if publish {"published"} else {"kept"},"actor":ACTOR})).await?;
+            let decided = ExperimentDecided {
+                id: &id,
+                operation: "knowledge.experiment.decide",
+                decision: if publish { "published" } else { "kept" },
+                actor: ACTOR,
+            };
+            veyndo_core::events::emit(&mut *tx, &t, &decided).await?;
             tx.commit().await?;
             Ok::<_, Error>(true)
         }

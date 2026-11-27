@@ -1,0 +1,47 @@
+{
+  "$id": "frontend.configured.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant connected a frontend address to a sales channel.",
+  "properties": {
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "alias": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "actor",
+    "alias",
+    "channel",
+    "revision"
+  ],
+  "title": "frontend.configured",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "frontend.configured",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "FrontendConfigured"
+      }
+    ],
+    "version": 1
+  }
+}

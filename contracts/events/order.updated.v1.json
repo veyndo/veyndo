@@ -1,0 +1,53 @@
+{
+  "$id": "order.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An order mutation was recorded: the audited change kind, its target state and the new order revision.",
+  "properties": {
+    "kind": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "state": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "orderId",
+    "revision",
+    "state"
+  ],
+  "title": "order.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "order.updated",
+    "producers": [
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "OrderUpdated"
+      }
+    ],
+    "version": 1
+  }
+}

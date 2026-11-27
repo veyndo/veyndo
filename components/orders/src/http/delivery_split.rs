@@ -5,6 +5,7 @@ use crate::domain::order_workflow::{guard, workflow};
 use crate::http::transitions::accepted_machine;
 use crate::store::machine::machine;
 use crate::store::order_mutation;
+use crate::types::events::DeliverySplit;
 use crate::types::order_document::OrderControl;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
@@ -99,7 +100,17 @@ pub async fn split_delivery(
     let mut event_order = o.clone();
     strip_cart_token(&mut event_order)?;
     let activity = json!({"kind":"delivery","state":"split","sourceIndex":index,"deliveryId":split_id,"positions":input.positions,"requestKey":key,"revision":revision+1});
-    let event = json!({"orderId":id,"deliveryId":split_id,"sourceIndex":index,"positions":input.positions,"kind":"delivery","state":"split","revision":revision+1,"requestKey":key,"order":event_order});
+    let event = DeliverySplit {
+        order_id: &id,
+        delivery_id: &split_id,
+        source_index: index,
+        positions: input.positions,
+        kind: "delivery",
+        state: "split",
+        revision: revision + 1,
+        request_key: key,
+        order: event_order,
+    };
     order_mutation::persist(
         &mut tx,
         &t,

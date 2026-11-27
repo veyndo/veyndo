@@ -1,0 +1,42 @@
+{
+  "$id": "payment.instructions.available.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Accepted recipient instructions (for example bank transfer details) became available with an invoice snapshot. Apps receive `order` and `paymentInstructions` only with customer and instruction data rights.",
+  "properties": {
+    "attemptId": {
+      "type": "string"
+    },
+    "order": {},
+    "orderId": {
+      "type": "string"
+    },
+    "paymentInstructions": {}
+  },
+  "required": [
+    "attemptId",
+    "order",
+    "orderId",
+    "paymentInstructions"
+  ],
+  "title": "payment.instructions.available",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows",
+      "app:email"
+    ],
+    "kind": "payment.instructions.available",
+    "producers": [
+      {
+        "component": "payments",
+        "crate": "veyndo-payments",
+        "source": "rust",
+        "type": "InstructionsAvailable"
+      }
+    ],
+    "version": 1
+  }
+}

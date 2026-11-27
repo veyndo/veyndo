@@ -1,0 +1,37 @@
+{
+  "$id": "app.activated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A hosted frontend activated its inactive app package.",
+  "properties": {
+    "app": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "app",
+    "reason"
+  ],
+  "title": "app.activated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "app.activated",
+    "producers": [
+      {
+        "component": "apps",
+        "crate": "veyndo-app-platform",
+        "source": "rust",
+        "type": "Activated"
+      }
+    ],
+    "version": 1
+  }
+}

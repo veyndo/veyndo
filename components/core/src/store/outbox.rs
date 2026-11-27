@@ -96,25 +96,8 @@ pub async fn consume(a: &State, subscriber: &str, projector: &dyn Projector) -> 
     Ok(worked)
 }
 
-/// Records an event in the same transaction as the change it describes.
-pub async fn publish(
-    tx: &mut sqlx::PgConnection,
-    tenant: &str,
-    kind: &str,
-    data: serde_json::Value,
-) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)",
-        tenant,
-        kind,
-        data
-    )
-    .execute(tx)
-    .await?;
-    Ok(())
-}
-
 /// Records an event on any executor: in the caller's transaction, or on the pool when the change already committed.
+/// Components publish through the typed `veyndo_core::events::emit*` functions, which call this.
 pub async fn publish_on<'e>(
     db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
     tenant: &str,

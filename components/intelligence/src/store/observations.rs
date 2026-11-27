@@ -48,6 +48,9 @@ struct ObservedLine {
     referenced_id: Option<String>,
 }
 
+/// The outbox kinds the cognition lane projects into observations.
+pub const OBSERVED_KINDS: [&str; 2] = ["order.placed", "payment.captured"];
+
 /// Projects one order event once; `external` tells whether an order waits for a confirmed capture.
 pub async fn project(
     tx: &mut Transaction<'_, Postgres>,
@@ -58,7 +61,7 @@ pub async fn project(
     external: fn(&Value) -> bool,
 ) -> Result<()> {
     let input: ProjectInput = view(data);
-    if kind != "order.placed" && kind != "payment.captured" {
+    if !OBSERVED_KINDS.contains(&kind) {
         return Ok(());
     }
     sqlx::query!("SELECT pg_advisory_xact_lock(hashtextextended($1,12))", t)

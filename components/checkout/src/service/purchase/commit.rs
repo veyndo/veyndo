@@ -8,6 +8,7 @@ use crate::ports::Purchase;
 use crate::store::customer_snapshot::snapshot as customer_snapshot;
 use crate::store::purchase;
 use crate::store::session::admit_channel;
+use crate::types::events::OrderPlaced;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_b2b::service::quote_contract::consume as consume_quote;
@@ -297,13 +298,11 @@ pub(super) async fn run<P: Purchase>(
     {
         port.count_purchase(&mut tx, &c.tenant, &variant).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &c.tenant,
-        "order.placed",
-        &json!({"orderId":id,"totalMinor":minor}),
-    )
-    .await?;
+    let placed = OrderPlaced {
+        order_id: &id,
+        total_minor: minor,
+    };
+    veyndo_core::events::emit(&mut *tx, &c.tenant, &placed).await?;
     port.fence(&mut tx).await?;
     tx.commit().await?;
     Ok(Placed {

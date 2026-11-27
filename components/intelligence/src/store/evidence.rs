@@ -1,4 +1,5 @@
 //! Source-bound claim lifecycle on the knowledge relation ledger; no model text becomes a confirmed fact automatically.
+use crate::types::events::ClaimReviewed;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
@@ -188,13 +189,12 @@ pub async fn decide(a: &State, t: &str, actor: Option<&str>, v: &Value) -> Resul
     }
     sqlx::query!("UPDATE knowledge_relations SET state=$1,actor=$2 WHERE tenant=$3 AND kind='CLAIMS' AND target_id=$4",
         state, actor.unwrap_or("integration"), t, id).execute(&mut *tx).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "intelligence.claim.reviewed",
-        &json!({"claimId":id,"state":state,"actor":actor}),
-    )
-    .await?;
+    let reviewed = ClaimReviewed {
+        claim_id: id,
+        state,
+        actor,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &reviewed).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"state":state,"revision":revision+1}))
 }

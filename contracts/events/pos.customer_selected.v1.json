@@ -1,0 +1,51 @@
+{
+  "$id": "pos.customer_selected.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A cashier selected (or cleared, `customerId: null`) the customer of a register cart.",
+  "properties": {
+    "cartId": {
+      "type": "string"
+    },
+    "cashierId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "customerId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "salesChannelId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cartId",
+    "cashierId",
+    "customerId",
+    "salesChannelId"
+  ],
+  "title": "pos.customer_selected",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "pos.customer_selected",
+    "producers": [
+      {
+        "component": "pos",
+        "crate": "veyndo-pos",
+        "source": "rust",
+        "type": "CustomerSelected"
+      }
+    ],
+    "version": 1
+  }
+}

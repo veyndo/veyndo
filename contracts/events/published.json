@@ -1,0 +1,1623 @@
+{
+  "description": "Published event contract signatures; written by scripts/event_contracts.py --publish. A breaking change to a listed version fails the gate; add a new version instead.",
+  "versions": {
+    "account.security.updated.v1.json": {
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "credentialRevision": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "userId"
+      ]
+    },
+    "ai.autonomy.reverted.v1.json": {
+      "properties": {
+        "actor": {
+          "type": "string"
+        },
+        "automatic": {
+          "type": "boolean"
+        },
+        "productIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "actor",
+        "automatic",
+        "productIds"
+      ]
+    },
+    "app.activated.v1.json": {
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "reason"
+      ]
+    },
+    "app.callback_approved.v1.json": {
+      "properties": {
+        "actor": {
+          "type": "string"
+        },
+        "app": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "keyId": {
+          "type": "string"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "actor",
+        "app",
+        "digest",
+        "keyId",
+        "permissions"
+      ]
+    },
+    "app.configuration.changed.v1.json": {
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "cartId": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "products": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "salesChannelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "cartId",
+        "operation",
+        "products",
+        "revision",
+        "salesChannelId"
+      ]
+    },
+    "app.replay_requested.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "after": {
+          "type": "integer"
+        },
+        "app": {
+          "type": "string"
+        },
+        "queued": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "actor",
+        "after",
+        "app",
+        "queued"
+      ]
+    },
+    "app.{app}.source_imported.v1.json": {
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "metadata": {},
+        "sourceId": {
+          "type": "string"
+        },
+        "sourceKind": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "metadata",
+        "sourceId",
+        "sourceKind",
+        "title"
+      ]
+    },
+    "app.{app}.submitted.v1.json": {
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "intakeKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "entity",
+        "id",
+        "intakeKey"
+      ]
+    },
+    "app.{app}.{event}.v1.json": {
+      "appDefined": true
+    },
+    "b2b.approval_decided.v1.json": {
+      "properties": {
+        "approvalId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "approvalId",
+        "state",
+        "unitId"
+      ]
+    },
+    "b2b.approval_requested.v1.json": {
+      "properties": {
+        "approvalId": {
+          "type": "string"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "approvalId",
+        "unitId"
+      ]
+    },
+    "b2b.catalog_changed.v1.json": {
+      "properties": {
+        "revision": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "unitId"
+      ]
+    },
+    "b2b.employee_changed.v1.json": {
+      "properties": {
+        "customerId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "customerId",
+        "revision",
+        "unitId"
+      ]
+    },
+    "b2b.list_changed.v1.json": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "listId": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "unitId"
+      ]
+    },
+    "b2b.organization_changed.v1.json": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "revision"
+      ]
+    },
+    "b2b.purchase_completed.v1.json": {
+      "properties": {
+        "approvalId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "companyId": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "totalMinor": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "approvalId",
+        "companyId",
+        "currency",
+        "orderId",
+        "totalMinor",
+        "unitId"
+      ]
+    },
+    "b2b.quote_changed.v1.json": {
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "lifecycle": {},
+        "quoteId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "lifecycle",
+        "quoteId",
+        "revision",
+        "state"
+      ]
+    },
+    "b2b.quote_requested.v1.json": {
+      "properties": {
+        "quoteId": {
+          "type": "string"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "quoteId",
+        "unitId"
+      ]
+    },
+    "b2b.quote_selected.v1.json": {
+      "properties": {
+        "cartId": {
+          "type": "string"
+        },
+        "quoteId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cartId",
+        "quoteId",
+        "revision"
+      ]
+    },
+    "cache.invalidate.v1.json": {
+      "properties": {
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "namespace"
+      ]
+    },
+    "commerce.configured.v1.json": {
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision"
+      ]
+    },
+    "consumer.request.reviewed.v1.json": {
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "requestId",
+        "revision",
+        "state"
+      ]
+    },
+    "consumer.{kind}.requested.v1.json": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "receipt": {},
+        "requestId": {
+          "type": "string"
+        },
+        "salesChannelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "receipt",
+        "requestId",
+        "salesChannelId"
+      ]
+    },
+    "customer.address_changed.v1.json": {
+      "properties": {
+        "addressId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "addressId",
+        "email"
+      ]
+    },
+    "customer.address_deleted.v1.json": {
+      "properties": {
+        "addressId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "addressId",
+        "email"
+      ]
+    },
+    "customer.created.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "customerId": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "customerId",
+        "source"
+      ]
+    },
+    "customer.updated.v1.json": {
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "email": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "active",
+        "actor",
+        "email",
+        "revision"
+      ]
+    },
+    "delivery.booking_released.v1.json": {
+      "properties": {
+        "deliveryIndex": {
+          "type": "integer"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "sourceApp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deliveryIndex",
+        "orderId",
+        "sourceApp"
+      ]
+    },
+    "delivery.booking_reserved.v1.json": {
+      "properties": {
+        "deliveryIndex": {
+          "type": "integer"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "sourceApp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deliveryIndex",
+        "orderId",
+        "sourceApp"
+      ]
+    },
+    "delivery.split.v1.json": {
+      "properties": {
+        "deliveryId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "positions": {},
+        "requestKey": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "sourceIndex": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deliveryId",
+        "kind",
+        "order",
+        "orderId",
+        "positions",
+        "requestKey",
+        "revision",
+        "sourceIndex",
+        "state"
+      ]
+    },
+    "delivery.state_changed.v1.json": {
+      "properties": {
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "requestKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "kind",
+        "order",
+        "orderId",
+        "requestKey",
+        "revision",
+        "state"
+      ]
+    },
+    "document.created.v1.json": {
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "sourceApp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "documentId",
+        "kind",
+        "orderId"
+      ]
+    },
+    "frontend.configured.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "alias": {
+          "type": "string"
+        },
+        "channel": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "actor",
+        "alias",
+        "channel",
+        "revision"
+      ]
+    },
+    "frontend.disconnected.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "alias": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "alias"
+      ]
+    },
+    "intelligence.agent.allocated.v1.json": {
+      "properties": {
+        "agentId": {
+          "type": "string"
+        },
+        "costMicros": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "agentId",
+        "costMicros",
+        "currency",
+        "tokens"
+      ]
+    },
+    "intelligence.agents.controlled.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cancelled": {
+          "type": "integer"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "stopped": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "actor",
+        "cancelled",
+        "revision",
+        "stopped"
+      ]
+    },
+    "intelligence.claim.reviewed.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "claimId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "claimId",
+        "state"
+      ]
+    },
+    "intelligence.decision.v1.json": {
+      "properties": {
+        "experimentStarted": {
+          "type": "boolean"
+        },
+        "hypothesisId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "experimentStarted",
+        "hypothesisId",
+        "state"
+      ]
+    },
+    "intelligence.experiment.changed.v1.json": {
+      "properties": {
+        "actor": {
+          "type": "string"
+        },
+        "decision": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "id",
+        "operation"
+      ]
+    },
+    "intelligence.experiment.result.v1.json": {
+      "properties": {
+        "asOf": {
+          "type": "string"
+        },
+        "causalUpliftProven": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "asOf",
+        "causalUpliftProven",
+        "channelId",
+        "id"
+      ]
+    },
+    "intelligence.run.changed.v1.json": {
+      "properties": {
+        "revision": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        },
+        "taskId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "state",
+        "taskId"
+      ]
+    },
+    "knowledge.document.archived.v1.json": {
+      "properties": {
+        "decision": {
+          "additionalProperties": false,
+          "properties": {
+            "revision": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "revision"
+          ],
+          "type": "object"
+        },
+        "documentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "documentId"
+      ]
+    },
+    "knowledge.document.ingested.v1.json": {
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "documentId",
+        "productId",
+        "sourceType"
+      ]
+    },
+    "knowledge.document.restored.v1.json": {
+      "properties": {
+        "decision": {
+          "additionalProperties": false,
+          "properties": {
+            "revision": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "revision"
+          ],
+          "type": "object"
+        },
+        "documentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "documentId"
+      ]
+    },
+    "knowledge.document.updated.v1.json": {
+      "properties": {
+        "decision": {
+          "additionalProperties": false,
+          "properties": {
+            "revision": {
+              "type": "integer"
+            },
+            "visibility": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "revision",
+            "visibility"
+          ],
+          "type": "object"
+        },
+        "documentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "documentId"
+      ]
+    },
+    "knowledge.document.visibility.v1.json": {
+      "properties": {
+        "decision": {
+          "additionalProperties": false,
+          "properties": {
+            "visibility": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "visibility"
+          ],
+          "type": "object"
+        },
+        "documentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "documentId"
+      ]
+    },
+    "membership.updated.v1.json": {
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "permissions": {},
+        "previousActive": {
+          "type": "boolean"
+        },
+        "previousRole": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "active",
+        "actor",
+        "permissions",
+        "previousActive",
+        "previousRole",
+        "role",
+        "subject"
+      ]
+    },
+    "merchant.change.applied.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "autonomous": {
+          "type": "boolean"
+        },
+        "taskId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "autonomous",
+        "taskId"
+      ]
+    },
+    "migration.record.imported.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "customerId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "targetId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "order.placed.v1.json": {
+      "properties": {
+        "appId": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "salesChannelId": {
+          "type": "string"
+        },
+        "totalMinor": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "orderId",
+        "totalMinor"
+      ]
+    },
+    "order.state_changed.v1.json": {
+      "properties": {
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "requestKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "kind",
+        "order",
+        "orderId",
+        "requestKey",
+        "revision",
+        "state"
+      ]
+    },
+    "order.updated.v1.json": {
+      "properties": {
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "orderId",
+        "revision",
+        "state"
+      ]
+    },
+    "order.workflow.updated.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "sourceApp": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "actor",
+        "revision",
+        "sourceApp"
+      ]
+    },
+    "payment.captured.v1.json": {
+      "properties": {
+        "attemptId": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "realMoneyCharged": {
+          "type": "boolean"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attemptId",
+        "environment",
+        "order",
+        "orderId",
+        "provider",
+        "realMoneyCharged",
+        "state"
+      ]
+    },
+    "payment.instructions.available.v1.json": {
+      "properties": {
+        "attemptId": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "paymentInstructions": {}
+      },
+      "required": [
+        "attemptId",
+        "order",
+        "orderId",
+        "paymentInstructions"
+      ]
+    },
+    "payment.instrument.revoked.v1.json": {
+      "properties": {
+        "instrumentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "instrumentId"
+      ]
+    },
+    "payment.state_changed.v1.json": {
+      "properties": {
+        "cashierId": {
+          "type": "string"
+        },
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ]
+        },
+        "requestKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "salesChannelId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "orderId",
+        "state"
+      ]
+    },
+    "payment.updated.v1.json": {
+      "properties": {
+        "attemptId": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "order": {},
+        "orderId": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "realMoneyCharged": {
+          "type": "boolean"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attemptId",
+        "environment",
+        "order",
+        "orderId",
+        "provider",
+        "realMoneyCharged",
+        "state"
+      ]
+    },
+    "pos.customer_selected.v1.json": {
+      "properties": {
+        "cartId": {
+          "type": "string"
+        },
+        "cashierId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "customerId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "salesChannelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cartId",
+        "cashierId",
+        "customerId",
+        "salesChannelId"
+      ]
+    },
+    "pos.discount_changed.v1.json": {
+      "properties": {
+        "cartId": {
+          "type": "string"
+        },
+        "cashierId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "discount": {},
+        "previous": {},
+        "revision": {
+          "type": "integer"
+        },
+        "salesChannelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cartId",
+        "cashierId",
+        "discount",
+        "previous",
+        "revision",
+        "salesChannelId"
+      ]
+    },
+    "pos.sale_completed.v1.json": {
+      "properties": {
+        "cashierId": {
+          "type": "string"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ]
+        },
+        "orderId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "paymentState": {
+          "anyOf": [
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "salesChannelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ]
+        },
+        "totalMinor": {}
+      },
+      "required": [
+        "currency",
+        "orderId",
+        "paymentState",
+        "salesChannelId",
+        "totalMinor"
+      ]
+    },
+    "pos.sale_created.v1.json": {
+      "properties": {
+        "cashierId": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "paymentState": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "salesChannelId": {
+          "type": "string"
+        },
+        "totalMinor": {}
+      },
+      "required": [
+        "cashierId",
+        "currency",
+        "orderId",
+        "paymentState",
+        "salesChannelId",
+        "totalMinor"
+      ]
+    },
+    "privacy.consent_changed.v1.json": {
+      "properties": {
+        "cartId": {
+          "type": "string"
+        },
+        "choices": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "type": "object"
+        },
+        "salesChannelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cartId",
+        "choices",
+        "salesChannelId"
+      ]
+    },
+    "product.created.v1.json": {
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ]
+    },
+    "product.published.v1.json": {
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ]
+    },
+    "product.updated.v1.json": {
+      "properties": {
+        "jobId": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "productId",
+        "revision"
+      ]
+    },
+    "settings.master_data_changed.v1.json": {
+      "properties": {
+        "release": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "salesChannelId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": []
+    },
+    "shop.release.published.v1.json": {
+      "properties": {
+        "releaseId": {
+          "type": "string"
+        },
+        "selections": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "releaseId",
+        "selections"
+      ]
+    },
+    "supply.reorder.approved.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "productId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "supplierShop": {
+          "type": "string"
+        },
+        "totalMinor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "currency",
+        "productId",
+        "quantity",
+        "supplierShop",
+        "totalMinor"
+      ]
+    },
+    "team.role_changed.v1.json": {
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deleted": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "actor",
+        "deleted",
+        "id",
+        "revision"
+      ]
+    }
+  }
+}

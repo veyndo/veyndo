@@ -1,5 +1,6 @@
 //! Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access.
 use crate::types::cart::StoredCart;
+use crate::types::events::{ConsumerRequestReviewed, ConsumerRequested};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -74,13 +75,14 @@ pub async fn create(a: &State, c: &StoredCart, v: Intake) -> Result<Value> {
     }
     sqlx::query!("INSERT INTO consumer_requests(tenant,id,cart_id,channel_id,kind,data) VALUES($1,$2,$3,$4,$5,$6)",
       c.tenant, id, c.id, c.data.sales_channel, v.kind, data).execute(&mut *tx).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &c.tenant,
-        &format!("consumer.{}.requested", v.kind),
-        &json!({"requestId":id,"salesChannelId":c.data.sales_channel,"kind":v.kind,"receipt":data}),
-    )
-    .await?;
+    let requested = ConsumerRequested {
+        request_id: &id,
+        sales_channel_id: &c.data.sales_channel,
+        kind: &v.kind,
+        receipt: &data,
+    };
+    let kind = format!("consumer.{}.requested", v.kind);
+    veyndo_core::events::emit_as(&mut *tx, &c.tenant, &kind, &requested).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"kind":v.kind,"data":data,"state":"received"}))
 }
@@ -144,13 +146,12 @@ pub async fn review(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value)
     let mut tx = a.db.begin().await?;
     let n=sqlx::query_scalar!("UPDATE consumer_requests SET state=$1,revision=revision+1,data=data||jsonb_build_object('reviewNote',$2::text,'reviewedAt',now()::text,'reviewedBy',$3::text) WHERE tenant=$4 AND id=$5 AND revision=$6 RETURNING revision",
       state, note, header(h,"x-rac-user").unwrap_or("merchant"), t, id, revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Request changed or unavailable"))?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "consumer.request.reviewed",
-        &json!({"requestId":id,"state":state,"revision":n}),
-    )
-    .await?;
+    let reviewed = ConsumerRequestReviewed {
+        request_id: id,
+        state,
+        revision: n,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &reviewed).await?;
     sqlx::query!("INSERT INTO consumer_request_reviews(tenant,request_id,revision,actor,state,note) VALUES($1,$2,$3,$4,$5,$6)", t, id, revision+1, header(h,"x-rac-user").unwrap_or("merchant"), state, note).execute(&mut *tx).await?;
     tx.commit().await?;
     Ok(json!({"revision":revision+1}))

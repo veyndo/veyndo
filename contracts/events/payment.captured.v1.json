@@ -1,0 +1,56 @@
+{
+  "$id": "payment.captured.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The payment ledger recorded a provider state for an attempt; `payment.captured` marks the first capture. `order` is the order snapshot without the cart token.",
+  "properties": {
+    "attemptId": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "order": {},
+    "orderId": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "realMoneyCharged": {
+      "type": "boolean"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "attemptId",
+    "environment",
+    "order",
+    "orderId",
+    "provider",
+    "realMoneyCharged",
+    "state"
+  ],
+  "title": "payment.captured",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows",
+      "cognition"
+    ],
+    "kind": "payment.captured",
+    "producers": [
+      {
+        "component": "payments",
+        "crate": "veyndo-payments",
+        "source": "rust",
+        "type": "AttemptRecorded"
+      }
+    ],
+    "version": 1
+  }
+}

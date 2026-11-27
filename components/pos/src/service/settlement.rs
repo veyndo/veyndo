@@ -1,7 +1,8 @@
 //! Exact cash admission and order annotation execute in the existing checkout transaction.
 use crate::service::guard;
+use crate::types::events::{CashPaid, SaleCaptured, SalePlaced};
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_checkout::store::selected_customer;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::PosAdmission;
@@ -79,14 +80,29 @@ pub async fn settle(
     )?;
     let placed: PlacedOrder = view(order);
     if cash {
-        veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, "payment.state_changed", &json!({"orderId":placed.id,"state":"paid","kind":"payment","cashierId":p.actor,"salesChannelId":c.data.sales_channel})).await?;
+        let paid = CashPaid {
+            order_id: placed.id.as_str(),
+            state: "paid",
+            kind: "payment",
+            cashier_id: &p.actor,
+            sales_channel_id: &c.data.sales_channel,
+        };
+        veyndo_core::events::emit(&mut **tx, &c.tenant, &paid).await?;
     }
     let event = if placed.payment.state == "paid" {
         "pos.sale_completed"
     } else {
         "pos.sale_created"
     };
-    veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, event, &json!({"orderId":placed.id,"salesChannelId":c.data.sales_channel,"cashierId":p.actor,"paymentState":placed.payment.state,"totalMinor":placed.money.minor,"currency":c.data.currency})).await?;
+    let sale = SalePlaced {
+        order_id: placed.id.as_str(),
+        sales_channel_id: &c.data.sales_channel,
+        cashier_id: &p.actor,
+        payment_state: placed.payment.state.as_str(),
+        total_minor: placed.money.minor.clone(),
+        currency: &c.data.currency,
+    };
+    veyndo_core::events::emit_as(&mut **tx, &c.tenant, event, &sale).await?;
     Ok(())
 }
 
@@ -314,7 +330,14 @@ pub async fn payment_captured(
             },
         )?;
     }
-    veyndo_core::store::outbox::publish_on(&mut **tx, tenant, "pos.sale_completed", &json!({"orderId":placed.id,"salesChannelId":placed.sales_channel_id,"paymentState":state,"totalMinor":placed.money.minor,"currency":placed.cart.price.currency})).await?;
+    let completed = SaleCaptured {
+        order_id: placed.id.as_str(),
+        sales_channel_id: placed.sales_channel_id.as_str(),
+        payment_state: state,
+        total_minor: placed.money.minor.clone(),
+        currency: placed.cart.price.currency.as_str(),
+    };
+    veyndo_core::events::emit(&mut **tx, tenant, &completed).await?;
     Ok(())
 }
 

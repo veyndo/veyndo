@@ -1,0 +1,98 @@
+{
+  "$id": "commerce.configured.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision"
+      ],
+      "title": "CommerceConfigured (veyndo-shop)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "channelId",
+        "revision"
+      ],
+      "title": "ChannelConfigured (veyndo-shop)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "reason",
+        "revision"
+      ],
+      "title": "RatesRefreshed (veyndo-shop)",
+      "type": "object"
+    }
+  ],
+  "description": "The shop-wide commerce settings were saved at a new revision. | The settings overrides of one sales channel were saved. | A currency rate refresh saved new exchange rates (`reason`: `currency_rates`).",
+  "properties": {
+    "channelId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "revision"
+  ],
+  "title": "commerce.configured",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "commerce.configured",
+    "producers": [
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "rust",
+        "type": "CommerceConfigured"
+      },
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "rust",
+        "type": "ChannelConfigured"
+      },
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "rust",
+        "type": "RatesRefreshed"
+      }
+    ],
+    "version": 1
+  }
+}

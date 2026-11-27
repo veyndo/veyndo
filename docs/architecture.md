@@ -209,6 +209,41 @@ and starting rows of "baselines + all forward migrations" (`fixtures/schema/refe
 `schema_upgrade` proves that the previous release's database reaches the same schema with
 its data intact. Details: [Rust services](rust-services.md#forward-migrations).
 
+## Events
+
+Each component writes its events to the PostgreSQL outbox in the same transaction as
+the change. Four lanes consume them, each with its own checkpoint: `flows` (Flow
+Builder jobs), `apps` (leased app deliveries), `cognition` (order observations) and
+`audit`. Connector providers are reached from those lanes through the app gateway.
+
+Events are a versioned contract:
+
+- **Typed payloads.** Every event a component publishes is a struct declared with
+  `veyndo_core::event!` in the producer's `types::events` module. The macro derives
+  the serde shape and the JSON Schema from one field list. Producers publish only
+  through `veyndo_core::events::emit`, `emit_as` or `emit_id_as`, which also refuse a
+  kind the type does not declare. Each producer module has a test showing that the
+  stored JSON equals what the code wrote before the types existed.
+- **Registry.** `src/events.rs` collects the payload types of all components and derives
+  each kind's consumers from their own sources: the Flow catalogue, the cognition lane
+  and the bundled app manifests. It renders one schema per kind and version into
+  [`contracts/events/`](../contracts/events/index.json) (`<kind>.v<N>.json`). A kind
+  published by several producers gets one merged schema: the union of fields, the
+  intersection of required fields and an `anyOf` of the producer variants. App-defined
+  events (`app.{app}.{event}`) and the events of vendored app storage are listed as
+  such in `index.json`. `veyndo --event-contracts` prints the files, and a unit test
+  fails when the checked-in files drift.
+- **Compatibility.** `scripts/event_contracts.py` records every published version in
+  `contracts/events/published.json`. It fails on a removed or renamed field, a type
+  change, a newly required field or a dropped guarantee, unless a new version is
+  published next to the frozen one. A version 2 or later payload carries
+  `schemaVersion`. New optional fields are compatible. The same check refuses outbox
+  writes that bypass the typed functions. It runs in the quick `verify` job and as the
+  tooling suite `event_contracts`.
+
+The [read-model plan](plans/2026-11-27-read-models.md) builds on these contracts to
+replace the remaining cross-component table reads.
+
 ## Connector service and apps
 
 The connector binary (`src/bin/connectors.rs`) is process entry only. The service crate

@@ -139,6 +139,11 @@ app capability, rather than interpreting imported mail contents as instructions.
 
 ## Order events and graphical flows
 
+The events below follow their published payload schemas: for example
+[`order.placed.v1.json`](../contracts/events/order.placed.v1.json) and
+[`consumer.{kind}.requested.v1.json`](../contracts/events/index.json). The
+[event registry](architecture.md#events) explains how the schemas are versioned.
+
 Choose one of the following:
 
 - Enable **Send an order confirmation automatically** for the `order.placed` app

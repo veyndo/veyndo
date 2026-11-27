@@ -2,6 +2,7 @@
 use crate::store::consent as store;
 use crate::store::consent::ReceiptView;
 use crate::store::preferences::forget_many;
+use crate::types::events::ConsentChanged;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
@@ -141,13 +142,12 @@ pub async fn write_locked(
     if choices.get("analytics") != Some(&true) {
         store::forget_analytics(&mut **tx, &c.tenant, &signals).await?;
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        &c.tenant,
-        "privacy.consent_changed",
-        &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"choices":choices}),
-    )
-    .await?;
+    let changed = ConsentChanged {
+        cart_id: &c.id,
+        sales_channel_id: &c.data.sales_channel,
+        choices: &choices,
+    };
+    veyndo_core::events::emit(&mut **tx, &c.tenant, &changed).await?;
     Ok(receipt)
 }
 /// Requires a fresh receipt for the purpose under the current policy.

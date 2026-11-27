@@ -2,6 +2,7 @@
 use crate::domain::event_projection;
 use crate::store::packages::package;
 use crate::store::{activity, locks};
+use crate::types::events::ReplayRequested;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -77,13 +78,13 @@ pub async fn replay(
             queued += activity::requeue(&mut tx, &t, &id, r.id).await?;
         }
     }
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        &t,
-        "app.replay_requested",
-        &json!({"app":id,"after":after,"queued":queued,"actor":h.principal.user}),
-    )
-    .await?;
+    let requested = ReplayRequested {
+        app: &id,
+        after,
+        queued,
+        actor: h.principal.user.as_deref(),
+    };
+    veyndo_core::events::emit(&mut *tx, &t, &requested).await?;
     tx.commit().await?;
     Ok(Json(
         json!({"queued":queued,"nextCursor":rows.last().map(|r|r.id).unwrap_or(after),"hasMore":rows.len()==limit as usize}),

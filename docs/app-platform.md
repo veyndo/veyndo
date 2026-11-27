@@ -318,6 +318,15 @@ service does not hold a database transaction or the sole global event lane.
 Filters run on the permission-projected payload. Replay checks current permissions
 and processes up to 50 events per request, preserving original IDs.
 
+The payload of every core event kind is a published JSON Schema in
+[`contracts/events/`](../contracts/events/index.json), one file per kind and version
+(for example `order.placed.v1.json`). The index lists producers and consumers. A
+published version never changes incompatibly; a breaking change ships as a new
+version whose payload carries `schemaVersion`. Events in an app's own namespace
+(`app.<app>.<event>`) carry the payload the app declares. Subscriptions receive the
+permission-projected payload, so a field may be missing when the app lacks the data
+right for it.
+
 Subscriptions cannot see other apps, team changes or personal customer fields by
 requesting only coarse `events.read`. Own events use `events:self`; core families
 need their declared scope. Receiver code validates the **whole** batch before effects.

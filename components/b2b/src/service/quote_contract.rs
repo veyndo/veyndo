@@ -2,6 +2,7 @@
 use crate::store::access::{guard_conn, require};
 use crate::store::purchase;
 use crate::store::{carts as cart_rows, quotes};
+use crate::types::events::QuoteSelected;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, merge, view};
@@ -84,7 +85,12 @@ pub async fn select(
     }
     c.revision += 1;
     cart_rows::save(&mut tx, &c.tenant, &c.id, &json!(c.data), c.revision).await?;
-    crate::store::organization::event(&mut tx,&c.tenant,"b2b.quote_selected",json!({"cartId":c.id,"quoteId":c.data.b2b.as_ref().and_then(|b|b.quote_id.as_ref()),"revision":c.revision})).await?;
+    let selected = QuoteSelected {
+        cart_id: &c.id,
+        quote_id: c.data.b2b.as_ref().and_then(|b| b.quote_id.as_deref()),
+        revision: c.revision,
+    };
+    crate::store::organization::event(&mut tx, &c.tenant, &selected).await?;
     tx.commit().await?;
     carts.view(&c).await
 }

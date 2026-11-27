@@ -45,10 +45,9 @@ pub async fn submitted(
     tx: &mut sqlx::PgConnection,
     t: &str,
     kind: &str,
-    data: &Value,
+    data: &crate::types::events::Submitted<'_>,
 ) -> Result<()> {
-    veyndo_core::store::outbox::publish_on(tx, t, kind, data).await?;
-    Ok(())
+    veyndo_core::events::emit_as(tx, t, kind, data).await
 }
 
 /// The running job a native import step belongs to, under its lease and the 30-minute bound: actor, action, package digest and reviewed input.

@@ -1,12 +1,13 @@
 //! Durable conservative model allocations use existing agent keys and the live shop stop switch.
 //! Counters reserve full envelopes before egress and never refund uncertain calls.
 use super::Admission;
+use crate::types::events::AgentAllocated;
 use crate::{ports, scoped_pool::ScopedPool, tenant_scope};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::future::Future;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::store::{live_shop, outbox};
+use veyndo_core::store::live_shop;
 
 #[derive(Clone, Debug)]
 pub struct Authority {
@@ -229,14 +230,15 @@ pub async fn reserve(
         host.allocate(&mut tx, &live, id, tokens as i64, cost as i64)
             .await
             .map_err(|_| "Agent usage could not be reserved")?;
-        outbox::publish(
-            &mut tx,
-            &live,
-            "intelligence.agent.allocated",
-            json!({"agentId":id,"tokens":tokens,"costMicros":cost,"currency":"USD"}),
-        )
-        .await
-        .map_err(|_| "Agent audit could not be saved")?;
+        let allocated = AgentAllocated {
+            agent_id: id,
+            tokens,
+            cost_micros: cost,
+            currency: "USD",
+        };
+        veyndo_core::events::emit(&mut *tx, &live, &allocated)
+            .await
+            .map_err(|_| "Agent audit could not be saved")?;
         tx.commit()
             .await
             .map_err(|_| Admission::Unavailable("Agent admission could not commit"))

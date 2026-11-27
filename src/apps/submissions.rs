@@ -72,7 +72,12 @@ pub(super) async fn submit(
         &mut tx,
         &t,
         &kind,
-        &json!({"app":m.id,"entity":e.name,"id":id,"intakeKey":intake_key}),
+        &veyndo_app_platform::types::events::Submitted {
+            app: &m.id,
+            entity: &e.name,
+            id: &id,
+            intake_key: &intake_key,
+        },
     )
     .await?;
     tx.commit().await?;

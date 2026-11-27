@@ -1,5 +1,6 @@
 //! Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent.
 use crate::store::package_fence::lock_package_write;
+use crate::types::events::BookingChanged;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -118,7 +119,7 @@ pub async fn booking_intent(
     )?;
     order_mutation::persist(&mut tx,&t,h,&mut order,order_mutation::Audit{
         kind:event,data:json!({"kind":"delivery","state":operation,"deliveryIndex":index,"sourceApp":m.id}),
-        event_kind:event,event:json!({"orderId":id,"deliveryIndex":index,"sourceApp":m.id}),
+        event_kind:event,event:BookingChanged{order_id:id,delivery_index:index,source_app:&m.id},
     }).await?;
     tx.commit().await?;
     Ok(

@@ -1,0 +1,43 @@
+{
+  "$id": "consumer.{kind}.requested.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A shopper filed a consumer-rights request (withdrawal, access, erase, correct, portability, objection); `receipt` is the stored request record.",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "receipt": {},
+    "requestId": {
+      "type": "string"
+    },
+    "salesChannelId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind",
+    "receipt",
+    "requestId",
+    "salesChannelId"
+  ],
+  "title": "consumer.{kind}.requested",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "app:email"
+    ],
+    "kind": "consumer.{kind}.requested",
+    "producers": [
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "rust",
+        "type": "ConsumerRequested"
+      }
+    ],
+    "version": 1
+  }
+}

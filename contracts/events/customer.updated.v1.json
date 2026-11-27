@@ -1,0 +1,47 @@
+{
+  "$id": "customer.updated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant updated a customer's profile, group or activity.",
+  "properties": {
+    "active": {
+      "type": "boolean"
+    },
+    "actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "active",
+    "actor",
+    "email",
+    "revision"
+  ],
+  "title": "customer.updated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "customer.updated",
+    "producers": [
+      {
+        "component": "customers",
+        "crate": "veyndo-customers",
+        "source": "rust",
+        "type": "CustomerUpdated"
+      }
+    ],
+    "version": 1
+  }
+}

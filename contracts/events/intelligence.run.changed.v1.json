@@ -1,0 +1,41 @@
+{
+  "$id": "intelligence.run.changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The state of a durable agent run changed; written by the `emit_agent_run_state` trigger of the intelligence baseline.",
+  "properties": {
+    "revision": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
+    },
+    "taskId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "revision",
+    "state",
+    "taskId"
+  ],
+  "title": "intelligence.run.changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.run.changed",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "sql-trigger",
+        "type": "RunChanged"
+      }
+    ],
+    "version": 1
+  }
+}

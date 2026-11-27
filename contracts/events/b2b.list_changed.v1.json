@@ -1,0 +1,99 @@
+{
+  "$id": "b2b.list_changed.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "listId": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "listId",
+        "operation",
+        "revision",
+        "unitId"
+      ],
+      "title": "ListChanged (veyndo-b2b)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "unitId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "unitId"
+      ],
+      "title": "RequisitionCreated (veyndo-b2b)",
+      "type": "object"
+    }
+  ],
+  "description": "A shared list of a purchasing unit was saved or deleted (`operation`: the list operation). | A buyer created a requisition list.",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "listId": {
+      "type": "string"
+    },
+    "operation": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "unitId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "revision",
+    "unitId"
+  ],
+  "title": "b2b.list_changed",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.list_changed",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "ListChanged"
+      },
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "RequisitionCreated"
+      }
+    ],
+    "version": 1
+  }
+}

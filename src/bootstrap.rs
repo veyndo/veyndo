@@ -5,7 +5,7 @@ use crate::{
     apps, currencies, demo_catalog, marketing, migrations, performance, platform, provision,
     runtime_config, workers,
 };
-use crate::{capabilities, documents};
+use crate::{capabilities, documents, events};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::sync::Arc;
@@ -214,6 +214,10 @@ async fn shutdown() {
 pub(crate) fn entry() {
     if env::args().nth(1).as_deref() == Some("--operation-contracts") {
         println!("{}", capabilities::export());
+        return;
+    }
+    if env::args().nth(1).as_deref() == Some("--event-contracts") {
+        println!("{}", events::export());
         return;
     }
     if env::args().nth(1).as_deref() == Some("--database-authority") {

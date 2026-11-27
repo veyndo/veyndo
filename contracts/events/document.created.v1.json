@@ -1,0 +1,97 @@
+{
+  "$id": "document.created.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "documentId",
+        "kind",
+        "orderId"
+      ],
+      "title": "ReceiptCreated (veyndo-orders)",
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "sourceApp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "documentId",
+        "kind",
+        "orderId",
+        "sourceApp"
+      ],
+      "title": "CarrierDocumentCreated (veyndo-orders)",
+      "type": "object"
+    }
+  ],
+  "description": "A receipt (invoice, delivery note, cancellation) was issued for an order. | A carrier app stored a shipping or return document for a package of an order.",
+  "properties": {
+    "documentId": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "sourceApp": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "documentId",
+    "kind",
+    "orderId"
+  ],
+  "title": "document.created",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "document.created",
+    "producers": [
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "ReceiptCreated"
+      },
+      {
+        "component": "orders",
+        "crate": "veyndo-orders",
+        "source": "rust",
+        "type": "CarrierDocumentCreated"
+      }
+    ],
+    "version": 1
+  }
+}

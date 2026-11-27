@@ -3,8 +3,9 @@ use crate::domain::attempt::Attempt;
 use crate::domain::{settlements, state};
 use crate::ports::Host;
 use crate::store::attempts;
+use crate::types::events::AttemptRecorded;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::document_slot::field;
 use veyndo_core::{Result, conflict};
@@ -118,7 +119,16 @@ pub async fn update_order(
     } else {
         "payment.updated"
     };
-    veyndo_core::store::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
+    let recorded = AttemptRecorded {
+        order_id: &p.order,
+        attempt_id: &p.id,
+        state,
+        provider: &p.provider,
+        environment: &p.environment,
+        real_money_charged: p.environment == "live" && state == "captured",
+        order: event_order,
+    };
+    veyndo_core::events::emit_as(&mut **tx, &p.tenant, kind, &recorded).await?;
     if state == "captured" {
         host.reward_capture(tx, &p.tenant, cart).await?;
     }

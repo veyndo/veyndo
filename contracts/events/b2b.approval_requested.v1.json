@@ -1,0 +1,37 @@
+{
+  "$id": "b2b.approval_requested.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A purchase exceeded the buyer's limits and waits for an approver.",
+  "properties": {
+    "approvalId": {
+      "type": "string"
+    },
+    "unitId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "approvalId",
+    "unitId"
+  ],
+  "title": "b2b.approval_requested",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "b2b.approval_requested",
+    "producers": [
+      {
+        "component": "b2b",
+        "crate": "veyndo-b2b",
+        "source": "rust",
+        "type": "ApprovalRequested"
+      }
+    ],
+    "version": 1
+  }
+}

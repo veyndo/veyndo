@@ -1,0 +1,41 @@
+{
+  "$id": "intelligence.decision.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A merchant marked a hypothesis; marking never starts an experiment.",
+  "properties": {
+    "experimentStarted": {
+      "type": "boolean"
+    },
+    "hypothesisId": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "experimentStarted",
+    "hypothesisId",
+    "state"
+  ],
+  "title": "intelligence.decision",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.decision",
+    "producers": [
+      {
+        "component": "intelligence",
+        "crate": "veyndo-intelligence",
+        "source": "rust",
+        "type": "HypothesisDecided"
+      }
+    ],
+    "version": 1
+  }
+}

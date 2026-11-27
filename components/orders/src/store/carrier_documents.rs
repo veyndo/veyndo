@@ -1,6 +1,7 @@
 //! Immutable private carrier documents belong to the existing order receipt store, never product assets.
 use crate::domain::order_patches::{Revised, TrackingCode, TrackingUrl};
 use crate::store::order_mutation::{self, Audit, Tx};
+use crate::types::events::CarrierDocumentCreated;
 use crate::types::order_document::{DeliveryControl, OrderControl};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -240,7 +241,7 @@ pub async fn record(
     merge(&mut order, Revised { revision })?;
     order_mutation::persist(tx,t,h,&mut order,Audit {
         kind:"receipt", data:json!({"id":document,"number":number,"kind":kind,"state":"issued","sourceApp":app}),
-        event_kind:"document.created",event:json!({"orderId":id,"documentId":document,"kind":kind,"sourceApp":app}),
+        event_kind:"document.created",event:CarrierDocumentCreated{order_id:&id,document_id:&document,kind:&kind,source_app:app},
     }).await?;
     Ok(json!({"id":document,"number":number}))
 }

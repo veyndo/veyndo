@@ -351,6 +351,22 @@ inventory, checkout, orders, identity, customers, B2B, POS, studio, intelligence
 The server is a binary crate, so its implementations are reachable only from its own unit
 tests; running these sets needs a database-backed `App` fixture in those tests.
 
+### Outbox event contracts
+
+Each outbox kind has a published JSON Schema in `contracts/events/`. The schemas are
+generated from the typed payloads (`veyndo_core::event!`, see
+[Events](architecture.md#events)). The unit test `events::tests` in the server crate
+fails when a checked-in schema drifts from its type. Each producer's
+`types::events` tests compare the payload with the JSON the code stored before the
+types existed. The tooling suite `event_contracts` (`scripts/event_contracts.py`,
+also in the quick `verify` job) compares every published version with
+`contracts/events/published.json`. It refuses removed, renamed or retyped fields,
+newly required fields and dropped guarantees unless a new version is added. It also
+refuses outbox writes that bypass `veyndo_core::events::emit*` and baseline triggers
+that write undeclared kinds. Twelve negative controls run with every check. After
+changing a payload, run `cargo build --bin veyndo` and then
+`python3 scripts/event_contracts.py --write`.
+
 ### HTTP and MCP contracts generated from the schema
 
 `scripts/testing/schema_contracts.py` reads the route catalogue

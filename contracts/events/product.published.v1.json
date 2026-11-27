@@ -1,0 +1,36 @@
+{
+  "$id": "product.published.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A staging release published a product to the live shop.",
+  "properties": {
+    "productId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "productId",
+    "revision"
+  ],
+  "title": "product.published",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "product.published",
+    "producers": [
+      {
+        "component": "studio",
+        "crate": "veyndo-studio",
+        "source": "rust",
+        "type": "ProductPublished"
+      }
+    ],
+    "version": 1
+  }
+}

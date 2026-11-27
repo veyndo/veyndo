@@ -1,0 +1,32 @@
+{
+  "$id": "cache.invalidate.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A cached read table changed; written by the `emit_read_cache_event` trigger of the shop baseline.",
+  "properties": {
+    "namespace": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "namespace"
+  ],
+  "title": "cache.invalidate",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps"
+    ],
+    "kind": "cache.invalidate",
+    "producers": [
+      {
+        "component": "shop",
+        "crate": "veyndo-shop",
+        "source": "sql-trigger",
+        "type": "CacheInvalidated"
+      }
+    ],
+    "version": 1
+  }
+}

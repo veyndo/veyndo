@@ -1318,3 +1318,19 @@ suites run on a fresh build.
 
 MCP, UCP and capability dispatch (`src/capabilities*`, `src/mcp*`, `src/ucp`,
 about 2,500 lines) stay in the server as protocol adapters.
+
+### Batch J: versioned events and read models (from 27 November)
+
+- [x] Every outbox event is a typed payload (`veyndo_core::event!` in the producer's
+      `types::events`). There are 77 payload types and 70 kind versions. Each producer
+      module tests that the stored JSON is unchanged, and producers publish only
+      through `veyndo_core::events::emit*`. The schemas are generated into
+      `contracts/events/` with an index; see [Events](../architecture.md#events).
+- [x] Compatibility gate `scripts/event_contracts.py` (tooling suite
+      `event_contracts`, quick `verify` job) refuses breaking changes to a
+      published version, outbox writes that bypass the typed functions and
+      undeclared trigger kinds. Twelve negative controls run with it.
+- [ ] Read models for the 61 foreign table accesses, after the forward migrations:
+      10 can be fed by existing events, 12 need a new event first and 39 stay
+      same-transaction accesses. Tables, events and order are in
+      [the read-model plan](2026-11-27-read-models.md).

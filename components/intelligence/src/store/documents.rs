@@ -1,6 +1,10 @@
 //! Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations.
 use crate::domain::source_content::{Source, admit_guidance};
 use crate::knowledge::{sync_document, sync_product, vectors};
+use crate::types::events::{
+    DocumentIngested, DocumentLifecycle, DocumentUpdated, DocumentVisibility, Edited, Revised,
+    Visible,
+};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_catalog::store::products;
@@ -104,14 +108,14 @@ pub async fn edit(
     }
     let chunks = chunks(&mut tx, t, id, data).await?;
     sync_document(&mut tx, t, id, product, &data.title, &data.digest).await?;
-    record(
-        &mut tx,
-        t,
-        id,
-        "knowledge.document.updated",
-        json!({"revision":rev+1,"visibility":"private"}),
-    )
-    .await?;
+    let updated = DocumentUpdated {
+        document_id: id,
+        decision: Edited {
+            revision: rev + 1,
+            visibility: "private",
+        },
+    };
+    record(&mut tx, t, "knowledge.document.updated", &updated).await?;
     tx.commit().await?;
     Ok(
         json!({"id":id,"revision":rev+1,"visibility":"private","chunks":chunks,"contentHash":data.digest}),
@@ -139,38 +143,28 @@ pub async fn lifecycle(
     if n != 1 {
         return Err(conflict("Source changed or unavailable"));
     }
-    record(
-        &mut tx,
-        t,
-        id,
-        if archived {
-            "knowledge.document.archived"
-        } else {
-            "knowledge.document.restored"
-        },
-        json!({"revision":rev+1}),
-    )
-    .await?;
+    let kind = if archived {
+        "knowledge.document.archived"
+    } else {
+        "knowledge.document.restored"
+    };
+    let decided = DocumentLifecycle {
+        document_id: id,
+        decision: Revised { revision: rev + 1 },
+    };
+    record(&mut tx, t, kind, &decided).await?;
     tx.commit().await?;
     Ok(json!({"id":id,"revision":rev+1,"archived":archived,"visibility":"private"}))
 }
 
 /// Announces a decision about a source.
-pub async fn record(
+pub async fn record<E: veyndo_core::events::Event>(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
-    id: &str,
     kind: &str,
-    data: Value,
+    decision: &E,
 ) -> Result<()> {
-    veyndo_core::store::outbox::publish_on(
-        &mut **tx,
-        t,
-        kind,
-        &json!({"documentId":id,"decision":data}),
-    )
-    .await?;
-    Ok(())
+    veyndo_core::events::emit_as(&mut **tx, t, kind, decision).await
 }
 
 /// Stores a validated source once; identical content for the same product returns the existing source.
@@ -207,13 +201,12 @@ pub async fn save(
         t, id, product, title, digest, text, source, data.kind, data.locale, data.translations).execute(&mut *tx).await?;
     let chunks = chunks(&mut tx, t, &id, data).await?;
     sync_document(&mut tx, t, &id, product, title, digest).await?;
-    veyndo_core::store::outbox::publish_on(
-        &mut *tx,
-        t,
-        "knowledge.document.ingested",
-        &json!({"documentId":id,"productId":product,"sourceType":source}),
-    )
-    .await?;
+    let ingested = DocumentIngested {
+        document_id: &id,
+        product_id: product,
+        source_type: source,
+    };
+    veyndo_core::events::emit(&mut *tx, t, &ingested).await?;
     tx.commit().await?;
     Ok(
         json!({"id":id,"contentHash":digest,"revision":1,"visibility":"private","chunks":chunks,"sourceType":source}),
@@ -263,14 +256,11 @@ pub async fn publish(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value
     if n != 1 {
         return Err(conflict("Document changed or unavailable"));
     }
-    record(
-        &mut tx,
-        t,
-        id,
-        "knowledge.document.visibility",
-        json!({"visibility":visibility}),
-    )
-    .await?;
+    let decided = DocumentVisibility {
+        document_id: id,
+        decision: Visible { visibility },
+    };
+    record(&mut tx, t, "knowledge.document.visibility", &decided).await?;
     tx.commit().await?;
     Ok(json!({"updated":true,"id":id,"visibility":visibility}))
 }

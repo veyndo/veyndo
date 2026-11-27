@@ -6,6 +6,12 @@ to the existing Veyndo Flow Builder and app screens. Email, Gmail, Google
 Analytics, Slack, Vercel, Klaviyo, HubSpot, Contentful and Algolia keep their own
 adapters.
 
+Commerce events reach the service only through Flow Builder or app subscriptions and
+the app gateway. Their payloads are the published schemas in
+[`contracts/events/`](../contracts/events/index.json). The `consumers` of each entry
+in the index name the bundled apps that subscribe to it, such as `app:email` and
+`app:slack`.
+
 ## Run it with Veyndo
 
 The Core profile sets up the connector tables (`extensions/services/connectors/migrations/0001-baseline.sql`) and keeps the existing app gateway contract.

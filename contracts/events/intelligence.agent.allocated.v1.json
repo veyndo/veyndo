@@ -1,0 +1,45 @@
+{
+  "$id": "intelligence.agent.allocated.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An agent's model usage was reserved against the shop budget (`costMicros` in micro-units of `currency`).",
+  "properties": {
+    "agentId": {
+      "type": "string"
+    },
+    "costMicros": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "tokens": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "agentId",
+    "costMicros",
+    "currency",
+    "tokens"
+  ],
+  "title": "intelligence.agent.allocated",
+  "type": "object",
+  "x-veyndo-event": {
+    "consumers": [
+      "audit",
+      "apps",
+      "flows"
+    ],
+    "kind": "intelligence.agent.allocated",
+    "producers": [
+      {
+        "component": "inference",
+        "crate": "veyndo-cognition",
+        "source": "rust",
+        "type": "AgentAllocated"
+      }
+    ],
+    "version": 1
+  }
+}
