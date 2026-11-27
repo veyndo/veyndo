@@ -8062,8 +8062,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "507b68616b89b2cbdf77a4d8ee74ec947eb02aec0e2c069d66351b9afbbb2f9d",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "84973dcbb7c4a5adbf7dda97a73d33b031020dbaf3c2014fec052c8aeebffbf1",
+      "review": "Operator bootstrap runs in system scope like serving"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",

@@ -231,7 +231,11 @@ pub(crate) fn entry() {
     if env::args().nth(1).as_deref() == Some("--bootstrap-operator") {
         tokio::runtime::Runtime::new()
             .unwrap()
-            .block_on(platform::bootstrap_operator());
+            // Like serving, setup writes system rows (leases, outbox checkpoints) that forced row security admits only in system scope.
+            .block_on(veyndo::tenant_scope::scoped(
+                veyndo::tenant_scope::Scope::System,
+                platform::bootstrap_operator(),
+            ));
         return;
     }
     tokio::runtime::Runtime::new()
