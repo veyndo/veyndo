@@ -3119,6 +3119,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/scalability.py](../scripts/scalability.py) | Real HTTP/PG regression for bounded reads and concurrent cart edits. |
 | [scripts/schema_baseline.py](../scripts/schema_baseline.py) | Fresh-install schema equality: a database set up by the server from the component baselines must |
 | [scripts/schema_contracts.py](../scripts/schema_contracts.py) | HTTP and MCP contract cases generated from the route catalogue and the operation contracts, against the running server. |
+| [scripts/schema_upgrade.py](../scripts/schema_upgrade.py) | /migrations', 'extensions/services/connectors/migrations'] |
 | [scripts/security/authenticated_scope.py](../scripts/security/authenticated_scope.py) | Adversarial SQL uses the actual tenant login, not SET ROLE on a privileged fixture session. |
 | [scripts/security/core_hardening.py](../scripts/security/core_hardening.py) | Real replica regressions for auth admission, poison-event isolation, retention and bounded resource leases. |
 | [scripts/security/tenant_schema.py](../scripts/security/tenant_schema.py) | Database adversarial checks: reject cross-shop links even when API predicates are accidentally omitted. |

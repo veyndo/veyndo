@@ -103,6 +103,7 @@
     "visual_workspace",
     "browser_journeys",
     "schema_baseline",
+    "schema_upgrade",
     "store_isolation"
   ],
   "browser_contracts": [

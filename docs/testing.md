@@ -7,11 +7,25 @@ database, runs the built `target/debug/veyndo` in `BOOTSTRAP_MODE=migrate` witho
 data and compares a normalized `pg_dump --schema-only` (every statement, sorted,
 owners left out) plus the rows setup creates with `fixtures/schema/reference.sql`.
 Timestamps, generated UUIDs and the per-database scope key are masked; everything else
-must be identical. The reference was taken from a fresh installation of commit
-`ce4285d7`, the last release with incremental migrations, so the component baselines
-are proven to produce the same schema. A deliberate schema change regenerates it with
-`--write`. There are no upgrade or legacy-import tests: a release replaces earlier
-installations and setup refuses a database that an earlier release created.
+must be identical. The reference is the schema of "baselines + all forward migrations":
+the baselines were proven equal to commit `ce4285d7` (the last release with incremental
+migrations) when they were introduced, and every forward migration regenerates the
+reference with `--write`, so the difference shows up in review.
+
+## Upgrade from the previous release
+
+The registered `schema_upgrade` suite (`scripts/schema_upgrade.py`) builds the previous
+release (the commit before the newest forward migration file, or `UPGRADE_FROM=<ref>`) in a
+temporary worktree under `target/schema-upgrade/` and keeps its binary per commit. It
+installs that release fresh in its own database, writes a shop (registration and settings),
+products, a price edit, a cart, an order and its payment through the previous release's
+HTTP API, then runs the new binary's `BOOTSTRAP_MODE=migrate`. It checks the ledger, the
+backfilled exact prices and that the upgraded schema equals the fresh-install reference;
+the new binary must serve the same products, storefront prices and the complete merchant
+order document, and its new behaviour must work. Finally both binaries serve the migrated
+database at the same time for one request round (each reads what the other wrote, both
+price an order equally): the expand/contract proof. Databases of the pre-baseline
+incremental release have no upgrade test; setup refuses them.
 
 ## External order batching regression
 
