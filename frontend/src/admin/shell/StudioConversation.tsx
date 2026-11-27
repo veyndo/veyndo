@@ -252,6 +252,7 @@ export default function StudioConversation({
                       value={m.data.preview.proposal.navigation}
                     />
                     <ProposalCard
+                      request={request}
                       onTest={
                         environment && canTestCustomers(access) && m.data.taskId
                           ? () =>

@@ -1,0 +1,13 @@
+/* Typed operation facts beside a proposed step: a wrapping row of badges that never overflows the review card. */
+.operation-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  margin: 0.25rem 0;
+  min-width: 0;
+}
+.operation-facts small {
+  color: var(--vy-text-muted, inherit);
+  overflow-wrap: anywhere;
+}

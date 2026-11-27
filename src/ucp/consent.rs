@@ -22,7 +22,7 @@ use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::tenant;
 use veyndo_shop::types::cart::StoredCart;
-pub(super) const CAPABILITY: &str = "dev.ucp.shopping.buyer_consent";
+pub(crate) const CAPABILITY: &str = "dev.ucp.shopping.buyer_consent";
 const PURPOSES: &[(&str, &str)] = &[
     ("dev.ucp.consent.analytics", "analytics"),
     ("dev.ucp.consent.preferences", "personalization"),

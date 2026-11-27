@@ -15,7 +15,7 @@ use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::document::view;
 use veyndo_core::request_context::RequestContext;
-pub(super) const CAPABILITY: &str = "dev.ucp.shopping.cart";
+pub(crate) const CAPABILITY: &str = "dev.ucp.shopping.cart";
 pub(super) async fn create(
     State(a): State<App>,
     h: RequestContext,

@@ -153,9 +153,9 @@ it("keeps legacy proposals reviewable without fetching a nonexistent durable run
   await act(async () =>
     fireEvent.click(screen.getByRole("button", { name: /approve/i })),
   );
-  expect(request).toHaveBeenCalledExactlyOnceWith(
-    "/api/agent/tasks/legacy/apply",
-    { approve: true },
-  );
+  // Besides the read-only operation facts, approval is the only request.
+  expect(request.mock.calls.filter(([path]: any) => path !== "/mcp")).toEqual([
+    ["/api/agent/tasks/legacy/apply", { approve: true }],
+  ]);
   expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
 });

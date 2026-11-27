@@ -2802,6 +2802,28 @@ class MerchantImportRecordInput:
     asset_chunks: Optional[list[str]] = field(default=None, metadata={"json": "assetChunks"})
 
 
+@dataclass
+class MerchantOperationsListInput:
+    """Input of the `merchant.operations.list` tool contract."""
+    TOOL: ClassVar[str] = "merchant.operations.list"
+    include_unavailable: Optional[bool] = field(default=None, metadata={"json": "includeUnavailable"})
+    names: Optional[list[str]] = field(default=None, metadata={"json": "names"})
+
+
+@dataclass
+class MerchantOperationsCheckInputStepsItem:
+    """Part of the `MerchantOperationsCheckInputStepsItem` tool contract."""
+    name: str = field(metadata={"json": "name"})
+    arguments: Optional[Any] = field(default=None, metadata={"json": "arguments"})
+
+
+@dataclass
+class MerchantOperationsCheckInput:
+    """Input of the `merchant.operations.check` tool contract."""
+    TOOL: ClassVar[str] = "merchant.operations.check"
+    steps: list[MerchantOperationsCheckInputStepsItem] = field(metadata={"json": "steps"})
+
+
 #: Owning component, read-only hint, input dataclass and description of every tool.
 TOOLS: dict[str, dict[str, Any]] = {
     "team.roles": {"component": "identity", "read_only": False, "input": TeamRolesInput, "description": "Read current tenant role definitions"},
@@ -3016,4 +3038,6 @@ TOOLS: dict[str, dict[str, Any]] = {
     "studio.workspace.save": {"component": "studio", "read_only": False, "input": StudioWorkspaceSaveInput, "description": "Revise the current personal Studio workspace"},
     "merchant.import.inspect": {"component": "studio", "read_only": True, "input": MerchantImportInspectInput, "description": "Read current mapped target fields and report missing/changed imports without writing"},
     "merchant.import.record": {"component": "studio", "read_only": False, "input": MerchantImportRecordInput, "description": "Explicitly import a source record through current domain permissions; historical orders have no purchase effects"},
+    "merchant.operations.list": {"component": "protocols", "read_only": True, "input": MerchantOperationsListInput, "description": "List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions"},
+    "merchant.operations.check": {"component": "protocols", "read_only": True, "input": MerchantOperationsCheckInput, "description": "Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing"},
 }

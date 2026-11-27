@@ -3,6 +3,7 @@ use super::document::{UcpCapability, UcpMeta, UcpService};
 use super::views::ShopLinks;
 use super::{UCP_VERSION, cart, consent};
 use crate::apps;
+use crate::capabilities;
 use axum::Json;
 use axum::http::StatusCode;
 use serde::Deserialize;
@@ -18,10 +19,10 @@ use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 use veyndo_core::shop_scope::tenant;
-pub(super) const B2B: &str = "ai.veyndo.app.shopping.b2b_negotiation";
-pub(super) const VERSION: &str = "2026-10-13";
-pub(super) const CHECKOUT: &str = "dev.ucp.shopping.checkout";
-const SCHEMA: &str = "https://app.veyndo.ai/ucp/2026-10-13/b2b-negotiation.json";
+pub(crate) const B2B: &str = "ai.veyndo.app.shopping.b2b_negotiation";
+pub(crate) const VERSION: &str = "2026-10-13";
+pub(crate) const CHECKOUT: &str = "dev.ucp.shopping.checkout";
+pub(crate) const SCHEMA: &str = "https://app.veyndo.ai/ucp/2026-10-13/b2b-negotiation.json";
 pub(crate) fn ucp_meta() -> UcpMeta {
     UcpMeta {
         version: UCP_VERSION,
@@ -46,42 +47,18 @@ fn discovery_meta(endpoint: &str) -> UcpMeta {
             endpoint: endpoint.to_owned(),
         }],
     )]));
-    meta.capabilities.insert(
-        CHECKOUT,
-        vec![UcpCapability {
-            version: UCP_VERSION,
-            spec: Some("https://ucp.dev/2026-08-25/specification/shopping/checkout/"),
-            schema: Some("https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"),
-            extends: None,
-        }],
-    );
-    meta.capabilities.insert(
-        B2B,
-        vec![UcpCapability {
-            version: VERSION,
-            extends: Some(vec![CHECKOUT]),
-            schema: Some(SCHEMA),
-            spec: Some("https://www.veyndo.ai/docs/b2b-ucp-negotiation.html"),
-        }],
-    );
-    meta.capabilities.insert(
-        cart::CAPABILITY,
-        vec![UcpCapability {
-            version: UCP_VERSION,
-            spec: Some("https://ucp.dev/2026-08-25/specification/shopping/cart/"),
-            schema: Some("https://ucp.dev/2026-08-25/schemas/shopping/cart.json"),
-            extends: None,
-        }],
-    );
-    meta.capabilities.insert(
-        consent::CAPABILITY,
-        vec![UcpCapability {
-            version: UCP_VERSION,
-            extends: Some(vec![CHECKOUT, cart::CAPABILITY]),
-            schema: Some("https://ucp.dev/2026-08-25/schemas/shopping/buyer_consent.json"),
-            spec: Some("https://ucp.dev/2026-08-25/specification/buyer-consent/"),
-        }],
-    );
+    // Every advertised capability comes from the operations graph declaration.
+    for declaration in capabilities::UCP_SURFACES {
+        meta.capabilities.insert(
+            declaration.id,
+            vec![UcpCapability {
+                version: declaration.version,
+                spec: Some(declaration.spec),
+                schema: Some(declaration.schema),
+                extends: (!declaration.extends.is_empty()).then(|| declaration.extends.to_vec()),
+            }],
+        );
+    }
     meta.payment_handlers = Some(BTreeMap::new());
     meta
 }

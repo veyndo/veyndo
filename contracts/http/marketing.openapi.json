@@ -1062,6 +1062,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/AutomationCatalogInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation",
+            "app"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1070,6 +1095,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/AutomationListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1078,6 +1127,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/AutomationSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "email"
+        ],
+        "permissions": [
+          "automation.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "by": "merchant.history.restore",
+          "kind": "compensatable"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -1086,6 +1163,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/AutomationDependenciesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1094,6 +1195,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/AutomationDeleteInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.manage"
+        ],
+        "requires": [
+          "automation.dependencies"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -1102,6 +1229,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/AutomationPreviewInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation",
+            "cart"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1110,6 +1262,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/AutomationImportInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1118,6 +1294,38 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/AutomationCompareHistoryInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read",
+          "b2b.read",
+          "catalog.read",
+          "orders.read",
+          "customers.read",
+          "customers.pii",
+          "documents.read",
+          "payments.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1126,6 +1334,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/AutomationValidateFlowInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "automation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       },
       "output": {
         "$ref": "#/components/schemas/AutomationValidateFlowOutput"

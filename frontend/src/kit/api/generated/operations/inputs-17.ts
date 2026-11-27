@@ -100,4 +100,11 @@ export interface Inputs17 {
     ruleId: string;
   };
   "automation.validate_flow": { data: JsonValue; id: string; revision: number };
+  "merchant.operations.list": {
+    includeUnavailable?: boolean;
+    names?: Array<string>;
+  };
+  "merchant.operations.check": {
+    steps: Array<{ arguments?: JsonValue; name: string }>;
+  };
 }

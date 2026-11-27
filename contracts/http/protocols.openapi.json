@@ -645,6 +645,54 @@
             }
           }
         }
+      },
+      "MerchantOperationsListInput": {
+        "additionalProperties": false,
+        "properties": {
+          "includeUnavailable": {
+            "type": "boolean"
+          },
+          "names": {
+            "items": {
+              "maxLength": 120,
+              "type": "string"
+            },
+            "maxItems": 300,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MerchantOperationsCheckInput": {
+        "additionalProperties": false,
+        "properties": {
+          "steps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "arguments": {
+                  "type": "object"
+                },
+                "name": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "steps"
+        ],
+        "type": "object"
       }
     },
     "parameters": {
@@ -671,6 +719,69 @@
       }
     }
   },
-  "x-veyndo-tools": [],
+  "x-veyndo-tools": [
+    {
+      "name": "merchant.operations.list",
+      "description": "List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions",
+      "readOnly": true,
+      "input": {
+        "$ref": "#/components/schemas/MerchantOperationsListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "operation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
+      }
+    },
+    {
+      "name": "merchant.operations.check",
+      "description": "Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing",
+      "readOnly": true,
+      "input": {
+        "$ref": "#/components/schemas/MerchantOperationsCheckInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "operation"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [
+          "merchant.operations.list"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
+      }
+    }
+  ],
   "x-veyndo-component": "protocols"
 }

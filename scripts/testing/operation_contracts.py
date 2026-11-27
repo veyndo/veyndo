@@ -41,9 +41,48 @@ class Wit:
             self.types.append('  record '+name+' {\n'+'\n'.join(fields)+'\n  }');return name
         return 'string' # JSON object without declared fields is an explicitly opaque JSON string.
 
+# The typed operations graph: every operation carries complete facts (components/core/src/operation_facts.rs).
+FACT_VALUES={'audience':{'shopper','merchant'},'risk':{'low','medium','high'},
+    'reversibility':{'reversible','compensatable','irreversible'},'cost':{'free','standard','batch','provider','model'}}
+EFFECTS={'email','payment','externalCall','modelCall','publication','backgroundJob','event'}
+def check_facts(ops):
+    """Refuse an operation without complete typed facts, or with edges to operations that do not exist."""
+    names={o['name'] for o in ops}
+    for o in ops:
+        name=o['name'];f=o.get('facts')
+        if not isinstance(f,dict):raise ValueError(name+': typed facts missing')
+        if f.get('audience') not in FACT_VALUES['audience'] or f.get('risk') not in FACT_VALUES['risk']:raise ValueError(name+': audience or risk missing')
+        rev=f.get('reversibility') or {}
+        if rev.get('kind') not in FACT_VALUES['reversibility']:raise ValueError(name+': reversibility missing')
+        if rev.get('kind')=='compensatable' and rev.get('by') not in names:raise ValueError(name+': compensation is no operation')
+        if o.get('cost') not in FACT_VALUES['cost'] or not isinstance(o.get('requiresApproval'),bool):raise ValueError(name+': cost or approval missing')
+        if not isinstance(f.get('permissions'),list) or not isinstance(f.get('writes'),bool):raise ValueError(name+': permissions or writes missing')
+        data=f.get('data') or {}
+        if not all(isinstance(data.get(k),bool) for k in ('pii','money','stock')) or not isinstance(data.get('entities'),list):raise ValueError(name+': affected data missing')
+        if not set(f.get('effects',[None]))<=EFFECTS:raise ValueError(name+': unknown side effect')
+        if not set(f.get('requires',[]))<=names:raise ValueError(name+': required operation does not exist')
+        if o['readOnly'] and f['writes']:raise ValueError(name+': read-only operation declares writes')
+        if rev['kind']=='irreversible' and f['writes'] and not o['requiresApproval']:raise ValueError(name+': irreversible change without approval')
+def facts_negative_controls(ops):
+    import copy
+    def rejects(mutate):
+        broken=copy.deepcopy(ops);mutate(broken)
+        try:check_facts(broken)
+        except ValueError:return True
+        return False
+    first=next(i for i,o in enumerate(ops) if o['facts']['writes'])
+    controls=[lambda b:b[0].pop('facts'),lambda b:b[0]['facts'].pop('risk'),
+        lambda b:b[first]['facts'].update(reversibility={'kind':'compensatable','by':'no.such.operation'}),
+        lambda b:b[0]['facts'].update(requires=['no.such.operation']),lambda b:b[0]['facts']['data'].pop('pii'),
+        lambda b:b[0].update(cost='cheap'),lambda b:b[0]['facts'].update(effects=['teleport']),
+        lambda b:b[first].update(readOnly=True),
+        lambda b:(b[first]['facts'].update(reversibility={'kind':'irreversible'}),b[first].update(requiresApproval=False))]
+    assert all(rejects(c) for c in controls),'Operation facts gate accepted a broken registry'
+
 def outputs():
     registry=json.loads(subprocess.check_output([str(ROOT/'target/debug/veyndo'),'--operation-contracts'],cwd=ROOT))
     ops=registry['operations'];assert len(ops)>100 and len({o['name'] for o in ops})==len(ops)
+    check_facts(ops);facts_negative_controls(ops)
     declared_outputs={o['name']:o['outputSchema'] for o in ops if 'outputSchema' in o}
     out={};prefix='/** Generated native operation input contracts; do not edit. */\n'
     out['extensions/sdk/generated/operations.json']=json.dumps(registry,indent=2)+'\n'
@@ -84,5 +123,5 @@ def main():
         path=ROOT/name
         if args.check:assert path.exists() and path.read_text()==text,'Generated contract drift: '+name
         else:path.parent.mkdir(parents=True,exist_ok=True);path.write_text(text)
-    print('PASS compiled registry -> typed TS/WIT inputs and declared outputs, and OpenAPI')
+    print('PASS compiled registry -> typed facts (negative controls rejected), TS/WIT inputs and declared outputs, and OpenAPI')
 if __name__=='__main__':main()

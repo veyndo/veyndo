@@ -1,5 +1,5 @@
-//! One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads.
-use super::{admission, catalog, dispatch, schema};
+//! One immutable native operation record for dispatch, schemas, typed planner facts, MCP discovery and bounded agent reads.
+use super::{admission, catalog, dispatch, facts, schema};
 use crate::apps;
 use crate::foundation::App;
 use dispatch::Owner;
@@ -9,9 +9,10 @@ use serde_json::json;
 use std::sync::LazyLock;
 use veyndo_core::Error;
 use veyndo_core::Result;
+use veyndo_core::operation_facts::{Cost, OperationFacts};
 use veyndo_core::request_context::RequestContext;
 #[derive(Clone, Copy, PartialEq)]
-enum Effect {
+pub(super) enum Effect {
     Read,
     Write,
 }
@@ -21,16 +22,73 @@ pub(crate) struct Operation {
     pub(super) owner: Owner,
     input: Value,
     output: Option<Value>,
-    effect: Effect,
+    pub(super) effect: Effect,
     agent_read: bool,
+    pub(super) facts: OperationFacts,
+    pub(super) preconditions: Preconditions,
+}
+/// Call preconditions read from the published input contract, so they cannot drift from it.
+#[derive(Clone, Copy, Serialize, Default, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct Preconditions {
+    /// The caller must pass the record revision it read (optimistic concurrency).
+    expected_revision: bool,
+    /// The caller must pass an idempotency or request key.
+    idempotency_key: bool,
+    /// The caller must state an explicit approval in the call itself.
+    explicit_approval: bool,
+}
+impl Preconditions {
+    fn of(input: &Value) -> Self {
+        let mut found = Self::default();
+        found.collect(input, 0);
+        found
+    }
+    /// Follows required properties only: an optional nested field is no precondition.
+    fn collect(&mut self, schema: &Value, depth: usize) {
+        let Some(properties) = schema.get("properties").and_then(Value::as_object) else {
+            return;
+        };
+        let required = schema.get("required").and_then(Value::as_array);
+        for (name, property) in properties {
+            if !required.is_some_and(|names| names.iter().any(|n| n == name)) {
+                continue;
+            }
+            match name.as_str() {
+                "revision" | "settingsRevision" => self.expected_revision = true,
+                "idempotency_key" | "requestKey" => self.idempotency_key = true,
+                "approve" => self.explicit_approval = true,
+                _ if depth < 4 => self.collect(property, depth + 1),
+                _ => {}
+            }
+        }
+    }
 }
 pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
-    let definitions = catalog::definitions();
+    assemble(catalog::definitions(), facts::FACTS).unwrap_or_else(|error| panic!("{error}"))
+});
+/// Joins every catalogue entry with its typed facts; a missing, stale or contradictory declaration is refused.
+fn assemble(
+    definitions: Vec<(&'static str, &'static str)>,
+    declared: &[(&'static str, OperationFacts)],
+) -> std::result::Result<Vec<Operation>, String> {
+    let mut facts = std::collections::HashMap::new();
+    for (name, value) in declared {
+        if facts.insert(*name, *value).is_some() {
+            return Err(format!("{name}: facts are declared twice"));
+        }
+    }
     let mut seen = std::collections::HashSet::new();
-    definitions
+    let operations = definitions
         .into_iter()
         .map(|(name, description)| {
-            assert!(seen.insert(name), "Duplicate native operation {name}");
+            if !seen.insert(name) {
+                return Err(format!("Duplicate native operation {name}"));
+            }
+            let facts = facts.remove(name).ok_or_else(|| {
+                format!("{name}: a native operation needs typed facts in capabilities/facts.rs")
+            })?;
+            facts.check(name)?;
             let agent_read = matches!(
                 name,
                 "knowledge.behavior"
@@ -59,6 +117,8 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                     | "knowledge.workspace"
                     | "knowledge.product"
                     | "knowledge.source.detail"
+                    | "merchant.operations.list"
+                    | "merchant.operations.check"
             );
             // Unclassified operations deliberately retain conservative mutating hints.
             let read = agent_read
@@ -86,18 +146,53 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                         | "cart.offer"
                         | "offer.verify"
                 );
-            Operation {
+            let effect = if read { Effect::Read } else { Effect::Write };
+            if effect == Effect::Read && facts.writes {
+                return Err(format!(
+                    "{name}: a read-only operation cannot declare writes"
+                ));
+            }
+            let input = schema::input(name);
+            Ok(Operation {
                 name,
                 description,
                 owner: Owner::for_name(name),
-                input: schema::input(name),
+                preconditions: Preconditions::of(&input),
+                input,
                 output: schema::output(name),
-                effect: if read { Effect::Read } else { Effect::Write },
+                effect,
                 agent_read,
-            }
+                facts,
+            })
         })
-        .collect()
-});
+        .collect::<std::result::Result<Vec<_>, String>>()?;
+    if let Some(name) = facts.keys().next() {
+        return Err(format!("{name}: facts name no native operation"));
+    }
+    for operation in &operations {
+        let target = |name: &str| operations.iter().find(|other| other.name == name);
+        if let Some(by) = operation.facts.compensation()
+            && !target(by).is_some_and(|other| other.facts.writes)
+        {
+            return Err(format!(
+                "{}: compensation {by} is no writing operation",
+                operation.name
+            ));
+        }
+        if let Some(missing) = operation
+            .facts
+            .requires
+            .iter()
+            .find(|name| target(name).is_none())
+        {
+            return Err(format!(
+                "{}: required operation {missing} does not exist",
+                operation.name
+            ));
+        }
+    }
+    Ok(operations)
+}
 pub(super) fn find(name: &str) -> Option<&'static Operation> {
     OPERATIONS.iter().find(|operation| operation.name == name)
 }
@@ -125,14 +220,30 @@ impl Operation {
         }
         Ok(value)
     }
-    pub(crate) fn admitted(&self, a: &App, h: &RequestContext) -> bool {
+    pub(crate) fn admitted(&self, _a: &App, h: &RequestContext) -> bool {
+        self.admitted_now(h)
+    }
+    /// Current admission from the request principal alone; agent credentials stay limited to reads.
+    pub(super) fn admitted_now(&self, h: &RequestContext) -> bool {
         if h.principal.agent_key.is_some()
             && self.effect != Effect::Read
             && !self.name.starts_with("merchant.run.")
         {
             return false;
         }
-        admission::visible(a, h, self.name)
+        admission::visible(h, self.name)
+    }
+    /// The planner view of this operation: its contract summary, facts and call preconditions.
+    pub(super) fn plan(&self) -> OperationPlan<'_> {
+        OperationPlan {
+            name: self.name,
+            description: self.description,
+            read_only: self.effect == Effect::Read,
+            cost: self.facts.cost(),
+            requires_approval: self.facts.requires_approval(),
+            facts: &self.facts,
+            preconditions: self.preconditions,
+        }
     }
     pub(crate) fn description(&self) -> Value {
         json!({"name":self.name,"description":self.description})
@@ -147,6 +258,18 @@ impl Operation {
         )
     }
 }
+/// The typed planner view of one operation, shared by the planner read and the offline export.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct OperationPlan<'a> {
+    pub(super) name: &'a str,
+    description: &'a str,
+    read_only: bool,
+    cost: Cost,
+    requires_approval: bool,
+    facts: &'a OperationFacts,
+    preconditions: Preconditions,
+}
 /// One operation in the offline contract export.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -157,6 +280,10 @@ struct ExportedOperation<'a> {
     read_only: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     output_schema: Option<&'a Value>,
+    cost: Cost,
+    requires_approval: bool,
+    facts: &'a OperationFacts,
+    preconditions: Preconditions,
 }
 /// Build-time contract export is offline and includes no actor credentials or records.
 pub(crate) fn export() -> Value {
@@ -168,6 +295,10 @@ pub(crate) fn export() -> Value {
             input_schema: &operation.input,
             read_only: operation.effect == Effect::Read,
             output_schema: operation.output.as_ref(),
+            cost: operation.facts.cost(),
+            requires_approval: operation.facts.requires_approval(),
+            facts: &operation.facts,
+            preconditions: operation.preconditions,
         })
         .collect::<Vec<_>>();
     json!({"version":1,"operations":operations})
@@ -187,6 +318,10 @@ mod tests {
                 "inputSchema":operation.input,"readOnly":operation.effect==Effect::Read});
                 if let Some(schema) = &operation.output {
                     value["outputSchema"] = schema.clone();
+                }
+                let plan = serde_json::to_value(operation.plan()).unwrap();
+                for key in ["cost", "requiresApproval", "facts", "preconditions"] {
+                    value[key] = plan[key].clone();
                 }
                 value
             })
@@ -272,5 +407,178 @@ mod tests {
             assert!(!operation.agent_read);
             assert_eq!(operation.tool()["annotations"]["readOnlyHint"], false);
         }
+    }
+    fn member(permissions: &[&str], personal: bool) -> RequestContext {
+        let mut h = RequestContext::new();
+        for (key, value) in [
+            ("x-rac-role", "member".to_owned()),
+            ("x-rac-tenant", "demo".to_owned()),
+            ("x-tenant", "demo".to_owned()),
+            ("x-rac-user", "u1".to_owned()),
+            (
+                "x-rac-permissions",
+                serde_json::to_string(permissions).unwrap(),
+            ),
+        ] {
+            h.insert(key, value.parse().unwrap());
+        }
+        h.principal.personal_session = personal;
+        h
+    }
+    #[test]
+    fn declared_permissions_match_admission() {
+        use veyndo_core::operation_facts::{Audience, Condition};
+        for operation in OPERATIONS.iter() {
+            let facts = &operation.facts;
+            let name = operation.name;
+            let anonymous = admission::visible(&RequestContext::new(), name);
+            assert_eq!(
+                anonymous,
+                facts.audience == Audience::Shopper,
+                "{name}: audience differs from admission"
+            );
+            if anonymous {
+                continue;
+            }
+            let personal = facts.conditions.contains(&Condition::PersonalSession);
+            assert!(
+                admission::visible(&member(facts.permissions, personal), name),
+                "{name}: declared permissions are not sufficient"
+            );
+            if personal {
+                assert!(
+                    !admission::visible(&member(facts.permissions, false), name),
+                    "{name}: a personal session is declared but not required"
+                );
+            }
+            for missing in facts.permissions {
+                let rest = facts
+                    .permissions
+                    .iter()
+                    .copied()
+                    .filter(|permission| permission != missing)
+                    .collect::<Vec<_>>();
+                assert!(
+                    !admission::visible(&member(&rest, personal), name),
+                    "{name}: {missing} is declared but not required"
+                );
+            }
+        }
+    }
+    #[test]
+    fn every_operation_is_declared_once_with_consistent_facts() {
+        use std::collections::HashSet;
+        let declared = facts::FACTS
+            .iter()
+            .map(|(name, _)| *name)
+            .collect::<HashSet<_>>();
+        let names = OPERATIONS.iter().map(|o| o.name).collect::<HashSet<_>>();
+        assert_eq!(declared, names);
+        for name in [
+            "checkout.complete",
+            "merchant.payment",
+            "merchant.apply",
+            "team.role.delete",
+        ] {
+            assert!(find(name).unwrap().facts.requires_approval(), "{name}");
+        }
+        for name in [
+            "catalog.search",
+            "merchant.products",
+            "cart.replace",
+            "merchant.plan",
+        ] {
+            assert!(!find(name).unwrap().facts.requires_approval(), "{name}");
+        }
+        assert!(
+            find("merchant.category.save")
+                .unwrap()
+                .preconditions
+                .expected_revision
+        );
+        assert!(
+            !find("merchant.category.create")
+                .unwrap()
+                .preconditions
+                .expected_revision
+        );
+        assert!(
+            find("merchant.apply")
+                .unwrap()
+                .preconditions
+                .explicit_approval
+        );
+        assert!(
+            find("checkout.complete")
+                .unwrap()
+                .preconditions
+                .idempotency_key
+        );
+    }
+    #[test]
+    fn assembly_refuses_missing_stale_and_contradictory_facts() {
+        use veyndo_core::operation_facts::{Audience, OperationFacts, Reversibility, Risk};
+        let read = OperationFacts::read(Audience::Shopper, &[]);
+        let write =
+            OperationFacts::write(Audience::Shopper, &[], Reversibility::Reversible, Risk::Low);
+        let error = |definitions: Vec<(&'static str, &'static str)>,
+                     declared: &[(&'static str, OperationFacts)]| {
+            assemble(definitions, declared).err().unwrap()
+        };
+        let one = || vec![("cart.create", "Create cart")];
+        assert!(error(one(), &[]).contains("needs typed facts"));
+        assert!(
+            error(one(), &[("cart.create", write), ("cart.gone", write)])
+                .contains("name no native")
+        );
+        assert!(error(one(), &[("cart.create", write), ("cart.create", write)]).contains("twice"));
+        assert!(
+            error(
+                vec![("cart.create", "a"), ("cart.create", "b")],
+                &[("cart.create", write)]
+            )
+            .contains("Duplicate")
+        );
+        assert!(
+            error(
+                vec![("catalog.search", "Read")],
+                &[("catalog.search", write)]
+            )
+            .contains("cannot declare writes")
+        );
+        let compensated = OperationFacts::write(
+            Audience::Shopper,
+            &[],
+            Reversibility::Compensatable { by: "cart.missing" },
+            Risk::Low,
+        );
+        assert!(error(one(), &[("cart.create", compensated)]).contains("no writing operation"));
+        let by_read = OperationFacts::write(
+            Audience::Shopper,
+            &[],
+            Reversibility::Compensatable {
+                by: "catalog.search",
+            },
+            Risk::Low,
+        );
+        assert!(
+            error(
+                vec![("cart.create", "a"), ("catalog.search", "b")],
+                &[("cart.create", by_read), ("catalog.search", read)]
+            )
+            .contains("no writing operation")
+        );
+        assert!(
+            error(one(), &[("cart.create", write.requires(&["cart.missing"]))])
+                .contains("does not exist")
+        );
+        let irreversible_low = OperationFacts::write(
+            Audience::Shopper,
+            &[],
+            Reversibility::Irreversible,
+            Risk::Low,
+        );
+        assert!(error(one(), &[("cart.create", irreversible_low)]).contains("at least medium"));
+        assert_eq!(assemble(one(), &[("cart.create", write)]).unwrap().len(), 1);
     }
 }

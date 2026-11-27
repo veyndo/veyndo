@@ -5454,6 +5454,45 @@ impl Tool for MerchantImportRecordInput {
     type Output = Value;
 }
 
+/// Input of `merchant.operations.list`: List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsListInput {
+    #[serde(
+        rename = "includeUnavailable",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub include_unavailable: Option<bool>,
+    #[serde(rename = "names", default, skip_serializing_if = "Option::is_none")]
+    pub names: Option<Vec<String>>,
+}
+
+impl Tool for MerchantOperationsListInput {
+    const NAME: &'static str = "merchant.operations.list";
+    type Output = Value;
+}
+
+/// Part of the `merchant.operations.check` contract.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsCheckInputStepsItem {
+    #[serde(rename = "arguments", default, skip_serializing_if = "Option::is_none")]
+    pub arguments: Option<Value>,
+    #[serde(rename = "name")]
+    pub name: String,
+}
+
+/// Input of `merchant.operations.check`: Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsCheckInput {
+    #[serde(rename = "steps")]
+    pub steps: Vec<MerchantOperationsCheckInputStepsItem>,
+}
+
+impl Tool for MerchantOperationsCheckInput {
+    const NAME: &'static str = "merchant.operations.check";
+    type Output = Value;
+}
+
 /// Every tool: name, owning component and read-only hint.
 pub const TOOLS: &[(&str, &str, bool)] = &[
     ("team.roles", "identity", false),
@@ -5668,6 +5707,8 @@ pub const TOOLS: &[(&str, &str, bool)] = &[
     ("studio.workspace.save", "studio", false),
     ("merchant.import.inspect", "studio", true),
     ("merchant.import.record", "studio", false),
+    ("merchant.operations.list", "protocols", true),
+    ("merchant.operations.check", "protocols", true),
 ];
 
 /// Keeps the map import used when no contract declares one.

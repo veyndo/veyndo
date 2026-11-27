@@ -18,6 +18,7 @@ against the compiled server elsewhere:
 | Permission per method (`x-veyndo-permission`, `security`) | the rights list each `secure_route` registers (`public`, `read`, `platform` or a scope such as `catalog.read`) |
 | Error envelope (`Problem`, `ErrorEnvelope`) | `Problem`, `Kind` and `Failure::problem` in `components/core/src/failure.rs` |
 | Typed request and response schemas (`x-veyndo-tools`) | the native operation registry, `extensions/sdk/generated/operations.json`, which `scripts/testing/operation_contracts.py --check` keeps equal to `veyndo --operation-contracts` |
+| Typed operation facts (`x-veyndo-tools[].facts`, `cost`, `requiresApproval`) | the same registry export; see [the typed operations graph](business-capabilities.md#the-typed-operations-graph). A newly required permission or approval is a major release change |
 | Owning component | `contracts/ownership.json`, longest path or name prefix |
 | Version (`info.version`) | `components.release.json`, derived from contract changes |
 

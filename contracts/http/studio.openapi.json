@@ -2030,6 +2030,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantHistoryInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "history"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2038,6 +2062,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantHistoryVersionInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "history"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "automation.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2046,6 +2094,39 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantHistoryRestoreInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "history",
+            "product",
+            "category",
+            "automation",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "automation.read",
+          "automation.manage"
+        ],
+        "requires": [
+          "merchant.history.version"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2054,6 +2135,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantGridPlanInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "order",
+            "customer"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2062,6 +2172,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantSiteTaskInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "site"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "channels.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2070,6 +2206,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantSiteProposeInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "site"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "channels.manage"
+        ],
+        "requires": [
+          "merchant.site.task"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2078,6 +2242,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantSitePlanInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "site"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall"
+        ],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "channels.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2086,6 +2278,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantSiteApplyInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "site"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "channels.manage"
+        ],
+        "requires": [
+          "merchant.site.plan"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2094,6 +2316,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantReportsReadInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "report",
+            "order"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "overview.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2102,6 +2349,32 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/StudioWorkspaceWorkReadInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "personalSession"
+        ],
+        "data": {
+          "entities": [
+            "workspace",
+            "order",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2110,6 +2383,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/StudioWorkspaceReadInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "personalSession"
+        ],
+        "data": {
+          "entities": [
+            "workspace"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2118,6 +2415,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/StudioWorkspaceSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "personalSession"
+        ],
+        "data": {
+          "entities": [
+            "workspace"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [
+          "studio.workspace.read"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2126,6 +2449,33 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantImportInspectInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "import",
+            "product",
+            "customer",
+            "order"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "apps.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2134,6 +2484,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantImportRecordInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "import",
+            "product",
+            "customer",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": true
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "apps.manage"
+        ],
+        "requires": [
+          "merchant.import.inspect"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     }
   ],

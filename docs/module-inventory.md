@@ -136,8 +136,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/capabilities/catalog/core_catalog.rs](../src/capabilities/catalog/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
 | [src/capabilities/catalog.rs](../src/capabilities/catalog.rs) | Shared catalogue composes native capabilities and cognitive contracts without duplicating authorization. |
 | [src/capabilities/dispatch.rs](../src/capabilities/dispatch.rs) | Closed native domain routing selected once by the operation registry; inactive futures stay boxed. |
-| [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads. |
+| [src/capabilities/facts.rs](../src/capabilities/facts.rs) | The typed facts of every native operation, keyed by its catalogue name; the registry refuses an operation without them. |
+| [src/capabilities/planner.rs](../src/capabilities/planner.rs) | Planner-facing reads of the operations graph: list admitted operations with typed facts and check a plan before execution. |
+| [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, typed planner facts, MCP discovery and bounded agent reads. |
 | [src/capabilities/schema.rs](../src/capabilities/schema.rs) | Native operation input contracts; transports consume this owner instead of maintaining their own schemas. |
+| [src/capabilities/surfaces.rs](../src/capabilities/surfaces.rs) | Protocol surfaces of the operations graph: the native operations each UCP capability exposes; discovery and the buyer negotiation allowlist are generated from it. |
 | [src/capabilities.rs](../src/capabilities.rs) | Shared HTTP/MCP capability dispatch and tool authorization. |
 | [src/cart_mutation.rs](../src/cart_mutation.rs) | Optimistic cart mutations and quantity normalization. |
 | [src/cart_price.rs](../src/cart_price.rs) | Authoritative quantity pricing and localized checkout quote assembly. |
@@ -1093,6 +1096,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/model_contract/schema_tests.rs](../components/core/src/model_contract/schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
 | [components/core/src/model_contract.rs](../components/core/src/model_contract.rs) | The native error contract of the pure app model: problem kinds, revision conflicts, escaped JSON pointers and the bounded input schema validator. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
+| [components/core/src/operation_facts.rs](../components/core/src/operation_facts.rs) | Typed planner facts of agent-facing operations: permission, cost, reversibility, risk, data and side effects; facts never grant rights. |
 | [components/core/src/process_config.rs](../components/core/src/process_config.rs) | Immutable process configuration: the server validates it once at startup, every component reads the same value. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
@@ -1469,7 +1473,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
-| [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
+| [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema, permissions and typed facts use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [components/marketing/src/domain/flow_projection.rs](../components/marketing/src/domain/flow_projection.rs) | What a flow sees of an outbox event: personal receipts and payment instructions removed, the order states and the event folded into one rule context. |
 | [components/marketing/src/domain/flow_steps.rs](../components/marketing/src/domain/flow_steps.rs) | The app steps of a flow: a simple app action and every app or mail node of its pipeline, seen as one app flow each. |
 | [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
@@ -2208,8 +2212,11 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/platform/styles/platform.css](../frontend/src/platform/styles/platform.css) | Ordered platform stylesheet entry; domain rules live in the adjacent folder. |
 | [frontend/src/shared/agents/AgentComposer.tsx](../frontend/src/shared/agents/AgentComposer.tsx) | Shared agent entry: domain adapters retain all API, model, permission and approval behavior. |
 | [frontend/src/shared/agents/AgentTaskTransfer.tsx](../frontend/src/shared/agents/AgentTaskTransfer.tsx) | Explicit coding-agent task download/copy and domain-validated result import; no tokens or background execution. |
+| [frontend/src/shared/agents/OperationFacts.tsx](../frontend/src/shared/agents/OperationFacts.tsx) | Shows the typed facts of a proposed operation from the operations graph; presentation only, admission stays on the server. |
 | [frontend/src/shared/agents/agent-i18n.ts](../frontend/src/shared/agents/agent-i18n.ts) | The same human and coding-agent language across native workspaces. |
 | [frontend/src/shared/agents/agents.css](../frontend/src/shared/agents/agents.css) | Compact shared composer, sized by its host rather than hardcoded to one editor. |
+| [frontend/src/shared/agents/operation-facts-i18n.ts](../frontend/src/shared/agents/operation-facts-i18n.ts) | Review vocabulary for typed operation facts: risk, reversibility, approval, affected data and side effects. |
+| [frontend/src/shared/agents/operation-facts.css](../frontend/src/shared/agents/operation-facts.css) | Typed operation facts beside a proposed step: a wrapping row of badges that never overflows the review card. |
 | [frontend/src/shared/agents/reference-images.ts](../frontend/src/shared/agents/reference-images.ts) | Bounded local screenshot preparation; only reduced raster data reaches the existing vision API. |
 | [frontend/src/shared/api/account-types.ts](../frontend/src/shared/api/account-types.ts) | Native personal account response shared by merchant and platform authentication. |
 | [frontend/src/shared/api/agent-stream.ts](../frontend/src/shared/api/agent-stream.ts) | Decode bounded UTF-8 SSE chat frames; dispatch scoped updates while the native result is pending. |

@@ -2,6 +2,7 @@
 use super::document::{UcpCapability, UcpDocument, UcpMessage, UcpNegotiation};
 use super::views::{CheckoutHandoff, OrderSnapshot, PricedCart, Purchasing, QuotePage, ShopLinks};
 use super::{consent, profile, ucp_document, ucp_load};
+use crate::capabilities;
 use crate::cart_price::cart_json;
 use crate::foundation::App;
 use crate::{accounts, b2b, checkout_handoff};
@@ -21,25 +22,16 @@ fn operation(op: &str) -> Result<String> {
     if op == "checkout.handoff" {
         return Ok(op.into());
     }
-    if ![
-        "contexts",
-        "select",
-        "quote.current",
-        "quote.get",
-        "quote.request",
-        "quote.message",
-        "quote.reject",
-        "quote.accept",
-        "quote.release",
-        "approval.request",
-    ]
-    .contains(&op)
+    // The buyer allowlist is the B2B capability's operations in the operations graph: shopper calls only.
+    let name = format!("b2b.{op}");
+    if !capabilities::ucp_surface(super::profile::B2B)
+        .is_some_and(|declaration| declaration.operations.contains(&name.as_str()))
     {
         return Err(bad(
             "Unsupported buyer negotiation operation; merchant offers and approver decisions use their authenticated native APIs",
         ));
     }
-    Ok(format!("b2b.{op}"))
+    Ok(name)
 }
 /// The JSON fields `command` reads, typed as it reads them.
 #[derive(Deserialize, Default)]

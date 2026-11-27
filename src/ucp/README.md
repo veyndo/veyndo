@@ -8,8 +8,9 @@ adapter reads: protocol requests, the priced native cart, stored order and conse
 snapshots, shop links and checkout handoffs. Each view field reads exactly what
 indexing the JSON did (an unexpected shape reads as null/`None`/empty); the unit
 tests compare the typed output with the former indexed construction.
-`profile.rs` publishes discovery and intersects platform profiles, `consent.rs`
-validates and projects buyer consent, `negotiation.rs` routes B2B commands and
+`profile.rs` publishes discovery, generated from the UCP declarations of the operations
+graph (`capabilities/surfaces.rs`), and intersects platform profiles, `consent.rs`
+validates and projects buyer consent, `negotiation.rs` routes B2B commands (its buyer allowlist is the B2B declaration's operations) and
 `cart.rs` issues cart transfers. Handlers serialize the typed document to JSON
 once at the route boundary.
 

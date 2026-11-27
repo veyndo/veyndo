@@ -1781,6 +1781,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantCompanyInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "settings.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1789,6 +1813,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCompanySaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "settings.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1797,6 +1847,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantWorkflowInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "orders.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1805,6 +1880,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantWorkflowSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "settings.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1813,6 +1913,33 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "customer",
+            "payment"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "orders.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1821,6 +1948,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderTransitionInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "payment"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": true
+        },
+        "effects": [
+          "email",
+          "event"
+        ],
+        "permissions": [
+          "orders.write",
+          "customers.pii"
+        ],
+        "requires": [
+          "merchant.order"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -1829,6 +1987,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderNoteInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "orders.write",
+          "customers.pii"
+        ],
+        "requires": [
+          "merchant.order"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1837,6 +2022,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantReceiptsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "document",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.pii",
+          "documents.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1845,6 +2056,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantReceiptCreateInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "document",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "customers.pii",
+          "documents.create"
+        ],
+        "requires": [
+          "merchant.order"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1853,6 +2094,32 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantOrdersInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "customer"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "orders.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1861,6 +2128,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderContextInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "customer",
+            "settings"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read",
+          "orders.write",
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1869,6 +2165,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderReviewInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "cart",
+            "order",
+            "customer"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read",
+          "orders.write",
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [
+          "merchant.order.context"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1877,6 +2204,39 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantOrderCompleteInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order",
+            "customer",
+            "cart"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": true
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "catalog.read",
+          "orders.write",
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [
+          "merchant.order.review"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     }
   ],
