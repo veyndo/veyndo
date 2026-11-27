@@ -9407,12 +9407,12 @@
       "review": "CI checks out full history in native jobs for the mirror release record; docs consolidation"
     },
     "Cargo.lock": {
-      "sha256": "b2799cdb165d9eacf0c0f54205c71a922a5b4f232f5114f05288c5ef2e6d64e5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "c6f2337cb1b47fea52bc0f7cc71b1d6aa2db2318137960a60bf684123c2a2c8e",
+      "review": "Batch J SDKs: workspace gains the generated client crate sdks/rust (veyndo-sdk, workspace dependencies reqwest/serde/serde_json/tokio only); no change to extracted policies or bindings"
     },
     "Cargo.toml": {
-      "sha256": "70f07b9cf2ac78a4c852e39aafd1edfb0aadb3ce4a5012301dcabf83bcd75529",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "4ef6ef6f830d7d30f18306e89ba348bcd3b7c9bade632ae631a1be31f9e082df",
+      "review": "Batch J SDKs: workspace gains the generated client crate sdks/rust (veyndo-sdk, workspace dependencies reqwest/serde/serde_json/tokio only); no change to extracted policies or bindings"
     },
     "components/apps/migrations/0001-baseline.sql": {
       "sha256": "541710e2a49ce3b34cf3d6b05ae94d19f50a53400030c633b4bcf7a432545496",

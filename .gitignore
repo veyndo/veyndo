@@ -21,3 +21,5 @@ __pycache__/
 
 /frontend/coverage
 *.profraw
+/sdks/typescript/dist
+/sdks/typescript/node_modules

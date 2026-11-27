@@ -3,6 +3,7 @@
     "sql_prepare",
     "studio",
     "hosted_api",
+    "sdk_smoke",
     "merchant_reports",
     "integration",
     "protocols",
@@ -124,6 +125,8 @@
     "testing/test_partition_coverage",
     "testing/component_mirrors_check",
     "testing/schema_contracts",
-    "event_contracts"
+    "event_contracts",
+    "testing/sdk_contracts_test",
+    "testing/component_releases_test"
   ]
 }

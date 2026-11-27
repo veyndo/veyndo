@@ -29,3 +29,5 @@ subprocess.run(["node", "frontend/scripts/architecture.mjs"], cwd=root, check=Tr
 subprocess.run(["node", "frontend/scripts/localization.mjs"], cwd=root, check=True)
 subprocess.run(["python3", "scripts/testing/source_inventory.py"], cwd=root, check=True)
 subprocess.run(["python3", "scripts/api_catalogue.py", "--check"], cwd=root, check=True)
+# Component contracts and the generated SDKs follow the router, the operation registry and the failure type.
+subprocess.run(["python3", "scripts/sdks/generate.py", "--check"], cwd=root, check=True)

@@ -24,6 +24,19 @@ components that have a crate. `components.release.json` names the target reposit
 the mirrors were generated from. Publishing the mirrors to those repositories is not done
 yet. [Component mirrors](component-mirrors.md).
 
+**Versions and contracts.** Every component, including `host`, `protocols` and
+`connectors`, has an OpenAPI 3.1 contract in `contracts/http/<component>.openapi.json`
+and a semantic version in `components.release.json`. A recorded release moves a
+component's major version when its contract breaks a caller, its minor version when the
+contract only grows and its patch version when only its sources change; the version
+appears in the contract, the mirror's `MIRROR.json` and its `CHANGELOG.md`
+(`contracts/changelogs/<component>.md`, written from the commits touching the
+component). The TypeScript, Python and Rust clients in `sdks/` are generated from the
+combined contract and carry its version. `python3 scripts/component_mirrors.py
+--publish --dry-run` prints which repository, branch, tag and package would receive
+what; it never pushes. [Contracts and SDKs](sdks.md),
+[release flow](component-mirrors.md#versions-changelogs-and-the-dry-run-publish).
+
 **Separately run services.** Some parts run as their own process and talk to the
 commerce server only through documented HTTP, MCP or app contracts:
 
