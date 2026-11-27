@@ -8,6 +8,7 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 
 - [`checkout.css`](checkout.css): One-page checkout: calm responsive workspace with a sticky, readable order review.
 - [`company-identity.css`](company-identity.css): Public company branding and readable legal identity across storefront channels.
+- [`mobile-header.css`](mobile-header.css): Compact storefront header below 760px: one row (menu, brand, search, bag) and a menu drawer; wider screens keep the full header.
 - [`shop.css`](shop.css): Ordered shop stylesheet entry; domain rules live in the adjacent folder.
 
 ## Verification

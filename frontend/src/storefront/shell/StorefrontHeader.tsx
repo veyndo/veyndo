@@ -1,4 +1,5 @@
 /** StorefrontHeader: storefront view composed from the scoped cart/controller. */
+import { returnToCollection } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { commercePage } from "../../../../extensions/apps/site-builder/commerce-layout";
 import { usePublishedSite } from "../../../../extensions/apps/site-builder/storefront/PublishedSite";
 import { openConsent } from "../../shared/legal/consent-store";
@@ -23,6 +24,9 @@ export default function StorefrontHeader() {
     adaptation,
     brand,
     openBag,
+    id,
+    query,
+    setQuery,
   } = useStorefront();
   const { pages } = usePublishedSite();
   return (
@@ -44,6 +48,14 @@ export default function StorefrontHeader() {
       onMerchant={onMerchant}
       onConsent={openConsent}
       onBag={openBag}
+      query={query}
+      onSearch={(text) => {
+        setQuery(text);
+        if (id) returnToCollection();
+        requestAnimationFrame(() =>
+          document.getElementById("collection")?.scrollIntoView(),
+        );
+      }}
       onBusiness={() => setAccount("business")}
     >
       <StorefrontLanguage />
