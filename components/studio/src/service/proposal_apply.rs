@@ -1,19 +1,22 @@
-//! Transactional application of approved, revision-bound proposals: product changes, experience, app saves, translation drafts and bounded price autonomy.
+//! Transactional application of approved, revision-bound and twin-simulated proposals: product changes at the editor's clocks, experience, app saves, translation drafts and bounded price autonomy, with the applied action recorded in the explanation and audit history.
 use super::work_execution::{admit_provider, enqueue_translation};
 use super::work_plan::approve;
 use crate::domain::proposal::{Change, Proposal, validate_proposal};
+use crate::domain::simulation::admits;
 use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
 use crate::types::events::ChangeApplied;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_catalog::store::workspace::Clocks;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
-use veyndo_core::store::history_context::context;
-use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
+use veyndo_core::store::history_context::{context, reason};
+use veyndo_core::{Error, Failure, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_identity::{allowed, permit};
+use veyndo_intelligence::domain::explanation::{applied, history_reason};
 use veyndo_intelligence::domain::price_guardrails::check;
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_intelligence::service::autonomy::{Autonomous, reserve};
@@ -107,6 +110,26 @@ async fn write_changes(
     }
     Ok(())
 }
+/// Price-only changes planned on a content clock must still match it; a sale in between does not make them stale.
+fn current_content(changes: &[Change], clocks: &[Clocks]) -> Result<()> {
+    for c in changes {
+        if let (Some(expected), None) = (c.expected_content_revision, c.stock) {
+            let current = clocks
+                .iter()
+                .find(|k| k.id == c.product_id)
+                .ok_or(bad("Unknown product"))?
+                .content_revision;
+            if current != expected {
+                return Err(Failure::revision_at(
+                    current,
+                    "/contentRevision",
+                    "Product content changed since the proposal was simulated; ask the agent again",
+                ));
+            }
+        }
+    }
+    Ok(())
+}
 /// Applies a reviewed proposal in one transaction, explicitly or as bounded price autonomy.
 pub async fn apply_mode<H: WorkHost>(
     host: &H,
@@ -138,6 +161,8 @@ pub async fn apply_mode<H: WorkHost>(
         },
     )
     .await?;
+    // The audit history of every row this proposal writes names the proposal and its explanation.
+    reason(&mut tx, &history_reason(id)).await?;
     let r = tasks::lock(&mut tx, t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Task not found".into()))?;
@@ -154,6 +179,8 @@ pub async fn apply_mode<H: WorkHost>(
             json!({"taskId":id,"applied":true,"replayed":true,"translationJobId":p.translation.as_ref().map(|_|id)}),
         );
     }
+    // Simulate-then-apply: a proposal whose twin replay failed or found a blocking violation is never written.
+    admits(&saved.simulation).map_err(conflict)?;
     let (settings_data, settings_revision) = products::lock_settings(&mut tx, t).await?;
     let settings: Settings =
         serde_json::from_value(settings_data).map_err(|_| bad("Invalid commerce settings"))?;
@@ -169,8 +196,9 @@ pub async fn apply_mode<H: WorkHost>(
         .iter()
         .map(|c| c.product_id.clone())
         .collect::<Vec<_>>();
-    let products = products::lock(&mut tx, t, ids).await?;
+    let products = products::lock(&mut tx, t, ids.clone()).await?;
     validate_proposal(&p, &products)?;
+    current_content(&p.changes, &products::clocks(&mut tx, t, &ids).await?)?;
     for c in &p.changes {
         check(
             &settings,
@@ -213,6 +241,16 @@ pub async fn apply_mode<H: WorkHost>(
     )
     .await?;
     tasks::mark_applied(&mut tx, t, id).await?;
+    let at = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+    let action = applied(
+        id,
+        header(h, "x-rac-user"),
+        autonomous,
+        settings_revision,
+        &saved.simulation,
+        &at,
+    );
+    tasks::explain_applied(&mut tx, t, id, &action).await?;
     let applied = ChangeApplied {
         task_id: id,
         autonomous,
@@ -221,4 +259,34 @@ pub async fn apply_mode<H: WorkHost>(
     veyndo_core::events::emit(&mut *tx, t, &applied).await?;
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":true,"translationJobId":p.translation.as_ref().map(|_|id)}))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn change(stock: Option<i32>, content: Option<i64>) -> Change {
+        Change {
+            product_id: "lamp".into(),
+            expected_revision: 2,
+            expected_content_revision: content,
+            price: veyndo_pricing::decimal::Decimal::from_wire(9.5).ok(),
+            stock,
+        }
+    }
+
+    #[test]
+    fn content_clocks_refuse_a_changed_product_with_their_pointer() {
+        let clocks = [Clocks {
+            id: "lamp".into(),
+            revision: 9,
+            content_revision: 4,
+        }];
+        assert!(current_content(&[change(None, Some(4))], &clocks).is_ok());
+        let stale = current_content(&[change(None, Some(3))], &clocks).unwrap_err();
+        assert_eq!(stale.problem()["pointer"], "/contentRevision");
+        assert_eq!(stale.problem()["currentRevision"], 4);
+        // Stock changes and legacy proposals without a content clock are left to the aggregate check.
+        assert!(current_content(&[change(Some(1), Some(3)), change(None, None)], &clocks).is_ok());
+    }
 }

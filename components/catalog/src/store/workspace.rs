@@ -1,4 +1,4 @@
-//! Catalogue reads and writes of the merchant workspace: product rows for proposals and the editor, reviewed price/stock changes, existence checks, products out of stock and translation jobs with reviewable items.
+//! Catalogue reads and writes of the merchant workspace: product rows for proposals and the editor, reviewed price/stock changes at the aggregate or content clock, existence checks, products out of stock and translation jobs with reviewable items.
 use super::products::ProductRow;
 use crate::store::exact::Exact;
 use serde_json::{Value, json};
@@ -109,6 +109,35 @@ pub async fn apply_change(
     stock: Option<i32>,
 ) -> Result<u64> {
     Ok(sqlx::query!("UPDATE products SET price_decimal=COALESCE($1,price_decimal),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5", price.map(Exact) as Option<Exact>, stock, t, product_id, expected_revision).execute(&mut *c).await?.rows_affected())
+}
+
+/// A product's two concurrency clocks: the aggregate revision (stock included) and the content revision.
+pub struct Clocks {
+    pub id: String,
+    pub revision: i64,
+    pub content_revision: i64,
+}
+
+/// The clocks of the given products, read inside the caller's transaction (locked rows stay locked).
+pub async fn clocks(c: &mut PgConnection, t: &str, ids: &[String]) -> Result<Vec<Clocks>> {
+    Ok(sqlx::query_as!(
+        Clocks,
+        "SELECT id,revision,content_revision FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id",
+        t,
+        ids
+    )
+    .fetch_all(&mut *c)
+    .await?)
+}
+
+/// Sets a reviewed price at its expected content clock and keeps the current stock, as a content-only manual edit does; returns the rows changed.
+pub async fn apply_price(
+    c: &mut PgConnection,
+    t: &str,
+    (product_id, expected_content_revision): (&str, i64),
+    price: Decimal,
+) -> Result<u64> {
+    Ok(sqlx::query!("UPDATE products SET price_decimal=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND content_revision=$4", Exact(price) as Exact, t, product_id, expected_content_revision).execute(&mut *c).await?.rows_affected())
 }
 
 /// Whether a product exists.

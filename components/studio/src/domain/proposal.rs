@@ -4,7 +4,8 @@ use serde_json::{Value, json};
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::selection::validate as validate_selection;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::{Result, bad, conflict};
+
+use veyndo_core::{Failure, Result, bad};
 pub use veyndo_intelligence::domain::price_guardrails::Change;
 use veyndo_intelligence::service::navigation::{Entity, Navigation};
 use veyndo_pricing::catalog::Product;
@@ -96,6 +97,9 @@ pub struct Proposal {
     pub translation_products: Option<Vec<String>>,
     /// What the proposal does.
     pub summary: String,
+    /// Why, in the model's words: untrusted text the review shows as such, never an instruction or a fact.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rationale: Option<String>,
     /// Price and stock changes.
     pub changes: Vec<Change>,
     #[serde(default)]
@@ -131,7 +135,10 @@ pub fn validate_experience(v: &Value) -> Result<()> {
 }
 /// Checks a proposal against the products it touches: bounds, uniqueness, revisions and ranges.
 pub fn validate_proposal(p: &Proposal, ps: &[Product]) -> Result<()> {
-    if p.changes.len() > 100 || p.summary.len() > 2000 {
+    if p.changes.len() > 100
+        || p.summary.len() > 2000
+        || p.rationale.as_ref().is_some_and(|r| r.len() > 2000)
+    {
         return Err(bad("Proposal is too large"));
     }
     if let Some(ids) = &p.translation_products {
@@ -149,8 +156,14 @@ pub fn validate_proposal(p: &Proposal, ps: &[Product]) -> Result<()> {
             .iter()
             .find(|p| p.id == c.product_id)
             .ok_or(bad("Unknown product in plan"))?;
-        if c.expected_revision != product.revision {
-            return Err(conflict("Model used a stale product revision"));
+        // A price-only change on a content clock is checked against that clock by its writer, like a content-only manual edit.
+        let content_clock = c.stock.is_none() && c.expected_content_revision.is_some();
+        if !content_clock && c.expected_revision != product.revision {
+            return Err(Failure::revision_at(
+                product.revision,
+                "/revision",
+                "Product changed since the proposal was simulated; ask the agent again",
+            ));
         }
         if c.price.is_some_and(|p| {
             !(Decimal::new(1, 2).unwrap_or(Decimal::ZERO)..=Decimal::integer(1_000_000))
@@ -250,5 +263,19 @@ mod proposal_tests {
         assert!(view_schema(false).is_object());
         assert_eq!(work_schema()["maxItems"], 12);
         assert!(NATIVE.contains(&"merchant.product.save"));
+    }
+    #[test]
+    fn a_price_only_change_on_a_content_clock_survives_a_sale_but_a_stock_change_does_not() {
+        let mut p: Proposal = serde_json::from_value(json!({"summary":"s","rationale":"r","changes":[{"product_id":"p","price":12.0,"expected_revision":2,"expected_content_revision":5}]})).unwrap();
+        // A sale advanced the aggregate revision to 3; the content clock decides for a price-only change.
+        assert!(validate_proposal(&p, &[product()]).is_ok());
+        p.changes[0].stock = Some(4);
+        let stale = validate_proposal(&p, &[product()]).unwrap_err();
+        assert_eq!(stale.0, veyndo_core::StatusCode::CONFLICT);
+        assert_eq!(stale.problem()["pointer"], "/revision");
+        assert_eq!(stale.problem()["currentRevision"], 3);
+        p.changes[0].stock = None;
+        p.rationale = Some("x".repeat(2001));
+        assert!(validate_proposal(&p, &[product()]).is_err());
     }
 }

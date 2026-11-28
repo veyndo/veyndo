@@ -1,6 +1,7 @@
-//! Durable agent runs extend native tasks: admission with quota and replay detection, revision-bound status, cancel and explicit resume. Leases fence checkpoints and publication, never approved writes.
+//! Durable agent runs extend native tasks: admission with quota and replay detection, revision-bound status and explanation, cancel and explicit resume. Leases fence checkpoints and publication, never approved writes.
 use super::agent_controls::conversation_actor;
 use super::models::choice;
+use crate::domain::explanation::visible;
 use crate::store::agent_runs::{self as store, NewRun, claim_conversation, project};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -68,6 +69,10 @@ pub const CAPABILITIES: &[(&str, &str)] = &[
         "Read a saved run and completed proposal with current rights",
     ),
     (
+        "merchant.run.explain",
+        "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change",
+    ),
+    (
         "merchant.run.cancel",
         "Cancel a saved run with its expected revision",
     ),
@@ -78,7 +83,7 @@ pub const CAPABILITIES: &[(&str, &str)] = &[
 ];
 /// The input schema of a run operation.
 pub fn schema(name: &str) -> Option<Value> {
-    CAPABILITIES.iter().any(|(n,_)|*n==name).then(||json!({"type":"object","properties":{"requestId":{"type":"string","minLength":1,"maxLength":64},"id":{"type":"string","maxLength":64},"revision":{"type":"integer","minimum":1},"approve":{"type":"boolean"},"instruction":{"type":"string","minLength":1,"maxLength":4000},"inference":{"type":"object","properties":{"provider":{"type":"string","enum":["platform","ollama","openai","anthropic"]},"model":{"type":["string","null"],"maxLength":128}},"required":["provider"],"additionalProperties":false},"workspaceContext":context_schema()},"required":if name=="merchant.run.create" {vec!["instruction"]}else if name=="merchant.run.status" {vec!["id"]}else{vec!["id","revision","approve"]},"additionalProperties":false}))
+    CAPABILITIES.iter().any(|(n,_)|*n==name).then(||json!({"type":"object","properties":{"requestId":{"type":"string","minLength":1,"maxLength":64},"id":{"type":"string","maxLength":64},"revision":{"type":"integer","minimum":1},"approve":{"type":"boolean"},"instruction":{"type":"string","minLength":1,"maxLength":4000},"inference":{"type":"object","properties":{"provider":{"type":"string","enum":["platform","ollama","openai","anthropic"]},"model":{"type":["string","null"],"maxLength":128}},"required":["provider"],"additionalProperties":false},"workspaceContext":context_schema()},"required":if name=="merchant.run.create" {vec!["instruction"]}else if ["merchant.run.status","merchant.run.explain"].contains(&name) {vec!["id"]}else{vec!["id","revision","approve"]},"additionalProperties":false}))
 }
 /// Queues a run after admission: shop agents live, request ID replay, backlog, conversation turn and the shared AI quota.
 pub async fn enqueue(
@@ -356,6 +361,9 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
         }
         return Ok(value);
     }
+    if name == "merchant.run.explain" {
+        return Ok(explained(&row, |scope| allowed(h, scope)));
+    }
     if input.approve != Some(true) || input.revision != Some(revision) {
         return Err(conflict(
             "Explicit approval and current run revision required",
@@ -414,6 +422,26 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
     tx.commit().await?;
     Ok(json!({"taskId":row.id,"state":next,"revision":revision+1,"approvalRequired":true}))
 }
+/// The stored explanation and twin result of a run, with only the source references the reader's current rights cover.
+fn explained(row: &store::TaskRun, allowed: impl Fn(&str) -> bool) -> Value {
+    let evidence = view::<Explained>(&row.proposal);
+    json!({
+        "taskId": row.id,
+        "state": row.run_state,
+        "applied": row.applied,
+        "explanation": if evidence.explanation.is_null() { Value::Null } else { visible(&evidence.explanation, allowed) },
+        "simulation": evidence.simulation,
+    })
+}
+
+/// The explanation parts of saved run evidence.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Explained {
+    explanation: Value,
+    simulation: Value,
+}
+
 /// Compatibility wait is only a transport: dropping it never deletes the persisted run.
 pub async fn wait(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
     let start = std::time::Instant::now();

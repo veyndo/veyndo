@@ -36,3 +36,10 @@ export function printable(value: unknown): string {
       ? value
       : JSON.stringify(value, null, 2);
 }
+
+/** The task ID of an audit history reason written by an applied agent proposal, whose explanation the run keeps. */
+export function proposalReason(reason: string | null | undefined) {
+  return reason?.startsWith("agent-proposal:")
+    ? reason.slice("agent-proposal:".length)
+    : null;
+}

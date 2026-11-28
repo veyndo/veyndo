@@ -98,6 +98,54 @@ external service. The switch, credentials and allocation counters are operationa
 configuration history, sandbox cloning and selected publication cannot restore or
 increase them. Original financial approvals and domain invariants remain authoritative.
 
+## Simulate, explain, then approve
+
+Every proposal a merchant agent prepares is replayed in the
+[shop twin](shop-twin.md#simulate-agent-proposals-before-you-approve-them) before
+review. Studio shows the field diff, the projected 30-day impact with its
+assumptions and the rules it checked side by side. A failed replay or a blocking
+violation (for example a price below the corridor minimum) disables **Approve**,
+and the server refuses it as well: the corridor is checked again on the current
+shop when you approve, and HTTP, MCP and the price autopilot share that refusal.
+
+A corridor violation no longer stops the agent run. It is saved as a proposal
+with a blocking finding, so you see which limit the agent missed instead of a
+failed run. It still cannot be applied.
+
+### Explanations
+
+Each agent action records why it happened and what it relied on:
+
+| Action | Rationale | Sources |
+| --- | --- | --- |
+| Tool call (a read during planning) | Requested by the model while planning | Your instruction (digest) and the read operation with a digest of its input and result |
+| Proposal | The model's own `rationale` (or its summary), marked **Unverified model text** | Changed products with their revision, documents with content hash, external sources with digest, installed apps, knowledge graph and shop observations (digests), AI policy revision, the Flow job that started the run, model and prompt with a digest of the output |
+| Twin simulation | The simulation status | Each evaluated rule and the recorded-order window (digest) |
+| Applied change | Approved after review, or applied within the autopilot policy | AI policy revision, the history entry `agent-proposal:<task>`, the `merchant.change.applied` event and a digest of the simulation |
+
+Sources are references: IDs, revisions and SHA-256 digests. No tool result,
+instruction text, credential, prompt or customer record is copied into an
+explanation. Model text is untrusted data; Studio renders it as text, never as
+markup or instructions. At most 120 sources are stored per run; the rest are
+counted.
+
+Every row an applied proposal writes gets the history reason
+`agent-proposal:<task>`. The product history panel shows it as
+**Agent proposal** with the task ID, so the audit history leads back to the
+explanation.
+
+Read an explanation through HTTP or MCP:
+
+| Operation | HTTP | Behavior |
+| --- | --- | --- |
+| `merchant.run.explain` | `GET /api/agent/runs/{id}/explanation` | Explanation and simulation of a saved run, with the same original-actor, agent-identity and original-scope checks as `merchant.run.status` |
+
+A reader only sees sources its current permissions cover (`catalog.read`,
+`knowledge.read`, `apps.read`, `orders.read`, `assistant.use`); the response
+counts hidden ones in `hiddenSources`. A merchant's own agent key reads the
+explanations of its own runs; it cannot read another agent's or a person's runs,
+and another shop gets 404.
+
 ## Shared contracts and verification
 
 | Owner | Responsibility |
@@ -106,7 +154,9 @@ increase them. Original financial approvals and domain invariants remain authori
 | `src/agent_runs/controls.rs` | Personal revision-bound status/control, planning-only credential admission and per-agent conversation identity. |
 | `crates/cognition/src/inference/budget.rs` | Task-local trusted authority and transactional allocations at actual central model egress. |
 | Native task/checkpoint/worker owners | Current credential/scope checks and lease-fenced continuation and final persistence. |
-| Operation registry | `merchant.agents.status` and `merchant.agents.control`; HTTP `/api/agent/control`, MCP, generated TS/WIT/OpenAPI request contracts. |
+| Operation registry | `merchant.agents.status` and `merchant.agents.control`; HTTP `/api/agent/control`, MCP, generated TS/WIT/OpenAPI request contracts. `merchant.run.explain` reads explanations. |
+| `components/studio/src/{domain/simulation,service/proposal_simulation}.rs` | Shop twin replay, diff, projection and rule findings stored with the proposal; `service/proposal_apply.rs` refuses failed or blocking simulations and records the applied action. |
+| `components/intelligence/src/domain/explanation.rs` | Rationale and source references of every agent action, filtered by current permissions on read. |
 | Existing outbox/Flows | `intelligence.agent.allocated` and `intelligence.agents.controlled` carry IDs/counts/state, never credentials or prompt bodies. |
 
 `agent_authorities` runs actual HTTP/PostgreSQL, two Rust replicas and a local
@@ -117,6 +167,11 @@ The signed-runtime foundation also repeats it through separate restricted tenant
 and system logins. `durable_agents` stops a real worker during a provider call and
 rejects its late result. UI tests fence late credentials and status from a previous
 shop and require explicit limit/confirmation inputs. No real paid provider is used.
+`proposal_simulation` runs a price proposal through the twin, approval and apply
+with real HTTP/PostgreSQL, an HTTP and a worker process and a synthetic model: the
+rolled-back replay, a sale between review and approval, a stale content revision,
+a corridor violation, an unsimulatable storefront change, the history reason and
+the MCP explanation.
 
 The small arithmetic allowance check reuses the existing extracted kernel guard.
 That proof does not certify surrounding SQL, authentication, asynchronous workers

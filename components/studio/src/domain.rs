@@ -6,6 +6,7 @@ pub mod product_restore;
 pub mod proposal;
 pub mod report_config;
 pub mod report_period;
+pub mod simulation;
 pub mod staging_access;
 pub mod view_components;
 pub mod views;

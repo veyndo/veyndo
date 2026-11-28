@@ -1885,6 +1885,35 @@ export interface MerchantRunStatusInput {
   "workspaceContext"?: MerchantRunStatusInputWorkspaceContext;
 }
 
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputInference {
+  "model"?: string | null;
+  "provider": "platform" | "ollama" | "openai" | "anthropic";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputWorkspaceContextSelected {
+  "id": string;
+  "kind": "product" | "order" | "customer" | "company" | "app" | "page" | "flow";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputWorkspaceContext {
+  "selected"?: MerchantRunExplainInputWorkspaceContextSelected;
+  "view": "assistant" | "workspace" | "setup" | "overview" | "knowledge" | "agents" | "commerce" | "design" | "productData" | "products" | "orders" | "customers" | "b2b" | "pos" | "storyfronts" | "channels" | "automation" | "apps" | "developers" | "environments" | "users";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInput {
+  "approve"?: boolean;
+  "id": string;
+  "inference"?: MerchantRunExplainInputInference;
+  "instruction"?: string;
+  "requestId"?: string;
+  "revision"?: number;
+  "workspaceContext"?: MerchantRunExplainInputWorkspaceContext;
+}
+
 /** Input of `merchant.run.cancel`. */
 export interface MerchantRunCancelInputInference {
   "model"?: string | null;
@@ -2463,6 +2492,7 @@ export interface ToolInputs {
   "merchant.apply": MerchantApplyInput;
   "merchant.run.create": MerchantRunCreateInput;
   "merchant.run.status": MerchantRunStatusInput;
+  "merchant.run.explain": MerchantRunExplainInput;
   "merchant.run.cancel": MerchantRunCancelInput;
   "merchant.run.resume": MerchantRunResumeInput;
   "merchant.scenario.create": MerchantScenarioCreateInput;
@@ -2688,6 +2718,7 @@ export const toolCatalog = {
   "merchant.apply": { component: "intelligence", readOnly: false, description: "Approve stored change; merchant authorization required" },
   "merchant.run.create": { component: "intelligence", readOnly: false, description: "Queue a durable native planning task; no automatic business writes" },
   "merchant.run.status": { component: "intelligence", readOnly: true, description: "Read a saved run and completed proposal with current rights" },
+  "merchant.run.explain": { component: "intelligence", readOnly: true, description: "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change" },
   "merchant.run.cancel": { component: "intelligence", readOnly: false, description: "Cancel a saved run with its expected revision" },
   "merchant.run.resume": { component: "intelligence", readOnly: false, description: "Explicitly resume a failed or ambiguous run from completed checkpoints" },
   "merchant.scenario.create": { component: "intelligence", readOnly: false, description: "Run a bounded fictional customer cohort in a private sandbox" },

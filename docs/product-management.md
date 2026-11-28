@@ -109,8 +109,11 @@ neither the agent nor an app bypasses the decision. A conflict includes the actu
 `currentRevision` and `/revision` or `/contentRevision` pointer identifying its clock.
 
 The catalog baseline keeps the content clock next to stock and the aggregate
-revision; a database trigger advances it for every content write. Versioned translation/FX/proposal owners continue to invalidate content;
-their own existing conservative aggregate revision checks are preserved. History
+revision; a database trigger advances it for every content write. Versioned translation/FX owners continue to invalidate content;
+their own existing conservative aggregate revision checks are preserved. Agent
+price proposals follow the editor rule: a price-only proposal records the content
+clock it was planned on and keeps the current stock; a stock change keeps the
+aggregate CAS ([simulate-then-apply](shop-twin.md#approving-a-simulated-proposal)). History
 restores omit quantities. Sandbox diffs/publication exclude both revision clocks
 and stock; a released content unit advances the live clock without importing a
 sandbox quantity. This is not a new inventory ledger or a stock-only edit API.

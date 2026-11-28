@@ -1,4 +1,4 @@
-/** ProposalCard keeps merchant interaction separate from workspace orchestration. */
+/** ProposalCard keeps merchant interaction separate from workspace orchestration; approval waits for a usable shop twin simulation. */
 import { Button, LinkButton, Notice } from "../../kit/ui";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 import { useAppText } from "../../shared/i18n/app-i18n";
@@ -17,6 +17,8 @@ import OperationFacts, {
   type OperationFactsIndex,
 } from "../../shared/agents/OperationFacts";
 import type { RequestFn } from "./studio-types";
+import ProposalSimulation from "../../../../components/studio/ui/admin/proposals/ProposalSimulation";
+import { approvable } from "../../../../components/studio/ui/admin/proposals/proposal-simulation-model";
 export default function ProposalCard({
   message,
   onApply,
@@ -244,6 +246,13 @@ export default function ProposalCard({
           <blockquote>{preview.proposal.experience.headline}</blockquote>
         </div>
       )}
+      <ProposalSimulation
+        simulation={preview.simulation}
+        explanation={preview.explanation}
+        names={Object.fromEntries(
+          preview.catalogBefore.map((p) => [p.id, p.name]),
+        )}
+      />
       {!message.applied && !approvalStarted && !preview.proposal.view && (
         <footer>
           <span>
@@ -253,7 +262,7 @@ export default function ProposalCard({
           <Button
             tone="primary"
             type="submit"
-            disabled={busy || !canApply}
+            disabled={busy || !canApply || !approvable(preview.simulation)}
             onClick={onApply}
           >
             {t("approve")}

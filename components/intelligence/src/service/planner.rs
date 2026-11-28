@@ -1,8 +1,9 @@
-//! Grounded model planning: durable input snapshots share native proposal validation and explicit apply.
+//! Grounded model planning: durable input snapshots share native proposal validation, a shop twin simulation and an explanation before explicit apply.
 use super::agent_runs::{current_context, current_id};
 use super::read_rounds::rounds;
 use super::retrieval::{SourceQuery, context_retrieval, search_in};
 use super::run_journal::{load, model, persist, save};
+use crate::domain::explanation;
 use crate::domain::prompt_context::{SOURCE_POLICY, catalog_snapshot, snapshot};
 use crate::domain::tool_trace::attachments;
 use crate::knowledge;
@@ -115,7 +116,12 @@ pub async fn plan_with<H: AgentHost>(
     };
     let id = current_id().unwrap_or_else(uid);
     let app_views = attachments(&tool_trace);
-    let evidence = json!({"workspaceContext":current_context(),"model":output.model,"inference":output.provider,"usage":output.usage,"evalCount":view::<Usage>(&output.usage).output_tokens,"knowledge":graph,"instruction":instruction,"locale":locale,"proposal":p,"translationInference":choice.cloned().unwrap_or(Choice{provider:Provider::Platform,model:None}),"verifiedFacts":facts,"catalogBefore":ps,"memory":memory,"contextLimit":24,"policyRevision":policy_revision,"actor":header(authority,"x-rac-user"),"toolTrace":tool_trace,"appViews":app_views,"proposalRepair":repair_evidence,"appActions":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"externalSources":private_sources,"experienceBefore":context.experience,"applied":false});
+    // Simulate before the merchant decides: the twin result and the explanation are stored with the proposal.
+    let simulation = host.simulate(t, authority, &p, policy_revision).await?;
+    let mut evidence = json!({"workspaceContext":current_context(),"model":output.model,"inference":output.provider,"usage":output.usage,"evalCount":view::<Usage>(&output.usage).output_tokens,"knowledge":graph,"instruction":instruction,"locale":locale,"proposal":p,"translationInference":choice.cloned().unwrap_or(Choice{provider:Provider::Platform,model:None}),"verifiedFacts":facts,"catalogBefore":ps,"memory":memory,"contextLimit":24,"policyRevision":policy_revision,"actor":header(authority,"x-rac-user"),"toolTrace":tool_trace,"appViews":app_views,"proposalRepair":repair_evidence,"appActions":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"externalSources":private_sources,"experienceBefore":context.experience,"simulation":simulation,"applied":false});
+    let event = header(authority, "x-rac-flow-job").map(|job| format!("flow-job:{job}"));
+    let explanation = explanation::proposal(&view(&evidence), event.as_deref());
+    merge(&mut evidence, json!({ "explanation": explanation }))?;
     persist(host, t, &id, &evidence, authority).await?;
     Ok(json!({"taskId":id,"preview":evidence,"approvalRequired":true}))
 }
@@ -171,7 +177,7 @@ async fn prepare<H: AgentHost>(
     let system = include_str!("../../../../crates/cognition/prompts/merchant-planner.v6.txt");
     let sandbox = parent(a, t).await?.is_some();
     let system = format!(
-        "{system} For questions about AI price boundaries, read merchant.commerce.read with area=aiPolicy when authorized before explaining the saved aiPolicy; follow nextAfterProductId with afterProductId to read more pages, and never call a partial page the entire policy; use merchant.product.content for the selected product. Treat an omitted field as unavailable evidence, not as an absent boundary. Explain manual approval versus bounded price-only autonomy; enabling it does not start a recurring agent. Do not claim that price boundaries configure promotions, customer-group prices or checkout rules. Current workspace: tenant={t}, sandbox={sandbox}, mainLocale={}, catalogueWrite={}, assistantUse={}. Never offer an action as available when its right is false.",
+        "{system} For questions about AI price boundaries, read merchant.commerce.read with area=aiPolicy when authorized before explaining the saved aiPolicy; follow nextAfterProductId with afterProductId to read more pages, and never call a partial page the entire policy; use merchant.product.content for the selected product. Treat an omitted field as unavailable evidence, not as an absent boundary. Explain manual approval versus bounded price-only autonomy; enabling it does not start a recurring agent. Do not claim that price boundaries configure promotions, customer-group prices or checkout rules. Current workspace: tenant={t}, sandbox={sandbox}, mainLocale={}, catalogueWrite={}, assistantUse={}. Never offer an action as available when its right is false. For a proposed change, put in rationale why, naming the reads, facts, documents and rules you relied on; it is shown to the merchant as unverified model text. Every change is simulated in the shop twin before review.",
         commerce_settings.main_locale,
         allowed(authority, "catalog.write"),
         allowed(authority, "assistant.use")
@@ -280,7 +286,7 @@ async fn prepare<H: AgentHost>(
 
 /// The response schema of a planning turn: the native proposal fields plus the server's work schemas and the shop's translation locales.
 fn planning_schema(work: crate::ports::WorkSchemas, translation_locales: Vec<Value>) -> Value {
-    json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"},
+    json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"rationale":{"type":["string","null"],"maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"},
         "app_action":{"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false},
         "navigation":work.navigation,"view":work.view,"operations":work.operations,
         "translation":{"type":["string","null"],"enum":translation_locales},
@@ -498,7 +504,7 @@ mod tests {
         };
         let locales = vec![json!("de-DE"), json!("es-ES"), Value::Null];
         let w = work();
-        let mut old = json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"}},"required":["summary","changes"],"additionalProperties":false});
+        let mut old = json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"rationale":{"type":["string","null"],"maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"}},"required":["summary","changes"],"additionalProperties":false});
         old["properties"]["app_action"] = json!({"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false});
         old["properties"]["navigation"] = w.navigation;
         old["properties"]["view"] = w.view;

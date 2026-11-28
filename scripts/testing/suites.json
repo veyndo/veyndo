@@ -76,6 +76,7 @@
     "app_surfaces",
     "durable_agents",
     "agent_authorities",
+    "proposal_simulation",
     "email_tests",
     "rust_connectors",
     "connector_store_tests",

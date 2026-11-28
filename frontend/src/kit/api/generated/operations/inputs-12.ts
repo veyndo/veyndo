@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs12 {
+  "merchant.site.apply": { approve: boolean; taskId: string };
   "merchant.reports.read": {
     channel?: string | null;
     channelType?: "all" | "storefront" | "headless" | "marketplace" | "pos";
@@ -120,5 +121,4 @@ export interface Inputs12 {
     terms: boolean;
     totalMinor: string;
   };
-  "merchant.catalog.context": JsonValue;
 }

@@ -205,6 +205,24 @@ pub async fn mark_applied(c: &mut sqlx::PgConnection, t: &str, id: &str) -> Resu
     Ok(())
 }
 
+/// Appends the applied action to a proposal explanation; proposals saved before explanations existed keep their evidence unchanged.
+pub async fn explain_applied(
+    c: &mut sqlx::PgConnection,
+    t: &str,
+    id: &str,
+    action: &Value,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE tasks SET proposal=jsonb_set(proposal,'{explanation,actions}',coalesce(proposal#>'{explanation,actions}','[]'::jsonb)||jsonb_build_array($3::jsonb)) WHERE tenant=$1 AND id=$2 AND jsonb_typeof(proposal->'explanation')='object'",
+        t,
+        id,
+        action
+    )
+    .execute(&mut *c)
+    .await?;
+    Ok(())
+}
+
 /// The task's approval state.
 pub async fn reviewed_work(a: &State, t: &str, id: &str) -> Result<WorkTask> {
     Ok(sqlx::query_as!(

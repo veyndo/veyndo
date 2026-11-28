@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs10 {
+  "knowledge.experiment.suggest": JsonValue;
   "knowledge.experiment.report": { id?: string };
   "catalog.facts": { productId?: string };
   "knowledge.autonomy.apply": { taskId?: string };
@@ -49,9 +50,4 @@ export interface Inputs10 {
     productId?: string;
   };
   "checkout.payment.methods": JsonValue;
-  "checkout.payment.method.revoke": {
-    approve: boolean;
-    id: string;
-    requestKey: string;
-  };
 }

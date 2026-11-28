@@ -119,6 +119,7 @@ export type Preview = {
     } | null;
     operations?: { name: string; label: string; arguments_json: string }[];
     summary: string;
+    rationale?: string | null;
     translation?: string | null;
     translation_products?: string[] | null;
     app_action?: { app: string; action: string; arguments_json: string } | null;
@@ -134,6 +135,8 @@ export type Preview = {
     learningSignals?: { variant: string; views: number; purchases: number }[];
   };
   knowledge?: Graph;
+  simulation?: import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Simulation | null;
+  explanation?: import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Explanation | null;
 };
 export type Message = {
   id: number;

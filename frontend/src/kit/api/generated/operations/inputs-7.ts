@@ -121,6 +121,52 @@ export interface Inputs7 {
         | "users";
     };
   };
+  "merchant.run.explain": {
+    approve?: boolean;
+    id: string;
+    inference?: {
+      model?: string | null;
+      provider: "platform" | "ollama" | "openai" | "anthropic";
+    };
+    instruction?: string;
+    requestId?: string;
+    revision?: number;
+    workspaceContext?: {
+      selected?: {
+        id: string;
+        kind:
+          | "product"
+          | "order"
+          | "customer"
+          | "company"
+          | "app"
+          | "page"
+          | "flow";
+      };
+      view:
+        | "assistant"
+        | "workspace"
+        | "setup"
+        | "overview"
+        | "knowledge"
+        | "agents"
+        | "commerce"
+        | "design"
+        | "productData"
+        | "products"
+        | "orders"
+        | "customers"
+        | "b2b"
+        | "pos"
+        | "storyfronts"
+        | "channels"
+        | "automation"
+        | "apps"
+        | "developers"
+        | "environments"
+        | "users";
+    };
+  };
   "merchant.run.cancel": {
     approve: boolean;
     id: string;
@@ -212,23 +258,5 @@ export interface Inputs7 {
         | "environments"
         | "users";
     };
-  };
-  "merchant.scenario.create": {
-    inference?: {
-      model?: string | null;
-      provider: "platform" | "ollama" | "openai" | "anthropic";
-    };
-    instruction: string;
-    profiles: Array<{
-      budgetMinor: number;
-      country: string;
-      goal: string;
-      id: string;
-      locale: string;
-      name: string;
-    }>;
-    requestId: string;
-    sourceTaskId?: string;
-    title: string;
   };
 }

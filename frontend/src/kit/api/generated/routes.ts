@@ -16,6 +16,7 @@ export const routeSources = {
   "POST /api/agent/runs": "src/agent_runs/contract.rs",
   "GET /api/agent/runs/{id}": "src/agent_runs/contract.rs",
   "POST /api/agent/runs/{id}/cancel": "src/agent_runs/contract.rs",
+  "GET /api/agent/runs/{id}/explanation": "src/agent_runs/contract.rs",
   "POST /api/agent/runs/{id}/resume": "src/agent_runs/contract.rs",
   "GET /api/agent/scenario-probes": "src/agent_runs/scenarios.rs",
   "POST /api/agent/scenario-probes": "src/agent_runs/scenarios.rs",

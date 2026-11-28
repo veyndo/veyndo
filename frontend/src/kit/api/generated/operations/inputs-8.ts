@@ -2,6 +2,24 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs8 {
+  "merchant.scenario.create": {
+    inference?: {
+      model?: string | null;
+      provider: "platform" | "ollama" | "openai" | "anthropic";
+    };
+    instruction: string;
+    profiles: Array<{
+      budgetMinor: number;
+      country: string;
+      goal: string;
+      id: string;
+      locale: string;
+      name: string;
+    }>;
+    requestId: string;
+    sourceTaskId?: string;
+    title: string;
+  };
   "merchant.scenario.status": { id: string };
   "merchant.scenario.list": JsonValue;
   "merchant.scenario.readiness": JsonValue;
@@ -20,10 +38,5 @@ export interface Inputs8 {
     entity: "orders" | "products" | "customers";
     instruction: string;
     locale: string;
-  };
-  "merchant.customer.lookup": {
-    after?: string;
-    limit?: number;
-    query?: string;
   };
 }
