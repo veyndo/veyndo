@@ -154,6 +154,40 @@ cannot manufacture a purchase approval or change trusted prices/payment states.
 Adapters must declare supported subsets and reject unsupported bindings or effects
 explicitly. Do not label three independently evolving UI models as one system.
 
+## One catalog, one renderer
+
+**Status, 28 November 2026.** Agent, app and MCP App documents in A2UI v1.0,
+OpenUI Lang or `veyndo-ui/1` render through one renderer, `CatalogView` in
+[kit/catalog](../frontend/src/kit/catalog/README.md), against one versioned
+component catalog (`veyndo:components/1`). The catalog declares each kit component
+and storefront pattern with its props schema, slots, events, accessibility
+contract and admitting surfaces. The [design system](design-system.md) describes
+the catalog, the generated artifacts and the checks; the
+[component gallery](component-gallery.md) shows every entry.
+
+Before anything renders, the renderer reads the document into one tree and checks
+every node against the catalog and the host's admission. It refuses unknown
+components, invalid or unknown props, markup and script attributes, unsafe or
+unadmitted URLs, bindings to data the host did not resolve, commerce values a
+document states itself, misplaced children, unadmitted actions and oversized
+documents. Each refusal shows a localized notice in place of the node. A document
+carries no data: A2UI `updateDataModel` is refused, and `{"path": "/…"}` bindings
+read only the data the host passed in.
+
+| Surface | Entry point | What the host admits |
+| --- | --- | --- |
+| `studio` | The A2UI working view (`GeneratedWorkspace`) and the Studio gallery | The native directory, intake and shipping policy as host components; the workspace catalog id |
+| `storefront` | `<veyndo-document>` from `/assets/elements.js` | The `data`, `actions` and `origins` attributes of the embedding page; actions arrive as `veyndo:action` events |
+| `app` | `ConversationAppViews` in the Studio and storefront chats, when an app view's definition carries `document` | Only the arguments and result of the read the host ran; no commerce patterns |
+| `mcp-app` | The MCP App view `ui://veyndo/kit/storefront`, when a tool result carries `_meta["ai.veyndo/ui"]` | The payload's data and shop origins; links leave through `ui/open-link` |
+
+The Studio working view and the gallery run today. The other three entry points
+are ready in the frontend, with tests: the storefront element ships in
+`elements.js`, and the conversation and MCP App view render a document as soon as
+a definition or tool result carries one. The server does not emit
+`ai.veyndo/ui` payloads or app view `document` fields yet; the app manifest's
+validation of a declared document and those server payloads are the next step.
+
 ## Shared SDK composition
 
 SDK 0.3.0 introduces `@veyndo/sdk/composition`, independently usable in Node and
@@ -201,13 +235,15 @@ integration tracked under UI-06.
 
 Ask the Studio assistant to show products, orders or customers and open its
 working view. Studio admits the current user's view and projects it to A2UI
-v1.0 using the pinned SDK. Its React renderer maps only the registered
-directory, catalogue intake and shipping policy controls. The same native
-editor owns the selected record and its unsaved changes.
+v1.0 using the pinned SDK. The shared catalog renderer validates the A2UI
+messages and mounts only the registered directory, catalogue intake and
+shipping policy controls, which Studio passes in as host components. The same
+native editor owns the selected record and its unsaved changes.
 
-A client without the Studio catalog falls back to OpenUI for the admitted
-panels. Neither presentation receives credentials or grants access. The
-storefront conversation's A2UI integration remains tracked under UI-06.
+A client without the Studio catalog falls back to OpenUI Lang for the admitted
+panels, read by the same renderer. Neither presentation receives credentials or
+grants access. Storefront and MCP App documents use the same renderer; see
+[one catalog, one renderer](#one-catalog-one-renderer).
 
 ## Orders, shipments and shipping policy
 

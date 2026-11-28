@@ -1,4 +1,4 @@
-/** Project the native workspace's reviewed controls through the shared A2UI adapter. */
+/** Project the native workspace's reviewed controls through the shared A2UI adapter into documents for the catalog renderer. */
 import {
   createA2uiAdapter,
   type A2uiProjection,
@@ -49,10 +49,12 @@ function readNativeControls(projection: A2uiProjection): Control[] | null {
   return controls;
 }
 
-export function composeNativeWorkspace(
+export const workspaceCatalogId = catalogId;
+
+function project(
   candidate: unknown,
   rights: string[],
-  capabilities: RendererCapabilities = nativeCapabilities,
+  capabilities: RendererCapabilities,
 ) {
   const view = admitWorkspaceView(candidate, rights);
   if (!view) return null;
@@ -79,7 +81,32 @@ export function composeNativeWorkspace(
     surfaceId: "studio_workspace",
     capabilities,
   });
-  if (presentation.kind === "rejected") return null;
+  return presentation.kind === "rejected" ? null : presentation;
+}
+
+/** The admitted layout as a document for the shared catalog renderer: A2UI v1.0, or OpenUI Lang for clients without the catalog. */
+export function workspaceDocument(
+  candidate: unknown,
+  rights: string[],
+  capabilities: RendererCapabilities = nativeCapabilities,
+) {
+  const presentation = project(candidate, rights, capabilities);
+  if (!presentation) return null;
+  if (presentation.kind === "a2ui" && readNativeControls(presentation))
+    return { protocol: "a2ui-1.0", document: presentation.messages } as const;
+  return {
+    protocol: "openui",
+    document: `root = Workspace([${presentation.panels.map((panel) => `${panel.view}()`).join(", ")}])`,
+  } as const;
+}
+
+export function composeNativeWorkspace(
+  candidate: unknown,
+  rights: string[],
+  capabilities: RendererCapabilities = nativeCapabilities,
+) {
+  const presentation = project(candidate, rights, capabilities);
+  if (!presentation) return null;
   const controls = readNativeControls(presentation);
   if (controls) return { protocol: "a2ui-1.0", controls } as const;
   return {

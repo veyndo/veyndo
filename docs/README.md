@@ -49,6 +49,7 @@ explains how the handbook is built and which pages are generated.
 | Separately hosted Checkout, Knowledge, Automation, connectors | [Checkout component](checkout-component.md), [Knowledge component](knowledge-component.md), [Automation component](automation-component.md), [connector component](connector-component.md) |
 | Hosted API only | [Hosted component API](hosted-component-api.md) |
 | Agentic UI across components (MCP Apps, OpenUI, A2UI) | [Agentic component UI](agentic-component-ui.md), [Product Guide](product-guide-mcp-app.md) |
+| Design system, component catalog and gallery | [Design system](design-system.md), [Component gallery](component-gallery.md) |
 | Your own frontend; Storyfront | [Experience integration](experience-integration.md), [Storyfront](storyfront.md) |
 | B2B negotiation over UCP | [B2B and UCP](b2b-ucp-negotiation.md) |
 | External access decisions | [Connected commerce access](integrations/connected-commerce-access.md) |

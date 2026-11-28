@@ -131,6 +131,7 @@
     "testing/schema_contracts",
     "event_contracts",
     "testing/sdk_contracts_test",
-    "testing/component_releases_test"
+    "testing/component_releases_test",
+    "component_gallery"
   ]
 }

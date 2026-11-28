@@ -1,4 +1,4 @@
-/** Render server-selected MCP App results in an opaque iframe inside the conversation. */
+/** Render server-selected MCP App results: declarative views in an opaque iframe, catalog documents in place through the kit renderer. */
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { RequestFn } from "../api/types";
@@ -9,6 +9,7 @@ import {
   verifiedAppFilter,
   type AppFilterContext,
 } from "./conversation-app-context";
+import { CatalogView } from "../../kit/catalog";
 import "./conversation-app-views.css";
 
 export type ConversationAppReference = {
@@ -29,6 +30,12 @@ type Definition = {
   localeChain: string[];
   filter?: { name: string; choices: { value: string }[] } | null;
   productReference?: string | null;
+  /**
+   * A catalog document (`veyndo-ui/1`, A2UI or OpenUI) the app declares for this
+   * view. It renders in the conversation on the app surface, bound only to the
+   * arguments and result of the read the host ran; no frame is needed.
+   */
+  document?: unknown;
 };
 type UseFilter = (
   filter: AppFilterContext,
@@ -134,7 +141,7 @@ function Frame({
     };
   }, [request, uri, argumentsKey, readCurrent, suppliedResult]);
   useLayoutEffect(() => {
-    if (!loaded) return;
+    if (!loaded || loaded.definition.document !== undefined) return;
     const { definition, result } = loaded;
     const argsForView = JSON.parse(argumentsKey) as Record<string, unknown>;
     let ready = false;
@@ -349,6 +356,33 @@ function Frame({
   const label = definition.localeChain
     ?.map((key) => definition.label[key])
     .find((value) => value != null);
+  if (definition.document !== undefined && loaded)
+    return (
+      <>
+        <section
+          className="conversation-app-document"
+          aria-label={label || name}
+        >
+          <CatalogView
+            document={definition.document}
+            admission={{
+              surface: "app",
+              locale,
+              data: {
+                arguments: JSON.parse(argumentsKey),
+                result: loaded.result.structuredContent,
+              },
+            }}
+          />
+        </section>
+        {renderProducts?.(
+          productIds(
+            loaded.result.structuredContent,
+            definition.productReference,
+          ),
+        )}
+      </>
+    );
   return (
     <>
       <iframe
