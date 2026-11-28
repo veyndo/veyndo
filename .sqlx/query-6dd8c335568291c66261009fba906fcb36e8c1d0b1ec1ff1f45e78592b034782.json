@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE app_versions SET contract=$4 WHERE tenant=$1 AND app=$2 AND version=$3 AND contract IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6dd8c335568291c66261009fba906fcb36e8c1d0b1ec1ff1f45e78592b034782"
+}

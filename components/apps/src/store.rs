@@ -32,6 +32,7 @@ pub mod locks;
 pub mod managed_data;
 pub mod mcp_views;
 pub mod native_lifecycle;
+pub mod package_contracts;
 pub mod package_fence;
 pub mod package_install;
 pub mod packages;

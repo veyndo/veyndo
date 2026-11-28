@@ -1490,6 +1490,187 @@
         ]
       }
     },
+    "/api/apps/{id}/ports/{port}": {
+      "post": {
+        "operationId": "postAppsByIdPortsByPort",
+        "tags": [
+          "apps"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "port",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Tenant"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "default": {
+            "description": "Failure envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "x-veyndo-source": "src/apps/observability.rs",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-veyndo-permission": "read",
+        "security": [
+          {
+            "personalSession": []
+          },
+          {
+            "integrationKey": []
+          }
+        ]
+      }
+    },
+    "/api/apps/{id}/rollback": {
+      "post": {
+        "operationId": "postAppsByIdRollback",
+        "tags": [
+          "apps"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Tenant"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "default": {
+            "description": "Failure envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "x-veyndo-source": "src/apps/observability.rs",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-veyndo-permission": "apps.manage",
+        "security": [
+          {
+            "personalSession": []
+          },
+          {
+            "integrationKey": []
+          }
+        ]
+      }
+    },
+    "/api/apps/{id}/sandbox": {
+      "get": {
+        "operationId": "getAppsByIdSandbox",
+        "tags": [
+          "apps"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Tenant"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "default": {
+            "description": "Failure envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "x-veyndo-source": "src/apps/observability.rs",
+        "x-veyndo-permission": "apps.manage",
+        "security": [
+          {
+            "personalSession": []
+          },
+          {
+            "integrationKey": []
+          }
+        ]
+      }
+    },
     "/api/apps/{id}/secrets": {
       "get": {
         "operationId": "getAppsByIdSecrets",

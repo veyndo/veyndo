@@ -1,8 +1,8 @@
 //! Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter.
 use super::{
     Manifest, approval, asset_surfaces, configure, consent, core_callbacks, core_documents,
-    credentials, evidence_routes, gateway, hosted, install, jobs, observability, record_history,
-    secrets, settings, surface_grants, surfaces, ui_bundles, ui_documents,
+    credentials, evidence_routes, gateway, hosted, install_package, jobs, observability,
+    record_history, secrets, settings, surface_grants, surfaces, ui_bundles, ui_documents,
 };
 use crate::auth::SecureRoutes;
 use crate::foundation::App;
@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
+use veyndo_app_platform::domain::package_contract;
 use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, slots};
 use veyndo_app_platform::http::packages;
 use veyndo_core::Result;
@@ -150,9 +151,16 @@ async fn app_install(
     let input: AppInstallInput = view(&v);
     auth::permit(&h, "users")?;
     let t = merchant(&a, &h)?;
-    let m = consent::decode(&v)?;
+    let (m, contract) = consent::decode_package(&v)?;
     consent::approved(&h, &m, &v)?;
-    let result = install(&a, &t, m).await?;
+    if let Some(expected) = v.get("contractDigest").and_then(Value::as_str)
+        && contract.as_ref().map(package_contract::digest).as_deref() != Some(expected)
+    {
+        return Err(veyndo_core::conflict(
+            "The package contract changed after review; review it again",
+        ));
+    }
+    let result = install_package(&a, &t, m, contract.as_ref()).await?;
     if input.built_in == "paypal" {
         let mut tx = a.db.begin().await?;
         let mut config: commerce::Settings = serde_json::from_value(

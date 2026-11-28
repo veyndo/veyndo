@@ -11,6 +11,7 @@ use axum::routing::post;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
+use veyndo_app_platform::domain::package_contract::{self, Contract};
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::document::{lenient, view};
@@ -22,18 +23,33 @@ struct DecodeInput {
     #[serde(deserialize_with = "lenient")]
     built_in: Option<String>,
     manifest: Value,
+    contract: Value,
 }
 
-pub(super) fn decode(v: &Value) -> Result<Manifest> {
+/// The Manifest and its signed package contract: the bundled one for a built-in app, else the
+/// request's `contract`. A package without one keeps conservative tool defaults and no ports.
+pub(super) fn decode_package(v: &Value) -> Result<(Manifest, Option<Contract>)> {
     let input: DecodeInput = view(v);
-    let m = if let Some(s) = input.built_in.as_deref().and_then(approval::built_in) {
+    let built_in = input.built_in.as_deref();
+    let m: Manifest = if let Some(s) = built_in.and_then(approval::built_in) {
         serde_json::from_str(s).map_err(|_| bad("Invalid built-in"))?
     } else {
         serde_json::from_value(input.manifest.clone()).map_err(|e| bad(e.to_string()))?
     };
     validate(&m)?;
     approval::installation(&m)?;
-    Ok(m)
+    let contract: Option<Contract> = match built_in.and_then(package_contract::built_in) {
+        Some(s) => Some(serde_json::from_str(s).map_err(|_| bad("Invalid built-in contract"))?),
+        None if input.contract.is_null() => None,
+        None => Some(
+            serde_json::from_value(input.contract.clone())
+                .map_err(|e| bad(format!("Invalid package contract: {e}")))?,
+        ),
+    };
+    if let Some(c) = &contract {
+        package_contract::validate(&m, c, &crate::runtime_config::get().publishers)?;
+    }
+    Ok((m, contract))
 }
 pub(crate) use veyndo_app_platform::domain::consent::{actor_permissions, approved};
 pub(super) fn router() -> Router<App> {
@@ -58,7 +74,7 @@ async fn review(
     if environment.is_some() {
         auth::permit(&h, "developer.manage")?;
     }
-    let m = decode(&v)?;
+    let (m, contract) = decode_package(&v)?;
     actor_permissions(&h, &m)?;
     let (previous, upgrade) = veyndo_app_platform::service::upgrade_review::inspect(
         &service_limits::platform(&a),
@@ -74,6 +90,6 @@ async fn review(
         .filter(|p| old.is_none_or(|v| !v.contains(p)))
         .collect::<Vec<_>>();
     Ok(Json(
-        json!({"app":m.id,"name":m.name,"version":m.version,"digest":approval::canonical_digest(&m),"permissions":m.permissions,"added":added,"previousVersion":previous.map(|v|v.version),"upgrade":upgrade}),
+        json!({"app":m.id,"name":m.name,"version":m.version,"digest":approval::canonical_digest(&m),"contractDigest":contract.as_ref().map(package_contract::digest),"contract":contract,"permissions":m.permissions,"added":added,"previousVersion":previous.map(|v|v.version),"upgrade":upgrade}),
     ))
 }

@@ -65,3 +65,47 @@ pub async fn requeue(conn: &mut PgConnection, t: &str, app: &str, event: i64) ->
     .await?
     .rows_affected())
 }
+
+/// One recorded change of an app record, without its fields.
+pub struct RecordChange {
+    pub entity: String,
+    pub record: String,
+    pub revision: i64,
+    pub source: String,
+    pub at: String,
+}
+/// The latest 50 record changes of an app: model, record, revision and source only.
+pub async fn writes(a: &State, t: &str, app: &str) -> Result<Vec<RecordChange>> {
+    Ok(sqlx::query_as!(
+        RecordChange,
+        r#"SELECT entity,record_id AS record,revision,source,created_at::text AS "at!" FROM app_record_versions WHERE tenant=$1 AND app=$2 ORDER BY created_at DESC, revision DESC LIMIT 50"#,
+        t,
+        app
+    )
+    .fetch_all(&a.db)
+    .await?)
+}
+/// One recorded call, without its payload.
+pub struct ActionCall {
+    pub id: i64,
+    pub action: String,
+    pub status: i32,
+    pub at: String,
+}
+/// The latest 50 calls of the named actions, such as the ones that reach an external service.
+pub async fn calls_of(
+    a: &State,
+    t: &str,
+    app: &str,
+    actions: &[String],
+) -> Result<Vec<ActionCall>> {
+    Ok(sqlx::query_as!(
+        ActionCall,
+        r#"SELECT id,action,status,created_at::text AS "at!" FROM app_action_log WHERE tenant=$1 AND app=$2 AND action=ANY($3) ORDER BY id DESC LIMIT 50"#,
+        t,
+        app,
+        actions
+    )
+    .fetch_all(&a.db)
+    .await?)
+}

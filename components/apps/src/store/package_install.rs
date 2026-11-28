@@ -1,12 +1,13 @@
 //! Atomic installation and additive schema upgrades; required hooks preserve compiler/trust, commerce, schema, default-record and schedule admission in the shared transaction.
 use crate::domain::manifest_validation::validate;
+use crate::domain::package_contract::{Contract, Rollback};
 use crate::domain::{approval, field_values};
 use crate::ports::{CommerceInstall, Platform, RecordRules};
 use crate::service::configuration_runtime::validate_fee;
 use crate::service::package_verification::verify_package;
 use crate::store::{
-    commerce_hooks, dependencies, managed_data, native_lifecycle, records, schedules,
-    schema_upgrade, storage_usage,
+    commerce_hooks, dependencies, managed_data, native_lifecycle, package_contracts, records,
+    schedules, schema_upgrade, storage_usage,
 };
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -19,6 +20,8 @@ pub struct Host<'a> {
     pub manifest: &'a Manifest,
     pub rules: &'a dyn RecordRules,
     pub commerce: &'a dyn CommerceInstall,
+    /// The data steps of an explicit rollback, taken from the contract of the version being replaced.
+    pub rollback: Option<&'a Rollback>,
 }
 impl<'db> InstallHooks<'db> for Host<'_> {
     type Error = Error;
@@ -79,17 +82,28 @@ impl<'db> InstallHooks<'db> for Host<'_> {
         Box::pin(async move {
             let old: Manifest = serde_json::from_value(previous.clone())
                 .map_err(|_| bad("Invalid prior package"))?;
-            let version = |s: &str| {
-                s.split('.')
-                    .map(|v| v.parse::<u32>().unwrap_or(0))
-                    .collect::<Vec<_>>()
-            };
-            if version(&self.manifest.version) < version(&old.version) {
+            if old.version != self.manifest.version {
+                schema_upgrade::retire_snapshot(tx, self.tenant, &old.id, &self.manifest.version)
+                    .await?;
+            }
+            if !older(&self.manifest.version, &old.version) {
+                return schema_upgrade::upgrade(tx, self.tenant, &old, self.manifest).await;
+            }
+            // A downgrade only runs as an explicit rollback with the data steps the newer version declared.
+            let Some(rollback) = self
+                .rollback
+                .filter(|r| r.to_version == self.manifest.version)
+            else {
                 return Err(conflict(
                     "Downgrade requires an explicit compatible migration",
                 ));
-            }
-            schema_upgrade::upgrade(tx, self.tenant, &old, self.manifest).await
+            };
+            let mut target = self.manifest.clone();
+            target.schema_migrations = vec![veyndo_app_model::evolution::Migration {
+                from_version: old.version.clone(),
+                steps: rollback.steps.clone(),
+            }];
+            schema_upgrade::upgrade(tx, self.tenant, &old, &target).await
         })
     }
     fn attach<'a>(
@@ -134,6 +148,20 @@ impl<'db> InstallHooks<'db> for Host<'_> {
         })
     }
 }
+/// Whether `new` is an earlier version than `old`: semantic versions when both are, numeric parts otherwise.
+fn older(new: &str, old: &str) -> bool {
+    match (semver::Version::parse(new), semver::Version::parse(old)) {
+        (Ok(new), Ok(old)) => new < old,
+        _ => {
+            let parts = |s: &str| {
+                s.split('.')
+                    .map(|v| v.parse::<u32>().unwrap_or(0))
+                    .collect::<Vec<_>>()
+            };
+            parts(new) < parts(old)
+        }
+    }
+}
 /// The response for a refused or failed installation.
 pub fn error(error: InstallError<Error>) -> Error {
     match error {
@@ -143,10 +171,44 @@ pub fn error(error: InstallError<Error>) -> Error {
         InstallError::Hook(error) => error,
     }
 }
-/// Installs or upgrades a package in its own privileged transaction.
-pub async fn install(a: &Platform, t: &str, m: Manifest) -> Result<Value> {
+/// Installs or upgrades a package with its signed contract in one privileged transaction.
+pub async fn install_package(
+    a: &Platform,
+    t: &str,
+    m: Manifest,
+    contract: Option<&Contract>,
+) -> Result<Value> {
     let mut tx = a.db.begin_privileged().await?;
-    let result = install_tx(a.rules, a.commerce, &mut tx, t, m).await?;
+    let result = install_inner(a.rules, a.commerce, &mut tx, t, m, true, contract, None).await?;
+    tx.commit().await?;
+    Ok(result)
+}
+/// Explicitly returns an installed package to an earlier published version of this shop. The exact
+/// stored version and its contract are reinstalled; app data follows the rollback steps the current
+/// version declares for that target, so a version without them cannot be rolled back to.
+pub async fn rollback(a: &Platform, t: &str, app: &str, version: &str) -> Result<Value> {
+    let mut tx = a.db.begin_privileged().await?;
+    crate::store::locks::tenant_scope(&mut tx, t).await?;
+    let current = package_contracts::of_app(&mut *tx, t, app).await?;
+    let (m, contract) = package_contracts::version(&mut tx, t, app, version).await?;
+    let steps = current
+        .as_ref()
+        .and_then(|c| c.rollbacks.iter().find(|r| r.to_version == version))
+        .ok_or(conflict(
+            "The installed version declares no rollback to this version",
+        ))?
+        .clone();
+    let result = install_inner(
+        a.rules,
+        a.commerce,
+        &mut tx,
+        t,
+        m,
+        true,
+        contract.as_ref(),
+        Some(&steps),
+    )
+    .await?;
     tx.commit().await?;
     Ok(result)
 }
@@ -158,7 +220,7 @@ pub async fn install_tx(
     t: &str,
     m: Manifest,
 ) -> Result<Value> {
-    install_inner(rules, commerce, tx, t, m, true).await
+    install_inner(rules, commerce, tx, t, m, true, None, None).await
 }
 /// Installs a mutable package into a personal preview environment, without version history.
 pub async fn install_preview(
@@ -174,8 +236,9 @@ pub async fn install_preview(
             "Mutable app preview requires a personal preview environment",
         ));
     }
-    install_inner(rules, commerce, tx, t, m, false).await
+    install_inner(rules, commerce, tx, t, m, false, None, None).await
 }
+#[allow(clippy::too_many_arguments)]
 async fn install_inner(
     rules: &dyn RecordRules,
     commerce: &dyn CommerceInstall,
@@ -183,9 +246,11 @@ async fn install_inner(
     t: &str,
     m: Manifest,
     versions: bool,
+    contract: Option<&Contract>,
+    rollback: Option<&Rollback>,
 ) -> Result<Value> {
     let value = json!(m);
-    veyndo_app_storage::installation::install(
+    let result = veyndo_app_storage::installation::install(
         tx,
         &veyndo_app_storage::installation::Package {
             scope: veyndo_app_storage::Scope {
@@ -201,8 +266,20 @@ async fn install_inner(
             manifest: &m,
             rules,
             commerce,
+            rollback,
         },
     )
     .await
-    .map_err(error)
+    .map_err(error)?;
+    // Still under the tenant installation lock of the shared sequence: wire ports, keep the version's contract.
+    package_contracts::install(
+        tx,
+        t,
+        &m,
+        contract,
+        &process_config::get().publishers,
+        versions,
+    )
+    .await?;
+    Ok(result)
 }

@@ -39,7 +39,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/credentials.rs](../src/apps/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [src/apps/data.rs](../src/apps/data.rs) | Managed app records live in the apps component; this module supplies the record rules of the bundled site builder. |
 | [src/apps/discovery.rs](../src/apps/discovery.rs) | App capability discovery lives in the apps component; this module keeps the server-side entry for MCP and capabilities. |
-| [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys. |
+| [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces, package contracts and tenant-local dependency/version gates; the rules live in the apps component, this module supplies offline signing. |
 | [src/apps/egress.rs](../src/apps/egress.rs) | Pinned egress clients live in the apps component; this module supplies the operator's private service origins. |
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
@@ -56,7 +56,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/mod.rs](../src/apps/mod.rs) | Versioned app packages: managed data, UI slots, agent tools and isolated service calls. |
 | [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings. |
-| [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
+| [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, sandbox transparency, explicit version rollback, typed port calls and explicitly approved cursor-based event replay. |
 | [src/apps/package_fence.rs](../src/apps/package_fence.rs) | The package write fence lives in the apps component; this module keeps the short path for native writers. |
 | [src/apps/planning.rs](../src/apps/planning.rs) | App planning lives in the apps component; this module keeps the short path for the planner and proposals. |
 | [src/apps/record_history.rs](../src/apps/record_history.rs) | App record history lives in the apps component; this module registers its routes and keeps the capability path. |
@@ -472,9 +472,11 @@ This lists every checked-in source module in these roots, including files with n
 | Module | Responsibility |
 |---|---|
 | [components/apps/migrations/0001-baseline.sql](../components/apps/migrations/0001-baseline.sql) | Baseline schema of the apps component (App packages, managed data, UI surfaces, Wasm extensions and the app builder): its tables, sequences, functions, |
+| [components/apps/migrations/0002-package-contracts.sql](../components/apps/migrations/0002-package-contracts.sql) | Package contracts (expand). A signed contract travels beside each app Manifest: the effects of its |
 | [components/apps/src/domain/action_admission.rs](../components/apps/src/domain/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
 | [components/apps/src/domain/action_inputs.rs](../components/apps/src/domain/action_inputs.rs) | Typed reads of an app action input schema: the declared `properties` the host binds and filters by. |
 | [components/apps/src/domain/action_policy.rs](../components/apps/src/domain/action_policy.rs) | Which declared actions only read: the distinction every surface, grant and GET route relies on. |
+| [components/apps/src/domain/app_facts.rs](../components/apps/src/domain/app_facts.rs) | Planner facts of installed app tools in the exact wire shape of the native `OperationFacts` (audience, permissions, writes, reversibility, risk, data, effects, requires, conditions, with derived cost and approval); owned because they come from package data, and they never grant rights. |
 | [components/apps/src/domain/app_generation.rs](../components/apps/src/domain/app_generation.rs) | The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps. |
 | [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
 | [components/apps/src/domain/build_admission.rs](../components/apps/src/domain/build_admission.rs) | What an App Studio build must satisfy before it is stored: no reserved or reviewed-only package, bounded labels, the shop main language. |
@@ -510,8 +512,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/native_lifecycle.rs](../components/apps/src/domain/native_lifecycle.rs) | Versioned declarative native lifecycles; packages narrow native admission and never execute effects. |
 | [components/apps/src/domain/native_views.rs](../components/apps/src/domain/native_views.rs) | Shared view contracts of a package; actual grants, runtime execution and current rights remain with the server. |
 | [components/apps/src/domain/ontology.rs](../components/apps/src/domain/ontology.rs) | Native complete-package adapter for graph mapping; the existing authorized list supplies every projected row. |
+| [components/apps/src/domain/package_contract.rs](../components/apps/src/domain/package_contract.rs) | The signed package contract beside the Manifest: per-tool planner facts, typed app-to-app ports and explicit rollback migrations. It describes a package for agents and reviewers; it never grants a right. |
 | [components/apps/src/domain/persistence.rs](../components/apps/src/domain/persistence.rs) | Translate storage-port failures into the existing native HTTP/MCP domain errors. |
 | [components/apps/src/domain/planning.rs](../components/apps/src/domain/planning.rs) | Merchant planning over app records: what a proposal may bind and how much untrusted context a model sees. |
+| [components/apps/src/domain/port_wiring.rs](../components/apps/src/domain/port_wiring.rs) | Typed app-to-app ports: a consumer names an interface and version range, the platform picks the installed provider; incompatible versions are refused before installation, upgrade, rollback or deactivation. |
 | [components/apps/src/domain/presentation.rs](../components/apps/src/domain/presentation.rs) | Adapt shared passive artwork validation; installation and trusted service UI remain native owners. |
 | [components/apps/src/domain/record_lifecycle.rs](../components/apps/src/domain/record_lifecycle.rs) | Native transport mapping for shared app-owned workflow contracts and state transitions. |
 | [components/apps/src/domain/reference_policy.rs](../components/apps/src/domain/reference_policy.rs) | Which core records an app field may refer to; no app alters core tables. |
@@ -535,6 +539,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/http/jobs.rs](../components/apps/src/http/jobs.rs) | The job list, detail and control of an app. |
 | [components/apps/src/http/packages.rs](../components/apps/src/http/packages.rs) | Package transport: capability discovery for agents, switching an installed package on or off, and the public consent adapter. |
 | [components/apps/src/http/record_history.rs](../components/apps/src/http/record_history.rs) | Bounded app-record history, current entity rights and restoration through the normal managed save path. |
+| [components/apps/src/http/sandbox.rs](../components/apps/src/http/sandbox.rs) | Sandbox transparency, explicit version rollback and typed port calls of one installed app; declarations come from the stored package, activity from the existing metadata-only call and record history. |
 | [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
 | [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [components/apps/src/http/surface_grants.rs](../components/apps/src/http/surface_grants.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object on the server. |
@@ -546,6 +551,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/ports.rs](../components/apps/src/ports.rs) | What the app platform needs from the server: the shared state, its own execution limits, the record rules of bundled apps, the commerce side of an installation and the action handlers the server owns. |
 | [components/apps/src/service/admission.rs](../components/apps/src/service/admission.rs) | Shared network-app admission: the local bulkheads plus replica-wide fenced leases. |
 | [components/apps/src/service/app_builds.rs](../components/apps/src/service/app_builds.rs) | App Studio builds: immutable development versions saved after admission, listed, archived, and staged into an environment the shop owns. |
+| [components/apps/src/service/app_ports.rs](../components/apps/src/service/app_ports.rs) | Calls through a typed app port: the consumer names the interface, the platform resolves the installed provider and runs its action through the same permission-aware gateway, so the caller's rights, tenant, quotas and egress rules still apply. |
 | [components/apps/src/service/app_preview.rs](../components/apps/src/service/app_preview.rs) | Immediate App Studio preview: the native runtime in an expiring personal environment. No build, version or release is created. |
 | [components/apps/src/service/business_policy.rs](../components/apps/src/service/business_policy.rs) | The tenant business policy: a sandboxed Wasm module for company purchase approval, activated by the merchant, persisted with its digest and compiled on the bounded cache. |
 | [components/apps/src/service/carrier_booking.rs](../components/apps/src/service/carrier_booking.rs) | Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent. |
@@ -606,6 +612,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/managed_data.rs](../components/apps/src/store/managed_data.rs) | Shared managed app records: typed writes, optimistic revisions, bounded reads and local RLS context. |
 | [components/apps/src/store/mcp_views.rs](../components/apps/src/store/mcp_views.rs) | Which assistant views of the installed packages a caller may list and open. |
 | [components/apps/src/store/native_lifecycle.rs](../components/apps/src/store/native_lifecycle.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
+| [components/apps/src/store/package_contracts.rs](../components/apps/src/store/package_contracts.rs) | Stored package contracts: written with the package on the installation transaction, immutable per published version, trusted only when they name the row's version. |
 | [components/apps/src/store/package_fence.rs](../components/apps/src/store/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [components/apps/src/store/package_install.rs](../components/apps/src/store/package_install.rs) | Atomic installation and additive schema upgrades; required hooks preserve compiler/trust, commerce, schema, default-record and schedule admission in the shared transaction. |
 | [components/apps/src/store/packages.rs](../components/apps/src/store/packages.rs) | The installed package of a shop, read on the backend the caller already holds. |
@@ -625,7 +632,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/storage_usage.rs](../components/apps/src/store/storage_usage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
 | [components/apps/src/store/surface_grants.rs](../components/apps/src/store/surface_grants.rs) | Stored surface grants: the objects a context may name and the recheck of a presented grant. |
 | [components/apps/src/store/surface_registry.rs](../components/apps/src/store/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
-| [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
+| [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata, carry their declared or conservative planner facts, and validate declared results without disclosing provider payloads. |
 | [components/apps/src/store/webhook_receipts.rs](../components/apps/src/store/webhook_receipts.rs) | Receipts of incoming app webhooks: one outbox event per (app, webhook, sender event ID), replayed on repeats. |
 | [components/apps/src/store/workspace.rs](../components/apps/src/store/workspace.rs) | App samples for the merchant workspace: active apps with failed jobs and the activity check of workflow source apps. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
@@ -644,6 +651,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/ui/admin/apps/AppJobs.tsx](../components/apps/ui/admin/apps/AppJobs.tsx) | Long actions use the same app/outbox contract, with progress and explicit uncertain-outcome review. |
 | [components/apps/ui/admin/apps/AppLibrary.tsx](../components/apps/ui/admin/apps/AppLibrary.tsx) | Searchable installed/discovery app cards with category/status filters and real lifecycle actions. |
 | [components/apps/ui/admin/apps/AppPackageImport.tsx](../components/apps/ui/admin/apps/AppPackageImport.tsx) | Import a bounded manifest through the same server review and approval as built-in apps. |
+| [components/apps/ui/admin/apps/AppSandbox.tsx](../components/apps/ui/admin/apps/AppSandbox.tsx) | Per-app sandbox transparency: declared permissions, network access, data, ports and agent tool effects beside the recorded calls, service calls and data changes, with explicit version rollback. |
 | [components/apps/ui/admin/apps/AppSecrets.tsx](../components/apps/ui/admin/apps/AppSecrets.tsx) | Metadata-only credentials screen; rotation sends plaintext once to the encrypted server store. |
 | [components/apps/ui/admin/apps/AppSettings.tsx](../components/apps/ui/admin/apps/AppSettings.tsx) | Installed settings use the existing encrypted secret owner; secret inputs are write-only and cleared after save. |
 | [components/apps/ui/admin/apps/AppUpgradeReport.tsx](../components/apps/ui/admin/apps/AppUpgradeReport.tsx) | Display only native admission metadata; a report is never an installation permission. |
@@ -663,6 +671,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/ui/admin/apps/integration-directory-text.ts](../components/apps/ui/admin/apps/integration-directory-text.ts) | Service catalogue capability boundaries in all supported Studio languages. |
 | [components/apps/ui/admin/apps/library-model.ts](../components/apps/ui/admin/apps/library-model.ts) | Shared app discovery metadata, safe artwork sources and localized search independent of rendering. |
 | [components/apps/ui/admin/apps/provider-account.css](../components/apps/ui/admin/apps/provider-account.css) | Shared provider onboarding layout works independently of the lazy-loaded visual App Studio. |
+| [components/apps/ui/admin/apps/sandbox-i18n.ts](../components/apps/ui/admin/apps/sandbox-i18n.ts) | App sandbox transparency and version vocabulary: what an app may do, what it did, and explicit rollback; EN/DE/FR/ES. |
 | [components/apps/ui/admin/apps/service-integration-text.ts](../components/apps/ui/admin/apps/service-integration-text.ts) | Shared connector controls; provider-specific descriptions and field choices stay in app packages. |
 | [components/apps/ui/admin/apps/service-integrations.css](../components/apps/ui/admin/apps/service-integrations.css) | Compact, responsive provider setup and explicit operation feedback. |
 | [components/apps/ui/admin/apps/service-integrations.ts](../components/apps/ui/admin/apps/service-integrations.ts) | Installed provider UI capabilities come from their app packages, not an alternate commerce registry. |
@@ -3036,6 +3045,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/agentic_commerce.py](../scripts/agentic_commerce.py) | Real UCP cart transfer into native checkout: scoped single-use capability and one durable order. |
 | [scripts/agentic_scenarios.py](../scripts/agentic_scenarios.py) | Customer agents use the native isolated shop, cart and checkout; only inference is synthetic. |
 | [scripts/api_catalogue.py](../scripts/api_catalogue.py) | Generate a drift-checked static HTTP route catalogue from the compiled Rust router declarations. |
+| [scripts/app_agent_packages.py](../scripts/app_agent_packages.py) | Signed app packages as agent tools: effects on MCP tools, refused unauthorized calls, typed port wiring and version refusal, contract tamper refusal, upgrade/rollback with a data migration and Wasm hot swap without restart. |
 | [scripts/app_assets.py](../scripts/app_assets.py) | Actual native scoped file upload, callback read, product/digest/key fences and public-file policy. |
 | [scripts/app_assistants.py](../scripts/app_assistants.py) | Real assistant packages: editor context, rights, MCP opt-out, cron, signed webhooks, flows and local service fixtures. |
 | [scripts/app_callbacks.py](../scripts/app_callbacks.py) | Real app identity, separate PII consent, digest/creator fences and foreign-object tests. No paid services. |

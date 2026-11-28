@@ -655,7 +655,9 @@ checks are behavioral evidence, not 100% endpoint/authorization coverage.
 
 Registered PostgreSQL suites exercise `app_consent`, `app_callbacks`,
 `app_preview`, `app_relations`, `app_schema`, `app_jobs`, `app_components`,
-`app_assets`, `app_secrets`, `app_events`, `app_export` and `app_distribution`.
+`app_assets`, `app_secrets`, `app_events`, `app_export`, `app_distribution` and
+`app_agent_packages` (tool effects, refused calls, port wiring/version refusal,
+contract tamper refusal, upgrade/rollback with a data migration and Wasm hot swap).
 They observe installed versions and actual records/DDL, denied foreign mutations,
 lease fences, provider signatures, replay and export bytes. Existing apps,
 services, staging, connectors and automation suites verify compatibility.

@@ -386,3 +386,25 @@ partial updates, package/revision fences and secret-safe projection, with explic
 personal live administrator admission. The serving role cannot install packages
 or create schema objects. Reader/write profiles retain their separate grants.
 The original vault envelope is shared; existing native ciphertext stays readable.
+
+## Agent facts, ports and package contracts
+
+Package contracts (`components/apps/src/domain/package_contract.rs`) describe
+tools, ports and rollbacks; they never grant a right. Tool facts follow the native
+operation-facts invariants: the Manifest fixes audience, permissions and whether a
+tool writes, handlers add their effects (`service` stays an external call), and
+declarations are raised, never lowered, to the native rules. Undescribed writes
+are irreversible and high risk, so they require approval. The gateway's
+current-rights, tenant, quota and egress checks run for every MCP, HTTP, agent
+and port call. A port call runs the provider action with the caller's own rights;
+a consumer gains no provider permission.
+
+A signed Manifest requires a contract signed with the same registered publisher
+key over the canonical Manifest digest plus the contract digest; tampering with
+either is refused with 403 (`app_agent_packages`). Stored contracts are only
+trusted when they name the stored version, so a previous release that installs a
+new version without writing the contract column falls back to conservative
+defaults. Rollback reinstalls an exact stored version under the ordinary
+installation sequence and requires the current actor to hold that version's
+rights. The Sandbox endpoint returns metadata only: permissions, origins, model
+shapes, port wiring, effects, call status/time and record IDs/revisions.

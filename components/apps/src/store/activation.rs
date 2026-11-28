@@ -38,7 +38,8 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
             approval::installation(&m, &config.services)?;
             dependencies::check(tx, self.tenant, &m, &config.publishers).await?;
             commerce_hooks::admission(tx, self.tenant, &m).await?;
-            native_lifecycle::admission(tx, self.tenant, &m).await
+            native_lifecycle::admission(tx, self.tenant, &m).await?;
+            crate::store::package_contracts::admit_activation(tx, self.tenant, self.app).await
         })
     }
     fn deactivating<'a>(
@@ -56,7 +57,7 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
                     "App is required by connected frontends; disconnect them first",
                 ));
             }
-            Ok(())
+            crate::store::package_contracts::admit_deactivation(tx, self.tenant, self.app).await
         })
     }
 }

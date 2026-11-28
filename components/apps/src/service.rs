@@ -1,6 +1,7 @@
 //! Process-side helpers of the app platform: pinned egress clients and local execution limits.
 pub mod admission;
 pub mod app_builds;
+pub mod app_ports;
 pub mod app_preview;
 pub mod business_policy;
 pub mod carrier_booking;
