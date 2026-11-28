@@ -1,7 +1,7 @@
 # Capability catalogue
 
 `registry.rs` binds each native operation once to its catalogue name, input schema,
-domain owner, conservative safety hints and read-agent exposure. `admission.rs`
+domain owner, read-agent exposure and its typed facts, from which the MCP safety hints follow. `admission.rs`
 applies current domain permissions before discovery and execution; domain handlers
 still own object, PII, CAS and business checks. Metadata never grants access.
 

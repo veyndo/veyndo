@@ -10,9 +10,9 @@
    "recordedAt": "2026-11-27T13:28:01+00:00",
    "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
   },
-  "recordedAt": "2026-11-28T09:12:05+00:00",
-  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb",
-  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents"
+  "recordedAt": "2026-11-28T09:52:34+00:00",
+  "head": "2c7a38d9f75f62bc62d4b1eb36a081ae96285bd9",
+  "reason": "MCP safety hints now follow the typed operation facts"
  },
  "steps": [
   {

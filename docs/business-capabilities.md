@@ -124,8 +124,12 @@ The transport no longer owns a separate schema or visibility implementation. The
 selected domain future remains boxed before polling; this preserves the coverage
 worker stack repair. Registration rejects duplicate names.
 
-Core tools and installed app actions share `ToolContract`. Unclassified operations
-retain conservative mutating/destructive hints; these hints confer no rights.
+Core tools and installed app actions share `ToolContract`. Their MCP annotations follow
+the typed facts: `readOnlyHint` when the call writes nothing, `destructiveHint` for an
+irreversible or high-risk write, `openWorldHint` when it reaches email, payment, an
+external provider, a model or publication. App actions without declared facts keep
+conservative defaults. The separate `readOnly` member still states the admission effect
+(what an agent credential may run); hints confer no rights.
 App actions may declare `outputSchema`, using the bounded supported schema subset.
 Their results are validated by the existing action gateway across HTTP, MCP and
 native consumers. Omitted output contracts do not alter old immutable package

@@ -4,9 +4,9 @@
  "runDigest": "4cf611ce9f67d7d55b70d99203f82ff259f2b9765d80a092d717ec172cdd4334",
  "source": {
   "kind": "authored",
-  "recordedAt": "2026-11-28T09:11:58+00:00",
-  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents",
-  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb"
+  "recordedAt": "2026-11-28T09:52:34+00:00",
+  "reason": "MCP safety hints now follow the typed operation facts",
+  "head": "2c7a38d9f75f62bc62d4b1eb36a081ae96285bd9"
  },
  "steps": [
   {

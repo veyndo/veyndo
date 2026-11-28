@@ -107,6 +107,15 @@ pub enum SideEffect {
     /// Emits a domain event that Flows and apps may react to.
     Event,
 }
+impl SideEffect {
+    /// Whether the effect reaches people or systems outside the shop's own records.
+    pub const fn open_world(self) -> bool {
+        matches!(
+            self,
+            Self::Email | Self::Payment | Self::ExternalCall | Self::ModelCall | Self::Publication
+        )
+    }
+}
 
 /// A state the caller must be in, beyond permissions.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -135,7 +144,7 @@ pub struct OperationFacts {
     pub audience: Audience,
     /// Every permission admission requires together; empty for shopper calls and any signed-in member.
     pub permissions: &'static [&'static str],
-    /// Whether the call changes state; a conservative mutating transport hint may still apply to reads.
+    /// Whether the call changes state; the MCP read-only hint follows it.
     pub writes: bool,
     pub reversibility: Reversibility,
     pub risk: Risk,
@@ -233,6 +242,17 @@ impl OperationFacts {
     pub fn requires_approval(&self) -> bool {
         self.writes
             && (self.risk == Risk::High || self.reversibility == Reversibility::Irreversible)
+    }
+    /// The MCP safety hints these facts imply: reads are read-only, a write is destructive when it is
+    /// irreversible or high-risk, and a call is open-world when it reaches outside the shop (provider,
+    /// email, payment, publication or model).
+    pub fn hints(&self) -> crate::tool_contract::Hints {
+        crate::tool_contract::Hints::of(
+            self.writes,
+            self.writes
+                && (self.risk == Risk::High || self.reversibility == Reversibility::Irreversible),
+            self.effects.iter().any(|effect| effect.open_world()),
+        )
     }
     /// The compensating operation, if one exists.
     pub fn compensation(&self) -> Option<&'static str> {

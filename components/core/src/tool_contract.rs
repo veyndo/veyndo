@@ -22,7 +22,38 @@ struct Safety {
     idempotent_hint: bool,
     open_world_hint: bool,
 }
+/// MCP safety hints derived from typed facts; they inform clients and never grant execution rights.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Hints {
+    read_only: bool,
+    destructive: bool,
+    open_world: bool,
+}
+impl Hints {
+    /// Hints for a call that writes or not, may destroy data and reaches outside the shop.
+    pub const fn of(writes: bool, destructive: bool, open_world: bool) -> Self {
+        Self {
+            read_only: !writes,
+            destructive: writes && destructive,
+            open_world,
+        }
+    }
+}
 impl<'a> ToolContract<'a> {
+    /// Replaces the conservative hints of a described tool with the hints its typed facts imply.
+    pub fn with_hints(tool: &mut Value, hints: Hints) {
+        if let Some(described) = tool.as_object_mut() {
+            described.insert(
+                "annotations".into(),
+                json!(Safety {
+                    read_only_hint: hints.read_only,
+                    destructive_hint: hints.destructive,
+                    idempotent_hint: false,
+                    open_world_hint: hints.open_world,
+                }),
+            );
+        }
+    }
     /// Describes a tool; a tool that is not read-only is announced as destructive.
     pub fn describe(
         name: &'a str,

@@ -67,6 +67,7 @@ pub async fn app_tools_for(a: &State, h: &RequestContext, public_only: bool) -> 
                 // The same facts, cost and approval members the native operation contracts carry.
                 let (f, declared) = facts(&m, action, contract);
                 veyndo_core::document::merge(&mut tool, Described::of(&f, declared))?;
+                ToolContract::with_hints(&mut tool, f.hints());
                 if let Some(digest) = &digest
                     && let Some(s) = m
                         .surfaces
