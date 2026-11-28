@@ -12,6 +12,11 @@ export default defineConfig({
       "@openuidev/react-lang",
     ],
     alias: {
+      // OpenUI's parser carries opt-in Node telemetry whose `ci-info` import reads `process`.
+      "ci-info": new URL(
+        "./src/kit/catalog/ci-info-disabled.ts",
+        import.meta.url,
+      ).pathname,
       "three/examples/jsm/libs/meshopt_decoder.module.js": new URL(
         "./src/shared/media/model-decoder-disabled.ts",
         import.meta.url,
@@ -26,7 +31,7 @@ export default defineConfig({
       // The app, plus the storefront-kit web elements under stable names for embedding hosts.
       input: {
         main: new URL("./index.html", import.meta.url).pathname,
-        elements: new URL("./src/kit/storefront/embed.ts", import.meta.url)
+        elements: new URL("./src/kit/catalog/embed.ts", import.meta.url)
           .pathname,
       },
       output: {

@@ -32,5 +32,4 @@ export {
   rovingIndex,
   focusables,
 } from "./primitives";
-export { catalogue } from "./catalogue";
-export type { CatalogueEntry } from "./catalogue";
+export type * from "./props.generated";

@@ -66,6 +66,7 @@ const kitLayers = {
   api: [],
   query: [],
   storefront: ["tokens", "ui", "api", "query"],
+  catalog: ["tokens", "ui", "storefront"],
 };
 const kitPackage = (f) =>
   owner(f) === "kit" ? relative(f).split("/")[1] : undefined;
@@ -168,6 +169,11 @@ for (const file of files) {
   const registers = path.basename(file) === "studio-extension.ts";
   let registration = false;
   const add = (spec, runtime) => {
+    // Agent, app and MCP App documents render only through kit/catalog (one catalog, one renderer).
+    if (spec === "@openuidev/react-lang" && kitPackage(file) !== "catalog")
+      errors.push(
+        `${relative(file)} renders OpenUI outside kit/catalog; use CatalogView`,
+      );
     if (!spec.startsWith(".")) return;
     const target = resolve(file, spec);
     if (!target) {

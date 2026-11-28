@@ -6,9 +6,11 @@ import {
   type ReactNode,
 } from "react";
 import { Spinner } from "./Feedback";
+import type { ButtonDocumentProps } from "./props.generated";
 
-export type ButtonTone = "primary" | "secondary" | "ghost" | "danger";
-export type ButtonSize = "sm" | "md";
+/** Tone and size come from the component catalog's generated types. */
+export type ButtonTone = NonNullable<ButtonDocumentProps["tone"]>;
+export type ButtonSize = NonNullable<ButtonDocumentProps["size"]>;
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   tone?: ButtonTone;

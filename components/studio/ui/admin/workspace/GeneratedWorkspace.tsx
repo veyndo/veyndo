@@ -1,52 +1,20 @@
-/** Render registered workspace controls with A2UI or the existing OpenUI fallback. */
-import { createContext, useContext, type ReactNode } from "react";
+/** Render the admitted workspace layout through the shared catalog renderer; the native controls are host components. */
+import { isValidElement, useMemo, type ReactNode } from "react";
 import {
-  createLibrary,
-  defineComponent,
-  Renderer,
-} from "@openuidev/react-lang";
-import { z } from "zod";
-import { composeNativeWorkspace } from "./workspace-presentation";
-const NativeBindings = createContext<{
-  directory: ReactNode;
-  intake: ReactNode;
-  shippingPolicy: ReactNode;
-}>({ directory: null, intake: null, shippingPolicy: null });
-const Workspace = defineComponent({
-  name: "Workspace",
-  description: "A reviewed native Veyndo working view.",
-  props: z.object({ children: z.array(z.any()).max(2) }),
-  component: ({ props, renderNode }) => (
-    <div className="generated-native-workspace">
-      {props.children.map((node, index) => (
-        <div key={index}>{renderNode(node)}</div>
-      ))}
-    </div>
-  ),
+  CatalogView,
+  type HostComponent,
+} from "../../../../../frontend/src/kit/catalog";
+import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
+import {
+  workspaceCatalogId,
+  workspaceDocument,
+} from "./workspace-presentation";
+
+const slot = (description: string): HostComponent => ({
+  description,
+  render: () => null,
 });
-const Directory = defineComponent({
-  name: "Directory",
-  description:
-    "Current authorized native directory and optional selected-record editor.",
-  props: z.object({}),
-  component: () => useContext(NativeBindings).directory,
-});
-const Intake = defineComponent({
-  name: "Intake",
-  description: "Native reviewed catalogue intake, when authorized.",
-  props: z.object({}),
-  component: () => useContext(NativeBindings).intake,
-});
-const ShippingPolicy = defineComponent({
-  name: "ShippingPolicy",
-  description: "Current shipping policy passages from the shop knowledge base.",
-  props: z.object({}),
-  component: () => useContext(NativeBindings).shippingPolicy,
-});
-const library = createLibrary({
-  root: "Workspace",
-  components: [Workspace, Directory, Intake, ShippingPolicy],
-});
+
 export default function GeneratedWorkspace({
   candidate,
   rights,
@@ -60,32 +28,59 @@ export default function GeneratedWorkspace({
   intake: ReactNode;
   shippingPolicy?: ReactNode;
 }) {
-  const presentation = composeNativeWorkspace(candidate, rights);
+  const { locale } = useLocale();
+  const presentation = useMemo(
+    () => workspaceDocument(candidate, rights),
+    [candidate, rights],
+  );
+  const host = useMemo<Record<string, HostComponent>>(
+    () => ({
+      Workspace: {
+        description: "A reviewed native Veyndo working view.",
+        slots: {
+          children: {
+            description: "The admitted native controls.",
+            accepts: ["Directory", "Intake", "ShippingPolicy"],
+            max: 3,
+          },
+        },
+        render: ({ slots }) => (
+          <div className="generated-native-workspace">
+            {slots.children.map((child, index) => (
+              <div key={isValidElement(child) ? child.key : index}>{child}</div>
+            ))}
+          </div>
+        ),
+      },
+      Directory: {
+        ...slot("Current authorized native directory and editor."),
+        render: () => directory,
+      },
+      Intake: {
+        ...slot("Native reviewed catalogue intake, when authorized."),
+        render: () => intake,
+      },
+      ShippingPolicy: {
+        ...slot("Current shipping policy passages."),
+        render: () => shippingPolicy,
+      },
+    }),
+    [directory, intake, shippingPolicy],
+  );
+  const admission = useMemo(
+    () => ({
+      surface: "studio" as const,
+      locale,
+      host,
+      catalogs: [workspaceCatalogId],
+      openUiCatalog: workspaceCatalogId,
+    }),
+    [locale, host],
+  );
   if (!presentation) return null;
-  if (presentation.protocol === "a2ui-1.0") {
-    const controls = {
-      Directory: directory,
-      Intake: intake,
-      ShippingPolicy: shippingPolicy,
-    };
-    return (
-      <div
-        className="generated-native-workspace"
-        data-layout-protocol={presentation.protocol}
-      >
-        {presentation.controls.map((name) => (
-          <div key={name}>{controls[name]}</div>
-        ))}
-      </div>
-    );
-  }
   return (
-    <NativeBindings.Provider value={{ directory, intake, shippingPolicy }}>
-      <Renderer
-        response={presentation.source}
-        library={library}
-        isStreaming={false}
-      />
-    </NativeBindings.Provider>
+    <div data-layout-protocol={presentation.protocol}>
+      <CatalogView document={presentation.document} admission={admission} />
+    </div>
   );
 }

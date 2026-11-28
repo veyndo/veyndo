@@ -1,31 +1,4 @@
-/* Layout of the component catalogue page; the specimens themselves carry only kit/ui styles. */
-.ui-catalogue-themes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-  gap: var(--vy-space-4);
-}
-.ui-catalogue-theme {
-  padding: var(--vy-space-5);
-  border: 1px solid var(--vy-color-border);
-  border-radius: var(--vy-radius-lg);
-  background: var(--vy-color-bg);
-  color: var(--vy-color-text);
-}
-.ui-catalogue-theme > h2,
-.ui-catalogue-section > h2 {
-  margin: 0 0 var(--vy-space-3);
-  font-size: var(--vy-font-size-lg);
-}
-.ui-catalogue-index {
-  display: grid;
-  gap: var(--vy-space-2);
-  padding: 0;
-  list-style: none;
-}
-.ui-catalogue-index li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--vy-space-2);
-  color: var(--vy-color-muted);
+/* Page frame of the Studio component gallery; the gallery itself is styled by kit/catalog. */
+.ui-catalogue {
+  max-width: 1200px;
 }

@@ -9904,12 +9904,12 @@
       "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
     },
     "frontend/package-lock.json": {
-      "sha256": "acb68f0c959817b22d8ee748ad1e8fdc556b1bf4cc0d06cafa1e32380f50f8ee",
-      "review": "Pin the published SDK 0.4.15 archive for the Studio A2UI presentation adapter. Targeted workspace and rights regressions, frontend build, architecture and localization checks pass. Native domain operations and the verified kernel are unchanged."
+      "sha256": "152f2c53030c98b511c759340b0dce693de106adaa0ef9a3183bd9ce2060fc89",
+      "review": "Batch M component catalog: frontend devDependency axe-core 4.14.1 for accessibility checks of rendered catalog examples (unit tests and nightly gallery); no production runtime dependency or proof input semantics changed"
     },
     "frontend/package.json": {
-      "sha256": "3088114fa24cd34d1121fd54724bf01370a2a8129b5a7d7b80f1a0736236600e",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "ae4399e712431f3efbc2dac2231615f1d0334ea33e99899ace63773365532a62",
+      "review": "Batch M component catalog: frontend devDependency axe-core 4.14.1 for accessibility checks of rendered catalog examples (unit tests and nightly gallery); no production runtime dependency or proof input semantics changed"
     },
     "frontend/scripts/precompress.mjs": {
       "sha256": "dbe91d7985386628933dfb734bd5555ba4e8b97502d1f644b26488434cfc195c",

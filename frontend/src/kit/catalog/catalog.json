@@ -1,0 +1,1975 @@
+{
+  "id": "veyndo:components/1",
+  "version": "1.0.0",
+  "formats": ["veyndo-ui/1", "a2ui/1.0", "openui-lang"],
+  "surfaces": ["studio", "storefront", "app", "mcp-app"],
+  "limits": { "bytes": 262144, "nodes": 400, "depth": 16 },
+  "entries": [
+    {
+      "name": "Text",
+      "kind": "content",
+      "description": "A paragraph of plain text.",
+      "source": "kit/catalog",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "maxLength": 4000 },
+          "tone": {
+            "default": "default",
+            "type": "string",
+            "enum": ["default", "muted"]
+          }
+        },
+        "required": ["text"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "name": "none",
+        "notes": "Rendered as a paragraph; text is never parsed as HTML."
+      },
+      "openUi": { "arguments": ["text", "tone"] },
+      "examples": [
+        {
+          "id": "text",
+          "state": "default",
+          "root": {
+            "component": "Text",
+            "props": { "text": "Orders keep their own copy of the product." }
+          }
+        },
+        {
+          "id": "muted",
+          "state": "muted",
+          "root": {
+            "component": "Text",
+            "props": { "text": "Shown on invoices.", "tone": "muted" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Heading",
+      "kind": "content",
+      "description": "A section heading at level 2, 3 or 4, so the document fits the host's outline.",
+      "source": "kit/catalog",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "maxLength": 200 },
+          "level": {
+            "default": 3,
+            "anyOf": [
+              { "type": "number", "const": 2 },
+              { "type": "number", "const": 3 },
+              { "type": "number", "const": 4 }
+            ]
+          }
+        },
+        "required": ["text"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "heading",
+        "name": "content",
+        "notes": "Documents start below the host's page heading (level 1)."
+      },
+      "openUi": { "arguments": ["text", "level"] },
+      "examples": [
+        {
+          "id": "heading",
+          "state": "level 3",
+          "root": { "component": "Heading", "props": { "text": "Delivery" } }
+        }
+      ]
+    },
+    {
+      "name": "Image",
+      "kind": "content",
+      "description": "An image from a relative or https URL on an admitted origin, with required alternative text.",
+      "source": "kit/catalog",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string",
+            "maxLength": 2000,
+            "pattern": "^(\\/(?![/\\\\])|https:\\/\\/)[^\\s<>\"'`\\\\]*$",
+            "format": "safe-url"
+          },
+          "alt": { "type": "string", "maxLength": 300 },
+          "decorative": { "default": false, "type": "boolean" },
+          "width": { "type": "integer", "minimum": 1, "maximum": 4000 },
+          "height": { "type": "integer", "minimum": 1, "maximum": 4000 }
+        },
+        "required": ["src", "alt"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "img",
+        "name": { "prop": "alt" },
+        "notes": "Decorative images get an empty alt and are hidden from assistive technology."
+      },
+      "openUi": {
+        "arguments": ["src", "alt", "decorative", "width", "height"]
+      },
+      "examples": []
+    },
+    {
+      "name": "Stack",
+      "kind": "layout",
+      "description": "Arranges children in a row or column on the spacing scale.",
+      "source": "kit/ui#Stack",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "gap": {
+            "default": "3",
+            "type": "string",
+            "enum": ["1", "2", "3", "4", "5", "6", "8", "10"]
+          },
+          "direction": {
+            "default": "column",
+            "type": "string",
+            "enum": ["row", "column"]
+          },
+          "align": {
+            "type": "string",
+            "enum": ["start", "center", "end", "stretch"]
+          },
+          "wrap": { "default": false, "type": "boolean" }
+        },
+        "additionalProperties": false
+      },
+      "slots": {
+        "children": {
+          "description": "The arranged content.",
+          "accepts": "any",
+          "max": 50
+        }
+      },
+      "events": {},
+      "a11y": {
+        "name": "none",
+        "notes": "No role; reading order follows document order."
+      },
+      "openUi": {
+        "arguments": ["children", "gap", "direction", "align", "wrap"]
+      },
+      "examples": [
+        {
+          "id": "row",
+          "state": "row",
+          "root": {
+            "component": "Stack",
+            "props": { "direction": "row", "gap": "2", "align": "center" },
+            "children": [
+              { "component": "Badge", "props": { "text": "Draft" } },
+              {
+                "component": "Button",
+                "props": { "label": "Save", "tone": "primary" },
+                "action": "save"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "kind": "layout",
+      "description": "A titled surface that groups related content, with optional header actions.",
+      "source": "kit/ui#Card",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 200 },
+          "level": {
+            "default": 3,
+            "anyOf": [
+              { "type": "number", "const": 2 },
+              { "type": "number", "const": 3 },
+              { "type": "number", "const": 4 }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "slots": {
+        "children": {
+          "description": "The card body.",
+          "accepts": "any",
+          "max": 50
+        },
+        "actions": {
+          "description": "Header actions such as a badge or a button.",
+          "accepts": ["Badge", "Button", "LinkButton", "Menu"],
+          "max": 3
+        }
+      },
+      "events": {},
+      "a11y": {
+        "name": { "prop": "title" },
+        "notes": "A section with a heading at the level the document sets."
+      },
+      "openUi": { "arguments": ["children", "title", "level", "actions"] },
+      "examples": [
+        {
+          "id": "card",
+          "state": "with actions",
+          "root": {
+            "component": "Card",
+            "props": { "title": "Shipping profile" },
+            "slots": {
+              "actions": [
+                {
+                  "component": "Badge",
+                  "props": { "text": "New", "tone": "accent" }
+                }
+              ]
+            },
+            "children": [
+              {
+                "component": "Text",
+                "props": {
+                  "text": "Orders keep their own copy of the product."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Button",
+      "kind": "atom",
+      "description": "Triggers an admitted host action. Without an admitted action it renders disabled.",
+      "source": "kit/ui#Button",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 120 },
+          "tone": {
+            "default": "secondary",
+            "type": "string",
+            "enum": ["primary", "secondary", "ghost", "danger"]
+          },
+          "size": { "default": "md", "type": "string", "enum": ["sm", "md"] },
+          "busy": { "default": false, "type": "boolean" },
+          "disabled": { "default": false, "type": "boolean" }
+        },
+        "required": ["label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "press": {
+          "description": "The button was activated by pointer, Enter or Space."
+        }
+      },
+      "a11y": {
+        "role": "button",
+        "name": "content",
+        "keyboard": ["Enter", "Space"],
+        "notes": "Busy sets aria-busy, disables the button and shows a decorative spinner."
+      },
+      "openUi": {
+        "arguments": ["label", "tone", "size", "busy", "disabled", "action"]
+      },
+      "examples": [
+        {
+          "id": "tones",
+          "state": "tones",
+          "root": {
+            "component": "Stack",
+            "props": { "direction": "row", "gap": "2", "wrap": true },
+            "children": [
+              {
+                "component": "Button",
+                "props": { "label": "Save", "tone": "primary" },
+                "action": "save"
+              },
+              {
+                "component": "Button",
+                "props": { "label": "Cancel", "tone": "secondary" },
+                "action": "save"
+              },
+              {
+                "component": "Button",
+                "props": { "label": "More", "tone": "ghost" },
+                "action": "save"
+              },
+              {
+                "component": "Button",
+                "props": { "label": "Delete", "tone": "danger" },
+                "action": "save"
+              }
+            ]
+          }
+        },
+        {
+          "id": "busy",
+          "state": "busy",
+          "root": {
+            "component": "Button",
+            "props": { "label": "Saving", "tone": "primary", "busy": true },
+            "action": "save"
+          }
+        },
+        {
+          "id": "disabled",
+          "state": "disabled",
+          "root": {
+            "component": "Button",
+            "props": { "label": "Save", "disabled": true }
+          }
+        }
+      ]
+    },
+    {
+      "name": "IconButton",
+      "kind": "atom",
+      "description": "A button with only an icon and a required accessible label.",
+      "source": "kit/ui#IconButton",
+      "since": "1.0.0",
+      "surfaces": [],
+      "codeOnly": "Icons are code; documents use Button with a visible label.",
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 120 },
+          "tone": {
+            "default": "secondary",
+            "type": "string",
+            "enum": ["primary", "secondary", "ghost", "danger"]
+          },
+          "size": { "default": "md", "type": "string", "enum": ["sm", "md"] }
+        },
+        "required": ["label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": { "press": { "description": "The button was activated." } },
+      "a11y": {
+        "role": "button",
+        "name": { "prop": "label" },
+        "keyboard": ["Enter", "Space"],
+        "notes": "The label is the accessible name and the tooltip."
+      },
+      "examples": []
+    },
+    {
+      "name": "LinkButton",
+      "kind": "atom",
+      "description": "Navigation that looks like a button; keeps link semantics. URLs must be relative or on an admitted https origin.",
+      "source": "kit/ui#LinkButton",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 120 },
+          "href": {
+            "type": "string",
+            "maxLength": 2000,
+            "pattern": "^(\\/(?![/\\\\])|https:\\/\\/)[^\\s<>\"'`\\\\]*$",
+            "format": "safe-url"
+          },
+          "tone": {
+            "default": "secondary",
+            "type": "string",
+            "enum": ["primary", "secondary", "ghost", "danger"]
+          },
+          "size": { "default": "md", "type": "string", "enum": ["sm", "md"] }
+        },
+        "required": ["label", "href"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "link",
+        "name": "content",
+        "keyboard": ["Enter"],
+        "notes": "Absolute links open in a new tab without referrer or opener."
+      },
+      "openUi": { "arguments": ["label", "href", "tone", "size"] },
+      "examples": [
+        {
+          "id": "link",
+          "state": "default",
+          "root": {
+            "component": "LinkButton",
+            "props": { "label": "View products", "href": "/products" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Badge",
+      "kind": "atom",
+      "description": "A short status label.",
+      "source": "kit/ui#Badge",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "maxLength": 60 },
+          "tone": {
+            "default": "neutral",
+            "type": "string",
+            "enum": ["neutral", "accent", "positive", "warning", "danger"]
+          }
+        },
+        "required": ["text"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "name": "content",
+        "notes": "Tone is visual only; the text carries the meaning."
+      },
+      "openUi": { "arguments": ["text", "tone"] },
+      "examples": [
+        {
+          "id": "tones",
+          "state": "tones",
+          "root": {
+            "component": "Stack",
+            "props": { "direction": "row", "gap": "2", "wrap": true },
+            "children": [
+              { "component": "Badge", "props": { "text": "Draft" } },
+              {
+                "component": "Badge",
+                "props": { "text": "New", "tone": "accent" }
+              },
+              {
+                "component": "Badge",
+                "props": { "text": "Paid", "tone": "positive" }
+              },
+              {
+                "component": "Badge",
+                "props": { "text": "Pending", "tone": "warning" }
+              },
+              {
+                "component": "Badge",
+                "props": { "text": "Failed", "tone": "danger" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spinner",
+      "kind": "atom",
+      "description": "Progress of unknown length. With a label it is a polite status; without one it is decorative.",
+      "source": "kit/ui#Spinner",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": { "label": { "type": "string", "maxLength": 120 } },
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "status",
+        "name": "content",
+        "notes": "The label is read as hidden status text; motion stops under prefers-reduced-motion."
+      },
+      "openUi": { "arguments": ["label"] },
+      "examples": [
+        {
+          "id": "spinner",
+          "state": "loading",
+          "root": { "component": "Spinner", "props": { "label": "Loading" } }
+        }
+      ]
+    },
+    {
+      "name": "VisuallyHidden",
+      "kind": "content",
+      "description": "Text only for assistive technology.",
+      "source": "kit/ui#VisuallyHidden",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": { "text": { "type": "string", "maxLength": 300 } },
+        "required": ["text"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "name": "content",
+        "notes": "Hidden visually, read by screen readers."
+      },
+      "openUi": { "arguments": ["text"] },
+      "examples": []
+    },
+    {
+      "name": "Field",
+      "kind": "molecule",
+      "description": "Binds a label, hint and error to one control.",
+      "source": "kit/ui#Field",
+      "since": "1.0.0",
+      "surfaces": [],
+      "codeOnly": "Documents use the labelled controls TextInput, TextArea, Select, Checkbox and Switch, which render their Field.",
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 200 },
+          "hint": { "type": "string", "maxLength": 300 },
+          "error": { "type": "string", "maxLength": 300 },
+          "required": { "default": false, "type": "boolean" }
+        },
+        "required": ["label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "name": { "prop": "label" },
+        "notes": "The control gets the label by id and the hint or error through aria-describedby."
+      },
+      "examples": []
+    },
+    {
+      "name": "TextInput",
+      "kind": "atom",
+      "description": "A labelled single-line text field. The value stays in the view until committed.",
+      "source": "kit/ui#TextInput",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 200 },
+          "hint": { "type": "string", "maxLength": 300 },
+          "error": { "type": "string", "maxLength": 300 },
+          "required": { "default": false, "type": "boolean" },
+          "value": { "type": "string", "maxLength": 5000 },
+          "placeholder": { "type": "string", "maxLength": 200 },
+          "type": {
+            "default": "text",
+            "type": "string",
+            "enum": ["text", "email", "number", "search", "tel", "url"]
+          }
+        },
+        "required": ["name", "label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "change": {
+          "description": "The value was committed (blur or Enter).",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "value": { "type": "string" }
+            },
+            "required": ["name", "value"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "textbox",
+        "name": { "prop": "label" },
+        "notes": "Errors set aria-invalid and are announced through aria-describedby."
+      },
+      "openUi": {
+        "arguments": [
+          "name",
+          "label",
+          "hint",
+          "error",
+          "required",
+          "value",
+          "placeholder",
+          "type",
+          "action"
+        ]
+      },
+      "examples": [
+        {
+          "id": "hint",
+          "state": "with hint",
+          "root": {
+            "component": "TextInput",
+            "props": {
+              "name": "name",
+              "label": "Name",
+              "hint": "Shown on invoices.",
+              "required": true
+            }
+          }
+        },
+        {
+          "id": "invalid",
+          "state": "invalid",
+          "root": {
+            "component": "TextInput",
+            "props": {
+              "name": "email",
+              "label": "Email",
+              "type": "email",
+              "error": "Enter a valid email address."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "TextArea",
+      "kind": "atom",
+      "description": "A labelled multi-line text field.",
+      "source": "kit/ui#TextArea",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 200 },
+          "hint": { "type": "string", "maxLength": 300 },
+          "error": { "type": "string", "maxLength": 300 },
+          "required": { "default": false, "type": "boolean" },
+          "value": { "type": "string", "maxLength": 5000 },
+          "placeholder": { "type": "string", "maxLength": 200 },
+          "rows": {
+            "default": 3,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          }
+        },
+        "required": ["name", "label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "change": {
+          "description": "The value was committed (blur).",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "value": { "type": "string" }
+            },
+            "required": ["name", "value"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "textbox",
+        "name": { "prop": "label" },
+        "notes": "Multi-line; Enter inserts a line break."
+      },
+      "openUi": {
+        "arguments": [
+          "name",
+          "label",
+          "hint",
+          "error",
+          "required",
+          "value",
+          "placeholder",
+          "rows",
+          "action"
+        ]
+      },
+      "examples": [
+        {
+          "id": "note",
+          "state": "default",
+          "root": {
+            "component": "TextArea",
+            "props": { "name": "note", "label": "Note", "rows": 2 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Select",
+      "kind": "atom",
+      "description": "A labelled choice from a short list.",
+      "source": "kit/ui#Select",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 200 },
+          "hint": { "type": "string", "maxLength": 300 },
+          "options": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string", "maxLength": 200 },
+                "label": { "type": "string", "maxLength": 200 }
+              },
+              "required": ["value", "label"],
+              "additionalProperties": false
+            }
+          },
+          "value": { "type": "string", "maxLength": 200 }
+        },
+        "required": ["name", "label", "options"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "change": {
+          "description": "Another option was chosen.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "value": { "type": "string" }
+            },
+            "required": ["name", "value"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "combobox",
+        "name": { "prop": "label" },
+        "keyboard": ["Arrow keys", "Home", "End"],
+        "notes": "A native select."
+      },
+      "openUi": {
+        "arguments": ["name", "label", "hint", "options", "value", "action"]
+      },
+      "examples": [
+        {
+          "id": "country",
+          "state": "default",
+          "root": {
+            "component": "Select",
+            "props": {
+              "name": "country",
+              "label": "Country",
+              "value": "DE",
+              "options": [
+                { "value": "DE", "label": "Germany" },
+                { "value": "ES", "label": "Spain" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkbox",
+      "kind": "atom",
+      "description": "A labelled checkbox.",
+      "source": "kit/ui#Checkbox",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 200 },
+          "checked": { "default": false, "type": "boolean" }
+        },
+        "required": ["name", "label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "change": {
+          "description": "The box was ticked or cleared.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "checked": { "type": "boolean" }
+            },
+            "required": ["name", "checked"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "checkbox",
+        "name": { "prop": "label" },
+        "keyboard": ["Space"],
+        "notes": "A native checkbox linked to its label."
+      },
+      "openUi": { "arguments": ["name", "label", "checked", "action"] },
+      "examples": [
+        {
+          "id": "terms",
+          "state": "checked",
+          "root": {
+            "component": "Checkbox",
+            "props": {
+              "name": "terms",
+              "label": "I accept the terms",
+              "checked": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Switch",
+      "kind": "atom",
+      "description": "An on/off switch for a setting that applies at once.",
+      "source": "kit/ui#Switch",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 200 },
+          "checked": { "default": false, "type": "boolean" },
+          "disabled": { "default": false, "type": "boolean" }
+        },
+        "required": ["name", "label"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "change": {
+          "description": "The switch was turned on or off.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "checked": { "type": "boolean" }
+            },
+            "required": ["name", "checked"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "switch",
+        "pattern": "switch",
+        "name": { "prop": "label" },
+        "keyboard": ["Space", "Enter"],
+        "notes": "aria-checked follows the state."
+      },
+      "openUi": {
+        "arguments": ["name", "label", "checked", "disabled", "action"]
+      },
+      "examples": [
+        {
+          "id": "on",
+          "state": "on",
+          "root": {
+            "component": "Switch",
+            "props": { "name": "active", "label": "Active", "checked": true }
+          }
+        },
+        {
+          "id": "disabled",
+          "state": "disabled",
+          "root": {
+            "component": "Switch",
+            "props": { "name": "active", "label": "Active", "disabled": true }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notice",
+      "kind": "molecule",
+      "description": "A message about the current state. Danger is announced at once; other tones are polite.",
+      "source": "kit/ui#Notice",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "tone": {
+            "default": "neutral",
+            "type": "string",
+            "enum": ["neutral", "accent", "positive", "warning", "danger"]
+          },
+          "title": { "type": "string", "maxLength": 200 },
+          "text": { "type": "string", "maxLength": 2000 }
+        },
+        "additionalProperties": false
+      },
+      "slots": {
+        "action": {
+          "description": "One follow-up action, such as retry.",
+          "accepts": ["Button", "LinkButton"],
+          "max": 1
+        }
+      },
+      "events": {},
+      "a11y": {
+        "role": "alert / status",
+        "name": "content",
+        "notes": "Danger uses role=alert, every other tone role=status."
+      },
+      "openUi": { "arguments": ["tone", "title", "text", "action"] },
+      "examples": [
+        {
+          "id": "positive",
+          "state": "positive",
+          "root": {
+            "component": "Notice",
+            "props": { "tone": "positive", "text": "The order was shipped." }
+          }
+        },
+        {
+          "id": "danger",
+          "state": "danger with action",
+          "root": {
+            "component": "Notice",
+            "props": {
+              "tone": "danger",
+              "title": "Failed",
+              "text": "The payment provider did not answer."
+            },
+            "slots": {
+              "action": [
+                {
+                  "component": "Button",
+                  "props": { "label": "Try again", "size": "sm" },
+                  "action": "retry"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "EmptyState",
+      "kind": "molecule",
+      "description": "Explains why a list or area is empty and what to do next.",
+      "source": "kit/ui#EmptyState",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 200 },
+          "text": { "type": "string", "maxLength": 1000 }
+        },
+        "required": ["title"],
+        "additionalProperties": false
+      },
+      "slots": {
+        "action": {
+          "description": "The next step.",
+          "accepts": ["Button", "LinkButton"],
+          "max": 1
+        }
+      },
+      "events": {},
+      "a11y": {
+        "name": "content",
+        "notes": "A section whose title is a level-3 heading."
+      },
+      "openUi": { "arguments": ["title", "text", "action"] },
+      "examples": [
+        {
+          "id": "empty",
+          "state": "default",
+          "root": {
+            "component": "EmptyState",
+            "props": {
+              "title": "No orders yet",
+              "text": "Orders appear here as soon as customers buy."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tabs",
+      "kind": "molecule",
+      "description": "Switches between panels of related content.",
+      "source": "kit/ui#Tabs",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 200 },
+          "orientation": {
+            "default": "horizontal",
+            "type": "string",
+            "enum": ["horizontal", "vertical"]
+          },
+          "value": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          }
+        },
+        "required": ["label"],
+        "additionalProperties": false
+      },
+      "slots": {
+        "children": {
+          "description": "The panels, one per tab.",
+          "accepts": ["TabPanel"],
+          "min": 1,
+          "max": 12
+        }
+      },
+      "events": {
+        "change": {
+          "description": "Another tab was selected.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              }
+            },
+            "required": ["id"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "tablist",
+        "pattern": "tabs",
+        "name": { "prop": "label" },
+        "keyboard": ["Arrow keys", "Home", "End"],
+        "notes": "Roving focus with automatic activation; panels are linked to their tabs."
+      },
+      "openUi": {
+        "arguments": ["children", "label", "orientation", "value", "action"]
+      },
+      "examples": [
+        {
+          "id": "tabs",
+          "state": "default",
+          "root": {
+            "component": "Tabs",
+            "props": { "label": "Order sections" },
+            "children": [
+              {
+                "component": "TabPanel",
+                "props": { "id": "overview", "label": "Overview" },
+                "children": [
+                  {
+                    "component": "Text",
+                    "props": { "text": "The order was shipped." }
+                  }
+                ]
+              },
+              {
+                "component": "TabPanel",
+                "props": { "id": "details", "label": "View products" },
+                "children": [
+                  {
+                    "component": "Text",
+                    "props": { "text": "Shown on invoices." }
+                  }
+                ]
+              },
+              {
+                "component": "TabPanel",
+                "props": {
+                  "id": "history",
+                  "label": "History",
+                  "disabled": true
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TabPanel",
+      "kind": "layout",
+      "description": "One tab and its panel inside Tabs.",
+      "source": "kit/ui#Tabs",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "within": ["Tabs"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+          },
+          "label": { "type": "string", "maxLength": 120 },
+          "disabled": { "default": false, "type": "boolean" }
+        },
+        "required": ["id", "label"],
+        "additionalProperties": false
+      },
+      "slots": {
+        "children": {
+          "description": "The panel content.",
+          "accepts": "any",
+          "max": 50
+        }
+      },
+      "events": {},
+      "a11y": {
+        "role": "tabpanel",
+        "name": { "prop": "label" },
+        "notes": "Labelled by its tab; only the selected panel is rendered."
+      },
+      "openUi": { "arguments": ["children", "id", "label", "disabled"] },
+      "examples": []
+    },
+    {
+      "name": "Menu",
+      "kind": "molecule",
+      "description": "A button that opens a list of actions.",
+      "source": "kit/ui#Menu",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "app", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 120 },
+          "items": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+                },
+                "label": { "type": "string", "maxLength": 120 },
+                "disabled": { "default": false, "type": "boolean" },
+                "tone": { "type": "string", "enum": ["danger"] }
+              },
+              "required": ["id", "label"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["label", "items"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "select": {
+          "description": "An item was chosen.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              }
+            },
+            "required": ["id"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "button",
+        "pattern": "menu button",
+        "name": { "prop": "label" },
+        "keyboard": ["Enter", "Space", "Arrow keys", "Home", "End", "Escape"],
+        "notes": "Escape and outside presses close the menu and return focus to the trigger."
+      },
+      "openUi": { "arguments": ["label", "items", "action"] },
+      "examples": [
+        {
+          "id": "menu",
+          "state": "closed",
+          "root": {
+            "component": "Menu",
+            "props": {
+              "label": "Actions",
+              "items": [
+                { "id": "duplicate", "label": "Duplicate" },
+                { "id": "archive", "label": "Archive" },
+                { "id": "delete", "label": "Delete", "tone": "danger" }
+              ]
+            },
+            "action": "row"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dialog",
+      "kind": "molecule",
+      "description": "A modal dialog with focus containment and restoration.",
+      "source": "kit/ui#Dialog",
+      "since": "1.0.0",
+      "surfaces": [],
+      "codeOnly": "A document may not open a modal over its host; hosts open Dialog from their own controls.",
+      "props": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 200 },
+          "description": { "type": "string", "maxLength": 1000 },
+          "dismissible": { "default": true, "type": "boolean" }
+        },
+        "required": ["title"],
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {
+        "close": {
+          "description": "Escape, the backdrop or a footer action closed the dialog."
+        }
+      },
+      "a11y": {
+        "role": "dialog",
+        "pattern": "dialog (modal)",
+        "name": { "prop": "title" },
+        "keyboard": ["Tab", "Shift+Tab", "Escape"],
+        "notes": "aria-modal; focus returns to the opener."
+      },
+      "examples": []
+    },
+    {
+      "name": "ProductCard",
+      "kind": "pattern",
+      "description": "A product tile with image, name, price, tax note and stock from the shop.",
+      "source": "kit/storefront#product-card",
+      "since": "1.0.0",
+      "surfaces": ["studio", "storefront", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "name": { "type": "string", "minLength": 1, "maxLength": 300 },
+              "url": {
+                "type": "string",
+                "maxLength": 2000,
+                "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+              },
+              "image": {
+                "type": "string",
+                "maxLength": 2000,
+                "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+              },
+              "description": { "type": "string", "maxLength": 2000 },
+              "category": { "type": "string", "maxLength": 200 },
+              "price": { "type": "number" },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+              "stock": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["id", "name", "url", "price", "currency"]
+          },
+          "priceKind": {
+            "default": "gross",
+            "type": "string",
+            "enum": ["gross", "net"]
+          }
+        },
+        "required": ["product"],
+        "additionalProperties": false
+      },
+      "hostData": ["product"],
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "article",
+        "name": "content",
+        "notes": "The name links to the product page; prices come only from the host."
+      },
+      "openUi": { "arguments": ["product", "priceKind"] },
+      "examples": [
+        {
+          "id": "card",
+          "state": "in stock",
+          "root": {
+            "component": "ProductCard",
+            "props": { "product": { "path": "/product" } }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProductSummary",
+      "kind": "pattern",
+      "description": "The purchase area of a product: variants, price, stock and add to cart.",
+      "source": "kit/storefront#product-summary",
+      "since": "1.0.0",
+      "surfaces": ["storefront", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "name": { "type": "string", "minLength": 1, "maxLength": 300 },
+              "description": { "type": "string", "maxLength": 5000 },
+              "image": {
+                "type": "string",
+                "maxLength": 2000,
+                "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+              },
+              "price": { "type": "number" },
+              "listPrice": { "type": "number" },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+              "stock": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "deliveryDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 365
+              },
+              "minPurchase": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "purchaseSteps": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "maxPurchase": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "kicker": { "type": "string", "maxLength": 300 },
+              "sku": { "type": "string", "maxLength": 100 },
+              "rating": {
+                "type": "object",
+                "properties": {
+                  "average": { "type": "number", "minimum": 0, "maximum": 5 },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["average", "count"]
+              },
+              "reference": {
+                "type": "object",
+                "properties": {
+                  "price": { "type": "number" },
+                  "unit": { "type": "string", "maxLength": 200 }
+                },
+                "required": ["price", "unit"]
+              }
+            },
+            "required": ["id", "name", "price", "currency", "stock"]
+          },
+          "priceKind": {
+            "default": "gross",
+            "type": "string",
+            "enum": ["gross", "net"]
+          },
+          "shippingExtra": { "default": false, "type": "boolean" },
+          "groups": {
+            "default": [],
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 100 },
+                "label": { "type": "string", "maxLength": 200 },
+                "selected": { "type": "string", "maxLength": 200 },
+                "options": {
+                  "maxItems": 100,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "label": { "type": "string", "maxLength": 200 },
+                      "available": { "type": "boolean" },
+                      "selected": { "type": "boolean" },
+                      "swatch": { "type": "string", "maxLength": 60 }
+                    },
+                    "required": ["value", "label", "available", "selected"]
+                  }
+                }
+              },
+              "required": ["id", "label", "selected", "options"]
+            }
+          },
+          "moreVariants": {
+            "default": "none",
+            "type": "string",
+            "enum": ["none", "more", "loading"]
+          },
+          "showRules": { "default": false, "type": "boolean" },
+          "tiers": {
+            "default": [],
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "unitPrice": { "type": "number" },
+                "discountPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "required": ["quantity", "unitPrice", "discountPercent"]
+            }
+          },
+          "selectedTier": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "delivery": {
+            "type": "object",
+            "properties": {
+              "minDays": { "type": "integer", "minimum": 0, "maximum": 365 },
+              "maxDays": { "type": "integer", "minimum": 0, "maximum": 365 },
+              "method": { "type": "string", "maxLength": 200 },
+              "country": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["minDays", "maxDays", "method", "country"]
+          },
+          "quantity": { "type": "integer", "minimum": 1, "maximum": 100000 },
+          "disabled": { "default": false, "type": "boolean" }
+        },
+        "required": ["product"],
+        "additionalProperties": false
+      },
+      "hostData": ["product", "groups", "tiers", "delivery"],
+      "slots": {},
+      "events": {
+        "addToCart": {
+          "description": "The buyer asked to add the product.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "productId": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["productId", "quantity"]
+          }
+        },
+        "select": {
+          "description": "The buyer chose a variant option.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "group": { "type": "string" },
+              "value": { "type": "string" }
+            },
+            "required": ["group", "value"]
+          }
+        },
+        "open": {
+          "description": "The buyer opened reviews or variants.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["line", "order", "page"] },
+              "id": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["kind", "id"]
+          }
+        }
+      },
+      "a11y": {
+        "name": "content",
+        "notes": "Add to cart is a host action; the document never confirms a purchase."
+      },
+      "openUi": {
+        "arguments": [
+          "product",
+          "priceKind",
+          "shippingExtra",
+          "groups",
+          "moreVariants",
+          "showRules",
+          "tiers",
+          "selectedTier",
+          "delivery",
+          "quantity",
+          "disabled",
+          "action"
+        ]
+      },
+      "examples": []
+    },
+    {
+      "name": "CartSummary",
+      "kind": "pattern",
+      "description": "Priced cart lines, discounts, taxes and totals as the server calculated them.",
+      "source": "kit/storefront#cart-summary",
+      "since": "1.0.0",
+      "surfaces": ["storefront", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "lines": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "label": { "type": "string", "minLength": 1, "maxLength": 300 },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "unitPrice": { "type": "number" },
+                "total": { "type": "number" },
+                "url": {
+                  "type": "string",
+                  "maxLength": 2000,
+                  "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+                },
+                "image": {
+                  "type": "string",
+                  "maxLength": 2000,
+                  "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+                },
+                "minPurchase": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "purchaseSteps": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "maxPurchase": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                }
+              },
+              "required": ["id", "label", "quantity", "total"]
+            }
+          },
+          "subtotal": { "type": "number" },
+          "discounts": {
+            "default": [],
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "label": { "type": "string", "maxLength": 300 },
+                "amount": { "type": "number" }
+              },
+              "required": ["id", "label", "amount"]
+            }
+          },
+          "shipping": { "type": "number" },
+          "tax": { "type": "number" },
+          "total": { "type": "number" },
+          "delivery": {
+            "type": "object",
+            "properties": {
+              "earliest": { "type": "string", "maxLength": 40 },
+              "latest": { "type": "string", "maxLength": 40 }
+            },
+            "required": ["earliest", "latest"]
+          },
+          "priceKind": {
+            "default": "gross",
+            "type": "string",
+            "enum": ["gross", "net"]
+          },
+          "busy": { "default": false, "type": "boolean" }
+        },
+        "required": ["currency", "lines", "total"],
+        "additionalProperties": false
+      },
+      "hostData": [
+        "currency",
+        "lines",
+        "subtotal",
+        "discounts",
+        "shipping",
+        "tax",
+        "total",
+        "delivery"
+      ],
+      "slots": {},
+      "events": {
+        "quantity": {
+          "description": "The buyer changed a line quantity; the server reprices.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "lineId": { "type": "string" },
+              "quantity": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["lineId", "quantity"]
+          }
+        },
+        "checkout": {
+          "description": "The buyer asked to continue to checkout."
+        },
+        "open": {
+          "description": "The buyer opened a line.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["line", "order", "page"] },
+              "id": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["kind", "id"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "region",
+        "name": "content",
+        "notes": "Totals are announced as text; quantity fields are labelled per line."
+      },
+      "openUi": {
+        "arguments": [
+          "currency",
+          "lines",
+          "subtotal",
+          "discounts",
+          "shipping",
+          "tax",
+          "total",
+          "delivery",
+          "priceKind",
+          "busy",
+          "action"
+        ]
+      },
+      "examples": [
+        {
+          "id": "cart",
+          "state": "one line",
+          "root": {
+            "component": "CartSummary",
+            "props": {
+              "currency": { "path": "/cart/currency" },
+              "lines": { "path": "/cart/lines" },
+              "subtotal": { "path": "/cart/subtotal" },
+              "shipping": { "path": "/cart/shipping" },
+              "total": { "path": "/cart/total" }
+            },
+            "action": "cart"
+          }
+        }
+      ]
+    },
+    {
+      "name": "CheckoutSteps",
+      "kind": "pattern",
+      "description": "Where the buyer is in checkout; it never implies a confirmed payment.",
+      "source": "kit/storefront#checkout-steps",
+      "since": "1.0.0",
+      "surfaces": ["storefront", "mcp-app"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "current": {
+            "default": "details",
+            "type": "string",
+            "enum": ["details", "review", "complete"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "slots": {},
+      "events": {},
+      "a11y": {
+        "role": "list",
+        "name": "content",
+        "notes": "The current step carries aria-current=step."
+      },
+      "openUi": { "arguments": ["current"] },
+      "examples": [
+        {
+          "id": "review",
+          "state": "review",
+          "root": {
+            "component": "CheckoutSteps",
+            "props": { "current": "review" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AccountOverview",
+      "kind": "pattern",
+      "description": "The account home: greeting, counts and recent orders of the signed-in customer.",
+      "source": "kit/storefront#account-overview",
+      "since": "1.0.0",
+      "surfaces": ["storefront"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 300 },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "orders": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "addresses": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "downloads": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["orders", "addresses", "downloads"]
+          },
+          "orders": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "number": { "type": "string", "maxLength": 100 },
+                "date": { "type": "string", "maxLength": 40 },
+                "state": { "type": "string", "maxLength": 100 },
+                "total": { "type": "number" },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                "items": {
+                  "default": [],
+                  "maxItems": 3,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": { "type": "string", "maxLength": 300 },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "image": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+                      }
+                    },
+                    "required": ["label", "quantity"]
+                  }
+                }
+              },
+              "required": ["id", "number", "state", "total", "currency"]
+            }
+          },
+          "recent": {
+            "default": 2,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 50
+          }
+        },
+        "required": ["name", "counts", "orders"],
+        "additionalProperties": false
+      },
+      "hostData": ["name", "counts", "orders"],
+      "slots": {},
+      "events": {
+        "open": {
+          "description": "The customer opened an order or account page.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["line", "order", "page"] },
+              "id": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["kind", "id"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "region",
+        "name": "content",
+        "notes": "Personal data; only the storefront account host admits it."
+      },
+      "openUi": {
+        "arguments": ["name", "counts", "orders", "recent", "action"]
+      },
+      "examples": []
+    },
+    {
+      "name": "OrderList",
+      "kind": "pattern",
+      "description": "The signed-in customer's orders.",
+      "source": "kit/storefront#order-list",
+      "since": "1.0.0",
+      "surfaces": ["storefront"],
+      "props": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "number": { "type": "string", "maxLength": 100 },
+                "date": { "type": "string", "maxLength": 40 },
+                "state": { "type": "string", "maxLength": 100 },
+                "total": { "type": "number" },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                "items": {
+                  "default": [],
+                  "maxItems": 3,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": { "type": "string", "maxLength": 300 },
+                      "quantity": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "image": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "pattern": "^(\\/(?!\\/)|https:\\/\\/)"
+                      }
+                    },
+                    "required": ["label", "quantity"]
+                  }
+                }
+              },
+              "required": ["id", "number", "state", "total", "currency"]
+            }
+          }
+        },
+        "required": ["orders"],
+        "additionalProperties": false
+      },
+      "hostData": ["orders"],
+      "slots": {},
+      "events": {
+        "open": {
+          "description": "The customer opened an order.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["line", "order", "page"] },
+              "id": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["kind", "id"]
+          }
+        }
+      },
+      "a11y": {
+        "role": "list",
+        "name": "content",
+        "notes": "Personal data; only the storefront account host admits it."
+      },
+      "openUi": { "arguments": ["orders", "action"] },
+      "examples": []
+    }
+  ]
+}
