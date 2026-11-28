@@ -4,9 +4,9 @@
  "runDigest": "cbcc995333c702d4928c20f515b7f18b96d217922750a33b95eb1a4124462df0",
  "source": {
   "kind": "authored",
-  "recordedAt": "2026-11-27T13:31:46+00:00",
-  "reason": "Initial reference decisions and negative controls bound to the current planner and advisor requests",
-  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+  "recordedAt": "2026-11-28T09:11:58+00:00",
+  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents",
+  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb"
  },
  "steps": [
   {
@@ -36,6 +36,8 @@
      "merchant.catalog.context",
      "merchant.commerce.read",
      "merchant.company",
+     "merchant.operations.check",
+     "merchant.operations.list",
      "merchant.order",
      "merchant.orders",
      "merchant.product.content",
@@ -43,7 +45,7 @@
      "merchant.reports.read",
      "studio.workspace.work.read"
     ],
-    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "toolsDigest": "386854130d602cfad22b73ad435a585ffeb6cb1585c74d203185377ee2ba026c",
     "schemaDigest": null
    },
    "decision": {
@@ -86,6 +88,8 @@
      "merchant.catalog.context",
      "merchant.commerce.read",
      "merchant.company",
+     "merchant.operations.check",
+     "merchant.operations.list",
      "merchant.order",
      "merchant.orders",
      "merchant.product.content",
@@ -93,7 +97,7 @@
      "merchant.reports.read",
      "studio.workspace.work.read"
     ],
-    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "toolsDigest": "386854130d602cfad22b73ad435a585ffeb6cb1585c74d203185377ee2ba026c",
     "schemaDigest": null
    },
    "decision": {
@@ -112,7 +116,7 @@
     ],
     "tools": [],
     "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "schemaDigest": "f282ddfb263711bddfeef6e963798c9aff475c76d11cbda547f1bc19e3801c7c"
+    "schemaDigest": "0c622e557ae2a9c74e146bf025dc4fa136b2f03de80e806ded24aa6f9f6d8c18"
    },
    "decision": {
     "final": {

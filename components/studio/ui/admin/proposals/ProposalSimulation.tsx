@@ -17,7 +17,11 @@ import {
 import { useProposalSimulationText } from "./proposal-simulation-i18n";
 
 /** Columns wrap below each other on narrow screens instead of overflowing the card. */
-const column = { flex: "1 1 14rem", minWidth: 0, overflowWrap: "anywhere" } as const;
+const column = {
+  flex: "1 1 14rem",
+  minWidth: 0,
+  overflowWrap: "anywhere",
+} as const;
 
 function value(v: unknown) {
   return v == null ? "–" : String(v);
@@ -152,13 +156,37 @@ export default function ProposalSimulation({
                               </tr>
                               <tr>
                                 <th>{word("revenue")}</th>
-                                <td>{money(p.baseline.grossRevenueMinor, p.currency, p.scale)}</td>
-                                <td>{money(p.proposed.grossRevenueMinor, p.currency, p.scale)}</td>
+                                <td>
+                                  {money(
+                                    p.baseline.grossRevenueMinor,
+                                    p.currency,
+                                    p.scale,
+                                  )}
+                                </td>
+                                <td>
+                                  {money(
+                                    p.proposed.grossRevenueMinor,
+                                    p.currency,
+                                    p.scale,
+                                  )}
+                                </td>
                               </tr>
                               <tr>
                                 <th>{word("margin")}</th>
-                                <td>{money(p.baseline.marginMinor, p.currency, p.scale)}</td>
-                                <td>{money(p.proposed.marginMinor, p.currency, p.scale)}</td>
+                                <td>
+                                  {money(
+                                    p.baseline.marginMinor,
+                                    p.currency,
+                                    p.scale,
+                                  )}
+                                </td>
+                                <td>
+                                  {money(
+                                    p.proposed.marginMinor,
+                                    p.currency,
+                                    p.scale,
+                                  )}
+                                </td>
                               </tr>
                               <tr>
                                 <th>{word("endingStock")}</th>

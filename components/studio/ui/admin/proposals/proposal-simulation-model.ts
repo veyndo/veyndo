@@ -94,7 +94,9 @@ export type Explanation = {
 
 /** Whether the stored simulation lets the merchant approve; proposals saved before simulation existed keep their review. */
 export function approvable(simulation: Simulation | null | undefined) {
-  return !simulation || (simulation.status !== "failed" && !simulation.blocking);
+  return (
+    !simulation || (simulation.status !== "failed" && !simulation.blocking)
+  );
 }
 
 /** The rule findings worth showing first: violations, blocking ones before warnings. */
@@ -129,4 +131,3 @@ export function amount(
     maximumFractionDigits: scale,
   }).format(minor / 10 ** scale);
 }
-

@@ -135,8 +135,12 @@ export type Preview = {
     learningSignals?: { variant: string; views: number; purchases: number }[];
   };
   knowledge?: Graph;
-  simulation?: import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Simulation | null;
-  explanation?: import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Explanation | null;
+  simulation?:
+    | import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Simulation
+    | null;
+  explanation?:
+    | import("../../../../components/studio/ui/admin/proposals/proposal-simulation-model").Explanation
+    | null;
 };
 export type Message = {
   id: number;

@@ -3,12 +3,16 @@
  "scenario": "purchasing-spend-cap",
  "runDigest": "a14a60fee07cfb903a2e48ae8bc60d499caf1dc5b5b9c75ca2e0bdf0fd68794e",
  "source": {
-  "kind": "model",
-  "provider": "ollama",
-  "model": "qwen3.6:35b",
-  "recordedAt": "2026-11-27T13:28:01+00:00",
-  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd",
-  "reason": "First local qwen3.6:35b run: clean, correct behaviour worth replaying as recorded"
+  "kind": "authored",
+  "derivedFrom": {
+   "provider": "ollama",
+   "model": "qwen3.6:35b",
+   "recordedAt": "2026-11-27T13:28:01+00:00",
+   "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+  },
+  "recordedAt": "2026-11-28T09:12:05+00:00",
+  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb",
+  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents"
  },
  "steps": [
   {
@@ -38,6 +42,8 @@
      "merchant.catalog.context",
      "merchant.commerce.read",
      "merchant.company",
+     "merchant.operations.check",
+     "merchant.operations.list",
      "merchant.order",
      "merchant.orders",
      "merchant.product.content",
@@ -45,7 +51,7 @@
      "merchant.reports.read",
      "studio.workspace.work.read"
     ],
-    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "toolsDigest": "386854130d602cfad22b73ad435a585ffeb6cb1585c74d203185377ee2ba026c",
     "schemaDigest": null
    },
    "decision": {
@@ -89,6 +95,8 @@
      "merchant.catalog.context",
      "merchant.commerce.read",
      "merchant.company",
+     "merchant.operations.check",
+     "merchant.operations.list",
      "merchant.order",
      "merchant.orders",
      "merchant.product.content",
@@ -96,7 +104,7 @@
      "merchant.reports.read",
      "studio.workspace.work.read"
     ],
-    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "toolsDigest": "386854130d602cfad22b73ad435a585ffeb6cb1585c74d203185377ee2ba026c",
     "schemaDigest": null
    },
    "decision": {
@@ -116,7 +124,7 @@
     ],
     "tools": [],
     "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "schemaDigest": "f282ddfb263711bddfeef6e963798c9aff475c76d11cbda547f1bc19e3801c7c"
+    "schemaDigest": "0c622e557ae2a9c74e146bf025dc4fa136b2f03de80e806ded24aa6f9f6d8c18"
    },
    "decision": {
     "text": "{\n  \"changes\": [\n    {\n      \"product_id\": \"desk\",\n      \"stock\": 12\n    }\n  ],\n  \"summary\": \"Proposed stock update for **Studio Desk** (desk).\\n\\n**Calculation:**\\n- Supplier cost per unit: 449 EUR / 2 = 224.50 EUR.\\n- Budget: 1,000 EUR.\\n- Max units affordable: floor(1,000 / 224.50) = 4 units.\\n- Current stock: 10.\\n- New proposed stock: 10 + 4 = **14**.\\n\\n*Correction*: The previous calculation in the thought process was slightly off in the final integer check. Let's re-verify.\\n1000 / 224.5 = 4.45... -> 4 units.\\nCurrent stock is 10.\\nNew stock level should be 14.\\n\\nWait, let me double check the math.\\n224.5 * 4 = 898 EUR. (Within budget)\\n224.5 * 5 = 1122.5 EUR. (Over budget)\\nSo we can buy 4 units.\\nCurrent stock: 10.\\nNew total: 14.\\n\\nI will propose a stock level of **14**.\"\n    }"
