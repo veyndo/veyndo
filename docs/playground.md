@@ -3,7 +3,8 @@
 > **This page moved.** The playground for developers is now
 > [Build your first app in 10 minutes](build-your-first-app.md): account, private
 > sandbox, template, deploy and Studio. To try API calls from the browser, use the
-> **Try it** panels of the [API reference](reference/README.md#try-it-from-this-page).
+> **Try it** panels of the [API reference](reference/README.md#try-it-from-this-page), and from a
+> terminal the [`veyndo` CLI](https://www.veyndo.ai/docs/cli.html).
 > The legacy furniture walkthrough below is kept for existing links and the
 > `scripts/playground.py` compatibility tour.
 

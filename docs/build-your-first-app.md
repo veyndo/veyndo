@@ -64,18 +64,17 @@ Or paste your shop ID into any **Try it** panel of the
 | [`shopper-guide`](../templates/shopper-guide/README.md) | A product guide as an MCP App for shopping assistants, with a private merchant view | Storefront assistant, Studio assistant |
 | [`storefront-starter`](../templates/storefront-starter/README.md) | A headless storefront on the TypeScript SDK, in four languages | Your own Node server |
 
-With the `veyndo` CLI, which scaffolds exactly these folders and gives the app its own ID:
-
-```sh
-veyndo app new product-badge
-```
-
-Without it, copy the folder from a checkout of this repository:
+Copy the folder from a checkout of this repository:
 
 ```sh
 git clone --depth 1 https://github.com/veyndo/veyndo.git
 cp -R veyndo/templates/product-badge my-badge
 ```
+
+The [`veyndo` CLI](https://www.veyndo.ai/docs/cli.html) offers a second set of starting
+points, the App Studio patterns, and deploys them through the native package review
+and install path: `veyndo app new advisor|returns|erp|edi|furniture <dir>`, then
+`veyndo app deploy`. It does not scaffold the four templates above yet.
 
 Then run the tests. They need no network and no account:
 
@@ -85,8 +84,8 @@ npm test
 ```
 
 Every app template is a `manifest.json` (the app's data, views, actions and
-permissions), tests and `scripts/deploy-sandbox.mjs`. If you copied by hand,
-give the app its own ID first: change `"id"` in `manifest.json` to a new
+permissions), tests and `scripts/deploy-sandbox.mjs`. Give the app its own ID
+first: change `"id"` in `manifest.json` to a new
 snake_case name. The [App platform](app-platform.md) describes every field.
 
 ## Deploy to a private sandbox
@@ -95,7 +94,7 @@ snake_case name. The [App platform](app-platform.md) describes every field.
 npm run deploy
 ```
 
-The script makes three calls with your session, the same ones Studio uses:
+The script makes three calls with your session, the same ones App Studio's builder uses:
 
 1. `POST /api/environments` creates a private sandbox, a copy of your shop
    that only you can see.
@@ -140,6 +139,8 @@ against your shop ID and open `http://localhost:3000`.
 - Change the template, raise its version and deploy again.
 - Read every call your app can make in the [API reference](reference/README.md).
 - Generate clients from the same contracts: [SDKs](sdks.md).
+- Connect your coding agent to the shop: `veyndo mcp --client claude-code` (or
+  `claude-desktop`, `cursor`) prints an MCP configuration without secrets.
 - Build the five longer [app workshops](app-tutorials/README.md), or let a
   coding agent extend your Manifest through [App Studio](app-studio.md).
 
