@@ -1263,6 +1263,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerAddressesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1271,6 +1296,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerAddressSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.pii",
+          "customers.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1279,6 +1329,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerAddressDeleteInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.pii",
+          "customers.write"
+        ],
+        "requires": [
+          "merchant.customer.addresses"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1287,6 +1364,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomersInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1295,6 +1397,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1303,6 +1431,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "customers.pii",
+          "customers.write"
+        ],
+        "requires": [
+          "merchant.customer"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1311,6 +1468,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerLookupInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read",
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1319,6 +1501,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerCreationInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.pii",
+          "customers.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1327,6 +1535,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerCreateInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "customers.pii",
+          "customers.write"
+        ],
+        "requires": [
+          "merchant.customer.creation"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     }
   ],

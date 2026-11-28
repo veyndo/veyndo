@@ -5,6 +5,13 @@ domain owner, conservative safety hints and read-agent exposure. `admission.rs`
 applies current domain permissions before discovery and execution; domain handlers
 still own object, PII, CAS and business checks. Metadata never grants access.
 
+`facts.rs` declares the typed facts of every operation (permission, reversibility,
+risk, data, side effects, graph edges); `registry.rs` refuses a missing, stale or
+contradictory declaration and a test proves the permissions match admission.
+`planner.rs` serves `merchant.operations.list` and `merchant.operations.check` from the
+registry; `surfaces.rs` declares the UCP capabilities and the operations behind them,
+from which UCP discovery and the buyer allowlist are generated.
+
 `schema.rs` owns native input descriptions; `contract.rs` describes native and app
 tools consistently. `dispatch.rs` selects the existing domain owner; it does not
 implement another business service. See [the operation registry](../../docs/business-capabilities.md#the-operation-registry-underneath)

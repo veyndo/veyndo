@@ -2482,8 +2482,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "f96180abb796273432646507e961c7fd0184f13c1a38d8b7ef7a22bf868f3e82",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "74c358747003cfeac3ae1c5d7aa1f4b0a29d1086180cdb9ae37cb7c5ea21bd2a",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -2509,6 +2509,11 @@
       "status": "unproved",
       "sha256": "b1324e25f81c0f43d79b8b6a232d3140c4f6e2aadcf16731526cd84896a7886b",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/operation_facts.rs": {
+      "status": "unproved",
+      "sha256": "88aea2b5e7811650e0bcafc5905701fd6d0ba56f3153ed7757093ecd98d3356c",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/core/src/process_config.rs": {
       "status": "unproved",
@@ -3742,8 +3747,8 @@
     },
     "components/marketing/src/domain/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "2de3264adff7684afb39ba63047b86a63b3468a25ad6af5db73ef6f9e974f9ff",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "785cd08459bee4454b13460823edddadcfb32575148cc163ca3e0e54c15d7088",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/domain/flow_projection.rs": {
       "status": "unproved",
@@ -3812,8 +3817,8 @@
     },
     "components/marketing/src/http/catalog.rs": {
       "status": "unproved",
-      "sha256": "21278f38de53418c6567767ef03eacf4f6b704c7524d99244dd9d9cd691674f5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5d787b8389583bc0ebe0eed798e0d50f3d9845a003d5555b6b9c567a33966cee",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/http/channel_preview.rs": {
       "status": "unproved",
@@ -3872,8 +3877,8 @@
     },
     "components/marketing/src/service/configuration_writes.rs": {
       "status": "unproved",
-      "sha256": "e3eb00ad8b8bf6d6127edb964bdc5fcd65521e9d1030940f149b51b8c54ea74f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "7b009c3874c9a1911edb215889e0786a5d04fe9e9a8f899a065db8d04502bcbc",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/service/coupons.rs": {
       "status": "unproved",
@@ -8202,8 +8207,8 @@
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "b40e96e55d80f582549bbeef58408703d78b38d417a5be80868b25930db51777",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "2ad9a5b9a43bd8bc6ca1b91dd1bbdbf5cb18d7ff62fe498afaa02d93c837b9cd",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/catalog/core_catalog.rs": {
       "status": "unproved",
@@ -8212,28 +8217,43 @@
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
-      "sha256": "241958410bc8eabcf6ee9e454e3739cccec92ffa2757faae88c3e5983c7ee916",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+      "sha256": "174790aae2705a2cb2d64edb5afd4ab923bdead58bff062b30b7bc65044622cf",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "c7944377df6d667456f4d2dde14050dc3eedb95bbdc946b5c7b5d3cfb8663688",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "2f04fc7245a7067b6e5d58305a9c29db3dcd610e7c994ba617466fca4f387e4e",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
+    },
+    "src/capabilities/facts.rs": {
+      "status": "unproved",
+      "sha256": "a692e9423fb25744f4291cc47b1102f0841ba8a94081a87fb7a02309f442d7ab",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
+    },
+    "src/capabilities/planner.rs": {
+      "status": "unproved",
+      "sha256": "33dfa2a257fcff54988b2389fc0fed0bb3cd78533d1d1d659bf4719298a05046",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "67c2e2ade6dba3df9ce9a95d919d7c0d9aae2b73c2abb5fd99fe44fe880e8d09",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "253d893dc23517ea54742e308466013fd3224c7d7fc4d87a877fa4ac09dd6b57",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "c3aa1a81ac21bbc128f28786ddd5d800a821ba29842b0a9a03789828a4f1618e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "d0dd9a7ffa9d4e00b4dcf3f246c1610dda66e91b95309084c7844eb496df74ca",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
+    },
+    "src/capabilities/surfaces.rs": {
+      "status": "unproved",
+      "sha256": "7fb0591e14dd0ce3219b036c88efb06557b8304301f4d4f88fbcc4b18146941b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "4bb27b7d18f86f00dec11d5480a83b2ef9eaed5517f0c1d62f03cda40743ed18",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "8273bda84fca01d60755b5fb355db0fcdcf3ecc8a18745613c3bcdb78aa9d1b9",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
@@ -9472,13 +9492,13 @@
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "319a14949d582c608190bce6d1c39a24b3cb03ea3736339e59042b3ad06636bf",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "6dd65fdab9665ea3fbb0967939eed5cd823d31db40d5e44fcaedbd2b40c7f44b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "8145b969cc1a74e211193150135c74d632b2e404a22d65e2a65268e59a67ab8e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "c4d00affd4fa0973130554bdff955b9b6631a5a1317808843b7c306acea4d836",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
@@ -9492,18 +9512,18 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "5014e48e58c8c31e6b214c0ccdab87703adf6ab74c4525020a34248481474163",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "89bcd9e9670772155ef2bc6f3e7a37fce086f4142a89962f3845f82f9ea5c96b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "f3e94503469046b1c9e1249d5e7dd4766b1d18c4bb0a3bfc4bf660a272d520bc",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "829625ec8dd893a6bfbc7d30c1f7f5205104f301de7ee8980af6235a7f7a383e",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
-      "sha256": "b4ae6071b46775524598820f7e2153fe25d5aed06fb801d112b9eb8fd23b8b07",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "3336fbe80bd3e8857f8f0a3d45e11fba8bedfa2cae76df1152738fce3ab898e6",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",

@@ -70,6 +70,7 @@ export default function WorkspaceTask({
       {open && (
         <div className="personal-task-review">
           <ProposalCard
+            request={request}
             message={{
               id: 0,
               role: "assistant",

@@ -1624,6 +1624,17 @@ interface inputs {
     %id: string,
     %revision: s64,
   }
+  record merchant-operations-list-input {
+    %include-unavailable: option<bool>,
+    %names: option<list<string>>,
+  }
+  record merchant-operations-check-input-steps-item {
+    %arguments: option<string>,
+    %name: string,
+  }
+  record merchant-operations-check-input {
+    %steps: list<merchant-operations-check-input-steps-item>,
+  }
   currency-list: func(input: string) -> result<string, string>;
   currency-select: func(input: currency-select-input) -> result<string, string>;
   merchant-currencies-refresh: func(input: merchant-currencies-refresh-input) -> result<string, string>;
@@ -1836,6 +1847,8 @@ interface inputs {
   b2b-approval-decide: func(input: b2b-approval-decide-input) -> result<string, string>;
   automation-compare-history: func(input: automation-compare-history-input) -> result<string, string>;
   automation-validate-flow: func(input: automation-validate-flow-input) -> result<string, string>;
+  merchant-operations-list: func(input: merchant-operations-list-input) -> result<string, string>;
+  merchant-operations-check: func(input: merchant-operations-check-input) -> result<string, string>;
 }
 
 interface typed-results {

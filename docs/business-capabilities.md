@@ -115,7 +115,7 @@ Studio discovery and agents use the same contract, admission and errors.
 
 Native operations have one immutable registry in `src/capabilities/registry.rs`.
 Each record binds its name, description, selected domain, input contract, conservative
-safety hints and internal read-agent exposure. MCP, native dispatch, Studio discovery
+safety hints, internal read-agent exposure and its typed facts (next section). MCP, native dispatch, Studio discovery
 and agent reads consume it. Domain admission remains authoritative and is applied
 before dispatch as well as during discovery. Domain handlers retain their own
 object, ownership, revision and business checks.
@@ -136,6 +136,85 @@ The compiled registry generates request OpenAPI, TypeScript and WIT
 contracts, with drift checks in CI. These describe the bounded published input
 schema; broad managed-field objects and complete response DTOs still require
 domain typing. Generation is not evidence that every response is already typed.
+
+### The typed operations graph
+
+Every agent-facing operation carries one `OperationFacts` value
+([`components/core/src/operation_facts.rs`](../components/core/src/operation_facts.rs)).
+Native operations declare theirs in [`src/capabilities/facts.rs`](../src/capabilities/facts.rs);
+built-in Flow actions declare theirs next to their admission in
+[`components/marketing/src/domain/flow_actions.rs`](../components/marketing/src/domain/flow_actions.rs).
+
+| Fact | Meaning |
+| --- | --- |
+| `audience`, `permissions` | Shopper session or signed-in merchant, and every permission admission requires together |
+| `writes` | Whether the call changes state. The MCP `readOnly` hint stays conservative and may still call a read mutating |
+| `reversibility` | `reversible` (saving the previous values restores it), `compensatable` with the compensating operation, or `irreversible` |
+| `risk` | `low`, `medium` or `high` review weight |
+| `data` | Affected entities, and whether personal data, money or stock are touched |
+| `effects` | Email, payment, external call, model call, publication, background job, domain event |
+| `requires` | Operations whose result this one consumes: the edges of the graph |
+| `conditions` | Private sandbox only, personal login only |
+
+`cost` (free, standard, batch, provider, model) is derived from the effects, and
+`requiresApproval` is true for every high-risk or irreversible write. Call
+preconditions (expected revision, idempotency key, explicit `approve`) are read
+from the published input contract, so they cannot drift from it.
+
+The metadata is mandatory and checked at three points:
+
+* **Registry assembly** refuses an operation without facts, facts for a name that is
+  not an operation, duplicate facts, contradictory facts (for example a read that sends
+  email, an irreversible change at low risk, a reversible payment), a compensation that
+  is not a writing operation, a `requires` edge to a missing operation, and a read-only
+  operation that declares writes. The server does not start and every test fails.
+* **Admission parity**: a test asks current admission whether the declared permissions
+  are sufficient and whether each one is necessary, for every operation. Declared
+  permissions are therefore exactly what dispatch enforces, not documentation.
+* **Contract generation** (`scripts/testing/operation_contracts.py`, part of the
+  structure check) refuses an export with missing or malformed facts, with nine
+  negative controls. A Flow action without facts fails the build through a
+  compile-time check against the published `veyndo_flow_graph` catalogue.
+
+Facts never grant rights. Admission and the domain owners stay authoritative.
+
+**Generated surfaces.** MCP `tools/list` is generated from the registry as before;
+names, permissions, schemas and annotations are unchanged. The offline export
+(`veyndo --operation-contracts`), the per-component OpenAPI contracts
+(`x-veyndo-tools[].facts`) and the SDK operation manifest carry the facts.
+`component_releases.py` treats a newly required permission or approval as a major
+change. The Flow catalogue (`GET /api/automation/catalog`) keeps its `actions` list
+and adds `actionFacts` from the same declaration that admits each action. UCP
+discovery (`/.well-known/ucp`) and the B2B buyer-negotiation allowlist are generated
+from the UCP declarations in [`src/capabilities/surfaces.rs`](../src/capabilities/surfaces.rs);
+a test proves that every operation behind a UCP capability is a shopper operation,
+so the buyer protocol cannot reach merchant authority.
+
+**Planner reads.** Two read-only native operations serve agents, MCP clients and Studio:
+
+* `merchant.operations.list` returns the operations the caller is admitted to (or all,
+  with `includeUnavailable`), each with its facts, cost, approval requirement,
+  preconditions and UCP capabilities, plus the built-in Flow actions and UCP capabilities.
+* `merchant.operations.check` takes a plan of up to 50 steps (`name`, optional
+  `arguments`) and returns per step `allowed`, `approval`, `blocked` or `unknown`, with
+  reasons (`notAuthorized`, `agentCredentialReadOnly`, `invalidArguments`, `highRisk`,
+  `irreversible`, `undeclaredFacts`, `sandboxOnly`, `personalSession`), prerequisites
+  the plan does not run first and the compensating operation. Arguments are validated
+  against the same input contract dispatch uses. It runs nothing.
+
+Both are budgeted-agent reads. A step that needs approval still goes through the
+existing controls in [agent authority controls](agent-authority-controls.md): a person
+applies the proposal or calls the native operation, and agent credentials stay
+read-only. Installed app actions (`app.*`) have no declared facts yet and are reported
+as needing approval.
+
+Studio shows the facts beside every proposed step in the proposal review
+(`frontend/src/shared/agents/OperationFacts.tsx`, all text through
+`operation-facts-i18n.ts`); a step whose operation has no declared facts is flagged.
+
+**Boundary.** Reversibility, risk, data and effects are reviewed declarations, checked
+for consistency but not derived from the handler code. HTTP routes call their domain
+handlers directly and are not generated from the graph. App actions do not yet carry facts.
 
 ### Actionable failures
 

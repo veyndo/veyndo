@@ -2830,6 +2830,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2838,6 +2862,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaProviderInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2846,6 +2894,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaCreateInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "externalCall",
+          "backgroundJob"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2854,6 +2930,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaDetailInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [
+          "merchant.media.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2862,6 +2964,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaApplyInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [
+          "merchant.media.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2870,6 +3001,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantTranslationsListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2878,6 +3034,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantTranslationsCreateInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "backgroundJob"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2886,6 +3070,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantTranslationsDetailInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [
+          "merchant.translations.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2894,6 +3105,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantTranslationsControlInput"
+      },
+      "cost": "batch",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "backgroundJob"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [
+          "merchant.translations.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2902,6 +3141,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantTranslationsApplyInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [
+          "merchant.translations.create"
+        ],
+        "reversibility": {
+          "by": "merchant.history.restore",
+          "kind": "compensatable"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2910,6 +3180,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantProductsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2918,6 +3212,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantProductCreateInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "category"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "by": "merchant.product.save",
+          "kind": "compensatable"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2926,6 +3249,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCategoriesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2934,6 +3281,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCategoryCreateInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "by": "merchant.category.save",
+          "kind": "compensatable"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2942,6 +3316,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCategorySaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "category"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -2950,6 +3350,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantProductContentInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2958,6 +3382,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantProductSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [
+          "merchant.product.content"
+        ],
+        "reversibility": {
+          "by": "merchant.history.restore",
+          "kind": "compensatable"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2966,6 +3420,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantProductAssetsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2974,6 +3453,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantAssetPublishInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -2982,6 +3488,28 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/CatalogSearchInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2990,6 +3518,29 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/CatalogDetailInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "media"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2998,6 +3549,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantMediaCaptionInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "media"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall"
+        ],
+        "permissions": [
+          "assistant.use"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -3006,6 +3583,28 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/CatalogFactsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -3014,6 +3613,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantCatalogContextInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -3022,6 +3646,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCatalogPrepareInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "import"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "externalCall"
+        ],
+        "permissions": [
+          "catalog.read",
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -3030,6 +3683,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCatalogSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read",
+          "catalog.write"
+        ],
+        "requires": [
+          "merchant.catalog.prepare"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     }
   ],

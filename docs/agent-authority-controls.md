@@ -42,6 +42,16 @@ integration operations. To start saved merchant-agent work or use central model
 planning with a nonpersonal integration credential, create a dedicated bounded
 agent key. A generic key is no longer an unmetered native AI credential.
 
+## Check a plan before it runs
+
+An agent or MCP client can read `merchant.operations.list` for the operations it may
+call, with permission, cost, reversibility, risk, affected data and side effects, and
+send a planned sequence to `merchant.operations.check`. The check names every step that
+needs approval (high risk or irreversible), that the credential cannot run, or whose
+arguments fail the published input contract. It executes nothing and grants nothing:
+approval still happens through the proposal review or the native operation by a person.
+See [the typed operations graph](business-capabilities.md#the-typed-operations-graph).
+
 ## What is counted
 
 Before each text-model request, PostgreSQL locks the live shop and key, checks

@@ -26,6 +26,9 @@ pub(super) fn output(name: &str) -> Option<Value> {
 
 /// Schemas that the owning module of an operation publishes itself.
 fn owned(name: &str) -> Option<Value> {
+    if let Some(schema) = super::planner::schema(name) {
+        return Some(schema);
+    }
     if let Some(schema) = studio::reports::schema(name) {
         return Some(schema);
     }

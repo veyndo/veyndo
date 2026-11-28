@@ -197,6 +197,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantDeliverySplitInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "order"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": true
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "orders.write",
+          "customers.pii"
+        ],
+        "requires": [
+          "merchant.order"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     }
   ],

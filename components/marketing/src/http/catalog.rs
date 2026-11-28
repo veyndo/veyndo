@@ -1,5 +1,6 @@
 //! Native condition metadata, app action/event discovery and source-compatible condition import.
 use crate::domain::condition_import::normalize;
+use crate::domain::flow_actions;
 use crate::domain::rule_fields::FIELDS;
 use crate::domain::rules::Condition;
 use crate::store::catalog;
@@ -50,8 +51,18 @@ pub async fn catalog(Shared(a): Shared<State>, h: RequestContext) -> Result<Json
     let rules = catalog::active_rules(&a, &t).await?;
     let source: SourceCatalog = view(automation_rules::catalog());
     Ok(Json(
-        json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.id,"manifest":r.manifest})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false,"rules":rules.iter().map(|r|json!({"id":r.id,"name":r.name,"revision":r.revision})).collect::<Vec<_>>(),"sourceConditions":source.conditions,"actions":builtin::PIPELINE_ACTIONS,"sourceActions":source.actions,"flowCatalogVersion":builtin::VERSION,"pipelineContract":{"nodes":["condition","action","delay","stop"],"maxNodes":veyndo_flow_graph::MAX_NODES,"maxDelaySeconds":2592000,"cyclicGraphs":false}}),
+        json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.id,"manifest":r.manifest})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false,"rules":rules.iter().map(|r|json!({"id":r.id,"name":r.name,"revision":r.revision})).collect::<Vec<_>>(),"sourceConditions":source.conditions,"actions":builtin::PIPELINE_ACTIONS,"actionFacts":action_facts(),"sourceActions":source.actions,"flowCatalogVersion":builtin::VERSION,"pipelineContract":{"nodes":["condition","action","delay","stop"],"maxNodes":veyndo_flow_graph::MAX_NODES,"maxDelaySeconds":2592000,"cyclicGraphs":false}}),
     ))
+}
+
+/// The typed facts of every built-in action, generated from the one declaration that also admits them.
+fn action_facts() -> Vec<Value> {
+    flow_actions::ACTIONS
+        .iter()
+        .map(|(name, facts)| {
+            json!({"name":name,"facts":facts,"cost":facts.cost(),"requiresApproval":facts.requires_approval()})
+        })
+        .collect()
 }
 
 /// `POST /api/automation/import-condition`: normalizes a source condition and checks it, without saving it.

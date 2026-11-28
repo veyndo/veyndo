@@ -68,6 +68,7 @@ pub(super) fn definitions() -> Vec<(&'static str, &'static str)> {
     all.extend(crate::b2b::CAPABILITIES.iter().copied());
     all.extend(crate::marketing::HISTORY_CAPABILITIES.iter().copied());
     all.push(crate::marketing::DRAFT_CAPABILITY);
+    all.extend(super::planner::CAPABILITIES.iter().copied());
     all
 }
 const COGNITIVE: &[(&str, &str)] = &[

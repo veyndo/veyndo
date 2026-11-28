@@ -31,8 +31,13 @@ mod negotiation;
 mod profile;
 mod readiness;
 mod views;
+pub(crate) use cart::CAPABILITY as UCP_CART;
+pub(crate) use consent::CAPABILITY as UCP_CONSENT;
 use document::{UcpDocument, ucp_document};
 pub(crate) use negotiation::command as ucp_b2b;
+pub(crate) use profile::{
+    B2B as UCP_B2B, CHECKOUT as UCP_CHECKOUT, SCHEMA as UCP_B2B_SCHEMA, VERSION as UCP_B2B_VERSION,
+};
 pub(crate) use profile::{schema as ucp_b2b_schema, ucp_meta, ucp_profile};
 pub(crate) use readiness::readiness;
 pub(crate) use views::keep_present;

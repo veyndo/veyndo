@@ -12,6 +12,11 @@ metadata never grants rights. Domain object/PII/CAS/business checks stay authori
 An app output-contract failure may follow a real external effect: preserve its
 non-retryable/uncertain boundary, never automatically re-run it as harmless validation.
 
+Every native operation and built-in Flow action declares `OperationFacts` (see
+`docs/business-capabilities.md#the-typed-operations-graph`). Declare facts with the
+operation, never weaken a declaration to pass a check, and keep permissions equal to
+admission. Facts and planner verdicts never grant rights or record an approval.
+
 Outbox dispatch scheduling metadata is operational, forced-RLS and never a release
 unit. Lock scheduling rows rather than tenant roots, preserve per-event savepoints
 and exact original outbox consumers. A fair tenant batch is not independent subscriber

@@ -15450,6 +15450,128 @@
                         }
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "jsonrpc",
+                      "id",
+                      "method",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "jsonrpc": {
+                        "const": "2.0"
+                      },
+                      "id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "method": {
+                        "const": "tools/call"
+                      },
+                      "params": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "arguments"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "name": {
+                            "const": "merchant.operations.list"
+                          },
+                          "arguments": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "includeUnavailable": {
+                                "type": "boolean"
+                              },
+                              "names": {
+                                "items": {
+                                  "maxLength": 120,
+                                  "type": "string"
+                                },
+                                "maxItems": 300,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "jsonrpc",
+                      "id",
+                      "method",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "jsonrpc": {
+                        "const": "2.0"
+                      },
+                      "id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "method": {
+                        "const": "tools/call"
+                      },
+                      "params": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "arguments"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "name": {
+                            "const": "merchant.operations.check"
+                          },
+                          "arguments": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "steps": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "arguments": {
+                                      "type": "object"
+                                    },
+                                    "name": {
+                                      "maxLength": 120,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "maxItems": 50,
+                                "minItems": 1,
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ],
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
                   }
                 ]
               }

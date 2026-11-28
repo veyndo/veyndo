@@ -48,6 +48,7 @@ export default function FlowProposalReview({
         </Notice>
       )}
       <ProposalCard
+        request={request}
         message={{
           id: 0,
           role: "assistant",

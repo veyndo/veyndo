@@ -141,6 +141,7 @@ def compare(old, new):
     resolve = lambda schemas, ref: schemas.get(ref['$ref'].rsplit('/', 1)[1], {}) if ref else None
     for name in sorted(set(old_tools) & set(new_tools)):
         before, after = old_tools[name], new_tools[name]
+        facts_changes(before, after, name, out)
         input_changes(resolve(schemas_old, before['input']), resolve(schemas_new, after['input']), f'tool {name} input', out)
         if 'output' in before:
             if 'output' not in after:
@@ -155,6 +156,24 @@ def compare(old, new):
         out.append(('patch', 'descriptions or source locations changed'))
     level = max((level for level, _ in out), key=LEVELS.get, default=None)
     return level, [reason for _, reason in out]
+
+
+def facts_changes(before, after, name, out):
+    """Typed operation facts: a newly required permission or approval breaks a caller; other fact changes do not."""
+    old, new = before.get('facts'), after.get('facts')
+    if old is None or new is None:
+        if new is not None:
+            out.append(('minor', f'tool {name}: typed facts declared'))
+        return
+    added = sorted(set(new.get('permissions', [])) - set(old.get('permissions', [])))
+    if added:
+        out.append(('major', f'tool {name}: newly requires permission {", ".join(added)}'))
+    elif set(old.get('permissions', [])) != set(new.get('permissions', [])):
+        out.append(('minor', f'tool {name}: requires fewer permissions'))
+    if after.get('requiresApproval') and not before.get('requiresApproval'):
+        out.append(('major', f'tool {name}: newly requires approval'))
+    elif old != new or before.get('requiresApproval') != after.get('requiresApproval'):
+        out.append(('patch', f'tool {name}: facts changed'))
 
 
 # Git helpers -----------------------------------------------------------------------------

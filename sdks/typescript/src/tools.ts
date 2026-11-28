@@ -2274,6 +2274,23 @@ export interface MerchantImportRecordInput {
   "record": MerchantImportRecordInputRecord;
 }
 
+/** Input of `merchant.operations.list`. */
+export interface MerchantOperationsListInput {
+  "includeUnavailable"?: boolean;
+  "names"?: Array<string>;
+}
+
+/** Input of `merchant.operations.check`. */
+export interface MerchantOperationsCheckInputStepsItem {
+  "arguments"?: JsonValue;
+  "name": string;
+}
+
+/** Input of `merchant.operations.check`. */
+export interface MerchantOperationsCheckInput {
+  "steps": Array<MerchantOperationsCheckInputStepsItem>;
+}
+
 /** Tool name -> input type. */
 export interface ToolInputs {
   "team.roles": TeamRolesInput;
@@ -2488,6 +2505,8 @@ export interface ToolInputs {
   "studio.workspace.save": StudioWorkspaceSaveInput;
   "merchant.import.inspect": MerchantImportInspectInput;
   "merchant.import.record": MerchantImportRecordInput;
+  "merchant.operations.list": MerchantOperationsListInput;
+  "merchant.operations.check": MerchantOperationsCheckInput;
 }
 
 /** Tool name -> declared output type (tools without a declared output return any JSON). */
@@ -2711,6 +2730,8 @@ export const toolCatalog = {
   "studio.workspace.save": { component: "studio", readOnly: false, description: "Revise the current personal Studio workspace" },
   "merchant.import.inspect": { component: "studio", readOnly: true, description: "Read current mapped target fields and report missing/changed imports without writing" },
   "merchant.import.record": { component: "studio", readOnly: false, description: "Explicitly import a source record through current domain permissions; historical orders have no purchase effects" },
+  "merchant.operations.list": { component: "protocols", readOnly: true, description: "List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions" },
+  "merchant.operations.check": { component: "protocols", readOnly: true, description: "Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing" },
 } as const;
 
 /** Unused import guard for tools without declared outputs. */

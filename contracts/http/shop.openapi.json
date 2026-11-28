@@ -1651,6 +1651,28 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/PrivacyPolicyInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1659,6 +1681,29 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/PrivacyConsentInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal",
+            "cart"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -1667,6 +1712,29 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/LegalAcceptInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal",
+            "cart"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1675,6 +1743,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/LegalRequestInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal",
+            "order"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1683,6 +1776,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantLegalRequestsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal",
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1691,6 +1809,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantLegalReviewInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "legal",
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "customers.write"
+        ],
+        "requires": [
+          "merchant.legal.requests"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -1699,6 +1846,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCommerceDependenciesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "settings.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1707,6 +1878,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantCommerceReadInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "settings"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "settings.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1715,6 +1910,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCommerceSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "settings"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "settings.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     }
   ],
