@@ -1,0 +1,82 @@
+# Builds the `veyndo` command-line client (sdks/cli) for macOS and Linux and attaches the archives to a
+# draft GitHub release. A person reviews and publishes the draft; nothing is pushed to a package registry.
+name: CLI release
+
+on:
+  push:
+    tags: ['cli-v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing cli-vX.Y.Z tag to build (leave empty for a build without a release)'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-24.04
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
+          - target: x86_64-apple-darwin
+            runner: macos-13
+          - target: aarch64-apple-darwin
+            runner: macos-14
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Check, test and build the client
+        run: |
+          cargo fmt --manifest-path sdks/cli/Cargo.toml --check
+          cargo test --locked --manifest-path sdks/cli/Cargo.toml
+          cargo build --locked --release --manifest-path sdks/cli/Cargo.toml --target ${{ matrix.target }}
+      - name: Package binary, completions and license
+        shell: bash
+        run: |
+          version=$(sdks/cli/target/${{ matrix.target }}/release/veyndo --version | awk '{print $2}')
+          name="veyndo-cli-${version}-${{ matrix.target }}"
+          mkdir -p "dist/${name}/completions"
+          cp "sdks/cli/target/${{ matrix.target }}/release/veyndo" LICENSE "dist/${name}/"
+          for shell in bash zsh fish; do
+            "dist/${name}/veyndo" completions "${shell}" > "dist/${name}/completions/veyndo.${shell}"
+          done
+          tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          (cd dist && shasum -a 256 "${name}.tar.gz" > "${name}.tar.gz.sha256")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: veyndo-cli-${{ matrix.target }}
+          path: dist/*.tar.gz*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/cli-v') || inputs.tag != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: veyndo-cli-*
+          path: dist
+          merge-multiple: true
+      - name: Attach the archives to a draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+                 --title "veyndo CLI ${TAG#cli-v}" --notes "Command-line client; see docs/cli.md."
+          gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber

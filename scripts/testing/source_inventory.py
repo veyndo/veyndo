@@ -13,7 +13,7 @@ GROUPS = {
     'Studio, storefront, platform and shared frontend': ('frontend/src', {'.ts', '.tsx', '.css'}),
     'Independent apps, services and SDK': ('extensions', {'.rs', '.ts', '.tsx', '.css', '.py', '.js', '.wat', '.html'}),
     'Verification tools and fixtures': ('scripts', {'.py'}),
-    'Generated client SDKs': ('sdks', {'.rs', '.ts', '.py'}),
+    'Generated client SDKs and the CLI': ('sdks', {'.rs', '.ts', '.py'}),
 }
 
 
@@ -54,7 +54,7 @@ def render():
     for title, (directory, suffixes) in GROUPS.items():
         lines += ['## ' + title, '', '| Module | Responsibility |', '|---|---|']
         for path in sorted((ROOT / directory).rglob('*')):
-            if not path.is_file() or path.suffix not in suffixes or '__pycache__' in path.parts:
+            if not path.is_file() or path.suffix not in suffixes or '__pycache__' in path.parts or 'target' in path.parts:
                 continue
             relative = path.relative_to(ROOT).as_posix()
             summary = responsibility(path).replace('|', '\\|')

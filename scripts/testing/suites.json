@@ -4,6 +4,7 @@
     "studio",
     "hosted_api",
     "sdk_smoke",
+    "cli_client",
     "merchant_reports",
     "integration",
     "protocols",

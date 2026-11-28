@@ -220,6 +220,7 @@
         "docs/component-dependencies.md",
         "docs/component-mirrors.md",
         "docs/sdks.md",
+        "docs/cli.md",
         "docs/rust-services.md",
         "docs/testing.md",
         "docs/formal-verification.md",

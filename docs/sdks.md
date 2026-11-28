@@ -75,6 +75,9 @@ The TypeScript SDK runs unbuilt on Node 22.18 or newer (type stripping) and buil
 `dist/` with `tsc -p tsconfig.build.json`. Hand-written and not generated: each SDK's
 `examples/` and smoke test, and this page.
 
+The [`veyndo` command-line client](cli.md) is built on the Rust SDK and talks only to
+these public contracts.
+
 ## Smoke test against a real server
 
 The HTTP suite `sdk_smoke` runs all three SDKs against the suite server:

@@ -31,6 +31,7 @@ explains how the handbook is built and which pages are generated.
 | Using one component from your own system; repositories | [One shop, composable parts](one-shop-components.md), [component repositories](commerce-components.md) |
 | Standalone component mirrors | [Component mirrors](component-mirrors.md) |
 | OpenAPI contracts and generated TypeScript, Python and Rust clients | [Contracts and SDKs](sdks.md) |
+| The `veyndo` command-line client for merchants and developers | [CLI](cli.md) |
 | Connector service, schema baselines, checked queries, Python boundary | [Rust services](rust-services.md) |
 | Suites, CI cadence, coverage | [Testing](testing.md) |
 | What the Lean proofs cover | [Formal verification](formal-verification.md), [proof coverage](proof-coverage.md) (generated), [domain inventory](formal-coverage.md) (generated) |
