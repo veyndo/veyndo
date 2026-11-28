@@ -38,7 +38,10 @@ export default function PageInspector({
   onChange,
   onSelect,
   onSearch,
+  workspace,
 }: {
+  /** The private workspace of the preview; brand themes need it to render their comparison. */
+  workspace?: string;
   canGenerate?: boolean;
   page: Page;
   block?: Block;
@@ -149,6 +152,17 @@ export default function PageInspector({
           appearance={appearance}
           open={!block}
           onChange={(theme) => patch({ theme })}
+          brand={
+            page.slug === "home" && workspace !== undefined
+              ? {
+                  request,
+                  products,
+                  channel: page.channel,
+                  language,
+                  workspace,
+                }
+              : undefined
+          }
         />
         {block?.kind === "native" && (
           <section className="designer-block-properties">

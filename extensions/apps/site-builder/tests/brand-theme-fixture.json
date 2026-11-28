@@ -1,0 +1,95 @@
+{
+  "vivid": {
+    "version": 1,
+    "source": ["logo:fixture"],
+    "palette": {
+      "primary": "#f06e14",
+      "secondary": "#149696",
+      "neutral": "#7c6e68"
+    },
+    "colors": {
+      "bg": "#fef5f0",
+      "surface": "#fffdfc",
+      "panel": "#fcece5",
+      "hover": "#ffe5d9",
+      "border": "#e5d5ce",
+      "muted": "#725e55",
+      "text": "#291c15",
+      "accent": "#b14d00",
+      "accentText": "#fffdfc",
+      "accentSoft": "#ffe9df",
+      "accentStrong": "#974100",
+      "accentBorder": "#eeac8b",
+      "focus": "#b14d00"
+    },
+    "fonts": {
+      "pairing": "friendly",
+      "heading": "humanist",
+      "body": "humanist"
+    },
+    "radius": "round",
+    "density": "regular"
+  },
+  "monochrome": {
+    "version": 1,
+    "source": [],
+    "palette": {
+      "primary": "#141414",
+      "secondary": null,
+      "neutral": "#717171"
+    },
+    "colors": {
+      "bg": "#f7f7f7",
+      "surface": "#fdfdfd",
+      "panel": "#f0f0f0",
+      "hover": "#ebebeb",
+      "border": "#d9d9d9",
+      "muted": "#636363",
+      "text": "#1f1f1f",
+      "accent": "#141414",
+      "accentText": "#fdfdfd",
+      "accentSoft": "#eeeeee",
+      "accentStrong": "#070707",
+      "accentBorder": "#bebebe",
+      "focus": "#141414"
+    },
+    "fonts": {
+      "pairing": "editorial",
+      "heading": "didone",
+      "body": "neo-grotesque"
+    },
+    "radius": "sharp",
+    "density": "regular"
+  },
+  "pastel": {
+    "version": 1,
+    "source": [],
+    "palette": {
+      "primary": "#a8f0ff",
+      "secondary": "#ffd6e8",
+      "neutral": "#8a8f99"
+    },
+    "colors": {
+      "bg": "#f2f8f9",
+      "surface": "#fbfefe",
+      "panel": "#e8f2f4",
+      "hover": "#dbf0f4",
+      "border": "#d1dbdd",
+      "muted": "#596669",
+      "text": "#182123",
+      "accent": "#2b7482",
+      "accentText": "#fbfefe",
+      "accentSoft": "#dff3f7",
+      "accentStrong": "#146370",
+      "accentBorder": "#9ec6ce",
+      "focus": "#2b7482"
+    },
+    "fonts": {
+      "pairing": "timeless",
+      "heading": "old-style",
+      "body": "old-style"
+    },
+    "radius": "soft",
+    "density": "compact"
+  }
+}

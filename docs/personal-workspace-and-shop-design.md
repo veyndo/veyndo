@@ -137,6 +137,26 @@ explicit failed preparations without a new executable task.
 
 ![Current shop preview and editing tools](assets/product-tour-20261102/shop-editor.jpg)
 
+### Create a theme from your brand
+
+1. Open the home page in **Shop design** (the global home themes every channel; a
+   channel home overrides it) and expand **Shop appearance**.
+2. Choose **Create theme from brand**. Your company logo is preselected; add product
+   images or upload up to four PNG, JPEG or WebP images. Uploads are read in your
+   browser and are not stored.
+3. Choose **Create theme**. Veyndo reads the colours, builds a complete theme and
+   confirms that all colour pairs meet WCAG AA contrast. Adjust typography, corners,
+   spacing and motion; each choice is one of a vetted set.
+4. Compare **Current design** and **Brand theme** side by side in the real storefront
+   preview, then choose **Apply to draft**.
+5. Save the draft and choose **Review publication**. The live shop is unchanged until
+   you publish the selected home-page change. History keeps the previous design, so you
+   can restore it the same way.
+
+**Motion** in Shop appearance selects off, subtle or expressive for the whole shop.
+Visitors who prefer reduced motion always see a still shop. **Remove brand theme**
+returns colours, fonts and scales to inheritance. Details: [shop brand themes](branding.md#shop-brand-themes).
+
 The global `*` home supplies the inherited appearance. A channel home overrides
 selected values; null/missing theme properties inherit. Editing an inherited
 page in a writable channel creates a channel-specific copy with a new stable ID.

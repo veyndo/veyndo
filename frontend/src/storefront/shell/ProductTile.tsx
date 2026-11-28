@@ -30,7 +30,7 @@ export default function ProductTile({
   const shop = useShopText();
   const category = p.category ? shop.s(p.category) : undefined;
   return (
-    <div className="shop-tile" onMouseEnter={onViewed}>
+    <div className="shop-tile" data-vy-reveal onMouseEnter={onViewed}>
       <Card
         locale={locale ?? shop.locale}
         priceKind={business ? "net" : "gross"}

@@ -2,7 +2,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { RequestFn } from "../api/types";
-import { appTheme, observeAppTheme } from "./conversation-app-theme";
+import {
+  appStyleVariables,
+  appTheme,
+  observeAppTheme,
+} from "./conversation-app-theme";
 import { conversationAppText } from "../i18n/conversation-app-i18n";
 import { useLocale } from "../i18n/i18n";
 import {
@@ -183,6 +187,9 @@ function Frame({
             hostContext: {
               locale,
               theme: appTheme(frame.current),
+              ...(appStyleVariables(frame.current)
+                ? { styles: { variables: appStyleVariables(frame.current) } }
+                : {}),
               "ai.veyndo/definition": definition,
             },
           },

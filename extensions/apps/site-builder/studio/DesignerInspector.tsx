@@ -168,6 +168,7 @@ export default function DesignerInspector({
               block={block}
               products={products}
               request={request}
+              workspace={scopeKey.split(":")[0]}
               onSearch={d.search}
               disabled={!writable}
               onChange={d.edit}

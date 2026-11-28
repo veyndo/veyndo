@@ -2,6 +2,7 @@
 import { createRoot } from "react-dom/client";
 import { useEffect, useState } from "react";
 import { injectKitStyles } from "./standalone-styles";
+import { safeThemeVariables } from "../tokens";
 import { partById, storefrontText } from "./index";
 
 /** The MCP Apps bridge version this view speaks. */
@@ -59,7 +60,13 @@ export function View({
           const context = (message.result.hostContext ?? {}) as {
             theme?: string;
             locale?: string;
+            styles?: { variables?: unknown };
           };
+          // The shop's brand tokens, so parts in the view match the storefront around it.
+          for (const [name, value] of Object.entries(
+            safeThemeVariables(context.styles?.variables),
+          ))
+            document.documentElement.style.setProperty(name, value);
           if (context.theme === "dark" || context.theme === "light")
             document.documentElement.dataset.theme = context.theme;
           if (context.locale) setLocale(context.locale);
