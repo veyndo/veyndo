@@ -52,6 +52,7 @@ shipped language. The machine-readable catalog is
   --vy-radius-pill: 999px;
   --vy-font-family:
     Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vy-font-heading: Georgia, "Times New Roman", serif;
   --vy-font-size-xs: 11px;
   --vy-font-size-sm: 12px;
   --vy-font-size-md: 13px;
@@ -67,7 +68,17 @@ shipped language. The machine-readable catalog is
   --vy-shadow-lg: 0 18px 70px #14243212;
   --vy-motion-fast: 120ms;
   --vy-motion-base: 200ms;
+  --vy-motion-slow: 320ms;
   --vy-motion-easing: cubic-bezier(0.2, 0, 0, 1);
+  --vy-motion-easing-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --vy-motion-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --vy-motion-enter: 240ms;
+  --vy-motion-reveal: 420ms;
+  --vy-motion-hover: 160ms;
+  --vy-motion-page: 200ms;
+  --vy-motion-distance: 8px;
+  --vy-motion-lift: -2px;
+  --vy-motion-press: 0.98;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -126,10 +137,46 @@ shipped language. The machine-readable catalog is
   --vy-shadow-lg: 0 18px 70px #0003;
   color-scheme: dark;
 }
+[data-motion="off"] {
+  --vy-motion-enter: 0ms;
+  --vy-motion-reveal: 0ms;
+  --vy-motion-hover: 0ms;
+  --vy-motion-page: 0ms;
+  --vy-motion-distance: 0px;
+  --vy-motion-lift: 0px;
+  --vy-motion-press: 1;
+}
+[data-motion="subtle"] {
+  --vy-motion-enter: 240ms;
+  --vy-motion-reveal: 420ms;
+  --vy-motion-hover: 160ms;
+  --vy-motion-page: 200ms;
+  --vy-motion-distance: 8px;
+  --vy-motion-lift: -2px;
+  --vy-motion-press: 0.98;
+}
+[data-motion="expressive"] {
+  --vy-motion-enter: 520ms;
+  --vy-motion-reveal: 760ms;
+  --vy-motion-hover: 220ms;
+  --vy-motion-page: 380ms;
+  --vy-motion-distance: 28px;
+  --vy-motion-lift: -6px;
+  --vy-motion-press: 0.95;
+}
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  [data-motion] {
     --vy-motion-fast: 0ms;
     --vy-motion-base: 0ms;
+    --vy-motion-slow: 0ms;
+    --vy-motion-enter: 0ms;
+    --vy-motion-reveal: 0ms;
+    --vy-motion-hover: 0ms;
+    --vy-motion-page: 0ms;
+    --vy-motion-distance: 0px;
+    --vy-motion-lift: 0px;
+    --vy-motion-press: 1;
   }
 }
 .vy-visually-hidden {
@@ -1127,6 +1174,22 @@ a.vy-button {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: var(--vy-space-4);
+}
+.vy-sf-card {
+  transition:
+    transform var(--vy-motion-hover) var(--vy-motion-easing),
+    box-shadow var(--vy-motion-hover) var(--vy-motion-easing);
+}
+[data-motion] .vy-sf-card:hover {
+  transform: translateY(var(--vy-motion-lift));
+}
+.vy-sf-card button,
+.vy-sf-summary button {
+  transition: transform var(--vy-motion-hover) var(--vy-motion-easing);
+}
+.vy-sf-card button:active:not(:disabled),
+.vy-sf-summary button:active:not(:disabled) {
+  transform: scale(var(--vy-motion-press));
 }
 .vy-doc {
   display: grid;
