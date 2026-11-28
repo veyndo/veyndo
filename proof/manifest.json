@@ -782,8 +782,8 @@
     },
     "components/apps/src/domain/app_facts.rs": {
       "status": "unproved",
-      "sha256": "bcbc1c3095bc260ea26a21e819a6bc36f781501e1b7bc378a41e8204d4f23415",
-      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+      "sha256": "5721549466ff468b7ee5cabe40b845229355514084dc62fcfd96c4233e7dda36",
+      "review": "MCP safety hints derived from typed operation and app facts; admission (readOnly) unchanged; no rule claimed as proved"
     },
     "components/apps/src/domain/app_generation.rs": {
       "status": "unproved",
@@ -1562,8 +1562,8 @@
     },
     "components/apps/src/store/tool_catalogue.rs": {
       "status": "reviewed-binding",
-      "sha256": "4081b1667783727513f65d28d8c03a360174780f47f2632f27980e7ba5ed790e",
-      "review": "Batch L: planner lookup for app tool facts (read-only adapter)"
+      "sha256": "92807201acfb9c7006ae2d8f4c814527f25aa4226302a7fe5c4a9e18187068f7",
+      "review": "MCP safety hints derived from typed operation and app facts; admission (readOnly) unchanged; no rule claimed as proved"
     },
     "components/apps/src/store/webhook_receipts.rs": {
       "status": "unproved",
@@ -2542,8 +2542,8 @@
     },
     "components/core/src/operation_facts.rs": {
       "status": "unproved",
-      "sha256": "88aea2b5e7811650e0bcafc5905701fd6d0ba56f3153ed7757093ecd98d3356c",
-      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
+      "sha256": "a9ccbd63f3a5f7eed557cee4100434bcdc91ceaa7768fbdeb3dacec262377893",
+      "review": "MCP safety hints derived from typed operation and app facts; admission (readOnly) unchanged; no rule claimed as proved"
     },
     "components/core/src/process_config.rs": {
       "status": "unproved",
@@ -2697,8 +2697,8 @@
     },
     "components/core/src/tool_contract.rs": {
       "status": "unproved",
-      "sha256": "866fca6c96cb6877f8358d1d809faf15e39ea16b45e973020b5f8553abb55c63",
-      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
+      "sha256": "6a5da888984def0f113eb938157d0ef71f3c8a9856ca48274105e15b287698c4",
+      "review": "MCP safety hints derived from typed operation and app facts; admission (readOnly) unchanged; no rule claimed as proved"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -8292,8 +8292,8 @@
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "c37575e75d0ee8016b9df1eba2f1abc12bbbdd2736f9367e9bfad395f8cdf244",
-      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+      "sha256": "d5568cb1fcb448e2775c11db038ff5b274c7eddfdce4c0c0f0f4068975c5a744",
+      "review": "MCP safety hints derived from typed operation and app facts; admission (readOnly) unchanged; no rule claimed as proved"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",

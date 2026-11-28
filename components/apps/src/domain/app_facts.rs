@@ -126,6 +126,24 @@ impl AppFacts {
             Cost::Free
         }
     }
+    /// The MCP safety hints, with the same rules as native operation facts.
+    pub fn hints(&self) -> veyndo_core::tool_contract::Hints {
+        veyndo_core::tool_contract::Hints::of(
+            self.writes,
+            self.writes
+                && (self.risk == Risk::High || self.reversibility == Reversibility::Irreversible),
+            self.effects.iter().any(|effect| {
+                matches!(
+                    effect,
+                    SideEffect::Email
+                        | SideEffect::Payment
+                        | SideEffect::ExternalCall
+                        | SideEffect::ModelCall
+                        | SideEffect::Publication
+                )
+            }),
+        )
+    }
     /// A high-risk or irreversible change needs a person's approval, as for native operations.
     pub fn requires_approval(&self) -> bool {
         self.writes

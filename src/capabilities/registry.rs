@@ -249,14 +249,18 @@ impl Operation {
     pub(crate) fn description(&self) -> Value {
         json!({"name":self.name,"description":self.description})
     }
+    /// The MCP tool: `readOnly` keeps the admission effect (what agent credentials may run), while the
+    /// annotations follow the typed facts.
     pub(crate) fn tool(&self) -> Value {
-        super::ToolContract::describe(
+        let mut tool = super::ToolContract::describe(
             self.name,
             self.description,
             &self.input,
             self.output.as_ref(),
             self.effect == Effect::Read,
-        )
+        );
+        super::ToolContract::with_hints(&mut tool, self.facts.hints());
+        tool
     }
 }
 /// The typed planner view of one operation, shared by the planner read and the offline export.
@@ -408,6 +412,39 @@ mod tests {
             assert!(!operation.agent_read);
             assert_eq!(operation.tool()["annotations"]["readOnlyHint"], false);
         }
+    }
+
+    #[test]
+    fn mcp_hints_follow_the_typed_facts() {
+        use veyndo_core::operation_facts::{Reversibility, Risk};
+        for operation in OPERATIONS.iter() {
+            let tool = operation.tool();
+            let facts = &operation.facts;
+            assert_eq!(
+                tool["annotations"]["readOnlyHint"], !facts.writes,
+                "{}",
+                operation.name
+            );
+            assert_eq!(
+                tool["annotations"]["destructiveHint"],
+                facts.writes
+                    && (facts.risk == Risk::High
+                        || facts.reversibility == Reversibility::Irreversible),
+                "{}",
+                operation.name
+            );
+            // Admission is unchanged: `readOnly` still states what agent credentials may run.
+            assert_eq!(
+                tool["readOnly"],
+                operation.effect == Effect::Read,
+                "{}",
+                operation.name
+            );
+        }
+        let currencies = find("currency.list").unwrap().tool();
+        assert_eq!(currencies["annotations"]["readOnlyHint"], true);
+        assert_eq!(currencies["annotations"]["destructiveHint"], false);
+        assert_eq!(currencies["annotations"]["openWorldHint"], false);
     }
     fn member(permissions: &[&str], personal: bool) -> RequestContext {
         let mut h = RequestContext::new();
