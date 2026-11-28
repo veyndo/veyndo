@@ -165,6 +165,11 @@ jobs:
           sudo apt-get update && sudo apt-get install -y pgbouncer
           python3 -m playwright install --with-deps chromium-headless-shell
       - run: cargo fmt --all --check && cargo clippy --locked --workspace --all-targets -- -D warnings -W clippy::too_many_lines
+      - name: Check the veyndo CLI (its own workspace, sdks/cli)
+        run: |
+          cargo fmt --manifest-path sdks/cli/Cargo.toml --check
+          cargo clippy --locked --manifest-path sdks/cli/Cargo.toml --all-targets -- -D warnings -W clippy::too_many_lines
+          cargo test --locked --manifest-path sdks/cli/Cargo.toml
       - name: Instrument the real Rust unit and HTTP paths
         run: |
           rustup component add llvm-tools-preview
@@ -176,6 +181,9 @@ jobs:
         run: |
           if [ "${{ matrix.partition }}" = core ]; then cargo test --locked --workspace; fi
           cargo build --locked --workspace --bins
+          # The CLI executable is also named `veyndo`: build it uninstrumented into its own target directory.
+          env -u RUSTFLAGS -u CARGO_ENCODED_RUSTFLAGS -u LLVM_PROFILE_FILE CARGO_TARGET_DIR="$PWD/sdks/cli/target" \
+            cargo build --locked --manifest-path sdks/cli/Cargo.toml
       - name: Install pinned Lean toolchain
         if: matrix.partition == 'core'
         uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865 # v1

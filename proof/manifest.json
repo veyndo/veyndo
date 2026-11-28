@@ -9613,8 +9613,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "89c58ab3f0350fd89ef5f9cf304ba40e309a7506a7e562db8c0fc4776ad0663d",
-      "review": "verify.yml: PR check of agent-evaluation formats and baseline; optional report-only real-model evaluation step after sealed coverage"
+      "sha256": "23b8b0515bbfef3ef8714e19e9ae974dfe42e997a32b7858ee310c4bf3abce99",
+      "review": "Batch P CLI: verify.yml also formats, lints, tests and builds the separate veyndo CLI workspace (sdks/cli) uninstrumented into its own target directory; no change to extracted policies, bindings or the server build"
     },
     "Cargo.lock": {
       "sha256": "a19f43c120272aceb58cd55028bd9e9f75952ea216a19a678ed151392d3ec0b1",
