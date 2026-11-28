@@ -29706,6 +29706,35 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantRunExplainInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.run.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {

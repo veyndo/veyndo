@@ -7,8 +7,12 @@
 use super::registry::{self, Effect, Operation, OperationPlan};
 use super::surfaces;
 use crate::apps;
+use crate::foundation::App;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use std::borrow::Cow;
+use std::collections::HashMap;
+use veyndo_app_platform::domain::app_facts::AppFacts;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::document::{lenient, view};
@@ -133,9 +137,9 @@ struct Checked<'a> {
     verdict: Verdict,
     reasons: Vec<Reason>,
     /// Prerequisite operations this plan does not run before the step; their result must already exist.
-    unmet_requires: Vec<&'static str>,
+    unmet_requires: Vec<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    compensation: Option<&'static str>,
+    compensation: Option<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     argument_error: Option<String>,
 }
@@ -150,7 +154,10 @@ struct PlanCheck<'a> {
     executable: bool,
 }
 
-pub(super) async fn invoke(h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+/// Facts of each installed app tool named by a plan, loaded once per distinct step; `None` means no such tool.
+type AppStepFacts = HashMap<String, Option<(AppFacts, bool)>>;
+
+pub(super) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     match name {
         LIST => Ok(list(h, view(v))),
         CHECK => {
@@ -158,7 +165,20 @@ pub(super) async fn invoke(h: &RequestContext, name: &str, v: &Value) -> Result<
             if request.steps.is_empty() || request.steps.len() > MAX_STEPS {
                 return Err(bad("A plan has between 1 and 50 steps"));
             }
-            Ok(json!(check(h, &request.steps)))
+            let mut apps = AppStepFacts::new();
+            for step in request
+                .steps
+                .iter()
+                .filter(|step| step.name.starts_with("app."))
+            {
+                if !apps.contains_key(&step.name) {
+                    let facts =
+                        veyndo_app_platform::store::tool_catalogue::tool_facts(a, h, &step.name)
+                            .await?;
+                    apps.insert(step.name.clone(), facts);
+                }
+            }
+            Ok(json!(check(h, &request.steps, &apps)))
         }
         _ => Err(bad("Unknown planner operation")),
     }
@@ -219,24 +239,24 @@ fn admitted(operation: &Operation, h: &RequestContext) -> bool {
     operation.admitted_now(h)
 }
 
-fn check<'a>(h: &RequestContext, steps: &'a [Step]) -> PlanCheck<'a> {
+fn check<'a>(h: &RequestContext, steps: &'a [Step], apps: &'a AppStepFacts) -> PlanCheck<'a> {
     let mut checked = Vec::with_capacity(steps.len());
     for (index, step) in steps.iter().enumerate() {
+        if step.name.starts_with("app.") {
+            checked.push(app_step(
+                h,
+                steps,
+                index,
+                apps.get(&step.name).and_then(Option::as_ref),
+            ));
+            continue;
+        }
         let Some(operation) = registry::find(&step.name) else {
-            let app = step.name.starts_with("app.");
             checked.push(Checked {
                 index,
                 name: &step.name,
-                verdict: if app {
-                    Verdict::Approval
-                } else {
-                    Verdict::Unknown
-                },
-                reasons: if app {
-                    vec![Reason::UndeclaredFacts]
-                } else {
-                    vec![]
-                },
+                verdict: Verdict::Unknown,
+                reasons: vec![],
                 unmet_requires: vec![],
                 compensation: None,
                 argument_error: None,
@@ -284,6 +304,7 @@ fn check<'a>(h: &RequestContext, steps: &'a [Step]) -> PlanCheck<'a> {
             .iter()
             .copied()
             .filter(|required| !earlier.iter().any(|step| step.name == *required))
+            .map(Cow::Borrowed)
             .collect();
         checked.push(Checked {
             index,
@@ -297,7 +318,7 @@ fn check<'a>(h: &RequestContext, steps: &'a [Step]) -> PlanCheck<'a> {
             },
             reasons,
             unmet_requires,
-            compensation: facts.compensation(),
+            compensation: facts.compensation().map(Cow::Borrowed),
             argument_error,
         });
     }
@@ -307,6 +328,78 @@ fn check<'a>(h: &RequestContext, steps: &'a [Step]) -> PlanCheck<'a> {
             .iter()
             .all(|step| matches!(step.verdict, Verdict::Allowed | Verdict::Approval)),
         steps: checked,
+    }
+}
+
+/// An installed app tool step gets the same reasons and verdicts as a native operation from its manifest facts;
+/// facts the publisher did not declare are conservative defaults and additionally marked `undeclaredFacts`.
+fn app_step<'a>(
+    h: &RequestContext,
+    steps: &'a [Step],
+    index: usize,
+    found: Option<&'a (AppFacts, bool)>,
+) -> Checked<'a> {
+    use veyndo_app_platform::domain::app_facts::{Audience, Condition, Reversibility, Risk};
+    let step = &steps[index];
+    let Some((facts, declared)) = found else {
+        return Checked {
+            index,
+            name: &step.name,
+            verdict: Verdict::Unknown,
+            reasons: vec![],
+            unmet_requires: vec![],
+            compensation: None,
+            argument_error: None,
+        };
+    };
+    let mut reasons = vec![];
+    let permitted = facts
+        .permissions
+        .iter()
+        .all(|permission| veyndo_identity::allowed(h, permission));
+    let person =
+        facts.audience == Audience::Shopper || (veyndo_identity::merchant(h).is_ok() && permitted);
+    if !person {
+        reasons.push(Reason::NotAuthorized);
+    } else if facts.writes && h.principal.agent_key.is_some() {
+        reasons.push(Reason::AgentCredentialReadOnly);
+    }
+    let blocked = !reasons.is_empty();
+    if facts.writes && facts.risk == Risk::High {
+        reasons.push(Reason::HighRisk);
+    }
+    if facts.writes && facts.reversibility == Reversibility::Irreversible {
+        reasons.push(Reason::Irreversible);
+    }
+    for condition in &facts.conditions {
+        reasons.push(match condition {
+            Condition::Sandbox => Reason::SandboxOnly,
+            Condition::PersonalSession => Reason::PersonalSession,
+        });
+    }
+    if !declared {
+        reasons.push(Reason::UndeclaredFacts);
+    }
+    let earlier = &steps[..index];
+    Checked {
+        index,
+        name: &step.name,
+        verdict: if blocked {
+            Verdict::Blocked
+        } else if facts.requires_approval() || !declared {
+            Verdict::Approval
+        } else {
+            Verdict::Allowed
+        },
+        reasons,
+        unmet_requires: facts
+            .requires
+            .iter()
+            .filter(|required| !earlier.iter().any(|step| &step.name == *required))
+            .map(|required| Cow::Borrowed(required.as_str()))
+            .collect(),
+        compensation: None,
+        argument_error: None,
     }
 }
 
@@ -429,7 +522,24 @@ mod tests {
             ("app.demo.sync", None),
             ("no.such.operation", None),
         ]);
-        let result = json!(check(&h, &plan));
+        let undeclared = AppFacts {
+            audience: veyndo_app_platform::domain::app_facts::Audience::Merchant,
+            permissions: vec![],
+            writes: true,
+            reversibility: veyndo_app_platform::domain::app_facts::Reversibility::Irreversible,
+            risk: veyndo_app_platform::domain::app_facts::Risk::High,
+            data: Default::default(),
+            effects: vec![],
+            requires: vec![],
+            conditions: vec![],
+        };
+        let mut apps = AppStepFacts::new();
+        apps.insert("app.demo.sync".into(), Some((undeclared, false)));
+        let result = json!(check(&h, &plan, &apps));
+        assert_eq!(
+            result["steps"][4]["reasons"],
+            json!(["highRisk", "irreversible", "undeclaredFacts"])
+        );
         let verdicts = result["steps"]
             .as_array()
             .unwrap()
@@ -458,7 +568,8 @@ mod tests {
         assert_eq!(result["executable"], false);
         let ordered = json!(check(
             &h,
-            &steps(&[("merchant.plan", None), ("merchant.apply", None)])
+            &steps(&[("merchant.plan", None), ("merchant.apply", None)]),
+            &AppStepFacts::new()
         ));
         assert_eq!(ordered["steps"][1]["unmetRequires"], json!([]));
         assert_eq!(ordered["executable"], true);
@@ -470,7 +581,8 @@ mod tests {
         h.principal.agent_key = Some("agent".into());
         let result = json!(check(
             &h,
-            &steps(&[("merchant.product.save", None), ("merchant.products", None)])
+            &steps(&[("merchant.product.save", None), ("merchant.products", None)]),
+            &AppStepFacts::new()
         ));
         assert_eq!(result["steps"][0]["verdict"], "blocked");
         assert_eq!(result["steps"][0]["reasons"][0], "agentCredentialReadOnly");

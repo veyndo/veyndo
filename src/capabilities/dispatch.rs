@@ -156,7 +156,7 @@ impl Owner {
             Self::Operations => Box::pin(operations::invoke(a, h, name, v)),
             Self::Developer => Box::pin(developer::invoke(a, h, name, v)),
             Self::Knowledge => Box::pin(documents::knowledge_invoke(a, h, name, v)),
-            Self::Planner => Box::pin(super::planner::invoke(h, name, v)),
+            Self::Planner => Box::pin(super::planner::invoke(a, h, name, v)),
             Self::Native => Box::pin(invoke_native(a, h, name, v)),
         }
     }

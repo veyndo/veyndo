@@ -24,6 +24,36 @@ pub(super) struct ResultContext<'a> {
     pub model: &'a str,
     pub usage: &'a Value,
 }
+/// Without a content selection every block keeps its current merchant content; a new block is refused.
+fn keep_content(fields: &Value, content: &mut Value) -> Result<()> {
+    for block in content["blocks"]
+        .as_array_mut()
+        .ok_or(bad("Invalid blocks"))?
+    {
+        let Some(old) = fields["content"]["blocks"]
+            .as_array()
+            .and_then(|rows| rows.iter().find(|old| old["id"] == block["id"]))
+        else {
+            return Err(bad("New content requires explicit selection"));
+        };
+        for key in [
+            "text",
+            "rich",
+            "products",
+            "productMode",
+            "fields",
+            "image",
+            "extension",
+        ] {
+            if let Some(value) = old.get(key) {
+                block[key] = value.clone();
+            } else if let Some(object) = block.as_object_mut() {
+                object.remove(key);
+            }
+        }
+    }
+    Ok(())
+}
 pub(super) async fn prepare(
     a: &State,
     h: &RequestContext,
@@ -99,33 +129,7 @@ pub(super) async fn prepare(
             }
         }
         if !v.content() {
-            for block in content["blocks"]
-                .as_array_mut()
-                .ok_or(bad("Invalid blocks"))?
-            {
-                if let Some(old) = fields["content"]["blocks"]
-                    .as_array()
-                    .and_then(|rows| rows.iter().find(|old| old["id"] == block["id"]))
-                {
-                    for key in [
-                        "text",
-                        "rich",
-                        "products",
-                        "productMode",
-                        "fields",
-                        "image",
-                        "extension",
-                    ] {
-                        if let Some(value) = old.get(key) {
-                            block[key] = value.clone();
-                        } else {
-                            block.as_object_mut().unwrap().remove(key);
-                        }
-                    }
-                } else {
-                    return Err(bad("New content requires explicit selection"));
-                }
-            }
+            keep_content(fields, &mut content)?;
         }
         if !v.style() {
             next["theme"] = fields["theme"].clone();

@@ -808,6 +808,20 @@ pub(super) const FACTS: &[(&str, F)] = &[
         .requires(&["merchant.run.create"]),
     ),
     (
+        "merchant.run.explain",
+        F::read(
+            Audience::Merchant,
+            &[
+                "assistant.use",
+                "catalog.read",
+                "orders.read",
+                "knowledge.read",
+            ],
+        )
+        .on(&[E::Run])
+        .requires(&["merchant.run.create"]),
+    ),
+    (
         "merchant.run.cancel",
         F::write(
             Audience::Merchant,

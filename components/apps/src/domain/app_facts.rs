@@ -236,6 +236,113 @@ impl<'a> Described<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Every variant of the native fact vocabulary has a twin here; an added core variant must be added to both.
+    #[test]
+    fn app_fact_vocabulary_matches_the_native_operation_facts() {
+        use veyndo_core::operation_facts as core;
+        fn round<T: serde::de::DeserializeOwned>(value: impl serde::Serialize) -> T {
+            serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap()
+        }
+        let entities = [
+            core::Entity::Product,
+            core::Entity::Category,
+            core::Entity::Media,
+            core::Entity::Order,
+            core::Entity::Customer,
+            core::Entity::Cart,
+            core::Entity::Payment,
+            core::Entity::Settings,
+            core::Entity::Currency,
+            core::Entity::Legal,
+            core::Entity::Knowledge,
+            core::Entity::Experiment,
+            core::Entity::Automation,
+            core::Entity::App,
+            core::Entity::Role,
+            core::Entity::Run,
+            core::Entity::Workspace,
+            core::Entity::History,
+            core::Entity::Company,
+            core::Entity::Quote,
+            core::Entity::List,
+            core::Entity::Document,
+            core::Entity::Report,
+            core::Entity::Site,
+            core::Entity::Import,
+            core::Entity::Operation,
+        ];
+        for entity in entities {
+            // Exhaustive: a new core entity fails to compile here until the list above and the twin include it.
+            match entity {
+                core::Entity::Product
+                | core::Entity::Category
+                | core::Entity::Media
+                | core::Entity::Order
+                | core::Entity::Customer
+                | core::Entity::Cart
+                | core::Entity::Payment
+                | core::Entity::Settings
+                | core::Entity::Currency
+                | core::Entity::Legal
+                | core::Entity::Knowledge
+                | core::Entity::Experiment
+                | core::Entity::Automation
+                | core::Entity::App
+                | core::Entity::Role
+                | core::Entity::Run
+                | core::Entity::Workspace
+                | core::Entity::History
+                | core::Entity::Company
+                | core::Entity::Quote
+                | core::Entity::List
+                | core::Entity::Document
+                | core::Entity::Report
+                | core::Entity::Site
+                | core::Entity::Import
+                | core::Entity::Operation => {}
+            }
+            let _: Entity = round(entity);
+        }
+        for effect in [
+            core::SideEffect::Email,
+            core::SideEffect::Payment,
+            core::SideEffect::ExternalCall,
+            core::SideEffect::ModelCall,
+            core::SideEffect::Publication,
+            core::SideEffect::BackgroundJob,
+            core::SideEffect::Event,
+        ] {
+            match effect {
+                core::SideEffect::Email
+                | core::SideEffect::Payment
+                | core::SideEffect::ExternalCall
+                | core::SideEffect::ModelCall
+                | core::SideEffect::Publication
+                | core::SideEffect::BackgroundJob
+                | core::SideEffect::Event => {}
+            }
+            let _: SideEffect = round(effect);
+        }
+        for condition in [core::Condition::Sandbox, core::Condition::PersonalSession] {
+            match condition {
+                core::Condition::Sandbox | core::Condition::PersonalSession => {}
+            }
+            let _: Condition = round(condition);
+        }
+        for risk in [core::Risk::Low, core::Risk::Medium, core::Risk::High] {
+            match risk {
+                core::Risk::Low | core::Risk::Medium | core::Risk::High => {}
+            }
+            let _: Risk = round(risk);
+        }
+        for audience in [core::Audience::Shopper, core::Audience::Merchant] {
+            match audience {
+                core::Audience::Shopper | core::Audience::Merchant => {}
+            }
+            let _: Audience = round(audience);
+        }
+    }
     fn write(rev: Reversibility, risk: Risk, effects: Vec<SideEffect>) -> AppFacts {
         AppFacts {
             audience: Audience::Merchant,
