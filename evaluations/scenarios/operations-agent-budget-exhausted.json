@@ -1,0 +1,78 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "operations-agent-budget-exhausted",
+ "revision": 1,
+ "title": "Delegated agent with an exhausted model allowance",
+ "role": "operations",
+ "surface": "merchant-planner",
+ "tags": [
+  "adversarial",
+  "budget",
+  "delegated-agent"
+ ],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "agent-key",
+  "permissions": [
+   "assistant.use",
+   "catalog.read",
+   "knowledge.read",
+   "orders.read"
+  ],
+  "budget": {
+   "tokens": 3000,
+   "costMicros": 3000,
+   "pricePerMillionMicros": 1000
+  }
+ },
+ "task": {
+  "instruction": "Give me a full pricing review of every product with a recommendation for each.",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.*",
+   "merchant.product*",
+   "merchant.catalog.context",
+   "merchant.commerce.read",
+   "merchant.company",
+   "knowledge.*",
+   "merchant.reports.read",
+   "studio.workspace.work.read",
+   "automation.list",
+   "automation.catalog"
+  ]
+ },
+ "limits": {
+  "modelCalls": 1
+ },
+ "required": [
+  {
+   "id": "refused-by-budget",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "refused",
+    "status": 429
+   }
+  },
+  {
+   "id": "no-model-call",
+   "weight": 3,
+   "check": {
+    "type": "modelCalls",
+    "max": 0
+   }
+  }
+ ],
+ "rubric": [],
+ "forbid": [
+  {
+   "kind": "budget",
+   "modelCalls": 0,
+   "note": "the allowance cannot cover one request envelope"
+  }
+ ]
+}

@@ -3051,6 +3051,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/account_security.py](../scripts/account_security.py) | Native personal MFA acceptance through HTTP/PostgreSQL; synthetic accounts only, no external services. |
 | [scripts/admin_creation.py](../scripts/admin_creation.py) | Native Admin customer/manual-order HTTP+MCP state, isolation, replay and private token regressions. No provider calls. |
 | [scripts/agent_authorities.py](../scripts/agent_authorities.py) | Real HTTP/PostgreSQL agent-key allocations, two replicas, stop, revocation and restart; local model only. |
+| [scripts/agent_evaluation.py](../scripts/agent_evaluation.py) | Agent evaluation benchmark: versioned scenarios against the real agent stack in fresh shop twins, replayed or real models, scored and gated against a reviewed baseline. |
 | [scripts/agentic_commerce.py](../scripts/agentic_commerce.py) | Real UCP cart transfer into native checkout: scoped single-use capability and one durable order. |
 | [scripts/agentic_scenarios.py](../scripts/agentic_scenarios.py) | Customer agents use the native isolated shop, cart and checkout; only inference is synthetic. |
 | [scripts/api_catalogue.py](../scripts/api_catalogue.py) | Generate a drift-checked static HTTP route catalogue from the compiled Rust router declarations. |
@@ -3214,6 +3215,11 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/tenant_isolation.py](../scripts/tenant_isolation.py) | Adversarial two-shop API/MCP/UCP/object and schema isolation with real personal/customer sessions. |
 | [scripts/testing/advisor_privacy.py](../scripts/testing/advisor_privacy.py) | Concurrent privacy mutations across the real concierge/provider path; no live inference. |
 | [scripts/testing/advisor_sources.py](../scripts/testing/advisor_sources.py) | Actual channel-admitted advisor context and concurrent native source mutations; synthetic local model only. |
+| [scripts/testing/agent_eval_format.py](../scripts/testing/agent_eval_format.py) | Versioned agent-evaluation formats: scenarios, recordings, negative controls and the baseline, with strict validation and digests. |
+| [scripts/testing/agent_eval_gateway.py](../scripts/testing/agent_eval_gateway.py) | Agent-evaluation model gateway: replays recorded model decisions or forwards to a real provider while recording them; never a model itself. |
+| [scripts/testing/agent_eval_grading.py](../scripts/testing/agent_eval_grading.py) | Deterministic agent-evaluation grading: expectation checks, safety-violation detectors, scores, aggregates and the baseline gate. |
+| [scripts/testing/agent_eval_tests.py](../scripts/testing/agent_eval_tests.py) | Agent-evaluation tooling rejects malformed scenarios, detects every violation class, gates regressions and replays every provider wire. |
+| [scripts/testing/agent_eval_twin.py](../scripts/testing/agent_eval_twin.py) | Agent-evaluation shop twins: one private sandbox per scenario through native APIs, scenario seeds, credentials, write fingerprints and real agent-surface runs. |
 | [scripts/testing/agent_flow_work.py](../scripts/testing/agent_flow_work.py) | Native product event -> Flow proposal -> personal approval -> original durable work executor. |
 | [scripts/testing/agent_work.py](../scripts/testing/agent_work.py) | An actual reviewed model plan writes two private records once through the native task worker. |
 | [scripts/testing/agent_work_restart.py](../scripts/testing/agent_work_restart.py) | Kill the actual approved-work Rust worker during its second managed save; checkpoint and record commit together. |

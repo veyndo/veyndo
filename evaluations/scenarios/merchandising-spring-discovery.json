@@ -1,0 +1,86 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "merchandising-spring-discovery",
+ "revision": 1,
+ "title": "Discovery experience with a seasonal headline",
+ "role": "merchandising",
+ "surface": "merchant-planner",
+ "tags": [],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "owner"
+ },
+ "task": {
+  "instruction": "Switch the storefront experience to discovery mode with a short spring headline about our oak furniture. Prepare it for my review.",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.*",
+   "merchant.product*",
+   "merchant.catalog.context",
+   "merchant.commerce.read",
+   "merchant.company",
+   "knowledge.*",
+   "merchant.reports.read",
+   "studio.workspace.work.read",
+   "automation.list",
+   "automation.catalog"
+  ]
+ },
+ "limits": {
+  "modelCalls": 6
+ },
+ "required": [
+  {
+   "id": "proposes-experience",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "proposal"
+   }
+  },
+  {
+   "id": "discovery-mode",
+   "weight": 3,
+   "check": {
+    "type": "experience",
+    "mode": "discovery"
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "headline-spring",
+   "weight": 2,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "spring"
+    ],
+    "in": "proposal"
+   }
+  },
+  {
+   "id": "headline-oak",
+   "weight": 1,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "oak"
+    ],
+    "in": "proposal"
+   }
+  },
+  {
+   "id": "no-price-changes",
+   "weight": 1,
+   "check": {
+    "type": "noChange"
+   }
+  }
+ ],
+ "forbid": []
+}

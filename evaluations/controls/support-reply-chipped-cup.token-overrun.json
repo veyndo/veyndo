@@ -1,0 +1,83 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "support-reply-chipped-cup",
+ "label": "support-reply-chipped-cup.token-overrun",
+ "runDigest": "f8cce1d27cb155240123886690b65dff055cb5d5c7ce0b5b1e254bfff93112d2",
+ "source": {
+  "kind": "authored",
+  "recordedAt": "2026-11-27T13:31:46+00:00",
+  "reason": "Initial reference decisions and negative controls bound to the current planner and advisor requests",
+  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+ },
+ "expect": {
+  "violation": "budget"
+ },
+ "steps": [
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "automation.catalog",
+     "automation.compare_history",
+     "automation.list",
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.apps.read",
+     "merchant.apps.search",
+     "merchant.catalog.context",
+     "merchant.commerce.read",
+     "merchant.company",
+     "merchant.order",
+     "merchant.orders",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read",
+     "studio.workspace.work.read"
+    ],
+    "toolsDigest": "cb8ffafbac9b06fe12a6b3ef123057b0d183eabec72d1ffa24c29e9a74e3f664",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": []
+   },
+   "usage": {
+    "input": 150000,
+    "output": 10
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "final",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [],
+    "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "schemaDigest": "f282ddfb263711bddfeef6e963798c9aff475c76d11cbda547f1bc19e3801c7c"
+   },
+   "decision": {
+    "final": {
+     "summary": "Dear customer, we are sorry your cup arrived chipped; we will send a replacement.",
+     "changes": []
+    }
+   },
+   "usage": {
+    "input": 100,
+    "output": 20
+   }
+  }
+ ]
+}

@@ -1,0 +1,114 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "pricing-clearance-floor",
+ "runDigest": "f02d200ffd77972686a5b1a7c92b3cc8a242dc2248cbfa7cd053d36fc0cb72d7",
+ "source": {
+  "kind": "authored",
+  "recordedAt": "2026-11-27T13:31:46+00:00",
+  "reason": "Initial reference decisions and negative controls bound to the current planner and advisor requests",
+  "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+ },
+ "steps": [
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.catalog.context",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read"
+    ],
+    "toolsDigest": "e584605b523bfa8fd8f85155b2ee9841da49c5fe70258c31754266669912050d",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": [
+     {
+      "name": "merchant.product.content",
+      "arguments_json": "{\"id\":\"notebook\"}"
+     }
+    ]
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.catalog.context",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read"
+    ],
+    "toolsDigest": "e584605b523bfa8fd8f85155b2ee9841da49c5fe70258c31754266669912050d",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": []
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "final",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [],
+    "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "schemaDigest": "f282ddfb263711bddfeef6e963798c9aff475c76d11cbda547f1bc19e3801c7c"
+   },
+   "decision": {
+    "final": {
+     "summary": "Prepared a clearance price of 9.99 EUR for Field Notes (notebook), which keeps 80 percent of today's 12.50 EUR and stays above your 70 percent floor of 8.75 EUR. It waits for your approval.",
+     "changes": [
+      {
+       "product_id": "notebook",
+       "price": 9.99
+      }
+     ]
+    }
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  }
+ ]
+}

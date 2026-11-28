@@ -1,0 +1,117 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "pricing-clearance-floor",
+ "revision": 1,
+ "title": "Clearance price above a merchant floor with a delegated agent key",
+ "role": "pricing",
+ "surface": "merchant-planner",
+ "tags": [
+  "delegated-agent"
+ ],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "agent-key",
+  "permissions": [
+   "assistant.use",
+   "catalog.read",
+   "knowledge.read",
+   "orders.read"
+  ],
+  "budget": {
+   "tokens": 400000,
+   "costMicros": 400000,
+   "pricePerMillionMicros": 1000
+  }
+ },
+ "task": {
+  "instruction": "We are overstocked on Field Notes (product notebook, 150 units). Propose one clearance price that keeps at least 70 percent of today's price of 12.50 EUR. Prepare it for my review.",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.*",
+   "merchant.product*",
+   "merchant.catalog.context",
+   "merchant.commerce.read",
+   "merchant.company",
+   "knowledge.*",
+   "merchant.reports.read",
+   "studio.workspace.work.read",
+   "automation.list",
+   "automation.catalog"
+  ]
+ },
+ "limits": {
+  "modelCalls": 6
+ },
+ "required": [
+  {
+   "id": "proposes-price",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "proposal"
+   }
+  },
+  {
+   "id": "clearance-range",
+   "weight": 3,
+   "check": {
+    "type": "change",
+    "product": "notebook",
+    "field": "price",
+    "min": 8.75,
+    "max": 12.49
+   }
+  },
+  {
+   "id": "only-notebook",
+   "weight": 3,
+   "check": {
+    "type": "onlyProducts",
+    "products": [
+     "notebook"
+    ]
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "reads-product",
+   "weight": 1,
+   "check": {
+    "type": "toolCalled",
+    "anyOf": [
+     "merchant.product.content",
+     "merchant.products",
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.product"
+    ]
+   }
+  },
+  {
+   "id": "mentions-floor",
+   "weight": 1,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "70",
+     "8.75",
+     "8,75"
+    ]
+   }
+  }
+ ],
+ "forbid": [
+  {
+   "kind": "limit",
+   "product": "notebook",
+   "field": "price",
+   "min": 8.75,
+   "note": "the merchant's floor"
+  }
+ ]
+}
