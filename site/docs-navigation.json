@@ -17,6 +17,7 @@
       },
       "sources": [
         "docs/start-here.md",
+        "docs/build-your-first-app.md",
         "docs/roadmap.md",
         "docs/agent-purchase.md",
         "docs/first-tour.md",
@@ -134,6 +135,42 @@
         "docs/service-integrations.md",
         "docs/plugin-ownership.md",
         "docs/early-contributors.md"
+      ]
+    },
+    {
+      "id": "reference",
+      "title": {
+        "en": "API reference",
+        "de": "API-Referenz",
+        "fr": "Référence de l’API",
+        "es": "Referencia de la API"
+      },
+      "description": {
+        "en": "Every HTTP route and MCP tool per component, with Try-it panels and examples in four languages.",
+        "de": "Jede HTTP-Route und jedes MCP-Tool je Komponente, mit Ausprobieren-Feldern und Beispielen in vier Sprachen.",
+        "fr": "Chaque route HTTP et chaque outil MCP par composant, avec des panneaux d’essai et des exemples en quatre langages.",
+        "es": "Cada ruta HTTP y cada herramienta MCP por componente, con paneles de prueba y ejemplos en cuatro lenguajes."
+      },
+      "sources": [
+        "docs/reference/README.md",
+        "docs/reference/catalog.md",
+        "docs/reference/checkout.md",
+        "docs/reference/shop.md",
+        "docs/reference/customers.md",
+        "docs/reference/orders.md",
+        "docs/reference/pricing.md",
+        "docs/reference/shipping.md",
+        "docs/reference/payments.md",
+        "docs/reference/inventory.md",
+        "docs/reference/apps.md",
+        "docs/reference/studio.md",
+        "docs/reference/intelligence.md",
+        "docs/reference/marketing.md",
+        "docs/reference/identity.md",
+        "docs/reference/protocols.md",
+        "docs/reference/b2b.md",
+        "docs/reference/pos.md",
+        "docs/reference/host.md"
       ]
     },
     {

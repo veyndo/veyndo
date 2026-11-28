@@ -22,6 +22,7 @@ COPY sdks/rust/ sdks/rust/
 COPY components/ components/
 COPY extensions/ extensions/
 COPY fixtures/ fixtures/
+COPY contracts/browser-reads.json contracts/browser-reads.json
 COPY reference/app-manifests/ reference/app-manifests/
 RUN cargo build --release --locked --bin veyndo
 FROM debian:bookworm-slim

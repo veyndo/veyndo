@@ -39,8 +39,9 @@ allowed to do something, or that stock can be sold.
 | You want to | Start with | Time |
 | --- | --- | --- |
 | See an agent shop | [Let an agent buy from your shop](agent-purchase.md) | 5 minutes, no account |
+| Build and deploy an app | [Build your first app](build-your-first-app.md) | 10 minutes |
 | Click through a complete shop | [Create a hosted shop](https://start.veyndo.ai/start) or follow the [first tour](first-tour.md) | 10 minutes |
-| Call the API from your own code | [Use Veyndo as a hosted API](hosted-component-api.md) | 5 minutes |
+| Call the API from your own code | [Use Veyndo as a hosted API](hosted-component-api.md) and the [API reference](reference/README.md) | 5 minutes |
 | Understand the parts | [One shop, composable parts](one-shop-components.md) | 10 minutes to read |
 | Build an extension | [Five app workshops](app-tutorials/README.md) | 30 minutes each |
 | Run it yourself | [Local quickstart](quickstart.md) | 15 minutes with Docker |
@@ -66,10 +67,11 @@ The [roadmap](roadmap.md) shows what was added most recently and what comes next
 1. **Start here.** The idea, one agent purchase and your first complete round.
 2. **Agents buy.** Shopping channels, intent shopping, checkout and UCP.
 3. **Agents work.** The merchant workspace, knowledge, approvals and limits.
-4. **Build.** The SDK, the components and the app platform.
-5. **Run the shop.** Catalog, orders, payments, countries and channels.
-6. **Stay in control.** Rights, sandboxes, releases and hosting.
-7. **Why you can trust it.** Architecture, tests, proofs and measurements.
+4. **Build.** Your first app, the SDK, the components and the app platform.
+5. **API reference.** Every route and MCP tool, with Try-it panels.
+6. **Run the shop.** Catalog, orders, payments, countries and channels.
+7. **Stay in control.** Rights, sandboxes, releases and hosting.
+8. **Why you can trust it.** Architecture, tests, proofs and measurements.
 
 Each chapter starts with the guide most people need first. Dated acceptance
 records and module notes stay searchable in the complete reference.

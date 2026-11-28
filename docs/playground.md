@@ -1,4 +1,13 @@
-# Try the connected commerce playground
+# Playground: moved to Build your first app
+
+> **This page moved.** The playground for developers is now
+> [Build your first app in 10 minutes](build-your-first-app.md): account, private
+> sandbox, template, deploy and Studio. To try API calls from the browser, use the
+> **Try it** panels of the [API reference](reference/README.md#try-it-from-this-page).
+> The legacy furniture walkthrough below is kept for existing links and the
+> `scripts/playground.py` compatibility tour.
+
+## Legacy: try the connected commerce playground
 
 This is the **legacy furniture compatibility walkthrough**. The shipping default
 is now [Nord Atelier](fashion-demo.md); see [the current illustrated feature tour](features.md)
@@ -12,7 +21,7 @@ It has its own catalog, inventory, orders, apps, rules and settings. Its active
 order flow needs no AI model, mail provider or real payment account. Setup creates
 no orders; you place them through the storefront.
 
-## Create your playground
+### Create your playground
 
 1. Set `DEMO_CATALOG=legacy-furniture` in the private `.env`, then start/restart
    the app with `./scripts/dev.sh` and open `http://127.0.0.1:8787/#merchant`.
@@ -45,7 +54,7 @@ The script accepts loopback HTTP origins only. For a separate local instance use
 setup and preserves existing rules, flows, campaigns, app configuration and
 company details. It does not reset merchant edits or recreate orders.
 
-## A ten-minute tour
+### A ten-minute tour
 
 | Step | Where to go | Try this | Actual result |
 |---|---|---|---|
@@ -79,7 +88,7 @@ checking **Orders → Documents**. Browser reloads do not discard persisted jobs
 
 [Archived capture from the preceding release: Installed six-step playground flow: saved rule, two tag branches, delay, invoice and stop](https://github.com/sthamann/veyndo/blob/ced4a3887086e8c6a943d774a78bc8cca5deb5dd/docs/assets/playground-flow-en.jpg)
 
-## Try the other workspaces
+### Try the other workspaces
 
 - **Products:** select one product, maintain its enabled content languages,
   specifications, rich description/media blocks, SEO metadata and cross-selling.
@@ -107,7 +116,7 @@ checking **Orders → Documents**. Browser reloads do not discard persisted jobs
   allowed reads with rejected writes. Do not use the instance bootstrap token as
   a normal merchant integration.
 
-## Optional AI, mail and agent clients
+### Optional AI, mail and agent clients
 
 The installed flow has **no AI, email, Slack or external payment action**. To test
 AI deliberately, create a separate flow, add **AI proposal for review**, select a
@@ -122,7 +131,7 @@ Connect a local MCP client using [connectors.md](connectors.md); automation HTTP
 and MCP use the same handlers and rights. Hosted clients need a reachable HTTPS
 backend; localhost cannot serve a remote ChatGPT/Claude account directly.
 
-## What “try everything” means here
+### What “try everything” means here
 
 This tour covers the implemented prototype. Disabled rules, complete original
 FlowSequence import/export, all upstream triggers/configurations, production
@@ -136,7 +145,7 @@ orders. It checks their actual tags and generated invoice records. It also check
 that the state file contains no session token and has private permissions.
 The suite uses no paid provider, mail delivery or live payment account.
 
-## Manage the catalog
+### Manage the catalog
 
 Open **Products** in Studio. Search by name or product number, filter status,
 category or low stock, then select a row. Use **Create product**, enter a unique

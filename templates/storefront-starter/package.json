@@ -1,0 +1,14 @@
+{
+  "name": "storefront-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small server-rendered storefront on the TypeScript SDK: catalog and product pages in four languages.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.ts",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

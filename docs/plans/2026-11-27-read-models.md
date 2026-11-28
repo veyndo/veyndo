@@ -143,23 +143,23 @@ All of this waits for the forward-migration framework. Then:
    compares. No foreign table changes yet.
 2. **Class (a), lowest risk first.** Each item is one commit with its table,
    backfill, projector and removed `foreign_tables` entry:
-   1. #44 `intelligence_search_weights`
-   2. #37 `report_channel_overrides`
-   3. #47, #48 `intelligence_order_facts`
-   4. #55, #58, #59 `report_orders` (without channel kind until #60)
-   5. #27, #28 `customer_order_digests`
-   6. #17 `catalog_unit_scopes`. It is last because it affects catalogue
+   1. \#44 `intelligence_search_weights`
+   2. \#37 `report_channel_overrides`
+   3. \#47, #48 `intelligence_order_facts`
+   4. \#55, #58, #59 `report_orders` (without channel kind until #60)
+   5. \#27, #28 `customer_order_digests`
+   6. \#17 `catalog_unit_scopes`. It is last because it affects catalogue
       visibility. Keep `admit_unit` synchronous.
 3. **Class (b).** First the event in the owner, published as v1. Then the read
    model:
-   1. #60 `sales_channel.changed` (also completes `report_orders`)
-   2. #57 `merchant.account.changed`
-   3. #50 `product.review.moderated`
-   4. #41, #42 app evidence and package lifecycle
-   5. #30, #31 download grants and asset metadata
-   6. #45, #56 `customer.changed`
-   7. #18, #19 `intelligence.claim.changed`
-   8. #51 `product.changed`. It is last because it replaces the synchronous
+   1. \#60 `sales_channel.changed` (also completes `report_orders`)
+   2. \#57 `merchant.account.changed`
+   3. \#50 `product.review.moderated`
+   4. \#41, #42 app evidence and package lifecycle
+   5. \#30, #31 download grants and asset metadata
+   6. \#45, #56 `customer.changed`
+   7. \#18, #19 `intelligence.claim.changed`
+   8. \#51 `product.changed`. It is last because it replaces the synchronous
       `sync_product` calls in several writers.
 4. **Class (c) follow-ups, not read models.** Move `exposures` and
    `privacy_consents` to intelligence, `languages` to core, buyer order reads to

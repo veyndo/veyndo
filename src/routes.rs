@@ -392,6 +392,8 @@ pub(crate) fn router(a: App) -> Router {
         .layer(axum::middleware::from_fn(security_headers::apply))
         .layer(axum::middleware::from_fn(brand_redirect::apply))
         .layer(axum::middleware::from_fn(http_profile::admit))
+        // Outermost after logging: a listed anonymous read answers its preflight before profile/brand routing.
+        .layer(axum::middleware::from_fn(crate::browser_reads::apply))
         .layer(axum::middleware::from_fn(observability::request))
         .with_state(a)
 }

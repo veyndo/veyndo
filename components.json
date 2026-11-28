@@ -660,6 +660,7 @@
         "src/bin",
         "src/bootstrap.rs",
         "src/brand_redirect.rs",
+        "src/browser_reads.rs",
         "src/cart_mutation.rs",
         "src/cart_price.rs",
         "src/cart_routes.rs",

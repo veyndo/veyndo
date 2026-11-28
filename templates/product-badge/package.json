@@ -1,0 +1,15 @@
+{
+  "name": "product-badge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A badge such as New or Sale on product pages, edited in the product tab, with shop-wide settings.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "node scripts/deploy-sandbox.mjs",
+    "deploy:dry-run": "node scripts/deploy-sandbox.mjs --dry-run"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "order-tags",
+  "kind": "app",
+  "title": {
+    "en": "Order-tag automation",
+    "de": "Bestell-Tag-Automatisierung",
+    "es": "Automatización de etiquetas de pedido",
+    "fr": "Automatisation des étiquettes de commande"
+  },
+  "summary": {
+    "en": "Tag orders in the order screen and let a flow suggest a VIP tag for every large order.",
+    "de": "Bestellungen in der Bestellansicht taggen und einen Flow für jede große Bestellung einen VIP-Tag vorschlagen lassen.",
+    "es": "Etiqueta pedidos en la vista del pedido y deja que un flujo sugiera la etiqueta VIP para cada pedido grande.",
+    "fr": "Étiquetez les commandes dans leur fiche et laissez un flux proposer l’étiquette VIP pour chaque grosse commande."
+  },
+  "appId": "order_tags",
+  "rename": [
+    {
+      "file": "manifest.json",
+      "pointer": "/id"
+    },
+    {
+      "file": "flows/tag_large_orders.json",
+      "pointer": "/appAction/app"
+    },
+    {
+      "file": "package.json",
+      "pointer": "/name",
+      "value": "kebab"
+    }
+  ],
+  "test": [
+    "node",
+    "--test"
+  ],
+  "deploy": [
+    "node",
+    "scripts/deploy-sandbox.mjs"
+  ]
+}
