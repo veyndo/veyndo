@@ -60,6 +60,10 @@ export class AppsApi {
   getAppsByIdJobsByJob(params: { "id": string; "job": string }, options?: RequestOptions): Promise<JsonValue> {
     return this.#transport.request("GET", "/api/apps/{id}/jobs/{job}", params, options);
   }
+  /** `GET /api/apps/{id}/sandbox` · permission `apps.manage` */
+  getAppsByIdSandbox(params: { "id": string }, options?: RequestOptions): Promise<JsonValue> {
+    return this.#transport.request("GET", "/api/apps/{id}/sandbox", params, options);
+  }
   /** `GET /api/apps/{id}/secrets` · permission `apps.manage` */
   getAppsByIdSecrets(params: { "id": string }, options?: RequestOptions): Promise<JsonValue> {
     return this.#transport.request("GET", "/api/apps/{id}/secrets", params, options);
@@ -155,6 +159,14 @@ export class AppsApi {
   /** `POST /api/apps/{id}/jobs/{job}` · permission `apps.manage` */
   postAppsByIdJobsByJob(params: { "id": string; "job": string }, options?: RequestOptions): Promise<JsonValue> {
     return this.#transport.request("POST", "/api/apps/{id}/jobs/{job}", params, options);
+  }
+  /** `POST /api/apps/{id}/ports/{port}` · permission `read` */
+  postAppsByIdPortsByPort(params: { "id": string; "port": string }, options?: RequestOptions): Promise<JsonValue> {
+    return this.#transport.request("POST", "/api/apps/{id}/ports/{port}", params, options);
+  }
+  /** `POST /api/apps/{id}/rollback` · permission `apps.manage` */
+  postAppsByIdRollback(params: { "id": string }, options?: RequestOptions): Promise<JsonValue> {
+    return this.#transport.request("POST", "/api/apps/{id}/rollback", params, options);
   }
   /** `POST /api/apps/{id}/surfaces/{surface}/actions/{action}` · permission `read` */
   postAppsByIdSurfacesBySurfaceActionsByAction(params: { "id": string; "surface": string; "action": string }, options?: RequestOptions): Promise<JsonValue> {

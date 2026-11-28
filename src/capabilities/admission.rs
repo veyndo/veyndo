@@ -1,75 +1,77 @@
 //! MCP discovery applies current merchant permissions through the same capability owners as invocation.
-use crate::foundation::App;
-use crate::foundation::merchant;
 use crate::{
     agent, agent_runs, assets, auth, b2b, commerce, currencies, history, legal, marketing,
     operations, studio,
 };
 use veyndo_core::request_context::RequestContext;
-pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
+/// Current admission reads only the request's principal, so planners and tests ask it without server state.
+fn merchant(h: &RequestContext) -> veyndo_core::Result<String> {
+    veyndo_identity::merchant(h)
+}
+pub(super) fn visible(h: &RequestContext, name: &str) -> bool {
     let n = &name;
     if name == "merchant.reports.read" {
-        return merchant(a, h).is_ok() && studio::reports::visible(h);
+        return merchant(h).is_ok() && studio::reports::visible(h);
     }
     if name.starts_with("merchant.scenario.") {
-        return merchant(a, h).is_ok() && agent_runs::scenarios::visible(h);
+        return merchant(h).is_ok() && agent_runs::scenarios::visible(h);
     }
     if name.starts_with("merchant.apps.") {
-        return merchant(a, h).is_ok() && auth::allowed(h, "apps.read");
+        return merchant(h).is_ok() && auth::allowed(h, "apps.read");
     }
     if name.starts_with("merchant.agents.") {
         return agent_runs::controls::visible(h);
     }
     if name.starts_with("merchant.catalog.") {
-        return merchant(a, h).is_ok() && commerce::catalog_intake::visible(h, name);
+        return merchant(h).is_ok() && commerce::catalog_intake::visible(h, name);
     }
     if n.starts_with("merchant.run.") {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && agent::assistant_access(h).is_ok()
             && h.principal.app.is_none();
     }
     if n.starts_with("merchant.app.") {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && auth::allowed(h, "apps.read")
             && auth::allowed(h, "catalog.read")
             && (*n != "merchant.app.restore" || auth::allowed(h, "apps.manage"));
     }
     if n.starts_with("merchant.site.") {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && auth::allowed(h, "channels.read")
             && auth::allowed(h, "channels.manage")
             && auth::allowed(h, "assistant.use");
     }
     if n.starts_with("studio.workspace.") {
-        return merchant(a, h).is_ok() && h.principal.personal_session;
+        return merchant(h).is_ok() && h.principal.personal_session;
     }
 
     if auth::roles::schema(n).is_some() {
-        return merchant(a, h).is_ok() && auth::allowed(h, "team.manage");
+        return merchant(h).is_ok() && auth::allowed(h, "team.manage");
     }
     if let Some(scope) = b2b::permission(n) {
-        return merchant(a, h).is_ok() && auth::allowed(h, scope);
+        return merchant(h).is_ok() && auth::allowed(h, scope);
     }
     if n.starts_with("pos.") {
-        return merchant(a, h).is_ok() && auth::allowed(h, "pos.use");
+        return merchant(h).is_ok() && auth::allowed(h, "pos.use");
     }
     if let Some(permission) = currencies::permission(n) {
-        return merchant(a, h).is_ok() && auth::permit(h, permission).is_ok();
+        return merchant(h).is_ok() && auth::permit(h, permission).is_ok();
     }
     if let Some(permission) = legal::permission(n) {
-        return merchant(a, h).is_ok() && auth::permit(h, permission).is_ok();
+        return merchant(h).is_ok() && auth::permit(h, permission).is_ok();
     }
     if history::schema(n).is_some() {
-        return merchant(a, h).is_ok() && history::visible(h, n);
+        return merchant(h).is_ok() && history::visible(h, n);
     }
     if let Some(permission) = assets::media_permission(n) {
-        return merchant(a, h).is_ok() && auth::permit(h, permission).is_ok();
+        return merchant(h).is_ok() && auth::permit(h, permission).is_ok();
     }
     if let Some(permission) = commerce::international_permission(n) {
-        return merchant(a, h).is_ok() && auth::permit(h, permission).is_ok();
+        return merchant(h).is_ok() && auth::permit(h, permission).is_ok();
     }
     if n.starts_with("automation.") {
-        return merchant(a, h).is_ok() && marketing::capability_visible(h, n);
+        return merchant(h).is_ok() && marketing::capability_visible(h, n);
     }
     if *n == "knowledge.autonomy.apply" || *n == "knowledge.autonomy.revert" {
         return auth::allowed(h, "knowledge.read")
@@ -77,10 +79,10 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
             && auth::allowed(h, "settings.write");
     }
     if *n == "knowledge.behavior.journey" {
-        return merchant(a, h).is_ok() && auth::allowed(h, "customers.pii");
+        return merchant(h).is_ok() && auth::allowed(h, "customers.pii");
     }
     if n.starts_with("knowledge.") {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && auth::permit(h, "knowledge.read").is_ok()
             && (!matches!(
                 *n,
@@ -94,16 +96,16 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
             ) || auth::permit(h, "knowledge.write").is_ok());
     }
     if *n == "merchant.grid.plan" {
-        return merchant(a, h).is_ok() && operations::grid_visible(h);
+        return merchant(h).is_ok() && operations::grid_visible(h);
     }
     if let Some(permission) = operations::permission(n) {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && auth::permit(h, permission).is_ok()
             && operations::creation_visible(h, n)
             && (!operations::requires_pii(n) || auth::allowed(h, "customers.pii"));
     }
     if n.starts_with("developer.") {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && auth::permit(
                 h,
                 if *n == "developer.builds" {
@@ -115,10 +117,10 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
             .is_ok();
     }
     if ["merchant.plan", "merchant.apply"].contains(n) {
-        return merchant(a, h).is_ok()
+        return merchant(h).is_ok()
             && agent::assistant_access(h).is_ok()
             && (*n != "merchant.apply" || auth::allowed(h, "catalog.write"));
     }
     !(n.starts_with("merchant.") || n.starts_with("knowledge."))
-        || merchant(a, h).is_ok() && (*n != "merchant.apply" || auth::permit(h, "catalog").is_ok())
+        || merchant(h).is_ok() && (*n != "merchant.apply" || auth::permit(h, "catalog").is_ok())
 }

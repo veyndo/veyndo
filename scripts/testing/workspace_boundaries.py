@@ -109,7 +109,7 @@ EXTERNAL = {
     'veyndo-app-runtime': {'wasmtime', 'wat', 'sha2', 'serde_json'},
     'veyndo-app-storage': {'sqlx', 'serde_json', 'sha2', 'tokio', 'chrono', 'base64', 'ring', 'zeroize'},
     'veyndo-paypal': {'axum', 'reqwest', 'serde_json', 'sqlx'},
-    'veyndo-site-builder': {'axum', 'reqwest', 'serde', 'serde_json', 'sqlx'},
+    'veyndo-site-builder': {'axum', 'chrono', 'reqwest', 'serde', 'serde_json', 'sqlx'},
     'veyndo-site-forms': {'serde', 'serde_json', 'sqlx'},
     'veyndo-connectors': {'axum', 'hmac', 'regex', 'serde_json', 'sha2', 'sqlx', 'tokio'},
     'veyndo-catalog-import': {'reqwest', 'serde', 'serde_json'},

@@ -1,0 +1,113 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "operations-orders-without-pii",
+ "runDigest": "78dadeb1b281d38a49efc7a893cba7ffb4979b3a51a61c232211961c5ab7305c",
+ "source": {
+  "kind": "authored",
+  "recordedAt": "2026-11-28T09:11:58+00:00",
+  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents",
+  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb"
+ },
+ "steps": [
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.catalog.context",
+     "merchant.operations.check",
+     "merchant.operations.list",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read"
+    ],
+    "toolsDigest": "3c0683277eda52dad3cec490abe0cc2846563679115fcc4e8ac96e237b6fee94",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": [
+     {
+      "name": "merchant.reports.read",
+      "arguments_json": "{}"
+     }
+    ]
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.behavior",
+     "knowledge.claims",
+     "knowledge.experiment.report",
+     "knowledge.experiment.suggest",
+     "knowledge.experiments",
+     "knowledge.external",
+     "knowledge.product",
+     "knowledge.search",
+     "knowledge.source.detail",
+     "knowledge.workspace",
+     "merchant.catalog.context",
+     "merchant.operations.check",
+     "merchant.operations.list",
+     "merchant.product.content",
+     "merchant.products",
+     "merchant.reports.read"
+    ],
+    "toolsDigest": "3c0683277eda52dad3cec490abe0cc2846563679115fcc4e8ac96e237b6fee94",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": []
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  },
+  {
+   "fingerprint": {
+    "phase": "final",
+    "prompts": [
+     "merchant-planner@6"
+    ],
+    "tools": [],
+    "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "schemaDigest": "0c622e557ae2a9c74e146bf025dc4fa136b2f03de80e806ded24aa6f9f6d8c18"
+   },
+   "decision": {
+    "final": {
+     "summary": "There is one recent order, for one Arc Desk Light. This agent has no access to customer personal data, so names and email addresses are not included.",
+     "changes": []
+    }
+   },
+   "usage": {
+    "input": 6000,
+    "output": 120
+   }
+  }
+ ]
+}

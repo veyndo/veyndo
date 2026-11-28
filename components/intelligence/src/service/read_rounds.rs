@@ -21,6 +21,8 @@ struct ToolView {
     annotations: ToolAnnotations,
     #[serde(rename = "_meta", deserialize_with = "lenient")]
     meta: ToolMeta,
+    /// The planner facts verdict an app tool carries.
+    requires_approval: Value,
 }
 
 /// A tool's behaviour hints.
@@ -47,9 +49,9 @@ struct ToolUi {
 }
 
 impl ToolView {
-    /// Whether the tool declares itself read-only.
+    /// Whether the tool declares itself read-only and an agent may call it without a human approval.
     fn read_only(&self) -> bool {
-        self.annotations.read_only_hint == true
+        self.annotations.read_only_hint == true && self.requires_approval != true
     }
     /// The interactive view the tool returns, if any.
     fn view_uri(&self) -> Option<&str> {

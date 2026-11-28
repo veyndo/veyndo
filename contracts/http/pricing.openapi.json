@@ -516,6 +516,28 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/CurrencyListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "currency"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -524,6 +546,29 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/CurrencySelectInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "cart",
+            "currency"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -532,6 +577,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCurrenciesRefreshInput"
+      },
+      "cost": "provider",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "currency"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "externalCall"
+        ],
+        "permissions": [
+          "settings.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -540,6 +611,33 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCurrenciesGenerateInput"
+      },
+      "cost": "batch",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "currency",
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "backgroundJob"
+        ],
+        "permissions": [
+          "catalog.write"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -548,6 +646,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCurrenciesJobsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "currency"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -556,6 +678,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCurrenciesJobInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "currency"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "catalog.read"
+        ],
+        "requires": [
+          "merchant.currencies.generate"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -564,6 +712,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantCustomerGroupsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "customer",
+            "settings"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     }
   ],

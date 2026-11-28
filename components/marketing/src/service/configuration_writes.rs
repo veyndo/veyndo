@@ -1,6 +1,6 @@
 //! Typed configuration reads and revision-bound saves of rules, promotions, flows and channels; flow drafts validate without saving.
 use crate::domain::configuration_kinds::{configuration_right, table};
-use crate::domain::flow_actions::permission;
+use crate::domain::flow_actions::permissions;
 use crate::domain::flow_text;
 use crate::domain::pipeline::Node;
 use crate::domain::rules::Condition;
@@ -21,7 +21,7 @@ use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, store::history_context};
 use veyndo_identity::domain::permissions::allowed;
-use veyndo_identity::{assistant_access, merchant, permit};
+use veyndo_identity::{merchant, permit};
 use veyndo_shop::domain::defaults::decode;
 use veyndo_shop::service::read_cache::config;
 
@@ -90,12 +90,9 @@ pub fn bind_actor(h: &RequestContext, data: &mut Value) -> Result<()> {
 /// The publishing actor holds the native rights of every action the flow runs.
 pub fn authorize_flow(h: &RequestContext, f: &Flow) -> Result<()> {
     fn action(h: &RequestContext, name: &str) -> Result<()> {
-        permit(h, permission(name))?;
-        if matches!(name, "ai_proposal" | "work_proposal") {
-            assistant_access(h)?;
-        }
-        if matches!(name, "ai_proposal" | "work_proposal" | "knowledge.extract") {
-            permit(h, "knowledge.read")?;
+        // The typed facts list the action's native right first, then the rights its queued work needs.
+        for permission in permissions(name) {
+            permit(h, permission)?;
         }
         Ok(())
     }

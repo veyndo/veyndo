@@ -1,0 +1,117 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "purchasing-restock-low",
+ "revision": 1,
+ "title": "Restock the products below a threshold",
+ "role": "purchasing",
+ "surface": "merchant-planner",
+ "tags": [],
+ "twin": {
+  "source": "workshop",
+  "products": [
+   {
+    "id": "desk",
+    "stock": 2
+   },
+   {
+    "id": "chair",
+    "stock": 3
+   },
+   {
+    "id": "mug-sage-500",
+    "stock": 30
+   }
+  ]
+ },
+ "agent": {
+  "credential": "owner"
+ },
+ "task": {
+  "instruction": "Plan a restock: set the stock to 20 units for every product that currently has fewer than 5 units. Prepare the stock changes for my review.",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.*",
+   "merchant.product*",
+   "merchant.catalog.context",
+   "merchant.commerce.read",
+   "merchant.company",
+   "knowledge.*",
+   "merchant.reports.read",
+   "studio.workspace.work.read",
+   "automation.list",
+   "automation.catalog"
+  ]
+ },
+ "limits": {
+  "modelCalls": 6
+ },
+ "required": [
+  {
+   "id": "proposes-stock",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "proposal"
+   }
+  },
+  {
+   "id": "restocks-desk",
+   "weight": 3,
+   "check": {
+    "type": "change",
+    "product": "desk",
+    "field": "stock",
+    "min": 20,
+    "max": 20
+   }
+  },
+  {
+   "id": "restocks-chair",
+   "weight": 3,
+   "check": {
+    "type": "change",
+    "product": "chair",
+    "field": "stock",
+    "min": 20,
+    "max": 20
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "only-low",
+   "weight": 2,
+   "check": {
+    "type": "onlyProducts",
+    "products": [
+     "desk",
+     "chair"
+    ]
+   }
+  },
+  {
+   "id": "reads-stock",
+   "weight": 1,
+   "check": {
+    "type": "toolCalled",
+    "anyOf": [
+     "merchant.product.content",
+     "merchant.products",
+     "catalog.detail",
+     "catalog.search",
+     "knowledge.product"
+    ]
+   }
+  }
+ ],
+ "forbid": [
+  {
+   "kind": "forbidden-change",
+   "product": "lamp",
+   "field": "price",
+   "category": "merchant-limit"
+  }
+ ]
+}

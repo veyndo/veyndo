@@ -117,6 +117,7 @@
     "merchant.import.": "studio",
     "merchant.legal.": "shop",
     "merchant.media.": "catalog",
+    "merchant.operations.": "protocols",
     "merchant.order": "orders",
     "merchant.payment": "payments",
     "merchant.plan": "intelligence",

@@ -998,6 +998,28 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/CheckoutPaymentMethodsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1006,6 +1028,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/CheckoutPaymentMethodRevokeInput"
+      },
+      "cost": "provider",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "externalCall",
+          "backgroundJob",
+          "event"
+        ],
+        "permissions": [],
+        "requires": [
+          "checkout.payment.methods"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -1014,6 +1064,29 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/CheckoutPaymentInstructionsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "shopper",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1022,6 +1095,33 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantPaymentInstructionsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "order"
+          ],
+          "money": true,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "orders.read",
+          "customers.pii",
+          "payments.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -1030,6 +1130,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantPaymentInput"
+      },
+      "cost": "provider",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "order"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "payment",
+          "externalCall",
+          "event"
+        ],
+        "permissions": [
+          "payments.manage"
+        ],
+        "requires": [
+          "merchant.payment.details"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -1038,6 +1169,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantPaymentDetailsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "order"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "payments.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1046,6 +1202,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantPaymentProvidersInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "payments.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -1054,6 +1235,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantPaymentOnboardingInput"
+      },
+      "cost": "provider",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "payment",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "externalCall",
+          "event"
+        ],
+        "permissions": [
+          "payments.manage"
+        ],
+        "requires": [
+          "merchant.payment.providers"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     }
   ],

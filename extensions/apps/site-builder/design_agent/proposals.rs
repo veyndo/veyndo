@@ -14,13 +14,45 @@ use veyndo_core::conflict;
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::uid;
 use veyndo_identity::merchant;
+use veyndo_intelligence::domain::explanation;
 use veyndo_studio::domain::proposal::Proposal;
+use veyndo_studio::domain::simulation::unreplayed;
 pub(super) struct ResultContext<'a> {
     pub instruction: &'a str,
     pub output: &'a Value,
     pub sources: &'a Value,
     pub model: &'a str,
     pub usage: &'a Value,
+}
+/// Without a content selection every block keeps its current merchant content; a new block is refused.
+fn keep_content(fields: &Value, content: &mut Value) -> Result<()> {
+    for block in content["blocks"]
+        .as_array_mut()
+        .ok_or(bad("Invalid blocks"))?
+    {
+        let Some(old) = fields["content"]["blocks"]
+            .as_array()
+            .and_then(|rows| rows.iter().find(|old| old["id"] == block["id"]))
+        else {
+            return Err(bad("New content requires explicit selection"));
+        };
+        for key in [
+            "text",
+            "rich",
+            "products",
+            "productMode",
+            "fields",
+            "image",
+            "extension",
+        ] {
+            if let Some(value) = old.get(key) {
+                block[key] = value.clone();
+            } else if let Some(object) = block.as_object_mut() {
+                object.remove(key);
+            }
+        }
+    }
+    Ok(())
 }
 pub(super) async fn prepare(
     a: &State,
@@ -97,33 +129,7 @@ pub(super) async fn prepare(
             }
         }
         if !v.content() {
-            for block in content["blocks"]
-                .as_array_mut()
-                .ok_or(bad("Invalid blocks"))?
-            {
-                if let Some(old) = fields["content"]["blocks"]
-                    .as_array()
-                    .and_then(|rows| rows.iter().find(|old| old["id"] == block["id"]))
-                {
-                    for key in [
-                        "text",
-                        "rich",
-                        "products",
-                        "productMode",
-                        "fields",
-                        "image",
-                        "extension",
-                    ] {
-                        if let Some(value) = old.get(key) {
-                            block[key] = value.clone();
-                        } else {
-                            block.as_object_mut().unwrap().remove(key);
-                        }
-                    }
-                } else {
-                    return Err(bad("New content requires explicit selection"));
-                }
-            }
+            keep_content(fields, &mut content)?;
         }
         if !v.style() {
             next["theme"] = fields["theme"].clone();
@@ -152,6 +158,7 @@ pub(super) async fn prepare(
                 .chars()
                 .take(500)
                 .collect(),
+            rationale: None,
             changes: vec![],
             experience: None,
             expected_experience_revision: None,
@@ -173,8 +180,19 @@ pub(super) async fn prepare(
         return Err(conflict("Page changed during design generation"));
     }
     let mut tx = a.db.begin().await?;
+    let at = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
     for (id, _, p) in &prepared {
-        sqlx::query("INSERT INTO tasks(id,tenant,proposal) VALUES($1,$2,$3)").bind(id).bind(&t).bind(json!({"source":"site.designer","actor":h.principal.user,"instruction":instruction,"proposal":p,"interpretation":output["interpretation"],"sources":sources,"model":model,"usage":usage,"applied":false})).execute(&mut *tx).await?;
+        // A page design is app-owned state: the twin names it as not simulated instead of projecting an effect.
+        let simulation = unreplayed(p, None, at.clone());
+        let mut evidence = json!({"source":"site.designer","actor":h.principal.user,"instruction":instruction,"proposal":p,"interpretation":output["interpretation"],"sources":sources,"model":model,"usage":usage,"simulation":simulation,"promptId":"site-designer","applied":false});
+        let explanation = explanation::proposal(&veyndo_core::document::view(&evidence), None);
+        veyndo_core::document::merge(&mut evidence, json!({ "explanation": explanation }))?;
+        sqlx::query("INSERT INTO tasks(id,tenant,proposal) VALUES($1,$2,$3)")
+            .bind(id)
+            .bind(&t)
+            .bind(evidence)
+            .execute(&mut *tx)
+            .await?;
     }
     tx.commit().await?;
     Ok(

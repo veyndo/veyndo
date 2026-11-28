@@ -607,3 +607,126 @@ An installed package can publish a view for its MCP read tool. Set `mcp: true` o
 the action and bind the app's native view to `storefront.assistant` for the shopper
 or `admin.assistant` for Studio. The agent's actual tool call determines when its
 view appears in the conversation. See the [package example and host contract](agentic-component-ui.md#app-owned-views-in-the-conversation).
+
+## Apps as agent tools
+
+Every action of an installed, active app is an MCP tool named `app.<app>.<action>`
+and an operation the Studio agent can plan with. Besides its schemas and hints,
+the tool carries `facts`, `cost`, `requiresApproval` and `declared`, in exactly the
+wire shape of the native operation facts (`veyndo_core::operation_facts`):
+
+```json
+{"facts":{"audience":"merchant","permissions":["catalog"],"writes":true,
+  "reversibility":{"kind":"reversible"},"risk":"medium",
+  "data":{"entities":["app","cart"],"pii":false,"money":true,"stock":false},
+  "effects":[],"requires":["app.engraving.rules"],"conditions":[]},
+ "cost":"standard","requiresApproval":false,"declared":true}
+```
+
+The Manifest decides the audience (public actions are shopper calls), the
+permissions (the ones the gateway checks) and whether the tool writes. The
+handler adds the effects it always has: a `service` action is an `externalCall`,
+a `job` a `backgroundJob`, an `emit` an `event`. Reversibility, risk, data and
+further effects come from the package contract (below) and are raised to the
+native invariants (`components/apps/src/domain/app_facts.rs`): email or payment is
+never reversible, payment is high risk, personal data and irreversible changes
+are at least medium risk, a read cannot send, pay, publish, queue or emit. A
+contract that contradicts them for a read is refused. A tool the contract does not
+describe is a read when the Manifest says so and otherwise **irreversible and high
+risk**, so `requiresApproval` is true (`requiresApproval` = writes and (high risk
+or irreversible), as for native operations). Agent read rounds only call app tools
+that are read-only and do not require approval; everything else stays a proposal
+for explicit review.
+
+Calls keep the existing path: MCP `tools/call`, HTTP actions and agent reads all
+run through the permission-aware gateway with tenant, current actor rights,
+quota and egress checks. Facts grant nothing. Agent keys still see no app tools
+(the existing agent-key boundary is unchanged).
+
+## Typed app ports
+
+A package can provide or consume a named, versioned interface without knowing the
+other app. The provider binds a port to one of its actions; the port's input and
+output schemas must equal that action's schemas:
+
+```json
+{"provides":[{"name":"acme.ledger","version":"1.1.0","action":"entries",
+  "inputSchema":{"type":"object","properties":{},"additionalProperties":false},
+  "outputSchema":{"type":"object"}}],
+ "consumes":[{"name":"acme.tax-quote","version":"^1.2"}]}
+```
+
+`POST /api/apps/<consumer>/ports/<port>` resolves the installed provider with the
+highest compatible version (then the lowest app ID), validates the input against
+the port schema and runs the provider action through the same gateway, with the
+caller's rights. Installation, upgrade, rollback and activation are refused with
+409 when a consumed port has no compatible provider; an upgrade, rollback or
+deactivation of a provider is refused when it would leave an active consumer
+without one. Ports are wired at call time from the active package contracts;
+there is no stored binding to drift.
+
+## Signed packages, versions and rollback
+
+The Manifest wire is the strict shared model, so everything above lives in a
+**package contract** beside it: `extensions/apps/<app>/contract.json` for bundled
+apps, the `contract` member of `POST /api/apps/review` and `POST /api/apps` for
+others. The review returns `contractDigest`; an installation that repeats it is
+refused if the contract changed in between.
+
+```json
+{"app":"acme_ledger","version":"1.1.0",
+ "tools":{"save_entry":{"reversibility":{"kind":"reversible"},"risk":"medium","data":{"entities":["app"]}}},
+ "provides":[],"consumes":[],
+ "rollbacks":[{"toVersion":"1.0.0","steps":[{"op":"rename","entity":"ledger","field":"amount_minor","to":"amount"}]}],
+ "signature":"<Ed25519>"}
+```
+
+A signed package (Manifest `distribution`) requires a contract signed by the same
+operator-registered publisher key. The signed message binds the canonical
+Manifest digest and the contract digest, so neither can be exchanged or edited
+without the other; an unsigned local app carries no contract signature. Package
+and port versions are semantic versions. A published version keeps the contract it
+was first installed with.
+
+**Upgrade** stays the ordinary explicit installation with consent and the
+Manifest's `schemaMigrations`. A plain downgrade is refused. **Rollback** is
+explicit: `POST /api/apps/<app>/rollback {"version":"1.0.0","approve":true}`
+reinstalls the exact stored version and contract and converts app data with the
+`rollbacks` steps the *currently installed* version declares for that target, on
+the same transaction, quotas, recovery snapshot and checks as an upgrade. A
+version without such steps cannot be rolled back to. Orders, payments and
+messages already sent are not undone. A recovery snapshot is kept per target
+version; returning to a version replaces its older snapshot.
+
+Neither needs a restart. Wasm modules (configuration and commerce hooks) are
+content-addressed: the next call after an upgrade compiles and uses the new
+module, while a call that already holds the old module finishes on it.
+
+## Sandbox transparency
+
+Studio shows each installed app's **Sandbox and permissions** panel
+(`GET /api/apps/<app>/sandbox`, `apps.manage`). *May do* lists the package
+permissions, network access (only a `service` app with `service.call`, its
+operator-configured origin and whether its digest is approved), the models it
+keeps (fields, public or private, extended core object), its ports with the
+provider each consumed port resolves to, and the facts of every tool. *Did*
+lists recent calls and service calls from the metadata-only action log and recent
+record changes from app record history. No payloads, field values or secrets are
+returned. The panel also lists the shop's published versions and offers the
+explicit rollback where the installed version declares one.
+
+### Developer guide: ship a signed, versioned package
+
+1. Give the package a semantic `version` and, for a publisher namespace, a
+   `distribution` block (`publisher`, `keyId`, `channel`).
+2. Write `contract.json` for the same app and version: describe each tool's
+   facts (reversibility, risk, data, effects, requires), the ports it provides or consumes and, from the second version on,
+   the `rollbacks` that undo this version's `schemaMigrations`.
+3. Sign both offline: `veyndo --sign-app manifest.json contract.json < seed`.
+   The seed is read from stdin and never printed; the output holds the signed
+   Manifest, the signed contract and the public key the operator registers in
+   `APP_PUBLISHERS`.
+4. Review and install with `{"manifest":…, "contract":…}`. Install the providers
+   of consumed ports first.
+5. Check the Sandbox panel; `scripts/app_agent_packages.py` is the executable
+   reference for every step.

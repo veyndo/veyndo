@@ -3581,7 +3581,8 @@ CREATE TABLE public.app_packages (
     digest text NOT NULL,
     active boolean DEFAULT true NOT NULL,
     revision bigint DEFAULT 1 NOT NULL,
-    installed_at timestamp with time zone DEFAULT now() NOT NULL
+    installed_at timestamp with time zone DEFAULT now() NOT NULL,
+    contract jsonb
 );
 
 CREATE TABLE public.app_record_indexes (
@@ -3711,7 +3712,8 @@ CREATE TABLE public.app_versions (
     version text NOT NULL,
     digest text NOT NULL,
     manifest jsonb NOT NULL,
-    installed_at timestamp with time zone DEFAULT now() NOT NULL
+    installed_at timestamp with time zone DEFAULT now() NOT NULL,
+    contract jsonb
 );
 
 CREATE TABLE public.app_webhook_receipts (
@@ -5364,7 +5366,7 @@ COPY public.app_jobs (tenant, app, id, action, actor, permission, package_digest
 COPY public.app_models (tenant, app, entity, version, definition) FROM stdin;
 
 
-COPY public.app_packages (tenant, id, version, manifest, digest, active, revision, installed_at) FROM stdin;
+COPY public.app_packages (tenant, id, version, manifest, digest, active, revision, installed_at, contract) FROM stdin;
 
 
 COPY public.app_record_indexes (tenant, app, entity, field, record_id, value, is_unique) FROM stdin;
@@ -5397,7 +5399,7 @@ COPY public.app_storage_usage (tenant, app, rows, bytes, updated_at) FROM stdin;
 COPY public.app_surface_grants (tenant, token_hash, app, surface, actor_hash, package_digest, actions, context, expires_at) FROM stdin;
 
 
-COPY public.app_versions (tenant, app, version, digest, manifest, installed_at) FROM stdin;
+COPY public.app_versions (tenant, app, version, digest, manifest, installed_at, contract) FROM stdin;
 
 
 COPY public.app_webhook_receipts (tenant, app, webhook, request_key, digest, event_id) FROM stdin;

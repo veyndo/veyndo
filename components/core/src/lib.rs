@@ -13,6 +13,7 @@ pub mod http_limits;
 pub mod localized;
 pub mod model_contract;
 pub mod observability;
+pub mod operation_facts;
 pub mod process_config;
 pub mod request_context;
 pub mod shop_scope;

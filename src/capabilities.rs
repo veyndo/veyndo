@@ -33,10 +33,14 @@ mod admission;
 mod catalog;
 pub(crate) use veyndo_core::tool_contract::ToolContract;
 mod dispatch;
+mod facts;
+mod planner;
 mod registry;
 mod schema;
+mod surfaces;
 pub(crate) use registry::{OPERATIONS, tool_schema};
 pub(crate) use registry::{agent_reads, export};
+pub(crate) use surfaces::{UCP as UCP_SURFACES, ucp as ucp_surface};
 pub(crate) async fn capabilities() -> Json<Value> {
     Json(
         json!({"capabilities":OPERATIONS.iter().map(|operation|operation.description()).collect::<Vec<_>>()}),

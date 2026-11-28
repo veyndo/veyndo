@@ -190,6 +190,21 @@ impl AppsApi<'_> {
             )
             .await
     }
+    /// `GET /api/apps/{id}/sandbox` · permission `apps.manage`
+    pub async fn get_apps_by_id_sandbox(
+        &self,
+        id: &str,
+        options: RequestOptions,
+    ) -> Result<Value, Error> {
+        self.client
+            .request(
+                Method::GET,
+                "/api/apps/{id}/sandbox",
+                &[("id", id)],
+                options,
+            )
+            .await
+    }
     /// `GET /api/apps/{id}/secrets` · permission `apps.manage`
     pub async fn get_apps_by_id_secrets(
         &self,
@@ -464,6 +479,37 @@ impl AppsApi<'_> {
                 Method::POST,
                 "/api/apps/{id}/jobs/{job}",
                 &[("id", id), ("job", job)],
+                options,
+            )
+            .await
+    }
+    /// `POST /api/apps/{id}/ports/{port}` · permission `read`
+    pub async fn post_apps_by_id_ports_by_port(
+        &self,
+        id: &str,
+        port: &str,
+        options: RequestOptions,
+    ) -> Result<Value, Error> {
+        self.client
+            .request(
+                Method::POST,
+                "/api/apps/{id}/ports/{port}",
+                &[("id", id), ("port", port)],
+                options,
+            )
+            .await
+    }
+    /// `POST /api/apps/{id}/rollback` · permission `apps.manage`
+    pub async fn post_apps_by_id_rollback(
+        &self,
+        id: &str,
+        options: RequestOptions,
+    ) -> Result<Value, Error> {
+        self.client
+            .request(
+                Method::POST,
+                "/api/apps/{id}/rollback",
+                &[("id", id)],
                 options,
             )
             .await

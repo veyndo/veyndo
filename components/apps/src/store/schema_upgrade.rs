@@ -26,6 +26,25 @@ impl<'db> Validation<'db> for Host<'_> {
         })
     }
 }
+/// Replaces the recovery snapshot kept for `version` when a shop returns to a version it already
+/// migrated to (after a rollback): the shared upgrade keeps one snapshot per target version, and the
+/// newer one is taken from the current records by the migration that follows on this transaction.
+pub async fn retire_snapshot(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    tenant: &str,
+    app: &str,
+    version: &str,
+) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM app_schema_history WHERE tenant=$1 AND app=$2 AND to_version=$3",
+        tenant,
+        app,
+        version
+    )
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
+}
 /// Migrates stored records to the next package version on the installation transaction.
 pub async fn upgrade(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,

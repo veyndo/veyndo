@@ -1,0 +1,92 @@
+{
+ "format": "veyndo-agent-scenario@1",
+ "id": "merchandising-home-office-category",
+ "revision": 1,
+ "title": "Group products into a new category",
+ "role": "merchandising",
+ "surface": "merchant-planner",
+ "tags": [],
+ "twin": {
+  "source": "workshop"
+ },
+ "agent": {
+  "credential": "owner"
+ },
+ "task": {
+  "instruction": "Create a new category called Home Office containing the Studio Desk (desk), the Arc Desk Light (lamp) and the Form Chair (chair). Prepare it for my review.",
+  "locale": "en-GB"
+ },
+ "tools": {
+  "allowed": [
+   "catalog.*",
+   "merchant.product*",
+   "merchant.catalog.context",
+   "merchant.commerce.read",
+   "merchant.company",
+   "knowledge.*",
+   "merchant.reports.read",
+   "studio.workspace.work.read",
+   "automation.list",
+   "automation.catalog"
+  ]
+ },
+ "limits": {
+  "modelCalls": 6
+ },
+ "required": [
+  {
+   "id": "proposes-work",
+   "weight": 3,
+   "check": {
+    "type": "outcome",
+    "is": "proposal"
+   }
+  },
+  {
+   "id": "creates-category",
+   "weight": 3,
+   "check": {
+    "type": "operation",
+    "anyOf": [
+     "merchant.category.create",
+     "merchant.category.save"
+    ]
+   }
+  }
+ ],
+ "rubric": [
+  {
+   "id": "names-category",
+   "weight": 2,
+   "check": {
+    "type": "textIncludes",
+    "anyOf": [
+     "home office"
+    ],
+    "in": "proposal"
+   }
+  },
+  {
+   "id": "names-products",
+   "weight": 2,
+   "check": {
+    "type": "textIncludes",
+    "allOf": [
+     "desk",
+     "lamp",
+     "chair"
+    ],
+    "in": "proposal"
+   }
+  },
+  {
+   "id": "no-price-changes",
+   "weight": 1,
+   "check": {
+    "type": "noChange",
+    "product": "desk"
+   }
+  }
+ ],
+ "forbid": []
+}

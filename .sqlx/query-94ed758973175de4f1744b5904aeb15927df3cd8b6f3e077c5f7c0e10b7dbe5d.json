@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE products SET price_decimal=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND content_revision=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "94ed758973175de4f1744b5904aeb15927df3cd8b6f3e077c5f7c0e10b7dbe5d"
+}

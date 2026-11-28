@@ -14,6 +14,7 @@ pub mod order_list;
 pub mod order_mutation;
 pub mod order_reads;
 pub mod placement;
+pub mod product_demand;
 pub mod receipts;
 pub mod redacted_reads;
 pub mod references;

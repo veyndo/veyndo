@@ -56,6 +56,7 @@ flowchart LR
 | --- | --- | --- |
 | `merchant.run.create` | `POST /api/agent/runs` | Save an instruction; optional `requestId` deduplicates retries. |
 | `merchant.run.status` | `GET /api/agent/runs/{id}` | Safe progress and completed preview, with current original scopes. |
+| `merchant.run.explain` | `GET /api/agent/runs/{id}/explanation` | Rationale and source references of each action, plus the [twin simulation](shop-twin.md#simulate-agent-proposals-before-you-approve-them). |
 | `merchant.run.cancel` | `POST /api/agent/runs/{id}/cancel` | Require `approve: true` and current `revision`; fence the worker. |
 | `merchant.run.resume` | `POST /api/agent/runs/{id}/resume` | Explicitly continue failed/uncertain work using the same credential kind. |
 

@@ -44,11 +44,14 @@ pub(super) enum Owner {
     Operations,
     Developer,
     Knowledge,
+    Planner,
     Native,
 }
 impl Owner {
     pub(super) fn for_name(name: &str) -> Self {
-        if ["checkout.payment.methods", "checkout.payment.method.revoke"].contains(&name) {
+        if super::planner::schema(name).is_some() {
+            Self::Planner
+        } else if ["checkout.payment.methods", "checkout.payment.method.revoke"].contains(&name) {
             Self::PaymentMethods
         } else if name == "checkout.payment.instructions" {
             Self::PaymentInstructions
@@ -153,6 +156,7 @@ impl Owner {
             Self::Operations => Box::pin(operations::invoke(a, h, name, v)),
             Self::Developer => Box::pin(developer::invoke(a, h, name, v)),
             Self::Knowledge => Box::pin(documents::knowledge_invoke(a, h, name, v)),
+            Self::Planner => Box::pin(super::planner::invoke(a, h, name, v)),
             Self::Native => Box::pin(invoke_native(a, h, name, v)),
         }
     }

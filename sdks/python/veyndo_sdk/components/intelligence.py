@@ -53,6 +53,11 @@ class IntelligenceApi:
         """`GET /api/agent/runs/{id}`. Permission `assistant.use`."""
         return self._transport.request("GET", "/api/agent/runs/{id}", {"id": id}, body=body, query=query, headers=headers)
 
+    def get_agent_runs_by_id_explanation(self, id: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
+            headers: Optional[dict[str, str]] = None) -> Any:
+        """`GET /api/agent/runs/{id}/explanation`. Permission `assistant.use`."""
+        return self._transport.request("GET", "/api/agent/runs/{id}/explanation", {"id": id}, body=body, query=query, headers=headers)
+
     def get_agent_scenario_probes(self, *, body: Any = None, query: Optional[dict[str, Any]] = None,
             headers: Optional[dict[str, str]] = None) -> Any:
         """`GET /api/agent/scenario-probes`. Permission `assistant.use`."""

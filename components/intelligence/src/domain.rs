@@ -2,6 +2,7 @@
 pub mod behavior_input;
 pub mod claim_batch;
 pub mod experiment_model;
+pub mod explanation;
 pub mod offer;
 pub mod preference_graph;
 pub mod price_guardrails;

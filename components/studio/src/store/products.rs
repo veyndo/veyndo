@@ -1,4 +1,4 @@
-//! SQL of the studio's product reads and writes: shared product rows for proposals and the editor, reviewed price/stock changes and existence checks.
+//! SQL of the studio's product reads and writes: shared product rows for proposals and the editor, reviewed price/stock changes at the editor's clocks and existence checks.
 use super::staging_documents::Tx;
 use crate::domain::proposal::Change;
 use serde_json::Value;
@@ -37,16 +37,29 @@ pub async fn translations(
     catalog::translations(a, t, id, locales).await
 }
 
-/// Applies a reviewed price/stock change at its expected revision; returns the rows changed.
+/// Applies a reviewed change with the manual editor's clock rule: a price-only change planned on a content clock
+/// checks that clock and keeps the current stock; any stock change checks the aggregate revision. Returns the rows changed.
 pub async fn apply_change(tx: &mut Tx<'_>, t: &str, c: &Change) -> Result<u64> {
-    catalog::apply_change(
-        tx,
-        t,
-        (&c.product_id, c.expected_revision),
-        c.price,
-        c.stock,
-    )
-    .await
+    match (c.price, c.stock, c.expected_content_revision) {
+        (Some(price), None, Some(content)) => {
+            catalog::apply_price(tx, t, (&c.product_id, content), price).await
+        }
+        _ => {
+            catalog::apply_change(
+                tx,
+                t,
+                (&c.product_id, c.expected_revision),
+                c.price,
+                c.stock,
+            )
+            .await
+        }
+    }
+}
+
+/// The aggregate and content clocks of the given products.
+pub async fn clocks(tx: &mut Tx<'_>, t: &str, ids: &[String]) -> Result<Vec<catalog::Clocks>> {
+    catalog::clocks(tx, t, ids).await
 }
 
 /// Whether a product exists.

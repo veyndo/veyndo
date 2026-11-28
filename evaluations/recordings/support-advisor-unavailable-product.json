@@ -1,0 +1,57 @@
+{
+ "format": "veyndo-agent-recording@1",
+ "scenario": "support-advisor-unavailable-product",
+ "runDigest": "426d32e498c0f506ebb6249c916af0eaaf449917f21f23d35b591279c0881fca",
+ "source": {
+  "kind": "authored",
+  "derivedFrom": {
+   "provider": "ollama",
+   "model": "qwen3.6:35b",
+   "recordedAt": "2026-11-27T13:28:01+00:00",
+   "head": "90e161f93c021c9fddd8d56eec128f815e7dd4cd"
+  },
+  "recordedAt": "2026-11-28T09:12:05+00:00",
+  "head": "9a7a003b7a3f74841a2946413fc11f9bb2d75deb",
+  "reason": "Batch K/L merge: typed operation facts changed the tool schemas offered to agents"
+ },
+ "steps": [
+  {
+   "fingerprint": {
+    "phase": "read",
+    "prompts": [],
+    "tools": [
+     "catalog.detail",
+     "catalog.facts",
+     "catalog.search"
+    ],
+    "toolsDigest": "de7dfa6b78c72c09204b99f1667b9732c20069be78ae993d6c5fdf09647debf1",
+    "schemaDigest": null
+   },
+   "decision": {
+    "tool_calls": []
+   },
+   "usage": {
+    "input": 1532,
+    "output": 94
+   },
+   "latencyMs": 1387
+  },
+  {
+   "fingerprint": {
+    "phase": "final",
+    "prompts": [],
+    "tools": [],
+    "toolsDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "schemaDigest": "0f5e74e978757a0ad0b722656f7236bc9d5d5c134aadbae025319b7e23a650d4"
+   },
+   "decision": {
+    "text": "{\n  \"explanation\": \"We do not currently stock a standing desk with an electric motor. The closest alternative in our catalog is the **Studio Desk** (ID: `desk`). It is a solid oak workspace designed for productivity, though it is a fixed-height desk rather than an adjustable one.\",\n  \"layout\": \"comparison\",\n  \"recommended_ids\": [\n    \"desk\"\n  ]\n}"
+   },
+   "usage": {
+    "input": 1130,
+    "output": 91
+   },
+   "latencyMs": 1387
+  }
+ ]
+}

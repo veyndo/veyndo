@@ -2106,6 +2106,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/TeamRolesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "role"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "team.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2114,6 +2138,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/TeamRoleSaveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "role"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "team.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -2122,6 +2170,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/TeamRoleDependenciesInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "role"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "team.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -2130,6 +2202,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/TeamRoleDeleteInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "role"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "team.manage"
+        ],
+        "requires": [
+          "team.role.dependencies"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "high",
+        "writes": true
       }
     }
   ],

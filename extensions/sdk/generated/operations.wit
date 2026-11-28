@@ -491,6 +491,27 @@ interface inputs {
     %revision: option<s64>,
     %workspace-context: option<merchant-run-status-input-workspace-context>,
   }
+  record merchant-run-explain-input-inference {
+    %model: option<option<string>>,
+    %provider: string,
+  }
+  record merchant-run-explain-input-workspace-context-selected {
+    %id: string,
+    %kind: string,
+  }
+  record merchant-run-explain-input-workspace-context {
+    %selected: option<merchant-run-explain-input-workspace-context-selected>,
+    %view: string,
+  }
+  record merchant-run-explain-input {
+    %approve: option<bool>,
+    %id: string,
+    %inference: option<merchant-run-explain-input-inference>,
+    %instruction: option<string>,
+    %request-id: option<string>,
+    %revision: option<s64>,
+    %workspace-context: option<merchant-run-explain-input-workspace-context>,
+  }
   record merchant-run-cancel-input-inference {
     %model: option<option<string>>,
     %provider: string,
@@ -1624,6 +1645,17 @@ interface inputs {
     %id: string,
     %revision: s64,
   }
+  record merchant-operations-list-input {
+    %include-unavailable: option<bool>,
+    %names: option<list<string>>,
+  }
+  record merchant-operations-check-input-steps-item {
+    %arguments: option<string>,
+    %name: string,
+  }
+  record merchant-operations-check-input {
+    %steps: list<merchant-operations-check-input-steps-item>,
+  }
   currency-list: func(input: string) -> result<string, string>;
   currency-select: func(input: currency-select-input) -> result<string, string>;
   merchant-currencies-refresh: func(input: merchant-currencies-refresh-input) -> result<string, string>;
@@ -1717,6 +1749,7 @@ interface inputs {
   merchant-media-caption: func(input: merchant-media-caption-input) -> result<string, string>;
   merchant-run-create: func(input: merchant-run-create-input) -> result<string, string>;
   merchant-run-status: func(input: merchant-run-status-input) -> result<string, string>;
+  merchant-run-explain: func(input: merchant-run-explain-input) -> result<string, string>;
   merchant-run-cancel: func(input: merchant-run-cancel-input) -> result<string, string>;
   merchant-run-resume: func(input: merchant-run-resume-input) -> result<string, string>;
   merchant-scenario-create: func(input: merchant-scenario-create-input) -> result<string, string>;
@@ -1836,6 +1869,8 @@ interface inputs {
   b2b-approval-decide: func(input: b2b-approval-decide-input) -> result<string, string>;
   automation-compare-history: func(input: automation-compare-history-input) -> result<string, string>;
   automation-validate-flow: func(input: automation-validate-flow-input) -> result<string, string>;
+  merchant-operations-list: func(input: merchant-operations-list-input) -> result<string, string>;
+  merchant-operations-check: func(input: merchant-operations-check-input) -> result<string, string>;
 }
 
 interface typed-results {

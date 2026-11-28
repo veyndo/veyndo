@@ -2,6 +2,11 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs9 {
+  "merchant.customer.lookup": {
+    after?: string;
+    limit?: number;
+    query?: string;
+  };
   "team.roles": {
     approve?: boolean;
     data?: {
@@ -193,5 +198,4 @@ export interface Inputs9 {
     id?: string;
     revision?: number;
   };
-  "knowledge.experiment.suggest": JsonValue;
 }

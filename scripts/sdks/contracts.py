@@ -242,6 +242,10 @@ def document(title, version, rows, tools, problem, envelope, component=None):
     for tool in tools:
         entry = {'name': tool['name'], 'description': tool['description'], 'readOnly': tool['readOnly'],
                  'input': {'$ref': '#/components/schemas/' + tool_schema_name(tool['name'], 'Input')}}
+        # Typed planner facts from the operations graph (components/core/src/operation_facts.rs).
+        for key in ('cost', 'requiresApproval', 'facts'):
+            if key in tool:
+                entry[key] = tool[key]
         schemas[tool_schema_name(tool['name'], 'Input')] = tool['inputSchema']
         if 'outputSchema' in tool:
             schemas[tool_schema_name(tool['name'], 'Output')] = tool['outputSchema']

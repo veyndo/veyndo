@@ -95,6 +95,12 @@ export const crmWords = {
     "Veyndo Studio / API",
     "Veyndo Studio / API",
   ],
+  agentProposal: [
+    "Agent proposal {id}",
+    "Agentenvorschlag {id}",
+    "Proposition d’agent {id}",
+    "Propuesta del agente {id}",
+  ],
   customer: [
     "Customer account",
     "Kundenkonto",

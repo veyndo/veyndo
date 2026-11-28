@@ -86,6 +86,21 @@ impl IntelligenceApi<'_> {
             .request(Method::GET, "/api/agent/runs/{id}", &[("id", id)], options)
             .await
     }
+    /// `GET /api/agent/runs/{id}/explanation` · permission `assistant.use`
+    pub async fn get_agent_runs_by_id_explanation(
+        &self,
+        id: &str,
+        options: RequestOptions,
+    ) -> Result<Value, Error> {
+        self.client
+            .request(
+                Method::GET,
+                "/api/agent/runs/{id}/explanation",
+                &[("id", id)],
+                options,
+            )
+            .await
+    }
     /// `GET /api/agent/scenario-probes` · permission `assistant.use`
     pub async fn get_agent_scenario_probes(&self, options: RequestOptions) -> Result<Value, Error> {
         self.client

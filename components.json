@@ -635,7 +635,8 @@
         "inference",
         "intelligence",
         "pricing",
-        "shop"
+        "shop",
+        "apps"
       ],
       "foreign_tables": {},
       "glob_imports": 0,

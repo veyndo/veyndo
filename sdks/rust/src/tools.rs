@@ -4570,6 +4570,65 @@ impl Tool for MerchantRunStatusInput {
     type Output = Value;
 }
 
+/// Part of the `merchant.run.explain` contract.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantRunExplainInputInference {
+    #[serde(rename = "model", default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    #[serde(rename = "provider")]
+    pub provider: String,
+}
+
+/// Part of the `merchant.run.explain` contract.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantRunExplainInputWorkspaceContextSelected {
+    #[serde(rename = "id")]
+    pub id: String,
+    #[serde(rename = "kind")]
+    pub kind: String,
+}
+
+/// Part of the `merchant.run.explain` contract.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantRunExplainInputWorkspaceContext {
+    #[serde(rename = "selected", default, skip_serializing_if = "Option::is_none")]
+    pub selected: Option<MerchantRunExplainInputWorkspaceContextSelected>,
+    #[serde(rename = "view")]
+    pub view: String,
+}
+
+/// Input of `merchant.run.explain`: Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantRunExplainInput {
+    #[serde(rename = "approve", default, skip_serializing_if = "Option::is_none")]
+    pub approve: Option<bool>,
+    #[serde(rename = "id")]
+    pub id: String,
+    #[serde(rename = "inference", default, skip_serializing_if = "Option::is_none")]
+    pub inference: Option<MerchantRunExplainInputInference>,
+    #[serde(
+        rename = "instruction",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub instruction: Option<String>,
+    #[serde(rename = "requestId", default, skip_serializing_if = "Option::is_none")]
+    pub request_id: Option<String>,
+    #[serde(rename = "revision", default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i64>,
+    #[serde(
+        rename = "workspaceContext",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub workspace_context: Option<MerchantRunExplainInputWorkspaceContext>,
+}
+
+impl Tool for MerchantRunExplainInput {
+    const NAME: &'static str = "merchant.run.explain";
+    type Output = Value;
+}
+
 /// Part of the `merchant.run.cancel` contract.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct MerchantRunCancelInputInference {
@@ -5454,6 +5513,45 @@ impl Tool for MerchantImportRecordInput {
     type Output = Value;
 }
 
+/// Input of `merchant.operations.list`: List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsListInput {
+    #[serde(
+        rename = "includeUnavailable",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub include_unavailable: Option<bool>,
+    #[serde(rename = "names", default, skip_serializing_if = "Option::is_none")]
+    pub names: Option<Vec<String>>,
+}
+
+impl Tool for MerchantOperationsListInput {
+    const NAME: &'static str = "merchant.operations.list";
+    type Output = Value;
+}
+
+/// Part of the `merchant.operations.check` contract.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsCheckInputStepsItem {
+    #[serde(rename = "arguments", default, skip_serializing_if = "Option::is_none")]
+    pub arguments: Option<Value>,
+    #[serde(rename = "name")]
+    pub name: String,
+}
+
+/// Input of `merchant.operations.check`: Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MerchantOperationsCheckInput {
+    #[serde(rename = "steps")]
+    pub steps: Vec<MerchantOperationsCheckInputStepsItem>,
+}
+
+impl Tool for MerchantOperationsCheckInput {
+    const NAME: &'static str = "merchant.operations.check";
+    type Output = Value;
+}
+
 /// Every tool: name, owning component and read-only hint.
 pub const TOOLS: &[(&str, &str, bool)] = &[
     ("team.roles", "identity", false),
@@ -5626,6 +5724,7 @@ pub const TOOLS: &[(&str, &str, bool)] = &[
     ("merchant.apply", "intelligence", false),
     ("merchant.run.create", "intelligence", false),
     ("merchant.run.status", "intelligence", true),
+    ("merchant.run.explain", "intelligence", true),
     ("merchant.run.cancel", "intelligence", false),
     ("merchant.run.resume", "intelligence", false),
     ("merchant.scenario.create", "intelligence", false),
@@ -5668,6 +5767,8 @@ pub const TOOLS: &[(&str, &str, bool)] = &[
     ("studio.workspace.save", "studio", false),
     ("merchant.import.inspect", "studio", true),
     ("merchant.import.record", "studio", false),
+    ("merchant.operations.list", "protocols", true),
+    ("merchant.operations.check", "protocols", true),
 ];
 
 /// Keeps the map import used when no contract declares one.

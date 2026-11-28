@@ -31,6 +31,11 @@ pub(crate) fn router() -> Router<App> {
             get(agents::status),
         )
         .secure_route(
+            "/api/agent/runs/{id}/explanation",
+            &[("GET", "assistant.use")],
+            get(agents::explanation),
+        )
+        .secure_route(
             "/api/agent/runs/{id}/cancel",
             &[("POST", "assistant.use")],
             post(agents::cancel),

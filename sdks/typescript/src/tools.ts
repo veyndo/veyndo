@@ -1885,6 +1885,35 @@ export interface MerchantRunStatusInput {
   "workspaceContext"?: MerchantRunStatusInputWorkspaceContext;
 }
 
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputInference {
+  "model"?: string | null;
+  "provider": "platform" | "ollama" | "openai" | "anthropic";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputWorkspaceContextSelected {
+  "id": string;
+  "kind": "product" | "order" | "customer" | "company" | "app" | "page" | "flow";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInputWorkspaceContext {
+  "selected"?: MerchantRunExplainInputWorkspaceContextSelected;
+  "view": "assistant" | "workspace" | "setup" | "overview" | "knowledge" | "agents" | "commerce" | "design" | "productData" | "products" | "orders" | "customers" | "b2b" | "pos" | "storyfronts" | "channels" | "automation" | "apps" | "developers" | "environments" | "users";
+}
+
+/** Input of `merchant.run.explain`. */
+export interface MerchantRunExplainInput {
+  "approve"?: boolean;
+  "id": string;
+  "inference"?: MerchantRunExplainInputInference;
+  "instruction"?: string;
+  "requestId"?: string;
+  "revision"?: number;
+  "workspaceContext"?: MerchantRunExplainInputWorkspaceContext;
+}
+
 /** Input of `merchant.run.cancel`. */
 export interface MerchantRunCancelInputInference {
   "model"?: string | null;
@@ -2274,6 +2303,23 @@ export interface MerchantImportRecordInput {
   "record": MerchantImportRecordInputRecord;
 }
 
+/** Input of `merchant.operations.list`. */
+export interface MerchantOperationsListInput {
+  "includeUnavailable"?: boolean;
+  "names"?: Array<string>;
+}
+
+/** Input of `merchant.operations.check`. */
+export interface MerchantOperationsCheckInputStepsItem {
+  "arguments"?: JsonValue;
+  "name": string;
+}
+
+/** Input of `merchant.operations.check`. */
+export interface MerchantOperationsCheckInput {
+  "steps": Array<MerchantOperationsCheckInputStepsItem>;
+}
+
 /** Tool name -> input type. */
 export interface ToolInputs {
   "team.roles": TeamRolesInput;
@@ -2446,6 +2492,7 @@ export interface ToolInputs {
   "merchant.apply": MerchantApplyInput;
   "merchant.run.create": MerchantRunCreateInput;
   "merchant.run.status": MerchantRunStatusInput;
+  "merchant.run.explain": MerchantRunExplainInput;
   "merchant.run.cancel": MerchantRunCancelInput;
   "merchant.run.resume": MerchantRunResumeInput;
   "merchant.scenario.create": MerchantScenarioCreateInput;
@@ -2488,6 +2535,8 @@ export interface ToolInputs {
   "studio.workspace.save": StudioWorkspaceSaveInput;
   "merchant.import.inspect": MerchantImportInspectInput;
   "merchant.import.record": MerchantImportRecordInput;
+  "merchant.operations.list": MerchantOperationsListInput;
+  "merchant.operations.check": MerchantOperationsCheckInput;
 }
 
 /** Tool name -> declared output type (tools without a declared output return any JSON). */
@@ -2669,6 +2718,7 @@ export const toolCatalog = {
   "merchant.apply": { component: "intelligence", readOnly: false, description: "Approve stored change; merchant authorization required" },
   "merchant.run.create": { component: "intelligence", readOnly: false, description: "Queue a durable native planning task; no automatic business writes" },
   "merchant.run.status": { component: "intelligence", readOnly: true, description: "Read a saved run and completed proposal with current rights" },
+  "merchant.run.explain": { component: "intelligence", readOnly: true, description: "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change" },
   "merchant.run.cancel": { component: "intelligence", readOnly: false, description: "Cancel a saved run with its expected revision" },
   "merchant.run.resume": { component: "intelligence", readOnly: false, description: "Explicitly resume a failed or ambiguous run from completed checkpoints" },
   "merchant.scenario.create": { component: "intelligence", readOnly: false, description: "Run a bounded fictional customer cohort in a private sandbox" },
@@ -2711,6 +2761,8 @@ export const toolCatalog = {
   "studio.workspace.save": { component: "studio", readOnly: false, description: "Revise the current personal Studio workspace" },
   "merchant.import.inspect": { component: "studio", readOnly: true, description: "Read current mapped target fields and report missing/changed imports without writing" },
   "merchant.import.record": { component: "studio", readOnly: false, description: "Explicitly import a source record through current domain permissions; historical orders have no purchase effects" },
+  "merchant.operations.list": { component: "protocols", readOnly: true, description: "List the operations you may call now with typed permission, cost, reversibility, risk, data, side effects and preconditions" },
+  "merchant.operations.check": { component: "protocols", readOnly: true, description: "Check a planned sequence of operation calls before execution: admission, arguments, prerequisites and required approvals; runs nothing" },
 } as const;
 
 /** Unused import guard for tools without declared outputs. */

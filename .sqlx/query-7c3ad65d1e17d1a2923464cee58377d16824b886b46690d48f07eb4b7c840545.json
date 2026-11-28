@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT manifest,contract FROM app_versions WHERE tenant=$1 AND app=$2 AND version=$3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "manifest",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "manifest"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "contract",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "contract"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "7c3ad65d1e17d1a2923464cee58377d16824b886b46690d48f07eb4b7c840545"
+}

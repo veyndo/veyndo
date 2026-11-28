@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ApiRequestFn as RequestFn } from "../api/types";
 import { useCrmText } from "../i18n/crm-i18n";
 import ConfirmDialog from "../ui/ConfirmDialog";
-import { changes, printable } from "./history-model";
+import { changes, printable, proposalReason } from "./history-model";
 import "./history.css";
 type Entry = {
   id: number;
@@ -139,7 +139,16 @@ export default function EntityHistory({
                     {entry.source === "merchant" || entry.source === "customer"
                       ? r(entry.source)
                       : entry.source}
-                    {entry.reason ? ` · ${entry.reason}` : ""}
+                    {entry.reason
+                      ? ` · ${
+                          proposalReason(entry.reason)
+                            ? r("agentProposal").replace(
+                                "{id}",
+                                proposalReason(entry.reason)!,
+                              )
+                            : entry.reason
+                        }`
+                      : ""}
                   </small>
                 </span>
                 <span>{r("inspect")} →</span>

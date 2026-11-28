@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tasks SET proposal=jsonb_set(proposal,'{explanation,actions}',coalesce(proposal#>'{explanation,actions}','[]'::jsonb)||jsonb_build_array($3::jsonb)) WHERE tenant=$1 AND id=$2 AND jsonb_typeof(proposal->'explanation')='object'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "908d9af555dc42dc0ae7d05ac56df6dd071bfdfabd07a92a094f8c2514db38d7"
+}

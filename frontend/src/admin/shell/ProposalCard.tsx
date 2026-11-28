@@ -1,4 +1,4 @@
-/** ProposalCard keeps merchant interaction separate from workspace orchestration. */
+/** ProposalCard keeps merchant interaction separate from workspace orchestration; approval waits for a usable shop twin simulation. */
 import { Button, LinkButton, Notice } from "../../kit/ui";
 import { useAgentWorkspaceText } from "../../shared/i18n/agent-workspace-i18n";
 import { useAppText } from "../../shared/i18n/app-i18n";
@@ -12,6 +12,13 @@ import { matchesWorkspaceNavigation } from "../../shared/grid/workspace-view";
 import { useExperienceUIText } from "../../shared/i18n/experience-ui-i18n";
 import type { WorkspaceView } from "../../shared/grid/workspace-view";
 import { useScenarioText } from "../../../../components/intelligence/ui/admin/scenarios/scenario-i18n";
+import OperationFacts, {
+  useOperationFacts,
+  type OperationFactsIndex,
+} from "../../shared/agents/OperationFacts";
+import type { RequestFn } from "./studio-types";
+import ProposalSimulation from "../../../../components/studio/ui/admin/proposals/ProposalSimulation";
+import { approvable } from "../../../../components/studio/ui/admin/proposals/proposal-simulation-model";
 export default function ProposalCard({
   message,
   onApply,
@@ -22,8 +29,14 @@ export default function ProposalCard({
   onOpenView,
   onOpenWorkspace,
   onTest,
+  request,
+  operationFacts,
 }: {
   message: Message;
+  /** Loads the typed facts of each proposed operation for review; without it steps show no facts. */
+  request?: RequestFn;
+  /** Facts already loaded by the caller, keyed by operation name. */
+  operationFacts?: OperationFactsIndex;
   onApply: () => void;
   busy: boolean;
   canApply: boolean;
@@ -46,6 +59,14 @@ export default function ProposalCard({
   const { tabLabel } = useStudioNavigation();
   const preview = message.data.preview;
   const scenarioText = useScenarioText();
+  // Only a proposal with operation steps reads the operations graph.
+  const loadedFacts = useOperationFacts(
+    operationFacts || !preview?.proposal.operations?.length
+      ? undefined
+      : request,
+  );
+  const factsIndex = operationFacts ?? loadedFacts;
+  const factsReady = Object.keys(factsIndex).length > 0;
   if (!preview) return null;
   const view = preview.proposal.view;
   const viewMatches =
@@ -86,6 +107,10 @@ export default function ProposalCard({
           <b>
             {index + 1}. {step.label}
           </b>
+          <OperationFacts
+            operation={factsIndex[step.name]}
+            known={!factsReady || step.name in factsIndex}
+          />
           <details>
             <summary>{step.name}</summary>
             <pre>{step.arguments_json}</pre>
@@ -221,6 +246,13 @@ export default function ProposalCard({
           <blockquote>{preview.proposal.experience.headline}</blockquote>
         </div>
       )}
+      <ProposalSimulation
+        simulation={preview.simulation}
+        explanation={preview.explanation}
+        names={Object.fromEntries(
+          preview.catalogBefore.map((p) => [p.id, p.name]),
+        )}
+      />
       {!message.applied && !approvalStarted && !preview.proposal.view && (
         <footer>
           <span>
@@ -230,7 +262,7 @@ export default function ProposalCard({
           <Button
             tone="primary"
             type="submit"
-            disabled={busy || !canApply}
+            disabled={busy || !canApply || !approvable(preview.simulation)}
             onClick={onApply}
           >
             {t("approve")}

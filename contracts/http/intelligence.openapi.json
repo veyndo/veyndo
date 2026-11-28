@@ -600,6 +600,57 @@
         ]
       }
     },
+    "/api/agent/runs/{id}/explanation": {
+      "get": {
+        "operationId": "getAgentRunsByIdExplanation",
+        "tags": [
+          "intelligence"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Tenant"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "default": {
+            "description": "Failure envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "x-veyndo-source": "src/agent_runs/contract.rs",
+        "x-veyndo-permission": "assistant.use",
+        "security": [
+          {
+            "personalSession": []
+          },
+          {
+            "integrationKey": []
+          }
+        ]
+      }
+    },
     "/api/agent/runs/{id}/resume": {
       "post": {
         "operationId": "postAgentRunsByIdResume",
@@ -3296,6 +3347,123 @@
         ],
         "type": "object"
       },
+      "MerchantRunExplainInput": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "id": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "inference": {
+            "additionalProperties": false,
+            "properties": {
+              "model": {
+                "maxLength": 128,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provider": {
+                "enum": [
+                  "platform",
+                  "ollama",
+                  "openai",
+                  "anthropic"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "provider"
+            ],
+            "type": "object"
+          },
+          "instruction": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requestId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "workspaceContext": {
+            "additionalProperties": false,
+            "properties": {
+              "selected": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "kind": {
+                    "enum": [
+                      "product",
+                      "order",
+                      "customer",
+                      "company",
+                      "app",
+                      "page",
+                      "flow"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "type": "object"
+              },
+              "view": {
+                "enum": [
+                  "assistant",
+                  "workspace",
+                  "setup",
+                  "overview",
+                  "knowledge",
+                  "agents",
+                  "commerce",
+                  "design",
+                  "productData",
+                  "products",
+                  "orders",
+                  "customers",
+                  "b2b",
+                  "pos",
+                  "storyfronts",
+                  "channels",
+                  "automation",
+                  "apps",
+                  "developers",
+                  "environments",
+                  "users"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "view"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "MerchantRunCancelInput": {
         "additionalProperties": false,
         "properties": {
@@ -4009,6 +4177,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeGraphInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4017,6 +4210,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSearchInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4025,6 +4243,32 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExternalInput"
+      },
+      "cost": "provider",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [
+          "externalCall"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -4033,6 +4277,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeProductInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4041,6 +4310,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeWorkspaceInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4049,6 +4342,30 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgePreviewInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4057,6 +4374,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSourceDetailInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4065,6 +4406,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSourceCreateInput"
+      },
+      "cost": "batch",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "backgroundJob",
+          "event"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4073,6 +4442,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSourceEditInput"
+      },
+      "cost": "batch",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "backgroundJob",
+          "event"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.source.detail"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4081,6 +4480,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSourceVisibilityInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.source.detail"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4089,6 +4518,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeSourceArchiveInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.source.detail"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4097,6 +4555,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantPlanInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run",
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4105,6 +4593,41 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantApplyInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "order"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "catalog.write",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.plan"
+        ],
+        "reversibility": {
+          "by": "merchant.history.restore",
+          "kind": "compensatable"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -4113,6 +4636,38 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantRunCreateInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "backgroundJob",
+          "event"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "by": "merchant.run.cancel",
+          "kind": "compensatable"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4121,6 +4676,72 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantRunStatusInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.run.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
+      }
+    },
+    {
+      "name": "merchant.run.explain",
+      "description": "Read why a saved run acted: rationale and source references of each tool call, proposal, twin simulation and applied change",
+      "readOnly": true,
+      "input": {
+        "$ref": "#/components/schemas/MerchantRunExplainInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.run.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4129,6 +4750,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantRunCancelInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.run.create"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4137,6 +4789,38 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantRunResumeInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "backgroundJob"
+        ],
+        "permissions": [
+          "assistant.use",
+          "catalog.read",
+          "orders.read",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.run.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4145,6 +4829,45 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioCreateInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "cart",
+            "order"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall",
+          "backgroundJob"
+        ],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.scenario.readiness"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4153,6 +4876,41 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioStatusInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "order"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.scenario.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4161,6 +4919,38 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioListInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4169,6 +4959,39 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioReadinessInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4177,6 +5000,40 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioStockInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": true
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.scenario.readiness"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4185,6 +5042,40 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioAttacksInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.scenario.probe"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4193,6 +5084,44 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantScenarioProbeInput"
+      },
+      "cost": "batch",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "sandbox"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "cart",
+            "order"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "backgroundJob"
+        ],
+        "permissions": [
+          "assistant.use",
+          "channels.read",
+          "environments.manage",
+          "catalog.read",
+          "orders.read",
+          "orders.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "merchant.scenario.readiness"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4201,6 +5130,33 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/MerchantAgentsStatusInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "personalSession"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "ai.manage"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4209,6 +5165,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/MerchantAgentsControlInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [
+          "personalSession"
+        ],
+        "data": {
+          "entities": [
+            "run",
+            "settings"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "ai.manage"
+        ],
+        "requires": [
+          "merchant.agents.status"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4217,6 +5204,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeBehaviorInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "report"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4225,6 +5237,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeBehaviorJourneyInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "customer"
+          ],
+          "money": false,
+          "pii": true,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "customers.pii"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": false
       }
     },
     {
@@ -4233,6 +5270,30 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4241,6 +5302,32 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentCreateInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4249,6 +5336,36 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentStartInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.experiment.create"
+        ],
+        "reversibility": {
+          "by": "knowledge.experiment.stop",
+          "kind": "compensatable"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -4257,6 +5374,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentStopInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.experiment.start"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4265,6 +5410,34 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentFinishInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.experiment.start"
+        ],
+        "reversibility": {
+          "kind": "irreversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4273,6 +5446,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentSuggestInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment",
+            "payment"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4281,6 +5479,33 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExperimentReportInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "experiment",
+            "payment"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.experiment.create"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4289,6 +5514,38 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeAutonomyApplyInput"
+      },
+      "cost": "standard",
+      "requiresApproval": true,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "catalog.write",
+          "settings.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.autonomy.status"
+        ],
+        "reversibility": {
+          "by": "knowledge.autonomy.revert",
+          "kind": "compensatable"
+        },
+        "risk": "high",
+        "writes": true
       }
     },
     {
@@ -4297,6 +5554,37 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeAutonomyRevertInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication",
+          "event"
+        ],
+        "permissions": [
+          "catalog.write",
+          "settings.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.autonomy.apply"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4305,6 +5593,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeAutonomyStatusInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "product",
+            "settings"
+          ],
+          "money": true,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4313,6 +5626,31 @@
       "readOnly": true,
       "input": {
         "$ref": "#/components/schemas/KnowledgeClaimsInput"
+      },
+      "cost": "free",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": false
       }
     },
     {
@@ -4321,6 +5659,31 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeClaimProposeInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4329,6 +5692,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeClaimReviewInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "event"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.claim.propose"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     },
     {
@@ -4337,6 +5729,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeExtractInput"
+      },
+      "cost": "model",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "modelCall"
+        ],
+        "permissions": [
+          "knowledge.write",
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.source.detail"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "low",
+        "writes": true
       }
     },
     {
@@ -4345,6 +5766,35 @@
       "readOnly": false,
       "input": {
         "$ref": "#/components/schemas/KnowledgeCompileInput"
+      },
+      "cost": "standard",
+      "requiresApproval": false,
+      "facts": {
+        "audience": "merchant",
+        "conditions": [],
+        "data": {
+          "entities": [
+            "knowledge",
+            "product"
+          ],
+          "money": false,
+          "pii": false,
+          "stock": false
+        },
+        "effects": [
+          "publication"
+        ],
+        "permissions": [
+          "knowledge.read"
+        ],
+        "requires": [
+          "knowledge.claim.review"
+        ],
+        "reversibility": {
+          "kind": "reversible"
+        },
+        "risk": "medium",
+        "writes": true
       }
     }
   ],

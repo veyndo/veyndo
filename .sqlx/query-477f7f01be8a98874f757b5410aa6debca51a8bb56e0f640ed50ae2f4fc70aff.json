@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,digest,manifest,contract,installed_at::text AS \"installed_at!\" FROM app_versions WHERE tenant=$1 AND app=$2 ORDER BY installed_at DESC, version DESC LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "digest"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "manifest",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "manifest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "contract",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_versions",
+            "name": "contract"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "installed_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "477f7f01be8a98874f757b5410aa6debca51a8bb56e0f640ed50ae2f4fc70aff"
+}

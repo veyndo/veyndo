@@ -78,6 +78,11 @@ class AppsApi:
         """`GET /api/apps/{id}/jobs/{job}`. Permission `read`."""
         return self._transport.request("GET", "/api/apps/{id}/jobs/{job}", {"id": id, "job": job}, body=body, query=query, headers=headers)
 
+    def get_apps_by_id_sandbox(self, id: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
+            headers: Optional[dict[str, str]] = None) -> Any:
+        """`GET /api/apps/{id}/sandbox`. Permission `apps.manage`."""
+        return self._transport.request("GET", "/api/apps/{id}/sandbox", {"id": id}, body=body, query=query, headers=headers)
+
     def get_apps_by_id_secrets(self, id: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
             headers: Optional[dict[str, str]] = None) -> Any:
         """`GET /api/apps/{id}/secrets`. Permission `apps.manage`."""
@@ -197,6 +202,16 @@ class AppsApi:
             headers: Optional[dict[str, str]] = None) -> Any:
         """`POST /api/apps/{id}/jobs/{job}`. Permission `apps.manage`."""
         return self._transport.request("POST", "/api/apps/{id}/jobs/{job}", {"id": id, "job": job}, body=body, query=query, headers=headers)
+
+    def post_apps_by_id_ports_by_port(self, id: str, port: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
+            headers: Optional[dict[str, str]] = None) -> Any:
+        """`POST /api/apps/{id}/ports/{port}`. Permission `read`."""
+        return self._transport.request("POST", "/api/apps/{id}/ports/{port}", {"id": id, "port": port}, body=body, query=query, headers=headers)
+
+    def post_apps_by_id_rollback(self, id: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
+            headers: Optional[dict[str, str]] = None) -> Any:
+        """`POST /api/apps/{id}/rollback`. Permission `apps.manage`."""
+        return self._transport.request("POST", "/api/apps/{id}/rollback", {"id": id}, body=body, query=query, headers=headers)
 
     def post_apps_by_id_surfaces_by_surface_actions_by_action(self, id: str, surface: str, action: str, *, body: Any = None, query: Optional[dict[str, Any]] = None,
             headers: Optional[dict[str, str]] = None) -> Any:

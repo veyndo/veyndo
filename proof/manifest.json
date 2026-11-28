@@ -780,6 +780,11 @@
       "sha256": "c9ec9428c4494a7990b3635b8a90b8e25f404e6ef7d44d0ea68e9179c320844f",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/app_facts.rs": {
+      "status": "unproved",
+      "sha256": "bcbc1c3095bc260ea26a21e819a6bc36f781501e1b7bc378a41e8204d4f23415",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
     "components/apps/src/domain/app_generation.rs": {
       "status": "unproved",
       "sha256": "41fb169b54f8adec5c64fd5f9add7d77e443d382b839fe6393f32b7a68e95b7a",
@@ -955,6 +960,11 @@
       "sha256": "bd09125153bdb1f205046f3b6287d2574700d15d4417206900363ad02b27f55b",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/package_contract.rs": {
+      "status": "unproved",
+      "sha256": "9540e3c550735ee4ca88e8fd77abf616bee9c649a51c2aa5f20d8b88fee2d8b9",
+      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
+    },
     "components/apps/src/domain/persistence.rs": {
       "status": "unproved",
       "sha256": "976e401c9727b2494ea86f8ba7bfbb29fb238b7eca5b264844e458aecf7ce541",
@@ -964,6 +974,11 @@
       "status": "unproved",
       "sha256": "573072cb39e0cd89a8dbc32fe50ebbaddcc157620bafa215650f6814d9c8fd3e",
       "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
+    "components/apps/src/domain/port_wiring.rs": {
+      "status": "unproved",
+      "sha256": "8a564559c97ee068b4c57e0702a9d6460debdf66ba8ee320c0c70a7f9089a11a",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/domain/presentation.rs": {
       "status": "unproved",
@@ -1037,8 +1052,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "f0753a7108f69ee8c50730d588ace05662594f01444f9f24d549b7408c9dc28e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "870b0e701006b54dab07e3afc94632da00f818e48eeefdca09eb0dfff9bc9572",
+      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/http/actions.rs": {
       "status": "unproved",
@@ -1080,6 +1095,11 @@
       "sha256": "7d084802f87f3f74e128a3f684734e8b07202733afb24d2013ab6cf33a73eff2",
       "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
     },
+    "components/apps/src/http/sandbox.rs": {
+      "status": "unproved",
+      "sha256": "cf8ec787a5861e37371a527e49e854a3d4b9a18c32f6360c870f695b9995cea3",
+      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
+    },
     "components/apps/src/http/secrets.rs": {
       "status": "unproved",
       "sha256": "75f2c0980dbebeb0d16325eadd87423dd47ccc19d1af0dee02331efd1de60805",
@@ -1112,8 +1132,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "95ee1cf154fac8ebebdfcafea281372cec68e6a5c9a5caca382a48ddd9e5d5a2",
-      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+      "sha256": "ab0b5c313189cf9e72eb954e2e0e57da0915a69ca09b4a0aec760427b4744d76",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -1134,6 +1154,11 @@
       "status": "unproved",
       "sha256": "e924bcb07b707bca429537d0cc605d0a86e730a1f5e4037b1b07611ed4cb7c1d",
       "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+    },
+    "components/apps/src/service/app_ports.rs": {
+      "status": "unproved",
+      "sha256": "0df7a12e0c9a55637b4a0047467c55561768c84b348b9e7e23e7fe12bb3371e3",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/service/app_preview.rs": {
       "status": "unproved",
@@ -1247,8 +1272,8 @@
     },
     "components/apps/src/service/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "592fa48bca4482b403e468793ccb51b381d6a1bf6a73cd883fc16363b395a42d",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "099c77f0c84e82cb488127cb55a53ffb39e3fd97ccc18c3e956c29f590604ab6",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/service/service_call.rs": {
       "status": "unproved",
@@ -1267,8 +1292,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "455e728f7e1bb45a70d2fe58addb93f1c7bfa53ded834d5ebba3d41a64533c6f",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "5390d8c3fe37f8599a64b1c851d93c69ea903a5e52fbbace02aa3c046a41c92b",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1277,8 +1302,8 @@
     },
     "components/apps/src/store/activation.rs": {
       "status": "unproved",
-      "sha256": "402b6ae2ccc033c48a85c03baaab43bb665d9061115a7f75b204a2e4401337bb",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5916c9b6bbd2ee4b349f81e685262a3d051c0a437c902c4ff5b12cf86ed806e2",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/store/active_packages.rs": {
       "status": "unproved",
@@ -1287,8 +1312,8 @@
     },
     "components/apps/src/store/activity.rs": {
       "status": "unproved",
-      "sha256": "3bd1d5b6548617bc4dae9df66b39746c955c1c58d4a5e0f73de3248a635c084d",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "0760729cf9e2eac1b72293a348723cdfa2d7967f68abf2d4fa6a8c8a1ee5c33a",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/store/app_host_reads.rs": {
       "status": "unproved",
@@ -1435,6 +1460,11 @@
       "sha256": "6b2b63b3a321eca0f4afcf0991523a96ee36b62e158bf66453ef872a29d08de8",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
+    "components/apps/src/store/package_contracts.rs": {
+      "status": "unproved",
+      "sha256": "179a68785ec858d1b33313816ba69e204d8a26e13d9fffc6e8058d824fa9a3cf",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
+    },
     "components/apps/src/store/package_fence.rs": {
       "status": "unproved",
       "sha256": "cc13545b262bec525e226a541a9038530bc420ee1393abecd7e666fdbd194f1b",
@@ -1442,8 +1472,8 @@
     },
     "components/apps/src/store/package_install.rs": {
       "status": "unproved",
-      "sha256": "2b02b353b02908668a99429525dec378feae892d9e25e9269fb528d85c830354",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "1b1a06a8124aa245583b15f9c96c2a61b0d3dfd9ae6daf3b8e622a738f5dfa8d",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/store/packages.rs": {
       "status": "unproved",
@@ -1492,8 +1522,8 @@
     },
     "components/apps/src/store/schema_upgrade.rs": {
       "status": "unproved",
-      "sha256": "2cd288774dcf356de2cd1c74ac89356898471e1f2966d33c55a3ca805704e7de",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "b5465a8ec4122b3d6a13db272187acc84bb9da57374d62a045750029c0cc5f19",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/store/secrets.rs": {
       "status": "unproved",
@@ -1532,8 +1562,8 @@
     },
     "components/apps/src/store/tool_catalogue.rs": {
       "status": "reviewed-binding",
-      "sha256": "853daf19f201d4aab72fffcb2e9913fbbce606461638fb23c2ca5eddbc76ea3b",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "4081b1667783727513f65d28d8c03a360174780f47f2632f27980e7ba5ed790e",
+      "review": "Batch L: planner lookup for app tool facts (read-only adapter)"
     },
     "components/apps/src/store/webhook_receipts.rs": {
       "status": "unproved",
@@ -1547,8 +1577,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "7a0ee28536b621606d70b0310bb054fd5f1c3dd497c15403379d964e68e2c390",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "aefa351eb5007a64478f6a5edb42a610b15500333e859136ef63829c8643a281",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/apps/src/types/events.rs": {
       "status": "unproved",
@@ -2072,8 +2102,8 @@
     },
     "components/catalog/src/store/workspace.rs": {
       "status": "unproved",
-      "sha256": "5e60cdcbef0d3317e232ac89cffb0c137bc85e8796159ffe881bf355e9bb8491",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "523b8d880b61026782ac6832e75553624cfef4b251c716b45636b2d13c1d1790",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
@@ -2482,8 +2512,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "f96180abb796273432646507e961c7fd0184f13c1a38d8b7ef7a22bf868f3e82",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "74c358747003cfeac3ae1c5d7aa1f4b0a29d1086180cdb9ae37cb7c5ea21bd2a",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -2509,6 +2539,11 @@
       "status": "unproved",
       "sha256": "b1324e25f81c0f43d79b8b6a232d3140c4f6e2aadcf16731526cd84896a7886b",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/operation_facts.rs": {
+      "status": "unproved",
+      "sha256": "88aea2b5e7811650e0bcafc5905701fd6d0ba56f3153ed7757093ecd98d3356c",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/core/src/process_config.rs": {
       "status": "unproved",
@@ -2567,8 +2602,8 @@
     },
     "components/core/src/store/history_context.rs": {
       "status": "unproved",
-      "sha256": "cfcb3b8a9cbfd06fb6b7346f58c09dd2b84495b708a5ecbf27495203f2a5b00f",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "87216e7595165d8e78c92f0b5898d4bc919a21b4ffb15963be0660be7ce3873f",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/core/src/store/lease.rs": {
       "status": "unproved",
@@ -2663,7 +2698,7 @@
     "components/core/src/tool_contract.rs": {
       "status": "unproved",
       "sha256": "866fca6c96cb6877f8358d1d809faf15e39ea16b45e973020b5f8553abb55c63",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -3100,6 +3135,11 @@
       "sha256": "1c429826983e273c1d4e84786a01791bafbfe4b5adf86c552f84b41c70e23679",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/intelligence/src/domain/explanation.rs": {
+      "status": "unproved",
+      "sha256": "0eff97865faa28bfb981b8868ec57ae70885126097e4f7a01112da75794a7e1a",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
     "components/intelligence/src/domain/offer.rs": {
       "status": "unproved",
       "sha256": "cff714e56437a893854bd93f15f8c796e7242fd8989cb8428b7327f255d2bc5b",
@@ -3112,8 +3152,8 @@
     },
     "components/intelligence/src/domain/price_guardrails.rs": {
       "status": "reviewed-binding",
-      "sha256": "8c73f0db8203b57cfd4d5e99d32c123a0ea234e9ea79e0bca5f09052aa81132f",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "432dbf55028a0f843f4b62a3eb4da2c56aeb2135274fed5242d4ddbcea27caa3",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/domain/prompt_context.rs": {
       "status": "unproved",
@@ -3142,13 +3182,13 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "13b26df12563c69afd742d863e43b149a894d7e3ad700c1e73035aa5969879b3",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "e6bfadfbfc748ba4f4b01ce1d7ad9c2e0288f7b4adab1c1befaf73c3ada26a1d",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/http/agents.rs": {
       "status": "unproved",
-      "sha256": "491a1ef685e1590ce107648df1d03b8b46bf70128f822e50ad8110e63cb8a291",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "fe8a12d6b109cee0e562ffa204bb1ca06fd1307fce2300cdbfd049bae785bf62",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/http/behavior_capture.rs": {
       "status": "unproved",
@@ -3247,8 +3287,8 @@
     },
     "components/intelligence/src/ports.rs": {
       "status": "unproved",
-      "sha256": "e78f60ef1786cd971b224e0027be1177d56e8a43c48e94e8e534d257c5353fef",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "a092cb38a4d8d6da22e73702fc5313e9be56949bbc0e45b8106e659f4f985fe6",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/service/advisor.rs": {
       "status": "unproved",
@@ -3262,8 +3302,8 @@
     },
     "components/intelligence/src/service/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "a3ff2f5a9255b606ab45c78e4387b50ec0d0d5861053b648d358a30bc14f0b3d",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "18d5216ac46ca15f16112dac753e3d3fd5229b138a56e875cb5962e8359e8681",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/service/autonomy.rs": {
       "status": "reviewed-binding",
@@ -3382,8 +3422,8 @@
     },
     "components/intelligence/src/service/planner.rs": {
       "status": "unproved",
-      "sha256": "652fb784970eb813ff04e7b9f7a2271d6a343c28a8d19c0c7f7c2f2b2cb67c39",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "a280e959c46b8f959168a34c9c9a4012c464bd696566feb45f836646ee11777e",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/service/platform_ai.rs": {
       "status": "reviewed-binding",
@@ -3397,8 +3437,8 @@
     },
     "components/intelligence/src/service/read_rounds.rs": {
       "status": "unproved",
-      "sha256": "49cddef65d5cd9416194c1f2daeb4acac92bc02ae3271d3a7f48e2e01cc0ce69",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "64d280e548e54a511186c49cd7c093fd441173348d3515d761a7d49418aa6565",
+      "review": "Batch L: package contracts, app facts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/intelligence/src/service/retrieval.rs": {
       "status": "unproved",
@@ -3617,8 +3657,8 @@
     },
     "components/intelligence/src/store/work_tasks.rs": {
       "status": "unproved",
-      "sha256": "ab0bf222ba79dd4c9ca0dd22c2b0eba59a6605eef1cd0a944adac834e3006eef",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "b7f7c28be24e9ff60bc921183107935fa3e58e25ec2c65b31f5cc7bd58538276",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/intelligence/src/store/workspace.rs": {
       "status": "unproved",
@@ -3742,8 +3782,8 @@
     },
     "components/marketing/src/domain/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "2de3264adff7684afb39ba63047b86a63b3468a25ad6af5db73ef6f9e974f9ff",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "785cd08459bee4454b13460823edddadcfb32575148cc163ca3e0e54c15d7088",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/domain/flow_projection.rs": {
       "status": "unproved",
@@ -3812,8 +3852,8 @@
     },
     "components/marketing/src/http/catalog.rs": {
       "status": "unproved",
-      "sha256": "21278f38de53418c6567767ef03eacf4f6b704c7524d99244dd9d9cd691674f5",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "5d787b8389583bc0ebe0eed798e0d50f3d9845a003d5555b6b9c567a33966cee",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/http/channel_preview.rs": {
       "status": "unproved",
@@ -3872,8 +3912,8 @@
     },
     "components/marketing/src/service/configuration_writes.rs": {
       "status": "unproved",
-      "sha256": "e3eb00ad8b8bf6d6127edb964bdc5fcd65521e9d1030940f149b51b8c54ea74f",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "7b009c3874c9a1911edb215889e0786a5d04fe9e9a8f899a065db8d04502bcbc",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "components/marketing/src/service/coupons.rs": {
       "status": "unproved",
@@ -4290,6 +4330,11 @@
       "sha256": "f90a31fd1a14f8e761b9eee816de9297f8b4571d7aab24a61d51f2c0303c7cdd",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
     },
+    "components/orders/src/store/product_demand.rs": {
+      "status": "unproved",
+      "sha256": "f25b2217b3e595d4e1240ecea1a9c279786ec294ff167eb203efa46b7b45fd42",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
     "components/orders/src/store/receipts.rs": {
       "status": "unproved",
       "sha256": "5839c922358c9f2a31885dee099be81c9c37c2bf78495d51ffd4d80e44901042",
@@ -4332,8 +4377,8 @@
     },
     "components/orders/src/store.rs": {
       "status": "unproved",
-      "sha256": "8a547fa60391cc2893d74961487100aa4afd5c9bb7215b156c7c127aff5cb385",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "810755caf980b298f208e52d94404f56932434116e0135a44bcbe10d6fb0405b",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/orders/src/types/events.rs": {
       "status": "unproved",
@@ -5337,8 +5382,8 @@
     },
     "components/studio/src/domain/proposal.rs": {
       "status": "unproved",
-      "sha256": "d0dd349b4d26298cbf8645f6f737722c6f701f0b465328c7a7bf55c9d134a9e7",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "f7879708477f272f76f6454b03344cb3d89b799e3f4378f5f4dd227fdf03ed32",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/domain/report_config.rs": {
       "status": "unproved",
@@ -5349,6 +5394,11 @@
       "status": "unproved",
       "sha256": "c64b428fee5002bebc66b72447bccbfd7503c3758cd81b846b38ccb5e397942f",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/studio/src/domain/simulation.rs": {
+      "status": "unproved",
+      "sha256": "9c3c90ec68072b4985a9e69a7b3d1864ac8682475fcce2be7db94fbeb48d5f3d",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/domain/staging_access.rs": {
       "status": "unproved",
@@ -5362,8 +5412,8 @@
     },
     "components/studio/src/domain/views.rs": {
       "status": "unproved",
-      "sha256": "4361fe346e84a547980ff060dfd6e8885471105854424371ecbc621e5514deb2",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "8a58df7e0ea71ba0e86816d7b49893937a4ac829236a647ab3b1ec752e33e47b",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/domain/workspace.rs": {
       "status": "unproved",
@@ -5372,8 +5422,8 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "cebef845638e4fb880c08291e646b499ada2abdafa8208ca905e7b7158c3c58b",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "6de9455bc138868655954804044afdb1b3f6d2b21c565a9713e3a223495b2c72",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/http/customers.rs": {
       "status": "unproved",
@@ -5522,13 +5572,18 @@
     },
     "components/studio/src/service/proposal_admission.rs": {
       "status": "unproved",
-      "sha256": "61787882a13799051693c731e2269117606e363786714c0e1752afa909a4e917",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "60748c8f3f0342ef25b9e2afbe143176261ace756fa181f243218edc91ec6475",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/service/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "b7620f4df3a81acf5ce30f9e6494ad10238d9db5ea13395856aa3515d2c2623d",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "cccca81e07d76c18d38d874f92d494fc488aa2c30dd3cbed04e3f6f2e9bff9f4",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
+    "components/studio/src/service/proposal_simulation.rs": {
+      "status": "unproved",
+      "sha256": "59b2e542f078c1c94fb6d982166e7eb0fabbe10342c685e43cddbf3723384d8f",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/service/reports.rs": {
       "status": "unproved",
@@ -5582,8 +5637,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "a0ce6cee30c97056e33f97c0d88f90d098fc201c9427305b7ac0120f6a2dc061",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "697585ed224c31df6b578f9d2617d9f7de0d35c5e570c50bbb05c9b9d5b334f9",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/store/app_previews.rs": {
       "status": "unproved",
@@ -5632,8 +5687,8 @@
     },
     "components/studio/src/store/products.rs": {
       "status": "unproved",
-      "sha256": "c1ff2e5ac878caf40b6deb357eaebe0105e61943f3922c12285600d72d467c67",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "0a76ec43aa219b17c31436fa97fde2e61a64b5c22493e4176889726cd63b6f9e",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/store/reports.rs": {
       "status": "unproved",
@@ -5672,13 +5727,18 @@
     },
     "components/studio/src/store/tasks.rs": {
       "status": "unproved",
-      "sha256": "0e05fa1c71457a5ff00452f739ebd8964247255e6dc24d0d0fee18b7f6eede05",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "fdbf86c87a174a773829472ab8c06a89d45bf4f8f5067e3bc9760e13d874807a",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/store/translation_runs.rs": {
       "status": "unproved",
       "sha256": "075ce8c9cf9a18ec990c308805f32e1cb704c43ec6a34f7f9ee82926ff7c33ae",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+    },
+    "components/studio/src/store/twin.rs": {
+      "status": "unproved",
+      "sha256": "4c2587ade98c1863245815ae1d00f3c00c66b7d03373f67989516b48c5c00f8f",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/store/work_items.rs": {
       "status": "unproved",
@@ -5697,8 +5757,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "422c7b403bde7701d270d63010cf4c8000c2e578f9319aa02e626ebd23df7daa",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "8b7dc1fa9639bd58eb5b3955f9b0917e08560a740b81f709d911b84f79f0db91",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "components/studio/src/types/events.rs": {
       "status": "unproved",
@@ -6497,8 +6557,8 @@
     },
     "extensions/apps/site-builder/design_agent/proposals.rs": {
       "status": "unproved",
-      "sha256": "74bff20bf79c3e9eae63af50152da0ec78c78796966f406196d31277cbbaa66d",
-      "review": "F29 typed request inputs: proof bindings unchanged"
+      "sha256": "a8c81fe0877487b367ed6fc50fab447c6e541ab13b848211edf00c21a9c5845d",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
@@ -7617,8 +7677,8 @@
     },
     "src/agent_host.rs": {
       "status": "unproved",
-      "sha256": "aef6d633f4776470f85b92fc7f3a191b106a33ba92bad01c472339c8c44f0870",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "34970f7f848b647f2ad9d8caa2d01e82750eb7cf49f4020e7a86b4c65ed38ca5",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
@@ -7632,8 +7692,8 @@
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "8b05bd654ede785ec7b04acd0f3d290fb45e4fc2102b6b1ae3b029ad484ad628",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "ad259c480a0215145f3ed4ee74e2c9c1360fb0d4bdee3304aedbe55aa7406266",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "src/agent_runs/controls.rs": {
       "status": "unproved",
@@ -7697,8 +7757,8 @@
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "e07fa6ec8017ce2da9cac70187782938c6cdc72c0991d6157b5d4696a2efc6e0",
-      "review": "F41 typed server and extension inputs: proof bindings unchanged"
+      "sha256": "ee69a136fda050421bcffd48dbb27578ef0e1f7baf34f9b0491ef712e12810fb",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
@@ -7737,8 +7797,8 @@
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "a25308b565928addbd68309f7614f901551909ee6480f4084395ad516f24704f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "4980feceab95822c3fa14d254b2283516ff7b8347dcbd6b6d64e7039df4309b5",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/apps/egress.rs": {
       "status": "unproved",
@@ -7822,8 +7882,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "2489299db79fff9752647505580f2184847b7424e197ee15019db93cb9892ac6",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "fb291764a7c70cf49f46a8a320d474577dac4dae67f4709b23cfeda56fe1a8a5",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
@@ -7847,13 +7907,13 @@
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "058195a1fe96afbfced9d49bba8a4c49178adee9805e1d807887d2753a30d8a3",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "291199937eee671b289bdabf58eee0940b21be9527f13124b8ddea825f65be16",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "5a5aae23559ff27a3d12b1766e83331cdcc0a56c0806ec97357460289e212c43",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "21da026c2c370f68a9306540b725c400c42ce6e084b82deb6da8cf689f7b9c2c",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -8202,8 +8262,8 @@
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "b40e96e55d80f582549bbeef58408703d78b38d417a5be80868b25930db51777",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "2ad9a5b9a43bd8bc6ca1b91dd1bbdbf5cb18d7ff62fe498afaa02d93c837b9cd",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/catalog/core_catalog.rs": {
       "status": "unproved",
@@ -8212,28 +8272,43 @@
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
-      "sha256": "241958410bc8eabcf6ee9e454e3739cccec92ffa2757faae88c3e5983c7ee916",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+      "sha256": "174790aae2705a2cb2d64edb5afd4ab923bdead58bff062b30b7bc65044622cf",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "c7944377df6d667456f4d2dde14050dc3eedb95bbdc946b5c7b5d3cfb8663688",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "b0686c2f0862f9f1583ab41b32f300b7ab472b26eabaca9b154505a5006ca076",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
+    "src/capabilities/facts.rs": {
+      "status": "unproved",
+      "sha256": "c594dd47e6e34ae0cdc2d434a8128d6ed47e9c9f5b015d0c37edd5e1adaac7d4",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
+    },
+    "src/capabilities/planner.rs": {
+      "status": "unproved",
+      "sha256": "ef6daccc662cf6a562c5f1ddc01c31c3cc71742e8ec25231583a4d63984d588c",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "67c2e2ade6dba3df9ce9a95d919d7c0d9aae2b73c2abb5fd99fe44fe880e8d09",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "c37575e75d0ee8016b9df1eba2f1abc12bbbdd2736f9367e9bfad395f8cdf244",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "c3aa1a81ac21bbc128f28786ddd5d800a821ba29842b0a9a03789828a4f1618e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "d0dd9a7ffa9d4e00b4dcf3f246c1610dda66e91b95309084c7844eb496df74ca",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
+    },
+    "src/capabilities/surfaces.rs": {
+      "status": "unproved",
+      "sha256": "7fb0591e14dd0ce3219b036c88efb06557b8304301f4d4f88fbcc4b18146941b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "4bb27b7d18f86f00dec11d5480a83b2ef9eaed5517f0c1d62f03cda40743ed18",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "8273bda84fca01d60755b5fb355db0fcdcf3ecc8a18745613c3bcdb78aa9d1b9",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
@@ -8892,8 +8967,8 @@
     },
     "src/migrations/schema.rs": {
       "status": "unproved",
-      "sha256": "78da8737f1e1c5b6724a0e68648f025109e249fb5a2e9e15b79616c9b6dfbe13",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "4a64d45c3af4fe1d6be6eb2ded5481f1322b791a1f070e769cd69b5487323a41",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "src/migrations.rs": {
       "status": "unproved",
@@ -9472,13 +9547,13 @@
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "319a14949d582c608190bce6d1c39a24b3cb03ea3736339e59042b3ad06636bf",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "6dd65fdab9665ea3fbb0967939eed5cd823d31db40d5e44fcaedbd2b40c7f44b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "8145b969cc1a74e211193150135c74d632b2e404a22d65e2a65268e59a67ab8e",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "c4d00affd4fa0973130554bdff955b9b6631a5a1317808843b7c306acea4d836",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
@@ -9492,18 +9567,18 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "5014e48e58c8c31e6b214c0ccdab87703adf6ab74c4525020a34248481474163",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "89bcd9e9670772155ef2bc6f3e7a37fce086f4142a89962f3845f82f9ea5c96b",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "f3e94503469046b1c9e1249d5e7dd4766b1d18c4bb0a3bfc4bf660a272d520bc",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "829625ec8dd893a6bfbc7d30c1f7f5205104f301de7ee8980af6235a7f7a383e",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
-      "sha256": "b4ae6071b46775524598820f7e2153fe25d5aed06fb801d112b9eb8fd23b8b07",
-      "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+      "sha256": "3336fbe80bd3e8857f8f0a3d45e11fba8bedfa2cae76df1152738fce3ab898e6",
+      "review": "Batch K typed operations graph: new OperationFacts vocabulary (core), native facts table, planner reads and UCP surfaces (protocols), flow action facts and admission via declared permissions (marketing), admission without App; no kernel policy or binding changed, adapters stay unproved"
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
@@ -9533,12 +9608,12 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "0f423f7ce087a374223389fd4c802d4c250ea25afb991d2f7a5c46f7887d2e33",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "89c58ab3f0350fd89ef5f9cf304ba40e309a7506a7e562db8c0fc4776ad0663d",
+      "review": "verify.yml: PR check of agent-evaluation formats and baseline; optional report-only real-model evaluation step after sealed coverage"
     },
     "Cargo.lock": {
-      "sha256": "c6f2337cb1b47fea52bc0f7cc71b1d6aa2db2318137960a60bf684123c2a2c8e",
-      "review": "Batch J SDKs: workspace gains the generated client crate sdks/rust (veyndo-sdk, workspace dependencies reqwest/serde/serde_json/tokio only); no change to extracted policies or bindings"
+      "sha256": "a19f43c120272aceb58cd55028bd9e9f75952ea216a19a678ed151392d3ec0b1",
+      "review": "Release merge of batches K and L: operation facts and planner (incl. app tool facts), simulate-then-apply and explanations, agent evaluation, app tool facts, ports and signed packages; no adapter claimed as proved"
     },
     "Cargo.toml": {
       "sha256": "4ef6ef6f830d7d30f18306e89ba348bcd3b7c9bade632ae631a1be31f9e082df",
@@ -9547,6 +9622,10 @@
     "components/apps/migrations/0001-baseline.sql": {
       "sha256": "541710e2a49ce3b34cf3d6b05ae94d19f50a53400030c633b4bcf7a432545496",
       "review": "Money refactor (2026-11-26): whole minor units (Minor/Money), exact decimals and rationals (Decimal/Ratio) and an integer binary64 emulation (Binary) for the Shopware calculator; new rules line_total (bound in Minor::times) and rounded_quotient (bound in Ratio::rounded via quotient), extractor gains saturating_mul, max and guarded division; quote-total theorems over line lists bound through amount_sum/net_amount in cart_quote, delivery, quote totals. Also records the domain inventory drift from the round-2 merge (order_patches, admin_order)."
+    },
+    "components/apps/migrations/0002-package-contracts.sql": {
+      "sha256": "931f2df00c97b6d2593e30a876c44c9fafa6c71cea82e02b9c3b6b328168ddee",
+      "review": "Batch L: package contracts, port wiring, sandbox view and rollback are unproved adapters around existing admission; reviewed source hashes"
     },
     "components/b2b/migrations/0001-baseline.sql": {
       "sha256": "49f76cbb456f844b8b219d95d3a14f4c8d4cbe5b5a06f39d9a58467ec15e58fb",

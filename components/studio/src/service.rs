@@ -5,6 +5,7 @@ pub mod imports;
 pub mod manual_orders;
 pub mod proposal_admission;
 pub mod proposal_apply;
+pub mod proposal_simulation;
 pub mod reports;
 pub mod staging;
 pub mod translation_worker;
