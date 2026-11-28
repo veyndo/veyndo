@@ -11,6 +11,7 @@ use veyndo_core::bad;
 use veyndo_core::conflict;
 use veyndo_core::document::{lenient, view};
 mod block_validation;
+mod brand_theme;
 mod context;
 pub mod design_agent;
 mod elements;
@@ -95,6 +96,8 @@ struct Theme {
     radius: Option<u8>,
     spacing: Option<u8>,
     columns: Option<u8>,
+    motion: Option<String>,
+    brand: Option<brand_theme::BrandTheme>,
 }
 pub fn normalize(v: &Value) -> Result<Value> {
     let mut next = v.clone();
@@ -154,6 +157,20 @@ pub fn validate(entity: &str, v: &Value) -> Result<()> {
         || theme.columns.is_some_and(|n| !(1..=4).contains(&n))
     {
         return Err(bad("Theme values exceed design bounds"));
+    }
+    if theme
+        .motion
+        .as_ref()
+        .is_some_and(|m| !brand_theme::MOTION.contains(&m.as_str()))
+    {
+        return Err(bad("Motion must be off, subtle or expressive"));
+    }
+    if let Some(brand) = &theme.brand {
+        // A brand themes the whole shop, so only home pages (global or channel) carry one.
+        if slug != "home" {
+            return Err(bad("Only the home page carries a brand theme"));
+        }
+        brand_theme::validate(brand)?;
     }
     Ok(())
 }
@@ -284,6 +301,25 @@ mod tests {
         v["theme"] = json!({});
         v["content"]["blocks"] = json!([{"id":"x","kind":"image","image":"javascript:alert(1)"}]);
         assert!(validate("pages", &v).is_err());
+    }
+    #[test]
+    fn brand_themes_and_motion_are_home_scoped_and_bounded() {
+        let fixture: Value =
+            serde_json::from_str(include_str!("tests/brand-theme-fixture.json")).unwrap();
+        let brand = fixture["vivid"].clone();
+        let mut v = json!({"slug":"home","content":{"blocks":[]},"theme":{"brand":brand,"motion":"expressive"}});
+        assert!(validate("pages", &v).is_ok());
+        v["theme"]["motion"] = json!("wild");
+        assert!(validate("pages", &v).is_err(), "unknown motion intensity");
+        v["theme"]["motion"] = json!(null);
+        v["slug"] = json!("about");
+        assert!(validate("pages", &v).is_err(), "brand only on home pages");
+        v["slug"] = json!("home");
+        v["theme"]["brand"]["colors"]["muted"] = v["theme"]["brand"]["colors"]["surface"].clone();
+        assert!(
+            validate("pages", &v).is_err(),
+            "contrast is enforced on save"
+        );
     }
     #[test]
     fn placed_parts_follow_their_generated_contract() {

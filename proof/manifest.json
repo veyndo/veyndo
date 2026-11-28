@@ -6545,6 +6545,11 @@
       "sha256": "b403c9871fac7f2cda4db0129bd8ba9994ec9d2276244cc2e4b48bd8ba64ec5c",
       "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
     },
+    "extensions/apps/site-builder/brand_theme.rs": {
+      "status": "unproved",
+      "sha256": "2e1ad66bf2359ed1f4bc353fb7b965e289b746afb7f1089683a4598aee28ee47",
+      "review": "m-brand: brand_theme.rs adds pure brand-theme validation (WCAG contrast, vetted fonts); covered by unit tests, not formally proved"
+    },
     "extensions/apps/site-builder/context.rs": {
       "status": "unproved",
       "sha256": "099e11495cc32ce83fcbf7cf804a37e0a3208b7043ebed305fd01cdc597f2efd",
@@ -6587,8 +6592,8 @@
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "3d7b38143bbf35c5e222f7bdaca9deac47fee28c65b69de1b7965eaf9425e804",
-      "review": "Phase 8 (2026-11-25): added reservation_admissible (bound in inventory InventoryLines::new) and order_transition_admissible (bound in orders order_workflow::admitted_edge), sequence theorems for order runs, payment ledger, refunds, captures and revisions, the domain proof inventory and the formal_differential suite. Also records the Batch H restructuring hashes of this branch (store/ports moves by the component sessions); no other extracted policy or binding call changed."
+      "sha256": "0b5705ac252822f4ccb30ae4faf5bab4bc57848f36fb64dbd7015e62d0f57c5b",
+      "review": "m-brand: brand_theme.rs adds pure brand-theme validation (WCAG contrast, vetted fonts); covered by unit tests, not formally proved"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",

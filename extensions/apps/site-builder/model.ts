@@ -2,6 +2,10 @@
 import type { LocalizedText } from "../../../frontend/src/shared/i18n/content-language";
 import type { RichBlock } from "../../../frontend/src/shared/content/RichDescription";
 import type { FormField } from "../../../frontend/src/shared/apps/form-contract";
+import type {
+  BrandTheme,
+  MotionIntensity,
+} from "../../../frontend/src/kit/tokens";
 export type { FormField };
 export type BlockKind =
   | "hero"
@@ -41,6 +45,10 @@ export type Theme = {
   radius?: number | null;
   spacing?: number | null;
   columns?: number | null;
+  /** Motion intensity of the shop; missing keeps the static storefront. */
+  motion?: MotionIntensity | null;
+  /** The brand token document; only home pages carry one, and it themes the whole shop. */
+  brand?: BrandTheme | null;
 };
 export type PageFields = {
   channel: string;
@@ -69,6 +77,8 @@ export const defaultTheme: Required<Theme> = {
   radius: 18,
   spacing: 40,
   columns: 3,
+  motion: null,
+  brand: null,
 };
 export const appPath = "/api/apps/site_builder/actions/";
 export function newBlock(

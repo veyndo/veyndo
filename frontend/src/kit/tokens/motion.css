@@ -1,0 +1,34 @@
+/* Motion primitives on the motion tokens: entrance, scroll reveal, hover lift and press. Intensity and reduced motion change only the tokens. */
+@keyframes vy-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--vy-motion-distance));
+  }
+}
+/* Entrance plays only in a shop that chose an intensity; others keep their static first paint. */
+[data-motion] .vy-enter {
+  animation: vy-enter var(--vy-motion-enter) var(--vy-motion-easing-enter) both;
+}
+[data-vy-reveal] {
+  transition:
+    opacity var(--vy-motion-reveal) var(--vy-motion-easing-enter),
+    transform var(--vy-motion-reveal) var(--vy-motion-easing-enter);
+}
+[data-vy-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(var(--vy-motion-distance));
+}
+.vy-lift {
+  transition:
+    transform var(--vy-motion-hover) var(--vy-motion-easing),
+    box-shadow var(--vy-motion-hover) var(--vy-motion-easing);
+}
+.vy-lift:hover {
+  transform: translateY(var(--vy-motion-lift));
+}
+.vy-press {
+  transition: transform var(--vy-motion-hover) var(--vy-motion-easing);
+}
+.vy-press:active:not(:disabled) {
+  transform: scale(var(--vy-motion-press));
+}

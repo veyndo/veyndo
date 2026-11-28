@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { injectKitStyles } from "./standalone-styles";
 import { partById } from "./parts";
 import { storefrontText } from "./storefront-i18n";
+import { safeThemeVariables } from "../tokens";
 
 /** The MCP Apps bridge version this view speaks. */
 export const bridgeVersion = "2026-01-26";
@@ -72,7 +73,13 @@ export function View({
           const context = (message.result.hostContext ?? {}) as {
             theme?: string;
             locale?: string;
+            styles?: { variables?: unknown };
           };
+          // The shop's brand tokens, so parts in the view match the storefront around it.
+          for (const [name, value] of Object.entries(
+            safeThemeVariables(context.styles?.variables),
+          ))
+            document.documentElement.style.setProperty(name, value);
           if (context.theme === "dark" || context.theme === "light")
             document.documentElement.dataset.theme = context.theme;
           if (context.locale) setLocale(context.locale);

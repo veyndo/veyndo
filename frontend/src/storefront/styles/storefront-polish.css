@@ -68,17 +68,17 @@
   border-radius: 30px;
   min-height: 52px;
   transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+    transform var(--vy-motion-hover) var(--vy-motion-easing),
+    box-shadow var(--vy-motion-hover) var(--vy-motion-easing);
 }
 .shop-primary:hover {
   box-shadow: 0 5px 18px
     color-mix(in srgb, var(--vy-color-accent) 15%, transparent);
-  transform: translateY(-2px);
+  transform: translateY(var(--vy-motion-lift));
 }
 .shop-primary:active,
 .shop-secondary:active {
-  transform: scale(0.98);
+  transform: scale(var(--vy-motion-press));
 }
 .shop button:disabled {
   transform: none;
@@ -88,7 +88,7 @@
   padding-top: 56px;
 }
 .shop-hero h1 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--vy-font-heading);
   font-weight: 400;
   font-size: clamp(44px, 5.3vw, 76px);
   line-height: 1.08;
@@ -179,7 +179,7 @@
   object-fit: cover;
 }
 .pdp-purchase .vy-sf-summary-body h1 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--vy-font-heading);
   font-weight: 400;
   font-size: clamp(32px, 3vw, 48px);
 }

@@ -19,6 +19,14 @@ private. Existing staging diff/release publishes selected app packages and recor
 `usePageProducts.ts` resolves explicit selections outside the first catalogue page
 in native bounded batches; it does not price products or retain a separate catalogue.
 
+A home page's `theme` may carry `brand`, the typed brand token document derived in
+Studio (see `docs/branding.md#shop-brand-themes`), and `motion` (`off`, `subtle`,
+`expressive`). `brand_theme.rs` validates the document on every save, whoever wrote it
+(Studio, API, MCP or an agent proposal): canonical colours, a vetted font pairing,
+known scales, bounded sources and every WCAG AA contrast pair. Brand themes live only
+on home pages; `Renderer.tsx` turns them into `--vy-*` overrides on the shop root, so
+native storefront parts, kit parts and native app surfaces follow them.
+
 Forms use the host's public form-block contract. The forms app owns intake and its
 private inbox. The original private Storyfront editor remains a different app.
 

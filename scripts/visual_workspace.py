@@ -53,6 +53,8 @@ try:
  verify_setup(call,account,headers,mcp)
  from testing.site_release import verify as verify_site_release
  verify_site_release(call,account,headers)
+ from testing.brand_theme_release import verify as verify_brand_theme
+ verify_brand_theme(call,account,headers)
  a=account('visual'); other=account('foreign-visual'); ah=headers(a); bh=headers(other)
  empty=call('/api/studio/workspace',h=ah);assert empty['revision']==0
  layout={'active':'area_1','areas':[{'id':'area_1','name':'Content','cards':['productData','design'],'pins':[{'title':'Native product work','tab':'productData','query':'{}','components':['records','details','intake']}]}],'goals':[]}
