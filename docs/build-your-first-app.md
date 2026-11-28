@@ -71,7 +71,7 @@ git clone --depth 1 https://github.com/veyndo/veyndo.git
 cp -R veyndo/templates/product-badge my-badge
 ```
 
-The [`veyndo` CLI](https://www.veyndo.ai/docs/cli.html) offers a second set of starting
+The [`veyndo` CLI](cli.md) offers a second set of starting
 points, the App Studio patterns, and deploys them through the native package review
 and install path: `veyndo app new advisor|returns|erp|edi|furniture <dir>`, then
 `veyndo app deploy`. It does not scaffold the four templates above yet.
