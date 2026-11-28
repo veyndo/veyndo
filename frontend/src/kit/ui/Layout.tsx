@@ -1,6 +1,7 @@
 /** Layout atoms: cards and stacks whose spacing comes only from the token scale. */
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
 import type { SpaceToken } from "../tokens";
+import type { CardDocumentProps, StackDocumentProps } from "./props.generated";
 
 export function Stack({
   gap = "3",
@@ -13,8 +14,8 @@ export function Stack({
   ...rest
 }: HTMLAttributes<HTMLElement> & {
   gap?: SpaceToken;
-  direction?: "row" | "column";
-  align?: "start" | "center" | "end" | "stretch";
+  direction?: StackDocumentProps["direction"];
+  align?: StackDocumentProps["align"];
   wrap?: boolean;
   as?: ElementType;
   children?: ReactNode;
@@ -46,7 +47,7 @@ export function Card({
   actions?: ReactNode;
   children?: ReactNode;
   /** Heading level of the title, so the card fits the page outline. */
-  level?: 2 | 3 | 4;
+  level?: CardDocumentProps["level"];
   as?: ElementType;
 }) {
   const Heading = `h${level}` as const;

@@ -9,6 +9,7 @@ mod auth;
 mod b2b;
 mod bootstrap;
 mod brand_redirect;
+mod browser_reads;
 mod capabilities;
 mod cart_mutation;
 mod cart_price;

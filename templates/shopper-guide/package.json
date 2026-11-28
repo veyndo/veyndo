@@ -1,0 +1,15 @@
+{
+  "name": "shopper-guide",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A product guide that shopping assistants show as an interactive view, with a private merchant view.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "node scripts/deploy-sandbox.mjs",
+    "deploy:dry-run": "node scripts/deploy-sandbox.mjs --dry-run"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

@@ -1,0 +1,415 @@
+{
+  "id": "shopper_guide",
+  "version": "0.1.0",
+  "coreApi": "1",
+  "runtime": "declarative",
+  "name": {
+    "en": "Shopper guide",
+    "de": "Einkaufsberater",
+    "es": "Guía de compra",
+    "fr": "Guide d’achat"
+  },
+  "category": "design",
+  "permissions": [
+    "data.read",
+    "data.write",
+    "admin.slot",
+    "storefront.slot"
+  ],
+  "entities": [
+    {
+      "name": "entries",
+      "label": {
+        "en": "Product care",
+        "de": "Produktpflege",
+        "fr": "Entretien des produits",
+        "es": "Cuidado de productos"
+      },
+      "publicRead": true,
+      "fields": [
+        {
+          "name": "product_id",
+          "label": {
+            "en": "Product",
+            "de": "Produkt",
+            "fr": "Produit",
+            "es": "Producto"
+          },
+          "kind": "string",
+          "required": true,
+          "indexed": true,
+          "coreReference": "product"
+        },
+        {
+          "name": "title",
+          "label": {
+            "en": "Title",
+            "de": "Titel",
+            "fr": "Titre",
+            "es": "Título"
+          },
+          "kind": "string",
+          "translatable": true,
+          "required": true
+        },
+        {
+          "name": "body",
+          "label": {
+            "en": "Content",
+            "de": "Inhalt",
+            "fr": "Contenu",
+            "es": "Contenido"
+          },
+          "kind": "string",
+          "translatable": true
+        },
+        {
+          "name": "segment",
+          "indexed": true,
+          "label": {
+            "en": "Care type",
+            "de": "Pflegeart",
+            "fr": "Type d’entretien",
+            "es": "Tipo de cuidado"
+          },
+          "kind": "string",
+          "choices": [
+            {
+              "value": "standard",
+              "label": {
+                "en": "Everyday care",
+                "de": "Alltagspflege",
+                "fr": "Entretien courant",
+                "es": "Cuidado habitual"
+              }
+            },
+            {
+              "value": "priority",
+              "label": {
+                "en": "Special care",
+                "de": "Besondere Pflege",
+                "fr": "Entretien particulier",
+                "es": "Cuidado especial"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "merchandising",
+      "label": {
+        "en": "Private merchandising notes",
+        "de": "Private Sortimentsnotizen",
+        "fr": "Notes privées de merchandising",
+        "es": "Notas privadas de comercialización"
+      },
+      "publicRead": false,
+      "fields": [
+        {
+          "name": "product_id",
+          "label": {
+            "en": "Product",
+            "de": "Produkt",
+            "fr": "Produit",
+            "es": "Producto"
+          },
+          "kind": "string",
+          "required": true,
+          "indexed": true,
+          "coreReference": "product"
+        },
+        {
+          "name": "title",
+          "label": {
+            "en": "Title",
+            "de": "Titel",
+            "fr": "Titre",
+            "es": "Título"
+          },
+          "kind": "string",
+          "translatable": true,
+          "required": true
+        },
+        {
+          "name": "body",
+          "label": {
+            "en": "Content",
+            "de": "Inhalt",
+            "fr": "Contenu",
+            "es": "Contenido"
+          },
+          "kind": "string",
+          "translatable": true
+        },
+        {
+          "name": "segment",
+          "indexed": true,
+          "label": {
+            "en": "Priority",
+            "de": "Priorität",
+            "fr": "Priorité",
+            "es": "Prioridad"
+          },
+          "kind": "string",
+          "choices": [
+            {
+              "value": "standard",
+              "label": {
+                "en": "Standard",
+                "de": "Standard",
+                "fr": "Standard",
+                "es": "Estándar"
+              }
+            },
+            {
+              "value": "priority",
+              "label": {
+                "en": "Priority",
+                "de": "Priorität",
+                "fr": "Priorité",
+                "es": "Prioridad"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "workspace",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "editor",
+          "kind": "form",
+          "title": {
+            "en": "Edit product care",
+            "de": "Produktpflege bearbeiten",
+            "fr": "Modifier les conseils d’entretien",
+            "es": "Editar cuidado del producto"
+          },
+          "entity": "entries",
+          "readAction": "list_entries",
+          "writeAction": "save_entries",
+          "contextBinding": {
+            "field": "product_id",
+            "key": "productId"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shopper",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "content",
+          "kind": "cards",
+          "title": {
+            "en": "Care instructions",
+            "de": "Pflegehinweise",
+            "fr": "Conseils d’entretien",
+            "es": "Instrucciones de cuidado"
+          },
+          "entity": "entries",
+          "readAction": "list_entries",
+          "writeAction": null
+        }
+      ]
+    },
+    {
+      "id": "merchant_results",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "entries",
+          "kind": "table",
+          "title": {
+            "en": "Product notes",
+            "de": "Notizen zum Sortiment",
+            "fr": "Notes sur les produits",
+            "es": "Notas de producto"
+          },
+          "entity": "merchandising",
+          "readAction": "list_merchant_entries"
+        }
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "workspace",
+      "location": "admin.product.tab",
+      "label": {
+        "en": "Product care",
+        "de": "Produktpflege",
+        "fr": "Entretien des produits",
+        "es": "Cuidado de productos"
+      },
+      "uiPath": "native/workspace",
+      "actions": [
+        "list_entries",
+        "save_entries"
+      ],
+      "permission": "catalog.read"
+    },
+    {
+      "id": "shopper",
+      "location": "storefront.assistant",
+      "label": {
+        "en": "Product guide",
+        "de": "Produktratgeber",
+        "fr": "Guide produit",
+        "es": "Guía de productos"
+      },
+      "uiPath": "native/shopper",
+      "actions": [
+        "list_entries"
+      ]
+    },
+    {
+      "id": "merchant_results",
+      "location": "admin.assistant",
+      "label": {
+        "en": "Merchandising notes",
+        "de": "Sortimentsnotizen",
+        "fr": "Notes de merchandising",
+        "es": "Notas de comercialización"
+      },
+      "uiPath": "native/merchant_results",
+      "actions": [
+        "list_merchant_entries"
+      ],
+      "permission": "apps.read"
+    }
+  ],
+  "apiRoutes": [
+    {
+      "path": "list_entries",
+      "method": "GET",
+      "scope": "storefront",
+      "action": "list_entries"
+    }
+  ],
+  "intelligence": {
+    "description": {
+      "en": "Public product care and separate private merchandising notes.",
+      "de": "Öffentliche Produktpflege und getrennte private Sortimentsnotizen.",
+      "fr": "Conseils d’entretien publics et notes privées de merchandising distinctes.",
+      "es": "Cuidado público de productos y notas privadas de comercialización separadas."
+    },
+    "tools": [],
+    "entities": []
+  },
+  "actions": [
+    {
+      "name": "list_entries",
+      "description": "Find product guide entries with care and use advice.",
+      "handler": "list",
+      "entity": "entries",
+      "public": true,
+      "readOnly": true,
+      "mcp": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "after": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "save_entries",
+      "description": "Save entries",
+      "handler": "save",
+      "entity": "entries",
+      "public": false,
+      "flowAllowed": true,
+      "permission": "catalog.write",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_merchant_entries",
+      "description": "Read the merchant merchandising guide entries.",
+      "handler": "list",
+      "entity": "merchandising",
+      "public": false,
+      "readOnly": true,
+      "mcp": true,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "after": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      },
+      "permission": "apps.read"
+    },
+    {
+      "name": "save_merchant_entry",
+      "description": "Save private merchandising notes.",
+      "handler": "save",
+      "entity": "merchandising",
+      "public": false,
+      "flowAllowed": true,
+      "permission": "apps.manage",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

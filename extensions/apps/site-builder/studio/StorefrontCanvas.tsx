@@ -227,6 +227,7 @@ export default function StorefrontCanvas({
                 <div
                   className="shop"
                   data-designed={appearance ? "true" : undefined}
+                  data-motion={appearance?.motion ?? undefined}
                   style={appearance ? themeStyle(appearance) : undefined}
                   onClickCapture={(event) => {
                     const el = event.target as Element;

@@ -24,7 +24,7 @@ export default function HomeHero({
   const hero =
     products.find((p) => p.id === (fashion ? "coat" : "chair")) ?? products[0];
   return (
-    <section className="shop-hero">
+    <section className="shop-hero vy-enter">
       <div>
         <p className="shop-kicker">
           {brandKicker(

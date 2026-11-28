@@ -41,6 +41,8 @@ import "../styles/storefront-polish.css";
 import "../styles/experience-polish.css";
 import ChannelPreview, { channelPreview } from "./ChannelPreview";
 import { ShopBrandProvider } from "../../shared/content/shop-brand";
+import { useEffect, useRef } from "react";
+import { observeReveal, playPageEnter } from "../../kit/tokens";
 export default function Storefront(props: { onMerchant: () => void }) {
   const c = useStorefrontController(props);
   const returnedAttempt = paymentReturnAttempt(location.hash);
@@ -67,6 +69,16 @@ export default function Storefront(props: { onMerchant: () => void }) {
     selection,
     buy,
   } = c;
+  // Motion language: reveal marked sections on scroll, and enter each route with the shop's page transition.
+  const shop = useRef<HTMLDivElement>(null);
+  useEffect(() => (shop.current ? observeReveal(shop.current) : undefined), []);
+  const route = `${appPath}:${id ?? ""}`;
+  const shown = useRef(route);
+  useEffect(() => {
+    if (shown.current === route || !shop.current) return;
+    shown.current = route;
+    playPageEnter(shop.current);
+  }, [route]);
   return (
     <CurrencyContext.Provider value={cart?.price.currency ?? "EUR"}>
       <StorefrontContext.Provider value={c}>
@@ -80,7 +92,7 @@ export default function Storefront(props: { onMerchant: () => void }) {
               scopeKey={`${shopTenant}:${salesChannel}`}
             >
               <PublishedSite>
-                <div className="shop">
+                <div className="shop" ref={shop}>
                   <ChannelPreview />
                   <BehaviorAnalytics
                     shop={shopTenant}

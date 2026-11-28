@@ -1,0 +1,25 @@
+[package]
+name = "veyndo-cli"
+version = "0.1.0"
+edition = "2024"
+license-file = "../../LICENSE"
+description = "veyndo: command-line client for merchants and developers, built on the generated Rust SDK"
+publish = false
+
+# Its own workspace: the executable is named `veyndo`, like the server binary of the root
+# workspace, so the two must never share a target directory or a `cargo build --workspace`.
+[workspace]
+
+[[bin]]
+name = "veyndo"
+path = "src/main.rs"
+
+[dependencies]
+veyndo-sdk = { path = "../rust" }
+clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }
+clap_complete = "4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt", "macros", "time"] }
+sha2 = "0.10"
+rpassword = "7.5"

@@ -1,8 +1,10 @@
-/** MCP App view (`ui://veyndo/kit/storefront`): renders kit parts from a commerce tool result inside the host sandbox. */
+/** MCP App view (`ui://veyndo/kit/storefront`): the bridge and the part payloads of commerce tool results; kit/catalog adds documents. */
 import { createRoot } from "react-dom/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { injectKitStyles } from "./standalone-styles";
-import { partById, storefrontText } from "./index";
+import { partById } from "./parts";
+import { storefrontText } from "./storefront-i18n";
+import { safeThemeVariables } from "../tokens";
 
 /** The MCP Apps bridge version this view speaks. */
 export const bridgeVersion = "2026-01-26";
@@ -42,15 +44,27 @@ export function payloadProps(payload: Payload | undefined) {
 const linkable = (url: unknown): url is string =>
   typeof url === "string" && url.startsWith("https://");
 
+/**
+ * Renders other payloads of a tool result's `_meta` (the catalog's documents); `null`
+ * leaves the result to the part payload. Supplied by a higher kit layer.
+ */
+export type RenderMeta = (
+  meta: Record<string, unknown>,
+  context: { locale: string; open: (url: unknown) => void },
+) => ReactNode | null;
+
 export function View({
   send,
   subscribe,
+  renderMeta,
 }: {
   send: (message: Message) => void;
   subscribe: (listener: (message: Message) => void) => () => void;
+  renderMeta?: RenderMeta;
 }) {
   const [locale, setLocale] = useState(navigator.language || "en-GB");
   const [payload, setPayload] = useState<Payload>();
+  const [meta, setMeta] = useState<Record<string, unknown>>({});
   const [received, setReceived] = useState(false);
   useEffect(
     () =>
@@ -59,7 +73,13 @@ export function View({
           const context = (message.result.hostContext ?? {}) as {
             theme?: string;
             locale?: string;
+            styles?: { variables?: unknown };
           };
+          // The shop's brand tokens, so parts in the view match the storefront around it.
+          for (const [name, value] of Object.entries(
+            safeThemeVariables(context.styles?.variables),
+          ))
+            document.documentElement.style.setProperty(name, value);
           if (context.theme === "dark" || context.theme === "light")
             document.documentElement.dataset.theme = context.theme;
           if (context.locale) setLocale(context.locale);
@@ -73,6 +93,7 @@ export function View({
         if (message.method === "ui/notifications/tool-result") {
           const meta = (message.params?._meta ?? {}) as Record<string, unknown>;
           setPayload(meta[partKey] as Payload | undefined);
+          setMeta(meta);
           setReceived(true);
         }
         if (
@@ -85,8 +106,6 @@ export function View({
   );
   const t = storefrontText(payload?.locale ?? locale);
   const { part, props } = payloadProps(payload);
-  if (!part || !props.length)
-    return <p role="status">{t(received ? "unavailable" : "waiting")}</p>;
   const open = (url: unknown) => {
     if (linkable(url))
       send({
@@ -95,6 +114,10 @@ export function View({
         params: { url },
       });
   };
+  const other = received ? renderMeta?.(meta, { locale, open }) : null;
+  if (other) return <>{other}</>;
+  if (!part || !props.length)
+    return <p role="status">{t(received ? "unavailable" : "waiting")}</p>;
   const Component = part.Component;
   return (
     <div className={props.length > 1 ? "vy-sf-grid" : undefined}>
@@ -144,11 +167,16 @@ export function channel(target: Window, source: Window = window) {
 }
 
 /** Starts the view in this document and announces it to the host. */
-export function start(target: Window = window.parent) {
-  injectKitStyles();
+export function start(
+  target: Window = window.parent,
+  options: { renderMeta?: RenderMeta; injectStyles?: () => void } = {},
+) {
+  (options.injectStyles ?? injectKitStyles)();
   const { send, subscribe } = channel(target);
   const root = document.getElementById("root")!;
-  createRoot(root).render(<View send={send} subscribe={subscribe} />);
+  createRoot(root).render(
+    <View send={send} subscribe={subscribe} renderMeta={options.renderMeta} />,
+  );
   new ResizeObserver(() =>
     send({
       method: "ui/notifications/size-changed",

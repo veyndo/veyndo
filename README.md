@@ -15,7 +15,7 @@ One core decides price, stock and order.
 [![Working prototype](https://img.shields.io/badge/status-working_prototype-189EFF)](docs/status.md)
 [![Sustainable Use License](https://img.shields.io/badge/license-Sustainable_Use-189EFF)](LICENSE)
 
-[**Create a shop**](https://start.veyndo.ai/start) · [Website](https://www.veyndo.ai/) · [Start here](docs/start-here.md) · [Handbook](https://www.veyndo.ai/docs/) · [Watch the tour](docs/video-tours.md) · [Deutsch](docs/platform-overview.md)
+[**Create a shop**](https://start.veyndo.ai/start) · [Website](https://www.veyndo.ai/) · [Start here](docs/start-here.md) · [Build your first app](docs/build-your-first-app.md) · [API reference](docs/reference/README.md) · [Handbook](https://www.veyndo.ai/docs/) · [Watch the tour](docs/video-tours.md) · [Deutsch](docs/platform-overview.md)
 
 </div>
 

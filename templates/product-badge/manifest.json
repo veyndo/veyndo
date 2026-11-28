@@ -1,0 +1,400 @@
+{
+  "id": "product_badge",
+  "version": "0.1.0",
+  "coreApi": "1",
+  "runtime": "declarative",
+  "name": {
+    "en": "Product badge",
+    "de": "Produkt-Badge",
+    "es": "Distintivo de producto",
+    "fr": "Badge produit"
+  },
+  "category": "design",
+  "permissions": [
+    "data.read",
+    "data.write",
+    "admin.slot",
+    "storefront.slot"
+  ],
+  "entities": [
+    {
+      "name": "badges",
+      "label": {
+        "en": "Product badges",
+        "de": "Produkt-Badges",
+        "es": "Distintivos de producto",
+        "fr": "Badges produit"
+      },
+      "publicRead": true,
+      "fields": [
+        {
+          "name": "product_id",
+          "label": {
+            "en": "Product",
+            "de": "Produkt",
+            "es": "Producto",
+            "fr": "Produit"
+          },
+          "kind": "string",
+          "required": true,
+          "indexed": true,
+          "coreReference": "product"
+        },
+        {
+          "name": "label",
+          "label": {
+            "en": "Badge text",
+            "de": "Badge-Text",
+            "es": "Texto del distintivo",
+            "fr": "Texte du badge"
+          },
+          "kind": "string",
+          "translatable": true,
+          "required": true
+        },
+        {
+          "name": "tone",
+          "indexed": true,
+          "label": {
+            "en": "Style",
+            "de": "Stil",
+            "es": "Estilo",
+            "fr": "Style"
+          },
+          "kind": "string",
+          "choices": [
+            {
+              "value": "new",
+              "label": {
+                "en": "New",
+                "de": "Neu",
+                "es": "Nuevo",
+                "fr": "Nouveau"
+              }
+            },
+            {
+              "value": "sale",
+              "label": {
+                "en": "Sale",
+                "de": "Angebot",
+                "es": "Oferta",
+                "fr": "Promotion"
+              }
+            },
+            {
+              "value": "eco",
+              "label": {
+                "en": "Sustainable",
+                "de": "Nachhaltig",
+                "es": "Sostenible",
+                "fr": "Durable"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "label": {
+        "en": "Badge settings",
+        "de": "Badge-Einstellungen",
+        "es": "Ajustes de distintivos",
+        "fr": "Réglages des badges"
+      },
+      "publicRead": false,
+      "fields": [
+        {
+          "name": "default_tone",
+          "label": {
+            "en": "Default style",
+            "de": "Standardstil",
+            "es": "Estilo predeterminado",
+            "fr": "Style par défaut"
+          },
+          "kind": "string",
+          "choices": [
+            {
+              "value": "new",
+              "label": {
+                "en": "New",
+                "de": "Neu",
+                "es": "Nuevo",
+                "fr": "Nouveau"
+              }
+            },
+            {
+              "value": "sale",
+              "label": {
+                "en": "Sale",
+                "de": "Angebot",
+                "es": "Oferta",
+                "fr": "Promotion"
+              }
+            },
+            {
+              "value": "eco",
+              "label": {
+                "en": "Sustainable",
+                "de": "Nachhaltig",
+                "es": "Sostenible",
+                "fr": "Durable"
+              }
+            }
+          ]
+        },
+        {
+          "name": "show_on_storefront",
+          "label": {
+            "en": "Show badges in the storefront",
+            "de": "Badges im Storefront zeigen",
+            "es": "Mostrar distintivos en la tienda",
+            "fr": "Afficher les badges en boutique"
+          },
+          "kind": "boolean"
+        }
+      ]
+    }
+  ],
+  "slots": [],
+  "views": [
+    {
+      "id": "workspace",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "editor",
+          "kind": "form",
+          "title": {
+            "en": "Badge for this product",
+            "de": "Badge für dieses Produkt",
+            "es": "Distintivo para este producto",
+            "fr": "Badge pour ce produit"
+          },
+          "entity": "badges",
+          "readAction": "list_badges",
+          "writeAction": "save_badges",
+          "contextBinding": {
+            "field": "product_id",
+            "key": "productId"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shopper",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "badge",
+          "kind": "cards",
+          "title": {
+            "en": "Highlights",
+            "de": "Highlights",
+            "es": "Destacados",
+            "fr": "Points forts"
+          },
+          "entity": "badges",
+          "readAction": "list_badges",
+          "writeAction": null,
+          "contextBinding": {
+            "field": "product_id",
+            "key": "productId"
+          }
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "settings",
+          "kind": "form",
+          "title": {
+            "en": "Badge settings",
+            "de": "Badge-Einstellungen",
+            "es": "Ajustes de distintivos",
+            "fr": "Réglages des badges"
+          },
+          "entity": "settings",
+          "readAction": "list_settings",
+          "writeAction": "save_settings"
+        }
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "workspace",
+      "location": "admin.product.tab",
+      "label": {
+        "en": "Badge",
+        "de": "Badge",
+        "es": "Distintivo",
+        "fr": "Badge"
+      },
+      "uiPath": "native/workspace",
+      "actions": [
+        "list_badges",
+        "save_badges"
+      ],
+      "permission": "catalog.read"
+    },
+    {
+      "id": "shopper",
+      "location": "product.detail",
+      "label": {
+        "en": "Product badge",
+        "de": "Produkt-Badge",
+        "es": "Distintivo de producto",
+        "fr": "Badge produit"
+      },
+      "uiPath": "native/shopper",
+      "actions": [
+        "list_badges"
+      ]
+    },
+    {
+      "id": "settings",
+      "location": "admin.navigation",
+      "label": {
+        "en": "Badge settings",
+        "de": "Badge-Einstellungen",
+        "es": "Ajustes de distintivos",
+        "fr": "Réglages des badges"
+      },
+      "uiPath": "native/settings",
+      "actions": [
+        "list_settings",
+        "save_settings"
+      ],
+      "permission": "catalog.read"
+    }
+  ],
+  "apiRoutes": [
+    {
+      "path": "badges",
+      "method": "GET",
+      "scope": "storefront",
+      "action": "list_badges"
+    }
+  ],
+  "intelligence": {
+    "description": {
+      "en": "Short badges such as New or Sale on product pages",
+      "de": "Kurze Badges wie Neu oder Angebot auf Produktseiten",
+      "es": "Distintivos breves como Nuevo u Oferta en las páginas de producto",
+      "fr": "Badges courts comme Nouveau ou Promotion sur les fiches produit"
+    },
+    "tools": [],
+    "entities": []
+  },
+  "actions": [
+    {
+      "name": "list_badges",
+      "description": "List product badges",
+      "handler": "list",
+      "entity": "badges",
+      "public": true,
+      "readOnly": true,
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "after": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "save_badges",
+      "description": "Save a product badge",
+      "handler": "save",
+      "entity": "badges",
+      "public": false,
+      "permission": "catalog.write",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_settings",
+      "description": "Read badge settings",
+      "handler": "list",
+      "entity": "settings",
+      "public": false,
+      "readOnly": true,
+      "permission": "catalog.read",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "after": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "save_settings",
+      "description": "Change badge settings",
+      "handler": "save",
+      "entity": "settings",
+      "public": false,
+      "permission": "catalog.write",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

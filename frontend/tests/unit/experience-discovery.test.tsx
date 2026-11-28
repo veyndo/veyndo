@@ -104,9 +104,10 @@ it("submits an explicit request with tenant and checkout context, then shows ser
   expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({
     request: "A reading light under 100 EUR",
   });
-  expect(
-    screen.getByRole("link", { name: "View product: Unit lamp" }),
-  ).toHaveAttribute("href", expect.stringContaining(`/products/${product.id}`));
+  expect(screen.getAllByRole("link", { name: "Unit lamp" })[0]).toHaveAttribute(
+    "href",
+    expect.stringContaining(`/products/${product.id}`),
+  );
 });
 function RoutedShop() {
   const c = useStorefrontController({ onMerchant: vi.fn() });

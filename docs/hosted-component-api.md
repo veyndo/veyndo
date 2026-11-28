@@ -34,7 +34,11 @@ integrations** and set it as a bearer credential in your backend.
 | UCP discovery | `/.well-known/ucp` | Explicit shop and eligible sales channel |
 
 From a custom browser frontend, call Veyndo through your own backend or
-same-origin proxy. Keep integration keys and privileged service credentials on
+same-origin proxy. The exception is a short list of anonymous catalog and
+discovery reads ([`contracts/browser-reads.json`](../contracts/browser-reads.json)),
+which any origin may call without credentials; they power the **Try it**
+panels of the [API reference](reference/README.md). Cart, buyer and merchant
+calls, and `POST /mcp`, stay on your server. Keep integration keys and privileged service credentials on
 the server. With SDK 0.4.18, `shop.account.token` handles registration,
 sign-in, password changes and sign-out. Sign-in returns the existing cart
 with a new cart token. Store that token and the buyer token in your own

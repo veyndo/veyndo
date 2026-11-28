@@ -28,7 +28,6 @@ import {
   TextArea,
   TextInput,
   VisuallyHidden,
-  catalogue,
   focusables,
   rovingIndex,
   useControllable,
@@ -36,6 +35,7 @@ import {
 import { color, radius, space, tokens } from "../../src/kit/tokens";
 import UICatalogue from "../../../components/apps/ui/admin/developer/catalogue/UICatalogue";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
+import { entries } from "../../src/kit/catalog";
 
 describe("primitives", () => {
   it("moves a roving index with wrapping, Home/End and disabled items skipped", () => {
@@ -400,35 +400,26 @@ describe("tokens and catalogue", () => {
     );
   });
 
-  it("lists every public component and primitive in the catalogue", () => {
-    const exported = Object.keys(ui)
-      .filter((name) => name !== "catalogue")
-      .sort();
-    expect(catalogue.map((entry) => entry.name).sort()).toEqual(exported);
+  it("declares every public component in the component catalog", () => {
+    const components = Object.keys(ui).filter((name) => /^[A-Z]/.test(name));
+    const declared = entries.map((entry) => entry.name);
+    expect(components.filter((name) => !declared.includes(name))).toEqual([]);
   });
 
-  it("renders the catalogue page in both themes", () => {
+  it("renders the gallery page in both themes", () => {
     render(
       <LocaleProvider>
         <UICatalogue />
       </LocaleProvider>,
     );
     expect(
-      screen.getByRole("heading", { level: 1, name: "Component catalogue" }),
+      screen.getByRole("heading", { level: 1, name: "Component gallery" }),
     ).toBeInTheDocument();
-    const themes = document.querySelectorAll(".ui-catalogue-theme");
-    expect([...themes].map((e) => e.getAttribute("data-theme"))).toEqual([
-      "light",
-      "dark",
-    ]);
-    fireEvent.click(screen.getAllByRole("button", { name: "Open dialog" })[1]);
-    const dialog = screen.getByRole("dialog", { name: "Delete this product?" });
-    expect(themes[1].contains(dialog)).toBe(true);
-    fireEvent.click(screen.getAllByRole("button", { name: "Delete" }).at(-1)!);
-    expect(screen.queryByRole("dialog")).toBeNull();
-    expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(
-      catalogue.length,
-    );
+    const frames = document.querySelectorAll("[data-gallery-example]");
+    expect(
+      new Set([...frames].map((e) => e.getAttribute("data-theme"))),
+    ).toEqual(new Set(["light", "dark"]));
+    expect(document.querySelectorAll("[data-refusal]")).toHaveLength(0);
   });
 });
 

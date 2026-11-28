@@ -1,0 +1,17 @@
+{
+  "description": "Anonymous Store API reads a browser on any origin may call (CORS). The server (src/browser_reads.rs) admits exactly these method/path templates, only without credentials, cart or buyer tokens and cookies, and only with the request headers listed here. The handbook's Try-it panels (scripts/api_reference.py) execute exactly these operations; every entry must exist in contracts/http as a public route. MCP is not listed: POST /mcp keeps its own origin policy.",
+  "headers": ["accept", "content-type", "x-tenant", "sw-sales-channel-id"],
+  "reads": [
+    {"method": "GET", "path": "/health"},
+    {"method": "GET", "path": "/.well-known/ucp"},
+    {"method": "GET", "path": "/store-api/context"},
+    {"method": "GET", "path": "/store-api/navigation"},
+    {"method": "POST", "path": "/store-api/product", "body": {"limit": 3}},
+    {"method": "GET", "path": "/store-api/product/{id}"},
+    {"method": "GET", "path": "/store-api/product/{id}/facts"},
+    {"method": "GET", "path": "/store-api/countries"},
+    {"method": "GET", "path": "/store-api/currencies"},
+    {"method": "GET", "path": "/store-api/legal"},
+    {"method": "GET", "path": "/store-api/apps/surfaces"}
+  ]
+}

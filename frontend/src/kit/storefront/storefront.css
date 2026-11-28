@@ -612,3 +612,20 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: var(--vy-space-4);
 }
+/* Motion: parts follow the shop's motion tokens; intensity off and reduced motion set them to zero. */
+.vy-sf-card {
+  transition:
+    transform var(--vy-motion-hover) var(--vy-motion-easing),
+    box-shadow var(--vy-motion-hover) var(--vy-motion-easing);
+}
+[data-motion] .vy-sf-card:hover {
+  transform: translateY(var(--vy-motion-lift));
+}
+.vy-sf-card button,
+.vy-sf-summary button {
+  transition: transform var(--vy-motion-hover) var(--vy-motion-easing);
+}
+.vy-sf-card button:active:not(:disabled),
+.vy-sf-summary button:active:not(:disabled) {
+  transform: scale(var(--vy-motion-press));
+}

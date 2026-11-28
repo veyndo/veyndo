@@ -76,3 +76,10 @@ if (document.querySelector('pre > code.language-mermaid')) {
     .then(() => { if (copy && navigation) translate(); })
     .catch(() => { /* Original readable diagram sources remain available. */ });
 }
+// API reference pages load Try-it panels and example tabs; examples stay readable without script.
+if (document.querySelector('.docs-try, .docs-try-config, .docs-examples')) {
+  import(new URL('docs-try.js', assets).href)
+    .then(module => module.renderTry(assets, docsRoot, (key, fallback) => copy?.[locale]?.[key] || copy?.en?.[key] || fallback))
+    .then(() => { if (copy && navigation) translate(); })
+    .catch(() => { /* Static examples and requests remain available. */ });
+}

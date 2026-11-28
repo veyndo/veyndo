@@ -12,6 +12,7 @@ import { useAppRegistry } from "../../../../frontend/src/shared/apps/AppSurfaces
 import { useStorefront } from "../../../../frontend/src/storefront/shell/StorefrontContext";
 import { inheritedTheme, normalizePage, type Page } from "../model";
 import { themeStyle } from "../Renderer";
+import { motionIntensity } from "../../../../frontend/src/kit/tokens";
 type Published = {
   pages: Page[];
   available: boolean;
@@ -69,7 +70,8 @@ export default function PublishedSite({ children }: { children: ReactNode }) {
     if (!pages.some((p) => p.slug === "home")) return;
     const shop = document.querySelector<HTMLElement>(".shop");
     if (!shop) return;
-    const style = themeStyle(inheritedTheme(pages, c.salesChannel));
+    const theme = inheritedTheme(pages, c.salesChannel);
+    const style = themeStyle(theme);
     const keys = Object.keys(style).filter((key) => key.startsWith("--"));
     const previous = keys.map((key) => [key, shop.style.getPropertyValue(key)]);
     for (const key of keys)
@@ -80,7 +82,9 @@ export default function PublishedSite({ children }: { children: ReactNode }) {
     const font = shop.style.fontFamily;
     shop.style.fontFamily = style.fontFamily ?? "";
     shop.dataset.designed = "true";
+    if (theme.motion) shop.dataset.motion = motionIntensity(theme.motion);
     return () => {
+      delete shop.dataset.motion;
       for (const [key, value] of previous)
         value
           ? shop.style.setProperty(key, value)

@@ -16,12 +16,14 @@ tokens from [`kit/tokens`](../tokens/README.md).
 - [`Tabs.tsx`](Tabs.tsx): WAI-ARIA tabs with roving focus.
 - [`Menu.tsx`](Menu.tsx): WAI-ARIA menu button.
 - [`Layout.tsx`](Layout.tsx): `Stack` and `Card` on the spacing scale.
-- [`catalogue.ts`](catalogue.ts): The catalogue index; a unit test fails when an export is missing from it.
+- [`props.generated.ts`](props.generated.ts): Document prop types generated from [the component catalog](../catalog/README.md); tones, sizes and layout options come from here. Do not edit.
 - [`ui.css`](ui.css): Component styles; the architecture check refuses colour literals here.
 
-The rendered component catalogue is the Studio developer page
-`admin/developer/ui-catalogue` (`#merchant` → Developer → Components).
+Every component is declared in [the component catalog](../catalog/README.md); a
+unit test fails when an exported component has no entry. The living gallery is
+the Studio developer page (`#merchant` → Developer → Components) and the
+handbook's [component gallery](../../../../docs/component-gallery.md).
 
 ## Verification
 
-Run `npm test -- kit-ui` and `npm run architecture` from `frontend/`.
+Run `npm test -- kit-ui component-catalog` and `npm run architecture` from `frontend/`.

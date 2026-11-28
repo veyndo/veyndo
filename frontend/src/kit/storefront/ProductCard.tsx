@@ -9,6 +9,7 @@ import {
   url,
 } from "./contract";
 import { money, storefrontText } from "./storefront-i18n";
+import { VisuallyHidden } from "../ui";
 
 export const productCard = definePart({
   id: "product-card",
@@ -34,12 +35,21 @@ export const productCard = definePart({
   }),
   Component: function ProductCard({ locale, product: p, priceKind }) {
     const t = storefrontText(locale);
+    const stock =
+      p.stock === undefined
+        ? undefined
+        : p.stock
+          ? `${p.stock} ${t("available")}`
+          : t("soldOut");
     return (
       <article className="vy-sf-card">
         <a
           className="vy-sf-card-media"
           href={p.url}
-          aria-label={`${t("details")}: ${p.name}`}
+          // Named by its image and stock note. Without an image it is only a pointer
+          // shortcut to the name link's page, hidden from assistive technology.
+          aria-hidden={p.image ? undefined : true}
+          tabIndex={p.image ? undefined : -1}
         >
           {p.image ? (
             <img
@@ -57,7 +67,7 @@ export const productCard = definePart({
               className="vy-sf-stock"
               data-empty={p.stock === 0 || undefined}
             >
-              {p.stock ? `${p.stock} ${t("available")}` : t("soldOut")}
+              {stock}
             </span>
           )}
         </a>
@@ -66,6 +76,7 @@ export const productCard = definePart({
           <a href={p.url}>
             <h3>{p.name}</h3>
           </a>
+          {stock && !p.image && <VisuallyHidden>{stock}</VisuallyHidden>}
           {p.description && <p>{p.description}</p>}
           <p className="vy-sf-price">
             <strong>{money(locale, p.currency, p.price)}</strong>

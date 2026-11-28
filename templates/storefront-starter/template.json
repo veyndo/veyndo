@@ -1,0 +1,37 @@
+{
+  "id": "storefront-starter",
+  "kind": "storefront",
+  "title": {
+    "en": "Headless storefront starter",
+    "de": "Headless-Storefront-Starter",
+    "es": "Plantilla de tienda headless",
+    "fr": "Kit de boutique headless"
+  },
+  "summary": {
+    "en": "A small server-rendered storefront on the TypeScript SDK: catalog and product pages in four languages.",
+    "de": "Ein kleiner serverseitig gerenderter Storefront auf dem TypeScript-SDK: Katalog und Produktseiten in vier Sprachen.",
+    "es": "Una pequeña tienda renderizada en el servidor con el SDK de TypeScript: catálogo y páginas de producto en cuatro idiomas.",
+    "fr": "Une petite boutique rendue côté serveur avec le SDK TypeScript : catalogue et fiches produit en quatre langues."
+  },
+  "appId": null,
+  "rename": [
+    {
+      "file": "package.json",
+      "pointer": "/name",
+      "value": "kebab"
+    }
+  ],
+  "sdk": {
+    "import": "src/sdk.ts",
+    "repository": "sdks/typescript/src",
+    "note": "Outside this repository, vendor sdks/typescript/src and point src/sdk.ts at it."
+  },
+  "test": [
+    "node",
+    "--test"
+  ],
+  "deploy": [
+    "node",
+    "src/server.ts"
+  ]
+}

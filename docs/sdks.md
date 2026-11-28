@@ -73,7 +73,12 @@ both as the same error type. JSON-RPC protocol errors (for example an unknown to
 
 The TypeScript SDK runs unbuilt on Node 22.18 or newer (type stripping) and builds to
 `dist/` with `tsc -p tsconfig.build.json`. Hand-written and not generated: each SDK's
-`examples/` and smoke test, and this page.
+`examples/` and smoke test, and this page. The handbook's [API reference](reference/README.md)
+shows a call for every route and tool in all three SDKs and curl, rendered from the same
+contracts with these method names.
+
+The [`veyndo` command-line client](cli.md) is built on the Rust SDK and talks only to
+these public contracts.
 
 ## Smoke test against a real server
 

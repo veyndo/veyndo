@@ -1,7 +1,9 @@
 /** Status display: badges, spinners, notices and empty states with the matching live-region roles. */
 import type { ReactNode } from "react";
+import type { BadgeDocumentProps } from "./props.generated";
 
-export type Tone = "neutral" | "accent" | "positive" | "warning" | "danger";
+/** The tone vocabulary, generated from the component catalog. */
+export type Tone = NonNullable<BadgeDocumentProps["tone"]>;
 
 export function Badge({
   tone = "neutral",

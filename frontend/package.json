@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build && vite build --config vite.mcp.config.ts && node scripts/precompress.mjs",
+    "build": "tsc --noEmit && vite build && vite build --config vite.mcp.config.ts && vite build --config vite.gallery.config.ts && node scripts/precompress.mjs",
     "format:check": "prettier --check src tests/unit scripts *.ts *.json index.html \"../extensions/apps/**/*.{ts,tsx,css}\" \"../components/*/ui/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -40,6 +40,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/coverage-v8": "^4.1.11",
+    "axe-core": "4.14.1",
     "jsdom": "^29.1.1",
     "prettier": "^3.9.9",
     "typescript": "^5.9.0",

@@ -1,0 +1,94 @@
+/* Styles of rendered catalog documents and the gallery; design tokens only. */
+.vy-doc {
+  display: grid;
+  gap: var(--vy-space-3);
+  min-width: 0;
+}
+.vy-doc-node {
+  display: contents;
+}
+.vy-doc-text {
+  margin: 0;
+  color: var(--vy-color-text);
+  overflow-wrap: anywhere;
+}
+.vy-doc-text[data-tone="muted"] {
+  color: var(--vy-color-muted);
+}
+.vy-doc-heading {
+  margin: 0;
+  color: var(--vy-color-text);
+}
+.vy-doc-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--vy-radius-sm);
+}
+.vy-gallery {
+  display: grid;
+  gap: var(--vy-space-8);
+  color: var(--vy-color-text);
+}
+.vy-gallery-head {
+  display: grid;
+  gap: var(--vy-space-3);
+}
+.vy-gallery-head h1,
+.vy-gallery-head p,
+.vy-gallery-entry p {
+  margin: 0;
+}
+.vy-gallery-entry {
+  display: grid;
+  gap: var(--vy-space-3);
+  padding-top: var(--vy-space-6);
+  border-top: 1px solid var(--vy-color-border);
+}
+.vy-gallery-entry > header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vy-space-2);
+  align-items: center;
+}
+.vy-gallery-entry h2 {
+  margin: 0 var(--vy-space-2) 0 0;
+}
+.vy-gallery-muted {
+  color: var(--vy-color-muted);
+}
+.vy-gallery-contract {
+  display: grid;
+  grid-template-columns: minmax(7rem, max-content) 1fr;
+  gap: var(--vy-space-2) var(--vy-space-4);
+  margin: 0;
+}
+.vy-gallery-contract dt {
+  font-weight: 600;
+}
+.vy-gallery-contract dd,
+.vy-gallery-contract ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--vy-space-1);
+  overflow-wrap: anywhere;
+}
+.vy-gallery-example {
+  margin: 0;
+  display: grid;
+  gap: var(--vy-space-2);
+}
+.vy-gallery-frames {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--vy-space-3);
+}
+.vy-gallery-frame {
+  padding: var(--vy-space-4);
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-md);
+  background: var(--vy-color-bg);
+  color: var(--vy-color-text);
+  min-width: 0;
+}

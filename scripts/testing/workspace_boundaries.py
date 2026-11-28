@@ -185,13 +185,56 @@ def check(packages):
         assert not any('custom-build' in t['kind'] for t in package['targets']), (name, 'Unreviewed domain build script')
 
 
+# The `veyndo` command-line client is its own Cargo workspace (its executable shares the server's
+# name, so it must never share a target directory). It is an external client: the generated SDK
+# is its only local dependency, and it never links a component, the server or a database driver.
+CLI = ROOT / 'sdks/cli'
+CLI_EXTERNAL = {'clap', 'clap_complete', 'serde', 'serde_json', 'tokio', 'sha2', 'rpassword'}
+
+
+def check_cli(packages):
+    assert [p['name'] for p in packages] == ['veyndo-cli'], 'The CLI workspace holds exactly the client crate'
+    package = packages[0]
+    assert Path(package['manifest_path']).resolve() == CLI / 'Cargo.toml', 'Wrong CLI owner directory'
+    for target in package['targets']:
+        assert Path(target['src_path']).resolve().is_relative_to(CLI), 'CLI target escapes its owner'
+        assert 'custom-build' not in target['kind'], 'Unreviewed CLI build script'
+    for dependency in package['dependencies']:
+        name = dependency['name']
+        if dependency.get('path'):
+            assert name == 'veyndo-sdk' and Path(dependency['path']).resolve() == OWNERS['veyndo-sdk'].resolve(), \
+                ('The CLI reaches the platform only through the generated SDK', name)
+        else:
+            assert name in CLI_EXTERNAL, ('Unreviewed CLI dependency capability', name)
+
+
+def cli_negative_controls(packages):
+    import copy
+    count = 0
+    for name, path in (('veyndo-core', str(ROOT / 'components/core')), ('sqlx', None)):
+        forged = copy.deepcopy(packages)
+        forged[0]['dependencies'].append({'name': name, 'path': path, 'kind': None})
+        try:
+            check_cli(forged)
+        except AssertionError:
+            count += 1
+        else:
+            raise AssertionError(('CLI boundary accepted', name))
+    return count
+
+
 def main():
     data = json.loads(subprocess.check_output(
         ['cargo', 'metadata', '--locked', '--no-deps', '--format-version', '1'], cwd=ROOT))
     check(data['packages'])
     from workspace_boundary_tests import negative_controls
     count = negative_controls(data['packages'])
-    print(f'PASS Cargo owner/dependency boundaries; {count} bypass negative controls')
+    cli = json.loads(subprocess.check_output(
+        ['cargo', 'metadata', '--locked', '--no-deps', '--format-version', '1', '--manifest-path',
+         str(CLI / 'Cargo.toml')], cwd=ROOT))
+    check_cli(cli['packages'])
+    count += cli_negative_controls(cli['packages'])
+    print(f'PASS Cargo owner/dependency boundaries and the CLI client boundary; {count} bypass negative controls')
 
 
 if __name__ == '__main__':

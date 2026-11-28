@@ -168,7 +168,7 @@ def build_documents(dest, write_page):
         [{'source': r['source'], 'url': r['url']} for r in records], indent=2) + '\n')
     assets = dest / 'docs/assets/ui'
     assets.mkdir(parents=True, exist_ok=True)
-    for name in ['docs.js', 'docs.css', 'docs-copy.json', 'docs-navigation.json']:
+    for name in ['docs.js', 'docs.css', 'docs-copy.json', 'docs-navigation.json', 'docs-try.js', 'playground.json']:
         shutil.copyfile(ROOT / 'site' / name, assets / name)
     shutil.copyfile(ROOT / 'site/style.css', assets / 'site.css')
     shutil.copyfile(ROOT / 'site/favicon.svg', assets / 'favicon.svg')

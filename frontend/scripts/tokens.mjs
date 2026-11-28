@@ -21,6 +21,17 @@ export function renderTokens() {
     Object.entries(tokens.color[scheme]).map(
       ([key, value]) => `  --vy-color-${key}: ${value};`,
     );
+  // Motion intensities: `:root` carries the subtle default, `[data-motion]` selects one per shop.
+  const intensity = (level) =>
+    Object.entries(tokens["motion-intensity"][level]).map(
+      ([key, value]) => `  --vy-motion-${key}: ${value};`,
+    );
+  const stilled = [
+    ...Object.keys(tokens.motion)
+      .filter((key) => !key.startsWith("easing"))
+      .map((key) => `    --vy-motion-${key}: 0ms;`),
+    ...intensity("off").map((line) => "  " + line),
+  ];
   const dark = [
     ...colors("dark"),
     `  --vy-shadow-lg: ${tokens.shadow["lg-dark"]};`,
@@ -32,6 +43,7 @@ export function renderTokens() {
     '[data-theme="light"] {',
     ...colors("light"),
     ...["space", "radius", "font", "shadow", "motion"].flatMap(flat),
+    ...intensity("subtle"),
     "  color-scheme: light;",
     "}",
     "@media (prefers-color-scheme: dark) {",
@@ -42,10 +54,16 @@ export function renderTokens() {
     '[data-theme="dark"] {',
     ...dark,
     "}",
+    ...Object.keys(tokens["motion-intensity"]).flatMap((level) => [
+      `[data-motion="${level}"] {`,
+      ...intensity(level),
+      "}",
+    ]),
+    // Reduced motion wins over every intensity a shop selects.
     "@media (prefers-reduced-motion: reduce) {",
-    "  :root {",
-    "    --vy-motion-fast: 0ms;",
-    "    --vy-motion-base: 0ms;",
+    "  :root,",
+    "  [data-motion] {",
+    ...stilled,
     "  }",
     "}",
     "",

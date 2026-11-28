@@ -3,6 +3,7 @@ import { mediaImage } from "../../../frontend/src/shared/media/product-media";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { Block, Page, Theme } from "./model";
 import { defaultTheme, fonts, explicitTheme } from "./model";
+import { brandVariables } from "../../../frontend/src/kit/tokens";
 import { contentText } from "../../../frontend/src/shared/i18n/content-language";
 import RichDescription from "../../../frontend/src/shared/content/RichDescription";
 import type { RequestFn } from "../../../frontend/src/shared/api/types";
@@ -42,7 +43,8 @@ export function themeStyle(theme: Theme): CSSProperties {
     "--site-radius": `${t.radius}px`,
     "--site-spacing": `${t.spacing}px`,
     "--site-columns": t.columns,
-    fontFamily: fonts[t.font ?? "sans"],
+    fontFamily: t.brand ? "var(--vy-font-family)" : fonts[t.font ?? "sans"],
+    ...(t.brand ? brandVariables(t.brand) : {}),
   } as CSSProperties;
 }
 export default function SiteRenderer({
@@ -167,6 +169,7 @@ export default function SiteRenderer({
           <section
             key={b.id}
             data-block-id={b.id}
+            data-vy-reveal={preview || index === 0 ? undefined : ""}
             tabIndex={preview ? 0 : undefined}
             aria-label={preview ? title || b.kind : undefined}
             className={`site-section site-${b.kind}${selected === b.id ? " is-selected" : ""}`}

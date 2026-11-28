@@ -11,7 +11,8 @@ locale and data, and receive buyer intents as callbacks (`onAddToCart`,
 
 ## Modules
 
-- [`index.ts`](index.ts): The public interface and the `parts` list.
+- [`index.ts`](index.ts): The public interface.
+- [`parts.ts`](parts.ts): The `parts` list in builder order and `partById`.
 - [`contract.ts`](contract.ts): `definePart` and shared field shapes (locale, currency, amount, safe URL).
 - [`storefront-i18n.ts`](storefront-i18n.ts): Part vocabulary in English, German, French and Spanish; money formatting.
 - [`ProductCard.tsx`](ProductCard.tsx): Product card.
@@ -22,9 +23,7 @@ locale and data, and receive buyer intents as callbacks (`onAddToCart`,
 - [`elements.tsx`](elements.tsx): `registerPartElements` defines `<veyndo-<id>>` web elements that validate their `props` attribute, upgrade server-rendered fallback markup (islands) and emit `veyndo:add-to-cart`, `veyndo:checkout`, `veyndo:quantity` and `veyndo:open` events.
 - [`PartForm.tsx`](PartForm.tsx): The Visual Builder form of a part's configuration, generated from its configuration JSON Schema; hosts supply localized labels and pickers for special formats such as `product-id`.
 - [`standalone-styles.ts`](standalone-styles.ts): Injects the token, ui and part styles for entries that load without the app stylesheet.
-- [`mcp-app.tsx`](mcp-app.tsx): The MCP App view: speaks the MCP Apps bridge (`2026-01-26`), renders the part payload of a tool result and sends buying to the shop through `ui/open-link`.
-- [`mcp-entry.ts`](mcp-entry.ts): Build entry of the view bundle (`vite.mcp.config.ts` → `dist/mcp/storefront-parts.js`).
-- [`embed.ts`](embed.ts): The standalone entry built as `/assets/elements.js`: it injects the token, ui and part styles once and defines every part element.
+- [`mcp-app.tsx`](mcp-app.tsx): The MCP App view: speaks the MCP Apps bridge (`2026-01-26`), renders the part payload of a tool result and sends buying to the shop through `ui/open-link`; `renderMeta` lets [kit/catalog](../catalog/README.md) add documents. Its bundle entry and the `/assets/elements.js` embed entry live in kit/catalog.
 - [`storefront.css`](storefront.css): Part styles; the architecture check refuses colour literals here.
 
 Prices, stock and totals always come from the server; parts only show them.

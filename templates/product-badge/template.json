@@ -1,0 +1,36 @@
+{
+  "id": "product-badge",
+  "kind": "app",
+  "title": {
+    "en": "Product badge with settings",
+    "de": "Produkt-Badge mit Einstellungen",
+    "es": "Distintivo de producto con ajustes",
+    "fr": "Badge produit avec réglages"
+  },
+  "summary": {
+    "en": "A badge such as New or Sale on product pages, edited in the product tab, with shop-wide settings.",
+    "de": "Ein Badge wie Neu oder Angebot auf Produktseiten, gepflegt im Produkt-Tab, mit shopweiten Einstellungen.",
+    "es": "Un distintivo como Nuevo u Oferta en las páginas de producto, editado en la pestaña del producto, con ajustes para toda la tienda.",
+    "fr": "Un badge comme Nouveau ou Promotion sur les fiches produit, édité dans l’onglet produit, avec des réglages pour toute la boutique."
+  },
+  "appId": "product_badge",
+  "rename": [
+    {
+      "file": "manifest.json",
+      "pointer": "/id"
+    },
+    {
+      "file": "package.json",
+      "pointer": "/name",
+      "value": "kebab"
+    }
+  ],
+  "test": [
+    "node",
+    "--test"
+  ],
+  "deploy": [
+    "node",
+    "scripts/deploy-sandbox.mjs"
+  ]
+}

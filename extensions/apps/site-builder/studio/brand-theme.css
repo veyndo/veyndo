@@ -1,0 +1,94 @@
+/* Brand theme dialog: sources and choices beside the current and the proposed storefront, both on design tokens. */
+.vy-dialog:has(.brand-theme) {
+  width: min(1320px, 96vw);
+  max-width: none;
+}
+.brand-theme {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) 1fr;
+  gap: var(--vy-space-5);
+  align-items: start;
+}
+.brand-controls {
+  display: grid;
+  gap: var(--vy-space-3);
+}
+.brand-sources {
+  display: grid;
+  gap: var(--vy-space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.brand-sources legend {
+  font-weight: var(--vy-font-weight-medium);
+  margin-bottom: var(--vy-space-2);
+}
+.brand-source {
+  display: flex;
+  align-items: center;
+  gap: var(--vy-space-2);
+}
+.brand-source img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-sm);
+  background: var(--vy-color-surface);
+}
+.brand-palette {
+  display: flex;
+  gap: var(--vy-space-1);
+}
+.brand-palette span {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--vy-radius-pill);
+  border: 1px solid var(--vy-color-border);
+}
+.brand-note {
+  margin: 0;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-sm);
+}
+.brand-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--vy-space-4);
+  min-width: 0;
+}
+.brand-preview {
+  margin: 0;
+  min-width: 0;
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid var(--vy-color-border);
+  border-radius: var(--vy-radius-md);
+}
+.brand-preview figcaption {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--vy-space-2) var(--vy-space-3);
+  background: var(--vy-color-panel);
+  font-weight: var(--vy-font-weight-medium);
+}
+@media (max-width: 900px) {
+  .brand-theme {
+    grid-template-columns: 1fr;
+  }
+}
+.designer-brand {
+  display: grid;
+  gap: var(--vy-space-2);
+  margin-bottom: var(--vy-space-3);
+}
+.designer-brand p {
+  margin: 0;
+}
+.designer-hint {
+  margin: 0;
+  color: var(--vy-color-muted);
+  font-size: var(--vy-font-size-sm);
+}

@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "apiBase": "https://api.veyndo.ai",
+  "demoShop": "",
+  "createShop": "https://start.veyndo.ai/start"
+}

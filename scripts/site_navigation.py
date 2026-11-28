@@ -83,6 +83,8 @@ def hub(records):
             '<h1><span data-docs-copy="titleA">One shop.</span> <span data-docs-copy="titleB">For people and agents.</span></h1>'
             '<p class="lead" data-docs-copy="intro">Agents buy, work and build on the same core that serves your storefront. The core decides price, stock and order.</p>'
             '<div class="docs-hero-actions"><a class="docs-primary" href="start-here.html" data-docs-copy="firstTour">Start here →</a>'
+            '<a href="build-your-first-app.html" data-docs-copy="buildFirst">Build your first app →</a>'
+            '<a href="reference/README.html" data-docs-copy="apiReference">API reference →</a>'
             '<a href="first-tour.html" data-docs-copy="understand">Take the first tour →</a>'
             '<a href="platform-overview.html" lang="de">Überblick auf Deutsch</a></div>'
             '<p class="docs-language-note" data-docs-copy="sourceLanguage">The navigation is available in four languages. Each guide identifies the language of its source.</p></section>'

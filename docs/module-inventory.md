@@ -132,6 +132,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/bin/verified_kernel/main.rs](../src/bin/verified_kernel/main.rs) | Generated input/output driver; production policies are dispatched by the generated module. |
 | [src/bootstrap.rs](../src/bootstrap.rs) | Startup, schema setup with release grants, persisted extensions and outbox worker. |
 | [src/brand_redirect.rs](../src/brand_redirect.rs) | Move browser pages to the configured domain while retaining integration and checkout endpoints. |
+| [src/browser_reads.rs](../src/browser_reads.rs) | Anonymous cross-origin reads of the public Store API, limited to the operations in contracts/browser-reads.json. |
 | [src/capabilities/admission.rs](../src/capabilities/admission.rs) | MCP discovery applies current merchant permissions through the same capability owners as invocation. |
 | [src/capabilities/catalog/core_catalog.rs](../src/capabilities/catalog/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
 | [src/capabilities/catalog.rs](../src/capabilities/catalog.rs) | Shared catalogue composes native capabilities and cognitive contracts without duplicating authorization. |
@@ -774,9 +775,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/ui/admin/developer/assistant-placements.ts](../components/apps/ui/admin/developer/assistant-placements.ts) | Multiple assistant placements remain ordinary independent views/models in one immutable package. |
 | [components/apps/ui/admin/developer/basic-code.ts](../components/apps/ui/admin/developer/basic-code.ts) | Small BASIC-style surface syntax compiles into the same bounded AST as visual and agent edits; no JavaScript execution. |
 | [components/apps/ui/admin/developer/brief-i18n.ts](../components/apps/ui/admin/developer/brief-i18n.ts) | Typed merchant vocabulary for description-led app creation; no extra agent or execution path. |
-| [components/apps/ui/admin/developer/catalogue/UICatalogue.tsx](../components/apps/ui/admin/developer/catalogue/UICatalogue.tsx) | The rendered component catalogue: every kit/ui part with its states, side by side in the light and dark theme. |
-| [components/apps/ui/admin/developer/catalogue/catalogue-i18n.ts](../components/apps/ui/admin/developer/catalogue/catalogue-i18n.ts) | Vocabulary of the component catalogue page: section titles, sample labels and states in four languages. |
-| [components/apps/ui/admin/developer/catalogue/ui-catalogue.css](../components/apps/ui/admin/developer/catalogue/ui-catalogue.css) | Layout of the component catalogue page; the specimens themselves carry only kit/ui styles. |
+| [components/apps/ui/admin/developer/catalogue/UICatalogue.tsx](../components/apps/ui/admin/developer/catalogue/UICatalogue.tsx) | The Studio component gallery: the kit catalog's entries, contracts and examples in the light and dark theme, in the Studio language. |
+| [components/apps/ui/admin/developer/catalogue/catalogue-i18n.ts](../components/apps/ui/admin/developer/catalogue/catalogue-i18n.ts) | Vocabulary of the developer workspace's component tab in four languages; the gallery brings its own from kit/catalog. |
+| [components/apps/ui/admin/developer/catalogue/ui-catalogue.css](../components/apps/ui/admin/developer/catalogue/ui-catalogue.css) | Page frame of the Studio component gallery; the gallery itself is styled by kit/catalog. |
 | [components/apps/ui/admin/developer/control-model.ts](../components/apps/ui/admin/developer/control-model.ts) | Pure control construction and bounded code-behind discovery keep visual edits and agent manifests identical. |
 | [components/apps/ui/admin/developer/core-extension-model.ts](../components/apps/ui/admin/developer/core-extension-model.ts) | Visual extension bindings compile into the canonical model and current native action scopes. |
 | [components/apps/ui/admin/developer/model-workspace.ts](../components/apps/ui/admin/developer/model-workspace.ts) | Form wizard emits the standard manifest IR; the ordinary compiler supplies all actions, APIs and permission allowlists. |
@@ -2078,7 +2079,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/ui/admin/workspace/AgentViewDirectory.tsx](../components/studio/ui/admin/workspace/AgentViewDirectory.tsx) | Composition mounts existing domain directories, filters and native entity editors without a second renderer. |
 | [components/studio/ui/admin/workspace/AgentWorkSurface.tsx](../components/studio/ui/admin/workspace/AgentWorkSurface.tsx) | Reviewed composition binds real native views to the current Studio scope and private workspace preferences. |
 | [components/studio/ui/admin/workspace/DesignRoute.tsx](../components/studio/ui/admin/workspace/DesignRoute.tsx) | Design route: opens the site builder designer with the design reference that belongs to the current shop and stage. |
-| [components/studio/ui/admin/workspace/GeneratedWorkspace.tsx](../components/studio/ui/admin/workspace/GeneratedWorkspace.tsx) | Render registered workspace controls with A2UI or the existing OpenUI fallback. |
+| [components/studio/ui/admin/workspace/GeneratedWorkspace.tsx](../components/studio/ui/admin/workspace/GeneratedWorkspace.tsx) | Render the admitted workspace layout through the shared catalog renderer; the native controls are host components. |
 | [components/studio/ui/admin/workspace/OrderShippingPolicy.tsx](../components/studio/ui/admin/workspace/OrderShippingPolicy.tsx) | Current source passages for the order workspace. The query contains no order or customer data. |
 | [components/studio/ui/admin/workspace/PersonalWorkspace.tsx](../components/studio/ui/admin/workspace/PersonalWorkspace.tsx) | Personal entry point on the existing shell; requests and linked views retain current scope and rights. |
 | [components/studio/ui/admin/workspace/WorkSuggestions.tsx](../components/studio/ui/admin/workspace/WorkSuggestions.tsx) | Actual permission-filtered work links open native owners; late responses cannot survive a scope change. |
@@ -2091,7 +2092,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/ui/admin/workspace/studio-extension.ts](../components/studio/ui/admin/workspace/studio-extension.ts) | Studio extension of the standard storefront design: the site builder's designer inside the current stage. |
 | [components/studio/ui/admin/workspace/workspace-i18n.ts](../components/studio/ui/admin/workspace/workspace-i18n.ts) | Personal workspace vocabulary; UI language never changes saved content language. |
 | [components/studio/ui/admin/workspace/workspace-model.ts](../components/studio/ui/admin/workspace/workspace-model.ts) | Layouts are private presentation preferences, never roles or delegated permissions. |
-| [components/studio/ui/admin/workspace/workspace-presentation.ts](../components/studio/ui/admin/workspace/workspace-presentation.ts) | Project the native workspace's reviewed controls through the shared A2UI adapter. |
+| [components/studio/ui/admin/workspace/workspace-presentation.ts](../components/studio/ui/admin/workspace/workspace-presentation.ts) | Project the native workspace's reviewed controls through the shared A2UI adapter into documents for the catalog renderer. |
 | [components/studio/ui/admin/workspace/workspace.css](../components/studio/ui/admin/workspace/workspace.css) | Personal workspace: stable shell, accessible rearrangement and scoped cards. |
 
 ## Studio, storefront, platform and shared frontend
@@ -2180,6 +2181,25 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/api/generated/routes.ts](../frontend/src/kit/api/generated/routes.ts) | Generated by scripts/api_catalogue.py from the Rust router declarations; do not edit. |
 | [frontend/src/kit/api/index.ts](../frontend/src/kit/api/index.ts) | Public interface of kit/api: the generated route catalogue, operation contracts and the typed client over them. |
 | [frontend/src/kit/api/routes.ts](../frontend/src/kit/api/routes.ts) | The generated route catalogue as records, and safe path filling for a route template. |
+| [frontend/src/kit/catalog/CatalogView.tsx](../frontend/src/kit/catalog/CatalogView.tsx) | The one renderer of catalog documents: validates, renders admitted nodes with kit components and shows localized fallbacks for refusals. |
+| [frontend/src/kit/catalog/Gallery.tsx](../frontend/src/kit/catalog/Gallery.tsx) | The living component gallery: every catalog entry's contract and examples, rendered through CatalogView in both themes. |
+| [frontend/src/kit/catalog/catalog-i18n.ts](../frontend/src/kit/catalog/catalog-i18n.ts) | Vocabulary of the catalog renderer and gallery in English, German, French and Spanish: refusal fallbacks, gallery labels and sample text. |
+| [frontend/src/kit/catalog/catalog.css](../frontend/src/kit/catalog/catalog.css) | Styles of rendered catalog documents and the gallery; design tokens only. |
+| [frontend/src/kit/catalog/catalog.ts](../frontend/src/kit/catalog/catalog.ts) | The versioned component catalog: its entries, the catalog document agents read and the generated TypeScript prop types. |
+| [frontend/src/kit/catalog/ci-info-disabled.ts](../frontend/src/kit/catalog/ci-info-disabled.ts) | Browser stand-in for `ci-info`, which OpenUI's opt-in Node telemetry imports; bundles never read `process`. |
+| [frontend/src/kit/catalog/define.ts](../frontend/src/kit/catalog/define.ts) | The shape of one catalog entry: props schema, slots, events, accessibility contract, surfaces, examples and renderer. |
+| [frontend/src/kit/catalog/document.ts](../frontend/src/kit/catalog/document.ts) | Reads `veyndo-ui/1`, A2UI v1.0 and OpenUI Lang documents into one untrusted node tree; nothing here is validated yet. |
+| [frontend/src/kit/catalog/element.tsx](../frontend/src/kit/catalog/element.tsx) | `<veyndo-document>`: the storefront surface's web element; it renders a catalog document with the data and actions its host page admits. |
+| [frontend/src/kit/catalog/embed.ts](../frontend/src/kit/catalog/embed.ts) | Standalone embed entry (`/assets/elements.js`): injects the kit styles once and defines every part element and `<veyndo-document>`. |
+| [frontend/src/kit/catalog/entries.tsx](../frontend/src/kit/catalog/entries.tsx) | Catalog entries of kit/ui: each component's document props, slots, events, accessibility contract and examples. |
+| [frontend/src/kit/catalog/fields.ts](../frontend/src/kit/catalog/fields.ts) | Safe field shapes of catalog props: plain text without markup, admitted URL forms and bounded identifiers. |
+| [frontend/src/kit/catalog/gallery-entry.tsx](../frontend/src/kit/catalog/gallery-entry.tsx) | Build entry of the standalone gallery (`dist/gallery/gallery.js`): renders the gallery in the language named by `?lang=`. |
+| [frontend/src/kit/catalog/index.ts](../frontend/src/kit/catalog/index.ts) | Public interface of kit/catalog: the versioned component catalog, document validation, the one renderer and the gallery. |
+| [frontend/src/kit/catalog/mcp-entry.ts](../frontend/src/kit/catalog/mcp-entry.ts) | Build entry of the MCP App view bundle (`dist/mcp/storefront-parts.js`); the server wraps it into the `ui://` document. |
+| [frontend/src/kit/catalog/mcp-view.tsx](../frontend/src/kit/catalog/mcp-view.tsx) | Catalog documents in the MCP App view: a tool result's `ai.veyndo/ui` payload renders through CatalogView on the mcp-app surface. |
+| [frontend/src/kit/catalog/patterns.tsx](../frontend/src/kit/catalog/patterns.tsx) | Composed patterns: the storefront parts as catalog entries; commerce data must come bound from host-admitted data. |
+| [frontend/src/kit/catalog/standalone-styles.ts](../frontend/src/kit/catalog/standalone-styles.ts) | Kit and catalog styles for the MCP App view, which loads without the Veyndo app stylesheet. |
+| [frontend/src/kit/catalog/validate.ts](../frontend/src/kit/catalog/validate.ts) | Validates a read document against the catalog and the host's admission: components, props, URLs, data, actions and slots. |
 | [frontend/src/kit/query/cache.ts](../frontend/src/kit/query/cache.ts) | In-memory query cache: one entry per key, shared in-flight loads, prefix invalidation and subscribers; nothing is persisted. |
 | [frontend/src/kit/query/hooks.tsx](../frontend/src/kit/query/hooks.tsx) | React bindings of the query cache: a provider per scope, useQuery for reads and useMutation for writes that invalidate. |
 | [frontend/src/kit/query/index.ts](../frontend/src/kit/query/index.ts) | Public interface of kit/query: the scoped in-memory query cache and its React hooks. |
@@ -2191,14 +2211,16 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/storefront/ProductSummary.tsx](../frontend/src/kit/storefront/ProductSummary.tsx) | Product summary part: the purchase area of a product page with price, variants, quantity prices, delivery and add-to-cart. |
 | [frontend/src/kit/storefront/contract.ts](../frontend/src/kit/storefront/contract.ts) | Part contracts: one typed schema per storefront part yields its React component, element, builder form and server checks. |
 | [frontend/src/kit/storefront/elements.tsx](../frontend/src/kit/storefront/elements.tsx) | Embeddable web elements from part contracts: validated `props` attributes, buyer intents as DOM events. |
-| [frontend/src/kit/storefront/embed.ts](../frontend/src/kit/storefront/embed.ts) | Standalone embed entry (`/assets/elements.js`): injects the kit styles once and defines every storefront part as a web element. |
 | [frontend/src/kit/storefront/index.ts](../frontend/src/kit/storefront/index.ts) | Public interface of kit/storefront: part contracts and the parts they define. |
-| [frontend/src/kit/storefront/mcp-app.tsx](../frontend/src/kit/storefront/mcp-app.tsx) | MCP App view (`ui://veyndo/kit/storefront`): renders kit parts from a commerce tool result inside the host sandbox. |
-| [frontend/src/kit/storefront/mcp-entry.ts](../frontend/src/kit/storefront/mcp-entry.ts) | Build entry of the MCP App view bundle (`dist/mcp/storefront-parts.js`); the server wraps it into the `ui://` document. |
+| [frontend/src/kit/storefront/mcp-app.tsx](../frontend/src/kit/storefront/mcp-app.tsx) | MCP App view (`ui://veyndo/kit/storefront`): the bridge and the part payloads of commerce tool results; kit/catalog adds documents. |
+| [frontend/src/kit/storefront/parts.ts](../frontend/src/kit/storefront/parts.ts) | The list of storefront parts in builder order and lookup by id. |
 | [frontend/src/kit/storefront/standalone-styles.ts](../frontend/src/kit/storefront/standalone-styles.ts) | Kit styles for standalone entries (web elements, MCP App views) that load without the Veyndo app stylesheet. |
 | [frontend/src/kit/storefront/storefront-i18n.ts](../frontend/src/kit/storefront/storefront-i18n.ts) | Vocabulary of the storefront parts in English, German, French and Spanish; hosts pass only the locale. |
 | [frontend/src/kit/storefront/storefront.css](../frontend/src/kit/storefront/storefront.css) | Storefront parts on design tokens only: card, product summary, cart, checkout steps and account. |
-| [frontend/src/kit/tokens/index.ts](../frontend/src/kit/tokens/index.ts) | Typed design tokens: the JSON source, CSS custom property names and the stylesheet that defines them. |
+| [frontend/src/kit/tokens/brand-theme.ts](../frontend/src/kit/tokens/brand-theme.ts) | Brand themes: deterministic palette extraction, WCAG AA contrast adjustment, vetted fonts and scales, and the typed token document. |
+| [frontend/src/kit/tokens/index.ts](../frontend/src/kit/tokens/index.ts) | Typed design tokens: the JSON source, CSS custom property names, the stylesheets that define them, brand themes and motion. |
+| [frontend/src/kit/tokens/motion.css](../frontend/src/kit/tokens/motion.css) | Motion primitives on the motion tokens: entrance, scroll reveal, hover lift and press. Intensity and reduced motion change only the tokens. |
+| [frontend/src/kit/tokens/motion.ts](../frontend/src/kit/tokens/motion.ts) | Motion primitives at run time: scroll reveal and page entrance read the motion tokens and stay still under reduced motion or intensity off. |
 | [frontend/src/kit/tokens/tokens.css](../frontend/src/kit/tokens/tokens.css) | Generated by scripts/tokens.mjs from tokens.json; do not edit. Design tokens for every Veyndo surface. |
 | [frontend/src/kit/ui/Button.tsx](../frontend/src/kit/ui/Button.tsx) | Buttons: one tone and size vocabulary, busy state announced, icon-only buttons require an accessible label. |
 | [frontend/src/kit/ui/Dialog.tsx](../frontend/src/kit/ui/Dialog.tsx) | Modal dialog: labelled by its title, focus contained and restored, Escape and the backdrop dismiss unless prevented. |
@@ -2207,9 +2229,9 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/ui/Layout.tsx](../frontend/src/kit/ui/Layout.tsx) | Layout atoms: cards and stacks whose spacing comes only from the token scale. |
 | [frontend/src/kit/ui/Menu.tsx](../frontend/src/kit/ui/Menu.tsx) | Menu button following the WAI-ARIA menu pattern: arrows and Home/End move, Escape and outside presses close and return focus. |
 | [frontend/src/kit/ui/Tabs.tsx](../frontend/src/kit/ui/Tabs.tsx) | Tabs following the WAI-ARIA tabs pattern: roving tabindex, arrow/Home/End keys, automatic activation, linked panels. |
-| [frontend/src/kit/ui/catalogue.ts](../frontend/src/kit/ui/catalogue.ts) | The component catalogue's index: every public kit/ui component with its kind and the WAI-ARIA pattern it follows. |
 | [frontend/src/kit/ui/index.ts](../frontend/src/kit/ui/index.ts) | Public interface of kit/ui: accessible, label-free atoms, molecules and headless primitives over the design tokens. |
 | [frontend/src/kit/ui/primitives.ts](../frontend/src/kit/ui/primitives.ts) | Headless primitives: focus containment, roving focus and controlled-or-uncontrolled state, without markup or text. |
+| [frontend/src/kit/ui/props.generated.ts](../frontend/src/kit/ui/props.generated.ts) | Generated from kit/catalog by `WRITE_COMPONENT_CATALOG=1 npm test -- component-catalog`; do not edit. Document prop types of catalog veyndo:components/1 (1.0.0). |
 | [frontend/src/kit/ui/ui.css](../frontend/src/kit/ui/ui.css) | Styles of the kit/ui atoms and molecules; colours, spacing, radii and type come only from design tokens. |
 | [frontend/src/main.tsx](../frontend/src/main.tsx) | Browser bootstrap only; application selection and error recovery live in application/. |
 | [frontend/src/platform/AdminHub.tsx](../frontend/src/platform/AdminHub.tsx) | Public service directory. Links select a login surface on the configured Studio origin without granting operator or merchant permissions. |
@@ -2256,7 +2278,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/apps/ConfigurationForm.tsx](../frontend/src/shared/apps/ConfigurationForm.tsx) | Shared product configuration form: declared input fields use the existing cart, revision and app gateway. |
 | [frontend/src/shared/apps/ConfigurationLibrary.tsx](../frontend/src/shared/apps/ConfigurationLibrary.tsx) | Bounded keyset library selection retains the chosen record while navigating actual server pages. |
 | [frontend/src/shared/apps/ConfigurationSummary.tsx](../frontend/src/shared/apps/ConfigurationSummary.tsx) | Checkout, receipts and Studio render the same frozen configuration, without fetching a newer app or private library. |
-| [frontend/src/shared/apps/ConversationAppViews.tsx](../frontend/src/shared/apps/ConversationAppViews.tsx) | Render server-selected MCP App results in an opaque iframe inside the conversation. |
+| [frontend/src/shared/apps/ConversationAppViews.tsx](../frontend/src/shared/apps/ConversationAppViews.tsx) | Render server-selected MCP App results: declarative views in an opaque iframe, catalog documents in place through the kit renderer. |
 | [frontend/src/shared/apps/CoreExtensions.tsx](../frontend/src/shared/apps/CoreExtensions.tsx) | Native object fields reuse managed forms, current app actions and the shop's content-language scope. |
 | [frontend/src/shared/apps/PrivateFormInbox.tsx](../frontend/src/shared/apps/PrivateFormInbox.tsx) | Host composition of the app-owned private response panel, with a neutral SDK contract. |
 | [frontend/src/shared/apps/PublicFormBlock.tsx](../frontend/src/shared/apps/PublicFormBlock.tsx) | Host composition of the registered forms app; apps depend on this contract, not each other's code. |
@@ -2719,6 +2741,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/site-builder/AppElement.tsx](../extensions/apps/site-builder/AppElement.tsx) | Placed native app surfaces use the existing public registry, renderer and server-bound read-only preview grants. |
 | [extensions/apps/site-builder/Renderer.tsx](../extensions/apps/site-builder/Renderer.tsx) | Shared page renderer: Studio previews and published shops use exactly these registered components. |
 | [extensions/apps/site-builder/block_validation.rs](../extensions/apps/site-builder/block_validation.rs) | App-owned block admission with bounded field paths; never echo untrusted content in errors. |
+| [extensions/apps/site-builder/brand_theme.rs](../extensions/apps/site-builder/brand_theme.rs) | Brand theme contract: the typed token document on a home page, vetted fonts and the WCAG AA contrast pairs every stored theme meets. |
 | [extensions/apps/site-builder/commerce-layout.ts](../extensions/apps/site-builder/commerce-layout.ts) | Native commerce sections share the channel page document and its existing publication boundary. |
 | [extensions/apps/site-builder/context.rs](../extensions/apps/site-builder/context.rs) | Designer context projects native channels, languages and calculated products; no second catalogue or price engine. |
 | [extensions/apps/site-builder/design_agent/agent_handoff.rs](../extensions/apps/site-builder/design_agent/agent_handoff.rs) | Coding agents edit the same page schema through credential-free tasks and explicit native review. |
@@ -2735,9 +2758,10 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/site-builder/storefront/CommerceLayout.tsx](../extensions/apps/site-builder/storefront/CommerceLayout.tsx) | Render a published channel template around the storefront's original commerce controls. |
 | [extensions/apps/site-builder/storefront/PublishedSite.tsx](../extensions/apps/site-builder/storefront/PublishedSite.tsx) | One permission-filtered page read supplies routing and the shared theme on every native commerce route. |
 | [extensions/apps/site-builder/storefront/ShopSite.tsx](../extensions/apps/site-builder/storefront/ShopSite.tsx) | Standard-shop routing is an app mount; commerce products, cart, account and checkout keep their original owners. |
-| [extensions/apps/site-builder/studio/AppearanceControls.tsx](../extensions/apps/site-builder/studio/AppearanceControls.tsx) | Shared page/channel appearance controls; null values retain native inheritance. |
+| [extensions/apps/site-builder/studio/AppearanceControls.tsx](../extensions/apps/site-builder/studio/AppearanceControls.tsx) | Shared page/channel appearance controls; null values retain native inheritance. Home pages also carry the brand theme and motion. |
 | [extensions/apps/site-builder/studio/BlockPalette.tsx](../extensions/apps/site-builder/studio/BlockPalette.tsx) | Built-in and installed-app elements share a visual insertion gallery and one document model. |
 | [extensions/apps/site-builder/studio/BlockPreview.tsx](../extensions/apps/site-builder/studio/BlockPreview.tsx) | Miniature component layouts communicate what each element adds without loading apps or remote images. |
+| [extensions/apps/site-builder/studio/BrandThemeDialog.tsx](../extensions/apps/site-builder/studio/BrandThemeDialog.tsx) | Brand theme on a button press: pick brand images, derive an accessible theme deterministically, compare it with the current design and apply it to the private draft. |
 | [extensions/apps/site-builder/studio/DesignAgent.tsx](../extensions/apps/site-builder/studio/DesignAgent.tsx) | Shop design uses the shared agent workspace and existing native proposal/approval owners. |
 | [extensions/apps/site-builder/studio/DesignReferences.tsx](../extensions/apps/site-builder/studio/DesignReferences.tsx) | Discoverable URL and image reference inputs; no external HTML is rendered in the editor. |
 | [extensions/apps/site-builder/studio/DesignReview.tsx](../extensions/apps/site-builder/studio/DesignReview.tsx) | Review real proposed page changes and viewport entry points; never infer visual correctness or app execution from a model summary. |
@@ -2759,6 +2783,9 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/site-builder/studio/ShopDesigner.tsx](../extensions/apps/site-builder/studio/ShopDesigner.tsx) | The native shop-design entry binds workspace data and content-language scope to the visual canvas. |
 | [extensions/apps/site-builder/studio/ShopOverview.tsx](../extensions/apps/site-builder/studio/ShopOverview.tsx) | Shared zoomable board mounts at most four native page/product/category previews and retains the domain draft. |
 | [extensions/apps/site-builder/studio/StorefrontCanvas.tsx](../extensions/apps/site-builder/studio/StorefrontCanvas.tsx) | Isolated viewport for native presentational components and the shared app renderer; no cart, analytics or orders run here. |
+| [extensions/apps/site-builder/studio/brand-i18n.ts](../extensions/apps/site-builder/studio/brand-i18n.ts) | Interface vocabulary of brand themes and motion in the shop designer (English, German, French, Spanish). |
+| [extensions/apps/site-builder/studio/brand-images.ts](../extensions/apps/site-builder/studio/brand-images.ts) | Decodes brand images in the browser into small pixel samples for the deterministic palette extraction; nothing is uploaded or stored. |
+| [extensions/apps/site-builder/studio/brand-theme.css](../extensions/apps/site-builder/studio/brand-theme.css) | Brand theme dialog: sources and choices beside the current and the proposed storefront, both on design tokens. |
 | [extensions/apps/site-builder/studio/canvas.css](../extensions/apps/site-builder/studio/canvas.css) | Canvas sizing uses real iframe viewports; mobile tools follow the preview rather than obscure it. |
 | [extensions/apps/site-builder/studio/commerce-layout-draft.ts](../extensions/apps/site-builder/studio/commerce-layout-draft.ts) | Seed a template with the native sections and keep their original relative order. |
 | [extensions/apps/site-builder/studio/design-i18n.ts](../extensions/apps/site-builder/studio/design-i18n.ts) | Complete interface vocabulary for the standard-shop designer, independent of page translations. |
@@ -2786,6 +2813,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/site-builder/studio/usePointerPlacement.ts](../extensions/apps/site-builder/studio/usePointerPlacement.ts) | Captured mouse/touch gestures cross the iframe boundary with viewport-aware drop positions and edge scrolling. |
 | [extensions/apps/site-builder/studio/workspace-i18n.ts](../extensions/apps/site-builder/studio/workspace-i18n.ts) | Shared visual workspace vocabulary; interface choices never become untranslated content. |
 | [extensions/apps/site-builder/studio/workspace.css](../extensions/apps/site-builder/studio/workspace.css) | Visual workspace panels: one scroll region per rail, stable mode controls and graphical element cards. |
+| [extensions/apps/site-builder/tests/brand-cases.tsx](../extensions/apps/site-builder/tests/brand-cases.tsx) | Brand theme cases: logo → derived accessible theme → side-by-side preview → applied only to the private draft; motion per intensity in the real frame. |
 | [extensions/apps/site-builder/tests/canvas-cases.tsx](../extensions/apps/site-builder/tests/canvas-cases.tsx) | Real sandboxed frame renders native components and sends no preview/cart/order commands. |
 | [extensions/apps/site-builder/tests/design-reference-cases.tsx](../extensions/apps/site-builder/tests/design-reference-cases.tsx) | Screenshot bounds and invalid-file recovery use the actual reference input and existing agent payload. |
 | [extensions/apps/site-builder/tests/designer-cases.tsx](../extensions/apps/site-builder/tests/designer-cases.tsx) | Initial native storefront, automatic home selection and inherited-draft copy regressions. |
@@ -3055,6 +3083,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/agentic_commerce.py](../scripts/agentic_commerce.py) | Real UCP cart transfer into native checkout: scoped single-use capability and one durable order. |
 | [scripts/agentic_scenarios.py](../scripts/agentic_scenarios.py) | Customer agents use the native isolated shop, cart and checkout; only inference is synthetic. |
 | [scripts/api_catalogue.py](../scripts/api_catalogue.py) | Generate a drift-checked static HTTP route catalogue from the compiled Rust router declarations. |
+| [scripts/api_reference.py](../scripts/api_reference.py) | Generate the handbook API reference (docs/reference/) from the component contracts; `--check` fails on drift. |
 | [scripts/app_agent_packages.py](../scripts/app_agent_packages.py) | Signed app packages as agent tools: effects on MCP tools, refused unauthorized calls, typed port wiring and version refusal, contract tamper refusal, upgrade/rollback with a data migration and Wasm hot swap without restart. |
 | [scripts/app_assets.py](../scripts/app_assets.py) | Actual native scoped file upload, callback read, product/digest/key fences and public-file policy. |
 | [scripts/app_assistants.py](../scripts/app_assistants.py) | Real assistant packages: editor context, rights, MCP opt-out, cron, signed webhooks, flows and local service fixtures. |
@@ -3095,10 +3124,12 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/checkout_handoff.py](../scripts/checkout_handoff.py) | Exercise actual PostgreSQL checkout transfer, isolation, replay and durable ordering. |
 | [scripts/checkout_review.py](../scripts/checkout_review.py) | Real SQL checkout rejects unreviewed changes without orders or stock writes; synthetic fixture only. |
 | [scripts/checkout_sandbox_composition.py](../scripts/checkout_sandbox_composition.py) | Exercise independent Checkout and the native PayPal payment owner with synthetic provider responses. |
+| [scripts/cli_client.py](../scripts/cli_client.py) | Run the `veyndo` command-line client (sdks/cli) against the suite's running server: sign-in, shops, sandbox import and release, apps, operations, MCP and exit codes. |
 | [scripts/cloud_benchmark.py](../scripts/cloud_benchmark.py) | Bounded private-cloud HTTP load using the existing validated benchmark sampler. |
 | [scripts/cognitive_experiments.py](../scripts/cognitive_experiments.py) | Real native consent/layout/payment paths with synthetic live-receipt fixtures, not a measured commerce experiment. |
 | [scripts/commerce.py](../scripts/commerce.py) | Real HTTP/PG tests for SKUs, moderated reviews, tax/shipping/payment and deliveries. |
 | [scripts/company_settings.py](../scripts/company_settings.py) | Real HTTP company basis/channel inheritance, immutable issuer snapshots, bounded logos and private staging. No external services. |
+| [scripts/component_gallery.py](../scripts/component_gallery.py) | Nightly browser check of the component gallery: axe with contrast in English and German, and visual snapshots of every example frame. |
 | [scripts/component_mirrors.py](../scripts/component_mirrors.py) | Generate standalone component mirrors from the monorepo, check that each builds and tests alone, and record the released commit. |
 | [scripts/component_releases.py](../scripts/component_releases.py) | Derive semantic component versions from contract changes, write per-component changelogs from git history and plan (never perform) a publish. |
 | [scripts/component_sources.py](../scripts/component_sources.py) | Verify pinned component source snapshots; explicit imports use clean, reviewed Git commits, never mutable branches. |
@@ -3212,6 +3243,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/storefront_urls.py](../scripts/storefront_urls.py) | Real HTTP product deep links and host isolation in disposable shops. |
 | [scripts/structure.py](../scripts/structure.py) | Guard the documented Rust domain split and public extension examples. |
 | [scripts/studio.py](../scripts/studio.py) | Actual Studio API, localization and original-kernel consumer checks. |
+| [scripts/templates.py](../scripts/templates.py) | Keep the developer templates (templates/) consistent: index, template descriptors, shared files and their tests. |
 | [scripts/tenant_isolation.py](../scripts/tenant_isolation.py) | Adversarial two-shop API/MCP/UCP/object and schema isolation with real personal/customer sessions. |
 | [scripts/testing/advisor_privacy.py](../scripts/testing/advisor_privacy.py) | Concurrent privacy mutations across the real concierge/provider path; no live inference. |
 | [scripts/testing/advisor_sources.py](../scripts/testing/advisor_sources.py) | Actual channel-admitted advisor context and concurrent native source mutations; synthetic local model only. |
@@ -3228,6 +3260,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/app_discovery.py](../scripts/testing/app_discovery.py) | Exercise real app discovery beyond an alphabetical sample and enforce read-only native dispatch. |
 | [scripts/testing/app_mcp_views.py](../scripts/testing/app_mcp_views.py) | Exercise installed MCP App placement, native tool calls, actor admission and conversation attachments. |
 | [scripts/testing/b2b_checkout_race.py](../scripts/testing/b2b_checkout_race.py) | Force the real customer-share/unit-update checkout interleaving; no business handler is mocked. |
+| [scripts/testing/brand_theme_release.py](../scripts/testing/brand_theme_release.py) | Brand theme draft → private preview → reviewed release: the live shop keeps its design until the selected release; invalid themes never save. |
 | [scripts/testing/catalog_intake_checks.py](../scripts/testing/catalog_intake_checks.py) | Native catalogue intake through HTTP/MCP; real stage saves, exact replay, current rights and selected release, no model calls. |
 | [scripts/testing/catalog_preparation_checks.py](../scripts/testing/catalog_preparation_checks.py) | Durable preparation projection through the native catalogue API/MCP; fixture SQL creates an explicit failed provider result only. |
 | [scripts/testing/checkout_buyer_identity.py](../scripts/testing/checkout_buyer_identity.py) | Check native buyer exchange, private introspection and grant confinement through HTTP. |
@@ -3315,10 +3348,20 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/visual_workspace.py](../scripts/visual_workspace.py) | Actual Rust/PostgreSQL workspace, page publication, form privacy and reviewed AI paths; synthetic model only. |
 | [scripts/workspace_roles.py](../scripts/workspace_roles.py) | Real HTTP/PostgreSQL role edits, current session/key/worker grants and native B2B setup regressions. |
 
-## Generated client SDKs
+## Generated client SDKs and the CLI
 
 | Module | Responsibility |
 |---|---|
+| [sdks/cli/src/account.rs](../sdks/cli/src/account.rs) | Sign-in, sign-out, status and shop selection over the identity API; secrets are read without echo and never printed. |
+| [sdks/cli/src/agents.rs](../sdks/cli/src/agents.rs) | Agent surfaces: the operations graph and planner check over MCP, the evaluation runner wrapper, MCP client configuration and a stdio bridge. |
+| [sdks/cli/src/apps.rs](../sdks/cli/src/apps.rs) | App developer loop over the native app API: scaffold from a pattern, review (`/api/apps/review`), install into a private sandbox and read the metadata-only activity log. |
+| [sdks/cli/src/catalog.rs](../sdks/cli/src/catalog.rs) | Product and order reads, and CSV import through the native catalogue intake into a private sandbox (never the live shop). |
+| [sdks/cli/src/failure.rs](../sdks/cli/src/failure.rs) | Exit codes and user-facing failures: one stable code per failure class, so scripts can branch on them. |
+| [sdks/cli/src/main.rs](../sdks/cli/src/main.rs) | `veyndo` command-line entry: argument grammar, help text and dispatch; every call goes through the generated Rust SDK. |
+| [sdks/cli/src/output.rs](../sdks/cli/src/output.rs) | Renders results as aligned tables for people or as JSON (`--json`) for scripts; status lines go to stderr. |
+| [sdks/cli/src/profile.rs](../sdks/cli/src/profile.rs) | The signed-in profile: server, selected shop and credential in one owner-only (0600) file; environment overrides for CI. |
+| [sdks/cli/src/sandbox.rs](../sdks/cli/src/sandbox.rs) | Private sandboxes over the existing staging API: create, list, review the diff and release selected changes with explicit approval. |
+| [sdks/cli/src/templates.rs](../sdks/cli/src/templates.rs) | App starter templates: the same app-owned pattern Manifests App Studio clones (components/apps/ui/admin/developer/app-recipes.ts). |
 | [sdks/python/examples/catalog.py](../sdks/python/examples/catalog.py) | Example: list a shop's products page by page, then call a typed MCP tool. |
 | [sdks/python/tests/smoke.py](../sdks/python/tests/smoke.py) | Smoke test of the generated Python SDK against a running Veyndo server (BASE_URL); synthetic accounts only. |
 | [sdks/python/veyndo_sdk/__init__.py](../sdks/python/veyndo_sdk/__init__.py) | Veyndo client: one typed API object per component plus MCP. Generated by scripts/sdks/python.py from contracts/http; do not edit. |
@@ -3390,3 +3433,25 @@ This lists every checked-in source module in these roots, including files with n
 | [sdks/typescript/src/runtime.ts](../sdks/typescript/src/runtime.ts) | Transport, authentication, typed failures, cursor pagination and MCP tool calls shared by every component client. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
 | [sdks/typescript/src/tools.ts](../sdks/typescript/src/tools.ts) | Typed inputs and declared outputs of every native MCP tool. Generated by scripts/sdks/typescript.py from contracts/http; do not edit. |
 | [sdks/typescript/tests/smoke.ts](../sdks/typescript/tests/smoke.ts) | Smoke test of the generated TypeScript SDK against a running Veyndo server (BASE_URL); synthetic accounts only. Run by scripts/sdk_smoke.py with Node type stripping. |
+
+## Developer templates
+
+| Module | Responsibility |
+|---|---|
+| [templates/order-tags/scripts/deploy-sandbox.mjs](../templates/order-tags/scripts/deploy-sandbox.mjs) | Deploy this app to a private Veyndo sandbox: create (or reuse) the environment, import the Manifest as a build, stage that exact digest, then save its flows there. |
+| [templates/order-tags/tests/flow.test.mjs](../templates/order-tags/tests/flow.test.mjs) | Order-tag specifics: the flow calls an action this app declares for flows, on an order event, with a tag the app knows. |
+| [templates/order-tags/tests/manifest.test.mjs](../templates/order-tags/tests/manifest.test.mjs) | Offline checks every app template's Manifest passes before the server compiles it: identity, languages, references and access. |
+| [templates/product-badge/scripts/deploy-sandbox.mjs](../templates/product-badge/scripts/deploy-sandbox.mjs) | Deploy this app to a private Veyndo sandbox: create (or reuse) the environment, import the Manifest as a build, stage that exact digest, then save its flows there. |
+| [templates/product-badge/tests/badge.test.mjs](../templates/product-badge/tests/badge.test.mjs) | Product-badge specifics: the public product view only reads badges, settings stay merchant-editable and share the badge styles. |
+| [templates/product-badge/tests/manifest.test.mjs](../templates/product-badge/tests/manifest.test.mjs) | Offline checks every app template's Manifest passes before the server compiles it: identity, languages, references and access. |
+| [templates/shared/scripts/deploy-sandbox.mjs](../templates/shared/scripts/deploy-sandbox.mjs) | Deploy this app to a private Veyndo sandbox: create (or reuse) the environment, import the Manifest as a build, stage that exact digest, then save its flows there. |
+| [templates/shared/tests/manifest.test.mjs](../templates/shared/tests/manifest.test.mjs) | Offline checks every app template's Manifest passes before the server compiles it: identity, languages, references and access. |
+| [templates/shopper-guide/scripts/deploy-sandbox.mjs](../templates/shopper-guide/scripts/deploy-sandbox.mjs) | Deploy this app to a private Veyndo sandbox: create (or reuse) the environment, import the Manifest as a build, stage that exact digest, then save its flows there. |
+| [templates/shopper-guide/tests/manifest.test.mjs](../templates/shopper-guide/tests/manifest.test.mjs) | Offline checks every app template's Manifest passes before the server compiles it: identity, languages, references and access. |
+| [templates/shopper-guide/tests/mcp-app.test.mjs](../templates/shopper-guide/tests/mcp-app.test.mjs) | Shopper-guide specifics: the assistant view exposes only public read tools; merchant notes stay behind a merchant permission. |
+| [templates/storefront-starter/src/render.ts](../templates/storefront-starter/src/render.ts) | Server-rendered HTML for the catalog and product pages; every shop value is escaped, every interface word comes from text.ts. |
+| [templates/storefront-starter/src/sdk.ts](../templates/storefront-starter/src/sdk.ts) | The one import seam to the generated TypeScript SDK; `veyndo app new` points it at a vendored copy outside this repository. |
+| [templates/storefront-starter/src/server.ts](../templates/storefront-starter/src/server.ts) | The starter's HTTP server: `/` lists the catalog, `/product/<id>` shows one product, `?lang=` picks the interface and content language. |
+| [templates/storefront-starter/src/shop.ts](../templates/storefront-starter/src/shop.ts) | Catalog and product reads through the generated SDK: one client per request, shop and language explicit, no credentials. |
+| [templates/storefront-starter/src/text.ts](../templates/storefront-starter/src/text.ts) | Storefront interface vocabulary in English, German, Spanish and French; product content comes from the shop in its own language. |
+| [templates/storefront-starter/tests/storefront.test.mjs](../templates/storefront-starter/tests/storefront.test.mjs) | Storefront starter: SDK requests name the shop and language, pages escape shop content and every interface word is translated. |

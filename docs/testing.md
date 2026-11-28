@@ -277,6 +277,19 @@ alone with `python3 scripts/verify_integration.py --container <postgres> --only
 browser_journeys` after `cargo build --workspace --bins` and a frontend build. A
 failing journey leaves a screenshot in `artifacts/browser-journeys/`.
 
+## Component gallery
+
+`component_gallery` (tooling suite group) renders the standalone component gallery
+(`frontend/dist/gallery/gallery.js`, built by `npm run build`) in Chromium with the
+same pinned Playwright driver as the browser journeys. It runs axe, contrast
+included, on the English and German gallery and compares a screenshot of every
+example frame with the baselines in `frontend/tests/visual/gallery/<platform>/`.
+Differences and missing baselines go to `artifacts/component-gallery/`. Run it with
+`python3 scripts/component_gallery.py`; `--update` rewrites the baselines after an
+intended change. The fast part (every example in four languages, roles, names and
+axe without contrast, every refusal) runs in `npm test`. See
+[the design system](design-system.md#checks).
+
 ## Component test suite (phase 7)
 
 Phase 7 of [the component plan](plans/2026-11-19-component-architecture.md#phase-7-test-suite)
