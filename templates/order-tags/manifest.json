@@ -1,0 +1,236 @@
+{
+  "id": "order_tags",
+  "version": "0.1.0",
+  "coreApi": "1",
+  "runtime": "declarative",
+  "name": {
+    "en": "Order tags",
+    "de": "Bestell-Tags",
+    "es": "Etiquetas de pedido",
+    "fr": "Étiquettes de commande"
+  },
+  "category": "operations",
+  "permissions": [
+    "data.read",
+    "data.write",
+    "admin.slot",
+    "events.publish"
+  ],
+  "entities": [
+    {
+      "name": "tags",
+      "label": {
+        "en": "Order tags",
+        "de": "Bestell-Tags",
+        "es": "Etiquetas de pedido",
+        "fr": "Étiquettes de commande"
+      },
+      "publicRead": false,
+      "fields": [
+        {
+          "name": "order_id",
+          "label": {
+            "en": "Order",
+            "de": "Bestellung",
+            "es": "Pedido",
+            "fr": "Commande"
+          },
+          "kind": "string",
+          "required": true,
+          "indexed": true,
+          "coreReference": "order"
+        },
+        {
+          "name": "tag",
+          "indexed": true,
+          "label": {
+            "en": "Tag",
+            "de": "Tag",
+            "es": "Etiqueta",
+            "fr": "Étiquette"
+          },
+          "kind": "string",
+          "required": true,
+          "choices": [
+            {
+              "value": "vip",
+              "label": {
+                "en": "VIP customer",
+                "de": "VIP-Kunde",
+                "es": "Cliente VIP",
+                "fr": "Client VIP"
+              }
+            },
+            {
+              "value": "gift",
+              "label": {
+                "en": "Gift",
+                "de": "Geschenk",
+                "es": "Regalo",
+                "fr": "Cadeau"
+              }
+            },
+            {
+              "value": "check",
+              "label": {
+                "en": "Needs a check",
+                "de": "Prüfen",
+                "es": "Revisar",
+                "fr": "À vérifier"
+              }
+            }
+          ]
+        },
+        {
+          "name": "note",
+          "label": {
+            "en": "Internal note",
+            "de": "Interne Notiz",
+            "es": "Nota interna",
+            "fr": "Note interne"
+          },
+          "kind": "string"
+        }
+      ]
+    }
+  ],
+  "slots": [],
+  "views": [
+    {
+      "id": "workspace",
+      "layout": "stack",
+      "blocks": [
+        {
+          "id": "editor",
+          "kind": "form",
+          "title": {
+            "en": "Tags for this order",
+            "de": "Tags für diese Bestellung",
+            "es": "Etiquetas de este pedido",
+            "fr": "Étiquettes de cette commande"
+          },
+          "entity": "tags",
+          "readAction": "list_tags",
+          "writeAction": "save_tags",
+          "contextBinding": {
+            "field": "order_id",
+            "key": "orderId"
+          }
+        }
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "workspace",
+      "location": "admin.order",
+      "label": {
+        "en": "Tags",
+        "de": "Tags",
+        "es": "Etiquetas",
+        "fr": "Étiquettes"
+      },
+      "uiPath": "native/workspace",
+      "actions": [
+        "list_tags",
+        "save_tags"
+      ],
+      "permission": "orders.read"
+    }
+  ],
+  "apiRoutes": [],
+  "intelligence": {
+    "description": {
+      "en": "Tags on orders, set by staff or by a flow",
+      "de": "Tags an Bestellungen, gesetzt vom Team oder von einem Flow",
+      "es": "Etiquetas en pedidos, puestas por el equipo o por un flujo",
+      "fr": "Étiquettes sur les commandes, posées par l’équipe ou par un flux"
+    },
+    "tools": [],
+    "entities": []
+  },
+  "actions": [
+    {
+      "name": "list_tags",
+      "description": "List order tags",
+      "handler": "list",
+      "entity": "tags",
+      "public": false,
+      "readOnly": true,
+      "mcp": false,
+      "permission": "orders.read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "after": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "save_tags",
+      "description": "Save an order tag",
+      "handler": "save",
+      "entity": "tags",
+      "public": false,
+      "flowAllowed": true,
+      "permission": "orders.write",
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "tag_suggested",
+      "description": "Publish a typed tag suggestion for one order",
+      "handler": "emit",
+      "permission": "apps.manage",
+      "flowAllowed": true,
+      "mcp": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string",
+            "enum": [
+              "vip",
+              "gift",
+              "check"
+            ]
+          }
+        },
+        "required": [
+          "tag"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

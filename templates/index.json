@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "description": "App and storefront templates for `veyndo app new <id>`; scripts/templates.py keeps this list, the folders and their shared files consistent. See docs/build-your-first-app.md.",
+  "templates": [
+    {
+      "id": "product-badge",
+      "kind": "app",
+      "path": "templates/product-badge",
+      "title": {
+        "en": "Product badge with settings",
+        "de": "Produkt-Badge mit Einstellungen",
+        "es": "Distintivo de producto con ajustes",
+        "fr": "Badge produit avec réglages"
+      },
+      "summary": {
+        "en": "A badge such as New or Sale on product pages, edited in the product tab, with shop-wide settings.",
+        "de": "Ein Badge wie Neu oder Angebot auf Produktseiten, gepflegt im Produkt-Tab, mit shopweiten Einstellungen.",
+        "es": "Un distintivo como Nuevo u Oferta en las páginas de producto, editado en la pestaña del producto, con ajustes para toda la tienda.",
+        "fr": "Un badge comme Nouveau ou Promotion sur les fiches produit, édité dans l’onglet produit, avec des réglages pour toute la boutique."
+      }
+    },
+    {
+      "id": "order-tags",
+      "kind": "app",
+      "path": "templates/order-tags",
+      "title": {
+        "en": "Order-tag automation",
+        "de": "Bestell-Tag-Automatisierung",
+        "es": "Automatización de etiquetas de pedido",
+        "fr": "Automatisation des étiquettes de commande"
+      },
+      "summary": {
+        "en": "Tag orders in the order screen and let a flow suggest a VIP tag for every large order.",
+        "de": "Bestellungen in der Bestellansicht taggen und einen Flow für jede große Bestellung einen VIP-Tag vorschlagen lassen.",
+        "es": "Etiqueta pedidos en la vista del pedido y deja que un flujo sugiera la etiqueta VIP para cada pedido grande.",
+        "fr": "Étiquetez les commandes dans leur fiche et laissez un flux proposer l’étiquette VIP pour chaque grosse commande."
+      }
+    },
+    {
+      "id": "shopper-guide",
+      "kind": "app",
+      "path": "templates/shopper-guide",
+      "title": {
+        "en": "Shopper-facing MCP App",
+        "de": "MCP-App für Kundinnen und Kunden",
+        "es": "App MCP para compradores",
+        "fr": "App MCP pour les clients"
+      },
+      "summary": {
+        "en": "A product guide that shopping assistants show as an interactive view, with a private merchant view.",
+        "de": "Ein Produktratgeber, den Einkaufsassistenten als interaktive Ansicht zeigen, mit privater Händleransicht.",
+        "es": "Una guía de productos que los asistentes de compra muestran como vista interactiva, con una vista privada para el comercio.",
+        "fr": "Un guide produit que les assistants d’achat affichent en vue interactive, avec une vue marchand privée."
+      }
+    },
+    {
+      "id": "storefront-starter",
+      "kind": "storefront",
+      "path": "templates/storefront-starter",
+      "title": {
+        "en": "Headless storefront starter",
+        "de": "Headless-Storefront-Starter",
+        "es": "Plantilla de tienda headless",
+        "fr": "Kit de boutique headless"
+      },
+      "summary": {
+        "en": "A small server-rendered storefront on the TypeScript SDK: catalog and product pages in four languages.",
+        "de": "Ein kleiner serverseitig gerenderter Storefront auf dem TypeScript-SDK: Katalog und Produktseiten in vier Sprachen.",
+        "es": "Una pequeña tienda renderizada en el servidor con el SDK de TypeScript: catálogo y páginas de producto en cuatro idiomas.",
+        "fr": "Une petite boutique rendue côté serveur avec le SDK TypeScript : catalogue et fiches produit en quatre langues."
+      }
+    }
+  ]
+}

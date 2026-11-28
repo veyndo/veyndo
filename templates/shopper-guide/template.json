@@ -1,0 +1,36 @@
+{
+  "id": "shopper-guide",
+  "kind": "app",
+  "title": {
+    "en": "Shopper-facing MCP App",
+    "de": "MCP-App für Kundinnen und Kunden",
+    "es": "App MCP para compradores",
+    "fr": "App MCP pour les clients"
+  },
+  "summary": {
+    "en": "A product guide that shopping assistants show as an interactive view, with a private merchant view.",
+    "de": "Ein Produktratgeber, den Einkaufsassistenten als interaktive Ansicht zeigen, mit privater Händleransicht.",
+    "es": "Una guía de productos que los asistentes de compra muestran como vista interactiva, con una vista privada para el comercio.",
+    "fr": "Un guide produit que les assistants d’achat affichent en vue interactive, avec une vue marchand privée."
+  },
+  "appId": "shopper_guide",
+  "rename": [
+    {
+      "file": "manifest.json",
+      "pointer": "/id"
+    },
+    {
+      "file": "package.json",
+      "pointer": "/name",
+      "value": "kebab"
+    }
+  ],
+  "test": [
+    "node",
+    "--test"
+  ],
+  "deploy": [
+    "node",
+    "scripts/deploy-sandbox.mjs"
+  ]
+}

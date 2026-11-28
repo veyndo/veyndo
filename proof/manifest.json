@@ -8265,6 +8265,11 @@
       "sha256": "bfbabb784638d97f3eb6097d7ce0dd80162e36ca73a5d74334f7a4236f8b999a",
       "review": "F14: prelude and unused compatibility re-exports removed"
     },
+    "src/browser_reads.rs": {
+      "status": "unproved",
+      "sha256": "45960d17c9a2a6c5827ff5367754d73f6939583aa759a5631f9db359f7de63e2",
+      "review": "p-docs: src/browser_reads.rs reads its contract through typed serde structs instead of Value indexing (components.py untyped-access gate); behavior unchanged, 3 unit tests pass. components.json assigns the module to host."
+    },
     "src/capabilities/admission.rs": {
       "status": "unproved",
       "sha256": "2ad9a5b9a43bd8bc6ca1b91dd1bbdbf5cb18d7ff62fe498afaa02d93c837b9cd",
@@ -8822,8 +8827,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "dbe35c07ad10374fb7c8db72a22b948af3cea5f1f8041df27ddffa7c84ba1bc3",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "27577f0772a5921673ddd571347f6df3ede349dfa137fc86509c52e7c8000036",
+      "review": "p-docs: src/browser_reads.rs adds anonymous CORS for the 11 Store API reads listed in contracts/browser-reads.json (no credentials, cookies or cart tokens; preflight only for listed headers; MCP origin policy unchanged), wired as the outermost layer after logging in src/routes.rs, module in src/main.rs, contract copied into the Rust image by deploy/Dockerfile. Evidence: 3 unit tests, curl preflight/negative checks and a cross-origin browser call against a local server."
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
@@ -9407,8 +9412,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "20c8957492172c56d7fa463b6220710dbf33715ee3b8b11ae7bb147cde669f5e",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "6c586080645ccda4e01d4f2370b1292fdb3d4703a43b2f126c43c07713ecd575",
+      "review": "p-docs: src/browser_reads.rs adds anonymous CORS for the 11 Store API reads listed in contracts/browser-reads.json (no credentials, cookies or cart tokens; preflight only for listed headers; MCP origin policy unchanged), wired as the outermost layer after logging in src/routes.rs, module in src/main.rs, contract copied into the Rust image by deploy/Dockerfile. Evidence: 3 unit tests, curl preflight/negative checks and a cross-origin browser call against a local server."
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -9837,8 +9842,8 @@
       "review": "Apps reader 0.25.0: current OAuth merchant/action admission, signed read-only fixed-schema host and shared original scope/page/field code; real independent PostgreSQL/HTTP/MCP/SDK and runtime/storage regressions pass. Native task context, privileged provisioning, object resolver and write owners retained. No new mathematical claim for host SQL or network."
     },
     "deploy/Dockerfile": {
-      "sha256": "bf2ba55fe6307ce657790584a1d7f1dfba6fb60159cdb50e09b17234dea401f2",
-      "review": "Release merge of batches I and J: typed event modules, exact catalog store, forward migrations, provisioning and UX fixes reviewed; no adapter claimed as proved"
+      "sha256": "5f0fbdb64095872bfd332d55915f10c2f89668a260c0a6b6e1f99abfa1e0aa1a",
+      "review": "p-docs: src/browser_reads.rs adds anonymous CORS for the 11 Store API reads listed in contracts/browser-reads.json (no credentials, cookies or cart tokens; preflight only for listed headers; MCP origin policy unchanged), wired as the outermost layer after logging in src/routes.rs, module in src/main.rs, contract copied into the Rust image by deploy/Dockerfile. Evidence: 3 unit tests, curl preflight/negative checks and a cross-origin browser call against a local server."
     },
     "extensions/apps/marketplaces/Cargo.lock": {
       "sha256": "2b38dfedc96b9acb5ff19003964e3fcb1daa33df27ef594eb29bf4cdd1821e81",

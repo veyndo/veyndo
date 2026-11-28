@@ -9,7 +9,10 @@
 - [Local quickstart](https://www.veyndo.ai/docs/quickstart.html)
 - [Local MCP bridge](https://www.veyndo.ai/docs/mcp.html)
 
-- [Connected playground](https://www.veyndo.ai/docs/playground.html)
+- [Build your first app in 10 minutes](https://www.veyndo.ai/docs/build-your-first-app.html): Account, private sandbox, template, deploy and Studio.
+- [API reference](https://www.veyndo.ai/docs/reference/README.html): Every HTTP route and MCP tool per component with permissions, typed operation facts and curl, TypeScript, Python and Rust examples generated from contracts/http.
+- [App and storefront templates](https://github.com/veyndo/veyndo/tree/main/templates): product-badge, order-tags, shopper-guide and storefront-starter, each with tests and a private-sandbox deploy.
+- [Legacy connected playground](https://www.veyndo.ai/docs/playground.html): The earlier local furniture walkthrough.
 
 ## Current release
 - [Shared order and inventory inputs](https://www.veyndo.ai/docs/status.html#hosted-pilot-earlier-release): Native purchase, shared stock, empty cart and exact hosted component verification.

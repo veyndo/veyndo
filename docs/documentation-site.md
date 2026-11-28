@@ -97,6 +97,13 @@ python3 scripts/api_catalogue.py --check
 python3 scripts/structure.py
 ```
 
+The [API reference](reference/README.md) pages are generated from the component
+contracts; `scripts/api_reference.py --check` (part of the structure check) fails
+on drift, and the site check requires exactly one **Try it** panel per anonymous
+browser read. Panels call the shop the reader enters; the default shop is the
+one value `demoShop` in `site/playground.json`, empty until a public demo shop
+exists, in which case the panels show the create-your-shop path.
+
 The structure check also needs `npm ci` in `frontend/`. The site renderer uses
 the pinned Python-Markdown dependency; ordinary commerce does not need it.
 Output is ignored `.site/`. Preview it with a local static web server.
@@ -124,6 +131,7 @@ Several pages are generated and must not be edited by hand:
 | [Domain proof inventory](formal-coverage.md) | `python3 scripts/formal/domain_inventory.py --write` |
 | [Roadmap](roadmap.md) | `python3 scripts/roadmap.py` from `docs/roadmap.json` |
 | [Source inventory](module-inventory.md) | `python3 scripts/testing/source_inventory.py --write` |
+| [API reference](reference/README.md) | `python3 scripts/api_reference.py` from `contracts/http` and `contracts/browser-reads.json` |
 
 The GitHub Pages workflow builds on every pull request and `main` push and publishes
 only `main` or an explicit manual run. Passing link and build checks does not prove

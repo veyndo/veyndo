@@ -196,6 +196,20 @@ def check():
     for name, row in showcase['screenshots'].items():
         assert hashlib.sha256((SITE / 'docs/assets/showcase' / name).read_bytes()).hexdigest() == row['sha256'], name
 
+    # API reference: generated pages, one Try-it panel per admitted browser read, the playground config value.
+    from api_reference import render as reference_pages
+    reference = reference_pages()
+    assert all(destination(Path(name)).as_posix() in pages for name in reference), 'Missing API reference page'
+    reads = json.loads((ROOT / 'contracts/browser-reads.json').read_text())['reads']
+    panels = [(attrs['data-method'], attrs['data-path']) for name, page in pages.items() if name.startswith('docs/reference/')
+              for tag, attrs in page.elements if 'docs-try' in attrs.get('class', '').split()]
+    assert sorted(panels) == sorted((r['method'], r['path']) for r in reads), 'Try-it panels and browser reads differ'
+    playground = json.loads((SITE / 'docs/assets/ui/playground.json').read_text())
+    assert playground == json.loads((ROOT / 'site/playground.json').read_text()), 'Playground config drift'
+    assert isinstance(playground['demoShop'], str) and playground['apiBase'].startswith('https://'), 'Playground config shape'
+    assert playground['createShop'].startswith('https://'), 'Create-shop path must be a public URL'
+    assert 'docs-try.js' in (SITE / 'docs/assets/ui/docs.js').read_text(), 'Try-it panels are disconnected'
+    assert (SITE / 'docs/assets/ui/docs-try.js').is_file(), 'Missing Try-it script'
     print(f'PASS: {len(pages)} pages, all {len(expected)} Markdown sources, {links} local links/assets, '
           'unique titles, metadata, JSON-LD, full-text search and sitemap')
 

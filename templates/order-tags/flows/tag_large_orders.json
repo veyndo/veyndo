@@ -1,0 +1,35 @@
+{
+  "name": {
+    "en": "Tag large orders",
+    "de": "Große Bestellungen markieren",
+    "es": "Etiquetar pedidos grandes",
+    "fr": "Étiqueter les grosses commandes"
+  },
+  "active": true,
+  "event": "order.placed",
+  "condition": {
+    "type": "andContainer",
+    "children": [
+      {
+        "type": "cartCartAmount",
+        "operator": ">=",
+        "amount": 250
+      }
+    ]
+  },
+  "action": "app_action",
+  "instruction": {
+    "en": "Suggest the VIP tag for order {orderNumber}",
+    "de": "VIP-Tag für Bestellung {orderNumber} vorschlagen",
+    "es": "Sugerir la etiqueta VIP para el pedido {orderNumber}",
+    "fr": "Proposer l’étiquette VIP pour la commande {orderNumber}"
+  },
+  "locale": "en-GB",
+  "appAction": {
+    "app": "order_tags",
+    "action": "tag_suggested",
+    "arguments": {
+      "tag": "vip"
+    }
+  }
+}

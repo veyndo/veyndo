@@ -14,6 +14,7 @@ GROUPS = {
     'Independent apps, services and SDK': ('extensions', {'.rs', '.ts', '.tsx', '.css', '.py', '.js', '.wat', '.html'}),
     'Verification tools and fixtures': ('scripts', {'.py'}),
     'Generated client SDKs and the CLI': ('sdks', {'.rs', '.ts', '.py'}),
+    'Developer templates': ('templates', {'.ts', '.mjs'}),
 }
 
 
